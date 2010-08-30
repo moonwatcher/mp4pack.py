@@ -4,7 +4,7 @@ import os
 import re
 import logging
 import hashlib
-
+from config import repository_config
 
 def load_media_file(file_path):
     f = None
@@ -36,6 +36,7 @@ class Container(object):
             self.exists = True
             self.file_path = os.path.abspath(file_path)
             self.file_type = os.path.splitext(self.file_path)[1]
+            self.file_info = file_detail_detector.detect(self.file_path)
     
     
     def load(self, file_path):
@@ -49,7 +50,13 @@ class Container(object):
     
     
     def __str__(self):
-        return self.file_path
+        result = None
+        if self.exists:
+            result = '\n' + self.file_path
+            result = '\n'.join((result, '# Parsed from path:', self.file_info.__str__()))
+        else:
+            result = 'file does not exist'
+        return result
     
 
 
@@ -91,19 +98,15 @@ class AVContainer(Container):
     
     
     def __str__(self):
-        result = None
+        result = Container.__str__(self)
         if self.exists:
-            result = ''
-            result = '\n'.join((result, self.file_path))
-            
             if len(self.tracks) > 0:
-                result = '\n'.join((result, self.print_tracks()))
+                result = '\n'.join((result, '# Tracks: ', self.print_tracks()))
             if len(self.tags) > 0:
-                result = '\n'.join((result, self.print_tags()))
+                result = '\n'.join((result, '# Tags: ', self.print_tags()))
             if len(self.chapters) > 0:
-                result = '\n'.join((result, self.print_chapters()))
-        else:
-            result = 'file does not exist'
+                result = '\n'.join((result, '# Chapter: ', self.print_chapters()))
+        
         return result
     
     
@@ -212,7 +215,7 @@ class Matroska(AVContainer):
     
     
     def _parse_chapter(self, index, mkvinfo_report, track_nest_depth):
-        chapter = container.Chapter()
+        chapter = Chapter()
         while (self._line_depth(mkvinfo_report[index]) > track_nest_depth):
             match = mkvinfo_chapter_start_re.search(mkvinfo_report[index])
             if match != None:
@@ -351,7 +354,7 @@ class Mpeg4(AVContainer):
         if match != None:
             chapter_start_time = match.group(2)
             chapter_name = match.group(3)
-            chapter = container.Chapter(chapter_start_time, chapter_name)
+            chapter = Chapter(chapter_start_time, chapter_name)
         return chapter
     
     
@@ -704,7 +707,6 @@ class TagNameResolver(object):
         return result
     
 
-
 tag_name_resolver = TagNameResolver()
 
 class SubtitleLineFilter(object):
@@ -739,9 +741,46 @@ class SubtitleLineFilter(object):
     
     
 
-
 subtitle_line_filter = SubtitleLineFilter()
 
+class FileDetailDetector(object):
+    def __init__(self):
+        self.file_name_schema_re = {}
+        for media_kind in repository_config['media-kinds'].keys():
+            self.file_name_schema_re[media_kind] = re.compile(repository_config['media-kinds'][media_kind]['schema'])
+    
+    
+    def detect(self, file_path):
+        media_kind = None
+        media_info = None
+        if file_path != None:
+            match = None
+            for mk, mk_re in self.file_name_schema_re.iteritems():
+                match = mk_re.search(os.path.basename(file_path))
+                if match != None:
+                    media_kind = mk
+                    break
+            
+            if media_kind != None:
+                media_info = {'media_kind':media_kind}
+                
+                if media_kind == 'movie':
+                    media_info['imdb_id'] = match.group(1)
+                    media_info['name'] = match.group(2)
+                    media_info['type'] = match.group(3)
+                    
+                elif media_kind == 'tvshow':
+                    media_info['show'] = match.group(1)
+                    media_info['code'] = match.group(2)
+                    media_info['episode'] = match.group(3)
+                    media_info['season'] = match.group(4)
+                    media_info['name'] = match.group(5)
+                    media_info['type'] = match.group(6)
+        
+        return media_info
+    
+
+file_detail_detector = FileDetailDetector()
 
 def timecode_to_miliseconds(timecode):
     result = None

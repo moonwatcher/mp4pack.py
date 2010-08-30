@@ -137,7 +137,7 @@ def main():
     options, args = load_options()
     logging.basicConfig(level=log_levels[options.verbosity])
     logger = logging.getLogger('mp4pack')
-    logger.info('opened log')
+    logger.info('open log')
     
     from model.entity import EntityManager
     entity_manager = EntityManager()
@@ -148,8 +148,10 @@ def main():
     files = load_input_files(options.input, options.kind, file_filter, options.recursive)
     preform_operations(entity_manager, files, options)
     
-#    for k, v in options.__dict__.iteritems():
-#        print '    {0}: {1}'.format(k, v)
+    for k, v in options.__dict__.iteritems():
+        print '    {0}: {1}'.format(k, v)
+    
+    logger.info('close log')
 
 
 

@@ -5,10 +5,10 @@
 repository_config = {}
 repository_config['volumes'] = {'alpha':'/pool/alpha', 'beta':'/pool/beta', 'gama':'/pool/gama', 'delta':'/pool/delta', 'epsilon':'/pool/epsilon', 'eta':'/pool/eta'}
 repository_config['media-kinds'] = {}
-repository_config['media-kinds']['tvshow'] = {'schema':'^(.*) (s([0-9]+)e([0-9]+))(.*)\.([^\.]+)$'}
+repository_config['media-kinds']['tvshow'] = {'schema':'^(.*) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$'}
 repository_config['media-kinds']['movie'] = {'schema':'^IMDb(tt[0-9]+) ?(.*)\.([^\.]+)$'}
-repository_config['media-kinds']['music'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$'}
-repository_config['media-kinds']['audiobook'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$'}
+#repository_config['media-kinds']['music'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$'}
+#repository_config['media-kinds']['audiobook'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$'}
 
 repository_config['kinds'] = {}
 repository_config['kinds']['m4v'] = {}
