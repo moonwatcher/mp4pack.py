@@ -139,7 +139,7 @@ def main():
     logger = logging.getLogger('mp4pack')
     logger.info('open log')
     
-    from model.entity import EntityManager
+    from db import EntityManager
     entity_manager = EntityManager()
     file_filter = load_file_filter(options.file_filter)
     
