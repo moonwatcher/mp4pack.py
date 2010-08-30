@@ -7,9 +7,7 @@ import getopt
 import fnmatch
 import logging
 
-import container.mp4 as mp4
-import container.matroska as matroska
-import container.subtitle as subtitle
+from container import *
 
 log_levels = {
     'debug': logging.DEBUG,
@@ -20,6 +18,17 @@ log_levels = {
 }
 
 invisable_file_path = re.compile(r'^\..*$')
+
+
+def load_input_files(path, kind, file_filter, recursive):
+    files = list()
+    file_paths = list_input_files(path, kind, file_filter, recursive)
+    for fp in file_paths:
+        mf = load_media_file(fp)
+        if mf != None:
+            files.append(mf)
+    
+    return files
 
 
 def list_input_files(path, kind, file_filter, recursive):
@@ -74,7 +83,7 @@ def load_options():
     group.add_option("-f", "--filter", dest="file_filter", default=None, help="Regex to filter input file names through")
     group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default="universal", help="[default: %default]")
     group.add_option("-k", "--kind", dest="kind", type="choice", choices=repository_config['kinds'].keys(), help="[default: %default]")
-    group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['media-kinds'], help="[default: %default]")
+    group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['media-kinds'].keys(), help="[default: %default]")
     group.add_option("-q", "--quality", dest="quality", help="[default: %default]")
     group.add_option("-s", "--width", dest="width", help="[default: %default]")
     group.add_option("--rate", dest="rate", help="[default: %default]")
@@ -86,6 +95,7 @@ def load_options():
     group.add_option("-w", "--overwrite", dest="overwrite", action="store_true", default=False, help="Allow overwriting existing files")
     group.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Recursivly process sub directories")
     group.add_option("--hd", dest="hd-flag", action="store_true", default=False, help="Mark the HD flag for resulting m4v files")
+    group.add_option("--md5", dest="md5", action="store_true", default=False, help="Calculate md5 checksum")
     group.add_option("--keep-ac3", dest="keep-ac3", action="store_true", default=False, help="Mux ac3 track in addition to the aac track")
     parser.add_option_group(group)
             
@@ -100,20 +110,10 @@ def load_options():
     return parser.parse_args()
 
 
-def load_media_file(file_path):
-    f = None
-    if mp4.is_mp4_file(file_path):
-        f = mp4.MP4File(file_path)
-    elif matroska.is_matroska_file(file_path):
-        f = matroska.MatroskaFile(file_path)
-    elif subtitle.is_subtitle_file(file_path):
-        f = subtitle.SubtitleFile(file_path)
-    
-    return f
-
-
-#def preform_operations(entity_manager, file_filter, options):
-    #if options.report:
+def preform_operations(entity_manager, files, options):
+    if options.report:
+        for f in files:
+            print f
         
     #if options.deposit:
     
@@ -132,6 +132,7 @@ def load_media_file(file_path):
     #if options.ac3:
     
 
+
 def main():
     options, args = load_options()
     logging.basicConfig(level=log_levels[options.verbosity])
@@ -144,11 +145,11 @@ def main():
     
     
     
-#    files = list_input_files(options.input, options.kind, file_filter, options.recursive)
-#    for x in files: print x
+    files = load_input_files(options.input, options.kind, file_filter, options.recursive)
+    preform_operations(entity_manager, files, options)
     
-    for k, v in options.__dict__.iteritems():
-        print '    {0}: {1}'.format(k, v)
+#    for k, v in options.__dict__.iteritems():
+#        print '    {0}: {1}'.format(k, v)
 
 
 
