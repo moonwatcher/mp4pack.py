@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
+import os
 import logging
 import urllib
-import re
 from datetime import datetime
 import xml.etree.cElementTree as ElementTree
 
@@ -13,43 +14,65 @@ from pymongo import Connection
 from config import tag_config
 
 
-class ResourceHandler:
+class ResourceHandler(object):
     def __init__(self, url):
-        self.url = url
+        self.remote_url = url
+        self.local_path = self.local_path_from_remote_url()
     
     
-    def _get_cache_uri(self, url):
-        result = url_to_cache.sub(tag_config['cache'], url)
-        result = result.replace('/' + tag_config['tmdb']['apikey'], '')
-        result = result.replace('/' + tag_config['tvdb']['apikey'], '')
-        return result
+    def local_path_from_remote_url(self):
+        return url_to_cache.sub(tag_config['cache'], self.remote_url)
     
     
-    def _cache_url(self, url):
-        import os
-        local_uri = self._get_cache_uri(url)
-        if not os.path.exists(local_uri):
-            dirname = os.path.dirname(local_uri)
+    def cache(self):
+        if not os.path.exists(self.local_path):
+            dirname = os.path.dirname(self.local_path)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
-            urllib.urlretrieve(url, local_uri)
-        return local_uri
+            urllib.urlretrieve(self.remote_url, self.local_path)
     
     
-    def _grabUrl(self, url):
+    def read(self):
         value = None
         try:
-            local_uri = self._cache_url(url)
-            urlhandle = urllib.urlopen(local_uri)
+            self.cache()
+            urlhandle = urllib.urlopen(self.local_path)
             value = urlhandle.read()
         except IOError, errormsg:
             value = None
         return value
     
     
-    def getEt(self):
+
+
+class JsonHandler(ResourceHandler):
+    def __init__(self, url):
+        ResourceHandler.__init__(self, url)
+    
+    
+    def get_json_element(self):
+        element = None
+        json_text = self.read()
+        if json_text != None:
+            try:
+                from StringIO import StringIO
+                io = StringIO(json_text)
+                import json
+                element = json.load(io)
+            except ValueError, errormsg:
+                element = None
+        return element
+    
+
+
+class XmlHandler(ResourceHandler):
+    def __init__(self, url):
+        ResourceHandler.__init__(self, url)
+    
+    
+    def get_element_tree(self):
         et = None
-        xml = self._grabUrl(self.url)
+        xml = self.read()
         if xml != None:
             try:
                 et = ElementTree.fromstring(xml)
@@ -59,7 +82,21 @@ class ResourceHandler:
     
 
 
-class EntityManager():
+class TmdbJsonHandler(JsonHandler):
+    def __init__(self, url):
+        JsonHandler.__init__(self, url)
+    
+    
+    def local_path_from_remote_url(self):
+        result = ResourceHandler.local_path_from_remote_url(self)
+        result = result.replace('/' + tag_config['tmdb']['apikey'], '')
+        return result
+    
+
+
+
+
+class TagManager(object):
     def __init__(self):
         self.logger = logging.getLogger('mp4pack.tag')
         self.connection = Connection()
@@ -75,7 +112,6 @@ class EntityManager():
         self.seasons = self.db.seasons
         self.episodes = self.db.episodes
         self.people = self.db.people
-    
     
     
     def find_network(self, name):
@@ -189,68 +225,51 @@ class EntityManager():
     def _update_tmdb_movie(self, tmdb_id):
         _movie = self.movies.find_one({'tmdb_id':tmdb_id})
         url = tag_config['tmdb']['urls']['Movie.getInfo']  % (tmdb_id)
-        etree = ResourceHandler(url).getEt()
-        if etree != None:
-            movies_tree = etree.find("movies").findall("movie")
+        handler = TmdbJsonHandler(url)
+        element = handler.get_json_element()
+        if element != None:
+            movie_element = element[0]
+            if _movie == None:
+                _movie = {'cast':[], 'genre':[], 'posters':[]}
+                
+            update_int_property('tmdb_id', movie_element['id'], _movie)
+            self.movies.save(_movie)
+            update_int_property('imdb_id', movie_element['imdb_id'], _movie)
+            update_string_property('name', movie_element['name'], _movie)
+            update_string_property('overview', movie_element['overview'], _movie)
+            update_string_property('tagline', movie_element['tagline'], _movie)
+            update_string_property('content_rating', movie_element['certification'], _movie)
+            update_date_property('released', movie_element['released'], _movie)
             
-            if len(movies_tree) != 0:
-                if _movie == None:
-                    _movie = {'cast':[], 'genre':[]}
-                    
-                for item in movies_tree[0].getchildren():
-                    if _is_tag('id', item):
-                        _update_property('tmdb_id', item.text, _movie)
-                        self.movies.save(_movie)
-                    elif _is_tag('imdb_id', item):
-                        _update_property('imdb_id', item.text, _movie)
-                    elif _is_tag('name', item):
-                        _update_property('name', item.text, _movie)
-                    elif _is_tag('overview', item):
-                        _update_property('overview', item.text, _movie)
-                    elif _is_tag('tagline', item):
-                        _update_property('tagline', item.text, _movie)
-                    elif _is_tag('released', item):
-                        _update_date_property('released', item.text, _movie)
-                    elif _is_tag('certification', item):
-                        _update_property('content_rating', item.text, _movie)
+            if 'genres' in movie_element.keys():
+                _movie['genre'] = list()
+                for ge in movie_element['genres']:
+                    if ge['type'] == 'genre':
+                        _movie['genre'].append(self._make_genre_item(ge['name']))
                         
-                    elif _is_tag('categories', item):
-                        _movie['genre'] = list()
-                        for category_item in item.getchildren():
-                            if  category_item.get('type') == 'genre':
-                                _category_name = category_item.get('name')
-                                _movie['genre'].append(self._make_genre_item(_category_name))
-                                
-                    elif _is_tag('cast', item):
-                        _movie['cast'] = list()
-                        for person_item in item.getchildren():
-                            _person_ref = self._make_person_ref(person_item.get('job'), person_item.get('department'), person_item.get('character'), person_item.get('id'), person_item.get('name'))
-                            if _person_ref != None:
-                                _movie['cast'].append(_person_ref)
-                                
-                    elif _is_tag('images', item):
-                        _movie['image'] = list()
-                        for image_item in item.getchildren():
-                            if  image_item.get('type') == 'poster':
-                                _image_size = image_item.get('size')
-                                _image_url = image_item.get('url')
-                                #_movie['image'].append(self.make_image_item(...))
+            if 'cast' in movie_element.keys():
+                _movie['cast'] = list()
+                for ce in movie_element['cast']:
+                    _person_ref = self._make_person_ref_from_element(ce)
+                    if _person_ref != None:
+                        _movie['cast'].append(_person_ref)
+                                    
+            #if 'posters' in movie_element.keys():
+            #    _movie['posters'] = list()
+            #    for pe in movie_element['posters']:
                     
-                self.movies.save(_movie)
+            self.movies.save(_movie)
         return _movie
     
     
     def _find_tmdb_id_by_imdb_id(self, imdb_id):
         _tmdb_id = None
         url = tag_config['tmdb']['urls']['Movie.imdbLookup'] % (imdb_id)
-        etree = ResourceHandler(url).getEt()
-        if etree != None:
-            movies_tree = etree.find("movies").findall("movie")
-            
-            if len(movies_tree) != 0:
-                for item in movies_tree[0].getchildren():
-                    if _is_tag('id', item):
-                        _tmdb_id = item.text
+        handler = TmdbJsonHandler(url)
+        element = handler.get_json_element()
+        if element != None:
+            movie_element = element[0]
+            _tmdb_id = movie_element['id']
         return _tmdb_id
     
     
@@ -279,59 +298,44 @@ class EntityManager():
     def update_tmdb_person(self, tmdb_id):
         _person = self.people.find_one({'tmdb_id':tmdb_id})
         url = tag_config['tmdb']['urls']['Person.getInfo'] % (tmdb_id)
-        etree = ResourceHandler(url).getEt()
-        if etree != None:
-            people_tree = etree.find("people").findall("person")
+        handler = TmdbJsonHandler(url)
+        element = handler.get_json_element()
+        if element != None:
+            person_element = element[0]
+            if _person == None:
+                _person = {'filmography':[]}
+            update_int_property('tmdb_id', person_element['id'], _person)
+            update_string_property('name', person_element['name'], _person)
+            update_string_property('small_name', person_element['name'].lower(), _person)
+            update_date_property('birthday', person_element['birthday'], _person)
+            update_string_property('biography', person_element['biography'], _person)
             
-            if len(people_tree) != 0:
-                if _person == None:
-                    _person = {'filmography':[]}
-                    
-                for item in people_tree[0].getchildren():
-                    if _is_tag('id', item):
-                        _update_property('tmdb_id', item.text, _person)
-                    elif _is_tag('name', item):
-                        _update_property('name', item.text, _person)
-                        if item.text != None:
-                            _update_property('small_name', item.text.lower(), _person)
-                    elif _is_tag('birthday', item):
-                        _update_date_property('birthday', item.text, _person)
-                    elif _is_tag('deathday', item):
-                        _update_date_property('deathday', item.text, _person)
-                    elif _is_tag('biography', item) and item.text != None:
-                        _update_property('biography', item.text, _person)
-                        
-                    elif _is_tag('filmography', item):
-                        _person['filmography'] = list()
-                        for movie_item in item.getchildren():
-                            _movie_ref = self._make_movie_ref(movie_item.get('job'), movie_item.get('department'), movie_item.get('id'), movie_item.get('name'), movie_item.get('character'))
-                            if _movie_ref != None:
-                                _person['filmography'].append(_movie_ref)
-                            
-                self.people.save(_person)
+            if 'filmography' in person_element.keys():
+                _person['filmography'] = list()
+                for fe in person_element['filmography']:
+                    _movie_ref = self._make_movie_ref_from_element(fe)
+                    if _movie_ref != None:
+                        _person['filmography'].append(_movie_ref)
+            self.people.save(_person)
         return _person
     
     
     def _find_tmdb_person_id_by_name(self, name):
         result = None
         name = collapse_whitespace.sub(' ', name)
-        url = tag_config['tmdb']['urls']['Person.search'] % (_prepare_for_tmdb_query(name))
-        etree = ResourceHandler(url).getEt()
-        if etree != None:
-            people_tree = etree.find("people").findall("person")
-            for person_item in people_tree:
-                is_match = False
-                tmdb_id = None
-                for item in person_item.getchildren():
-                    if _is_tag('name', item):
-                        if item.text.lower() == name.lower():
-                            is_match = True
-                    elif _is_tag('id', item):
-                        tmdb_id = item.text
-                if is_match:
-                    result = tmdb_id
+        url = tag_config['tmdb']['urls']['Person.search'] % (prepare_for_tmdb_query(name))
+        handler = TmdbJsonHandler(url)
+        element = handler.get_json_element()
+        if element != None:
+            for pe in element:
+                if pe['name'].lower() == name.lower():
+                    result = pe['id']
                     break
         return result
+    
+    
+    def _make_person_ref_from_element(self, person_element):
+        return self._make_person_ref(person_element['job'], person_element['department'], person_element['character'], person_element['id'], person_element['name'])
     
     
     def _make_person_ref(self, job, department, character=None, person_tmdb_id=None, person_name=None):
@@ -349,12 +353,16 @@ class EntityManager():
             _person_ref = dict()
             _person_ref['id'] = _person['_id']
             if 'tmdb_id' in _person:
-                _update_property('tmdb_id', _person['tmdb_id'], _person_ref)
-            _update_property('name', _person['name'], _person_ref)
-            _update_property('character', character, _person_ref)
-            _update_property('department', _department['_id'], _person_ref)
-            _update_property('job', _job['_id'], _person_ref)
+                update_int_property('tmdb_id', _person['tmdb_id'], _person_ref)
+            update_string_property('name', _person['name'], _person_ref)
+            update_string_property('character', character, _person_ref)
+            update_string_property('department', _department['_id'], _person_ref)
+            update_string_property('job', _job['_id'], _person_ref)
         return _person_ref
+    
+    
+    def _make_movie_ref_from_element(self, movie_element):
+        return self._make_movie_ref(movie_element['job'], movie_element['department'], movie_element['id'], movie_element['name'], movie_element['character'])
     
     
     def _make_movie_ref(self, job, department, movie_tmdb_id, movie_name, character=None):
@@ -364,17 +372,17 @@ class EntityManager():
         
         if movie_tmdb_id != None and movie_name != None:
             _movie_ref = dict()
-            _update_property('name', movie_name, _movie_ref)
-            _update_property('id', movie_tmdb_id, _movie_ref)
-            _update_property('job', _job['_id'], _movie_ref)
-            _update_property('department', _department['_id'], _movie_ref)
-            _update_property('character', character, _movie_ref)
+            update_string_property('name', movie_name, _movie_ref)
+            update_int_property('id', movie_tmdb_id, _movie_ref)
+            update_string_property('job', _job['_id'], _movie_ref)
+            update_string_property('department', _department['_id'], _movie_ref)
+            update_string_property('character', character, _movie_ref)
         return _movie_ref
     
     
     def _update_tvdb_show_tree(self, tvdb_id):
         url = tag_config['tvdb']['urls']['Show.getInfo'] % (tvdb_id)
-        etree = ResourceHandler(url).getEt()
+        etree = XmlHandler(url).get_element_tree()
         _show = self._update_tvdb_show(tvdb_id, etree)
         self._update_tvdb_episodes(_show, etree)
         return _show
@@ -391,28 +399,28 @@ class EntityManager():
                 _show['cast'] = []
                 
             for item in show_nodes[0].getchildren():
-                if _is_tag('id', item):
-                    _update_property('tvdb_id', item.text, _show)
-                elif _is_tag('IMDB_ID', item):
-                    _update_property('imdb_id', item.text, _show)
-                elif _is_tag('SeriesName', item):
-                    _update_property('name', item.text, _show)
-                elif _is_tag('Overview', item):
-                    _update_property('overview', item.text, _show)
-                elif _is_tag('ContentRating', item):
-                    _update_property('content_rating', item.text, _show)
-                elif _is_tag('Network', item):
+                if is_tag('id', item):
+                    update_string_property('tvdb_id', item.text, _show)
+                elif is_tag('IMDB_ID', item):
+                    update_string_property('imdb_id', item.text, _show)
+                elif is_tag('SeriesName', item):
+                    update_string_property('name', item.text, _show)
+                elif is_tag('Overview', item):
+                    update_string_property('overview', item.text, _show)
+                elif is_tag('ContentRating', item):
+                    update_string_property('content_rating', item.text, _show)
+                elif is_tag('Network', item):
                     _network = self.find_network(item.text)
-                    _update_property('network_id', _network['_id'], _show)
-                    _update_property('network', _network['name'], _show)
-                elif _is_tag('Genre', item):
+                    update_string_property('network_id', _network['_id'], _show)
+                    update_string_property('network', _network['name'], _show)
+                elif is_tag('Genre', item):
                     _show['genre'] = list()
-                    genre_list = _split_tvdb_list(item.text)
+                    genre_list = split_tvdb_list(item.text)
                     for g in genre_list:
                         _show['genre'].append(self._make_genre_item(g))
-                elif _is_tag('Actors', item):
+                elif is_tag('Actors', item):
                     _show['cast'] = list()
-                    actor_list = _split_tvdb_list(item.text)
+                    actor_list = split_tvdb_list(item.text)
                     for actor in actor_list:
                         _person_ref = self._make_person_ref(job='actor', department='actors', person_name=actor)
                         if _person_ref != None:
@@ -436,40 +444,40 @@ class EntityManager():
                     
                 _episode['small_show_name'] = small_show_name
                 for item in episode_item.getchildren():
-                    if _is_tag('id', item):
-                        _update_property('tvdb_id', item.text, _episode)
-                    elif _is_tag('seriesid', item):
-                        _update_property('show_tvdb_id', item.text, _episode)
-                    elif _is_tag('seasonid', item):
-                        _update_property('season_tvdb_id', item.text, _episode)
-                    elif _is_tag('IMDB_ID', item):
-                        _update_property('imdb_id', item.text, _episode)
-                    elif _is_tag('EpisodeName', item):
-                        _update_property('name', item.text, _episode)
-                    elif _is_tag('EpisodeNumber', item):
-                        _update_property('episode_number', item.text, _episode)
-                    elif _is_tag('SeasonNumber', item):
-                        _update_property('season_number', item.text, _episode)
-                    elif _is_tag('Overview', item):
-                        _update_property('overview', item.text, _episode)
-                    elif _is_tag('ProductionCode', item):
-                        _update_property('production_code', item.text, _episode)
-                    elif _is_tag('FirstAired', item):
-                        _update_date_property('released', item.text, _episode)
-                    elif _is_tag('Director', item):
-                        director_list = _split_tvdb_list(item.text)
+                    if is_tag('id', item):
+                        update_string_property('tvdb_id', item.text, _episode)
+                    elif is_tag('seriesid', item):
+                        update_string_property('show_tvdb_id', item.text, _episode)
+                    elif is_tag('seasonid', item):
+                        update_string_property('season_tvdb_id', item.text, _episode)
+                    elif is_tag('IMDB_ID', item):
+                        update_string_property('imdb_id', item.text, _episode)
+                    elif is_tag('EpisodeName', item):
+                        update_string_property('name', item.text, _episode)
+                    elif is_tag('EpisodeNumber', item):
+                        update_string_property('episode_number', item.text, _episode)
+                    elif is_tag('SeasonNumber', item):
+                        update_string_property('season_number', item.text, _episode)
+                    elif is_tag('Overview', item):
+                        update_string_property('overview', item.text, _episode)
+                    elif is_tag('ProductionCode', item):
+                        update_string_property('production_code', item.text, _episode)
+                    elif is_tag('FirstAired', item):
+                        update_date_property('released', item.text, _episode)
+                    elif is_tag('Director', item):
+                        director_list = split_tvdb_list(item.text)
                         for director in director_list:
                             _person_ref = self._make_person_ref(job='director', department='directing', person_name=director)
                             if _person_ref != None:
                                 _episode['cast'].append(_person_ref)
-                    elif _is_tag('Writer', item):
-                        writer_list = _split_tvdb_list(item.text)
+                    elif is_tag('Writer', item):
+                        writer_list = split_tvdb_list(item.text)
                         for writer in writer_list:
                             _person_ref = self._make_person_ref(job='screenplay', department='writing', person_name=writer)
                             if _person_ref != None:
                                 _episode['cast'].append(_person_ref)
-                    elif _is_tag('GuestStars', item):
-                        actor_list = _split_tvdb_list(item.text)
+                    elif is_tag('GuestStars', item):
+                        actor_list = split_tvdb_list(item.text)
                         for actor in actor_list:
                             _person_ref = self._make_person_ref(job='actor', department='actors', person_name=actor)
                             if _person_ref != None:
@@ -482,14 +490,30 @@ class EntityManager():
 
 
 
-def _is_tag(name, item):
+def is_tag(name, item):
     result = False
     if item.tag == name:
         result = True
     return result
 
 
-def _update_property(key, value, entity):
+
+def update_int_property(key, value, entity):
+    result = False
+    old_value = None
+    if key in entity:
+        old_value = entity[key]
+        
+    if old_value != value:
+        result = True
+        if value == None:
+            del entity[key]
+        else:
+            entity[key] = value
+    return result
+
+
+def update_string_property(key, value, entity):
     result = False
     old_value = None
     if key in entity:
@@ -509,7 +533,7 @@ def _update_property(key, value, entity):
     return result
 
 
-def _update_date_property(key, value, entity):
+def update_date_property(key, value, entity):
     result = False
     old_value = None
     if key in entity:
@@ -531,7 +555,7 @@ def _update_date_property(key, value, entity):
     return result
 
 
-def _split_tvdb_list(value):
+def split_tvdb_list(value):
     result = list()
     if value != None:
         value = tvdb_list_seperators.sub('|', value)
@@ -542,7 +566,7 @@ def _split_tvdb_list(value):
     return result
 
 
-def _prepare_for_tmdb_query(value):
+def prepare_for_tmdb_query(value):
     result = None
     if value != None:
         value = value.strip()

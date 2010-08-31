@@ -69,10 +69,10 @@ tag_config['cache'] = "/Users/lg/mp4pack/cache/"
 tag_config['tmdb'] = {}
 tag_config['tmdb']['apikey'] = "a8b9f96dde091408a03cb4c78477bd14"
 tag_config['tmdb']['urls'] = {}
-tag_config['tmdb']['urls']['Movie.getInfo'] = "http://api.themoviedb.org/2.1/Movie.getInfo/en/xml/%(apikey)s/%%s" % (tag_config['tmdb'])
-tag_config['tmdb']['urls']['Movie.imdbLookup'] = "http://api.themoviedb.org/2.1/Movie.imdbLookup/en/xml/%(apikey)s/%%s" % (tag_config['tmdb'])
-tag_config['tmdb']['urls']['Person.getInfo'] = "http://api.themoviedb.org/2.1/Person.getInfo/en/xml/%(apikey)s/%%s" % (tag_config['tmdb'])
-tag_config['tmdb']['urls']['Person.search'] = "http://api.themoviedb.org/2.1/Person.search/en/xml/%(apikey)s/%%s" % (tag_config['tmdb'])
+tag_config['tmdb']['urls']['Movie.getInfo'] = "http://api.themoviedb.org/2.1/Movie.getInfo/en/json/%(apikey)s/%%s" % (tag_config['tmdb'])
+tag_config['tmdb']['urls']['Movie.imdbLookup'] = "http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/%(apikey)s/%%s" % (tag_config['tmdb'])
+tag_config['tmdb']['urls']['Person.getInfo'] = "http://api.themoviedb.org/2.1/Person.getInfo/en/json/%(apikey)s/%%s" % (tag_config['tmdb'])
+tag_config['tmdb']['urls']['Person.search'] = "http://api.themoviedb.org/2.1/Person.search/en/json/%(apikey)s/%%s" % (tag_config['tmdb'])
 
 tag_config['tvdb'] = {}
 tag_config['tvdb']['apikey'] = "7B3B400B0146EA83"
