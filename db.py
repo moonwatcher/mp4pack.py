@@ -18,11 +18,11 @@ class ResourceHandler(object):
     def __init__(self, url):
         self.logger = logging.getLogger('mp4pack.resource')
         self.remote_url = url
-        self.local_path = self.local_path_from_remote_url()
+        self.local_path = self.local()
         self.headers = None
     
     
-    def local_path_from_remote_url(self):
+    def local(self):
         return url_to_cache.sub(tag_config['cache'], self.remote_url)
     
     
@@ -36,6 +36,7 @@ class ResourceHandler(object):
                 filename, self.headers = urllib.urlretrieve(self.remote_url, self.local_path)
             except IOError:
                 result = False
+                self.clean()
                 self.logger.error('failed to retrieve ' + self.remote_url)
         return result
     
@@ -52,6 +53,15 @@ class ResourceHandler(object):
         return value
     
     
+    def clean(self):
+        if os.path.isfile(self.local_path):
+            os.remove(self.local_path)
+            try:
+                os.removedirs(os.path.dirname(self.local_path))
+            except OSError:
+                pass
+    
+    
 
 
 class JsonHandler(ResourceHandler):
@@ -60,7 +70,7 @@ class JsonHandler(ResourceHandler):
         self.logger = logging.getLogger('mp4pack.json')
     
     
-    def get_element(self):
+    def element(self):
         element = None
         json_text = self.read()
         if json_text != None:
@@ -71,8 +81,25 @@ class JsonHandler(ResourceHandler):
                 element = json.load(io)
             except ValueError:
                 element = None
+                self.clean()
                 self.logger.error('failed to load json document ' + self.local_path)
         return element
+    
+
+
+class ImageHandler(ResourceHandler):
+    def __init__(self, url):
+        ResourceHandler.__init__(self, url)
+        self.logger = logging.getLogger('mp4pack.image')
+    
+    
+    def cache(self):
+        result = ResourceHandler.cache(self)
+        if self.headers != None and image_http_type.search(self.headers.type) == None:
+            self.clean()
+            result = False
+        return result
+    
     
 
 
@@ -82,20 +109,16 @@ class XmlHandler(ResourceHandler):
         self.logger = logging.getLogger('mp4pack.xml')
     
     
-    def get_element(self):
+    def element(self):
         element = None
         xml = self.read()
         if xml != None:
             try:
                 element = ElementTree.fromstring(xml)
             except SyntaxError:
-                self.logger.error('failed to load xml document ' + self.local_path)
-                os.remove(self.local_path)
-                try:
-                    os.removedirs(os.path.dirname(self.local_path))
-                except OSError:
-                    pass
                 element = None
+                self.clean()
+                self.logger.error('failed to load xml document ' + self.local_path)
         return element
     
 
@@ -106,22 +129,18 @@ class TmdbJsonHandler(JsonHandler):
         self.logger = logging.getLogger('mp4pack.json.tmdb')
     
     
-    def local_path_from_remote_url(self):
-        result = ResourceHandler.local_path_from_remote_url(self)
+    def local(self):
+        result = ResourceHandler.local(self)
         result = result.replace('/' + tag_config['tmdb']['apikey'], '')
         return result
     
     
-    def get_element(self):
-        element = JsonHandler.get_element(self)
+    def element(self):
+        element = JsonHandler.element(self)
         if element == None or len(element) == 0 or element[0] == 'Nothing found.':
-            self.logger.warning('Nothing found in ' + self.remote_url)
-            os.remove(self.local_path)
-            try:
-                os.removedirs(os.path.dirname(self.local_path))
-            except OSError:
-                pass
             element = None
+            self.clean()
+            self.logger.warning('Nothing found in ' + self.remote_url)
         return element
     
     
@@ -133,8 +152,8 @@ class TvdbXmlHandler(XmlHandler):
         self.logger = logging.getLogger('mp4pack.xml.tvdb')
     
     
-    def local_path_from_remote_url(self):
-        result = ResourceHandler.local_path_from_remote_url(self)
+    def local(self):
+        result = ResourceHandler.local(self)
         result = result.replace('/' + tag_config['tvdb']['apikey'], '')
         result = result.replace('/all', '')
         return result
@@ -142,14 +161,6 @@ class TvdbXmlHandler(XmlHandler):
     
 
 
-class TvdbImageHandler(ResourceHandler):
-    def __init__(self, url):
-        ResourceHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.image.tvdb')
-    
-    
-    def cache(self):
-        ResourceHandler.cache(self)
 
 
 class TagManager(object):
@@ -282,7 +293,7 @@ class TagManager(object):
         _movie = self.movies.find_one({'tmdb_id':tmdb_id})
         url = tag_config['tmdb']['urls']['Movie.getInfo']  % (tmdb_id)
         handler = TmdbJsonHandler(url)
-        element = handler.get_element()
+        element = handler.element()
         if element != None:
             element = element[0]
             if _movie == None:
@@ -322,7 +333,7 @@ class TagManager(object):
         _tmdb_id = None
         url = tag_config['tmdb']['urls']['Movie.imdbLookup'] % (imdb_id)
         handler = TmdbJsonHandler(url)
-        element = handler.get_element()
+        element = handler.element()
         if element != None:
             element = element[0]
             _tmdb_id = element['id']
@@ -355,7 +366,7 @@ class TagManager(object):
         _person = self.people.find_one({'tmdb_id':tmdb_id})
         url = tag_config['tmdb']['urls']['Person.getInfo'] % (tmdb_id)
         handler = TmdbJsonHandler(url)
-        element = handler.get_element()
+        element = handler.element()
         if element != None:
             element = element[0]
             if _person == None:
@@ -379,9 +390,9 @@ class TagManager(object):
     def _find_tmdb_person_id_by_name(self, name):
         result = None
         name = collapse_whitespace.sub(' ', name)
-        url = tag_config['tmdb']['urls']['Person.search'] % (prepare_for_tmdb_query(name))
+        url = tag_config['tmdb']['urls']['Person.search'] % (format_tmdb_query(name))
         handler = TmdbJsonHandler(url)
-        element = handler.get_element()
+        element = handler.element()
         if element != None:
             for pe in element:
                 if pe['name'].lower() == name.lower():
@@ -438,7 +449,7 @@ class TagManager(object):
     
     def _update_tvdb_show_tree(self, tvdb_id):
         url = tag_config['tvdb']['urls']['Show.getInfo'] % (tvdb_id)
-        element = TvdbXmlHandler(url).get_element()
+        element = TvdbXmlHandler(url).element()
         _show = self._update_tvdb_show(tvdb_id, element)
         self._update_tvdb_episodes(_show, element)
         return _show
@@ -621,7 +632,7 @@ def split_tvdb_list(value):
     return result
 
 
-def prepare_for_tmdb_query(value):
+def format_tmdb_query(value):
     result = None
     if value != None:
         value = value.strip().lower()
@@ -635,3 +646,4 @@ tvdb_list_seperators = re.compile(r'\||,')
 strip_space_around_seperator = re.compile(r'\s*\|\s*')
 collapse_whitespace = re.compile(r'\s+')
 url_to_cache = re.compile(r'http://')
+image_http_type = re.compile('image/.*')
