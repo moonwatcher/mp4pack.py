@@ -78,6 +78,8 @@ tag_config['tvdb'] = {}
 tag_config['tvdb']['apikey'] = "7B3B400B0146EA83"
 tag_config['tvdb']['urls'] = {}
 tag_config['tvdb']['urls']['Show.getInfo'] = "http://www.thetvdb.com/api/%(apikey)s/series/%%s/all/en.xml" % (tag_config['tvdb'])
+tag_config['tvdb']['urls']['Banner.getImage'] = "http://www.thetvdb.com/banners/%%s"
+
 
 
 

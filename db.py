@@ -16,8 +16,10 @@ from config import tag_config
 
 class ResourceHandler(object):
     def __init__(self, url):
+        self.logger = logging.getLogger('mp4pack.resource')
         self.remote_url = url
         self.local_path = self.local_path_from_remote_url()
+        self.headers = None
     
     
     def local_path_from_remote_url(self):
@@ -25,21 +27,28 @@ class ResourceHandler(object):
     
     
     def cache(self):
+        result = True
         if not os.path.exists(self.local_path):
             dirname = os.path.dirname(self.local_path)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
-            urllib.urlretrieve(self.remote_url, self.local_path)
+            try:
+                filename, self.headers = urllib.urlretrieve(self.remote_url, self.local_path)
+            except IOError:
+                result = False
+                self.logger.error('failed to retrieve ' + self.remote_url)
+        return result
     
     
     def read(self):
         value = None
         try:
-            self.cache()
-            urlhandle = urllib.urlopen(self.local_path)
-            value = urlhandle.read()
-        except IOError, errormsg:
+            if self.cache():
+                urlhandle = urllib.urlopen(self.local_path)
+                value = urlhandle.read()
+        except IOError:
             value = None
+            self.logger.error('failed to read ' + self.local_path)
         return value
     
     
@@ -48,9 +57,10 @@ class ResourceHandler(object):
 class JsonHandler(ResourceHandler):
     def __init__(self, url):
         ResourceHandler.__init__(self, url)
+        self.logger = logging.getLogger('mp4pack.json')
     
     
-    def get_json_element(self):
+    def get_element(self):
         element = None
         json_text = self.read()
         if json_text != None:
@@ -59,8 +69,9 @@ class JsonHandler(ResourceHandler):
                 io = StringIO(json_text)
                 import json
                 element = json.load(io)
-            except ValueError, errormsg:
+            except ValueError:
                 element = None
+                self.logger.error('failed to load json document ' + self.local_path)
         return element
     
 
@@ -68,23 +79,31 @@ class JsonHandler(ResourceHandler):
 class XmlHandler(ResourceHandler):
     def __init__(self, url):
         ResourceHandler.__init__(self, url)
+        self.logger = logging.getLogger('mp4pack.xml')
     
     
-    def get_element_tree(self):
-        et = None
+    def get_element(self):
+        element = None
         xml = self.read()
         if xml != None:
             try:
-                et = ElementTree.fromstring(xml)
-            except SyntaxError, errormsg:
-                et = None
-        return et
+                element = ElementTree.fromstring(xml)
+            except SyntaxError:
+                self.logger.error('failed to load xml document ' + self.local_path)
+                os.remove(self.local_path)
+                try:
+                    os.removedirs(os.path.dirname(self.local_path))
+                except OSError:
+                    pass
+                element = None
+        return element
     
 
 
 class TmdbJsonHandler(JsonHandler):
     def __init__(self, url):
         JsonHandler.__init__(self, url)
+        self.logger = logging.getLogger('mp4pack.json.tmdb')
     
     
     def local_path_from_remote_url(self):
@@ -92,8 +111,45 @@ class TmdbJsonHandler(JsonHandler):
         result = result.replace('/' + tag_config['tmdb']['apikey'], '')
         return result
     
+    
+    def get_element(self):
+        element = JsonHandler.get_element(self)
+        if element == None or len(element) == 0 or element[0] == 'Nothing found.':
+            self.logger.warning('Nothing found in ' + self.remote_url)
+            os.remove(self.local_path)
+            try:
+                os.removedirs(os.path.dirname(self.local_path))
+            except OSError:
+                pass
+            element = None
+        return element
+    
+    
 
 
+class TvdbXmlHandler(XmlHandler):
+    def __init__(self, url):
+        XmlHandler.__init__(self, url)
+        self.logger = logging.getLogger('mp4pack.xml.tvdb')
+    
+    
+    def local_path_from_remote_url(self):
+        result = ResourceHandler.local_path_from_remote_url(self)
+        result = result.replace('/' + tag_config['tvdb']['apikey'], '')
+        result = result.replace('/all', '')
+        return result
+    
+    
+
+
+class TvdbImageHandler(ResourceHandler):
+    def __init__(self, url):
+        ResourceHandler.__init__(self, url)
+        self.logger = logging.getLogger('mp4pack.image.tvdb')
+    
+    
+    def cache(self):
+        ResourceHandler.cache(self)
 
 
 class TagManager(object):
@@ -156,7 +212,7 @@ class TagManager(object):
     
     
     def find_movie_by_imdb_id(self, imdb_id):
-        _movie = self.movies.find_one({"imdb_id": imdb_id})
+        _movie = self.movies.find_one({'imdb_id': imdb_id})
         if _movie == None:
             _tmdb_id = self._find_tmdb_id_by_imdb_id(imdb_id)
             if _tmdb_id != None:
@@ -165,7 +221,7 @@ class TagManager(object):
     
     
     def find_movie_by_tmdb_id(self, tmdb_id):
-        _movie = self.movies.find_one({"tmdb_id": tmdb_id})
+        _movie = self.movies.find_one({'tmdb_id': tmdb_id})
         if _movie == None:
             _movie = self._update_tmdb_movie(tmdb_id)
         return _movie
@@ -179,7 +235,7 @@ class TagManager(object):
     
     
     def find_show_by_tvdb_id(self, tvdb_id):
-        _show = self.shows.find_one({"tvdb_id": tvdb_id})
+        _show = self.shows.find_one({'tvdb_id': tvdb_id})
         if _show == None:
             _show = self._update_tvdb_show_tree(tvdb_id)
         return _show
@@ -226,37 +282,37 @@ class TagManager(object):
         _movie = self.movies.find_one({'tmdb_id':tmdb_id})
         url = tag_config['tmdb']['urls']['Movie.getInfo']  % (tmdb_id)
         handler = TmdbJsonHandler(url)
-        element = handler.get_json_element()
+        element = handler.get_element()
         if element != None:
-            movie_element = element[0]
+            element = element[0]
             if _movie == None:
                 _movie = {'cast':[], 'genre':[], 'posters':[]}
                 
-            update_int_property('tmdb_id', movie_element['id'], _movie)
+            update_int_property('tmdb_id', element['id'], _movie)
             self.movies.save(_movie)
-            update_int_property('imdb_id', movie_element['imdb_id'], _movie)
-            update_string_property('name', movie_element['name'], _movie)
-            update_string_property('overview', movie_element['overview'], _movie)
-            update_string_property('tagline', movie_element['tagline'], _movie)
-            update_string_property('content_rating', movie_element['certification'], _movie)
-            update_date_property('released', movie_element['released'], _movie)
+            update_int_property('imdb_id', element['imdb_id'], _movie)
+            update_string_property('name', element['name'], _movie)
+            update_string_property('overview', element['overview'], _movie)
+            update_string_property('tagline', element['tagline'], _movie)
+            update_string_property('content_rating', element['certification'], _movie)
+            update_date_property('released', element['released'], _movie)
             
-            if 'genres' in movie_element.keys():
+            if 'genres' in element.keys():
                 _movie['genre'] = list()
-                for ge in movie_element['genres']:
+                for ge in element['genres']:
                     if ge['type'] == 'genre':
                         _movie['genre'].append(self._make_genre_item(ge['name']))
                         
-            if 'cast' in movie_element.keys():
+            if 'cast' in element.keys():
                 _movie['cast'] = list()
-                for ce in movie_element['cast']:
+                for ce in element['cast']:
                     _person_ref = self._make_person_ref_from_element(ce)
                     if _person_ref != None:
                         _movie['cast'].append(_person_ref)
                                     
-            #if 'posters' in movie_element.keys():
+            #if 'posters' in element.keys():
             #    _movie['posters'] = list()
-            #    for pe in movie_element['posters']:
+            #    for pe in element['posters']:
                     
             self.movies.save(_movie)
         return _movie
@@ -266,10 +322,10 @@ class TagManager(object):
         _tmdb_id = None
         url = tag_config['tmdb']['urls']['Movie.imdbLookup'] % (imdb_id)
         handler = TmdbJsonHandler(url)
-        element = handler.get_json_element()
+        element = handler.get_element()
         if element != None:
-            movie_element = element[0]
-            _tmdb_id = movie_element['id']
+            element = element[0]
+            _tmdb_id = element['id']
         return _tmdb_id
     
     
@@ -299,20 +355,20 @@ class TagManager(object):
         _person = self.people.find_one({'tmdb_id':tmdb_id})
         url = tag_config['tmdb']['urls']['Person.getInfo'] % (tmdb_id)
         handler = TmdbJsonHandler(url)
-        element = handler.get_json_element()
+        element = handler.get_element()
         if element != None:
-            person_element = element[0]
+            element = element[0]
             if _person == None:
                 _person = {'filmography':[]}
-            update_int_property('tmdb_id', person_element['id'], _person)
-            update_string_property('name', person_element['name'], _person)
-            update_string_property('small_name', person_element['name'].lower(), _person)
-            update_date_property('birthday', person_element['birthday'], _person)
-            update_string_property('biography', person_element['biography'], _person)
+            update_int_property('tmdb_id', element['id'], _person)
+            update_string_property('name', element['name'], _person)
+            update_string_property('small_name', element['name'].lower(), _person)
+            update_date_property('birthday', element['birthday'], _person)
+            update_string_property('biography', element['biography'], _person)
             
-            if 'filmography' in person_element.keys():
+            if 'filmography' in element.keys():
                 _person['filmography'] = list()
-                for fe in person_element['filmography']:
+                for fe in element['filmography']:
                     _movie_ref = self._make_movie_ref_from_element(fe)
                     if _movie_ref != None:
                         _person['filmography'].append(_movie_ref)
@@ -325,7 +381,7 @@ class TagManager(object):
         name = collapse_whitespace.sub(' ', name)
         url = tag_config['tmdb']['urls']['Person.search'] % (prepare_for_tmdb_query(name))
         handler = TmdbJsonHandler(url)
-        element = handler.get_json_element()
+        element = handler.get_element()
         if element != None:
             for pe in element:
                 if pe['name'].lower() == name.lower():
@@ -334,8 +390,8 @@ class TagManager(object):
         return result
     
     
-    def _make_person_ref_from_element(self, person_element):
-        return self._make_person_ref(person_element['job'], person_element['department'], person_element['character'], person_element['id'], person_element['name'])
+    def _make_person_ref_from_element(self, element):
+        return self._make_person_ref(element['job'], element['department'], element['character'], element['id'], element['name'])
     
     
     def _make_person_ref(self, job, department, character=None, person_tmdb_id=None, person_name=None):
@@ -361,8 +417,8 @@ class TagManager(object):
         return _person_ref
     
     
-    def _make_movie_ref_from_element(self, movie_element):
-        return self._make_movie_ref(movie_element['job'], movie_element['department'], movie_element['id'], movie_element['name'], movie_element['character'])
+    def _make_movie_ref_from_element(self, element):
+        return self._make_movie_ref(element['job'], element['department'], element['id'], element['name'], element['character'])
     
     
     def _make_movie_ref(self, job, department, movie_tmdb_id, movie_name, character=None):
@@ -382,9 +438,9 @@ class TagManager(object):
     
     def _update_tvdb_show_tree(self, tvdb_id):
         url = tag_config['tvdb']['urls']['Show.getInfo'] % (tvdb_id)
-        etree = XmlHandler(url).get_element_tree()
-        _show = self._update_tvdb_show(tvdb_id, etree)
-        self._update_tvdb_episodes(_show, etree)
+        element = TvdbXmlHandler(url).get_element()
+        _show = self._update_tvdb_show(tvdb_id, element)
+        self._update_tvdb_episodes(_show, element)
         return _show
     
     
@@ -400,7 +456,7 @@ class TagManager(object):
                 
             for item in show_nodes[0].getchildren():
                 if is_tag('id', item):
-                    update_string_property('tvdb_id', item.text, _show)
+                    update_int_property('tvdb_id', int(item.text), _show)
                 elif is_tag('IMDB_ID', item):
                     update_string_property('imdb_id', item.text, _show)
                 elif is_tag('SeriesName', item):
@@ -435,7 +491,7 @@ class TagManager(object):
         if len(episode_nodes) != 0:
             small_show_name = show['name'].lower()
             for episode_item in episode_nodes:
-                _tvdb_episode_id = episode_item.find('id').text
+                _tvdb_episode_id = int(episode_item.find('id').text)
                 _episode = self.episodes.find_one({'tvdb_id':_tvdb_episode_id})
                 if _episode == None:
                     _episode = {'cast':[]}
@@ -445,19 +501,19 @@ class TagManager(object):
                 _episode['small_show_name'] = small_show_name
                 for item in episode_item.getchildren():
                     if is_tag('id', item):
-                        update_string_property('tvdb_id', item.text, _episode)
+                        update_int_property('tvdb_id', int(item.text), _episode)
                     elif is_tag('seriesid', item):
-                        update_string_property('show_tvdb_id', item.text, _episode)
+                        update_int_property('show_tvdb_id', int(item.text), _episode)
                     elif is_tag('seasonid', item):
-                        update_string_property('season_tvdb_id', item.text, _episode)
+                        update_int_property('season_tvdb_id', int(item.text), _episode)
                     elif is_tag('IMDB_ID', item):
                         update_string_property('imdb_id', item.text, _episode)
                     elif is_tag('EpisodeName', item):
                         update_string_property('name', item.text, _episode)
                     elif is_tag('EpisodeNumber', item):
-                        update_string_property('episode_number', item.text, _episode)
+                        update_int_property('episode_number', int(item.text), _episode)
                     elif is_tag('SeasonNumber', item):
-                        update_string_property('season_number', item.text, _episode)
+                        update_int_property('season_number', int(item.text), _episode)
                     elif is_tag('Overview', item):
                         update_string_property('overview', item.text, _episode)
                     elif is_tag('ProductionCode', item):
@@ -495,7 +551,6 @@ def is_tag(name, item):
     if item.tag == name:
         result = True
     return result
-
 
 
 def update_int_property(key, value, entity):
@@ -569,7 +624,7 @@ def split_tvdb_list(value):
 def prepare_for_tmdb_query(value):
     result = None
     if value != None:
-        value = value.strip()
+        value = value.strip().lower()
         value = value.encode('utf8')
         value = collapse_whitespace.sub('+', value)
     return value
