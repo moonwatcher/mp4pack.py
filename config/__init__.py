@@ -78,7 +78,7 @@ tag_config['tvdb'] = {}
 tag_config['tvdb']['apikey'] = "7B3B400B0146EA83"
 tag_config['tvdb']['urls'] = {}
 tag_config['tvdb']['urls']['Show.getInfo'] = "http://www.thetvdb.com/api/%(apikey)s/series/%%s/all/en.xml" % (tag_config['tvdb'])
-tag_config['tvdb']['urls']['Banner.getImage'] = "http://www.thetvdb.com/banners/%%s"
+tag_config['tvdb']['urls']['Banner.getImage'] = "http://www.thetvdb.com/banners/%s"
 
 
 
@@ -91,7 +91,7 @@ tag_name.append(('Disk #', 'Disk #', 'Disk'))
 tag_name.append(('Album', 'Album', 'Album'))
 tag_name.append(('Album Artist', 'Album Artist', 'Album Artist'))
 tag_name.append(('Artist', 'Artist', 'Artist'))
-tag_name.append(('ArtisID', None, 'Artist ID'))
+tag_name.append(('ArtistID', None, 'Artist ID'))
 tag_name.append(('Tempo', 'Tempo', 'BPM'))
 tag_name.append(('Cast', 'Cast', None))
 tag_name.append(('Codirector', 'Codirector', None))

@@ -161,6 +161,14 @@ class TvdbXmlHandler(XmlHandler):
     
 
 
+class TvdbImageHandler(ImageHandler):
+    def __init__(self, url):
+        ImageHandler.__init__(self, tag_config['tvdb']['urls']['Banner.getImage'] % url)
+        self.logger = logging.getLogger('mp4pack.image.tvdb')
+    
+    
+    
+
 
 
 class TagManager(object):
@@ -241,7 +249,7 @@ class TagManager(object):
     def find_person_by_tmdb_id(self, tmdb_id):
         _person = self.people.find_one({'tmdb_id':tmdb_id})
         if _person == None:            
-            _person = self.update_tmdb_person(tmdb_id)
+            _person = self._update_tmdb_person(tmdb_id)
         return _person
     
     
@@ -256,8 +264,41 @@ class TagManager(object):
         return self.episodes.find_one({'tvdb_id':key})
     
     
-    def find_episode(self, show_name, season_number, episode_number):
-        return self.episodes.find_one({'small_show_name':show_name.lower(), 'season_number':season_number, 'episode_number':episode_number})
+    def map_show(self, small_name, tvdb_id):
+        show_by_tvdb_id = self.shows.find_one({'tvdb_id':tvdb_id})
+        show_by_small_name = self.shows.find_one({'small_name':small_name})
+        
+        if show_by_small_name == None and show_by_tvdb_id == None:
+            # This is good, we can do the mapping
+            show = {'small_name':small_name, 'tvdb_id':tvdb_id, 'last_update':None}
+            self.shows.save(show)
+            self.logger.info('Show ' + small_name + ' is now mapped to TVDB ID ' + tvdb_id)
+        
+        else: # This means at least one exists
+            if show_by_small_name != None:
+                self.logger.error('Show ' + small_name + ' already mapped to TVDB ID ' + show_by_small_name['tvdb_id'])
+            
+            if show_by_tvdb_id != None:
+                self.logger.error('Show ' + show_by_tvdb_id['small_name'] + ' is already mapped to TVDB ID ' + tvdb_id)
+        
+    
+    
+    def find_show(self, small_name):
+        show = self.shows.find_one({'small_name': small_name})
+        if show != None:
+            if show['last_update'] == None and 'tvdb_id' in show:
+                self.logger.info('Updating show ' + small_name)
+                self._update_tvdb_show_tree(show['tvdb_id'])
+                self.logger.info('Done updating show ' + small_name)
+        else:
+            self.logger.error('Show ' + small_name + ' does not exist')
+    
+    
+    def find_episode(self, show_small_name, season_number, episode_number):
+        show = self.find_show(show_small_name)
+        if show != None:
+            episode = self.episodes.find_one({'show_small_name':show_small_name, 'season_number':season_number, 'episode_number':episode_number})
+        return show, episode
     
     
     
@@ -362,7 +403,7 @@ class TagManager(object):
         return _person
     
     
-    def update_tmdb_person(self, tmdb_id):
+    def _update_tmdb_person(self, tmdb_id):
         _person = self.people.find_one({'tmdb_id':tmdb_id})
         url = tag_config['tmdb']['urls']['Person.getInfo'] % (tmdb_id)
         handler = TmdbJsonHandler(url)
@@ -448,109 +489,109 @@ class TagManager(object):
     
     
     def _update_tvdb_show_tree(self, tvdb_id):
-        url = tag_config['tvdb']['urls']['Show.getInfo'] % (tvdb_id)
-        element = TvdbXmlHandler(url).element()
-        _show = self._update_tvdb_show(tvdb_id, element)
-        self._update_tvdb_episodes(_show, element)
-        return _show
+        show = self.shows.find_one({'tvdb_id':tvdb_id})
+        if show != None:
+            url = tag_config['tvdb']['urls']['Show.getInfo'] % (tvdb_id)
+            element = TvdbXmlHandler(url).element()
+            show = self._update_tvdb_show(show, element)
+            self._update_tvdb_episodes(show, element)
+        else:
+            self.logger.error('Show ' + tvdb_id + ' does not exist')
+        return show
     
     
-    def _update_tvdb_show(self, tvdb_id, etree):
-        _show = self.shows.find_one({'tvdb_id':tvdb_id})
+    def _update_tvdb_show(self, show, etree):
         show_nodes = etree.findall("Series")
-        if len(show_nodes) != 0:
-            if _show == None:
-                _show = {'genre':[], 'cast':[]}
-            else:
-                _show['genre'] = []
-                _show['cast'] = []
-                
+        if len(show_nodes) > 0:
+            show['genre'] = []
+            show['cast'] = []
             for item in show_nodes[0].getchildren():
-                if is_tag('id', item):
-                    update_int_property('tvdb_id', int(item.text), _show)
-                elif is_tag('IMDB_ID', item):
-                    update_string_property('imdb_id', item.text, _show)
+                if is_tag('IMDB_ID', item):
+                    update_string_property('imdb_id', item.text, show)
                 elif is_tag('SeriesName', item):
-                    update_string_property('name', item.text, _show)
+                    update_string_property('name', item.text, show)
                 elif is_tag('Overview', item):
-                    update_string_property('overview', item.text, _show)
+                    update_string_property('overview', item.text, show)
                 elif is_tag('ContentRating', item):
-                    update_string_property('content_rating', item.text, _show)
+                    update_string_property('content_rating', item.text, show)
                 elif is_tag('Network', item):
                     _network = self.find_network(item.text)
-                    update_string_property('network_id', _network['_id'], _show)
-                    update_string_property('network', _network['name'], _show)
+                    update_string_property('network_id', _network['_id'], show)
+                    update_string_property('network', _network['name'], show)
                 elif is_tag('Genre', item):
-                    _show['genre'] = list()
+                    show['genre'] = list()
                     genre_list = split_tvdb_list(item.text)
                     for g in genre_list:
-                        _show['genre'].append(self._make_genre_item(g))
+                        show['genre'].append(self._make_genre_item(g))
                 elif is_tag('Actors', item):
-                    _show['cast'] = list()
+                    show['cast'] = list()
                     actor_list = split_tvdb_list(item.text)
                     for actor in actor_list:
                         _person_ref = self._make_person_ref(job='actor', department='actors', person_name=actor)
                         if _person_ref != None:
-                            _show['cast'].append(_person_ref)
+                            show['cast'].append(_person_ref)
                             
-            self.shows.save(_show)
-        return _show
+            self.shows.save(show)
+        return show
     
     
     def _update_tvdb_episodes(self, show, etree):
         episode_nodes = etree.findall("Episode")
         if len(episode_nodes) != 0:
-            small_show_name = show['name'].lower()
+            show_small_name = show['name'].lower()
             for episode_item in episode_nodes:
-                _tvdb_episode_id = int(episode_item.find('id').text)
-                _episode = self.episodes.find_one({'tvdb_id':_tvdb_episode_id})
-                if _episode == None:
-                    _episode = {'cast':[]}
+                tvdb_episode_id = int(episode_item.find('id').text)
+                episode = self.episodes.find_one({'tvdb_id':tvdb_episode_id})
+                if episode == None:
+                    episode = {'show_small_name':show['small_name'], 'cast':[]}
                 else:
-                    _episode['cast'] = list()
+                    episode['cast'] = list()
                     
-                _episode['small_show_name'] = small_show_name
+                episode['show_small_name'] = show_small_name
+                episode['show'] = show['name']
                 for item in episode_item.getchildren():
                     if is_tag('id', item):
-                        update_int_property('tvdb_id', int(item.text), _episode)
+                        update_int_property('tvdb_id', int(item.text), episode)
                     elif is_tag('seriesid', item):
-                        update_int_property('show_tvdb_id', int(item.text), _episode)
+                        update_int_property('show_tvdb_id', int(item.text), episode)
                     elif is_tag('seasonid', item):
-                        update_int_property('season_tvdb_id', int(item.text), _episode)
+                        update_int_property('season_tvdb_id', int(item.text), episode)
                     elif is_tag('IMDB_ID', item):
-                        update_string_property('imdb_id', item.text, _episode)
+                        update_string_property('imdb_id', item.text, episode)
                     elif is_tag('EpisodeName', item):
-                        update_string_property('name', item.text, _episode)
+                        update_string_property('name', item.text, episode)
                     elif is_tag('EpisodeNumber', item):
-                        update_int_property('episode_number', int(item.text), _episode)
+                        update_int_property('episode_number', int(item.text), episode)
                     elif is_tag('SeasonNumber', item):
-                        update_int_property('season_number', int(item.text), _episode)
+                        update_int_property('season_number', int(item.text), episode)
                     elif is_tag('Overview', item):
-                        update_string_property('overview', item.text, _episode)
+                        update_string_property('overview', item.text, episode)
                     elif is_tag('ProductionCode', item):
-                        update_string_property('production_code', item.text, _episode)
+                        update_string_property('production_code', item.text, episode)
                     elif is_tag('FirstAired', item):
-                        update_date_property('released', item.text, _episode)
+                        update_date_property('released', item.text, episode)
+                    elif is_tag('filename', item):
+                        update_string_property('artwork', item.text, episode)
                     elif is_tag('Director', item):
                         director_list = split_tvdb_list(item.text)
                         for director in director_list:
                             _person_ref = self._make_person_ref(job='director', department='directing', person_name=director)
                             if _person_ref != None:
-                                _episode['cast'].append(_person_ref)
+                                episode['cast'].append(_person_ref)
                     elif is_tag('Writer', item):
                         writer_list = split_tvdb_list(item.text)
                         for writer in writer_list:
                             _person_ref = self._make_person_ref(job='screenplay', department='writing', person_name=writer)
                             if _person_ref != None:
-                                _episode['cast'].append(_person_ref)
+                                episode['cast'].append(_person_ref)
                     elif is_tag('GuestStars', item):
                         actor_list = split_tvdb_list(item.text)
                         for actor in actor_list:
                             _person_ref = self._make_person_ref(job='actor', department='actors', person_name=actor)
                             if _person_ref != None:
-                                _episode['cast'].append(_person_ref)
+                                episode['cast'].append(_person_ref)
                                 
-                self.episodes.save(_episode)
+                self.episodes.save(episode)
     
     
 

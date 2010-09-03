@@ -5,6 +5,7 @@ import re
 import logging
 import hashlib
 from config import repository_config
+from db import TagManager
 
 def load_media_file(file_path):
     f = None
@@ -32,6 +33,7 @@ class Container(object):
         self.file_type = None
         self.exists = False
         self.checksum = None
+        self.meta = None
         if os.path.isfile(file_path):
             self.exists = True
             self.file_path = os.path.abspath(file_path)
@@ -49,14 +51,182 @@ class Container(object):
         return self.checksum
     
     
+    def is_movie(self):
+        return self.file_info != None and set(('media_kind', 'imdb_id')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'movie'
+    
+    
+    def is_tvshow(self):
+        return self.file_info != None and set(('media_kind', 'show', 'season', 'episode')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'tvshow'
+    
+    
+    def _load_genre(self, record):
+        if 'genre' in record.keys():
+            if len(record['genre']) > 0:
+                g = record['genre'][0]
+                self.meta['Genre'] = g['name']
+                if 'itmf_code' in g.keys():
+                    self.meta['GenreID'] = g['itmf_code']
+        return
+    
+    
+    def _load_cast(self, record):
+        if 'cast' in record.keys():
+            directors = [ r for r in record['cast'] if r['job'] == 'director' ]
+            codirectors = [ r for r in record['cast'] if r['job'] == 'director of photography' ]
+            producers = [ r for r in record['cast'] if r['job'].count('producer') > 0 ]
+            screenwriters = [ r for r in record['cast'] if r['job'] == 'screenplay' or r['job'] == 'author' ]
+            actors = [ r for r in record['cast'] if r['job'] == 'actor' ]
+            
+            artist = None
+            if len(directors) > 0:
+                if artist == None:
+                    artist = directors[0]
+                self.meta['Director'] = ', '.join([ d['name'] for d in directors ])
+            
+            if len(codirectors) > 0:
+                if artist == None:
+                    artist = codirectors[0]
+                self.meta['Codirector'] = ', '.join([ d['name'] for d in codirectors ])
+            
+            if len(producers) > 0:
+                if artist == None:
+                    artist = producers[0]
+                self.meta['Producers'] = ', '.join([ d['name'] for d in producers ])
+            
+            if len(screenwriters) > 0:
+                if artist == None:
+                    artist = screenwriters[0]
+                self.meta['Screenwriters'] = ', '.join([ d['name'] for d in screenwriters ])
+            
+            if len(actors) > 0:
+                if 'Cast' in self.meta and self.meta['Cast'] != None:
+                    self.meta['Cast'] = ', '.join([self.meta['Cast'], ', '.join([ d['name'] for d in actors ])])
+                else:
+                    self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
+                    
+                if artist == None:
+                    artist = actors[0]
+                
+            if artist != None:
+                self.meta['Artist'] = artist['name']
+        return
+    
+    
+    def _load_movie_meta(self):
+        result = False
+        if self.is_movie():
+            record = tag_manager.find_movie_by_imdb_id(self.file_info['imdb_id'])
+            if record != None:
+                self.meta = {'Media Kind':self.file_info['media_kind']}
+                
+                if 'name' in record:
+                    self.meta['Name'] = record['name']
+                if 'overview' in record:
+                    self.meta['Long Description'] = record['overview']
+                if 'content_rating' in record:
+                    self.meta['Rating'] = record['content_rating']
+                if 'released' in record:
+                    self.meta['Release Date'] = record['released']
+                if 'tagline' in record:
+                    self.meta['Description'] = record['tagline']
+                
+                self._load_cast(record)
+                self._load_genre(record)
+                result = True
+        return result
+    
+    
+    def _load_tvshow_meta(self):
+        result = False
+        if self.is_tvshow():
+            show, episode = tag_manager.find_episode(self.file_info['show_small_name'], self.file_info['season_number'], self.file_info['episode_number'])
+            if show != None and episode != None:
+                self.meta = {'Media Kind':self.file_info['media_kind']}
+                
+                if 'content_rating' in show:
+                    self.meta['Rating'] = show['content_rating']
+                if 'network' in show:
+                    self.meta['TV Network'] = show['network']
+                
+                self._load_genre(show)
+                
+                if 'cast' in show.keys():
+                    actors = [ r for r in episode['cast'] if r['job'] == 'actor' ]
+                    if len(actors) > 0:
+                        self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
+                
+                if 'show' in episode:
+                    self.meta['TV Show'] = episode['show']
+                    self.meta['Album'] = episode['show']
+                if 'season_number' in episode:
+                    self.meta['TV Season'] = episode['season_number']
+                    self.meta['Disk #'] = episode['season_number']
+                if 'episode_number' in episode:
+                    self.meta['TV Episode #'] = episode['episode_number']
+                    self.meta['Track #'] = episode['episode_number']
+                if 'name' in episode:
+                    self.meta['Name'] = episode['name']
+                if 'overview' in episode:
+                    self.meta['Long Description'] = episode['overview']
+                    self.meta['Description'] = episode['overview']
+                if 'released' in episode:
+                    self.meta['Release Date'] = episode['released']
+                
+                self._load_cast(episode)
+                result = True
+        return result
+    
+    
+    def load_meta(self):
+        result = False
+        self.meta = list()
+        if self.is_movie():
+            result = self._load_movie_meta()
+        elif self.is_tvshow():
+            result = self._load_tvshow_meta()
+        
+        if not result:
+            self.meta = None
+            
+        return result
+    
+    
+    def canonic_name(self, media_info):
+        result = None
+        if self.is_movie():
+            result = ''.join('IMDb', media_info['imdb_id'], ' ', media_info['name'], '.', media_info['type'])
+        elif self.is_tvshow():
+            result = ''.join(media_info['show_small_name'], ' ', media_info['code'], ' ', media_info['name'], '.', media_info['type'])
+        return result
+    
+    
+    def canonic_path(self, volume, profile, media_info):
+        result = repository_config['volumes'][volume]
+        if self.is_movie():
+            result = '/'.join(result, media_info['media_kind'], media_info['type'], profile, self.canonic_name(media_info))
+        elif self.is_tvshow():
+            result = '/'.join(result, media_info['media_kind'], media_info['type'], profile, media_info['show_small_name'], media_info['season_number'], self.canonic_name(media_info))
+        return result
+    
+    
+    def print_meta(self):
+        result = None
+        if self.meta != None:
+            result = (u'\n'.join([u'%s: %s' % (key, self.meta[key]) for key in sorted(set(self.meta))]))
+        return result
+    
+    
     def __str__(self):
         result = None
         if self.exists:
-            result = '\n' + self.file_path
-            result = '\n'.join((result, '# Parsed from path:', self.file_info.__str__()))
+            result = u'\n' + self.file_path
+            result = u'\n'.join((result, u'# Parsed from path:', self.file_info.__str__()))
+            if self.meta != None and len(self.meta) > 0:
+                result = u'\n'.join((result, u'# Meta: ', self.print_meta()))
         else:
             result = 'file does not exist'
         return result
+    
     
 
 
@@ -86,26 +256,26 @@ class AVContainer(Container):
     
     
     def print_chapters(self):
-        return ('\n'.join(["%s" % chapter for chapter in self.chapters]))
+        return (u'\n'.join([u'%s' % chapter for chapter in self.chapters]))
     
     
     def print_tags(self):
-        return ('\n'.join(["%s: %s" % (key, self.tags[key]) for key in sorted(set(self.tags))]))
+        return (u'\n'.join([u'%s: %s' % (key, self.tags[key]) for key in sorted(set(self.tags))]))
     
     
     def print_tracks(self):
-        return ('\n'.join(["%s" % track for track in self.tracks]))
+        return (u'\n'.join([u'%s' % track for track in self.tracks]))
     
     
     def __str__(self):
         result = Container.__str__(self)
         if self.exists:
             if len(self.tracks) > 0:
-                result = '\n'.join((result, '# Tracks: ', self.print_tracks()))
+                result = u'\n'.join((result, u'# Tracks: ', self.print_tracks()))
             if len(self.tags) > 0:
-                result = '\n'.join((result, '# Tags: ', self.print_tags()))
+                result = u'\n'.join((result, u'# Tags: ', self.print_tags()))
             if len(self.chapters) > 0:
-                result = '\n'.join((result, '# Chapter: ', self.print_chapters()))
+                result = u'\n'.join((result, u'# Chapter: ', self.print_chapters()))
         
         return result
     
@@ -770,10 +940,10 @@ class FileDetailDetector(object):
                     media_info['type'] = match.group(3)
                     
                 elif media_kind == 'tvshow':
-                    media_info['show'] = match.group(1)
+                    media_info['show_small_name'] = match.group(1)
                     media_info['code'] = match.group(2)
-                    media_info['episode'] = match.group(3)
-                    media_info['season'] = match.group(4)
+                    media_info['episode_number'] = int(match.group(3))
+                    media_info['season_number'] = int(match.group(4))
                     media_info['name'] = match.group(5)
                     media_info['type'] = match.group(6)
         
@@ -892,6 +1062,7 @@ def frame_to_miliseconds(frame, frame_rate):
     return round(float(1000)/float(frame_rate) * float(frame))
 
 
+tag_manager = TagManager()
 subtitle_file_type_re = re.compile('\.(srt|ass|sub|ssa)')
 mp4_file_type_re = re.compile('\.(mp4|m4v|m4a|m4b)')
 matroska_file_type_re = re.compile('\.mkv')
