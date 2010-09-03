@@ -272,14 +272,14 @@ class TagManager(object):
             # This is good, we can do the mapping
             show = {'small_name':small_name, 'tvdb_id':tvdb_id, 'last_update':None}
             self.shows.save(show)
-            self.logger.info('Show ' + small_name + ' is now mapped to TVDB ID ' + tvdb_id)
+            self.logger.info('Show ' + small_name + ' is now mapped to TVDB ID ' + str(tvdb_id))
         
         else: # This means at least one exists
             if show_by_small_name != None:
-                self.logger.error('Show ' + small_name + ' already mapped to TVDB ID ' + show_by_small_name['tvdb_id'])
+                self.logger.error('Show ' + small_name + ' already mapped to TVDB ID ' + str(show_by_small_name['tvdb_id']))
             
             if show_by_tvdb_id != None:
-                self.logger.error('Show ' + show_by_tvdb_id['small_name'] + ' is already mapped to TVDB ID ' + tvdb_id)
+                self.logger.error('Show ' + show_by_tvdb_id['small_name'] + ' is already mapped to TVDB ID ' + str(tvdb_id))
         
     
     
@@ -292,10 +292,12 @@ class TagManager(object):
                 self.logger.info('Done updating show ' + small_name)
         else:
             self.logger.error('Show ' + small_name + ' does not exist')
+        return show
     
     
     def find_episode(self, show_small_name, season_number, episode_number):
         show = self.find_show(show_small_name)
+        episode = None
         if show != None:
             episode = self.episodes.find_one({'show_small_name':show_small_name, 'season_number':season_number, 'episode_number':episode_number})
         return show, episode
@@ -538,17 +540,14 @@ class TagManager(object):
     def _update_tvdb_episodes(self, show, etree):
         episode_nodes = etree.findall("Episode")
         if len(episode_nodes) != 0:
-            show_small_name = show['name'].lower()
             for episode_item in episode_nodes:
                 tvdb_episode_id = int(episode_item.find('id').text)
                 episode = self.episodes.find_one({'tvdb_id':tvdb_episode_id})
                 if episode == None:
-                    episode = {'show_small_name':show['small_name'], 'cast':[]}
+                    episode = {'show':show['name'], 'show_small_name':show['small_name'], 'cast':[]}
                 else:
                     episode['cast'] = list()
                     
-                episode['show_small_name'] = show_small_name
-                episode['show'] = show['name']
                 for item in episode_item.getchildren():
                     if is_tag('id', item):
                         update_int_property('tvdb_id', int(item.text), episode)

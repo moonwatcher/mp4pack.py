@@ -83,7 +83,7 @@ def load_options():
     group.add_option("-f", "--filter", dest="file_filter", default=None, help="Regex to filter input file names through")
     group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default="universal", help="[default: %default]")
     group.add_option("-k", "--kind", dest="kind", type="choice", choices=repository_config['kinds'].keys(), help="[default: %default]")
-    group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['media-kinds'].keys(), help="[default: %default]")
+    group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
     group.add_option("-q", "--quality", dest="quality", help="[default: %default]")
     group.add_option("-s", "--width", dest="width", help="[default: %default]")
     group.add_option("--rate", dest="rate", help="[default: %default]")
@@ -107,6 +107,10 @@ def load_options():
     group.add_option("--xml", metavar="VOLUME", dest="xml", default="alpha", help="volume to use for xml")
     parser.add_option_group(group)
     
+    group = OptionGroup(parser, "Service", "service routines")
+    group.add_option("--map-show", dest="map_show", help="Map TV Show TVDB to name")
+    parser.add_option_group(group)
+    
     return parser.parse_args()
 
 
@@ -115,7 +119,9 @@ def preform_operations(entity_manager, files, options):
         for f in files:
             print f
         
-    #if options.deposit:
+    if options.deposit:
+        for f in files:
+            f.copy(options.volume, options.profile, options.overwrite, options.md5)
     
     #if options.extract:
     
@@ -139,14 +145,14 @@ def main():
     logger = logging.getLogger('mp4pack')
     logger.info('open log')
     
-    from db import EntityManager
-    entity_manager = EntityManager()
+    from db import TagManager
+    tag_manager = TagManager()
     file_filter = load_file_filter(options.file_filter)
     
     
     
     files = load_input_files(options.input, options.kind, file_filter, options.recursive)
-    preform_operations(entity_manager, files, options)
+    preform_operations(tag_manager, files, options)
     
     for k, v in options.__dict__.iteritems():
         print '    {0}: {1}'.format(k, v)

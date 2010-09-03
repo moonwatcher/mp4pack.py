@@ -3,12 +3,13 @@
 
 
 repository_config = {}
-repository_config['volumes'] = {'alpha':'/pool/alpha', 'beta':'/pool/beta', 'gama':'/pool/gama', 'delta':'/pool/delta', 'epsilon':'/pool/epsilon', 'eta':'/pool/eta'}
-repository_config['media-kinds'] = {}
-repository_config['media-kinds']['tvshow'] = {'schema':'^(.*) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$'}
-repository_config['media-kinds']['movie'] = {'schema':'^IMDb(tt[0-9]+) ?(.*)\.([^\.]+)$'}
-#repository_config['media-kinds']['music'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$'}
-#repository_config['media-kinds']['audiobook'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$'}
+repository_config['volumes'] = {'alpha':'/Users/lg/pool/alpha', 'beta':'/Users/lg/pool/beta', 'gama':'/Users/lg/pool/gama', 'delta':'/Users/lg/pool/delta', 'epsilon':'/Users/lg/pool/epsilon', 'eta':'/Users/lg/pool/eta'}
+repository_config['Media Kind'] = {}
+repository_config['Media Kind']['tvshow'] = {'schema':'^(.*) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10}
+repository_config['Media Kind']['movie'] = {'schema':'^IMDb(tt[0-9]+) ?(.*)\.([^\.]+)$', 'name':'Movie', 'stik':9}
+#repository_config['Media Kind']['music'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Music', 'stik':1}
+#repository_config['Media Kind']['audiobook'] = {'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2}
+
 
 repository_config['kinds'] = {}
 repository_config['kinds']['m4v'] = {}
@@ -65,7 +66,7 @@ tag_config = {}
 tag_config['db'] = {}
 tag_config['db']['name'] = "mp4pack"
 
-tag_config['cache'] = "/Users/lg/mp4pack/cache/"
+tag_config['cache'] = "/Users/lg/pool/cache/"
 tag_config['tmdb'] = {}
 tag_config['tmdb']['apikey'] = "a8b9f96dde091408a03cb4c78477bd14"
 tag_config['tmdb']['urls'] = {}

@@ -28,11 +28,9 @@ def load_media_file(file_path):
 class Container(object):
     def __init__(self, file_path=None):
         self.logger = logging.getLogger('mp4pack.container')
-        self.md5checksum = None
+        self.exists = False
         self.file_path = None
         self.file_type = None
-        self.exists = False
-        self.checksum = None
         self.meta = None
         if os.path.isfile(file_path):
             self.exists = True
@@ -45,10 +43,51 @@ class Container(object):
         return
     
     
-    def checksum(self):
-        if self.exist:
-            self.checksum = hashlib.md5(file(self.file_path).read()).hexdigest()
-        return self.checksum
+    def clean(self, path):
+        try:
+            os.remove(path)
+            os.removedirs(os.path.dirname(path))
+        except OSError:
+            pass
+    
+    
+    def copy(self, volume, profile, overwrite=False, md5=False):
+        dest_path = self.canonic_path(volume, profile)
+        if os.path.exists(dest_path) and not overwrite:
+            self.logger.warning('Not overwriting ' + dest_path)
+        else:
+            dirname = os.path.dirname(dest_path)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            
+            self.logger.info('Copy ' + self.file_path + ' --> ' + dest_path)
+            from subprocess import Popen, PIPE
+            proc = Popen(["rsync", self.file_path, dest_path], stdout=PIPE)
+            report = proc.communicate()
+            
+            if report[1] != None and len(report[1]) > 0:
+                self.logger.error(report[1])
+            if report[0] != None and len(report[0]) > 0:
+                self.logger.info(report[0])
+            
+            if not os.path.exists(dest_path):
+                self.clean(dest_path)
+            if md5:
+                self.check(dest_path)
+        
+    
+    
+    def check(self, path):
+        result = False
+        if os.path.exists(self.file_path) and os.path.exists(path):
+            source_md5 = hashlib.md5(file(self.file_path).read()).hexdigest()
+            dest_md5 = hashlib.md5(file(path).read()).hexdigest()
+            if source_md5 == dest_md5:
+                self.logger.info('md5 match: ' + source_md5 + ' ' + self.canonic_name())
+                result = True
+            else:
+                self.logger.error('md5 mismatch: ' + source_md5 + ' ' + dest_md5 + ' ' + self.canonic_name())
+        return result
     
     
     def is_movie(self):
@@ -56,7 +95,7 @@ class Container(object):
     
     
     def is_tvshow(self):
-        return self.file_info != None and set(('media_kind', 'show', 'season', 'episode')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'tvshow'
+        return self.file_info != None and set(('media_kind', 'show_small_name', 'season_number', 'episode_number')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'tvshow'
     
     
     def _load_genre(self, record):
@@ -126,7 +165,7 @@ class Container(object):
                 if 'content_rating' in record:
                     self.meta['Rating'] = record['content_rating']
                 if 'released' in record:
-                    self.meta['Release Date'] = record['released']
+                    self.meta['Release Date'] = record['released'].strftime("%Y-%m-%d")
                 if 'tagline' in record:
                     self.meta['Description'] = record['tagline']
                 
@@ -151,7 +190,7 @@ class Container(object):
                 self._load_genre(show)
                 
                 if 'cast' in show.keys():
-                    actors = [ r for r in episode['cast'] if r['job'] == 'actor' ]
+                    actors = [ r for r in show['cast'] if r['job'] == 'actor' ]
                     if len(actors) > 0:
                         self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
                 
@@ -170,7 +209,7 @@ class Container(object):
                     self.meta['Long Description'] = episode['overview']
                     self.meta['Description'] = episode['overview']
                 if 'released' in episode:
-                    self.meta['Release Date'] = episode['released']
+                    self.meta['Release Date'] = episode['released'].strftime("%Y-%m-%d")
                 
                 self._load_cast(episode)
                 result = True
@@ -191,40 +230,52 @@ class Container(object):
         return result
     
     
-    def canonic_name(self, media_info):
+    def canonic_name(self, info=None):
         result = None
+        if info == None:
+            info = self.file_info
         if self.is_movie():
-            result = ''.join('IMDb', media_info['imdb_id'], ' ', media_info['name'], '.', media_info['type'])
+            result = ''.join(['IMDb', info['imdb_id'], ' ', info['name'], '.', info['type']])
         elif self.is_tvshow():
-            result = ''.join(media_info['show_small_name'], ' ', media_info['code'], ' ', media_info['name'], '.', media_info['type'])
+            result = ''.join([info['show_small_name'], ' ', info['code'], ' ', info['name'], '.', info['type']])
         return result
     
     
-    def canonic_path(self, volume, profile, media_info):
+    def canonic_path(self, volume, profile, info=None):
         result = repository_config['volumes'][volume]
+        if info == None:
+            info = self.file_info
         if self.is_movie():
-            result = '/'.join(result, media_info['media_kind'], media_info['type'], profile, self.canonic_name(media_info))
+            result = '/'.join([result, info['media_kind'], info['type'], profile, self.canonic_name(info)])
         elif self.is_tvshow():
-            result = '/'.join(result, media_info['media_kind'], media_info['type'], profile, media_info['show_small_name'], media_info['season_number'], self.canonic_name(media_info))
+            result = '/'.join([result, info['media_kind'], info['type'], profile, info['show_small_name'], str(info['season_number']), self.canonic_name(info)])
         return result
     
     
     def print_meta(self):
         result = None
         if self.meta != None:
-            result = (u'\n'.join([u'%s: %s' % (key, self.meta[key]) for key in sorted(set(self.meta))]))
+            result = ('\n'.join(["%s: %s" % (key, self.meta[key]) for key in sorted(set(self.meta))]))
+        return result
+    
+    
+    def print_file_info(self):
+        result = None
+        if self.file_info != None:
+            result = ('\n'.join(["%s: %s" % (key, self.file_info[key]) for key in sorted(set(self.file_info))]))
         return result
     
     
     def __str__(self):
         result = None
         if self.exists:
-            result = u'\n' + self.file_path
-            result = u'\n'.join((result, u'# Parsed from path:', self.file_info.__str__()))
+            result = '\n' + self.file_path
+            if self.file_info != None and len(self.file_info) > 0:
+                result = '\n'.join((result, '\n# Parsed from path: ', self.print_file_info()))
             if self.meta != None and len(self.meta) > 0:
-                result = u'\n'.join((result, u'# Meta: ', self.print_meta()))
+                result = '\n'.join((result, '\n# Meta: ', self.print_meta()))
         else:
-            result = 'file does not exist'
+            result = '\nfile does not exist'
         return result
     
     
@@ -256,26 +307,26 @@ class AVContainer(Container):
     
     
     def print_chapters(self):
-        return (u'\n'.join([u'%s' % chapter for chapter in self.chapters]))
+        return ('\n'.join(["%s" % chapter for chapter in self.chapters]))
     
     
     def print_tags(self):
-        return (u'\n'.join([u'%s: %s' % (key, self.tags[key]) for key in sorted(set(self.tags))]))
+        return ('\n'.join(["%s: %s" % (key, self.tags[key]) for key in sorted(set(self.tags))]))
     
     
     def print_tracks(self):
-        return (u'\n'.join([u'%s' % track for track in self.tracks]))
+        return ('\n'.join(["%s" % track for track in self.tracks]))
     
     
     def __str__(self):
         result = Container.__str__(self)
         if self.exists:
             if len(self.tracks) > 0:
-                result = u'\n'.join((result, u'# Tracks: ', self.print_tracks()))
+                result = '\n'.join((result, '\n# Tracks: ', self.print_tracks()))
             if len(self.tags) > 0:
-                result = u'\n'.join((result, u'# Tags: ', self.print_tags()))
+                result = '\n'.join((result, '\n# Tags: ', self.print_tags()))
             if len(self.chapters) > 0:
-                result = u'\n'.join((result, u'# Chapter: ', self.print_chapters()))
+                result = '\n'.join((result, '\n# Chapter: ', self.print_chapters()))
         
         return result
     
@@ -916,13 +967,13 @@ subtitle_line_filter = SubtitleLineFilter()
 class FileDetailDetector(object):
     def __init__(self):
         self.file_name_schema_re = {}
-        for media_kind in repository_config['media-kinds'].keys():
-            self.file_name_schema_re[media_kind] = re.compile(repository_config['media-kinds'][media_kind]['schema'])
+        for media_kind in repository_config['Media Kind'].keys():
+            self.file_name_schema_re[media_kind] = re.compile(repository_config['Media Kind'][media_kind]['schema'])
     
     
     def detect(self, file_path):
         media_kind = None
-        media_info = None
+        info = None
         if file_path != None:
             match = None
             for mk, mk_re in self.file_name_schema_re.iteritems():
@@ -932,22 +983,22 @@ class FileDetailDetector(object):
                     break
             
             if media_kind != None:
-                media_info = {'media_kind':media_kind}
+                info = {'media_kind':media_kind}
                 
                 if media_kind == 'movie':
-                    media_info['imdb_id'] = match.group(1)
-                    media_info['name'] = match.group(2)
-                    media_info['type'] = match.group(3)
+                    info['imdb_id'] = match.group(1)
+                    info['name'] = match.group(2)
+                    info['type'] = match.group(3)
                     
                 elif media_kind == 'tvshow':
-                    media_info['show_small_name'] = match.group(1)
-                    media_info['code'] = match.group(2)
-                    media_info['episode_number'] = int(match.group(3))
-                    media_info['season_number'] = int(match.group(4))
-                    media_info['name'] = match.group(5)
-                    media_info['type'] = match.group(6)
+                    info['show_small_name'] = match.group(1)
+                    info['code'] = match.group(2)
+                    info['season_number'] = int(match.group(3))
+                    info['episode_number'] = int(match.group(4))
+                    info['name'] = match.group(5)
+                    info['type'] = match.group(6)
         
-        return media_info
+        return info
     
 
 file_detail_detector = FileDetailDetector()
