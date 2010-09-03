@@ -9,13 +9,13 @@ from db import TagManager
 
 def load_media_file(file_path):
     f = None
-    _extension = os.path.splitext(file_path)[1]
+    file_type = os.path.splitext(file_path)[1].strip('.')
     
-    if mp4_file_type_re.search(_extension) != None:
+    if file_type in container_type['Mpeg4']:
         f = Mpeg4(file_path)
-    elif matroska_file_type_re.search(_extension) != None:
+    elif file_type in container_type['Matroska']:
         f = Matroska(file_path)
-    elif subtitle_file_type_re.search(_extension) != None:
+    elif file_type in container_type['Subtitle']:
         f = Subtitle(file_path)
     
     return f
@@ -26,21 +26,19 @@ def load_media_file(file_path):
 # Container super Class
 
 class Container(object):
-    def __init__(self, file_path=None):
+    def __init__(self, file_path):
         self.logger = logging.getLogger('mp4pack.container')
         self.exists = False
         self.file_path = None
-        self.file_type = None
         self.meta = None
         if os.path.isfile(file_path):
             self.exists = True
             self.file_path = os.path.abspath(file_path)
-            self.file_type = os.path.splitext(self.file_path)[1]
             self.file_info = file_detail_detector.detect(self.file_path)
     
     
-    def load(self, file_path):
-        return
+    def load(self):
+        self.load_meta()
     
     
     def clean(self, path):
@@ -246,9 +244,14 @@ class Container(object):
         if info == None:
             info = self.file_info
         if self.is_movie():
-            result = '/'.join([result, info['media_kind'], info['type'], profile, self.canonic_name(info)])
+            result = os.path.join(result, info['media_kind'], info['type'], profile)
         elif self.is_tvshow():
-            result = '/'.join([result, info['media_kind'], info['type'], profile, info['show_small_name'], str(info['season_number']), self.canonic_name(info)])
+            result = os.path.join(result, info['media_kind'], info['type'], profile, info['show_small_name'], str(info['season_number']))
+            
+        if info['type'] in container_type['Subtitle']:
+            result = os.path.join(result, info['language'])
+            
+        result = os.path.join(result, self.canonic_name(info))
         return result
     
     
@@ -282,13 +285,13 @@ class Container(object):
 
 
 class AVContainer(Container):
-    def __init__(self, file_path=None):
+    def __init__(self, file_path):
         Container.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.avcontainer')
         self.tracks = []
         self.chapters = []
         self.tags = dict()
-        self.load(file_path)
+        self.load()
         
     
     
@@ -372,7 +375,7 @@ class Chapter(object):
 # Matroska Class
 
 class Matroska(AVContainer):
-    def __init__(self, file_path=None):
+    def __init__(self, file_path):
         AVContainer.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.container.matroska')
     
@@ -459,9 +462,8 @@ class Matroska(AVContainer):
         return index, chapter
     
     
-    def load(self, file_path):
-        AVContainer.load(self, file_path)
-        
+    def load(self):
+        AVContainer.load(self)
         from subprocess import Popen, PIPE
         mkvinfo_proc = Popen(["mkvinfo", self.file_path], stdout=PIPE)
         mkvinfo_report = mkvinfo_proc.communicate()[0].split('\n')        
@@ -528,7 +530,7 @@ mkvinfo_line_start_re = re.compile('\+')
 # Mpeg4 Class
 
 class Mpeg4(AVContainer):
-    def __init__(self, file_path=None):
+    def __init__(self, file_path):
         AVContainer.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.container.mp4')
     
@@ -579,8 +581,8 @@ class Mpeg4(AVContainer):
         return chapter
     
     
-    def load(self, file_path):
-        AVContainer.load(self, file_path)
+    def load(self):
+        AVContainer.load(self)
         
         from subprocess import Popen, PIPE
         mp4info_proc = Popen(["mp4info", self.file_path], stdout=PIPE)
@@ -628,10 +630,9 @@ mp4chaps_chapter_re  = re.compile('Chapter #([0-9]+) - ([0-9:\.]+) - (.*)$')
 # Subtitle Class
 
 class Subtitle(Container):
-    def __init__(self, file_path=None, input_frame_rate='25', output_frame_rate='25', format=None):
+    def __init__(self, file_path, input_frame_rate='25', output_frame_rate='25', format=None):
         Container.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.container.subtitle')
-        self.format = format
         self.input_frame_rate = input_frame_rate
         self.output_frame_rate = output_frame_rate
         self.time_begin = []
@@ -640,10 +641,9 @@ class Subtitle(Container):
         #self.load(file_path)
     
     
-    def load(self, file_path):
-        Container.load(file_path)
+    def load(self):
+        Container.load(self)
         if self.exists:
-            self.change_input_file(file_path)
             file_lines = self.read_subtitle_file()
             self.decode(file_lines)
             if self.input_frame_rate != self.output_frame_rate:
@@ -655,17 +655,6 @@ class Subtitle(Container):
     def write(self, output_file=None):
         file_lines = self.encode()
         self.write_subtitle_file(file_lines, output_file)
-    
-    
-    def change_input_file(self, file_path):
-        if file_path != None and os.path.isfile(file_path):
-            self.file_type = os.path.splitext(file_path)[1]
-            match = subtitle_file_type_re.search(self.file_type)
-            if match != None:
-                self.file_path = os.path.abspath(file_path)
-                self.format = match.group(1)
-            else:
-                self.file_type = None
     
     
     def read_subtitle_file(self):
@@ -796,11 +785,11 @@ class Subtitle(Container):
                     self.subtitle_list.append(line[2].strip('\n').replace('|', '\N'))
         
         
-        if self.format == 'srt':
+        if self.file_info['type'] == 'srt':
             decode_srt(file_lines)
-        elif self.format == 'sub':
+        elif self.file_info['type'] == 'sub':
             decode_sub(file_lines, self.input_frame_rate)
-        elif self.format == 'ass' or self.format == 'ssa':
+        elif self.file_info['type'] in ['ass', 'ssa']:
             decode_ass(file_lines)
     
     
@@ -997,7 +986,13 @@ class FileDetailDetector(object):
                     info['episode_number'] = int(match.group(4))
                     info['name'] = match.group(5)
                     info['type'] = match.group(6)
-        
+            
+            dirname = os.path.dirname(file_path)
+            if info['type'] in container_type['Subtitle']:
+                lang = os.path.split(dirname)[1]
+                if lang in repository_config['language']:
+                    info['language'] = lang
+                    
         return info
     
 
@@ -1114,8 +1109,6 @@ def frame_to_miliseconds(frame, frame_rate):
 
 
 tag_manager = TagManager()
-subtitle_file_type_re = re.compile('\.(srt|ass|sub|ssa)')
-mp4_file_type_re = re.compile('\.(mp4|m4v|m4a|m4b)')
-matroska_file_type_re = re.compile('\.mkv')
+container_type = { 'Subtitle':['srt', 'ass', 'sub', 'ssa'], 'Mpeg4':['mp4', 'm4v', 'm4a', 'm4b'], 'Matroska':['mkv'] }
 full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
 descriptive_time_format = re.compile('(?:([0-9]{,2})h)?(?:([0-9]{,2})m)?(?:([0-9]{,2})s)?(?:([0-9]+))?')

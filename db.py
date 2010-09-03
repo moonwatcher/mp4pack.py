@@ -189,12 +189,23 @@ class TagManager(object):
         self.people = self.db.people
     
     
+    def base_init(self):
+        from config import itmf_genre
+        for g in itmf_genre:
+            self.insert_genre(g)
+        
+        from config import tvshow_map
+        for s in tvshow_map:
+            self.map_show(s[1], s[0])
+    
+    
     def find_network(self, name):
         small_name = name.lower()
         _network = self.networks.find_one({'_id': small_name})
         if _network == None:
             _network = {'_id':small_name, 'name':name}
             self.networks.save(_network)
+            self.logger.info('Creating TV Network ' + name )
         return _network
     
     
@@ -204,6 +215,7 @@ class TagManager(object):
         if _job == None:
             _job = {'_id':small_name, 'name':name}
             self.jobs.save(_job)
+            self.logger.info('Creating Job ' + name )
         return _job
     
     
@@ -213,6 +225,7 @@ class TagManager(object):
         if _department == None:
             _department = {'_id':small_name, 'name':name}
             self.departments.save(_department)
+            self.logger.info('Creating Department ' + name )
         return _department
     
     
@@ -224,9 +237,7 @@ class TagManager(object):
             _genre = self.genres.find_one({'_id': _canonic_name})
             
         if _genre == None:
-            _genre = {'_id':small_name, 'name':name}
-            self.genres.save(_genre)
-            
+            _genre = self.make_genre(name)
         return _genre 
     
     
@@ -275,11 +286,12 @@ class TagManager(object):
             self.logger.info('Show ' + small_name + ' is now mapped to TVDB ID ' + str(tvdb_id))
         
         else: # This means at least one exists
-            if show_by_small_name != None:
-                self.logger.error('Show ' + small_name + ' already mapped to TVDB ID ' + str(show_by_small_name['tvdb_id']))
+            if not(show_by_small_name != None and show_by_tvdb_id != None and show_by_tvdb_id['_id'] == show_by_small_name['_id']):
+                if show_by_small_name != None:
+                    self.logger.error('Show ' + small_name + ' already mapped to TVDB ID ' + str(show_by_small_name['tvdb_id']))
             
-            if show_by_tvdb_id != None:
-                self.logger.error('Show ' + show_by_tvdb_id['small_name'] + ' is already mapped to TVDB ID ' + str(tvdb_id))
+                if show_by_tvdb_id != None:
+                    self.logger.error('Show ' + show_by_tvdb_id['small_name'] + ' is already mapped to TVDB ID ' + str(tvdb_id))
         
     
     
@@ -305,6 +317,29 @@ class TagManager(object):
     
     
     
+    def insert_genre(self, genre):
+        result = None
+        result = self.genres.find_one({'_id': genre['_id']})
+        if result == None:
+            self.genres.save(genre)
+            result = genre
+            if 'itmf' in genre.keys():
+                self.logger.info('Creating genre ' + genre['name'] + ' with iTMF code ' + str(genre['itmf']) )
+            else:
+                self.logger.info('Creating genre ' + genre['name'] )
+        return result
+    
+    
+    def make_genre(self, name, itmf=None, small_name=None):
+        result = None
+        if small_name == None:
+            small_name = name.lower()
+        result = {'_id':small_name, 'name':name}
+        if itmf != None:
+            result['itmf'] = itmf
+        result = self.insert_genre(result)
+        return result
+    
     
     def _map_genre(self, name):
         _canonic_name = None
@@ -327,9 +362,10 @@ class TagManager(object):
         _genre_ref = dict()
         _genre_ref['id'] = _genre['_id']
         _genre_ref['name'] = _genre['name']
-        if 'itmf_code' in _genre:
-            _genre_ref['itmf_code'] = _genre['itmf_code']
+        if 'itmf' in _genre:
+            _genre_ref['itmf'] = _genre['itmf']
         return _genre_ref
+    
     
     
     def _update_tmdb_movie(self, tmdb_id):
@@ -369,6 +405,7 @@ class TagManager(object):
             #    for pe in element['posters']:
                     
             self.movies.save(_movie)
+            self.logger.info(' '.join(['Creating Movie', _movie['name'], 'with IMDB ID', _movie['imdb_id']]))
         return _movie
     
     

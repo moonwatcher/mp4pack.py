@@ -39,7 +39,7 @@ def list_input_files(path, kind, file_filter, recursive):
             p = os.path.normpath(os.path.join(path,p))
             if os.path.isfile(p) and fnmatch.fnmatch(p, '*.' + kind):
                 if file_filter == None or file_filter.search(p) != None:
-                    result.append(p)
+                    result.append(unicode(p, 'utf-8'))
             elif os.path.isdir(p):
                 if recursive:
                     rec_result = list_input_files(p, kind, file_filter, recursive)
@@ -60,8 +60,8 @@ def load_options():
     from config import repository_config
     
     available_profiles = list()
-    for k in repository_config['kinds'].keys():
-        available_profiles += repository_config['kinds'][k]['profiles'].keys()
+    for k in repository_config['Kind'].keys():
+        available_profiles += repository_config['Kind'][k]['Profile'].keys()
     
     parser = OptionParser("usage: %prog [options] arg")
         
@@ -75,6 +75,7 @@ def load_options():
     group.add_option("-u", "--update", dest="update", action="store_true", default=False, help="update files in repository")
     group.add_option("-z", "--ac3", dest="ac3", action="store_true", default=False, help="create new ac3 track from existing dts track")
     group.add_option("-y", "--report", dest="report", action="store_true", default=False, help="report inventory")
+    group.add_option("--initialize", dest="initialize", action="store_true", default=False, help="First run initialization")
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Modifiers", "You have to specify at least one action to preform.")
@@ -82,7 +83,7 @@ def load_options():
     group.add_option("-i", "--input", dest="input", default=".", help="Path to scan for input [default: %default]")
     group.add_option("-f", "--filter", dest="file_filter", default=None, help="Regex to filter input file names through")
     group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default="universal", help="[default: %default]")
-    group.add_option("-k", "--kind", dest="kind", type="choice", choices=repository_config['kinds'].keys(), help="[default: %default]")
+    group.add_option("-k", "--kind", dest="kind", type="choice", choices=repository_config['Kind'].keys(), help="[default: %default]")
     group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
     group.add_option("-q", "--quality", dest="quality", help="[default: %default]")
     group.add_option("-s", "--width", dest="width", help="[default: %default]")
@@ -114,7 +115,7 @@ def load_options():
     return parser.parse_args()
 
 
-def preform_operations(entity_manager, files, options):
+def preform_operations(tag_manager, files, options):
     if options.report:
         for f in files:
             print f
@@ -136,6 +137,9 @@ def preform_operations(entity_manager, files, options):
     #if options.update:
     
     #if options.ac3:
+    
+    if options.initialize:
+        tag_manager.base_init()
     
 
 
