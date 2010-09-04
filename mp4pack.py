@@ -79,7 +79,7 @@ def load_options():
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Modifiers", "You have to specify at least one action to preform.")
-    group.add_option("-o", "--volume", dest="volume", type="choice", choices=repository_config['volumes'].keys(), default=None, help="Output volume [default: %default]")
+    group.add_option("-o", "--volume", dest="volume", type="choice", choices=repository_config['Volume'].keys(), default=None, help="Output volume [default: %default]")
     group.add_option("-i", "--input", dest="input", default=".", help="Path to scan for input [default: %default]")
     group.add_option("-f", "--filter", dest="file_filter", default=None, help="Regex to filter input file names through")
     group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default=None, help="[default: %default]")

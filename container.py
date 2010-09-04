@@ -155,7 +155,7 @@ class Container(object):
         if self.is_movie():
             record = tag_manager.find_movie_by_imdb_id(self.file_info['imdb_id'])
             if record != None:
-                self.meta = {'Media Kind':self.file_info['media_kind']}
+                self.meta = {'Media Kind':repository_config['Media Kind'][self.file_info['media_kind']]['name']}
                 
                 if 'name' in record:
                     self.meta['Name'] = record['name']
@@ -179,7 +179,7 @@ class Container(object):
         if self.is_tvshow():
             show, episode = tag_manager.find_episode(self.file_info['show_small_name'], self.file_info['season_number'], self.file_info['episode_number'])
             if show != None and episode != None:
-                self.meta = {'Media Kind':self.file_info['media_kind']}
+                self.meta = {'Media Kind':repository_config['Media Kind'][self.file_info['media_kind']]['name']}
                 
                 if 'content_rating' in show:
                     self.meta['Rating'] = show['content_rating']
@@ -260,7 +260,7 @@ class Container(object):
         if volume == None:
             volume = info['volume']
         
-        result = repository_config['volumes'][volume]
+        result = repository_config['Volume'][volume]
         
         if self.is_movie():
             result = os.path.join(result, info['media_kind'], info['type'], profile)
@@ -635,6 +635,32 @@ class Mpeg4(AVContainer):
             index += 1
     
     
+    def encode_subler_tag_command(self):
+        result = None
+        update = dict()
+        if self.meta != None:
+            for t in self.meta:
+                if not(t in self.tags and self.tags[t] == self.meta[t]):
+                    update[t] = self.meta[t]
+                    
+        elif self.file_info != None:
+            if self.is_movie():
+                if 'name' in self.file_info and self.file_info['name'] != self.tags['Name']:
+                    update['Name'] = self.file_info['name']
+                
+            elif self.is_tvshow():
+                if not('TV Season' in self.tags and self.file_info['season_number'] == self.tags['TV Season']):
+                    update['TV Season'] = self.file_info['season_number']
+                if not('TV Episode #' in self.tags and self.file_info['episode_number'] == self.tags['TV Episode #']):
+                    update['TV Episode #'] = self.file_info['episode_number']
+                if not('Name' in self.tags and self.file_info['name'] == self.tags['Name']):
+                    update['Name'] = self.file_info['name']
+        
+        if len(update) > 0:
+            result = (''.join(["{%s:%s}" % (t, format_for_subler_tag(update[t])) for t in sorted(set(update))]))
+        return result
+    
+    
 
 
 mp4info_video_track_re = re.compile('([0-9]+)	video	([^,]+), ([0-9\.]+) secs, ([0-9\.]+) kbps, ([0-9]+)x([0-9]+) @ ([0-9\.]+) fps')
@@ -935,6 +961,15 @@ class TagNameResolver(object):
             result = self.mp4info_map[name][0]
         return result
     
+    
+    def subler_name_from_canonic(self, name):
+        result = None
+        if name in self.canonic_map:
+            result = self.canonic_map[name][1]
+        return result
+    
+    
+
 
 tag_name_resolver = TagNameResolver()
 
@@ -1012,7 +1047,7 @@ class FileDetailDetector(object):
             if info['type'] in container_type['Subtitle']:
                 info['volume'] = repository_config['Kind']['srt']['default']['volume']
                 prefix, lang = os.path.split(prefix)
-                if lang in repository_config['language']:
+                if lang in repository_config['Language']:
                     info['language'] = lang
                     
                 prefix, profile = os.path.split(prefix)
@@ -1134,6 +1169,12 @@ def parse_limits(limits, length):
 
 def frame_to_miliseconds(frame, frame_rate):
     return round(float(1000)/float(frame_rate) * float(frame))
+
+
+def format_for_subler_tag(value):
+    if value != None:
+        value = value.replace('{','&#123;').replace('}','&#125;').replace(':','&#58;')
+    return value
 
 
 tag_manager = TagManager()

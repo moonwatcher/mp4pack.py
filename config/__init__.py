@@ -4,8 +4,8 @@
 
 repository_config = {}
 
-repository_config['language'] = {'heb':'Hebrew', 'eng':'English'}
-repository_config['volumes'] = {'alpha':'/Users/lg/pool/alpha', 'beta':'/Users/lg/pool/beta', 'gama':'/Users/lg/pool/gama', 'delta':'/Users/lg/pool/delta', 'epsilon':'/Users/lg/pool/epsilon', 'eta':'/Users/lg/pool/eta'}
+repository_config['Language'] = {'heb':'Hebrew', 'eng':'English'}
+repository_config['Volume'] = {'alpha':'/Users/lg/pool/alpha', 'beta':'/Users/lg/pool/beta', 'gama':'/Users/lg/pool/gama', 'delta':'/Users/lg/pool/delta', 'epsilon':'/Users/lg/pool/epsilon', 'eta':'/Users/lg/pool/eta'}
 repository_config['Media Kind'] = {}
 repository_config['Media Kind']['tvshow'] = {'schema':'^(.*) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10}
 repository_config['Media Kind']['movie'] = {'schema':'^IMDb(tt[0-9]+) ?(.*)\.([^\.]+)$', 'name':'Movie', 'stik':9}
@@ -18,7 +18,7 @@ repository_config['Kind']['m4v'] = {}
 repository_config['Kind']['m4v']['Profile'] = {}
 
 repository_config['Kind']['m4v']['Profile']['universal'] = {}
-repository_config['Kind']['m4v']['Profile']['universal']['description'] = 'an sd profile that decodes on every cabac capable apple device'
+repository_config['Kind']['m4v']['Profile']['universal']['description'] = 'an SD profile that decodes on every cabac capable apple device'
 repository_config['Kind']['m4v']['Profile']['universal']['crf'] = '18'
 repository_config['Kind']['m4v']['Profile']['universal']['cabac'] = '1'
 repository_config['Kind']['m4v']['Profile']['universal']['max_width'] = '720'
