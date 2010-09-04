@@ -35,10 +35,11 @@ class Container(object):
             self.exists = True
             self.file_path = os.path.abspath(file_path)
             self.file_info = file_detail_detector.detect(self.file_path)
+            self.load_meta()
     
     
     def load(self):
-        self.load_meta()
+        return
     
     
     def clean(self, path):
@@ -228,21 +229,39 @@ class Container(object):
         return result
     
     
+    def easy_name(self, info=None):
+        result = ''
+        if self.meta != None and 'Name' in self.meta:
+            result = self.meta['Name']
+        elif info != None and 'name' in info:
+            result = info['name']
+        elif 'name' in self.file_info:
+            result = self.file_info['name']
+        return result
+    
+    
     def canonic_name(self, info=None):
         result = None
         if info == None:
             info = self.file_info
         if self.is_movie():
-            result = ''.join(['IMDb', info['imdb_id'], ' ', info['name'], '.', info['type']])
+            result = ''.join(['IMDb', info['imdb_id'], ' ', self.easy_name(info), '.', info['type']])
         elif self.is_tvshow():
-            result = ''.join([info['show_small_name'], ' ', info['code'], ' ', info['name'], '.', info['type']])
+            result = ''.join([info['show_small_name'], ' ', info['code'], ' ', self.easy_name(info), '.', info['type']])
         return result
     
     
     def canonic_path(self, volume, profile, info=None):
-        result = repository_config['volumes'][volume]
+        result = None
         if info == None:
             info = self.file_info
+        if profile == None:
+            profile = info['profile']
+        if volume == None:
+            volume = info['volume']
+        
+        result = repository_config['volumes'][volume]
+        
         if self.is_movie():
             result = os.path.join(result, info['media_kind'], info['type'], profile)
         elif self.is_tvshow():
@@ -296,7 +315,7 @@ class AVContainer(Container):
     
     
     def set_tag(self, name, value):
-        self.tags[name] = value
+        self.tags[name] = unicode(value, 'utf-8')
     
     
     def add_track(self, track):
@@ -352,7 +371,7 @@ class Chapter(object):
     
     def set_name(self, name):
         if name != None:
-            self.name = name.strip('"')
+            self.name = unicode(name.strip('"'), 'utf-8')
         else:
             self.name = None
     
@@ -978,6 +997,8 @@ class FileDetailDetector(object):
                     info['imdb_id'] = match.group(1)
                     info['name'] = match.group(2)
                     info['type'] = match.group(3)
+                    if info['name'] == None:
+                        info['name'] = ''
                     
                 elif media_kind == 'tvshow':
                     info['show_small_name'] = match.group(1)
@@ -987,11 +1008,18 @@ class FileDetailDetector(object):
                     info['name'] = match.group(5)
                     info['type'] = match.group(6)
             
-            dirname = os.path.dirname(file_path)
+            prefix = os.path.dirname(file_path)
             if info['type'] in container_type['Subtitle']:
-                lang = os.path.split(dirname)[1]
+                info['volume'] = repository_config['Kind']['srt']['default']['volume']
+                prefix, lang = os.path.split(prefix)
                 if lang in repository_config['language']:
                     info['language'] = lang
+                    
+                prefix, profile = os.path.split(prefix)
+                if profile in repository_config['Kind']['srt']['Profile'].keys():
+                    info['profile'] = profile
+                else:
+                    info['profile'] = repository_config['Kind']['srt']['default']['profile']
                     
         return info
     

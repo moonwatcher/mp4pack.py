@@ -37,8 +37,8 @@ def list_input_files(path, kind, file_filter, recursive):
     for p in path_list:
         if invisable_file_path.search(p) == None:
             p = os.path.normpath(os.path.join(path,p))
-            if os.path.isfile(p) and fnmatch.fnmatch(p, '*.' + kind):
-                if file_filter == None or file_filter.search(p) != None:
+            if os.path.isfile(p):
+                if (kind == None or fnmatch.fnmatch(p, '*.' + kind)) and (file_filter == None or file_filter.search(p) != None):
                     result.append(unicode(p, 'utf-8'))
             elif os.path.isdir(p):
                 if recursive:
@@ -79,10 +79,10 @@ def load_options():
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Modifiers", "You have to specify at least one action to preform.")
-    group.add_option("-o", "--volume", dest="volume", type="choice", choices=repository_config['volumes'].keys(), default="epsilon", help="Output volume [default: %default]")
+    group.add_option("-o", "--volume", dest="volume", type="choice", choices=repository_config['volumes'].keys(), default=None, help="Output volume [default: %default]")
     group.add_option("-i", "--input", dest="input", default=".", help="Path to scan for input [default: %default]")
     group.add_option("-f", "--filter", dest="file_filter", default=None, help="Regex to filter input file names through")
-    group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default="universal", help="[default: %default]")
+    group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default=None, help="[default: %default]")
     group.add_option("-k", "--kind", dest="kind", type="choice", choices=repository_config['Kind'].keys(), help="[default: %default]")
     group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
     group.add_option("-q", "--quality", dest="quality", help="[default: %default]")
@@ -100,13 +100,13 @@ def load_options():
     group.add_option("--keep-ac3", dest="keep-ac3", action="store_true", default=False, help="Mux ac3 track in addition to the aac track")
     parser.add_option_group(group)
             
-    group = OptionGroup(parser, "Destinations", "Default volumes where media fragments are stored")
-    group.add_option("--root", dest="root", default="/pool", help="repository root")
-    group.add_option("--artwork", metavar="VOLUME", dest="artwork", default="alpha", help="volume to use for artwork")
-    group.add_option("--chapter", metavar="VOLUME", dest="chapter", default="alpha", help="volume to use for chapters")
-    group.add_option("--subtitle", metavar="VOLUME", dest="subtitle", default="alpha", help="volume to use for subtitles")
-    group.add_option("--xml", metavar="VOLUME", dest="xml", default="alpha", help="volume to use for xml")
-    parser.add_option_group(group)
+#    group = OptionGroup(parser, "Destinations", "Default volumes where media fragments are stored")
+#    group.add_option("--root", dest="root", default="/pool", help="repository root")
+#    group.add_option("--artwork", metavar="VOLUME", dest="artwork", default="alpha", help="volume to use for artwork")
+#    group.add_option("--chapter", metavar="VOLUME", dest="chapter", default="alpha", help="volume to use for chapters")
+#    group.add_option("--subtitle", metavar="VOLUME", dest="subtitle", default="alpha", help="volume to use for subtitles")
+#    group.add_option("--xml", metavar="VOLUME", dest="xml", default="alpha", help="volume to use for xml")
+#    parser.add_option_group(group)
     
     group = OptionGroup(parser, "Service", "service routines")
     group.add_option("--map-show", dest="map_show", help="Map TV Show TVDB to name")

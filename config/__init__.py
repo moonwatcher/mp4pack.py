@@ -58,6 +58,7 @@ repository_config['Kind']['mkv']['Profile']['720'] = {}
 repository_config['Kind']['mkv']['Profile']['1080'] = {}
 
 repository_config['Kind']['srt'] = {}
+repository_config['Kind']['srt']['default'] = {'profile':'original', 'volume':'alpha'}
 repository_config['Kind']['srt']['Profile'] = {}
 repository_config['Kind']['srt']['Profile']['original'] = {}
 repository_config['Kind']['srt']['Profile']['clean'] = {}

@@ -547,6 +547,8 @@ class TagManager(object):
             for item in show_nodes[0].getchildren():
                 if is_tag('IMDB_ID', item):
                     update_string_property('imdb_id', item.text, show)
+                elif is_tag('lastupdated', item):
+                    update_int_property('last_update', int(item.text), show)
                 elif is_tag('SeriesName', item):
                     update_string_property('name', item.text, show)
                 elif is_tag('Overview', item):
