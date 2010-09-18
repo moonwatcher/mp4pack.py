@@ -4,6 +4,8 @@ import os
 import re
 import logging
 import hashlib
+import chardet
+import copy
 from config import repository_config
 from db import TagManager
 
@@ -33,7 +35,7 @@ class Container(object):
         self.meta = None
         if os.path.isfile(file_path):
             self.exists = True
-            self.file_path = os.path.abspath(file_path)
+            self.file_path = os.path.realpath(os.path.abspath(file_path))
             self.file_info = file_detail_detector.detect(self.file_path)
             self.load_meta()
     
@@ -42,12 +44,146 @@ class Container(object):
         return
     
     
+    def load_meta(self):
+        result = False
+        self.meta = list()
+        if self.is_movie():
+            result = self._load_movie_meta()
+        elif self.is_tvshow():
+            result = self._load_tvshow_meta()
+            
+        if not result:
+            self.meta = None
+            
+        return result
+    
+    
+    def _load_genre(self, record):
+        if 'genre' in record.keys():
+            if len(record['genre']) > 0:
+                g = record['genre'][0]
+                self.meta['Genre'] = g['name']
+                if 'itmf_code' in g.keys():
+                    self.meta['GenreID'] = g['itmf_code']
+        return
+    
+    
+    def _load_cast(self, record):
+        if 'cast' in record.keys():
+            directors = [ r for r in record['cast'] if r['job'] == 'director' ]
+            codirectors = [ r for r in record['cast'] if r['job'] == 'director of photography' ]
+            producers = [ r for r in record['cast'] if r['job'].count('producer') > 0 ]
+            screenwriters = [ r for r in record['cast'] if r['job'] == 'screenplay' or r['job'] == 'author' ]
+            actors = [ r for r in record['cast'] if r['job'] == 'actor' ]
+            
+            artist = None
+            if len(directors) > 0:
+                if artist == None:
+                    artist = directors[0]
+                self.meta['Director'] = ', '.join([ d['name'] for d in directors ])
+                
+            if len(codirectors) > 0:
+                if artist == None:
+                    artist = codirectors[0]
+                self.meta['Codirector'] = ', '.join([ d['name'] for d in codirectors ])
+                
+            if len(producers) > 0:
+                if artist == None:
+                    artist = producers[0]
+                self.meta['Producers'] = ', '.join([ d['name'] for d in producers ])
+                
+            if len(screenwriters) > 0:
+                if artist == None:
+                    artist = screenwriters[0]
+                self.meta['Screenwriters'] = ', '.join([ d['name'] for d in screenwriters ])
+                
+            if len(actors) > 0:
+                if 'Cast' in self.meta and self.meta['Cast'] != None:
+                    self.meta['Cast'] = ', '.join([self.meta['Cast'], ', '.join([ d['name'] for d in actors ])])
+                else:
+                    self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
+                    
+                if artist == None:
+                    artist = actors[0]
+                    
+            if artist != None:
+                self.meta['Artist'] = artist['name']
+        return
+    
+    
+    def _load_movie_meta(self):
+        result = False
+        if self.is_movie():
+            record = tag_manager.find_movie_by_imdb_id(self.file_info['imdb_id'])
+            if record != None:
+                self.meta = {'Media Kind':repository_config['Media Kind'][self.file_info['media_kind']]['name']}
+                
+                if 'name' in record:
+                    self.meta['Name'] = record['name']
+                if 'overview' in record:
+                    self.meta['Long Description'] = record['overview']
+                if 'content_rating' in record:
+                    self.meta['Rating'] = record['content_rating']
+                if 'released' in record:
+                    self.meta['Release Date'] = record['released'].strftime("%Y-%m-%d")
+                if 'tagline' in record:
+                    self.meta['Description'] = record['tagline']
+                    
+                self._load_cast(record)
+                self._load_genre(record)
+                result = True
+        return result
+    
+    
+    def _load_tvshow_meta(self):
+        result = False
+        if self.is_tvshow():
+            show, episode = tag_manager.find_episode(self.file_info['show_small_name'], self.file_info['season_number'], self.file_info['episode_number'])
+            if show != None and episode != None:
+                self.meta = {'Media Kind':repository_config['Media Kind'][self.file_info['media_kind']]['name']}
+                
+                if 'content_rating' in show:
+                    self.meta['Rating'] = show['content_rating']
+                if 'network' in show:
+                    self.meta['TV Network'] = show['network']
+                    
+                self._load_genre(show)
+                
+                if 'cast' in show.keys():
+                    actors = [ r for r in show['cast'] if r['job'] == 'actor' ]
+                    if len(actors) > 0:
+                        self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
+                        
+                if 'show' in episode:
+                    self.meta['TV Show'] = episode['show']
+                    self.meta['Album'] = episode['show']
+                if 'season_number' in episode:
+                    self.meta['TV Season'] = episode['season_number']
+                    self.meta['Disk #'] = episode['season_number']
+                if 'episode_number' in episode:
+                    self.meta['TV Episode #'] = episode['episode_number']
+                    self.meta['Track #'] = episode['episode_number']
+                if 'name' in episode:
+                    self.meta['Name'] = episode['name']
+                if 'overview' in episode:
+                    self.meta['Long Description'] = episode['overview']
+                    self.meta['Description'] = episode['overview']
+                if 'released' in episode:
+                    self.meta['Release Date'] = episode['released'].strftime("%Y-%m-%d")
+                    
+                self._load_cast(episode)
+                result = True
+        return result
+    
+    
+    
     def clean(self, path):
         try:
             os.remove(path)
             os.removedirs(os.path.dirname(path))
         except OSError:
             pass
+    
     
     
     def copy(self, volume, profile, overwrite=False, md5=False):
@@ -89,6 +225,40 @@ class Container(object):
         return result
     
     
+    def make(self, volume, profile, overwrite=False):
+        return
+    
+    
+    def tag(self):
+        return
+    
+    
+    def rename(self):
+        dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_name())
+        if self.file_path == dest_path:
+            self.logger.debug('No renaming needed for ' + dest_path)
+        else:
+            if os.path.exists(dest_path):
+                self.logger.warning('Not renaming, destination exists ' + dest_path)
+            else:
+                dirname = os.path.dirname(dest_path)
+                if not os.path.exists(dirname):
+                    os.makedirs(dirname)
+                    
+                self.logger.info('Moving ' + self.file_path + ' --> ' + dest_path)
+                from subprocess import Popen, PIPE
+                proc = Popen(['mv', self.file_path, dest_path], stdout=PIPE)
+                report = proc.communicate()
+                
+                if report[1] != None and len(report[1]) > 0:
+                    self.logger.error(report[1])
+                if report[0] != None and len(report[0]) > 0:
+                    self.logger.info(report[0])
+                    
+                if not os.path.exists(dest_path):
+                    self.clean(dest_path)
+    
+    
     def is_movie(self):
         return self.file_info != None and set(('media_kind', 'imdb_id')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'movie'
     
@@ -97,140 +267,9 @@ class Container(object):
         return self.file_info != None and set(('media_kind', 'show_small_name', 'season_number', 'episode_number')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'tvshow'
     
     
-    def _load_genre(self, record):
-        if 'genre' in record.keys():
-            if len(record['genre']) > 0:
-                g = record['genre'][0]
-                self.meta['Genre'] = g['name']
-                if 'itmf_code' in g.keys():
-                    self.meta['GenreID'] = g['itmf_code']
-        return
-    
-    
-    def _load_cast(self, record):
-        if 'cast' in record.keys():
-            directors = [ r for r in record['cast'] if r['job'] == 'director' ]
-            codirectors = [ r for r in record['cast'] if r['job'] == 'director of photography' ]
-            producers = [ r for r in record['cast'] if r['job'].count('producer') > 0 ]
-            screenwriters = [ r for r in record['cast'] if r['job'] == 'screenplay' or r['job'] == 'author' ]
-            actors = [ r for r in record['cast'] if r['job'] == 'actor' ]
-            
-            artist = None
-            if len(directors) > 0:
-                if artist == None:
-                    artist = directors[0]
-                self.meta['Director'] = ', '.join([ d['name'] for d in directors ])
-            
-            if len(codirectors) > 0:
-                if artist == None:
-                    artist = codirectors[0]
-                self.meta['Codirector'] = ', '.join([ d['name'] for d in codirectors ])
-            
-            if len(producers) > 0:
-                if artist == None:
-                    artist = producers[0]
-                self.meta['Producers'] = ', '.join([ d['name'] for d in producers ])
-            
-            if len(screenwriters) > 0:
-                if artist == None:
-                    artist = screenwriters[0]
-                self.meta['Screenwriters'] = ', '.join([ d['name'] for d in screenwriters ])
-            
-            if len(actors) > 0:
-                if 'Cast' in self.meta and self.meta['Cast'] != None:
-                    self.meta['Cast'] = ', '.join([self.meta['Cast'], ', '.join([ d['name'] for d in actors ])])
-                else:
-                    self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
-                    
-                if artist == None:
-                    artist = actors[0]
-                
-            if artist != None:
-                self.meta['Artist'] = artist['name']
-        return
-    
-    
-    def _load_movie_meta(self):
-        result = False
-        if self.is_movie():
-            record = tag_manager.find_movie_by_imdb_id(self.file_info['imdb_id'])
-            if record != None:
-                self.meta = {'Media Kind':repository_config['Media Kind'][self.file_info['media_kind']]['name']}
-                
-                if 'name' in record:
-                    self.meta['Name'] = record['name']
-                if 'overview' in record:
-                    self.meta['Long Description'] = record['overview']
-                if 'content_rating' in record:
-                    self.meta['Rating'] = record['content_rating']
-                if 'released' in record:
-                    self.meta['Release Date'] = record['released'].strftime("%Y-%m-%d")
-                if 'tagline' in record:
-                    self.meta['Description'] = record['tagline']
-                
-                self._load_cast(record)
-                self._load_genre(record)
-                result = True
-        return result
-    
-    
-    def _load_tvshow_meta(self):
-        result = False
-        if self.is_tvshow():
-            show, episode = tag_manager.find_episode(self.file_info['show_small_name'], self.file_info['season_number'], self.file_info['episode_number'])
-            if show != None and episode != None:
-                self.meta = {'Media Kind':repository_config['Media Kind'][self.file_info['media_kind']]['name']}
-                
-                if 'content_rating' in show:
-                    self.meta['Rating'] = show['content_rating']
-                if 'network' in show:
-                    self.meta['TV Network'] = show['network']
-                
-                self._load_genre(show)
-                
-                if 'cast' in show.keys():
-                    actors = [ r for r in show['cast'] if r['job'] == 'actor' ]
-                    if len(actors) > 0:
-                        self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
-                
-                if 'show' in episode:
-                    self.meta['TV Show'] = episode['show']
-                    self.meta['Album'] = episode['show']
-                if 'season_number' in episode:
-                    self.meta['TV Season'] = episode['season_number']
-                    self.meta['Disk #'] = episode['season_number']
-                if 'episode_number' in episode:
-                    self.meta['TV Episode #'] = episode['episode_number']
-                    self.meta['Track #'] = episode['episode_number']
-                if 'name' in episode:
-                    self.meta['Name'] = episode['name']
-                if 'overview' in episode:
-                    self.meta['Long Description'] = episode['overview']
-                    self.meta['Description'] = episode['overview']
-                if 'released' in episode:
-                    self.meta['Release Date'] = episode['released'].strftime("%Y-%m-%d")
-                
-                self._load_cast(episode)
-                result = True
-        return result
-    
-    
-    def load_meta(self):
-        result = False
-        self.meta = list()
-        if self.is_movie():
-            result = self._load_movie_meta()
-        elif self.is_tvshow():
-            result = self._load_tvshow_meta()
-        
-        if not result:
-            self.meta = None
-            
-        return result
-    
     
     def easy_name(self, info=None):
-        result = ''
+        result = None
         if self.meta != None and 'Name' in self.meta:
             result = self.meta['Name']
         elif info != None and 'name' in info:
@@ -244,10 +283,17 @@ class Container(object):
         result = None
         if info == None:
             info = self.file_info
+        
+        easy_name = self.easy_name(info)
+        if easy_name != None:
+            easy_name = ' ' + easy_name
+        else:
+            easy_name = ''
+        
         if self.is_movie():
-            result = ''.join(['IMDb', info['imdb_id'], ' ', self.easy_name(info), '.', info['type']])
+            result = ''.join(['IMDb', info['imdb_id'], easy_name, '.', info['type']])
         elif self.is_tvshow():
-            result = ''.join([info['show_small_name'], ' ', info['code'], ' ', self.easy_name(info), '.', info['type']])
+            result = ''.join([info['show_small_name'], ' ', info['code'], easy_name, '.', info['type']])
         return result
     
     
@@ -635,6 +681,23 @@ class Mpeg4(AVContainer):
             index += 1
     
     
+    def tag(self):
+        AVContainer.tag(self)
+        tag_command = self.encode_subler_tag_command()
+        if tag_command != None:
+            self.logger.debug('Tag ' + self.file_path + ' : ' + tag_command)
+            from subprocess import Popen, PIPE
+            proc = Popen(['SublerCLI', '-i ', self.file_path, '-t', tag_command], stdout=PIPE)
+            report = proc.communicate()
+            
+            if report[1] != None and len(report[1]) > 0:
+                self.logger.error(report[1])
+            if report[0] != None and len(report[0]) > 0:
+                self.logger.info(report[0])
+        else:
+            self.logger.info('no tags to update on ' + self.file_path)
+    
+    
     def encode_subler_tag_command(self):
         result = None
         update = dict()
@@ -653,7 +716,7 @@ class Mpeg4(AVContainer):
                     update['TV Season'] = self.file_info['season_number']
                 if not('TV Episode #' in self.tags and self.file_info['episode_number'] == self.tags['TV Episode #']):
                     update['TV Episode #'] = self.file_info['episode_number']
-                if not('Name' in self.tags and self.file_info['name'] == self.tags['Name']):
+                if 'name' in self.file_info and not('Name' in self.tags and self.file_info['name'] == self.tags['Name']):
                     update['Name'] = self.file_info['name']
         
         if len(update) > 0:
@@ -674,150 +737,249 @@ mp4chaps_chapter_re  = re.compile('Chapter #([0-9]+) - ([0-9:\.]+) - (.*)$')
 
 # Subtitle Class
 
+class SubtitleBlock(object):
+    def __init__(self):
+        self.begin = None
+        self.end = None
+        self.lines = list()
+    
+    
+    def set_begin_miliseconds(self, value):
+        self.begin = value
+        
+    
+    
+    def set_end_miliseconds(self, value):
+        self.end = value
+    
+    
+    def add_line(self, value):
+        if value != None:
+            value = value.strip()
+            if len(value) > 0:
+                self.lines.append(value)
+    
+    
+    def shift(self, offset):
+        self.begin += offset
+        self.end += offset
+    
+    
+    def scale_rate(self, factor):
+        self.begin = int(round(float(self.begin) * float(factor)))
+        self.end = int(round(float(self.end) * float(factor)))
+    
+    
+    def is_valid(self):
+        return self.begin != None and self.end != None and self.begin < self.end and len(self.lines) > 0
+    
+    
+    def remove_lines_that_match(self, expression):
+        original_lines = self.lines
+        self.lines = list()
+        for line in original_lines:
+            if expression.search(line) == None:
+                self.add_line(line)
+        
+        return self.is_valid()
+    
+    
+    def remove_all_lines_if_match(self, expression):
+        for line in self.lines:
+            if expression.search(line) != None:
+                self.lines = list()
+                break
+        
+        return self.is_valid()
+    
+    
+    def replace_in_lines(self, expression, replacement):
+        original_lines = self.lines
+        self.lines = list()
+        for index in range(len(original_lines)):
+            self.add_line(expression.sub(replacement, original_lines[index]))
+        
+        return self.is_valid()
+    
+    
+    def encode(self, line_buffer, index):
+        line_buffer.append(index)
+        begin_time = miliseconds_to_time(self.begin, ',')
+        end_time = miliseconds_to_time(self.end, ',')
+        line_buffer.append(str(begin_time) + ' --> ' + str(end_time))
+        for line in self.lines:
+            line_buffer.append(line)
+        line_buffer.append('\n')
+    
+
+
 class Subtitle(Container):
-    def __init__(self, file_path, input_frame_rate='25', output_frame_rate='25', format=None):
+    def __init__(self, file_path, input_frame_rate=None, output_frame_rate=None, format=None):
         Container.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.container.subtitle')
         self.input_frame_rate = input_frame_rate
         self.output_frame_rate = output_frame_rate
-        self.time_begin = []
-        self.time_end = []
-        self.subtitle_list = []
-        #self.load(file_path)
+        self.subtitle_blocks = []
+        self.load()
+        self.parsed = False
     
     
     def load(self):
         Container.load(self)
+    
+    
+    def parse(self):
         if self.exists:
-            file_lines = self.read_subtitle_file()
-            self.decode(file_lines)
-            if self.input_frame_rate != self.output_frame_rate:
-                self.change_framerate()
-            self.filter_lines()
-        
+            if not self.parsed:
+                file_lines = self.read_subtitle_file()
+                self.decode(file_lines)
+                if self.input_frame_rate != None and self.output_frame_rate != None:
+                    if self.input_frame_rate != self.output_frame_rate:
+                        self.change_framerate()
+                self.filter_lines()
+                self.parsed = True
+    
+    
+    def make(self, volume, profile, overwrite=False):
+        Container.make(self, volume, profile, overwrite)
+        info = copy.deepcopy(self.file_info)
+        info['type'] = 'srt'
+        dest_path = self.canonic_path(volume, profile, info)
+        if os.path.exists(dest_path) and not overwrite:
+            self.logger.warning('Not overwriting ' + dest_path)
+        else:
+            dirname = os.path.dirname(dest_path)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+                
+            self.logger.info('Make ' + dest_path + ' from ' + self.file_path)
+            self.write(dest_path)
+            
+            if not os.path.exists(dest_path):
+                self.clean(dest_path)
     
     
     def write(self, output_file=None):
         file_lines = self.encode()
-        self.write_subtitle_file(file_lines, output_file)
+        self.write_subtitle_file(output_file)
     
     
     def read_subtitle_file(self):
         file_lines = None
-        if self.file_path == None:
-            try:
-                file_lines = sys.stdin.readlines()
-            except:
-                sys.stderr.write("Cannot read stdin\n")
-        else:
-            try:
-                file_reader = open(self.file_path, 'r')
-            except:
-                sys.stderr.write("Cannot open file\n")
+        try:
+            file_reader = open(self.file_path, 'r')
             file_lines = file_reader.readlines()
             file_reader.close()
+            file_encoding = chardet.detect(''.join(file_lines))
+            self.logger.debug(file_encoding['encoding'] + ' encoding detected for ' + self.file_path)
+            
+            for index in range(len(file_lines)):
+                file_lines[index] = file_lines[index].strip().decode(file_encoding['encoding']).encode('utf-8')
+        except IOError as error:
+            self.logger.error(error.__str__())
+            file_lines = None
         
-        for index in range(len(file_lines)):
-            if rmdos.search(file_lines[index]):
-                clean_line = rmdos.sub('\n', file_lines[index])
-                del file_lines[index]
-                file_lines.insert(index, clean_line)
         return file_lines
     
     
-    def write_subtitle_file(self, file_lines, output_file=None):
-        end = '\n'    
+    def write_subtitle_file(self, output_file=None):
         try:
-            if output_file == None:
-                for line in file_lines:
-                    if line == '\n':
-                        sys.stdout.write(end)
-                    else:
-                        sys.stdout.write(line + end)
-            else:
-                file_writer = open(output_file, 'w') 
-                for line in file_lines:
-                    if line == '\n':
-                        file_writer.write(end)
-                    else:
-                        file_writer.write(line + end)
-                        
-                file_writer.close
-        except IOError:
-            if output_file == '-':
-                sys.stderr.write("Can not write to stdout.\n")
-            else:
-                sys.stderr.write("Can not write to file " + output_file + ".\n")
+            writer = open(output_file, 'w')
+            line_buffer = self.encode()
+            for line in line_buffer:
+                if line == '\n':
+                    writer.write(line)
+                else:
+                    writer.write(str(line) + '\n')
+            writer.close
+        except IOError as error:
+            self.logger.error(error.__str__())
     
     
     def encode(self):
-        length = int(len(self.subtitle_list))
+        self.parse()
+        result = ['\n']
         index = 0
-        file_lines = ['\n']
-        while index < length:
-            file_lines.append(str(index + 1))
-            begin = miliseconds_to_time(self.time_begin[index], ',')
-            stop = miliseconds_to_time(self.time_end[index], ',')
-            file_lines.append(str(begin) +' --> '+str(stop))
-            file_lines.append(str(self.subtitle_list[index]).replace('\N','\n'))
-            file_lines.append('\n')
-            index = index + 1
-        return file_lines
+        for block in self.subtitle_blocks:
+            index += 1
+            block.encode(result, index)
+        return result
     
     
     def decode(self, file_lines):
         def decode_srt(file_lines):
-            indexlist= []
+            current_block_start = None
+            next_block_start = None
+            current_block = None
+            next_block = None
+            last_line = len(file_lines) - 1
+            
             for index in range(len(file_lines)):
+                # last line
+                if index == last_line and current_block_start != None:
+                    next_block_start = index + 1
+                    
                 match = srt_time_line.search(file_lines[index])
-                if match != None and str(file_lines[index - 1].strip('\n')).isdigit():
-                    indexlist.append(index)
-                    begin = timecode_to_miliseconds(match.group(1))
-                    end = timecode_to_miliseconds(match.group(2))
-                    self.time_begin.append(begin)
-                    self.time_end.append(end)
-            
-            indexlist.append(len(file_lines) + 1)
-            
-            a = 0
-            for index in indexlist[0:-1]:
-                a = a + 1
-                firstline = index + 1
-                lastline = indexlist[a] - 1
-                subline = ''.join(file_lines[firstline:lastline])
-                while True:
-                    if subtitle_noneline.search(subline):
-                        subline = subtitle_noneline.sub('',subline)
+                if match != None and file_lines[index - 1].strip().isdigit():
+                    next_block = SubtitleBlock()
+                    next_block.set_begin_miliseconds(timecode_to_miliseconds(match.group(1)))
+                    next_block.set_end_miliseconds(timecode_to_miliseconds(match.group(2)))
+                    
+                    if current_block_start != None:
+                        next_block_start = index - 1
                     else:
-                        break
-                self.subtitle_list.append(subline.replace('\n', '\N'))
+                        # first block
+                        current_block_start = index - 1
+                        current_block = next_block
+                        next_block = None
+                        
+                if next_block_start != None:
+                    for line in file_lines[current_block_start + 2:next_block_start]:
+                        current_block.add_line(line)
+                        
+                    if current_block.is_valid():
+                        self.subtitle_blocks.append(current_block)
+                        
+                    current_block_start = next_block_start
+                    next_block_start = None
+                    
+                    current_block = next_block
+                    next_block = None
         
         
         def decode_ass(file_lines):
             index = 0
+            formation = None
             for line in file_lines:
-                if line == '[Events]\n':
-                    formation = file_lines[index + 1].replace(':',',').replace(' ','').strip('\n').split(',')
+                if line == '[Events]':
+                    match = ass_formation_line.search(file_lines[index + 1])
+                    if match != None:
+                        formation = match.group(1).strip().replace(' ','').split(',')
                     break
-                index = index + 1
+                index += 1
                 
-            start = formation.index('Start')
-            stop = formation.index('End')
-            text = formation.index('Text')
-            for line in file_lines:
-                if ass_subline.search(line):
-                    line = re.sub('\n$','',line).split(',')
-                    linepart = line[0].split(':')
-                    del line[0]
-                    line.insert(0, linepart[0])
-                    line.insert(1, ':'.join(linepart[1: len(linepart)]))
-                    
-                    self.time_begin.append(timecode_to_miliseconds(line[start]))
-                    self.time_end.append(timecode_to_miliseconds(line[stop]))
-                    
-                    subpart = ','.join(line[text:1 + text + (len(line) - len(formation))])
-                    subpart = ass_event_command_re.sub('', subpart)
-                    self.subtitle_list.append(subpart.replace(r'\n', '\N'))
+            if formation != None:
+                start = formation.index('Start')
+                stop = formation.index('End')
+                text = formation.index('Text')
+                for line in file_lines:
+                    match = ass_subline.search(line)
+                    if match != None:
+                        line = match.group(1).strip().split(',')
+                        block = SubtitleBlock()
+                        block.set_begin_miliseconds(timecode_to_miliseconds(line[start]))
+                        block.set_end_miliseconds(timecode_to_miliseconds(line[stop]))
+                        
+                        subtitle_text = ','.join(line[text:])
+                        subtitle_text = ass_event_command_re.sub('', subtitle_text)
+                        subtitle_text = subtitle_text.replace('\n', '\N')
+                        subtitle_text = ass_condense_line_breaks.sub('\N', subtitle_text)
+                        subtitle_text = subtitle_text.split('\N')
+                        for line in subtitle_text:
+                            block.add_line(line)
+                        
+                        if block.is_valid():
+                            self.subtitle_blocks.append(block)
         
         
         def decode_sub(file_lines, frame_rate):
@@ -825,9 +987,15 @@ class Subtitle(Container):
             for line in file_lines:
                 if sub_line_begin.search(line):
                     line = line.split('}',2)
-                    self.time_begin.append(frame_to_miliseconds(line[0].strip('{'), frame_rate))
-                    self.time_end.append(frame_to_miliseconds(line[1].strip('{'), frame_rate))
-                    self.subtitle_list.append(line[2].strip('\n').replace('|', '\N'))
+                    subtitle_text = line[2].strip().replace('|', '\N')
+                    block = SubtitleBlock()
+                    block.set_begin_miliseconds(frame_to_miliseconds(line[0].strip('{'), frame_rate))
+                    block.set_end_miliseconds(frame_to_miliseconds(line[1].strip('{'), frame_rate))
+                    for line in subtitle_text:
+                        block.add_line(line)
+                    
+                    if block.is_valid():
+                        self.subtitle_blocks.append(block)
         
         
         if self.file_info['type'] == 'srt':
@@ -838,107 +1006,38 @@ class Subtitle(Container):
             decode_ass(file_lines)
     
     
-    def remove_duplicate_lines(self):
-        dupindex = []
-        for index in range(len(self.time_begin[0:-1])):
-            if self.time_begin[index] == self.time_begin[index + 1] and self.time_end[index] == self.time_end[index + 1] and self.subtitle_list[index] == self.subtitle_list[index + 1]:
-                dupindex.append(index + 1)
-        
-        dupindex.reverse()
-        
-        for index in dupindex:
-            del self.time_begin[index]
-            del self.time_end[index]
-            del self.subtitle_list[index]
-    
-    
     def filter_lines(self):
         removeindex = []
-        for index in range(len(self.subtitle_list)):
-            if subtitle_line_filter.is_bad_line(self.subtitle_list[index]):
+        for index in range(len(self.subtitle_blocks)):
+            if not subtitle_line_filter.filter_subtitle_block(self.subtitle_blocks[index]):
                 removeindex.append(index)
-            else:
-                self.subtitle_list[index] = subtitle_line_filter.clean(self.subtitle_list[index])
-                if subtitle_empty_line_re.search(self.subtitle_list[index]) != None:
-                    removeindex.append(index)
-        
+                
         removeindex.reverse()
         for index in removeindex:
-            del self.time_begin[index]
-            del self.time_end[index]
-            del self.subtitle_list[index]
+            del self.subtitle_blocks[index]
     
     
     def shift_times(self, offset):
-        def move_times_on_list(times, start, stop, offset):
-            index = start
-            for time in times[start:stop]:
-                time = int(time) + int(offset)
-                del times[index]
-                times.insert(index,time)
-                index = index + 1
-            return times
-        
-        begin, stop = parse_limits(offset, len(self.time_begin))
-        offset = timecode_to_miliseconds(offset.split(',')[0])
-        self.time_begin = move_times_on_list(self.time_begin, begin, stop, offset)
-        self.time_end = move_times_on_list(self.time_end, begin, stop, offset)
-    
-    
-    def modify_duration(self, add):
-        time = timecode_to_miliseconds(add.split(',')[0])
-        begin, end = parse_limits(add, len(self.time_end))
-        for index in range(begin, end):
-            endtime = self.time_end[index] + int(time) 
-            if index + 1 != len(self.time_begin):
-                if endtime + 50 > self.time_begin[index + 1]:
-                    endtime = self.time_begin[index + 1] - 50
-                    
-            del self.time_end[index]
-            self.time_end.insert(index, endtime)
-    
-    
-    def scale_length(self, factor):
-        if str(factor.split(',')[0]).isdigit():
-            begin, end = parse_limits(factor, len(self.time_end))
-            for index in range(begin, end):
-                endtime = int(round(float(self.time_end[index] - self.time_begin[index]) * float(factor.split(',')[0]))) + self.time_begin[index]
-                if index + 1 != len(self.time_begin):
-                    if endtime + 50 > self.time_begin[index + 1]:
-                        endtime = self.time_begin[index + 1] - 50
-                del self.time_end[index]
-                self.time_end.insert(index, endtime)
-        else:
-            sys.stderr.write("Scale factor is not a digit! No alternation done.\n")
+        for block in self.subtitle_blocks:
+            block.shift(offset)
     
     
     def change_framerate(self):
-        def scale(times, scale_frame_rate):
-            index = 0
-            for time in times:
-                time = int(round(float(time) * float(scale_frame_rate)))
-                del times[index]
-                times.insert(index, time)
-                index = index + 1
-            return times
-        
-        
         input_frame_rate = frame_rate_to_float(self.input_frame_rate)
         output_frame_rate = frame_rate_to_float(self.output_frame_rate)
-        scale_frame_rate = input_frame_rate/output_frame_rate
-        self.time_begin = scale(self.time_begin, scale_frame_rate)
-        self.time_end = scale(self.time_end, scale_frame_rate)
+        factor = input_frame_rate/output_frame_rate
+        for block in self.subtitle_blocks:
+            block.scale_rate(factor)
     
     
 
 
 srt_time_line = re.compile("^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})$")
-subtitle_noneline = re.compile("\n$")
-subtitle_empty_line_re = re.compile("^\s*$")
-ass_subline = re.compile('^Dialog.*')
+ass_subline = re.compile('^Dialogue\s*:\s*(.*)$')
+ass_formation_line = re.compile('^Format\s*:\s*(.*)$')
+ass_condense_line_breaks = re.compile(r'(\\N)+')
 ass_event_command_re = re.compile(r'\{\\[^\}]+\}')
 sub_line_begin = re.compile('^{(\d+)}{(\d+)}')
-rmdos = re.compile('\r\n$')
 
 
 
@@ -975,34 +1074,46 @@ tag_name_resolver = TagNameResolver()
 
 class SubtitleLineFilter(object):
     def __init__(self):
-        self.remove_pattern_list = []
-        self.replace_pattern_list = []
-        self.replacement_list = []
+        self.remove_block_filters = []
+        self.remove_line_filters = []
+        self.replace_filters = []
         
-        from config.subfilter import line_remove
-        for remove_filter in line_remove:
-            self.remove_pattern_list.append(re.compile(remove_filter,re.UNICODE))
+        from config.subfilter import subtitle_filter
+        for f in subtitle_filter['remove block']:
+            self.remove_block_filters.append(re.compile(f,re.UNICODE))
             
-        from config.subfilter import line_replace
-        for replace_filter in line_replace:
-            self.replace_pattern_list.append(re.compile(replace_filter[0], re.MULTILINE|re.UNICODE)) 
-            self.replacement_list.append(replace_filter[1])
+        for f in subtitle_filter['remove line']:
+            self.remove_line_filters.append(re.compile(f,re.UNICODE))
+            
+        for f in subtitle_filter['replace']:
+            self.replace_filters.append([re.compile(f[0], re.MULTILINE|re.UNICODE), f[1]])
     
     
-    def is_bad_line(self, line):
-        for index in range(len(self.remove_pattern_list)):
-            if self.remove_pattern_list[index].search(line) != None:
-                return True
-        return False
-    
-    
-    def clean(self, line):
-        line = line.replace('\N', '\n')
-        for index in range(len(self.replace_pattern_list)):            
-            line = self.replace_pattern_list[index].sub(self.replacement_list[index], line)
-        line = line.replace('\n', '\N')
-        return line
-    
+    def filter_subtitle_block(self, block):
+        result = block.is_valid()
+        if result:
+            for f in self.remove_block_filters:
+                if result:
+                    result = block.remove_all_lines_if_match(f)
+                else:
+                    break
+        
+        if result:
+            for f in self.remove_line_filters:
+                if result:
+                    result = block.remove_lines_that_match(f)
+                else:
+                    break
+        
+        if result:
+            for f in self.replace_filters:
+                if result:
+                    result = block.replace_in_lines(f[0], f[1])
+                else:
+                    break
+        
+        return result
+        
     
 
 subtitle_line_filter = SubtitleLineFilter()
@@ -1032,8 +1143,6 @@ class FileDetailDetector(object):
                     info['imdb_id'] = match.group(1)
                     info['name'] = match.group(2)
                     info['type'] = match.group(3)
-                    if info['name'] == None:
-                        info['name'] = ''
                     
                 elif media_kind == 'tvshow':
                     info['show_small_name'] = match.group(1)
@@ -1042,7 +1151,10 @@ class FileDetailDetector(object):
                     info['episode_number'] = int(match.group(4))
                     info['name'] = match.group(5)
                     info['type'] = match.group(6)
-            
+                    
+            if info['name'] == None or info['name'] == '':
+                del info['name']
+                
             prefix = os.path.dirname(file_path)
             if info['type'] in container_type['Subtitle']:
                 info['volume'] = repository_config['Kind']['srt']['default']['volume']

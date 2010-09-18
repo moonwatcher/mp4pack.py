@@ -118,7 +118,7 @@ def load_options():
 def preform_operations(tag_manager, files, options):
     if options.report:
         for f in files:
-            print f
+            print f.__str__().encode('utf-8')
         
     if options.deposit:
         for f in files:
@@ -126,11 +126,17 @@ def preform_operations(tag_manager, files, options):
     
     #if options.extract:
     
-    #if options.rename:
+    if options.rename:
+        for f in files:
+            print f.rename()
     
-    #if options.make:
+    if options.make:
+        for f in files:
+            print f.make(options.volume, options.profile, options.overwrite)
     
-    #if options.tag:
+    if options.tag:
+        for f in files:
+            print f.tag()
     
     #if options.optimize:
     

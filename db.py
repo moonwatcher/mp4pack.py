@@ -5,6 +5,7 @@ import re
 import os
 import logging
 import urllib
+import chardet
 from datetime import datetime
 import xml.etree.cElementTree as ElementTree
 
@@ -70,6 +71,13 @@ class JsonHandler(ResourceHandler):
         self.logger = logging.getLogger('mp4pack.json')
     
     
+#    def read(self):
+#        value = ResourceHandler.read(self)
+#        file_encoding = chardet.detect(value)
+#        value = value.decode(file_encoding['encoding']).encode('utf-8')
+#        return value
+    
+    
     def element(self):
         element = None
         json_text = self.read()
@@ -107,6 +115,13 @@ class XmlHandler(ResourceHandler):
     def __init__(self, url):
         ResourceHandler.__init__(self, url)
         self.logger = logging.getLogger('mp4pack.xml')
+    
+    
+#    def read(self):
+#        value = ResourceHandler.read(self)
+#        file_encoding = chardet.detect(value)
+#        value = value.decode(file_encoding['encoding']).encode('utf-8')
+#        return value
     
     
     def element(self):
