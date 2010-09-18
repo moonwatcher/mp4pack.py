@@ -15,6 +15,8 @@ repository_config['Media Kind']['movie'] = {'schema':'^IMDb(tt[0-9]+) ?(.*)\.([^
 
 repository_config['Kind'] = {}
 repository_config['Kind']['m4v'] = {}
+repository_config['Kind']['m4v']['container'] = 'mp4'
+repository_config['Kind']['m4v']['default'] = {'volume':'epsilon'}
 repository_config['Kind']['m4v']['Profile'] = {}
 
 repository_config['Kind']['m4v']['Profile']['universal'] = {}
@@ -47,21 +49,38 @@ repository_config['Kind']['m4v']['Profile']['ipod']['x264'] = "ref=2:me=umh:bfra
 repository_config['Kind']['m4v']['Profile']['ipod']['extra'] = ""
 
 repository_config['Kind']['m4a'] = {}
+repository_config['Kind']['m4a']['container'] = 'mp4'
+repository_config['Kind']['m4a']['default'] = {'volume':'alpha'}
 repository_config['Kind']['m4a']['Profile'] = {}
 repository_config['Kind']['m4a']['Profile']['lossless'] = {}
 repository_config['Kind']['m4a']['Profile']['portable'] = {}
 
 repository_config['Kind']['mkv'] = {}
+repository_config['Kind']['mkv']['container'] = 'matroska'
+repository_config['Kind']['mkv']['default'] = {'volume':'epsilon'}
 repository_config['Kind']['mkv']['Profile'] = {}
 repository_config['Kind']['mkv']['Profile']['sd'] = {}
 repository_config['Kind']['mkv']['Profile']['720'] = {}
 repository_config['Kind']['mkv']['Profile']['1080'] = {}
 
 repository_config['Kind']['srt'] = {}
+repository_config['Kind']['srt']['container'] = 'subtitles'
 repository_config['Kind']['srt']['default'] = {'profile':'original', 'volume':'alpha'}
 repository_config['Kind']['srt']['Profile'] = {}
 repository_config['Kind']['srt']['Profile']['original'] = {}
 repository_config['Kind']['srt']['Profile']['clean'] = {}
+
+repository_config['Kind']['ass'] = {}
+repository_config['Kind']['ass']['container'] = 'subtitles'
+repository_config['Kind']['ass']['default'] = {'profile':'original', 'volume':'alpha'}
+repository_config['Kind']['ass']['Profile'] = {}
+repository_config['Kind']['ass']['Profile']['original'] = {}
+
+repository_config['Kind']['sub'] = {}
+repository_config['Kind']['sub']['container'] = 'subtitles'
+repository_config['Kind']['sub']['default'] = {'profile':'original', 'volume':'alpha'}
+repository_config['Kind']['sub']['Profile'] = {}
+repository_config['Kind']['sub']['Profile']['original'] = {}
 
 
 

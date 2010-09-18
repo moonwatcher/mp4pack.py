@@ -13,11 +13,11 @@ def load_media_file(file_path):
     f = None
     file_type = os.path.splitext(file_path)[1].strip('.')
     
-    if file_type in container_type['Mpeg4']:
+    if file_type in file_detail_detector.mp4_kinds:
         f = Mpeg4(file_path)
-    elif file_type in container_type['Matroska']:
+    elif file_type in file_detail_detector.matroska_kinds:
         f = Matroska(file_path)
-    elif file_type in container_type['Subtitle']:
+    elif file_type in file_detail_detector.subtitles_kinds:
         f = Subtitle(file_path)
     
     return f
@@ -35,9 +35,12 @@ class Container(object):
         self.meta = None
         if os.path.isfile(file_path):
             self.exists = True
-            self.file_path = os.path.realpath(os.path.abspath(file_path))
+            self.file_path = file_path
             self.file_info = file_detail_detector.detect(self.file_path)
-            self.load_meta()
+            if self.load_meta():
+                self.logger.debug('Successfully loaded meta for ' + self.file_path)
+            else:
+                self.logger.debug('Failed loading meta for ' + self.file_path)
     
     
     def load(self):
@@ -317,7 +320,7 @@ class Container(object):
             result = os.path.join(result, info['language'])
             
         result = os.path.join(result, self.canonic_name(info))
-        return result
+        return os.path.realpath(result)
     
     
     def print_meta(self):
@@ -566,6 +569,8 @@ class Matroska(AVContainer):
             elif mkvinfo_start_re.search(mkvinfo_report[index]):
                 in_mkvinfo_output = True
                 index += 1
+    
+    
     
     
 
@@ -1121,11 +1126,16 @@ subtitle_line_filter = SubtitleLineFilter()
 class FileDetailDetector(object):
     def __init__(self):
         self.file_name_schema_re = {}
+        self.matroska_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'matroska' ]
+        self.mp4_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'mp4' ]
+        self.subtitles_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'subtitles' ]
+        
         for media_kind in repository_config['Media Kind'].keys():
             self.file_name_schema_re[media_kind] = re.compile(repository_config['Media Kind'][media_kind]['schema'])
     
     
     def detect(self, file_path):
+        # <Volume>/<Media Kind>/<Kind>/<Profile>(/<Show>/<Season>)?/(IMDb<IMDB ID> <Name>|<Show> <Code> <Name>).<Extension>
         media_kind = None
         info = None
         if file_path != None:
@@ -1151,24 +1161,96 @@ class FileDetailDetector(object):
                     info['episode_number'] = int(match.group(4))
                     info['name'] = match.group(5)
                     info['type'] = match.group(6)
+            
+            if info['type'] in repository_config['Kind'].keys():
+                if 'volume' in repository_config['Kind'][info['type']]['default']:
+                    info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
                     
+                if 'profile' in repository_config['Kind'][info['type']]['default']:
+                    info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
+            
             if info['name'] == None or info['name'] == '':
                 del info['name']
                 
             prefix = os.path.dirname(file_path)
-            if info['type'] in container_type['Subtitle']:
-                info['volume'] = repository_config['Kind']['srt']['default']['volume']
+            if info['type'] in self.subtitles_kinds:
+                info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
                 prefix, lang = os.path.split(prefix)
                 if lang in repository_config['Language']:
                     info['language'] = lang
                     
-                prefix, profile = os.path.split(prefix)
-                if profile in repository_config['Kind']['srt']['Profile'].keys():
-                    info['profile'] = profile
-                else:
-                    info['profile'] = repository_config['Kind']['srt']['default']['profile']
-                    
         return info
+    
+    
+    def easy_name(self, info):
+        result = None
+        if 'name' in info:
+            result = info['name']
+        return result
+    
+    
+    def canonic_name(self, info):
+        result = None
+        valid = False
+        easy_name = self.easy_name(info)
+        
+        if 'media-kind' in info and info['media-kind'] in repository_config['Media Kind'] and 'type' in info and info['type'] in repository_config['Kind']:
+            if info['media-kind'] == 'tvshow':
+                if 'show_small_name' in info and 'code' in info:
+                    result = ''.join([info['show_small_name'], ' ', info['code']])
+                    valid = True
+            elif info['media-kind'] == 'movie':
+                if 'imdb_id' in info:
+                    result = ''.join(['IMDb', info['imdb_id']])
+                    valid = True
+        if valid:
+            if easy_name != None:
+                result = ''.join([result, easy_name])
+            
+            result = ''.join([result, '.', info['type']])
+        
+        if not valid:
+            result = None
+        
+        return result
+    
+    
+    def canonic_path(self, info):
+        result = None
+        valid = True
+        
+        if 'media-kind' in info and info['media-kind'] in repository_config['Media Kind'] and 'type' in info and info['type'] in repository_config['Kind']:
+            if not 'volume' in info and 'volume' in repository_config['Kind'][info['type']]['default']:
+                info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
+                
+            if not 'profile' in info and 'profile' in repository_config['Kind'][info['type']]['default']:
+                info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
+                
+            if 'volume' in info and info['volume'] in repository_config['Volume'] and 'profile' in info and info['profile'] in repository_config['Kind'][info['type']]['Profile']:
+                result = os.path.join(repository_config['Volume'][volume], info['media_kind'], info['type'], info['profile'])
+                
+                if info['media-kind'] == 'tvshow' and 'show_small_name' in info and 'season_number' in info:
+                    result = os.path.join(result, info['show_small_name'], str(info['season_number']))
+                else:
+                    valid = False
+                    
+                
+                if info['type'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
+                        result = os.path.join(result, info['language'])
+                else:
+                    valid = False
+             else:
+                valid = False
+        else:
+            valid = False
+        
+        if valid:
+            result = os.path.join(result, self.canonic_name(info))
+            result = os.path.realpath(result)
+        else:
+            result = None
+        return result
+    
     
 
 file_detail_detector = FileDetailDetector()
@@ -1290,6 +1372,6 @@ def format_for_subler_tag(value):
 
 
 tag_manager = TagManager()
-container_type = { 'Subtitle':['srt', 'ass', 'sub', 'ssa'], 'Mpeg4':['mp4', 'm4v', 'm4a', 'm4b'], 'Matroska':['mkv'] }
+container_type = { 'Subtitle':['srt', 'ass', 'sub'], 'Mpeg4':['m4v', 'm4a', 'm4b'], 'Matroska':['mkv'] }
 full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
 descriptive_time_format = re.compile('(?:([0-9]{,2})h)?(?:([0-9]{,2})m)?(?:([0-9]{,2})s)?(?:([0-9]+))?')
