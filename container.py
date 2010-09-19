@@ -33,10 +33,12 @@ class Container(object):
         self.exists = False
         self.file_path = None
         self.meta = None
+        self.related = None
         if os.path.isfile(file_path):
             self.exists = True
             self.file_path = file_path
             self.file_info = file_detail_detector.detect(self.file_path)
+            self.related = file_detail_detector.related(self.file_path)
             if self.load_meta():
                 self.logger.debug('Successfully loaded meta for ' + self.file_path)
             else:
@@ -179,21 +181,19 @@ class Container(object):
         return result
     
     
-    
-    def clean(self, path):
-        try:
-            os.remove(path)
-            os.removedirs(os.path.dirname(path))
-        except OSError:
-            pass
-    
-    
-    
     def copy(self, volume, profile, overwrite=False, md5=False):
-        dest_path = self.canonic_path(volume, profile)
-        if os.path.exists(dest_path) and not overwrite:
-            self.logger.warning('Not overwriting ' + dest_path)
-        else:
+        info = copy.deepcopy(self.file_info)
+        
+        info['volume'] = volume
+        if info['volume'] == None:
+            del info['volume']
+        
+        info['profile'] = profile
+        if info['profile'] == None:
+            del info['profile']
+        
+        dest_path = file_detail_detector.canonic_path(info, self.meta)
+        if file_detail_detector.check_path(dest_path, overwrite):
             dirname = os.path.dirname(dest_path)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
@@ -209,10 +209,14 @@ class Container(object):
                 self.logger.info(report[0])
             
             if not os.path.exists(dest_path):
-                self.clean(dest_path)
+                file_detail_detector.clean(dest_path)
             if md5:
                 self.check(dest_path)
         
+    
+    
+    def extract(self, volume, profile, overwrite=False):
+        return
     
     
     def check(self, path):
@@ -259,7 +263,7 @@ class Container(object):
                     self.logger.info(report[0])
                     
                 if not os.path.exists(dest_path):
-                    self.clean(dest_path)
+                    file_detail_detector.clean(dest_path)
     
     
     def is_movie(self):
@@ -271,62 +275,29 @@ class Container(object):
     
     
     
-    def easy_name(self, info=None):
-        result = None
-        if self.meta != None and 'Name' in self.meta:
-            result = self.meta['Name']
-        elif info != None and 'name' in info:
-            result = info['name']
-        elif 'name' in self.file_info:
-            result = self.file_info['name']
-        return result
+    def easy_name(self):
+        return file_detail_detector.easy_name(self.file_info, self.meta)
     
     
-    def canonic_name(self, info=None):
-        result = None
-        if info == None:
-            info = self.file_info
-        
-        easy_name = self.easy_name(info)
-        if easy_name != None:
-            easy_name = ' ' + easy_name
-        else:
-            easy_name = ''
-        
-        if self.is_movie():
-            result = ''.join(['IMDb', info['imdb_id'], easy_name, '.', info['type']])
-        elif self.is_tvshow():
-            result = ''.join([info['show_small_name'], ' ', info['code'], easy_name, '.', info['type']])
-        return result
+    def canonic_name(self):
+        return file_detail_detector.canonic_name(self.file_info, self.meta)
     
     
-    def canonic_path(self, volume, profile, info=None):
-        result = None
-        if info == None:
-            info = self.file_info
-        if profile == None:
-            profile = info['profile']
-        if volume == None:
-            volume = info['volume']
-        
-        result = repository_config['Volume'][volume]
-        
-        if self.is_movie():
-            result = os.path.join(result, info['media_kind'], info['type'], profile)
-        elif self.is_tvshow():
-            result = os.path.join(result, info['media_kind'], info['type'], profile, info['show_small_name'], str(info['season_number']))
-            
-        if info['type'] in container_type['Subtitle']:
-            result = os.path.join(result, info['language'])
-            
-        result = os.path.join(result, self.canonic_name(info))
-        return os.path.realpath(result)
+    def canonic_path(self):
+        return file_detail_detector.canonic_path(self.file_info, self.meta)
     
     
     def print_meta(self):
         result = None
         if self.meta != None:
             result = ('\n'.join(["%s: %s" % (key, self.meta[key]) for key in sorted(set(self.meta))]))
+        return result
+    
+    
+    def print_related(self):
+        result = None
+        if self.related != None:
+            result = ('\n'.join(["%s" % (key) for key in sorted(set(self.related))]))
         return result
     
     
@@ -345,6 +316,8 @@ class Container(object):
                 result = '\n'.join((result, '\n# Parsed from path: ', self.print_file_info()))
             if self.meta != None and len(self.meta) > 0:
                 result = '\n'.join((result, '\n# Meta: ', self.print_meta()))
+            if self.related != None and len(self.related) > 0:
+                result = '\n'.join((result, '\n# Related: ', self.print_related()))
         else:
             result = '\nfile does not exist'
         return result
@@ -369,12 +342,51 @@ class AVContainer(Container):
     
     def add_track(self, track):
         if track != None:
+            if 'type' in track and track['type'] == 'audio' and 'codec' in track:
+                track['codec_kind'] = file_detail_detector.detect_audio_codec_kind(track['codec'])
+            
             self.tracks.append(track)
     
     
     def add_chapter(self, chapter):
         if chapter != None:
             self.chapters.append(chapter)
+    
+    
+    def package_matroska(self, volume, profile):
+        selected_related = list()
+        for k,v in self.related.iteritems():
+            match = False
+            for r in repository_config['Kind']['mkv']['Profile'][profile]['related']:
+                fit_all = True
+                for x in r.keys():
+                    fit_all = fit_all and v.has_key(x) and v[x] == r[x]
+                    if not fit_all: break
+                if fit_all: 
+                    match = True
+                    break
+            if match:
+                selected_related.append(k)
+                
+        selected_tracks = list()
+        for v in self.tracks:
+            match = False
+            for r in repository_config['Kind']['mkv']['Profile'][profile]['tracks']:
+                fit_all = True
+                for x in r.keys():
+                    fit_all = fit_all and v.has_key(x) and v[x] == r[x]
+                    if not fit_all: break
+                if fit_all: 
+                    match = True
+                    break
+            if match:
+                selected_tracks.append(v)
+        
+        
+        self.logger.debug('related files chosen: ' + selected_related.__str__())
+        self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
+        return selected_related, selected_tracks
+    
     
     
     def print_chapters(self):
@@ -571,7 +583,50 @@ class Matroska(AVContainer):
                 index += 1
     
     
-    
+    def extract(self, volume, profile, overwrite=False):
+        AVContainer.extract(self, volume, profile, overwrite=False)
+        command = ['mkvextract', 'tracks', self.file_path ]
+        new_media_files = []
+        
+        info = copy.deepcopy(self.file_info)
+        if 'volume' in info:
+            del info['volume']
+        if 'profile' in info:
+            del info['profile']
+        
+        for t in self.tracks:
+            if t['type'] == 'subtitles' and t['language'] in repository_config['Language']:
+                for subtitle_type in file_detail_detector.subtitles_kinds:
+                    if t['codec'] == repository_config['Kind'][subtitle_type]['codec']:
+                        info['type'] = subtitle_type
+                        info['language'] = t['language']
+                        dest_path = file_detail_detector.canonic_path(info, self.meta)
+                        if file_detail_detector.check_path(dest_path, overwrite):
+                            new_media_files.append(dest_path)
+                            command.append(str(t['number']) + ':' + dest_path)
+                        
+        #self.logger.debug(command.__str__())
+        if len(new_media_files) > 0:
+            
+            self.logger.info('Extracting streams from ' + self.file_path)
+            for f in new_media_files:
+                file_detail_detector.varify_directory(f)
+            
+            from subprocess import Popen, PIPE
+            proc = Popen(command, stdout=PIPE)
+            report = proc.communicate()
+            
+            if report[1] != None and len(report[1]) > 0:
+                self.logger.error(report[1])
+            if report[0] != None and len(report[0]) > 0:
+                self.logger.info(report[0])
+            
+            for f in new_media_files:
+                if not os.path.exists(f):
+                    file_detail_detector.clean(f)
+                else:
+                    s = Subtitle(f)
+                    s.make(volume, 'clean', overwrite)
     
 
 
@@ -713,16 +768,16 @@ class Mpeg4(AVContainer):
                     
         elif self.file_info != None:
             if self.is_movie():
-                if 'name' in self.file_info and self.file_info['name'] != self.tags['Name']:
-                    update['Name'] = self.file_info['name']
+                if 'Name' in self.file_info and self.file_info['Name'] != self.tags['Name']:
+                    update['Name'] = self.file_info['Name']
                 
             elif self.is_tvshow():
                 if not('TV Season' in self.tags and self.file_info['season_number'] == self.tags['TV Season']):
                     update['TV Season'] = self.file_info['season_number']
                 if not('TV Episode #' in self.tags and self.file_info['episode_number'] == self.tags['TV Episode #']):
                     update['TV Episode #'] = self.file_info['episode_number']
-                if 'name' in self.file_info and not('Name' in self.tags and self.file_info['name'] == self.tags['Name']):
-                    update['Name'] = self.file_info['name']
+                if 'Name' in self.file_info and not('Name' in self.tags and self.file_info['Name'] == self.tags['Name']):
+                    update['Name'] = self.file_info['Name']
         
         if len(update) > 0:
             result = (''.join(["{%s:%s}" % (t, format_for_subler_tag(update[t])) for t in sorted(set(update))]))
@@ -848,20 +903,26 @@ class Subtitle(Container):
     def make(self, volume, profile, overwrite=False):
         Container.make(self, volume, profile, overwrite)
         info = copy.deepcopy(self.file_info)
+        
+        info['volume'] = volume
+        if info['volume'] == None:
+            del info['volume']
+        
+        info['profile'] = profile
+        if info['profile'] == None:
+            del info['profile']
+            
         info['type'] = 'srt'
-        dest_path = self.canonic_path(volume, profile, info)
-        if os.path.exists(dest_path) and not overwrite:
-            self.logger.warning('Not overwriting ' + dest_path)
-        else:
-            dirname = os.path.dirname(dest_path)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-                
+        dest_path = file_detail_detector.canonic_path(info, self.meta)
+        
+        if file_detail_detector.check_path(dest_path, overwrite):
+            file_detail_detector.varify_directory(dest_path)
+            
             self.logger.info('Make ' + dest_path + ' from ' + self.file_path)
             self.write(dest_path)
             
             if not os.path.exists(dest_path):
-                self.clean(dest_path)
+                file_detail_detector.clean(dest_path)
     
     
     def write(self, output_file=None):
@@ -1125,11 +1186,16 @@ subtitle_line_filter = SubtitleLineFilter()
 
 class FileDetailDetector(object):
     def __init__(self):
-        self.file_name_schema_re = {}
+        self.logger = logging.getLogger('mp4pack.container.detector')
         self.matroska_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'matroska' ]
         self.mp4_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'mp4' ]
         self.subtitles_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'subtitles' ]
         
+        self.audio_codec_kind = {}
+        for k,v in repository_config['Codec']['Audio'].iteritems():
+            self.audio_codec_kind[k] = re.compile(v)
+        
+        self.file_name_schema_re = {}
         for media_kind in repository_config['Media Kind'].keys():
             self.file_name_schema_re[media_kind] = re.compile(repository_config['Media Kind'][media_kind]['schema'])
     
@@ -1151,7 +1217,7 @@ class FileDetailDetector(object):
                 
                 if media_kind == 'movie':
                     info['imdb_id'] = match.group(1)
-                    info['name'] = match.group(2)
+                    info['Name'] = match.group(2)
                     info['type'] = match.group(3)
                     
                 elif media_kind == 'tvshow':
@@ -1159,18 +1225,18 @@ class FileDetailDetector(object):
                     info['code'] = match.group(2)
                     info['season_number'] = int(match.group(3))
                     info['episode_number'] = int(match.group(4))
-                    info['name'] = match.group(5)
+                    info['Name'] = match.group(5)
                     info['type'] = match.group(6)
             
-            if info['type'] in repository_config['Kind'].keys():
+            if info['type'] in repository_config['Kind']:
                 if 'volume' in repository_config['Kind'][info['type']]['default']:
                     info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
                     
                 if 'profile' in repository_config['Kind'][info['type']]['default']:
                     info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
             
-            if info['name'] == None or info['name'] == '':
-                del info['name']
+            if info['Name'] == None or info['Name'] == '':
+                del info['Name']
                 
             prefix = os.path.dirname(file_path)
             if info['type'] in self.subtitles_kinds:
@@ -1182,30 +1248,32 @@ class FileDetailDetector(object):
         return info
     
     
-    def easy_name(self, info):
+    def easy_name(self, info, meta):
         result = None
-        if 'name' in info:
-            result = info['name']
+        if 'Name' in meta:
+            result = info['Name']
+        elif 'Name' in info:
+            result = info['Name']
         return result
     
     
-    def canonic_name(self, info):
+    def canonic_name(self, info, meta):
         result = None
         valid = False
-        easy_name = self.easy_name(info)
         
-        if 'media-kind' in info and info['media-kind'] in repository_config['Media Kind'] and 'type' in info and info['type'] in repository_config['Kind']:
-            if info['media-kind'] == 'tvshow':
+        if 'media_kind' in info and info['media_kind'] in repository_config['Media Kind'] and 'type' in info and info['type'] in repository_config['Kind']:
+            if info['media_kind'] == 'tvshow':
                 if 'show_small_name' in info and 'code' in info:
                     result = ''.join([info['show_small_name'], ' ', info['code']])
                     valid = True
-            elif info['media-kind'] == 'movie':
+            elif info['media_kind'] == 'movie':
                 if 'imdb_id' in info:
                     result = ''.join(['IMDb', info['imdb_id']])
                     valid = True
         if valid:
+            easy_name = self.easy_name(info, meta)
             if easy_name != None:
-                result = ''.join([result, easy_name])
+                result = ''.join([result, ' ', easy_name])
             
             result = ''.join([result, '.', info['type']])
         
@@ -1215,11 +1283,10 @@ class FileDetailDetector(object):
         return result
     
     
-    def canonic_path(self, info):
+    def canonic_path(self, info, meta):
         result = None
         valid = True
-        
-        if 'media-kind' in info and info['media-kind'] in repository_config['Media Kind'] and 'type' in info and info['type'] in repository_config['Kind']:
+        if ('media_kind' in info and info['media_kind'] in repository_config['Media Kind']) and ('type' in info and info['type'] in repository_config['Kind']):
             if not 'volume' in info and 'volume' in repository_config['Kind'][info['type']]['default']:
                 info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
                 
@@ -1227,28 +1294,98 @@ class FileDetailDetector(object):
                 info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
                 
             if 'volume' in info and info['volume'] in repository_config['Volume'] and 'profile' in info and info['profile'] in repository_config['Kind'][info['type']]['Profile']:
-                result = os.path.join(repository_config['Volume'][volume], info['media_kind'], info['type'], info['profile'])
+                result = os.path.join(repository_config['Volume'][info['volume']], info['media_kind'], info['type'], info['profile'])
                 
-                if info['media-kind'] == 'tvshow' and 'show_small_name' in info and 'season_number' in info:
+                if info['media_kind'] == 'tvshow' and 'show_small_name' in info and 'season_number' in info:
                     result = os.path.join(result, info['show_small_name'], str(info['season_number']))
-                else:
-                    valid = False
-                    
                 
                 if info['type'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
                         result = os.path.join(result, info['language'])
-                else:
-                    valid = False
-             else:
+            else:
                 valid = False
         else:
             valid = False
         
         if valid:
-            result = os.path.join(result, self.canonic_name(info))
-            result = os.path.realpath(result)
+            result = os.path.join(result, self.canonic_name(info, meta))
+            result = os.path.abspath(result)
         else:
             result = None
+        return result
+    
+    
+    def clean(self, path):
+        try:
+            os.remove(path)
+            os.removedirs(os.path.dirname(path))
+        except OSError:
+            pass
+    
+    
+    def related(self, path):
+        # <Volume>/<Media Kind>/<Kind>/<Profile>(/<Show>/<Season>)?/(IMDb<IMDB ID> <Name>|<Show> <Code> <Name>).<Extension>
+        related = dict()
+        info = self.detect(path)
+        meta = {}
+        for v in repository_config['Volume']:
+            for k in self.subtitles_kinds:
+                for p in repository_config['Kind'][k]['Profile']:
+                    for l in repository_config['Language']:
+                        i = copy.deepcopy(info)
+                        i['volume'] = v
+                        i['type'] = k
+                        i['profile'] = p
+                        i['language'] = l
+                        related_path = self.canonic_path(i, meta)
+                        if os.path.exists(related_path):
+                            related[related_path] = i
+            
+            for k in self.matroska_kinds:
+                for p in repository_config['Kind'][k]['Profile']:
+                    i = copy.deepcopy(info)
+                    i['volume'] = v
+                    i['type'] = k
+                    i['profile'] = p
+                    related_path = self.canonic_path(i, meta)
+                    if os.path.exists(related_path):
+                        related[related_path] = i
+            
+            for k in self.mp4_kinds:
+                for p in repository_config['Kind'][k]['Profile']:
+                    i = copy.deepcopy(info)
+                    i['volume'] = v
+                    i['type'] = k
+                    i['profile'] = p
+                    related_path = self.canonic_path(i, meta)
+                    if os.path.exists(related_path):
+                        related[related_path] = i
+                        
+        return related
+    
+    
+    
+    def detect_audio_codec_kind(self, codec):
+        result = None
+        for k,v in self.audio_codec_kind.iteritems():
+            if v.search(codec) != None:
+                result = k
+                break
+        return result
+    
+    
+    def varify_directory(self, path):
+        dirname = os.path.dirname(path)
+        if not os.path.exists(dirname):
+            self.logger.debug('Creating directory ' + dirname)
+            os.makedirs(dirname)
+        
+    
+    
+    def check_path(self, path, overwrite):
+        result = True
+        if os.path.exists(path) and not overwrite:
+            self.logger.warning('Refusing to overwriting ' + path)
+            result = False
         return result
     
     

@@ -36,7 +36,7 @@ def list_input_files(path, file_filter, recursive):
     path_list = os.listdir(path)
     for p in path_list:
         if invisable_file_path.search(p) == None:
-            p = os.path.realpath(os.path.join(path,p))
+            p = os.path.abspath(os.path.join(path,p))
             if os.path.isfile(p):
                 if file_filter == None or file_filter.search(p) != None:
                     result.append(unicode(p, 'utf-8'))
@@ -67,15 +67,19 @@ def load_options():
         
     group = OptionGroup(parser, "Operations", "You have to specify at least one operation to preform.")
     group.add_option("-i", "--info", dest="report", action="store_true", default=False, help="Report files info")
-    group.add_option("-c", "--deposit", dest="deposit", action="store_true", default=False, help="deposit in repository")
-    group.add_option("-n", "--rename", dest="rename", action="store_true", default=False, help="rename to canonic file name")
-    group.add_option("-t", "--tag", dest="tag", action="store_true", default=False, help="update meta data tags")
-    group.add_option("-x", "--optimize", dest="optimize", action="store_true", default=False, help="optimize files")
+    group.add_option("-c", "--copy", dest="copy", action="store_true", default=False, help="Copy into repository")
+    group.add_option("-n", "--rename", dest="rename", action="store_true", default=False, help="Rename to canonic file name")
+    group.add_option("--tag", dest="tag", action="store_true", default=False, help="Update meta tags")
+    group.add_option("--art", dest="art", action="store_true", default=False, help="Update embedded artwork")
+    group.add_option("--optimize", dest="optimize", action="store_true", default=False, help="Optimize files")
+    
+#    group.add_option("-m", "--pack", dest="pack", help="Package to kind")
+#    group.add_option("-t", "--transcode", dest="pack", help="Transcode to kind")
+#    group.add_option("-e", "--extract", dest="pack", help="Extract kind")
+#    group.add_option("-u", "--update", dest="pack", help="Update kind")
     
     group.add_option("-e", "--extract", dest="extract", action="store_true", default=False, help="extract into repository")
     group.add_option("-m", "--make", dest="make", action="store_true", default=False, help="make a new version")
-    group.add_option("-u", "--update", dest="update", action="store_true", default=False, help="update files in repository")
-    group.add_option("-z", "--ac3", dest="ac3", action="store_true", default=False, help="create new ac3 track from existing dts track")
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Modifiers", "Modify the runtime environment.")
@@ -87,6 +91,7 @@ def load_options():
     group.add_option("-v", "--verbosity", dest="verbosity", default='info', type="choice", choices=log_levels.keys(), help="Logging verbosity level [default: %default]")
     group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
     group.add_option("--pixel-width", dest="pixel_width", help="Max output pixel width [default: set by profile]")
+    group.add_option("--language", dest="language", help="Languge code to set for undefined")
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Flags")
@@ -94,13 +99,34 @@ def load_options():
     group.add_option("-w", "--overwrite", dest="overwrite", action="store_true", default=False, help="Allow overwriting existing files")
     group.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Recursivly process sub directories")
     group.add_option("--md5", dest="md5", action="store_true", default=False, help="Calculate md5 checksum")
-    group.add_option("--keep-ac3", dest="keep-ac3", action="store_true", default=False, help="Mux ac3 track in addition to the aac track")
     parser.add_option_group(group)
     
     group = OptionGroup(parser, "Service", "service routines")
-    group.add_option("--initialize", dest="initialize", action="store_true", default=False, help="First run initialization")
-    group.add_option("--map-show", dest="map_show", help="Map TV Show TVDB to name")
+    group.add_option("--initialize", dest="initialize", action="store_true", default=False, help="Initialize the system")
+    group.add_option("--map-show", dest="map_show", help="Map a TV Show TVDB ID to a name")
     parser.add_option_group(group)
+    
+#    Subtitle:
+#    	transcode srt: encode a new subtitle file @ profile
+        
+#    Matroska:
+#    	pack mkv: mux to matroska @ profile
+#    	transcode m4v: transcode to m4v @ profile
+#    	transcode mkv: transcode to mkv @ profile
+#    	transcode srt: extract all subtitles to 'original' profile and than transcode subtitle to srt @ profile
+#    	extract srt: extract subtitles to profile
+#    	extract ass: extract subtitles to profile
+#    	extract chap: extract chapters
+        
+#    Mpeg4:
+#    	pack mkv: mux to matroska @ profile
+#    	transcode m4v: transcode to m4v @ profile
+#    	transcode mkv: transcode to mkv @ profile
+#    	extract chap: extract chapters
+#    	update srt: remux subtitles @ profile
+#    	update art: update artwork
+#    	update chap: update chapters
+        
     
     return parser.parse_args()
 
@@ -110,11 +136,13 @@ def preform_operations(tag_manager, files, options):
         for f in files:
             print f.__str__().encode('utf-8')
         
-    if options.deposit:
+    if options.copy:
         for f in files:
             f.copy(options.volume, options.profile, options.overwrite, options.md5)
     
-    #if options.extract:
+    if options.extract:
+        for f in files:
+            print f.extract(options.volume, options.profile, options.overwrite)
     
     if options.rename:
         for f in files:
@@ -153,7 +181,7 @@ def main():
     tag_manager = TagManager()
     file_filter = load_file_filter(options.file_filter)
     
-    input_path = os.path.realpath(input_path)
+    input_path = os.path.abspath(input_path)
     logger.info('Loading file from ' + input_path)
     files = load_input_files(input_path, file_filter, options.recursive)
     preform_operations(tag_manager, files, options)

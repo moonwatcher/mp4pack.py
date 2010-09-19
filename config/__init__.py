@@ -4,6 +4,14 @@
 
 repository_config = {}
 
+repository_config['Codec'] = {}
+repository_config['Codec']['Audio'] = {}
+repository_config['Codec']['Audio']['AC3'] = 'ac-3|AC3'
+repository_config['Codec']['Audio']['AAC'] = 'AAC'
+repository_config['Codec']['Audio']['DTS'] = 'DTS'
+repository_config['Codec']['Audio']['MP3'] = 'MPEG/L3'
+
+
 repository_config['Language'] = {'heb':'Hebrew', 'eng':'English'}
 repository_config['Volume'] = {'alpha':'/Users/lg/pool/alpha', 'beta':'/Users/lg/pool/beta', 'gama':'/Users/lg/pool/gama', 'delta':'/Users/lg/pool/delta', 'epsilon':'/Users/lg/pool/epsilon', 'eta':'/Users/lg/pool/eta'}
 repository_config['Media Kind'] = {}
@@ -56,15 +64,30 @@ repository_config['Kind']['m4a']['Profile']['lossless'] = {}
 repository_config['Kind']['m4a']['Profile']['portable'] = {}
 
 repository_config['Kind']['mkv'] = {}
+
 repository_config['Kind']['mkv']['container'] = 'matroska'
 repository_config['Kind']['mkv']['default'] = {'volume':'epsilon'}
 repository_config['Kind']['mkv']['Profile'] = {}
 repository_config['Kind']['mkv']['Profile']['sd'] = {}
 repository_config['Kind']['mkv']['Profile']['720'] = {}
+repository_config['Kind']['mkv']['Profile']['720'] = {
+    'related':(
+        {'type':'srt', 'profile':'clean', 'language':'heb'},
+        {'type':'srt', 'profile':'clean', 'language':'eng'}
+    ),
+    'tracks':(
+        {'type':'audio', 'codec_kind':'AC3'},
+        {'type':'audio', 'codec_kind':'MP3'},
+        {'type':'audio', 'codec_kind':'AAC'},
+        {'type':'audio', 'codec_kind':'DTS'}
+    )
+}
+
 repository_config['Kind']['mkv']['Profile']['1080'] = {}
 
 repository_config['Kind']['srt'] = {}
 repository_config['Kind']['srt']['container'] = 'subtitles'
+repository_config['Kind']['srt']['codec'] = 'S_TEXT/UTF8'
 repository_config['Kind']['srt']['default'] = {'profile':'original', 'volume':'alpha'}
 repository_config['Kind']['srt']['Profile'] = {}
 repository_config['Kind']['srt']['Profile']['original'] = {}
@@ -72,12 +95,14 @@ repository_config['Kind']['srt']['Profile']['clean'] = {}
 
 repository_config['Kind']['ass'] = {}
 repository_config['Kind']['ass']['container'] = 'subtitles'
+repository_config['Kind']['ass']['codec'] = 'S_TEXT/ASS'
 repository_config['Kind']['ass']['default'] = {'profile':'original', 'volume':'alpha'}
 repository_config['Kind']['ass']['Profile'] = {}
 repository_config['Kind']['ass']['Profile']['original'] = {}
 
 repository_config['Kind']['sub'] = {}
 repository_config['Kind']['sub']['container'] = 'subtitles'
+repository_config['Kind']['sub']['codec'] = 'S_TEXT/SUB'
 repository_config['Kind']['sub']['default'] = {'profile':'original', 'volume':'alpha'}
 repository_config['Kind']['sub']['Profile'] = {}
 repository_config['Kind']['sub']['Profile']['original'] = {}
