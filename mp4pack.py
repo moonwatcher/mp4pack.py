@@ -63,42 +63,44 @@ def load_options():
     for k in repository_config['Kind'].keys():
         available_profiles += repository_config['Kind'][k]['Profile'].keys()
     
-    parser = OptionParser("usage: %prog [options] [file or directory. default: . ]")
+    parser = OptionParser("%prog [options] [file or directory. default: . ]")
         
-    group = OptionGroup(parser, "Operations", "You have to specify at least one operation to preform.")
-    group.add_option("-i", "--info", dest="report", action="store_true", default=False, help="Report files info")
+    group = OptionGroup(parser, "Operations", "You must specify at least one operation")
+    group.add_option("-i", "--info", dest="info", action="store_true", default=False, help="Show info")
     group.add_option("-c", "--copy", dest="copy", action="store_true", default=False, help="Copy into repository")
-    group.add_option("-n", "--rename", dest="rename", action="store_true", default=False, help="Rename to canonic file name")
+    group.add_option("-n", "--rename", dest="rename", action="store_true", default=False, help="Rename files to standard names")
     group.add_option("--tag", dest="tag", action="store_true", default=False, help="Update meta tags")
     group.add_option("--art", dest="art", action="store_true", default=False, help="Update embedded artwork")
     group.add_option("--optimize", dest="optimize", action="store_true", default=False, help="Optimize files")
     
-#    group.add_option("-m", "--pack", dest="pack", help="Package to kind")
-#    group.add_option("-t", "--transcode", dest="pack", help="Transcode to kind")
-#    group.add_option("-e", "--extract", dest="pack", help="Extract kind")
-#    group.add_option("-u", "--update", dest="pack", help="Update kind")
+    pack_choices = ['mkv']
+    transcode_choices = ['m4v', 'mkv', 'srt']
+    extract_choices = ['srt', 'ass']
+    update_choices = ['srt']
     
-    group.add_option("-e", "--extract", dest="extract", action="store_true", default=False, help="extract into repository")
-    group.add_option("-m", "--make", dest="make", action="store_true", default=False, help="make a new version")
+    group.add_option("-m", "--pack", metavar="KIND", dest="pack", type="choice", choices=pack_choices, help="Package to " + pack_choices.__str__())
+    group.add_option("-t", "--transcode", metavar="KIND", dest="transcode", type="choice", choices=transcode_choices, help="Transcode to " + transcode_choices.__str__())
+    group.add_option("-e", "--extract", metavar="KIND", dest="extract", type="choice", choices=extract_choices, help="Extract to " + extract_choices.__str__())
+    group.add_option("-u", "--update", metavar="KIND", dest="update", type="choice", choices=update_choices, help="Update to " + update_choices.__str__())
+    
     parser.add_option_group(group)
         
-    group = OptionGroup(parser, "Modifiers", "Modify the runtime environment.")
-    group.add_option("-k", "--kind", dest="kind", type="choice", choices=repository_config['Kind'].keys(), help="[default: %default]")
+    group = OptionGroup(parser, "Modifiers")
     group.add_option("-o", "--volume", dest="volume", type="choice", choices=repository_config['Volume'].keys(), default=None, help="Output volume [default: %default]")
     group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default=None, help="[default: %default]")
-    group.add_option("-f", "--filter", dest="file_filter", default=None, help="Regex to filter input file names through")
-    group.add_option("-q", "--quality", dest="quality", help="Quantizer for H.264 transcoding [default: %default]")
-    group.add_option("-v", "--verbosity", dest="verbosity", default='info', type="choice", choices=log_levels.keys(), help="Logging verbosity level [default: %default]")
-    group.add_option("--media-kind", dest="media-kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
-    group.add_option("--pixel-width", dest="pixel_width", help="Max output pixel width [default: set by profile]")
-    group.add_option("--language", dest="language", help="Languge code to set for undefined")
+    group.add_option("-f", "--filter", metavar="REGEX", dest="file_filter", default=None, help="Regex to filter input file names through")
+    group.add_option("-q", "--quality", metavar="QUANTIZER", dest="quality", help="Quantizer for H.264 transcoding [default: %default]")
+    group.add_option("-v", "--verbosity", metavar="LEVEL", dest="verbosity", default='info', type="choice", choices=log_levels.keys(), help="Logging verbosity level [default: %default]")
+    group.add_option("--media-kind", dest="media_kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
+    group.add_option("--pixel-width", metavar="WIDTH", dest="pixel_width", help="Max output pixel width [default: set by profile]")
+    group.add_option("--language", metavar="CODE", dest="language", help="Languge code to set for undefined")
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Flags")
     group.add_option("-d", "--debug", dest="debug", action="store_true", default=False, help="Only print commands without executing")
     group.add_option("-w", "--overwrite", dest="overwrite", action="store_true", default=False, help="Allow overwriting existing files")
     group.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Recursivly process sub directories")
-    group.add_option("--md5", dest="md5", action="store_true", default=False, help="Calculate md5 checksum")
+    group.add_option("-5", "--md5", dest="md5", action="store_true", default=False, help="Varify md5 checksum on copy")
     parser.add_option_group(group)
     
     group = OptionGroup(parser, "Service", "service routines")
@@ -132,35 +134,47 @@ def load_options():
 
 
 def preform_operations(tag_manager, files, options):
-    if options.report:
+    if options.info:
         for f in files:
-            print f.__str__().encode('utf-8')
-        
+            print f.info()
+            
     if options.copy:
         for f in files:
             f.copy(options.volume, options.profile, options.overwrite, options.md5)
     
-    if options.extract:
-        for f in files:
-            print f.extract(options.volume, options.profile, options.overwrite)
-    
     if options.rename:
         for f in files:
-            print f.rename()
-    
-    if options.make:
-        for f in files:
-            print f.make(options.volume, options.profile, options.overwrite)
+            f.rename()
     
     if options.tag:
         for f in files:
-            print f.tag()
+            f.tag()
     
-    #if options.optimize:
+    if options.art:
+        for f in files:
+            f.art()
+            
+    if options.optimize:
+        for f in files:
+            f.optimize()
     
-    #if options.update:
     
-    #if options.ac3:
+    if options.pack != None:
+        for f in files:
+            f.pack(options.pack, options.volume, options.profile, options.overwrite)
+    
+    if options.transcode != None:
+        for f in files:
+            f.transcode(options.transcode, options.volume, options.profile, options.overwrite)
+    
+    if options.extract != None:
+        for f in files:
+            f.extract(options.extract, options.volume, options.profile, options.overwrite)
+            
+    if options.update != None:
+        for f in files:
+            f.update(options.update, options.volume, options.profile, options.overwrite)
+    
     
     if options.initialize:
         tag_manager.base_init()
@@ -168,6 +182,7 @@ def preform_operations(tag_manager, files, options):
 
 
 def main():
+    print 'mp4pack.py a media collection manager\nLior Galanti lior.galanti@gmail.com\n'
     options, args = load_options()
     logging.basicConfig(level=log_levels[options.verbosity])
     logger = logging.getLogger('mp4pack')
@@ -182,7 +197,7 @@ def main():
     file_filter = load_file_filter(options.file_filter)
     
     input_path = os.path.abspath(input_path)
-    logger.info('Loading file from ' + input_path)
+    logger.info('Scanning for files in ' + input_path)
     files = load_input_files(input_path, file_filter, options.recursive)
     preform_operations(tag_manager, files, options)
     

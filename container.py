@@ -40,9 +40,9 @@ class Container(object):
             self.file_info = file_detail_detector.detect(self.file_path)
             self.related = file_detail_detector.related(self.file_path)
             if self.load_meta():
-                self.logger.debug('Successfully loaded meta for ' + self.file_path)
+                self.logger.debug('Meta loaded for ' + self.file_path)
             else:
-                self.logger.debug('Failed loading meta for ' + self.file_path)
+                self.logger.debug('Failed to load meta for ' + self.file_path)
     
     
     def load(self):
@@ -181,6 +181,12 @@ class Container(object):
         return result
     
     
+    
+    
+    def info(self):
+        return self.__str__().encode('utf-8')
+    
+    
     def copy(self, volume, profile, overwrite=False, md5=False):
         info = copy.deepcopy(self.file_info)
         
@@ -215,31 +221,6 @@ class Container(object):
         
     
     
-    def extract(self, volume, profile, overwrite=False):
-        return
-    
-    
-    def check(self, path):
-        result = False
-        if os.path.exists(self.file_path) and os.path.exists(path):
-            source_md5 = hashlib.md5(file(self.file_path).read()).hexdigest()
-            dest_md5 = hashlib.md5(file(path).read()).hexdigest()
-            if source_md5 == dest_md5:
-                self.logger.info('md5 match: ' + source_md5 + ' ' + self.canonic_name())
-                result = True
-            else:
-                self.logger.error('md5 mismatch: ' + source_md5 + ' ' + dest_md5 + ' ' + self.canonic_name())
-        return result
-    
-    
-    def make(self, volume, profile, overwrite=False):
-        return
-    
-    
-    def tag(self):
-        return
-    
-    
     def rename(self):
         dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_name())
         if self.file_path == dest_path:
@@ -266,13 +247,57 @@ class Container(object):
                     file_detail_detector.clean(dest_path)
     
     
+    def tag(self):
+        return
+    
+    
+    def art(self):
+        return
+    
+    
+    def optimize(self):
+        return
+    
+    
+    
+    
+    def extract(self, kind, volume, profile, overwrite=False):
+        return
+    
+    
+    def transcode(self, kind, volume, profile, overwrite=False):
+        return
+    
+    
+    def pack(self, kind, volume, profile, overwrite=False):
+        return
+    
+    
+    def update(self, kind, volume, profile, overwrite=False):
+        return
+    
+    
+    
+    
+    def check(self, path):
+        result = False
+        if os.path.exists(self.file_path) and os.path.exists(path):
+            source_md5 = hashlib.md5(file(self.file_path).read()).hexdigest()
+            dest_md5 = hashlib.md5(file(path).read()).hexdigest()
+            if source_md5 == dest_md5:
+                self.logger.info('md5 match: ' + source_md5 + ' ' + self.canonic_name())
+                result = True
+            else:
+                self.logger.error('md5 mismatch: ' + source_md5 + ' ' + dest_md5 + ' ' + self.canonic_name())
+        return result
+    
+    
     def is_movie(self):
         return self.file_info != None and set(('media_kind', 'imdb_id')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'movie'
     
     
     def is_tvshow(self):
         return self.file_info != None and set(('media_kind', 'show_small_name', 'season_number', 'episode_number')).issubset(set(self.file_info.keys())) and self.file_info['media_kind'] == 'tvshow'
-    
     
     
     def easy_name(self):
@@ -329,8 +354,8 @@ class AVContainer(Container):
     def __init__(self, file_path):
         Container.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.avcontainer')
-        self.tracks = []
-        self.chapters = []
+        self.tracks = list()
+        self.chapters = list()
         self.tags = dict()
         self.load()
         
@@ -353,39 +378,39 @@ class AVContainer(Container):
             self.chapters.append(chapter)
     
     
-    def package_matroska(self, volume, profile):
-        selected_related = list()
-        for k,v in self.related.iteritems():
-            match = False
-            for r in repository_config['Kind']['mkv']['Profile'][profile]['related']:
-                fit_all = True
-                for x in r.keys():
-                    fit_all = fit_all and v.has_key(x) and v[x] == r[x]
-                    if not fit_all: break
-                if fit_all: 
-                    match = True
-                    break
-            if match:
-                selected_related.append(k)
-                
-        selected_tracks = list()
-        for v in self.tracks:
-            match = False
-            for r in repository_config['Kind']['mkv']['Profile'][profile]['tracks']:
-                fit_all = True
-                for x in r.keys():
-                    fit_all = fit_all and v.has_key(x) and v[x] == r[x]
-                    if not fit_all: break
-                if fit_all: 
-                    match = True
-                    break
-            if match:
-                selected_tracks.append(v)
-        
-        
-        self.logger.debug('related files chosen: ' + selected_related.__str__())
-        self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
-        return selected_related, selected_tracks
+    def pack(self, kind, volume, profile, overwrite=False):
+        if kind == None or kind == 'mkv':
+            selected_related = list()
+            for k,v in self.related.iteritems():
+                match = False
+                for r in repository_config['Kind']['mkv']['Profile'][profile]['related']:
+                    fit_all = True
+                    for x in r.keys():
+                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
+                        if not fit_all: break
+                    if fit_all: 
+                        match = True
+                        break
+                if match:
+                    selected_related.append(k)
+                    
+            selected_tracks = list()
+            for v in self.tracks:
+                match = False
+                for r in repository_config['Kind']['mkv']['Profile'][profile]['tracks']:
+                    fit_all = True
+                    for x in r.keys():
+                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
+                        if not fit_all: break
+                    if fit_all: 
+                        match = True
+                        break
+                if match:
+                    selected_tracks.append(v)
+                    
+            self.logger.debug('related files chosen: ' + selected_related.__str__())
+            self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
+        return
     
     
     
@@ -583,15 +608,19 @@ class Matroska(AVContainer):
                 index += 1
     
     
-    def extract(self, volume, profile, overwrite=False):
-        AVContainer.extract(self, volume, profile, overwrite=False)
+    def extract(self, kind, volume, profile, overwrite=False):
+        AVContainer.extract(self, kind, volume, profile, overwrite=False)
         command = ['mkvextract', 'tracks', self.file_path ]
         new_media_files = []
         
         info = copy.deepcopy(self.file_info)
-        if 'volume' in info:
+        
+        info['volume'] = volume
+        if info['volume'] == None:
             del info['volume']
-        if 'profile' in info:
+        
+        info['profile'] = profile
+        if info['profile'] == None:
             del info['profile']
         
         for t in self.tracks:
@@ -599,16 +628,17 @@ class Matroska(AVContainer):
                 for subtitle_type in file_detail_detector.subtitles_kinds:
                     if t['codec'] == repository_config['Kind'][subtitle_type]['codec']:
                         info['type'] = subtitle_type
-                        info['language'] = t['language']
-                        dest_path = file_detail_detector.canonic_path(info, self.meta)
-                        if file_detail_detector.check_path(dest_path, overwrite):
-                            new_media_files.append(dest_path)
-                            command.append(str(t['number']) + ':' + dest_path)
+                        if kind == None or (info['type'] == kind):
+                            info['language'] = t['language']
+                            dest_path = file_detail_detector.canonic_path(info, self.meta)
+                            if file_detail_detector.check_path(dest_path, overwrite):
+                                new_media_files.append(dest_path)
+                                command.append(str(t['number']) + ':' + dest_path)
                         
         #self.logger.debug(command.__str__())
         if len(new_media_files) > 0:
             
-            self.logger.info('Extracting streams from ' + self.file_path)
+            self.logger.info('Extracting tracks from ' + self.file_path)
             for f in new_media_files:
                 file_detail_detector.varify_directory(f)
             
@@ -620,13 +650,22 @@ class Matroska(AVContainer):
                 self.logger.error(report[1])
             if report[0] != None and len(report[0]) > 0:
                 self.logger.info(report[0])
-            
+        
+        for f in new_media_files:
+            if not os.path.exists(f):
+                file_detail_detector.clean(f)
+        
+        return new_media_files
+    
+    
+    def transcode(self, kind, volume, profile, overwrite=False):
+        if kind == None or kind == 'srt':
+            new_media_files = self.extract(None, None, None, overwrite)
             for f in new_media_files:
-                if not os.path.exists(f):
-                    file_detail_detector.clean(f)
-                else:
+                if os.path.exists(f):
                     s = Subtitle(f)
-                    s.make(volume, 'clean', overwrite)
+                    s.transcode('srt', volume, profile, overwrite)
+    
     
 
 
@@ -900,8 +939,8 @@ class Subtitle(Container):
                 self.parsed = True
     
     
-    def make(self, volume, profile, overwrite=False):
-        Container.make(self, volume, profile, overwrite)
+    def transcode(self, kind, volume, profile, overwrite=False):
+        Container.transcode(self, volume, profile, overwrite)
         info = copy.deepcopy(self.file_info)
         
         info['volume'] = volume
@@ -918,7 +957,7 @@ class Subtitle(Container):
         if file_detail_detector.check_path(dest_path, overwrite):
             file_detail_detector.varify_directory(dest_path)
             
-            self.logger.info('Make ' + dest_path + ' from ' + self.file_path)
+            self.logger.info('Transcode ' + dest_path + ' from ' + self.file_path)
             self.write(dest_path)
             
             if not os.path.exists(dest_path):
@@ -1384,7 +1423,7 @@ class FileDetailDetector(object):
     def check_path(self, path, overwrite):
         result = True
         if os.path.exists(path) and not overwrite:
-            self.logger.warning('Refusing to overwriting ' + path)
+            self.logger.warning('Refusing to overwrite ' + path)
             result = False
         return result
     
