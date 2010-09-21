@@ -93,7 +93,7 @@ def load_options():
     group.add_option("-v", "--verbosity", metavar="LEVEL", dest="verbosity", default='info', type="choice", choices=log_levels.keys(), help="Logging verbosity level [default: %default]")
     group.add_option("--media-kind", dest="media_kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
     group.add_option("--pixel-width", metavar="WIDTH", dest="pixel_width", help="Max output pixel width [default: set by profile]")
-    group.add_option("--language", metavar="CODE", dest="language", help="Languge code to set for undefined")
+    group.add_option("--language", metavar="CODE", dest="language", default="eng", help="Languge code to set for undefined")
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Flags")
@@ -161,7 +161,7 @@ def preform_operations(tag_manager, files, options):
     
     if options.pack != None:
         for f in files:
-            f.pack(options.pack, options.volume, options.profile, options.overwrite)
+            f.pack(options.pack, options.volume, options.profile, options.overwrite, options.language)
     
     if options.transcode != None:
         for f in files:

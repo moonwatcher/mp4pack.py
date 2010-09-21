@@ -269,7 +269,7 @@ class Container(object):
         return
     
     
-    def pack(self, kind, volume, profile, overwrite=False):
+    def pack(self, kind, volume, profile, overwrite=False, language=None):
         return
     
     
@@ -378,7 +378,7 @@ class AVContainer(Container):
             self.chapters.append(chapter)
     
     
-    def pack(self, kind, volume, profile, overwrite=False):
+    def pack(self, kind, volume, profile, overwrite=False, language=None):
         if kind == None or kind == 'mkv':
             selected_related = list()
             for k,v in self.related.iteritems():
@@ -407,9 +407,69 @@ class AVContainer(Container):
                         break
                 if match:
                     selected_tracks.append(v)
+            
+            
+            info = copy.deepcopy(self.file_info)
+            info['type'] = kind
+            info['volume'] = volume
+            if info['volume'] == None:
+                del info['volume']
+                
+            info['profile'] = profile
+            if info['profile'] == None:
+                del info['profile']
+            
+            dest_path = file_detail_detector.canonic_path(info, self.meta)
+            command = None
+            if file_detail_detector.check_path(dest_path, overwrite):
+                file_detail_detector.varify_directory(dest_path)
+                self.logger.info('Pack matroska file ' + dest_path)
+                
+                command = ["mkvmerge", '--output', dest_path, '--no-chapters', '--no-attachments', '--no-subtitles', self.file_path]
+                for t in selected_related:
+                    t_info = self.related[t]
+                    if t_info['type'] == 'srt':
+                        command.append('--sub-charset')
+                        command.append('0:UTF-8')
+                        command.append('--language')
+                        command.append('0:' + t_info['language'])
+                        command.append(t)
+                
+                audio_tracks = list()
+                video_tracks = list()
+                for t in selected_tracks:
+                    if 'name' in t:
+                        command.append('--track-name')
+                        command.append(t['number'] + ':' + t['name'])
+                    if 'language' in t:
+                        command.append('--language')
+                        command.append(t['number'] + ':' + t['language'])
+                    if t['type'] == 'audio':
+                        audio_tracks.append(t['number'])
+                        
+                    elif t['type'] == 'video':
+                        video_tracks.append(t['number'])
                     
-            self.logger.debug('related files chosen: ' + selected_related.__str__())
-            self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
+                command.append('--audio-tracks')
+                command.append(','.join(audio_tracks))
+                command.append('--video-tracks')
+                command.append(','.join(video_tracks))
+                
+                #self.logger.debug('related files chosen: ' + selected_related.__str__())
+                #self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
+                self.logger.debug('Command: ' + command.__str__())
+                
+                from subprocess import Popen, PIPE
+                proc = Popen(command, stdout=PIPE)
+                report = proc.communicate()
+                
+                if report[1] != None and len(report[1]) > 0:
+                    self.logger.error(report[1])
+                if report[0] != None and len(report[0]) > 0:
+                    self.logger.info(report[0])
+                    
+                if not os.path.exists(dest_path):
+                    file_detail_detector.clean(dest_path)
         return
     
     
