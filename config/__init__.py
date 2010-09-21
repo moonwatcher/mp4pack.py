@@ -30,10 +30,10 @@ repository_config['Kind']['m4v']['Profile'] = {}
 repository_config['Kind']['m4v']['Profile']['universal'] = {
     'description': 'an SD profile that decodes on every cabac capable apple device',
     'handbrake':{
-        'crf':18
-        'cabac':True
-        'max_width':720
-        'x264':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=%(cabac)s'
+        'crf':18,
+        'cabac':True,
+        'max_width':720,
+        'x264':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=%(cabac)s',
         'extra':'--large-file'
     },
     'related':(
@@ -44,16 +44,16 @@ repository_config['Kind']['m4v']['Profile']['universal'] = {
         {'type':'video'},
         {'type':'audio', 'codec_kind':'AC3'},
         {'type':'audio', 'codec_kind':'MP3'},
-        {'type':'audio', 'codec_kind':'AAC'},
+        {'type':'audio', 'codec_kind':'AAC'}
     )
 }
 repository_config['Kind']['m4v']['Profile']['appletv'] = {
     'description': 'AppleTV Intel based',
     'handbrake':{
-        'crf':22
-        'cabac':True
-        'max_width':1280
-        'x264':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=%(cabac)s'
+        'crf':22,
+        'cabac':True,
+        'max_width':1280,
+        'x264':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=%(cabac)s',
         'extra':'--large-file'
     },
     'related':(
@@ -64,16 +64,16 @@ repository_config['Kind']['m4v']['Profile']['appletv'] = {
         {'type':'video'},
         {'type':'audio', 'codec_kind':'AC3'},
         {'type':'audio', 'codec_kind':'MP3'},
-        {'type':'audio', 'codec_kind':'AAC'},
+        {'type':'audio', 'codec_kind':'AAC'}
     )
 }
 repository_config['Kind']['m4v']['Profile']['ipod'] = {
     'description': 'All iPod touch models profile',
     'handbrake':{
-        'crf':21
-        'cabac':True
-        'max_width':480
-        'x264':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=%(cabac)s'
+        'crf':21,
+        'cabac':True,
+        'max_width':480,
+        'x264':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=%(cabac)s',
         'extra':None
     },
     'related':(
@@ -84,16 +84,16 @@ repository_config['Kind']['m4v']['Profile']['ipod'] = {
         {'type':'video'},
         {'type':'audio', 'codec_kind':'AC3'},
         {'type':'audio', 'codec_kind':'MP3'},
-        {'type':'audio', 'codec_kind':'AAC'},
+        {'type':'audio', 'codec_kind':'AAC'}
     )
 }
 repository_config['Kind']['m4v']['Profile']['high'] = {
     'description': 'High profile',
     'handbrake':{
-        'crf':18
-        'cabac':True
-        'max_width':1280
-        'x264':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=%(cabac)s'
+        'crf':18,
+        'cabac':True,
+        'max_width':1280,
+        'x264':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=%(cabac)s',
         'extra':'--large-file'
     },
     'related':(
@@ -104,7 +104,7 @@ repository_config['Kind']['m4v']['Profile']['high'] = {
         {'type':'video'},
         {'type':'audio', 'codec_kind':'AC3'},
         {'type':'audio', 'codec_kind':'MP3'},
-        {'type':'audio', 'codec_kind':'AAC'},
+        {'type':'audio', 'codec_kind':'AAC'}
     )
 }
 
