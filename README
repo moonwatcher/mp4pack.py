@@ -1,0 +1,55 @@
+mp4pack.py a media collection manager
+Lior Galanti lior.galanti@gmail.com
+
+Usage: mp4pack.py [options] [file or directory. default: . ]
+
+Options:
+  -h, --help            show this help message and exit
+
+  Operations:
+    You must specify at least one operation
+
+    -i, --info          Show info
+    -c, --copy          Copy into repository
+    -n, --rename        Rename files to standard names
+    --tag               Update meta tags
+    --art               Update embedded artwork
+    --optimize          Optimize file layout
+    -m KIND, --pack=KIND
+                        Package to ['mkv']
+    -t KIND, --transcode=KIND
+                        Transcode to ['m4v', 'mkv', 'srt']
+    -e KIND, --extract=KIND
+                        Extract to ['srt', 'ass', 'txt']
+    -u KIND, --update=KIND
+                        Update to ['srt']
+
+  Modifiers:
+    -o VOLUME, --volume=VOLUME
+                        Output volume [default: auto detect]
+    -p PROFILE, --profile=PROFILE
+                        [default: none]
+    -f REGEX, --filter=REGEX
+                        Regex to filter selected file names
+    -q QUANTIZER, --quality=QUANTIZER
+                        H.264 transcoding Quantizer
+    -v LEVEL, --verbosity=LEVEL
+                        Logging verbosity level [default: debug]
+    --media-kind=MEDIA_KIND
+                        [default: auto detect]
+    --pixel-width=WIDTH
+                        Max output pixel width [default: profile dependent]
+    --language=CODE     Languge code used when undefined
+    --md5               Varify md5 checksum on copy
+
+  Flags:
+    -d, --debug         Only print commands without executing
+    -w, --overwrite     Overwrite existing files
+    -r, --recursive     Recursivly process sub directories
+
+  Service:
+    service routines
+
+    --initialize        Initialize the system
+    --map-show=MAP_SHOW
+                        Map a TV Show TVDB ID to a name
