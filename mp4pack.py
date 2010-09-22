@@ -71,11 +71,11 @@ def load_options():
     group.add_option("-n", "--rename", dest="rename", action="store_true", default=False, help="Rename files to standard names")
     group.add_option("--tag", dest="tag", action="store_true", default=False, help="Update meta tags")
     group.add_option("--art", dest="art", action="store_true", default=False, help="Update embedded artwork")
-    group.add_option("--optimize", dest="optimize", action="store_true", default=False, help="Optimize files")
+    group.add_option("--optimize", dest="optimize", action="store_true", default=False, help="Optimize file layout")
     
     pack_choices = ['mkv']
     transcode_choices = ['m4v', 'mkv', 'srt']
-    extract_choices = ['srt', 'ass']
+    extract_choices = ['srt', 'ass', 'txt']
     update_choices = ['srt']
     
     group.add_option("-m", "--pack", metavar="KIND", dest="pack", type="choice", choices=pack_choices, help="Package to " + pack_choices.__str__())
@@ -86,21 +86,21 @@ def load_options():
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Modifiers")
-    group.add_option("-o", "--volume", dest="volume", type="choice", choices=repository_config['Volume'].keys(), default=None, help="Output volume [default: %default]")
+    group.add_option("-o", "--volume", dest="volume", type="choice", choices=repository_config['Volume'].keys(), default=None, help="Output volume [default: auto detect]")
     group.add_option("-p", "--profile", dest="profile", type="choice", choices=available_profiles, default=None, help="[default: %default]")
-    group.add_option("-f", "--filter", metavar="REGEX", dest="file_filter", default=None, help="Regex to filter input file names through")
-    group.add_option("-q", "--quality", metavar="QUANTIZER", dest="quality", help="Quantizer for H.264 transcoding [default: %default]")
-    group.add_option("-v", "--verbosity", metavar="LEVEL", dest="verbosity", default='info', type="choice", choices=log_levels.keys(), help="Logging verbosity level [default: %default]")
-    group.add_option("--media-kind", dest="media_kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: %default]")
-    group.add_option("--pixel-width", metavar="WIDTH", dest="pixel_width", help="Max output pixel width [default: set by profile]")
-    group.add_option("--language", metavar="CODE", dest="language", default="eng", help="Languge code to set for undefined")
+    group.add_option("-f", "--filter", metavar="REGEX", dest="file_filter", default=None, help="Regex to filter selected file names")
+    group.add_option("-q", "--quality", metavar="QUANTIZER", dest="quality", help="H.264 transcoding Quantizer")
+    group.add_option("-v", "--verbosity", metavar="LEVEL", dest="verbosity", default='debug', type="choice", choices=log_levels.keys(), help="Logging verbosity level [default: %default]")
+    group.add_option("--media-kind", dest="media_kind", type="choice", choices=repository_config['Media Kind'].keys(), help="[default: auto detect]")
+    group.add_option("--pixel-width", metavar="WIDTH", dest="pixel_width", help="Max output pixel width [default: profile dependent]")
+    group.add_option("--language", metavar="CODE", dest="language", default="eng", help="Languge code used when undefined")
+    group.add_option("--md5", dest="md5", action="store_true", default=False, help="Varify md5 checksum on copy")
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Flags")
     group.add_option("-d", "--debug", dest="debug", action="store_true", default=False, help="Only print commands without executing")
-    group.add_option("-w", "--overwrite", dest="overwrite", action="store_true", default=False, help="Allow overwriting existing files")
+    group.add_option("-w", "--overwrite", dest="overwrite", action="store_true", default=False, help="Overwrite existing files")
     group.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Recursivly process sub directories")
-    group.add_option("-5", "--md5", dest="md5", action="store_true", default=False, help="Varify md5 checksum on copy")
     parser.add_option_group(group)
     
     group = OptionGroup(parser, "Service", "service routines")
@@ -112,19 +112,19 @@ def load_options():
 #    	transcode srt: encode a new subtitle file @ profile
         
 #    Matroska:
-#    	pack mkv: mux to matroska @ profile
+##    	pack mkv: mux to matroska @ profile
 #    	transcode m4v: transcode to m4v @ profile
 #    	transcode mkv: transcode to mkv @ profile
-#    	transcode srt: extract all subtitles to 'original' profile and than transcode subtitle to srt @ profile
-#    	extract srt: extract subtitles to profile
-#    	extract ass: extract subtitles to profile
-#    	extract chap: extract chapters
+##    	transcode srt: extract all subtitles to 'original' profile and than transcode subtitle to srt @ profile
+##    	extract srt: extract subtitles to profile
+##    	extract ass: extract subtitles to profile
+##    	extract txt: extract chapters
         
 #    Mpeg4:
-#    	pack mkv: mux to matroska @ profile
+##    	pack mkv: mux to matroska @ profile
 #    	transcode m4v: transcode to m4v @ profile
 #    	transcode mkv: transcode to mkv @ profile
-#    	extract chap: extract chapters
+##    	extract txt: extract chapters
 #    	update srt: remux subtitles @ profile
 #    	update art: update artwork
 #    	update chap: update chapters
@@ -186,7 +186,6 @@ def main():
     options, args = load_options()
     logging.basicConfig(level=log_levels[options.verbosity])
     logger = logging.getLogger('mp4pack')
-    logger.info('open log')
     input_path = '.'
     
     if len(args) > 0:
@@ -204,8 +203,6 @@ def main():
     logger.debug('Positional arguments: ' + args.__str__())
     for k, v in options.__dict__.iteritems():
         logger.debug('Property {0}: {1}'.format(k, v))
-    
-    logger.info('close log')
 
 
 

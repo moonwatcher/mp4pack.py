@@ -13,11 +13,11 @@ def load_media_file(file_path):
     f = None
     file_type = os.path.splitext(file_path)[1].strip('.')
     
-    if file_type in file_detail_detector.mp4_kinds:
+    if file_type in file_util.mp4_kinds:
         f = Mpeg4(file_path)
-    elif file_type in file_detail_detector.matroska_kinds:
+    elif file_type in file_util.matroska_kinds:
         f = Matroska(file_path)
-    elif file_type in file_detail_detector.subtitles_kinds:
+    elif file_type in file_util.subtitles_kinds:
         f = Subtitle(file_path)
     
     return f
@@ -37,8 +37,8 @@ class Container(object):
         if os.path.isfile(file_path):
             self.exists = True
             self.file_path = file_path
-            self.file_info = file_detail_detector.detect(self.file_path)
-            self.related = file_detail_detector.related(self.file_path)
+            self.file_info = file_util.parse_info(self.file_path)
+            self.related = file_util.related(self.file_path)
             if self.load_meta():
                 self.logger.debug('Meta loaded for ' + self.file_path)
             else:
@@ -188,36 +188,16 @@ class Container(object):
     
     
     def copy(self, volume, profile, overwrite=False, md5=False):
-        info = copy.deepcopy(self.file_info)
+        info = file_util.copy_file_info(self.file_info, volume, profile)
         
-        info['volume'] = volume
-        if info['volume'] == None:
-            del info['volume']
-        
-        info['profile'] = profile
-        if info['profile'] == None:
-            del info['profile']
-        
-        dest_path = file_detail_detector.canonic_path(info, self.meta)
-        if file_detail_detector.check_path(dest_path, overwrite):
-            dirname = os.path.dirname(dest_path)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            
-            self.logger.info('Copy ' + self.file_path + ' --> ' + dest_path)
-            from subprocess import Popen, PIPE
-            proc = Popen(["rsync", self.file_path, dest_path], stdout=PIPE)
-            report = proc.communicate()
-            
-            if report[1] != None and len(report[1]) > 0:
-                self.logger.error(report[1])
-            if report[0] != None and len(report[0]) > 0:
-                self.logger.info(report[0])
-            
-            if not os.path.exists(dest_path):
-                file_detail_detector.clean(dest_path)
+        dest_path = file_util.canonic_path(info, self.meta)
+        if file_util.check_and_varify(dest_path, overwrite):
+            command = ["rsync", self.file_path, dest_path]
+            message = 'Copy ' + self.file_path + ' --> ' + dest_path
+            file_util.execute_command(command, message)
+            file_util.clean_if_not_exist(dest_path)
             if md5:
-                self.check(dest_path)
+                self.compare_checksum(dest_path)
         
     
     
@@ -226,25 +206,14 @@ class Container(object):
         if self.file_path == dest_path:
             self.logger.debug('No renaming needed for ' + dest_path)
         else:
-            if os.path.exists(dest_path):
-                self.logger.warning('Not renaming, destination exists ' + dest_path)
+            if file_util.check_path(dest_path, False):
+                file_util.varify_directory(dest_path)
+                command = ['mv', self.file_path, dest_path]
+                message = 'Rename ' + self.file_path + ' --> ' + dest_path
+                file_util.execute_command(command, message)
+                file_util.clean_if_not_exist(dest_path)
             else:
-                dirname = os.path.dirname(dest_path)
-                if not os.path.exists(dirname):
-                    os.makedirs(dirname)
-                    
-                self.logger.info('Moving ' + self.file_path + ' --> ' + dest_path)
-                from subprocess import Popen, PIPE
-                proc = Popen(['mv', self.file_path, dest_path], stdout=PIPE)
-                report = proc.communicate()
-                
-                if report[1] != None and len(report[1]) > 0:
-                    self.logger.error(report[1])
-                if report[0] != None and len(report[0]) > 0:
-                    self.logger.info(report[0])
-                    
-                if not os.path.exists(dest_path):
-                    file_detail_detector.clean(dest_path)
+                self.logger.warning('Not renaming, destination exists ' + dest_path)
     
     
     def tag(self):
@@ -278,8 +247,21 @@ class Container(object):
     
     
     
+    def write_text_file(self, line_buffer, output_file=None):
+        try:
+            if len(line_buffer) > 0:
+                writer = open(output_file, 'w')
+                for line in line_buffer:
+                    if line == '\n':
+                        writer.write(line)
+                    else:
+                        writer.write(str(line) + '\n')
+                writer.close
+        except IOError as error:
+            self.logger.error(error.__str__())
     
-    def check(self, path):
+    
+    def compare_checksum(self, path):
         result = False
         if os.path.exists(self.file_path) and os.path.exists(path):
             source_md5 = hashlib.md5(file(self.file_path).read()).hexdigest()
@@ -301,15 +283,15 @@ class Container(object):
     
     
     def easy_name(self):
-        return file_detail_detector.easy_name(self.file_info, self.meta)
+        return file_util.easy_name(self.file_info, self.meta)
     
     
     def canonic_name(self):
-        return file_detail_detector.canonic_name(self.file_info, self.meta)
+        return file_util.canonic_name(self.file_info, self.meta)
     
     
     def canonic_path(self):
-        return file_detail_detector.canonic_path(self.file_info, self.meta)
+        return file_util.canonic_path(self.file_info, self.meta)
     
     
     def print_meta(self):
@@ -336,13 +318,13 @@ class Container(object):
     def __str__(self):
         result = None
         if self.exists:
-            result = '\n' + self.file_path
-            if self.file_info != None and len(self.file_info) > 0:
-                result = '\n'.join((result, '\n# Parsed from path: ', self.print_file_info()))
-            if self.meta != None and len(self.meta) > 0:
-                result = '\n'.join((result, '\n# Meta: ', self.print_meta()))
+            result = '\n\nListing file information for ' + self.file_path
             if self.related != None and len(self.related) > 0:
-                result = '\n'.join((result, '\n# Related: ', self.print_related()))
+                result = '\n'.join((result, '\n# Related file in repository: ', self.print_related()))
+            if self.file_info != None and len(self.file_info) > 0:
+                result = '\n'.join((result, '\n# Detected from file path: ', self.print_file_info()))
+            if self.meta != None and len(self.meta) > 0:
+                result = '\n'.join((result, '\n# Metadata from database: ', self.print_meta()))
         else:
             result = '\nfile does not exist'
         return result
@@ -368,7 +350,7 @@ class AVContainer(Container):
     def add_track(self, track):
         if track != None:
             if 'type' in track and track['type'] == 'audio' and 'codec' in track:
-                track['codec_kind'] = file_detail_detector.detect_audio_codec_kind(track['codec'])
+                track['codec_kind'] = file_util.detect_audio_codec_kind(track['codec'])
             
             self.tracks.append(track)
     
@@ -378,98 +360,83 @@ class AVContainer(Container):
             self.chapters.append(chapter)
     
     
+    
+    def extract(self, kind, volume, profile, overwrite=False):
+        Container.extract(self, kind, volume, profile, overwrite=False)
+        if kind == None or kind == 'txt':
+            if len(self.chapters) > 0:
+                info = file_util.copy_file_info(self.file_info, volume, profile)
+                info['type'] = kind
+                dest_path = file_util.canonic_path(info, self.meta)
+                
+                chapter_line_buffer = []
+                index = 1
+                for chapter in self.chapters:
+                    chapter.encode(chapter_line_buffer, index)
+                    index += 1
+                
+                if file_util.check_and_varify(dest_path, overwrite):
+                    self.logger.debug('Extracting chapters from ' + self.file_path + ' into ' + dest_path)
+                    self.write_text_file(chapter_line_buffer, dest_path)
+                    file_util.clean_if_not_exist(dest_path)
+                
+        return
+    
+    
     def pack(self, kind, volume, profile, overwrite=False, language=None):
+        info = file_util.copy_file_info(self.file_info, volume, profile)
         if kind == None or kind == 'mkv':
-            selected_related = list()
-            for k,v in self.related.iteritems():
-                match = False
-                for r in repository_config['Kind']['mkv']['Profile'][profile]['related']:
-                    fit_all = True
-                    for x in r.keys():
-                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
-                        if not fit_all: break
-                    if fit_all: 
-                        match = True
-                        break
-                if match:
-                    selected_related.append(k)
-                    
-            selected_tracks = list()
-            for v in self.tracks:
-                match = False
-                for r in repository_config['Kind']['mkv']['Profile'][profile]['tracks']:
-                    fit_all = True
-                    for x in r.keys():
-                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
-                        if not fit_all: break
-                    if fit_all: 
-                        match = True
-                        break
-                if match:
-                    selected_tracks.append(v)
-            
-            
-            info = copy.deepcopy(self.file_info)
-            info['type'] = kind
-            info['volume'] = volume
-            if info['volume'] == None:
-                del info['volume']
-                
-            info['profile'] = profile
-            if info['profile'] == None:
-                del info['profile']
-            
-            dest_path = file_detail_detector.canonic_path(info, self.meta)
-            command = None
-            if file_detail_detector.check_path(dest_path, overwrite):
-                file_detail_detector.varify_directory(dest_path)
-                self.logger.info('Pack matroska file ' + dest_path)
-                
-                command = ["mkvmerge", '--output', dest_path, '--no-chapters', '--no-attachments', '--no-subtitles', self.file_path]
-                for t in selected_related:
-                    t_info = self.related[t]
-                    if t_info['type'] == 'srt':
-                        command.append('--sub-charset')
-                        command.append('0:UTF-8')
-                        command.append('--language')
-                        command.append('0:' + t_info['language'])
-                        command.append(t)
-                
-                audio_tracks = list()
-                video_tracks = list()
-                for t in selected_tracks:
-                    if 'name' in t:
-                        command.append('--track-name')
-                        command.append(t['number'] + ':' + t['name'])
-                    if 'language' in t:
-                        command.append('--language')
-                        command.append(t['number'] + ':' + t['language'])
-                    if t['type'] == 'audio':
-                        audio_tracks.append(t['number'])
+            info['type'] = 'mkv'
+            dest_path = file_util.canonic_path(info, self.meta)
+            if dest_path != None:
+                selected_related = file_util.filter_related_by_profile(self.related, info['profile'])
+                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'])
+                command = None
+                if file_util.check_and_varify(dest_path, overwrite):
+                    command = ["mkvmerge", '--output', dest_path, '--no-chapters', '--no-attachments', '--no-subtitles', self.file_path]
+                    for t in selected_related:
+                        t_info = self.related[t]
+                        if t_info['type'] == 'srt':
+                            command.append('--sub-charset')
+                            command.append('0:UTF-8')
+                            command.append('--language')
+                            command.append('0:' + t_info['language'])
+                            command.append(t)
+                        if t_info['type'] == 'txt' and t_info['profile'] == 'chapter':
+                            command.append('--chapter-language')
+                            command.append('eng')
+                            command.append('--chapter-charset')
+                            command.append('UTF-8')
+                            command.append('--chapters')
+                            command.append(t)
+                            
+                    audio_tracks = list()
+                    video_tracks = list()
+                    for t in selected_tracks:
+                        if 'name' in t:
+                            command.append('--track-name')
+                            command.append(t['number'] + ':' + t['name'])
+                        if 'language' in t:
+                            command.append('--language')
+                            command.append(t['number'] + ':' + t['language'])
+                        if t['type'] == 'audio':
+                            audio_tracks.append(t['number'])
                         
-                    elif t['type'] == 'video':
-                        video_tracks.append(t['number'])
+                        elif t['type'] == 'video':
+                            video_tracks.append(t['number'])
                     
-                command.append('--audio-tracks')
-                command.append(','.join(audio_tracks))
-                command.append('--video-tracks')
-                command.append(','.join(video_tracks))
-                
-                #self.logger.debug('related files chosen: ' + selected_related.__str__())
-                #self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
-                self.logger.debug('Command: ' + command.__str__())
-                
-                from subprocess import Popen, PIPE
-                proc = Popen(command, stdout=PIPE)
-                report = proc.communicate()
-                
-                if report[1] != None and len(report[1]) > 0:
-                    self.logger.error(report[1])
-                if report[0] != None and len(report[0]) > 0:
-                    self.logger.info(report[0])
+                    command.append('--audio-tracks')
+                    command.append(','.join(audio_tracks))
+                    command.append('--video-tracks')
+                    command.append(','.join(video_tracks))
                     
-                if not os.path.exists(dest_path):
-                    file_detail_detector.clean(dest_path)
+                    #self.logger.debug('related files chosen: ' + selected_related.__str__())
+                    #self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
+                    
+                    message = 'Pack matroska file ' + dest_path
+                    file_util.execute_command(command, message)
+                    file_util.clean_if_not_exist(dest_path)
+                    
         return
     
     
@@ -490,11 +457,11 @@ class AVContainer(Container):
         result = Container.__str__(self)
         if self.exists:
             if len(self.tracks) > 0:
-                result = '\n'.join((result, '\n# Tracks: ', self.print_tracks()))
+                result = '\n'.join((result, '\n# Tracks in file: ', self.print_tracks()))
             if len(self.tags) > 0:
-                result = '\n'.join((result, '\n# Tags: ', self.print_tags()))
+                result = '\n'.join((result, '\n# Tags in file: ', self.print_tags()))
             if len(self.chapters) > 0:
-                result = '\n'.join((result, '\n# Chapter: ', self.print_chapters()))
+                result = '\n'.join((result, '\n# Chapter markers in file: ', self.print_chapters()))
         
         return result
     
@@ -527,6 +494,13 @@ class Chapter(object):
             self.language = language
         else:
             self.language = None
+    
+    
+    def encode(self, line_buffer, index):
+        start_time_string = miliseconds_to_time(self.start_time, '.')
+        chapter_marker = 'CHAPTER' + str(index).zfill(2)
+        line_buffer.append(chapter_marker + '=' + start_time_string)
+        line_buffer.append(chapter_marker + 'NAME=' + self.name)
     
     
     def __str__(self):
@@ -629,9 +603,9 @@ class Matroska(AVContainer):
     
     def load(self):
         AVContainer.load(self)
-        from subprocess import Popen, PIPE
-        mkvinfo_proc = Popen(["mkvinfo", self.file_path], stdout=PIPE)
-        mkvinfo_report = mkvinfo_proc.communicate()[0].split('\n')        
+        command = ["mkvinfo", self.file_path]
+        output, error = file_util.execute_command(command, None)
+        mkvinfo_report = output.split('\n')        
         length = int(len(mkvinfo_report))
         index = 0
         in_mkvinfo_output = False
@@ -670,50 +644,31 @@ class Matroska(AVContainer):
     
     def extract(self, kind, volume, profile, overwrite=False):
         AVContainer.extract(self, kind, volume, profile, overwrite=False)
-        command = ['mkvextract', 'tracks', self.file_path ]
         new_media_files = []
         
-        info = copy.deepcopy(self.file_info)
-        
-        info['volume'] = volume
-        if info['volume'] == None:
-            del info['volume']
-        
-        info['profile'] = profile
-        if info['profile'] == None:
-            del info['profile']
-        
-        for t in self.tracks:
-            if t['type'] == 'subtitles' and t['language'] in repository_config['Language']:
-                for subtitle_type in file_detail_detector.subtitles_kinds:
-                    if t['codec'] == repository_config['Kind'][subtitle_type]['codec']:
-                        info['type'] = subtitle_type
-                        if kind == None or (info['type'] == kind):
-                            info['language'] = t['language']
-                            dest_path = file_detail_detector.canonic_path(info, self.meta)
-                            if file_detail_detector.check_path(dest_path, overwrite):
-                                new_media_files.append(dest_path)
-                                command.append(str(t['number']) + ':' + dest_path)
-                        
-        #self.logger.debug(command.__str__())
-        if len(new_media_files) > 0:
+        if kind == None or kind in file_util.subtitles_kinds:
+            command = ['mkvextract', 'tracks', self.file_path ]
+            info = file_util.copy_file_info(self.file_info, volume, profile)
+            #selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'])
             
-            self.logger.info('Extracting tracks from ' + self.file_path)
+            for t in self.tracks:
+                if t['type'] == 'subtitles' and t['language'] in repository_config['Language']:
+                    for subtitle_type in file_util.subtitles_kinds:
+                        if t['codec'] == repository_config['Kind'][subtitle_type]['codec']:
+                            info['type'] = subtitle_type
+                            if kind == None or (info['type'] == kind):
+                                info['language'] = t['language']
+                                dest_path = file_util.canonic_path(info, self.meta)
+                                if file_util.check_and_varify(dest_path, overwrite):
+                                    new_media_files.append(dest_path)
+                                    command.append(str(t['number']) + ':' + dest_path)
+            
+            if len(new_media_files) > 0:
+                message = 'Extract tracks from ' + self.file_path
+                file_util.execute_command(command, message)
+                
             for f in new_media_files:
-                file_detail_detector.varify_directory(f)
-            
-            from subprocess import Popen, PIPE
-            proc = Popen(command, stdout=PIPE)
-            report = proc.communicate()
-            
-            if report[1] != None and len(report[1]) > 0:
-                self.logger.error(report[1])
-            if report[0] != None and len(report[0]) > 0:
-                self.logger.info(report[0])
-        
-        for f in new_media_files:
-            if not os.path.exists(f):
-                file_detail_detector.clean(f)
+                file_util.clean_if_not_exist(f)
         
         return new_media_files
     
@@ -842,19 +797,19 @@ class Mpeg4(AVContainer):
     
     def tag(self):
         AVContainer.tag(self)
-        tag_command = self.encode_subler_tag_command()
-        if tag_command != None:
-            self.logger.debug('Tag ' + self.file_path + ' : ' + tag_command)
-            from subprocess import Popen, PIPE
-            proc = Popen(['SublerCLI', '-i ', self.file_path, '-t', tag_command], stdout=PIPE)
-            report = proc.communicate()
-            
-            if report[1] != None and len(report[1]) > 0:
-                self.logger.error(report[1])
-            if report[0] != None and len(report[0]) > 0:
-                self.logger.info(report[0])
+        command = self.encode_subler_tag_command()
+        if command != None:
+            message = 'Tag ' + self.file_path
+            file_util.execute_command(command, message)
         else:
-            self.logger.info('no tags to update on ' + self.file_path)
+            self.logger.info('No tags need update on ' + self.file_path)
+    
+    
+    def optimize(self):
+        AVContainer.optimize(self)
+        command = ['mp4file', '--optimize', self.file_path]
+        message = 'Optimize ' + self.file_path
+        file_util.execute_command(command, message)
     
     
     def encode_subler_tag_command(self):
@@ -1001,32 +956,20 @@ class Subtitle(Container):
     
     def transcode(self, kind, volume, profile, overwrite=False):
         Container.transcode(self, volume, profile, overwrite)
-        info = copy.deepcopy(self.file_info)
-        
-        info['volume'] = volume
-        if info['volume'] == None:
-            del info['volume']
-        
-        info['profile'] = profile
-        if info['profile'] == None:
-            del info['profile']
-            
+        info = file_util.copy_file_info(self.file_info, volume, profile)
         info['type'] = 'srt'
-        dest_path = file_detail_detector.canonic_path(info, self.meta)
+        dest_path = file_util.canonic_path(info, self.meta)
         
-        if file_detail_detector.check_path(dest_path, overwrite):
-            file_detail_detector.varify_directory(dest_path)
-            
+        if file_util.check_and_varify(dest_path, overwrite):
             self.logger.info('Transcode ' + dest_path + ' from ' + self.file_path)
             self.write(dest_path)
-            
-            if not os.path.exists(dest_path):
-                file_detail_detector.clean(dest_path)
+            file_util.clean_if_not_exist(dest_path)
     
     
     def write(self, output_file=None):
-        file_lines = self.encode()
-        self.write_subtitle_file(output_file)
+        lines = self.encode()
+        if len(lines) > 0:
+            self.write_text_file(lines, output_file)
     
     
     def read_subtitle_file(self):
@@ -1045,20 +988,6 @@ class Subtitle(Container):
             file_lines = None
         
         return file_lines
-    
-    
-    def write_subtitle_file(self, output_file=None):
-        try:
-            writer = open(output_file, 'w')
-            line_buffer = self.encode()
-            for line in line_buffer:
-                if line == '\n':
-                    writer.write(line)
-                else:
-                    writer.write(str(line) + '\n')
-            writer.close
-        except IOError as error:
-            self.logger.error(error.__str__())
     
     
     def encode(self):
@@ -1283,12 +1212,13 @@ class SubtitleLineFilter(object):
 
 subtitle_line_filter = SubtitleLineFilter()
 
-class FileDetailDetector(object):
+class FileUtil(object):
     def __init__(self):
-        self.logger = logging.getLogger('mp4pack.container.detector')
+        self.logger = logging.getLogger('mp4pack.container.resolver')
         self.matroska_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'matroska' ]
         self.mp4_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'mp4' ]
         self.subtitles_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'subtitles' ]
+        self.chapter_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'chapters' ]
         
         self.audio_codec_kind = {}
         for k,v in repository_config['Codec']['Audio'].iteritems():
@@ -1299,7 +1229,7 @@ class FileDetailDetector(object):
             self.file_name_schema_re[media_kind] = re.compile(repository_config['Media Kind'][media_kind]['schema'])
     
     
-    def detect(self, file_path):
+    def parse_info(self, file_path):
         # <Volume>/<Media Kind>/<Kind>/<Profile>(/<Show>/<Season>)?/(IMDb<IMDB ID> <Name>|<Show> <Code> <Name>).<Extension>
         media_kind = None
         info = None
@@ -1327,19 +1257,18 @@ class FileDetailDetector(object):
                     info['Name'] = match.group(5)
                     info['type'] = match.group(6)
             
-            if info['type'] in repository_config['Kind']:
-                if 'volume' in repository_config['Kind'][info['type']]['default']:
-                    info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
+            #if info['type'] in repository_config['Kind']:
+            #    if 'volume' in repository_config['Kind'][info['type']]['default']:
+            #        info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
                     
-                if 'profile' in repository_config['Kind'][info['type']]['default']:
-                    info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
+            #    if 'profile' in repository_config['Kind'][info['type']]['default']:
+            #        info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
             
             if info['Name'] == None or info['Name'] == '':
                 del info['Name']
                 
             prefix = os.path.dirname(file_path)
             if info['type'] in self.subtitles_kinds:
-                info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
                 prefix, lang = os.path.split(prefix)
                 if lang in repository_config['Language']:
                     info['language'] = lang
@@ -1392,16 +1321,27 @@ class FileDetailDetector(object):
             if not 'profile' in info and 'profile' in repository_config['Kind'][info['type']]['default']:
                 info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
                 
-            if 'volume' in info and info['volume'] in repository_config['Volume'] and 'profile' in info and info['profile'] in repository_config['Kind'][info['type']]['Profile']:
-                result = os.path.join(repository_config['Volume'][info['volume']], info['media_kind'], info['type'], info['profile'])
+            if 'volume' in info and info['volume'] in repository_config['Volume']:
+                if 'profile' in info and info['profile'] in repository_config['Kind'][info['type']]['Profile']:
+                    result = os.path.join(repository_config['Volume'][info['volume']], info['media_kind'], info['type'], info['profile'])
                 
-                if info['media_kind'] == 'tvshow' and 'show_small_name' in info and 'season_number' in info:
-                    result = os.path.join(result, info['show_small_name'], str(info['season_number']))
+                    if info['media_kind'] == 'tvshow' and 'show_small_name' in info and 'season_number' in info:
+                        result = os.path.join(result, info['show_small_name'], str(info['season_number']))
                 
-                if info['type'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
-                        result = os.path.join(result, info['language'])
+                    if info['type'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
+                            result = os.path.join(result, info['language'])
+                else:
+                    valid = False
+                    if 'profile' in info:
+                        self.logger.warning('Invalid profile: ' + info['profile']  + ' for ' + info.__str__())
+                    else:
+                        self.logger.warning('Unknow profile for ' + info.__str__())
             else:
                 valid = False
+                if 'volume' in info:
+                    self.logger.warning('Invalid volume: ' + info['volume']  + ' for ' + info.__str__())
+                else:
+                    self.logger.warning('Unknow volume for ' + info.__str__())
         else:
             valid = False
         
@@ -1411,6 +1351,14 @@ class FileDetailDetector(object):
         else:
             result = None
         return result
+    
+    
+    def clean_if_not_exist(self, path):
+        if not os.path.exists(path):
+            try:
+                os.removedirs(os.path.dirname(path))
+            except OSError:
+                pass
     
     
     def clean(self, path):
@@ -1424,7 +1372,7 @@ class FileDetailDetector(object):
     def related(self, path):
         # <Volume>/<Media Kind>/<Kind>/<Profile>(/<Show>/<Season>)?/(IMDb<IMDB ID> <Name>|<Show> <Code> <Name>).<Extension>
         related = dict()
-        info = self.detect(path)
+        info = self.parse_info(path)
         meta = {}
         for v in repository_config['Volume']:
             for k in self.subtitles_kinds:
@@ -1459,8 +1407,53 @@ class FileDetailDetector(object):
                     if os.path.exists(related_path):
                         related[related_path] = i
                         
+            for k in self.chapter_kinds:
+                for p in repository_config['Kind'][k]['Profile']:
+                    i = copy.deepcopy(info)
+                    i['volume'] = v
+                    i['type'] = k
+                    i['profile'] = p
+                    related_path = self.canonic_path(i, meta)
+                    if os.path.exists(related_path):
+                        related[related_path] = i
+                        
         return related
     
+    
+    def filter_related_by_profile(self, related, profile):
+        selected = list()
+        if profile != None and profile in repository_config['Kind']['mkv']['Profile'] and 'related' in repository_config['Kind']['mkv']['Profile'][profile]:
+            for k,v in related.iteritems():
+                match = False
+                for r in repository_config['Kind']['mkv']['Profile'][profile]['related']:
+                    fit_all = True
+                    for x in r.keys():
+                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
+                        if not fit_all: break
+                    if fit_all: 
+                        match = True
+                        break
+                if match:
+                    selected.append(k)
+        return selected
+    
+    
+    def filter_tracks_by_profile(self, tracks, profile):
+        selected = list()
+        for v in tracks:
+            match = False
+            if profile != None and profile in repository_config['Kind']['mkv']['Profile'] and 'tracks' in repository_config['Kind']['mkv']['Profile'][profile]:
+                for r in repository_config['Kind']['mkv']['Profile'][profile]['tracks']:
+                    fit_all = True
+                    for x in r.keys():
+                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
+                        if not fit_all: break
+                    if fit_all: 
+                        match = True
+                        break
+                if match:
+                    selected.append(v)
+        return selected
     
     
     def detect_audio_codec_kind(self, codec):
@@ -1473,23 +1466,81 @@ class FileDetailDetector(object):
     
     
     def varify_directory(self, path):
-        dirname = os.path.dirname(path)
-        if not os.path.exists(dirname):
-            self.logger.debug('Creating directory ' + dirname)
-            os.makedirs(dirname)
-        
-    
-    
-    def check_path(self, path, overwrite):
-        result = True
-        if os.path.exists(path) and not overwrite:
-            self.logger.warning('Refusing to overwrite ' + path)
+        result = False
+        try:
+            dirname = os.path.dirname(path)
+            if not os.path.exists(dirname):
+                self.logger.debug('Creating directory ' + dirname)
+                os.makedirs(dirname)
+                result = True
+        except OSError as error:
+            self.logger.error(error.__str__())
             result = False
         return result
     
     
+    def check_path(self, path, overwrite):
+        result = True
+        if path != None:
+            if os.path.exists(path) and not overwrite:
+                self.logger.warning('Refusing to overwrite ' + path)
+                result = False
+        else:
+            result = False
+        
+        return result
+    
+    
+    def check_and_varify(self, path, overwrite):
+        result = self.check_path(path, overwrite)
+        if result:
+            self.varify_directory(path)
+        return result
+    
+    
+    def execute_command(self, command, message= None, debug=False):
+        output = None
+        error = None
+        
+        if not debug:
+            if command != None:
+                self.logger.debug('Executing command:' + command.__str__())
+                if message != None:
+                    self.logger.info(message)
+                from subprocess import Popen, PIPE
+                proc = Popen(command, stdout=PIPE)
+                report = proc.communicate()
+                
+                output = report[0]
+                error = report[1]
+                
+                if error != None and len(error) > 0:
+                    self.logger.error(error)
+                if output != None and len(output) > 0:
+                    self.logger.debug(output)
+                    result = True
+        else:
+            self.logger.info('Command: ' + command.__str__())
+        return output, error
+    
+    
+    def copy_file_info(self, info, volume, profile):
+        result = None
+        if info != None:
+            i = copy.deepcopy(info)
+        
+            i['volume'] = volume
+            if i['volume'] == None:
+                del i['volume']
+        
+            i['profile'] = profile
+            if i['profile'] == None:
+                del i['profile']
+        return i
+    
+    
 
-file_detail_detector = FileDetailDetector()
+file_util = FileUtil()
 
 def timecode_to_miliseconds(timecode):
     result = None

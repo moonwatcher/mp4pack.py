@@ -38,7 +38,8 @@ repository_config['Kind']['m4v']['Profile']['universal'] = {
     },
     'related':(
         {'type':'srt', 'profile':'clean', 'language':'heb'},
-        {'type':'srt', 'profile':'clean', 'language':'eng'}
+        {'type':'srt', 'profile':'clean', 'language':'eng'},
+        {'type':'txt', 'profile':'chapter'}
     ),
     'tracks':(
         {'type':'video'},
@@ -58,7 +59,8 @@ repository_config['Kind']['m4v']['Profile']['appletv'] = {
     },
     'related':(
         {'type':'srt', 'profile':'clean', 'language':'heb'},
-        {'type':'srt', 'profile':'clean', 'language':'eng'}
+        {'type':'srt', 'profile':'clean', 'language':'eng'},
+        {'type':'txt', 'profile':'chapter'}
     ),
     'tracks':(
         {'type':'video'},
@@ -78,7 +80,8 @@ repository_config['Kind']['m4v']['Profile']['ipod'] = {
     },
     'related':(
         {'type':'srt', 'profile':'clean', 'language':'heb'},
-        {'type':'srt', 'profile':'clean', 'language':'eng'}
+        {'type':'srt', 'profile':'clean', 'language':'eng'},
+        {'type':'txt', 'profile':'chapter'}
     ),
     'tracks':(
         {'type':'video'},
@@ -98,7 +101,8 @@ repository_config['Kind']['m4v']['Profile']['high'] = {
     },
     'related':(
         {'type':'srt', 'profile':'clean', 'language':'heb'},
-        {'type':'srt', 'profile':'clean', 'language':'eng'}
+        {'type':'srt', 'profile':'clean', 'language':'eng'},
+        {'type':'txt', 'profile':'chapter'}
     ),
     'tracks':(
         {'type':'video'},
@@ -124,7 +128,8 @@ repository_config['Kind']['mkv']['Profile'] = {}
 repository_config['Kind']['mkv']['Profile']['sd'] = {
     'related':(
         {'type':'srt', 'profile':'clean', 'language':'heb'},
-        {'type':'srt', 'profile':'clean', 'language':'eng'}
+        {'type':'srt', 'profile':'clean', 'language':'eng'},
+        {'type':'txt', 'profile':'chapter'}
     ),
     'tracks':(
         {'type':'video'},
@@ -137,7 +142,8 @@ repository_config['Kind']['mkv']['Profile']['sd'] = {
 repository_config['Kind']['mkv']['Profile']['720'] = {
     'related':(
         {'type':'srt', 'profile':'clean', 'language':'heb'},
-        {'type':'srt', 'profile':'clean', 'language':'eng'}
+        {'type':'srt', 'profile':'clean', 'language':'eng'},
+        {'type':'txt', 'profile':'chapter'}
     ),
     'tracks':(
         {'type':'video'},
@@ -150,7 +156,8 @@ repository_config['Kind']['mkv']['Profile']['720'] = {
 repository_config['Kind']['mkv']['Profile']['1080'] = {
     'related':(
         {'type':'srt', 'profile':'clean', 'language':'heb'},
-        {'type':'srt', 'profile':'clean', 'language':'eng'}
+        {'type':'srt', 'profile':'clean', 'language':'eng'},
+        {'type':'txt', 'profile':'chapter'}
     ),
     'tracks':(
         {'type':'video'},
@@ -182,6 +189,12 @@ repository_config['Kind']['sub']['codec'] = 'S_TEXT/SUB'
 repository_config['Kind']['sub']['default'] = {'profile':'original', 'volume':'alpha'}
 repository_config['Kind']['sub']['Profile'] = {}
 repository_config['Kind']['sub']['Profile']['original'] = {}
+
+repository_config['Kind']['txt'] = {}
+repository_config['Kind']['txt']['container'] = 'chapters'
+repository_config['Kind']['txt']['default'] = {'profile':'chapter', 'volume':'alpha'}
+repository_config['Kind']['txt']['Profile'] = {}
+repository_config['Kind']['txt']['Profile']['chapter'] = {}
 
 
 
