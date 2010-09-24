@@ -4,14 +4,23 @@
 tmdb_apikey = 'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = '7B3B400B0146EA83'
 
-
 repository_config = {}
+repository_config['Action'] = {
+    'pack': ['all', 'mkv'],
+    'transcode':['m4v', 'mkv', 'srt'],
+    'extract':['all', 'srt', 'ass', 'txt'],
+    'update':['all', 'srt']
+}
 repository_config['Codec'] = {
     'Audio':{
-        'AC3':'ac-3|AC3',
-        'AAC':'AAC',
-        'DTS':'DTS',
-        'MP3':'MPEG/L3'
+        'ac3':'ac-3|AC3',
+        'aac':'AAC',
+        'dts':'DTS',
+        'mp3':'MPEG/L3'
+    },
+    'Subtitle':{
+        'srt':'S_TEXT/UTF8',
+        'ass':'S_TEXT/ASS'
     }
 }
 repository_config['Language'] = {
@@ -54,9 +63,9 @@ repository_config['Kind'] = {
                 ),
                 'tracks':(
                     {'type':'video'},
-                    {'type':'audio', 'codec_kind':'AC3'},
-                    {'type':'audio', 'codec_kind':'MP3'},
-                    {'type':'audio', 'codec_kind':'AAC'}
+                    {'type':'audio', 'kind':'ac3'},
+                    {'type':'audio', 'kind':'mp3'},
+                    {'type':'audio', 'kind':'aac'}
                 )
             },
             'appletv':{
@@ -75,9 +84,9 @@ repository_config['Kind'] = {
                 ),
                 'tracks':(
                     {'type':'video'},
-                    {'type':'audio', 'codec_kind':'AC3'},
-                    {'type':'audio', 'codec_kind':'MP3'},
-                    {'type':'audio', 'codec_kind':'AAC'}
+                    {'type':'audio', 'kind':'ac3'},
+                    {'type':'audio', 'kind':'mp3'},
+                    {'type':'audio', 'kind':'aac'}
                 )
             },
             'ipod':{
@@ -96,9 +105,9 @@ repository_config['Kind'] = {
                 ),
                 'tracks':(
                     {'type':'video'},
-                    {'type':'audio', 'codec_kind':'AC3'},
-                    {'type':'audio', 'codec_kind':'MP3'},
-                    {'type':'audio', 'codec_kind':'AAC'}
+                    {'type':'audio', 'kind':'ac3'},
+                    {'type':'audio', 'kind':'mp3'},
+                    {'type':'audio', 'kind':'aac'}
                 )
             },
             'high':{
@@ -117,9 +126,9 @@ repository_config['Kind'] = {
                 ),
                 'tracks':(
                     {'type':'video'},
-                    {'type':'audio', 'codec_kind':'AC3'},
-                    {'type':'audio', 'codec_kind':'MP3'},
-                    {'type':'audio', 'codec_kind':'AAC'}
+                    {'type':'audio', 'kind':'ac3'},
+                    {'type':'audio', 'kind':'mp3'},
+                    {'type':'audio', 'kind':'aac'}
                 )
             }
         }
@@ -146,10 +155,10 @@ repository_config['Kind'] = {
                 ),
                 'tracks':(
                     {'type':'video'},
-                    {'type':'audio', 'codec_kind':'AC3'},
-                    {'type':'audio', 'codec_kind':'MP3'},
-                    {'type':'audio', 'codec_kind':'AAC'},
-                    {'type':'audio', 'codec_kind':'DTS'}
+                    {'type':'audio', 'kind':'ac3'},
+                    {'type':'audio', 'kind':'mp3'},
+                    {'type':'audio', 'kind':'aac'},
+                    {'type':'audio', 'kind':'dts'}
                 )
             },
             '720':{
@@ -160,10 +169,10 @@ repository_config['Kind'] = {
                 ),
                 'tracks':(
                     {'type':'video'},
-                    {'type':'audio', 'codec_kind':'AC3'},
-                    {'type':'audio', 'codec_kind':'MP3'},
-                    {'type':'audio', 'codec_kind':'AAC'},
-                    {'type':'audio', 'codec_kind':'DTS'}
+                    {'type':'audio', 'kind':'ac3'},
+                    {'type':'audio', 'kind':'mp3'},
+                    {'type':'audio', 'kind':'aac'},
+                    {'type':'audio', 'kind':'dts'}
                 )
             },
             '1080':{
@@ -174,10 +183,10 @@ repository_config['Kind'] = {
                 ),
                 'tracks':(
                     {'type':'video'},
-                    {'type':'audio', 'codec_kind':'AC3'},
-                    {'type':'audio', 'codec_kind':'MP3'},
-                    {'type':'audio', 'codec_kind':'AAC'},
-                    {'type':'audio', 'codec_kind':'DTS'}
+                    {'type':'audio', 'kind':'ac3'},
+                    {'type':'audio', 'kind':'mp3'},
+                    {'type':'audio', 'kind':'aac'},
+                    {'type':'audio', 'kind':'dts'}
                 )
             }
         }
@@ -185,26 +194,34 @@ repository_config['Kind'] = {
     
     'srt':{
         'container':'subtitles',
-        'codec':'S_TEXT/UTF8',
         'default':{'profile':'original', 'volume':'alpha'},
         'Profile':{
-            'original':{},
+            'original':{
+                'tracks':(
+                    {'type':'subtitles', 'language': 'heb', 'kind':'srt'},
+                    {'type':'subtitles', 'language': 'eng', 'kind':'srt'}
+                )
+            
+            },
             'clean':{}
         }
     },
     
     'ass':{
         'container':'subtitles',
-        'codec':'S_TEXT/ASS',
         'default':{'profile':'original', 'volume':'alpha'},
         'Profile':{
-            'original':{}
+            'original':{
+                'tracks':(
+                    {'type':'subtitles', 'language': 'heb', 'kind':'ass'},
+                    {'type':'subtitles', 'language': 'eng', 'kind':'ass'}
+                )
+            }
         }
     },
     
     'sub':{
         'container':'subtitles',
-        'codec':'S_TEXT/SUB',
         'default':{'profile':'original', 'volume':'alpha'},
         'Profile':{
             'original':{}

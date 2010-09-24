@@ -183,25 +183,25 @@ class Container(object):
     
     
     
-    def info(self):
+    def info(self, options):
         return self.__str__().encode('utf-8')
     
     
-    def copy(self, volume, profile, overwrite=False, md5=False):
-        info = file_util.copy_file_info(self.file_info, volume, profile)
+    def copy(self, options):
+        info = file_util.copy_file_info(self.file_info, options)
         
         dest_path = file_util.canonic_path(info, self.meta)
-        if file_util.check_and_varify(dest_path, overwrite):
+        if file_util.check_and_varify(dest_path, options.overwrite):
             command = ["rsync", self.file_path, dest_path]
             message = 'Copy ' + self.file_path + ' --> ' + dest_path
-            file_util.execute_command(command, message)
+            file_util.execute_command(command, message, options.debug)
             file_util.clean_if_not_exist(dest_path)
-            if md5:
+            if options.md5:
                 self.compare_checksum(dest_path)
         
     
     
-    def rename(self):
+    def rename(self, options):
         dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_name())
         if self.file_path == dest_path:
             self.logger.debug('No renaming needed for ' + dest_path)
@@ -210,39 +210,39 @@ class Container(object):
                 file_util.varify_directory(dest_path)
                 command = ['mv', self.file_path, dest_path]
                 message = 'Rename ' + self.file_path + ' --> ' + dest_path
-                file_util.execute_command(command, message)
+                file_util.execute_command(command, message, options.debug)
                 file_util.clean_if_not_exist(dest_path)
             else:
                 self.logger.warning('Not renaming, destination exists ' + dest_path)
     
     
-    def tag(self):
+    def tag(self, options):
         return
     
     
-    def art(self):
+    def art(self, options):
         return
     
     
-    def optimize(self):
+    def optimize(self, options):
         return
     
     
     
     
-    def extract(self, kind, volume, profile, overwrite=False):
+    def extract(self, options):
         return
     
     
-    def transcode(self, kind, volume, profile, overwrite=False):
+    def transcode(self, options):
         return
     
     
-    def pack(self, kind, volume, profile, overwrite=False, language=None):
+    def pack(self, options):
         return
     
     
-    def update(self, kind, volume, profile, overwrite=False):
+    def update(self, options):
         return
     
     
@@ -349,9 +349,12 @@ class AVContainer(Container):
     
     def add_track(self, track):
         if track != None:
-            if 'type' in track and track['type'] == 'audio' and 'codec' in track:
-                track['codec_kind'] = file_util.detect_audio_codec_kind(track['codec'])
-            
+            if 'type' in track and 'codec' in track:
+                if track['type'] == 'audio':
+                    track['kind'] = file_util.detect_audio_codec_kind(track['codec'])
+                elif track['type'] == 'subtitles':
+                    track['kind'] = file_util.detect_subtitle_codec_kind(track['codec'])
+                
             self.tracks.append(track)
     
     
@@ -361,12 +364,12 @@ class AVContainer(Container):
     
     
     
-    def extract(self, kind, volume, profile, overwrite=False):
-        Container.extract(self, kind, volume, profile, overwrite=False)
-        if kind == None or kind == 'txt':
+    def extract(self, options):
+        Container.extract(self, options)
+        if options.extract in ('all', 'txt'):
             if len(self.chapters) > 0:
-                info = file_util.copy_file_info(self.file_info, volume, profile)
-                info['type'] = kind
+                info = file_util.copy_file_info(self.file_info, options)
+                info['type'] = 'txt'
                 dest_path = file_util.canonic_path(info, self.meta)
                 
                 chapter_line_buffer = []
@@ -375,7 +378,7 @@ class AVContainer(Container):
                     chapter.encode(chapter_line_buffer, index)
                     index += 1
                 
-                if file_util.check_and_varify(dest_path, overwrite):
+                if file_util.check_and_varify(dest_path, options.overwrite):
                     self.logger.debug('Extracting chapters from ' + self.file_path + ' into ' + dest_path)
                     self.write_text_file(chapter_line_buffer, dest_path)
                     file_util.clean_if_not_exist(dest_path)
@@ -383,16 +386,17 @@ class AVContainer(Container):
         return
     
     
-    def pack(self, kind, volume, profile, overwrite=False, language=None):
-        info = file_util.copy_file_info(self.file_info, volume, profile)
-        if kind == None or kind == 'mkv':
+    def pack(self, options):
+        Container.pack(self, options)
+        info = file_util.copy_file_info(self.file_info, options)
+        if options.pack in ('all', 'mkv'):
             info['type'] = 'mkv'
             dest_path = file_util.canonic_path(info, self.meta)
             if dest_path != None:
-                selected_related = file_util.filter_related_by_profile(self.related, info['profile'])
-                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'])
+                selected_related = file_util.filter_related_by_profile(self.related, info['profile'], info['type'])
+                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'], info['type'])
                 command = None
-                if file_util.check_and_varify(dest_path, overwrite):
+                if file_util.check_and_varify(dest_path, options.overwrite):
                     command = ["mkvmerge", '--output', dest_path, '--no-chapters', '--no-attachments', '--no-subtitles', self.file_path]
                     for t in selected_related:
                         t_info = self.related[t]
@@ -434,26 +438,24 @@ class AVContainer(Container):
                     #self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
                     
                     message = 'Pack matroska file ' + dest_path
-                    file_util.execute_command(command, message)
+                    file_util.execute_command(command, message, options.debug)
                     file_util.clean_if_not_exist(dest_path)
                     
         return
     
     
-    def transcode(self, kind, volume, profile, overwrite=False):
-        Container.transcode(kind, volume, profile, overwrite)
-        info = file_util.copy_file_info(self.file_info, volume, profile)
-        if kind == None or kind in ('mkv', 'm4v'):
-            if kind != None:
-                info['kind'] = kind
-            else:
-                info['kind'] = 'm4v'
+    def transcode(self, options):
+        Container.transcode(self, options)
+        info = file_util.copy_file_info(self.file_info, options)
+        if options.transcode in ('mkv', 'm4v'):
+            info['type'] = options.transcode
+            info = file_util.set_default_info(info)
             dest_path = file_util.canonic_path(info, self.meta)
             if dest_path != None:
-                selected_related = file_util.filter_related_by_profile(self.related, info['profile'])
-                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'])
+                selected_related = file_util.filter_related_by_profile(self.related, info['profile'], info['type'])
+                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'], info['type'])
                 command = None
-                if file_util.check_and_varify(dest_path, overwrite):
+                if file_util.check_and_varify(dest_path, options.overwrite):
                     command = ['HandbrakeCLI', '--encoder', 'x264']
         return
     
@@ -659,30 +661,37 @@ class Matroska(AVContainer):
                 index += 1
     
     
-    def extract(self, kind, volume, profile, overwrite=False):
-        AVContainer.extract(self, kind, volume, profile, overwrite=False)
+    def extract(self, options):
+        AVContainer.extract(self, options)
         new_media_files = []
         
-        if kind == None or kind in file_util.subtitles_kinds:
+        if options.extract in ('all', 'srt', 'ass'):
             command = ['mkvextract', 'tracks', self.file_path ]
-            info = file_util.copy_file_info(self.file_info, volume, profile)
-            #selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'])
+            info = file_util.copy_file_info(self.file_info, options)
+            selected = list()
+            kinds = list()
+            if options.extract == 'all':
+                kinds.append('srt')
+                kinds.append('ass')
+            else:
+                kinds.append(options.extract)
             
-            for t in self.tracks:
-                if t['type'] == 'subtitles' and t['language'] in repository_config['Language']:
-                    for subtitle_type in file_util.subtitles_kinds:
-                        if t['codec'] == repository_config['Kind'][subtitle_type]['codec']:
-                            info['type'] = subtitle_type
-                            if kind == None or (info['type'] == kind):
-                                info['language'] = t['language']
-                                dest_path = file_util.canonic_path(info, self.meta)
-                                if file_util.check_and_varify(dest_path, overwrite):
-                                    new_media_files.append(dest_path)
-                                    command.append(str(t['number']) + ':' + dest_path)
+            for k in kinds:
+                info['type'] = k
+                info = file_util.set_default_info(info)
+                selected += file_util.filter_tracks_by_profile(self.tracks, info['profile'], k)
+                
+            for t in selected:
+                info['type'] = t['kind']
+                info['language'] = t['language']
+                dest_path = file_util.canonic_path(info, self.meta)
+                if file_util.check_and_varify(dest_path, options.overwrite):
+                    new_media_files.append(dest_path)
+                    command.append(str(t['number']) + ':' + dest_path)
             
             if len(new_media_files) > 0:
                 message = 'Extract tracks from ' + self.file_path
-                file_util.execute_command(command, message)
+                file_util.execute_command(command, message, options.debug)
                 
             for f in new_media_files:
                 file_util.clean_if_not_exist(f)
@@ -812,21 +821,21 @@ class Mpeg4(AVContainer):
             index += 1
     
     
-    def tag(self):
-        AVContainer.tag(self)
+    def tag(self, options):
+        AVContainer.tag(self, options)
         command = self.encode_subler_tag_command()
         if command != None:
             message = 'Tag ' + self.file_path
-            file_util.execute_command(command, message)
+            file_util.execute_command(command, message, options.debug)
         else:
             self.logger.info('No tags need update on ' + self.file_path)
     
     
-    def optimize(self):
-        AVContainer.optimize(self)
+    def optimize(self, options):
+        AVContainer.optimize(self, options)
         command = ['mp4file', '--optimize', self.file_path]
         message = 'Optimize ' + self.file_path
-        file_util.execute_command(command, message)
+        file_util.execute_command(command, message, options.debug)
     
     
     def encode_subler_tag_command(self):
@@ -971,13 +980,13 @@ class Subtitle(Container):
                 self.parsed = True
     
     
-    def transcode(self, kind, volume, profile, overwrite=False):
-        Container.transcode(self, volume, profile, overwrite)
-        info = file_util.copy_file_info(self.file_info, volume, profile)
+    def transcode(self, options):
+        Container.transcode(self, options)
+        info = file_util.copy_file_info(self.file_info, options)
         info['type'] = 'srt'
         dest_path = file_util.canonic_path(info, self.meta)
         
-        if file_util.check_and_varify(dest_path, overwrite):
+        if file_util.check_and_varify(dest_path, options.overwrite):
             self.logger.info('Transcode ' + dest_path + ' from ' + self.file_path)
             self.write(dest_path)
             file_util.clean_if_not_exist(dest_path)
@@ -1241,6 +1250,10 @@ class FileUtil(object):
         for k,v in repository_config['Codec']['Audio'].iteritems():
             self.audio_codec_kind[k] = re.compile(v)
         
+        self.subtitle_codec_kind = {}
+        for k,v in repository_config['Codec']['Subtitle'].iteritems():
+            self.subtitle_codec_kind[k] = re.compile(v)
+            
         self.file_name_schema_re = {}
         for media_kind in repository_config['Media Kind'].keys():
             self.file_name_schema_re[media_kind] = re.compile(repository_config['Media Kind'][media_kind]['schema'])
@@ -1437,12 +1450,12 @@ class FileUtil(object):
         return related
     
     
-    def filter_related_by_profile(self, related, profile):
+    def filter_related_by_profile(self, related, profile, kind):
         selected = list()
-        if profile != None and profile in repository_config['Kind']['mkv']['Profile'] and 'related' in repository_config['Kind']['mkv']['Profile'][profile]:
+        if profile != None and kind != None and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'related' in repository_config['Kind'][kind]['Profile'][profile]:
             for k,v in related.iteritems():
                 match = False
-                for r in repository_config['Kind']['mkv']['Profile'][profile]['related']:
+                for r in repository_config['Kind'][kind]['Profile'][profile]['related']:
                     fit_all = True
                     for x in r.keys():
                         fit_all = fit_all and v.has_key(x) and v[x] == r[x]
@@ -1455,12 +1468,12 @@ class FileUtil(object):
         return selected
     
     
-    def filter_tracks_by_profile(self, tracks, profile):
+    def filter_tracks_by_profile(self, tracks, profile, kind):
         selected = list()
         for v in tracks:
             match = False
-            if profile != None and profile in repository_config['Kind']['mkv']['Profile'] and 'tracks' in repository_config['Kind']['mkv']['Profile'][profile]:
-                for r in repository_config['Kind']['mkv']['Profile'][profile]['tracks']:
+            if profile != None and kind != None and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'tracks' in repository_config['Kind'][kind]['Profile'][profile]:
+                for r in repository_config['Kind'][kind]['Profile'][profile]['tracks']:
                     fit_all = True
                     for x in r.keys():
                         fit_all = fit_all and v.has_key(x) and v[x] == r[x]
@@ -1482,6 +1495,15 @@ class FileUtil(object):
         return result
     
     
+    def detect_subtitle_codec_kind(self, codec):
+        result = None
+        for k,v in self.subtitle_codec_kind.iteritems():
+            if v.search(codec) != None:
+                result = k
+                break
+        return result
+    
+    
     def varify_directory(self, path):
         result = False
         try:
@@ -1496,7 +1518,7 @@ class FileUtil(object):
         return result
     
     
-    def check_path(self, path, overwrite):
+    def check_path(self, path, overwrite=False):
         result = True
         if path != None:
             if os.path.exists(path) and not overwrite:
@@ -1508,7 +1530,7 @@ class FileUtil(object):
         return result
     
     
-    def check_and_varify(self, path, overwrite):
+    def check_and_varify(self, path, overwrite=False):
         result = self.check_path(path, overwrite)
         if result:
             self.varify_directory(path)
@@ -1516,12 +1538,19 @@ class FileUtil(object):
     
     
     def execute_command(self, command, message= None, debug=False):
+        def encode_command(command):
+            cmd = copy.deepcopy(command)
+            for index in range(len(cmd)):
+                if ' ' in cmd[index]: cmd[index] = "'{0}'".format(cmd[index])
+            return ' '.join(cmd)
+        
+        
         output = None
         error = None
         
         if not debug:
             if command != None:
-                self.logger.debug('Executing command:' + command.__str__())
+                self.logger.debug('Execute: ' + encode_command(command))
                 if message != None:
                     self.logger.info(message)
                 from subprocess import Popen, PIPE
@@ -1537,20 +1566,29 @@ class FileUtil(object):
                     self.logger.debug(output)
                     result = True
         else:
-            self.logger.info('Command: ' + command.__str__())
+            print encode_command(command)
         return output, error
     
     
-    def copy_file_info(self, info, volume, profile):
+    def set_default_info(self, info):
+        if 'type' in info:
+            if not 'volume' in info and 'volume' in repository_config['Kind'][info['type']]['default']:
+                info['volume'] = repository_config['Kind'][info['type']]['default']['volume']
+                
+            if not 'profile' in info and 'profile' in repository_config['Kind'][info['type']]['default']:
+                info['profile'] = repository_config['Kind'][info['type']]['default']['profile']
+        return info
+    
+    
+    def copy_file_info(self, info, options):
         result = None
         if info != None:
             i = copy.deepcopy(info)
-        
-            i['volume'] = volume
+            i['volume'] = options.volume
             if i['volume'] == None:
                 del i['volume']
         
-            i['profile'] = profile
+            i['profile'] = options.profile
             if i['profile'] == None:
                 del i['profile']
         return i

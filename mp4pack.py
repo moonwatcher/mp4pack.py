@@ -78,10 +78,10 @@ def load_options():
     extract_choices = ['srt', 'ass', 'txt']
     update_choices = ['srt']
     
-    group.add_option("-m", "--pack", metavar="KIND", dest="pack", type="choice", choices=pack_choices, help="Package to " + pack_choices.__str__())
-    group.add_option("-t", "--transcode", metavar="KIND", dest="transcode", type="choice", choices=transcode_choices, help="Transcode to " + transcode_choices.__str__())
-    group.add_option("-e", "--extract", metavar="KIND", dest="extract", type="choice", choices=extract_choices, help="Extract to " + extract_choices.__str__())
-    group.add_option("-u", "--update", metavar="KIND", dest="update", type="choice", choices=update_choices, help="Update to " + update_choices.__str__())
+    group.add_option("-m", "--pack", metavar="KIND", dest="pack", type="choice", choices=repository_config['Action']['pack'], help="Package to " + repository_config['Action']['pack'].__str__())
+    group.add_option("-t", "--transcode", metavar="KIND", dest="transcode", type="choice", choices=repository_config['Action']['transcode'], help="Transcode to " + repository_config['Action']['transcode'].__str__())
+    group.add_option("-e", "--extract", metavar="KIND", dest="extract", type="choice", choices=repository_config['Action']['extract'], help="Extract to " + repository_config['Action']['extract'].__str__())
+    group.add_option("-u", "--update", metavar="KIND", dest="update", type="choice", choices=repository_config['Action']['update'], help="Update to " + repository_config['Action']['update'].__str__())
     
     parser.add_option_group(group)
         
@@ -136,44 +136,44 @@ def load_options():
 def preform_operations(tag_manager, files, options):
     if options.info:
         for f in files:
-            print f.info()
+            print f.info(options)
             
     if options.copy:
         for f in files:
-            f.copy(options.volume, options.profile, options.overwrite, options.md5)
+            f.copy(options)
     
     if options.rename:
         for f in files:
-            f.rename()
+            f.rename(options)
     
     if options.tag:
         for f in files:
-            f.tag()
+            f.tag(options)
     
     if options.art:
         for f in files:
-            f.art()
+            f.art(options)
             
     if options.optimize:
         for f in files:
-            f.optimize()
+            f.optimize(options)
     
     
     if options.pack != None:
         for f in files:
-            f.pack(options.pack, options.volume, options.profile, options.overwrite, options.language)
+            f.pack(options)
     
     if options.transcode != None:
         for f in files:
-            f.transcode(options.transcode, options.volume, options.profile, options.overwrite)
+            f.transcode(options)
     
     if options.extract != None:
         for f in files:
-            f.extract(options.extract, options.volume, options.profile, options.overwrite)
+            f.extract(options)
             
     if options.update != None:
         for f in files:
-            f.update(options.update, options.volume, options.profile, options.overwrite)
+            f.update(options)
     
     
     if options.initialize:
