@@ -440,6 +440,23 @@ class AVContainer(Container):
         return
     
     
+    def transcode(self, kind, volume, profile, overwrite=False):
+        Container.transcode(kind, volume, profile, overwrite)
+        info = file_util.copy_file_info(self.file_info, volume, profile)
+        if kind == None or kind in ('mkv', 'm4v'):
+            if kind != None:
+                info['kind'] = kind
+            else:
+                info['kind'] = 'm4v'
+            dest_path = file_util.canonic_path(info, self.meta)
+            if dest_path != None:
+                selected_related = file_util.filter_related_by_profile(self.related, info['profile'])
+                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'])
+                command = None
+                if file_util.check_and_varify(dest_path, overwrite):
+                    command = ['HandbrakeCLI', '--encoder', 'x264']
+        return
+    
     
     def print_chapters(self):
         return ('\n'.join(["%s" % chapter for chapter in self.chapters]))
@@ -1172,7 +1189,7 @@ class SubtitleLineFilter(object):
         self.remove_line_filters = []
         self.replace_filters = []
         
-        from config.subfilter import subtitle_filter
+        from config import subtitle_filter
         for f in subtitle_filter['remove block']:
             self.remove_block_filters.append(re.compile(f,re.UNICODE))
             
