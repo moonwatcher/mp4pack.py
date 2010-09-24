@@ -16,13 +16,13 @@ Options:
     --art               Update embedded artwork
     --optimize          Optimize file layout
     -m KIND, --pack=KIND
-                        Package to ['mkv']
+                        Package to ['all', 'mkv']
     -t KIND, --transcode=KIND
                         Transcode to ['m4v', 'mkv', 'srt']
     -e KIND, --extract=KIND
-                        Extract to ['srt', 'ass', 'txt']
+                        Extract to ['all', 'srt', 'ass', 'txt']
     -u KIND, --update=KIND
-                        Update to ['srt']
+                        Update to ['all', 'srt']
 
   Modifiers:
     -o VOLUME, --volume=VOLUME
