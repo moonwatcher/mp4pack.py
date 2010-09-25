@@ -79,17 +79,19 @@ repository_config['Kind'] = {
                         ],
                     ]
                 },
-                'related':(
-                    {'type':'srt', 'profile':'clean', 'language':'heb'},
-                    {'type':'srt', 'profile':'clean', 'language':'eng'},
-                    {'type':'txt', 'profile':'chapter'}
-                ),
-                'tracks':(
-                    {'type':'video'},
-                    {'type':'audio', 'kind':'ac3'},
-                    {'type':'audio', 'kind':'mp3'},
-                    {'type':'audio', 'kind':'aac'}
-                )
+                'pack':{
+                    'related':(
+                        {'type':'srt', 'profile':'clean', 'language':'heb'},
+                        {'type':'srt', 'profile':'clean', 'language':'eng'},
+                        {'type':'txt', 'profile':'chapter'}
+                    ),
+                    'tracks':(
+                        {'type':'video'},
+                        {'type':'audio', 'kind':'ac3'},
+                        {'type':'audio', 'kind':'mp3'},
+                        {'type':'audio', 'kind':'aac'}
+                    )
+                }
             },
             'appletv':{
                 'description': 'Intel based AppleTV profile',
@@ -126,17 +128,19 @@ repository_config['Kind'] = {
                         ],
                     ]
                 },
-                'related':(
-                    {'type':'srt', 'profile':'clean', 'language':'heb'},
-                    {'type':'srt', 'profile':'clean', 'language':'eng'},
-                    {'type':'txt', 'profile':'chapter'}
-                ),
-                'tracks':(
-                    {'type':'video'},
-                    {'type':'audio', 'kind':'ac3'},
-                    {'type':'audio', 'kind':'mp3'},
-                    {'type':'audio', 'kind':'aac'}
-                )
+                'pack':{
+                    'related':(
+                        {'type':'srt', 'profile':'clean', 'language':'heb'},
+                        {'type':'srt', 'profile':'clean', 'language':'eng'},
+                        {'type':'txt', 'profile':'chapter'}
+                    ),
+                    'tracks':(
+                        {'type':'video'},
+                        {'type':'audio', 'kind':'ac3'},
+                        {'type':'audio', 'kind':'mp3'},
+                        {'type':'audio', 'kind':'aac'}
+                    )
+                }
             },
             'ipod':{
                 'description': 'All iPod touch models profile',
@@ -168,17 +172,19 @@ repository_config['Kind'] = {
                         ],
                     ]
                 },
-                'related':(
-                    {'type':'srt', 'profile':'clean', 'language':'heb'},
-                    {'type':'srt', 'profile':'clean', 'language':'eng'},
-                    {'type':'txt', 'profile':'chapter'}
-                ),
-                'tracks':(
-                    {'type':'video'},
-                    {'type':'audio', 'kind':'ac3'},
-                    {'type':'audio', 'kind':'mp3'},
-                    {'type':'audio', 'kind':'aac'}
-                )
+                'pack':{
+                    'related':(
+                        {'type':'srt', 'profile':'clean', 'language':'heb'},
+                        {'type':'srt', 'profile':'clean', 'language':'eng'},
+                        {'type':'txt', 'profile':'chapter'}
+                    ),
+                    'tracks':(
+                        {'type':'video'},
+                        {'type':'audio', 'kind':'ac3'},
+                        {'type':'audio', 'kind':'mp3'},
+                        {'type':'audio', 'kind':'aac'}
+                    )
+                }
             },
             'high':{
                 'description': 'High profile',
@@ -213,17 +219,19 @@ repository_config['Kind'] = {
                         ],
                     ]
                 },
-                'related':(
-                    {'type':'srt', 'profile':'clean', 'language':'heb'},
-                    {'type':'srt', 'profile':'clean', 'language':'eng'},
-                    {'type':'txt', 'profile':'chapter'}
-                ),
-                'tracks':(
-                    {'type':'video'},
-                    {'type':'audio', 'kind':'ac3'},
-                    {'type':'audio', 'kind':'mp3'},
-                    {'type':'audio', 'kind':'aac'}
-                )
+                'pack':{
+                    'related':(
+                        {'type':'srt', 'profile':'clean', 'language':'heb'},
+                        {'type':'srt', 'profile':'clean', 'language':'eng'},
+                        {'type':'txt', 'profile':'chapter'}
+                    ),
+                    'tracks':(
+                        {'type':'video'},
+                        {'type':'audio', 'kind':'ac3'},
+                        {'type':'audio', 'kind':'mp3'},
+                        {'type':'audio', 'kind':'aac'}
+                    )
+                }
             }
         }
     },
@@ -315,8 +323,8 @@ repository_config['Kind'] = {
             'original':{
                 'pack':{
                     'tracks':(
-                        {'type':'subtitles', 'language': 'heb', 'kind':'srt'},
-                        {'type':'subtitles', 'language': 'eng', 'kind':'srt'}
+                        {'type':'subtitles', 'language': 'heb', 'kind':'ass'},
+                        {'type':'subtitles', 'language': 'eng', 'kind':'ass'}
                     )
                 }
             }
