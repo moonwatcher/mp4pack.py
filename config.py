@@ -42,19 +42,42 @@ repository_config['Media Kind'] = {
     #'audiobook':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2}
 }
 repository_config['Kind'] = {
-    
     'm4v':{
         'container':'mp4',
         'default':{'volume':'epsilon'},
         'Profile':{
             'universal':{
                 'description': 'an SD profile that decodes on every cabac capable apple device',
-                'handbrake':{
-                    'crf':18,
-                    'cabac':True,
-                    'max_width':720,
-                    'x264':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=%(cabac)s',
-                    'extra':'--large-file'
+                'transcode':{
+                    'options':{
+                        '--quality':18,
+                        '--encoder':'x264',
+                        '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1',
+                        '--maxWidth':720
+                    },
+                    'flags':['--large-file'],
+                    'audio':[
+                        [
+                            {
+                                'from': {'kind': 'ac3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ac3', '--ab':'auto', '--mixdown':'auto'}
+                            }, 
+                            {
+                                'from': {'kind': 'ac3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':160, '--mixdown':'dpl2'}
+                            }
+                        ],
+                        [
+                            {
+                                'from': {'kind': 'aac', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            },
+                            {
+                                'from': {'kind': 'mp3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            }
+                        ],
+                    ]
                 },
                 'related':(
                     {'type':'srt', 'profile':'clean', 'language':'heb'},
@@ -69,13 +92,39 @@ repository_config['Kind'] = {
                 )
             },
             'appletv':{
-                'description': 'AppleTV Intel based',
-                'handbrake':{
-                    'crf':22,
-                    'cabac':True,
-                    'max_width':1280,
-                    'x264':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=%(cabac)s',
-                    'extra':'--large-file'
+                'description': 'Intel based AppleTV profile',
+                'transcode':{
+                    'options':{
+                        '--quality':22,
+                        '--encoder':'x264',
+                        '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
+                        '--maxWidth':1280
+                    },
+                    'flags':['--large-file'],
+                    'audio':[
+                        [
+                            {
+                                'from': {'kind': 'ac3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ac3', '--ab':'auto', '--mixdown':'auto'}
+                            }, 
+                            {
+                                'from': {'kind': 'ac3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':160, '--mixdown':'dpl2'}
+                            }
+                        ],
+                        [
+                            {
+                                'from': {'kind': 'aac', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            }
+                        ],
+                        [
+                            {
+                                'from': {'kind': 'mp3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            }
+                        ],
+                    ]
                 },
                 'related':(
                     {'type':'srt', 'profile':'clean', 'language':'heb'},
@@ -91,12 +140,33 @@ repository_config['Kind'] = {
             },
             'ipod':{
                 'description': 'All iPod touch models profile',
-                'handbrake':{
-                    'crf':21,
-                    'cabac':True,
-                    'max_width':480,
-                    'x264':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=%(cabac)s',
-                    'extra':None
+                'transcode':{
+                    'options':{
+                        '--quality':21,
+                        '--encoder':'x264',
+                        '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
+                        '--maxWidth':480
+                    },
+                    'audio':[
+                        [
+                            {
+                                'from': {'kind': 'ac3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            }
+                        ],
+                        [
+                            {
+                                'from': {'kind': 'aac', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            },
+                        ],
+                        [
+                            {
+                                'from': {'kind': 'mp3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            }
+                        ],
+                    ]
                 },
                 'related':(
                     {'type':'srt', 'profile':'clean', 'language':'heb'},
@@ -112,12 +182,36 @@ repository_config['Kind'] = {
             },
             'high':{
                 'description': 'High profile',
-                'handbrake':{
-                    'crf':18,
-                    'cabac':True,
-                    'max_width':1280,
-                    'x264':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=%(cabac)s',
-                    'extra':'--large-file'
+                'transcode':{
+                    'options':{
+                        '--quality':18,
+                        '--encoder':'x264',
+                        '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
+                        '--maxWidth':1280
+                    },
+                    'flags':['--large-file'],
+                    'audio':[
+                        [
+                            {
+                                'from': {'kind': 'ac3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ac3', '--ab':'auto', '--mixdown':'auto'}
+                            }, 
+                            {
+                                'from': {'kind': 'ac3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':192, '--mixdown':'dpl2'}
+                            }
+                        ],
+                        [
+                            {
+                                'from': {'kind': 'aac', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            },
+                            {
+                                'from': {'kind': 'mp3', 'type': 'audio'},
+                                'to': {'--aencoder': 'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                            }
+                        ],
+                    ]
                 },
                 'related':(
                     {'type':'srt', 'profile':'clean', 'language':'heb'},
@@ -148,46 +242,52 @@ repository_config['Kind'] = {
         'default':{'volume':'epsilon'},
         'Profile':{
             'sd':{
-                'related':(
-                    {'type':'srt', 'profile':'clean', 'language':'heb'},
-                    {'type':'srt', 'profile':'clean', 'language':'eng'},
-                    {'type':'txt', 'profile':'chapter'}
-                ),
-                'tracks':(
-                    {'type':'video'},
-                    {'type':'audio', 'kind':'ac3'},
-                    {'type':'audio', 'kind':'mp3'},
-                    {'type':'audio', 'kind':'aac'},
-                    {'type':'audio', 'kind':'dts'}
-                )
+                'pack':{
+                    'related':[
+                        {'type':'srt', 'profile':'clean', 'language':'heb'},
+                        {'type':'srt', 'profile':'clean', 'language':'eng'},
+                        {'type':'txt', 'profile':'chapter'}
+                    ],
+                    'tracks':[
+                        {'type':'video'},
+                        {'type':'audio', 'kind':'ac3'},
+                        {'type':'audio', 'kind':'mp3'},
+                        {'type':'audio', 'kind':'aac'},
+                        {'type':'audio', 'kind':'dts'}
+                    ]
+                }
             },
             '720':{
-                'related':(
-                    {'type':'srt', 'profile':'clean', 'language':'heb'},
-                    {'type':'srt', 'profile':'clean', 'language':'eng'},
-                    {'type':'txt', 'profile':'chapter'}
-                ),
-                'tracks':(
-                    {'type':'video'},
-                    {'type':'audio', 'kind':'ac3'},
-                    {'type':'audio', 'kind':'mp3'},
-                    {'type':'audio', 'kind':'aac'},
-                    {'type':'audio', 'kind':'dts'}
-                )
+                'pack':{
+                    'related':[
+                        {'type':'srt', 'profile':'clean', 'language':'heb'},
+                        {'type':'srt', 'profile':'clean', 'language':'eng'},
+                        {'type':'txt', 'profile':'chapter'}
+                    ],
+                    'tracks':[
+                        {'type':'video'},
+                        {'type':'audio', 'kind':'ac3'},
+                        {'type':'audio', 'kind':'mp3'},
+                        {'type':'audio', 'kind':'aac'},
+                        {'type':'audio', 'kind':'dts'}
+                    ]
+                }
             },
             '1080':{
-                'related':(
-                    {'type':'srt', 'profile':'clean', 'language':'heb'},
-                    {'type':'srt', 'profile':'clean', 'language':'eng'},
-                    {'type':'txt', 'profile':'chapter'}
-                ),
-                'tracks':(
-                    {'type':'video'},
-                    {'type':'audio', 'kind':'ac3'},
-                    {'type':'audio', 'kind':'mp3'},
-                    {'type':'audio', 'kind':'aac'},
-                    {'type':'audio', 'kind':'dts'}
-                )
+                'pack':{
+                    'related':[
+                        {'type':'srt', 'profile':'clean', 'language':'heb'},
+                        {'type':'srt', 'profile':'clean', 'language':'eng'},
+                        {'type':'txt', 'profile':'chapter'}
+                    ],
+                    'tracks':[
+                        {'type':'video'},
+                        {'type':'audio', 'kind':'ac3'},
+                        {'type':'audio', 'kind':'mp3'},
+                        {'type':'audio', 'kind':'aac'},
+                        {'type':'audio', 'kind':'dts'}
+                    ]
+                }
             }
         }
     },
@@ -197,11 +297,12 @@ repository_config['Kind'] = {
         'default':{'profile':'original', 'volume':'alpha'},
         'Profile':{
             'original':{
-                'tracks':(
-                    {'type':'subtitles', 'language': 'heb', 'kind':'srt'},
-                    {'type':'subtitles', 'language': 'eng', 'kind':'srt'}
-                )
-            
+                'pack':{
+                    'tracks':(
+                        {'type':'subtitles', 'language': 'heb', 'kind':'srt'},
+                        {'type':'subtitles', 'language': 'eng', 'kind':'srt'}
+                    )
+                }
             },
             'clean':{}
         }
@@ -212,10 +313,12 @@ repository_config['Kind'] = {
         'default':{'profile':'original', 'volume':'alpha'},
         'Profile':{
             'original':{
-                'tracks':(
-                    {'type':'subtitles', 'language': 'heb', 'kind':'ass'},
-                    {'type':'subtitles', 'language': 'eng', 'kind':'ass'}
-                )
+                'pack':{
+                    'tracks':(
+                        {'type':'subtitles', 'language': 'heb', 'kind':'srt'},
+                        {'type':'subtitles', 'language': 'eng', 'kind':'srt'}
+                    )
+                }
             }
         }
     },

@@ -73,16 +73,10 @@ def load_options():
     group.add_option("--art", dest="art", action="store_true", default=False, help="Update embedded artwork")
     group.add_option("--optimize", dest="optimize", action="store_true", default=False, help="Optimize file layout")
     
-    pack_choices = ['mkv']
-    transcode_choices = ['m4v', 'mkv', 'srt']
-    extract_choices = ['srt', 'ass', 'txt']
-    update_choices = ['srt']
-    
     group.add_option("-m", "--pack", metavar="KIND", dest="pack", type="choice", choices=repository_config['Action']['pack'], help="Package to " + repository_config['Action']['pack'].__str__())
     group.add_option("-t", "--transcode", metavar="KIND", dest="transcode", type="choice", choices=repository_config['Action']['transcode'], help="Transcode to " + repository_config['Action']['transcode'].__str__())
     group.add_option("-e", "--extract", metavar="KIND", dest="extract", type="choice", choices=repository_config['Action']['extract'], help="Extract to " + repository_config['Action']['extract'].__str__())
     group.add_option("-u", "--update", metavar="KIND", dest="update", type="choice", choices=repository_config['Action']['update'], help="Update to " + repository_config['Action']['update'].__str__())
-    
     parser.add_option_group(group)
         
     group = OptionGroup(parser, "Modifiers")

@@ -393,8 +393,8 @@ class AVContainer(Container):
             info['type'] = 'mkv'
             dest_path = file_util.canonic_path(info, self.meta)
             if dest_path != None:
-                selected_related = file_util.filter_related_by_profile(self.related, info['profile'], info['type'])
-                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'], info['type'])
+                selected_related = file_util.related_by_profile(self.related, info['profile'], info['type'])
+                selected_tracks = file_util.tracks_by_profile(self.tracks, info['profile'], info['type'])
                 command = None
                 if file_util.check_and_varify(dest_path, options.overwrite):
                     command = ["mkvmerge", '--output', dest_path, '--no-chapters', '--no-attachments', '--no-subtitles', self.file_path]
@@ -434,10 +434,10 @@ class AVContainer(Container):
                     command.append('--video-tracks')
                     command.append(','.join(video_tracks))
                     
-                    #self.logger.debug('related files chosen: ' + selected_related.__str__())
-                    #self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
+                    self.logger.debug('related files chosen: ' + selected_related.__str__())
+                    self.logger.debug('tracks chosen: ' + selected_tracks.__str__())
                     
-                    message = 'Pack matroska file ' + dest_path
+                    message = 'Pack ' +  self.file_path + ' --> ' + dest_path
                     file_util.execute_command(command, message, options.debug)
                     file_util.clean_if_not_exist(dest_path)
                     
@@ -452,11 +452,48 @@ class AVContainer(Container):
             info = file_util.set_default_info(info)
             dest_path = file_util.canonic_path(info, self.meta)
             if dest_path != None:
-                selected_related = file_util.filter_related_by_profile(self.related, info['profile'], info['type'])
-                selected_tracks = file_util.filter_tracks_by_profile(self.tracks, info['profile'], info['type'])
                 command = None
                 if file_util.check_and_varify(dest_path, options.overwrite):
-                    command = ['HandbrakeCLI', '--encoder', 'x264']
+                    command = ['HandbrakeCLI']
+                    transcode_config = repository_config['Kind']['m4v']['Profile'][info['profile']]['transcode']
+                    if 'flags' in transcode_config:
+                        for v in transcode_config['flags']:
+                            command.append(v)
+                            
+                    if 'options' in transcode_config:
+                        for (k,v) in transcode_config['options'].iteritems():
+                            command.append(k)
+                            command.append(str(v))
+                            
+                    found_audio = False
+                    audio_options = {'--audio':[]}
+                    for s in transcode_config['audio']:
+                        for t in self.tracks:
+                            for c in s:
+                                if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
+                                    found_audio = True
+                                    audio_options['--audio'].append(t['number'])
+                                    for (k,v) in c['to'].iteritems():
+                                        if k not in audio_options: audio_options[k] = []
+                                        audio_options[k].append(str(v))
+                                        
+                        if found_audio:
+                            break
+                            
+                    if found_audio:
+                        for (k,v) in audio_options.iteritems():
+                            if len(v) > 0:
+                                command.append(k)
+                                command.append(','.join(v))
+                                
+                    command.append('--input')
+                    command.append(self.file_path)
+                    command.append('--output')
+                    command.append(dest_path)
+                    
+                    message = 'Transcode ' +  self.file_path + ' --> ' + dest_path
+                    file_util.execute_command(command, message, options.debug)
+                    file_util.clean_if_not_exist(dest_path)
         return
     
     
@@ -679,7 +716,7 @@ class Matroska(AVContainer):
             for k in kinds:
                 info['type'] = k
                 info = file_util.set_default_info(info)
-                selected += file_util.filter_tracks_by_profile(self.tracks, info['profile'], k)
+                selected += file_util.tracks_by_profile(self.tracks, info['profile'], k)
                 
             for t in selected:
                 info['type'] = t['kind']
@@ -699,13 +736,20 @@ class Matroska(AVContainer):
         return new_media_files
     
     
-    def transcode(self, kind, volume, profile, overwrite=False):
-        if kind == None or kind == 'srt':
-            new_media_files = self.extract(None, None, None, overwrite)
+    def transcode(self, options):
+        AVContainer.transcode(self, options)
+        if options.transcode == 'srt':
+            o = copy.deepcopy(options)
+            o.transcode = None
+            o.extract = 'all'
+            new_media_files = self.extract(o)
+            o.extract = None
+            o.transcode = 'srt'
+            o.profile = 'clean'
             for f in new_media_files:
                 if os.path.exists(f):
                     s = Subtitle(f)
-                    s.transcode('srt', volume, profile, overwrite)
+                    s.transcode(o)
     
     
 
@@ -987,7 +1031,8 @@ class Subtitle(Container):
         dest_path = file_util.canonic_path(info, self.meta)
         
         if file_util.check_and_varify(dest_path, options.overwrite):
-            self.logger.info('Transcode ' + dest_path + ' from ' + self.file_path)
+            self.filter_lines()
+            self.logger.info('Transcode ' + self.file_path + ' --> ' + dest_path)
             self.write(dest_path)
             file_util.clean_if_not_exist(dest_path)
     
@@ -1450,39 +1495,25 @@ class FileUtil(object):
         return related
     
     
-    def filter_related_by_profile(self, related, profile, kind):
+    def related_by_profile(self, related, profile, kind):
         selected = list()
-        if profile != None and kind != None and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'related' in repository_config['Kind'][kind]['Profile'][profile]:
-            for k,v in related.iteritems():
-                match = False
-                for r in repository_config['Kind'][kind]['Profile'][profile]['related']:
-                    fit_all = True
-                    for x in r.keys():
-                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
-                        if not fit_all: break
-                    if fit_all: 
-                        match = True
+        if profile != None and kind != None and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'pack' in repository_config['Kind'][kind]['Profile'][profile]:
+            for (path,info) in related.iteritems():
+                for c in repository_config['Kind'][kind]['Profile'][profile]['pack']['related']:
+                    if all((k in info and info[k] == v) for k,v in c.iteritems()):
+                        selected.append(path)
                         break
-                if match:
-                    selected.append(k)
         return selected
     
     
-    def filter_tracks_by_profile(self, tracks, profile, kind):
+    def tracks_by_profile(self, tracks, profile, kind):
         selected = list()
-        for v in tracks:
-            match = False
-            if profile != None and kind != None and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'tracks' in repository_config['Kind'][kind]['Profile'][profile]:
-                for r in repository_config['Kind'][kind]['Profile'][profile]['tracks']:
-                    fit_all = True
-                    for x in r.keys():
-                        fit_all = fit_all and v.has_key(x) and v[x] == r[x]
-                        if not fit_all: break
-                    if fit_all: 
-                        match = True
+        if profile != None and kind != None and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'pack' in repository_config['Kind'][kind]['Profile'][profile]:
+            for t in tracks:
+                for c in repository_config['Kind'][kind]['Profile'][profile]['pack']['tracks']:
+                    if all((k in t and t[k] == v) for k,v in c.iteritems()):
+                        selected.append(t)
                         break
-                if match:
-                    selected.append(v)
         return selected
     
     
@@ -1714,6 +1745,5 @@ def format_for_subler_tag(value):
 
 
 tag_manager = TagManager()
-container_type = { 'Subtitle':['srt', 'ass', 'sub'], 'Mpeg4':['m4v', 'm4a', 'm4b'], 'Matroska':['mkv'] }
 full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
 descriptive_time_format = re.compile('(?:([0-9]{,2})h)?(?:([0-9]{,2})m)?(?:([0-9]{,2})s)?(?:([0-9]+))?')
