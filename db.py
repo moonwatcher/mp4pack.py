@@ -555,7 +555,7 @@ class TagManager(object):
     
     
     def _update_tvdb_show(self, show, etree):
-        show_nodes = etree.findall("Series")
+        show_nodes = etree.findall('Series')
         if len(show_nodes) > 0:
             show['genre'] = []
             show['cast'] = []
@@ -592,7 +592,7 @@ class TagManager(object):
     
     
     def _update_tvdb_episodes(self, show, etree):
-        episode_nodes = etree.findall("Episode")
+        episode_nodes = etree.findall('Episode')
         if len(episode_nodes) != 0:
             for episode_item in episode_nodes:
                 tvdb_episode_id = int(episode_item.find('id').text)
@@ -702,7 +702,7 @@ def update_date_property(key, value, entity):
     if value != None:
         value = value.strip()
         if len(value) != 0 and valid_tmdb_date.search(value) != None:
-            value = datetime.strptime(value, "%Y-%m-%d")
+            value = datetime.strptime(value, '%Y-%m-%d')
         else:
             value = None
             
