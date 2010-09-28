@@ -23,8 +23,8 @@ invisable_file_path = re.compile(r'^\..*$')
 def load_input_files(path, file_filter, recursive):
     files = list()
     file_paths = list_input_files(path, file_filter, recursive)
-    for fp in file_paths:
-        mf = load_media_file(fp)
+    for f in file_paths:
+        mf = load_media_file(f)
         if mf != None:
             files.append(mf)
     return files
@@ -56,6 +56,7 @@ def load_options():
     from optparse import OptionParser
     from optparse import OptionGroup
     from config import repository_config
+    from config import subtitle_filter
     
     available_profiles = list()
     for k in repository_config['Kind'].keys():
@@ -81,23 +82,29 @@ def load_options():
     group.add_option('-o', '--volume', dest='volume', type='choice', choices=repository_config['Volume'].keys(), default=None, help='Output volume [default: auto detect]')
     group.add_option('-p', '--profile', dest='profile', type='choice', choices=available_profiles, default=None, help='[default: %default]')
     group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='Regex to filter selected file names')
-    group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', help='H.264 transcoding Quantizer')
-    group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='debug', type='choice', choices=log_levels.keys(), help='Logging verbosity level [default: %default]')
+    group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files.')
+    group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursivly process sub directories.')
+    group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='info', type='choice', choices=log_levels.keys(), help='Logging verbosity level [default: %default]')
+    group.add_option('-d', '--debug', dest='debug', action='store_true', default=False, help='Only print commands without executing. Also good for dumping the commands into a text file and editing before execution.')
+    group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='H.264 transcoding Quantizer')
+    group.add_option('--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [default: profile dependent]')
     group.add_option('--media-kind', dest='media_kind', type='choice', choices=repository_config['Media Kind'].keys(), help='[default: auto detect]')
-    group.add_option('--pixel-width', metavar='WIDTH', dest='pixel_width', help='Max output pixel width [default: profile dependent]')
     group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined')
     group.add_option('--md5', dest='md5', action='store_true', default=False, help='Varify md5 checksum on copy')
     parser.add_option_group(group)
-        
-    group = OptionGroup(parser, 'Flags')
-    group.add_option('-d', '--debug', dest='debug', action='store_true', default=False, help='Only print commands without executing')
-    group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files')
-    group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursivly process sub directories')
+    
+    
+    group = OptionGroup(parser, 'Options that only apply to text subtitles')
+    group.add_option('--input-rate', metavar='RATE', dest='input_rate', default=None, help='Decoding subtitles frame rate.')
+    group.add_option('--output-rate', metavar='RATE', dest='output_rate', default=None, help='Encoding subtitles frame rate.')
+    group.add_option('--time-shift', metavar='TIME', dest='time_shift', type='int', default=None, help='Subtitles shift offset in miliseconds.')
     parser.add_option_group(group)
     
-    group = OptionGroup(parser, 'Service', 'service routines')
-    group.add_option('--initialize', dest='initialize', action='store_true', default=False, help='Initialize the system')
-    group.add_option('--map-show', dest='map_show', help='Map a TV Show TVDB ID to a name')
+    
+    
+    group = OptionGroup(parser, 'Service', 'Options for initializing the repository.')
+    group.add_option('--initialize', dest='initialize', action='store_true', default=False, help='Run only once to initialize the system.')
+    group.add_option('--map-show', metavar="MAP", dest='map_show', help='For TV Shows you must provide a mapping between the numeric TVDB ID and a simplified name that will be used in file names.')
     parser.add_option_group(group)
     
 ##    Subtitle:
@@ -119,7 +126,7 @@ def load_options():
 ##    	extract txt: extract chapters
 #    	update srt: remux subtitles @ profile
 #    	update art: update artwork
-#    	update chap: update chapters
+#    	update txt: update chapters
         
     
     return parser.parse_args()
@@ -197,7 +204,7 @@ def main():
         logger.debug('Positional {0}: {1}'.format(index, args[index]))
         
     for k, v in options.__dict__.iteritems():
-        logger.debug('Property {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
+        logger.debug('Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
 
 
 

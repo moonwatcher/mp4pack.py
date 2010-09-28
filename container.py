@@ -9,42 +9,24 @@ import copy
 import textwrap
 
 from config import repository_config
+from config import subtitle_filter
 from db import TagManager
-
-def load_media_file(file_path):
-    f = None
-    file_type = os.path.splitext(file_path)[1].strip('.')
-    
-    if file_type in file_util.mp4_kinds:
-        f = Mpeg4(file_path)
-    elif file_type in file_util.matroska_kinds:
-        f = Matroska(file_path)
-    elif file_type in file_util.subtitles_kinds:
-        f = Subtitle(file_path)
-    
-    return f
-
-
-
 
 # Container super Class
 
 class Container(object):
     def __init__(self, file_path):
         self.logger = logging.getLogger('mp4pack.container')
-        self.exists = False
         self.file_path = None
         self.meta = None
         self.related = None
-        if os.path.isfile(file_path):
-            self.exists = True
-            self.file_path = file_path
-            self.file_info = file_util.parse_info(self.file_path)
-            self.related = file_util.related(self.file_path)
-            if self.load_meta():
-                self.logger.debug('Metadata loaded for ' + self.file_path)
-            else:
-                self.logger.debug('Failed to load meta for ' + self.file_path)
+        self.file_path = file_path
+        self.file_info = file_util.parse_info(self.file_path)
+        self.related = file_util.related(self.file_path)
+        if self.load_meta():
+            self.logger.debug('Metadata loaded for ' + self.file_path)
+        else:
+            self.logger.debug('Failed to load meta for ' + self.file_path)
     
     
     def load(self):
@@ -190,7 +172,7 @@ class Container(object):
     
     
     def info(self, options):
-        return self.__str__()#.encode('utf-8')
+        return self.__str__()
     
     
     def copy(self, options):
@@ -252,20 +234,6 @@ class Container(object):
     
     
     
-    def write_text_file(self, line_buffer, output_file=None):
-        try:
-            if len(line_buffer) > 0:
-                writer = open(output_file, 'w')
-                for line in line_buffer:
-                    if line == '\n':
-                        writer.write(line)
-                    else:
-                        writer.write(str(line) + '\n')
-                writer.close
-        except IOError as error:
-            self.logger.error(error.__str__())
-    
-    
     def compare_checksum(self, path):
         result = False
         if os.path.exists(self.file_path) and os.path.exists(path):
@@ -322,16 +290,13 @@ class Container(object):
     
     def __str__(self):
         result = None
-        if self.exists:
-            result = format_info_title(self.file_path)
-            if self.related != None and len(self.related) > 0:
-                result = u'\n'.join((result, format_info_subtitle(u'related'), self.print_related()))
-            if self.file_info != None and len(self.file_info) > 0:
-                result = u'\n'.join((result, format_info_subtitle(u'from path'), self.print_file_info()))
-            if self.meta != None and len(self.meta) > 0:
-                result = u'\n'.join((result, format_info_subtitle(u'metadata'), self.print_meta()))
-        else:
-            result = u'\nfile does not exist'
+        result = format_info_title(self.file_path)
+        if self.related != None and len(self.related) > 0:
+            result = u'\n'.join((result, format_info_subtitle(u'related'), self.print_related()))
+        if self.file_info != None and len(self.file_info) > 0:
+            result = u'\n'.join((result, format_info_subtitle(u'from path'), self.print_file_info()))
+        if self.meta != None and len(self.meta) > 0:
+            result = u'\n'.join((result, format_info_subtitle(u'metadata'), self.print_meta()))
         return result
     
     
@@ -342,19 +307,22 @@ class AVContainer(Container):
         Container.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.avcontainer')
         self.tracks = list()
-        self.chapters = list()
+        self.chapter_markers = list()
         self.tags = dict()
         self.load()
         
     
     
     def set_tag(self, name, value):
-        self.tags[name] = unicode(value, 'utf-8')
+        self.tags[name] = value
     
     
     def add_track(self, track):
         if track != None:
             if 'type' in track and 'codec' in track:
+                if track['type'] == 'video':
+                    if 'pixel width' in track and 'pixel height' in track:
+                        track['sar'] = float(track['pixel width']) / float(track['pixel height'])
                 if track['type'] == 'audio':
                     track['kind'] = file_util.detect_audio_codec_kind(track['codec'])
                 elif track['type'] == 'subtitles':
@@ -363,31 +331,40 @@ class AVContainer(Container):
             self.tracks.append(track)
     
     
-    def add_chapter(self, chapter):
-        if chapter != None:
-            self.chapters.append(chapter)
+    def add_chapter_marker(self, chapter_marker):
+        if chapter_marker != None:
+            self.chapter_markers.append(chapter_marker)
+    
+    
+    def playback_height(self):
+        result = 0
+        if len(self.tracks) > 0:
+            for t in self.tracks:
+                if t['type'] == 'video' and 'sar' in t:
+                    if t['sar'] >= ar_16_9:
+                        result = t['pixel width'] / t['sar']
+                    else:
+                        result = t['pixel height']
+        return result
     
     
     
     def extract(self, options):
         Container.extract(self, options)
         if options.extract in ('all', 'txt'):
-            if len(self.chapters) > 0:
+            if len(self.chapter_markers) > 0:
                 info = file_util.copy_file_info(self.file_info, options)
                 info['kind'] = 'txt'
                 dest_path = file_util.canonic_path(info, self.meta)
                 
-                chapter_line_buffer = []
-                index = 1
-                for chapter in self.chapters:
-                    chapter.encode(chapter_line_buffer, index)
-                    index += 1
-                
                 if file_util.check_and_varify(dest_path, options.overwrite):
-                    self.logger.debug('Extracting chapters from ' + self.file_path + ' into ' + dest_path)
-                    self.write_text_file(chapter_line_buffer, dest_path)
+                    c = Chapter(dest_path)
+                    for cm in self.chapter_markers:
+                        c.add_chapter_marker(cm)
+                    
+                    self.logger.debug('Extracting chapter markers from ' + self.file_path + ' into ' + dest_path)
+                    c.write(dest_path)
                     file_util.clean_if_not_exist(dest_path)
-                
         return
     
     
@@ -502,8 +479,9 @@ class AVContainer(Container):
         return
     
     
-    def print_chapters(self):
-        return (u'\n'.join([format_value(chapter) for chapter in self.chapters]))
+    
+    def print_chapter_markers(self):
+        return (u'\n'.join([format_value(chapter_marker) for chapter_marker in self.chapter_markers]))
     
     
     def print_tags(self):
@@ -516,20 +494,18 @@ class AVContainer(Container):
     
     def __str__(self):
         result = Container.__str__(self)
-        if self.exists:
-            if len(self.tracks) > 0:
-                result = u'\n'.join((result, format_info_subtitle(u'tracks'), self.print_tracks()))
-            if len(self.tags) > 0:
-                result = u'\n'.join((result, format_info_subtitle(u'tags'), self.print_tags()))
-            if len(self.chapters) > 0:
-                result = u'\n'.join((result, format_info_subtitle(u'chapter markers'), self.print_chapters()))
-        
+        if len(self.tracks) > 0:
+            result = u'\n'.join((result, format_info_subtitle(u'tracks'), self.print_tracks()))
+        if len(self.tags) > 0:
+            result = u'\n'.join((result, format_info_subtitle(u'tags'), self.print_tags()))
+        if len(self.chapter_markers) > 0:
+            result = u'\n'.join((result, format_info_subtitle(u'chapter markers'), self.print_chapter_markers()))
         return result
     
     
 
 
-class Chapter(object):
+class ChapterMarker(object):
     def __init__(self, start_time=None, name=None, language=None):
         self.set_start_time(start_time)
         self.set_name(name)
@@ -545,7 +521,7 @@ class Chapter(object):
     
     def set_name(self, name):
         if name != None:
-            self.name = unicode(name.strip('"').strip("'"), 'utf-8')
+            self.name = name.strip('"').strip("'").strip()
         else:
             self.name = None
     
@@ -559,9 +535,9 @@ class Chapter(object):
     
     def encode(self, line_buffer, index):
         start_time_string = miliseconds_to_time(self.start_time, '.')
-        chapter_marker = 'CHAPTER' + str(index).zfill(2)
-        line_buffer.append(chapter_marker + '=' + start_time_string)
-        line_buffer.append(chapter_marker + 'NAME=' + self.name)
+        cm = u'CHAPTER' + str(index).zfill(2)
+        line_buffer.append(cm + u'=' + unicode(start_time_string, 'utf-8'))
+        line_buffer.append(cm + u'NAME=' + self.name)
     
     
     def __str__(self):
@@ -570,14 +546,11 @@ class Chapter(object):
 
 
 
-
-
 # Matroska Class
-
 class Matroska(AVContainer):
     def __init__(self, file_path):
         AVContainer.__init__(self, file_path)
-        self.logger = logging.getLogger('mp4pack.container.matroska')
+        self.logger = logging.getLogger('mp4pack.matroska')
     
     
     def _line_depth(self, mkvinfo_line):
@@ -589,7 +562,7 @@ class Matroska(AVContainer):
         while (self._line_depth(mkvinfo_report[index]) > track_nest_depth):
             match = mkvinfo_track_number_re.search(mkvinfo_report[index])
             if match != None:
-                track['number'] = match.group(1)
+                track['number'] = int(match.group(1))
                 index += 1
                 continue
             match = mkvinfo_track_type_re.search(mkvinfo_report[index])
@@ -604,7 +577,7 @@ class Matroska(AVContainer):
                 continue
             match = mkvinfo_video_fps_re.search(mkvinfo_report[index])
             if match != None:
-                track['frame rate'] = match.group(1)
+                track['frame rate'] = float(match.group(1))
                 index += 1
                 continue
             match = mkvinfo_language_re.search(mkvinfo_report[index])
@@ -619,17 +592,17 @@ class Matroska(AVContainer):
                 continue
             match = mkvinfo_video_pixel_width_re.search(mkvinfo_report[index])
             if match != None:
-                track['pixel width'] = match.group(1)
+                track['pixel width'] = int(match.group(1))
                 index += 1
                 continue
             match = mkvinfo_video_pixel_height_re.search(mkvinfo_report[index])
             if match != None:
-                track['pixel height'] = match.group(1)
+                track['pixel height'] = int(match.group(1))
                 index += 1
                 continue
             match = mkvinfo_audio_sampling_frequency_re.search(mkvinfo_report[index])
             if match != None:
-                track['sampling frequency'] = match.group(1)
+                track['sampling frequency'] = int(match.group(1))
                 index += 1
                 continue
                 
@@ -640,36 +613,36 @@ class Matroska(AVContainer):
         return index, track
     
     
-    def _parse_chapter(self, index, mkvinfo_report, track_nest_depth):
-        chapter = Chapter()
+    def _parse_chapter_marker(self, index, mkvinfo_report, track_nest_depth):
+        chapter_marker = ChapterMarker()
         while (self._line_depth(mkvinfo_report[index]) > track_nest_depth):
             match = mkvinfo_chapter_start_re.search(mkvinfo_report[index])
             if match != None:
-                chapter.set_start_time(match.group(1))
+                chapter_marker.set_start_time(match.group(1))
                 index += 1
                 continue
             match = mkvinfo_chapter_string_re.search(mkvinfo_report[index])
             if match != None:
-                chapter.set_name(match.group(1))
+                chapter_marker.set_name(match.group(1))
                 index += 1
                 continue
             match = mkvinfo_chapter_language_re.search(mkvinfo_report[index])
             if match != None:
-                chapter.set_language(match.group(1))
+                chapter_marker.set_language(match.group(1))
                 index += 1
                 continue
                 
             index += 1
             
-        return index, chapter
+        return index, chapter_marker
     
     
     def load(self):
         AVContainer.load(self)
         command = ['mkvinfo', self.file_path]
         output, error = file_util.execute_command(command, None)
-        mkvinfo_report = output.split('\n')        
-        length = int(len(mkvinfo_report))
+        mkvinfo_report = unicode(output, 'utf-8').split('\n')
+        length = len(mkvinfo_report)
         index = 0
         in_mkvinfo_output = False
         in_segment_tracks = False
@@ -685,8 +658,8 @@ class Matroska(AVContainer):
                     
                 elif (in_chapters):
                     while mkvinfo_chapter_atom_re.search(mkvinfo_report[index]):
-                        index, chapter = self._parse_chapter(index + 1, mkvinfo_report, self._line_depth(mkvinfo_report[index]))
-                        self.add_chapter(chapter)
+                        index, chapter_marker = self._parse_chapter_marker(index + 1, mkvinfo_report, self._line_depth(mkvinfo_report[index]))
+                        self.add_chapter_marker(chapter_marker)
                     in_chapters = False
                     
                 elif mkvinfo_segment_tracks_re.search(mkvinfo_report[index]):
@@ -761,34 +734,12 @@ class Matroska(AVContainer):
     
 
 
-mkvinfo_start_re = re.compile('\+ EBML head')
-mkvinfo_segment_tracks_re = re.compile('\+ Segment tracks')
-mkvinfo_a_track_re = re.compile('\+ A track')
-mkvinfo_track_number_re = re.compile('\+ Track number: ([0-9]+)')
-mkvinfo_track_type_re = re.compile('\+ Track type: (.*)')
-mkvinfo_codec_id_re = re.compile('\+ Codec ID: (.*)')
-mkvinfo_language_re = re.compile('\+ Language: ([a-z]+)')
-mkvinfo_name_re = re.compile('\+ Name: (.*)')
-mkvinfo_video_fps_re = re.compile('\+ Default duration: .*ms \((.*) fps for a video track\)')
-mkvinfo_audio_sampling_frequency_re = re.compile('\+ Sampling frequency: ([0-9]+)')
-mkvinfo_video_pixel_width_re = re.compile('\+ Pixel width: ([0-9]+)')
-mkvinfo_video_pixel_height_re = re.compile('\+ Pixel height: ([0-9]+)')
-mkvinfo_chapters_re = re.compile('\+ Chapters')
-mkvinfo_chapter_atom_re = re.compile('\+ ChapterAtom')
-mkvinfo_chapter_start_re = re.compile('\+ ChapterTimeStart: ([0-9\.:]+)')
-mkvinfo_chapter_string_re = re.compile('\+ ChapterString: (.*)')
-mkvinfo_chapter_language_re = re.compile('\+ ChapterLanguage: ([a-z]+)')
-mkvinfo_line_start_re = re.compile('\+')
-
-
-
 
 # Mpeg4 Class
-
 class Mpeg4(AVContainer):
     def __init__(self, file_path):
         AVContainer.__init__(self, file_path)
-        self.logger = logging.getLogger('mp4pack.container.mp4')
+        self.logger = logging.getLogger('mp4pack.mp4')
     
     
     def _parse_tag(self, mp4info_report_line):
@@ -807,48 +758,47 @@ class Mpeg4(AVContainer):
         match = mp4info_video_track_re.search(mp4info_report_line)
         if match != None:
             track = { 'type':'video' }
-            track['number'] = match.group(1)
+            track['number'] = int(match.group(1))
             track['codec'] = match.group(2)
-            track['duration'] = match.group(3)
-            track['bit rate'] = match.group(4)
-            track['pixel width'] = match.group(5)
-            track['pixel height'] = match.group(6)
-            track['frame rate'] = match.group(7)
+            track['duration'] = float(match.group(3))
+            track['bit rate'] = int(match.group(4))
+            track['pixel width'] = int(match.group(5))
+            track['pixel height'] = int(match.group(6))
+            track['frame rate'] = float(match.group(7))
         else:
             match = mp4info_audio_track_re.search(mp4info_report_line)
             if match != None:
                 track = { 'type':'audio' }
-                track['number'] = match.group(1)
+                track['number'] = int(match.group(1))
                 track['codec'] = match.group(2)
-                track['duration'] = match.group(3)
-                track['bit rate'] = match.group(4)
-                track['sampling frequency'] = match.group(5)
+                track['duration'] = float(match.group(3))
+                track['bit rate'] = int(match.group(4))
+                track['sampling frequency'] = int(match.group(5))
                 
         return track
     
     
-    def _parse_chapter(self, mp4chaps_report_line):
-        chapter = None
+    def _parse_chapter_marker(self, mp4chaps_report_line):
+        chapter_marker = None
         match = mp4chaps_chapter_re.search(mp4chaps_report_line)
         if match != None:
             chapter_start_time = match.group(2)
             chapter_name = match.group(3)
-            chapter = Chapter(chapter_start_time, chapter_name)
-        return chapter
+            chapter_marker = ChapterMarker(chapter_start_time, chapter_name)
+        return chapter_marker
     
     
     def load(self):
         AVContainer.load(self)
-        
-        from subprocess import Popen, PIPE
-        mp4info_proc = Popen(['mp4info', self.file_path], stdout=PIPE)
-        mp4info_report = mp4info_proc.communicate()[0].split('\n')        
+        command = ['mp4info', self.file_path]
+        output, error = file_util.execute_command(command, None)
+        mp4info_report = unicode(output, 'utf-8').split('\n')
         length = int(len(mp4info_report))
         index = 0
         in_tag_section = False
         while index < length:
             if not in_tag_section:
-                track = self._parse_track(mp4info_report[index])            
+                track = self._parse_track(mp4info_report[index])
                 if track != None:
                     self.add_track(track)
                     index += 1
@@ -860,15 +810,16 @@ class Mpeg4(AVContainer):
                 if not in_tag_section:
                     in_tag_section = True
             index += 1
-        
-        mp4chaps_proc = Popen(['mp4chaps', '-l', self.file_path], stdout=PIPE)
-        mp4chaps_report = mp4chaps_proc.communicate()[0].split('\n')        
+            
+        command = ['mp4chaps', '-l', self.file_path]
+        output, error = file_util.execute_command(command, None)
+        mp4chaps_report = unicode(output, 'utf-8').split('\n')
         length = int(len(mp4chaps_report))
         index = 0
         while index < length:
-            chapter = self._parse_chapter(mp4chaps_report[index])
-            if chapter != None:
-                self.add_chapter(chapter)
+            chapter_marker = self._parse_chapter_marker(mp4chaps_report[index])
+            if chapter_marker != None:
+                self.add_chapter_marker(chapter_marker)
             index += 1
     
     
@@ -887,6 +838,59 @@ class Mpeg4(AVContainer):
         command = ['mp4file', '--optimize', self.file_path]
         message = 'Optimize ' + self.file_path
         file_util.execute_command(command, message, options.debug)
+    
+    
+    def update(self, options):
+        AVContainer.update(self, options)
+        if options.update == 'srt':
+            info = file_util.copy_file_info(self.file_info, options)
+            info['kind'] = 'srt'
+            info = file_util.set_default_info(info)
+            if 'profile' in info and 'update' in repository_config['Kind']['srt']['Profile'][info['profile']]:
+                update_section = repository_config['Kind']['srt']['Profile'][info['profile']]['update']
+                
+                message = 'Remove existing subtitle tracks in ' + self.file_path
+                command = ['SublerCLI', '-r', self.file_path]
+                file_util.execute_command(command, message, options.debug)
+                
+                selected = {}
+                for (p,i) in self.related.iteritems():
+                    for c in update_section['related']:
+                        if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
+                            selected[p] = i
+                            break
+                            
+                for (p,i) in selected.iteritems():
+                    for c in update_section['related']:
+                        if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
+                            message = 'Add subtitles ' + p + ' --> ' + self.file_path
+                            command = [
+                                'SublerCLI', '-i', self.file_path, 
+                                '-s', p, 
+                                '-l', repository_config['Language'][i['language']], 
+                                '-n', c['to']['Name'], 
+                                '-a', str(int(round(self.playback_height() * c['to']['height'])))
+                            ]
+                            file_util.execute_command(command, message, options.debug)
+                
+                if 'smart' in update_section:
+                    smart_section = update_section['smart']
+                    found = False
+                    for code in smart_section['order']:
+                        for (p,i) in selected.iteritems():
+                            if i['language'] == code:
+                                message = 'Add smart ' + repository_config['Language'][code] + ' subtitles ' + p + ' --> ' + self.file_path
+                                command = [
+                                    'SublerCLI', '-i', self.file_path, 
+                                    '-s', p, 
+                                    '-l', repository_config['Language'][smart_section['language']], 
+                                    '-n', smart_section['Name'], 
+                                    '-a', str(int(round(self.playback_height() * smart_section['height'])))
+                                ]
+                                file_util.execute_command(command, message, options.debug)
+                                found = True
+                                break
+                        if found: break
     
     
     def encode_subler_tag_command(self):
@@ -917,17 +921,73 @@ class Mpeg4(AVContainer):
     
 
 
-mp4info_video_track_re = re.compile('([0-9]+)	video	([^,]+), ([0-9\.]+) secs, ([0-9\.]+) kbps, ([0-9]+)x([0-9]+) @ ([0-9\.]+) fps')
-mp4info_h264_video_codec_re = re.compile('H264 ([^@]+)@([0-9\.]+)')
-mp4info_audio_track_re = re.compile('([0-9]+)	audio	([^,]+), ([0-9\.]+) secs, ([0-9\.]+) kbps, ([0-9]+) Hz')
-mp4info_tag_re = re.compile(' ([^:]+): (.*)$')
-mp4chaps_chapter_re  = re.compile('Chapter #([0-9]+) - ([0-9:\.]+) - (.*)$')
 
+
+# Text File
+class Text(Container):
+    def __init__(self, file_path):
+        Container.__init__(self, file_path)
+        self.logger = logging.getLogger('mp4pack.text')
+    
+    
+    def read(self):
+        lines = None
+        try:
+            reader = open(self.file_path, 'r')
+            lines = reader.readlines()
+            reader.close()
+            encoding = chardet.detect(''.join(lines))
+            self.logger.debug(encoding['encoding'] + ' encoding detected for ' + self.file_path)
+            for index in range(len(lines)):
+                #lines[index] = unicode(lines[index].strip().decode(encoding['encoding']))
+                lines[index] = unicode(lines[index].strip(), encoding['encoding'])
+        except IOError as error:
+            self.logger.error(error.__str__())
+            lines = None
+        return lines
+    
+    
+    def decode(self):
+        pass
+    
+    
+    def write(self, path):
+        lines = self.encode()
+        if lines != None and len(lines) > 0:
+            try:
+                writer = open(path, 'w')
+                for line in lines:
+                    if line == u'\n':
+                        writer.write(line)
+                    else:
+                        writer.write(line.encode('utf-8'))
+                        writer.write(u'\n')
+                writer.close()
+            except IOError as error:
+                self.logger.error(error.__str__())
+    
+    
+    def encode(self):
+        return None
+    
+    
+    def transcode(self, options):
+        Container.transcode(self, options)
+        self.decode()
+        info = file_util.copy_file_info(self.file_info, options)
+        info['kind'] = options.transcode
+        info = file_util.set_default_info(info)
+        dest_path = file_util.canonic_path(info, self.meta)
+        if file_util.check_and_varify(dest_path, options.overwrite):
+            self.logger.info(u'Transcode ' + self.file_path + u' --> ' + dest_path)
+            self.write(dest_path)
+            file_util.clean_if_not_exist(dest_path)
+    
+    
 
 
 
 # Subtitle Class
-
 class SubtitleBlock(object):
     def __init__(self):
         self.begin = None
@@ -942,6 +1002,10 @@ class SubtitleBlock(object):
     
     def set_end_miliseconds(self, value):
         self.end = value
+    
+    
+    def clear(self):
+        self.lines = list()
     
     
     def add_line(self, value):
@@ -965,138 +1029,41 @@ class SubtitleBlock(object):
         return self.begin != None and self.end != None and self.begin < self.end and len(self.lines) > 0
     
     
-    def remove_lines_that_match(self, expression):
-        original_lines = self.lines
-        self.lines = list()
-        for line in original_lines:
-            if expression.search(line) == None:
-                self.add_line(line)
-        
-        return self.is_valid()
-    
-    
-    def remove_all_lines_if_match(self, expression):
-        for line in self.lines:
-            if expression.search(line) != None:
-                self.lines = list()
-                break
-        
-        return self.is_valid()
-    
-    
-    def replace_in_lines(self, expression, replacement):
-        original_lines = self.lines
-        self.lines = list()
-        for index in range(len(original_lines)):
-            self.add_line(expression.sub(replacement, original_lines[index]))
-        
-        return self.is_valid()
-    
-    
     def encode(self, line_buffer, index):
-        line_buffer.append(index)
+        line_buffer.append(unicode(index))
         begin_time = miliseconds_to_time(self.begin, ',')
         end_time = miliseconds_to_time(self.end, ',')
-        line_buffer.append(str(begin_time) + ' --> ' + str(end_time))
+        line_buffer.append(unicode(begin_time) + ' --> ' + unicode(end_time))
         for line in self.lines:
             line_buffer.append(line)
-        line_buffer.append('\n')
+        line_buffer.append(u'\n')
     
 
 
-class Subtitle(Container):
-    def __init__(self, file_path, input_frame_rate=None, output_frame_rate=None, format=None):
-        Container.__init__(self, file_path)
-        self.logger = logging.getLogger('mp4pack.container.subtitle')
-        self.input_frame_rate = input_frame_rate
-        self.output_frame_rate = output_frame_rate
-        self.subtitle_blocks = []
-        self.load()
-        self.parsed = False
+class Subtitle(Text):
+    def __init__(self, file_path):
+        Text.__init__(self, file_path)
+        self.logger = logging.getLogger('mp4pack.subtitle')
+        self.subtitle_blocks = None
     
     
-    def load(self):
-        Container.load(self)
-    
-    
-    def parse(self):
-        if self.exists:
-            if not self.parsed:
-                file_lines = self.read_subtitle_file()
-                self.decode(file_lines)
-                if self.input_frame_rate != None and self.output_frame_rate != None:
-                    if self.input_frame_rate != self.output_frame_rate:
-                        self.change_framerate()
-                self.filter_lines()
-                self.parsed = True
-    
-    
-    def transcode(self, options):
-        Container.transcode(self, options)
-        info = file_util.copy_file_info(self.file_info, options)
-        info['kind'] = 'srt'
-        dest_path = file_util.canonic_path(info, self.meta)
-        
-        if file_util.check_and_varify(dest_path, options.overwrite):
-            self.filter_lines()
-            self.logger.info('Transcode ' + self.file_path + ' --> ' + dest_path)
-            self.write(dest_path)
-            file_util.clean_if_not_exist(dest_path)
-    
-    
-    def write(self, output_file=None):
-        lines = self.encode()
-        if len(lines) > 0:
-            self.write_text_file(lines, output_file)
-    
-    
-    def read_subtitle_file(self):
-        file_lines = None
-        try:
-            file_reader = open(self.file_path, 'r')
-            file_lines = file_reader.readlines()
-            file_reader.close()
-            file_encoding = chardet.detect(''.join(file_lines))
-            self.logger.debug(file_encoding['encoding'] + ' encoding detected for ' + self.file_path)
-            
-            for index in range(len(file_lines)):
-                file_lines[index] = file_lines[index].strip().decode(file_encoding['encoding']).encode('utf-8')
-        except IOError as error:
-            self.logger.error(error.__str__())
-            file_lines = None
-        
-        return file_lines
-    
-    
-    def encode(self):
-        self.parse()
-        result = ['\n']
-        index = 0
-        for block in self.subtitle_blocks:
-            index += 1
-            block.encode(result, index)
-        return result
-    
-    
-    def decode(self, file_lines):
-        def decode_srt(file_lines):
+    def decode(self):
+        def decode_srt(lines):
             current_block_start = None
             next_block_start = None
             current_block = None
             next_block = None
-            last_line = len(file_lines) - 1
-            
-            for index in range(len(file_lines)):
+            last_line = len(lines) - 1
+            for index in range(len(lines)):
                 # last line
                 if index == last_line and current_block_start != None:
                     next_block_start = index + 1
                     
-                match = srt_time_line.search(file_lines[index])
-                if match != None and file_lines[index - 1].strip().isdigit():
+                match = srt_time_line.search(lines[index])
+                if match != None and lines[index - 1].strip().isdigit():
                     next_block = SubtitleBlock()
                     next_block.set_begin_miliseconds(timecode_to_miliseconds(match.group(1)))
                     next_block.set_end_miliseconds(timecode_to_miliseconds(match.group(2)))
-                    
                     if current_block_start != None:
                         next_block_start = index - 1
                     else:
@@ -1106,7 +1073,7 @@ class Subtitle(Container):
                         next_block = None
                         
                 if next_block_start != None:
-                    for line in file_lines[current_block_start + 2:next_block_start]:
+                    for line in lines[current_block_start + 2:next_block_start]:
                         current_block.add_line(line)
                         
                     if current_block.is_valid():
@@ -1119,12 +1086,12 @@ class Subtitle(Container):
                     next_block = None
         
         
-        def decode_ass(file_lines):
+        def decode_ass(lines):
             index = 0
             formation = None
-            for line in file_lines:
+            for line in lines:
                 if line == '[Events]':
-                    match = ass_formation_line.search(file_lines[index + 1])
+                    match = ass_formation_line.search(lines[index + 1])
                     if match != None:
                         formation = match.group(1).strip().replace(' ','').split(',')
                     break
@@ -1134,7 +1101,7 @@ class Subtitle(Container):
                 start = formation.index('Start')
                 stop = formation.index('End')
                 text = formation.index('Text')
-                for line in file_lines:
+                for line in lines:
                     match = ass_subline.search(line)
                     if match != None:
                         line = match.group(1).strip().split(',')
@@ -1149,14 +1116,14 @@ class Subtitle(Container):
                         subtitle_text = subtitle_text.split('\N')
                         for line in subtitle_text:
                             block.add_line(line)
-                        
+                            
                         if block.is_valid():
                             self.subtitle_blocks.append(block)
         
         
-        def decode_sub(file_lines, frame_rate):
+        def decode_sub(lines, frame_rate):
             frame_rate = frame_rate_to_float(frame_rate)
-            for line in file_lines:
+            for line in lines:
                 if sub_line_begin.search(line):
                     line = line.split('}',2)
                     subtitle_text = line[2].strip().replace('|', '\N')
@@ -1165,28 +1132,63 @@ class Subtitle(Container):
                     block.set_end_miliseconds(frame_to_miliseconds(line[1].strip('{'), frame_rate))
                     for line in subtitle_text:
                         block.add_line(line)
-                    
+                        
                     if block.is_valid():
                         self.subtitle_blocks.append(block)
         
         
-        if self.file_info['kind'] == 'srt':
-            decode_srt(file_lines)
-        elif self.file_info['kind'] == 'sub':
-            decode_sub(file_lines, self.input_frame_rate)
-        elif self.file_info['kind'] in ['ass', 'ssa']:
-            decode_ass(file_lines)
+        if self.subtitle_blocks == None:
+            Text.decode(self)
+            self.subtitle_blocks = list()
+            lines = self.read()
+            if self.file_info['kind'] == 'srt':
+                decode_srt(lines)
+            elif self.file_info['kind'] in ['ass', 'ssa']:
+                decode_ass(lines)
+            elif self.file_info['kind'] == 'sub':
+                decode_sub(lines, 25)
     
     
-    def filter_lines(self):
-        removeindex = []
-        for index in range(len(self.subtitle_blocks)):
-            if not subtitle_line_filter.filter_subtitle_block(self.subtitle_blocks[index]):
-                removeindex.append(index)
-                
-        removeindex.reverse()
-        for index in removeindex:
-            del self.subtitle_blocks[index]
+    def encode(self):
+        result = Text.encode(self)
+        self.decode()
+        if len(self.subtitle_blocks) > 0:
+            result = ['\n']
+            index = 0
+            for block in self.subtitle_blocks:
+                index += 1
+                block.encode(result, index)
+        return result
+    
+    
+    def transcode(self, options):
+        self.decode()
+        info = file_util.copy_file_info(self.file_info, options)
+        info['kind'] = options.transcode
+        info = file_util.set_default_info(info)
+        
+        p = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
+        if 'transcode' in p and 'filter' in p['transcode']:
+            self.filter(p['transcode']['filter'])
+            self.logger.debug('Filtering ' + self.file_path + ' by ' + p['transcode']['filter'].__str__())
+        
+        if options.time_shift != None:
+            self.shift_times(options.time_shift)
+            
+        if options.input_rate != None and options.output_rate != None:
+            input_frame_rate = frame_rate_to_float(options.input_rate)
+            output_frame_rate = frame_rate_to_float(options.output_rate)
+            if input_frame_rate != None and output_frame_rate != None:
+                factor = input_frame_rate / output_frame_rate
+                self.change_framerate(factor)
+        
+        Text.transcode(self, options)
+        
+    
+    
+    def filter(self, sequence_list):
+        if len(sequence_list) > 0:
+            self.subtitle_blocks = subtitle_line_filter.filter(self.subtitle_blocks, sequence_list)
     
     
     def shift_times(self, offset):
@@ -1194,22 +1196,61 @@ class Subtitle(Container):
             block.shift(offset)
     
     
-    def change_framerate(self):
-        input_frame_rate = frame_rate_to_float(self.input_frame_rate)
-        output_frame_rate = frame_rate_to_float(self.output_frame_rate)
-        factor = input_frame_rate/output_frame_rate
+    def change_framerate(self, factor):
         for block in self.subtitle_blocks:
             block.scale_rate(factor)
     
     
 
 
-srt_time_line = re.compile('^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})$')
-ass_subline = re.compile('^Dialogue\s*:\s*(.*)$')
-ass_formation_line = re.compile('^Format\s*:\s*(.*)$')
-ass_condense_line_breaks = re.compile(r'(\\N)+')
-ass_event_command_re = re.compile(r'\{\\[^\}]+\}')
-sub_line_begin = re.compile('^{(\d+)}{(\d+)}')
+
+# Chapter Class
+class Chapter(Text):
+    def __init__(self, file_path):
+        Text.__init__(self, file_path)
+        self.logger = logging.getLogger('mp4pack.chapter')
+        self.chapter_markers = None
+    
+    
+    def decode(self):
+        if self.chapter_markers == None:
+            Text.decode(self)
+            lines = self.read()
+            if lines != None:
+                for index in range(len(lines) - 1):
+                    match_timecode = ogg_chapter_timestamp_re.search(lines[index])
+                    if match_timecode != None:
+                        match_name = ogg_chapter_name_re.search(lines[index + 1])
+                        if match_name != None:
+                            timecode = match_timecode.group(2)
+                            name = match_name.group(2)
+                            self.add_chapter_marker(ChapterMarker(timecode, name))
+    
+    
+    def encode(self):
+        result = Text.encode(self)
+        self.decode()
+        if self.chapter_markers != None and len(self.chapter_markers) > 0:
+            result = list()
+            index = 1
+            for chapter_marker in self.chapter_markers:
+                chapter_marker.encode(result, index)
+                index += 1
+        
+        return result
+    
+    
+    def add_chapter_marker(self, chapter_marker):
+        if chapter_marker != None:
+            if self.chapter_markers == None:
+                self.chapter_markers = list()
+            self.chapter_markers.append(chapter_marker)
+    
+
+
+
+
+
 
 
 
@@ -1241,57 +1282,170 @@ class TagNameResolver(object):
     
     
 
-tag_name_resolver = TagNameResolver()
+
+
+
+
+class FilterSequence(object):
+    def __init__(self, config):
+        self.logger = logging.getLogger('mp4pack.filtersequence')
+        self.config = config
+    
+    
+    def filter(self, block):
+        result = False
+        if block != None:
+            result = block.is_valid()
+        return result
+    
+
+
+class DropFilterSequence(FilterSequence):
+    def __init__(self, config):
+        self.logger = logging.getLogger('mp4pack.dropfiltersequence')
+        FilterSequence.__init__(self, config)
+        self.expression = list()
+    
+    
+    def load(self):
+        o = re.UNICODE
+        if 'case' in self.config and self.config['case'] == 'insensitive':
+            o = o|re.IGNORECASE
+        for e in self.config['expression']:
+            self.expression.append(re.compile(e,o))
+    
+    
+    def filter(self, block):
+        result = FilterSequence.filter(self, block)
+        if result:
+            if self.config['scope'] == 'line':
+                original = block.lines
+                block.clear()
+                for line in original:
+                    keep = True
+                    for e in self.expression:
+                        if e.search(line) != None:
+                            self.logger.debug('Found match in ' + line)
+                            keep = False
+                            break
+                    if keep:
+                        block.add_line(line)
+                        
+            elif self.config['scope'] == 'block':
+                for line in block.lines:
+                    for e in self.expression:
+                        if e.search(line) != None:
+                            block.clear()
+                            break
+                    if not block.is_valid():
+                        break
+                        
+            result = block.is_valid()
+        return result
+    
+
+
+class ReplaceFilterSequence(FilterSequence):
+    def __init__(self, config):
+        self.logger = logging.getLogger('mp4pack.replacefiltersequence')
+        FilterSequence.__init__(self, config)
+        self.expression = list()
+    
+    
+    def load(self):
+        o = re.UNICODE
+        if 'case' in self.config and self.config['case'] == 'insensitive':
+            o = o|re.IGNORECASE
+            
+        if self.config['scope'] == 'block':
+            o = o|re.MULTILINE
+            
+        for e in self.config['expression']:
+            self.expression.append([re.compile(e[0], o), e[1]])
+    
+    
+    def filter(self, block):
+        result = FilterSequence.filter(self, block)
+        if result:
+            if self.config['scope'] == 'line':
+                for e in self.expression:
+                    original = block.lines
+                    block.clear()
+                    for line in original:
+                        block.add_line(e[0].sub(e[1], line))
+                    if not block.is_valid():
+                        break
+                        
+            elif self.config['scope'] == 'block':
+                all_lines = u'\n'.join(block.lines)
+                block.clear()
+                for e in self.expression:
+                    all_lines = e[0].sub(e[1], all_lines).strip()
+                    if not len(all_lines) > 0:
+                        break
+                for line in all_lines.split(u'\n'):
+                    block.add_line(line)
+                    
+            result = block.is_valid()
+        return result
+    
+
 
 class SubtitleLineFilter(object):
     def __init__(self):
-        self.remove_block_filters = []
-        self.remove_line_filters = []
-        self.replace_filters = []
-        
-        from config import subtitle_filter
-        for f in subtitle_filter['remove block']:
-            self.remove_block_filters.append(re.compile(f,re.UNICODE))
-            
-        for f in subtitle_filter['remove line']:
-            self.remove_line_filters.append(re.compile(f,re.UNICODE))
-            
-        for f in subtitle_filter['replace']:
-            self.replace_filters.append([re.compile(f[0], re.MULTILINE|re.UNICODE), f[1]])
+        self.logger = logging.getLogger('mp4pack.subtitlefilter')
+        self.sequence = {}
     
     
-    def filter_subtitle_block(self, block):
+    def find_filter_sequence(self, name):
+        result = None
+        if name in self.sequence:
+            result = self.sequence[name]
+        elif name in subtitle_filter:
+            config = subtitle_filter[name]
+            self.logger.debug('Loading ' + name + ' filter sequence')
+            if config['action'] == 'drop':
+                s = DropFilterSequence(config)
+                s.load()
+                self.sequence[name] = s
+                result = s
+                
+            elif config['action'] == 'replace':
+                s = ReplaceFilterSequence(config)
+                s.load()
+                self.sequence[name] = s
+                result = s
+        return result
+    
+    
+    def filter(self, blocks, sequence_list):
+        for fn in sequence_list:
+            if len(blocks) > 0:
+                fs = self.find_filter_sequence(fn)
+                if fs != None:
+                    next = list()
+                    for block in blocks:
+                        if block.is_valid() and self.filter_block(block, fs):
+                            next.append(block)
+                    blocks = next
+        return blocks
+    
+    
+    def filter_block(self, block, filter_sequence):
         result = block.is_valid()
         if result:
-            for f in self.remove_block_filters:
-                if result:
-                    result = block.remove_all_lines_if_match(f)
-                else:
-                    break
-        
-        if result:
-            for f in self.remove_line_filters:
-                if result:
-                    result = block.remove_lines_that_match(f)
-                else:
-                    break
-        
-        if result:
-            for f in self.replace_filters:
-                if result:
-                    result = block.replace_in_lines(f[0], f[1])
-                else:
-                    break
-        
+            result = filter_sequence.filter(block)
         return result
         
     
 
-subtitle_line_filter = SubtitleLineFilter()
+
+
+
 
 class FileUtil(object):
     def __init__(self):
-        self.logger = logging.getLogger('mp4pack.container.resolver')
+        self.logger = logging.getLogger('mp4pack.container.util')
         self.matroska_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'matroska' ]
         self.mp4_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'mp4' ]
         self.subtitles_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'subtitles' ]
@@ -1360,7 +1514,7 @@ class FileUtil(object):
     def easy_name(self, info, meta):
         result = None
         if 'Name' in meta:
-            result = info['Name']
+            result = meta['Name']
         elif 'Name' in info:
             result = info['Name']
         return result
@@ -1603,6 +1757,7 @@ class FileUtil(object):
                     self.logger.debug(output)
                     result = True
         else:
+            self.logger.info(message)
             print encode_command(command)
         return output, error
     
@@ -1632,7 +1787,8 @@ class FileUtil(object):
     
     
 
-file_util = FileUtil()
+
+
 
 def timecode_to_miliseconds(timecode):
     result = None
@@ -1750,11 +1906,18 @@ def format_for_subler_tag(value):
     return value
 
 
-tag_manager = TagManager()
-full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
-descriptive_time_format = re.compile('(?:([0-9]{,2})h)?(?:([0-9]{,2})m)?(?:([0-9]{,2})s)?(?:([0-9]+))?')
-sentence_end = re.compile('[.!?]')
-
+def load_media_file(file_path):
+    f = None
+    file_type = os.path.splitext(file_path)[1].strip('.')
+    if file_type in file_util.mp4_kinds:
+        f = Mpeg4(file_path)
+    elif file_type in file_util.matroska_kinds:
+        f = Matroska(file_path)
+    elif file_type in file_util.subtitles_kinds:
+        f = Subtitle(file_path)
+    elif file_type in file_util.chapter_kinds:
+        f = Chapter(file_path)
+    return f
 
 
 
@@ -1793,3 +1956,50 @@ def format_value(value):
 def format_track(track):
     return u' | '.join([u'{0}: {1}'.format(key, track[key]) for key in sorted(set(track))])
 
+
+
+tag_manager = TagManager()
+tag_name_resolver = TagNameResolver()
+subtitle_line_filter = SubtitleLineFilter()
+file_util = FileUtil()
+
+ar_16_9 = float(16) / float(9)
+
+full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
+descriptive_time_format = re.compile('(?:([0-9]{,2})h)?(?:([0-9]{,2})m)?(?:([0-9]{,2})s)?(?:([0-9]+))?')
+sentence_end = re.compile('[.!?]')
+
+ogg_chapter_timestamp_re = re.compile('CHAPTER([0-9]{,2})=([0-9]{,2}:[0-9]{,2}:[0-9]{,2}\.[0-9]+)')
+ogg_chapter_name_re = re.compile('CHAPTER([0-9]{,2})NAME=(.*)', re.UNICODE)
+
+mkvinfo_start_re = re.compile('\+ EBML head')
+mkvinfo_segment_tracks_re = re.compile('\+ Segment tracks')
+mkvinfo_a_track_re = re.compile('\+ A track')
+mkvinfo_track_number_re = re.compile('\+ Track number: ([0-9]+)')
+mkvinfo_track_type_re = re.compile('\+ Track type: (.*)')
+mkvinfo_codec_id_re = re.compile('\+ Codec ID: (.*)')
+mkvinfo_language_re = re.compile('\+ Language: ([a-z]+)')
+mkvinfo_name_re = re.compile('\+ Name: (.*)')
+mkvinfo_video_fps_re = re.compile('\+ Default duration: .*ms \((.*) fps for a video track\)')
+mkvinfo_audio_sampling_frequency_re = re.compile('\+ Sampling frequency: ([0-9]+)')
+mkvinfo_video_pixel_width_re = re.compile('\+ Pixel width: ([0-9]+)')
+mkvinfo_video_pixel_height_re = re.compile('\+ Pixel height: ([0-9]+)')
+mkvinfo_chapters_re = re.compile('\+ Chapters')
+mkvinfo_chapter_atom_re = re.compile('\+ ChapterAtom')
+mkvinfo_chapter_start_re = re.compile('\+ ChapterTimeStart: ([0-9\.:]+)')
+mkvinfo_chapter_string_re = re.compile('\+ ChapterString: (.*)')
+mkvinfo_chapter_language_re = re.compile('\+ ChapterLanguage: ([a-z]+)')
+mkvinfo_line_start_re = re.compile('\+')
+
+mp4info_video_track_re = re.compile('([0-9]+)	video	([^,]+), ([0-9\.]+) secs, ([0-9\.]+) kbps, ([0-9]+)x([0-9]+) @ ([0-9\.]+) fps')
+mp4info_h264_video_codec_re = re.compile('H264 ([^@]+)@([0-9\.]+)')
+mp4info_audio_track_re = re.compile('([0-9]+)	audio	([^,]+), ([0-9\.]+) secs, ([0-9\.]+) kbps, ([0-9]+) Hz')
+mp4info_tag_re = re.compile(' ([^:]+): (.*)$')
+mp4chaps_chapter_re  = re.compile('Chapter #([0-9]+) - ([0-9:\.]+) - (.*)$')
+
+srt_time_line = re.compile('^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})$')
+ass_subline = re.compile('^Dialogue\s*:\s*(.*)$')
+ass_formation_line = re.compile('^Format\s*:\s*(.*)$')
+ass_condense_line_breaks = re.compile(r'(\\N)+')
+ass_event_command_re = re.compile(r'\{\\[^\}]+\}')
+sub_line_begin = re.compile('^{(\d+)}{(\d+)}')
