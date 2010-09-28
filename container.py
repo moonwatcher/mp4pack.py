@@ -9,7 +9,8 @@ import copy
 import textwrap
 
 from config import repository_config
-from config import subtitle_filter
+from config import db_config
+
 from db import TagManager
 
 # Container super Class
@@ -17,20 +18,23 @@ from db import TagManager
 class Container(object):
     def __init__(self, file_path):
         self.logger = logging.getLogger('mp4pack.container')
-        self.file_path = None
         self.meta = None
         self.related = None
         self.file_path = file_path
-        self.file_info = file_util.parse_info(self.file_path)
-        self.related = file_util.related(self.file_path)
-        if self.load_meta():
-            self.logger.debug('Metadata loaded for ' + self.file_path)
+        self.file_info = file_util.decode_path_info(self.file_path)
+        if self.valid():
+            self.related = file_util.related(self.file_path)
+            self.load_meta()
         else:
-            self.logger.debug('Failed to load meta for ' + self.file_path)
+            self.logger.warning(u'Unknown file name schema ' + self.file_path)
+    
+    
+    def valid(self):
+        return self.file_info != None
     
     
     def load(self):
-        return
+        pass
     
     
     def load_meta(self):
@@ -180,7 +184,7 @@ class Container(object):
         dest_path = file_util.canonic_path(info, self.meta)
         if file_util.check_and_varify(dest_path, options.overwrite):
             command = ['rsync', self.file_path, dest_path]
-            message = 'Copy ' + self.file_path + ' --> ' + dest_path
+            message = u'Copy ' + self.file_path + u' --> ' + dest_path
             file_util.execute_command(command, message, options.debug)
             file_util.clean_if_not_exist(dest_path)
             if options.md5:
@@ -304,12 +308,13 @@ class Container(object):
 
 class AVContainer(Container):
     def __init__(self, file_path):
+        self.logger = logging.getLogger('mp4pack.av')
         Container.__init__(self, file_path)
-        self.logger = logging.getLogger('mp4pack.avcontainer')
-        self.tracks = list()
-        self.chapter_markers = list()
-        self.tags = dict()
-        self.load()
+        if self.valid():
+            self.tracks = list()
+            self.chapter_markers = list()
+            self.tags = dict()
+            self.load()
         
     
     
@@ -549,8 +554,8 @@ class ChapterMarker(object):
 # Matroska Class
 class Matroska(AVContainer):
     def __init__(self, file_path):
-        AVContainer.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.matroska')
+        AVContainer.__init__(self, file_path)
     
     
     def _line_depth(self, mkvinfo_line):
@@ -738,8 +743,8 @@ class Matroska(AVContainer):
 # Mpeg4 Class
 class Mpeg4(AVContainer):
     def __init__(self, file_path):
-        AVContainer.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.mp4')
+        AVContainer.__init__(self, file_path)
     
     
     def _parse_tag(self, mp4info_report_line):
@@ -926,8 +931,8 @@ class Mpeg4(AVContainer):
 # Text File
 class Text(Container):
     def __init__(self, file_path):
-        Container.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.text')
+        Container.__init__(self, file_path)
     
     
     def read(self):
@@ -1042,9 +1047,10 @@ class SubtitleBlock(object):
 
 class Subtitle(Text):
     def __init__(self, file_path):
-        Text.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.subtitle')
-        self.subtitle_blocks = None
+        Text.__init__(self, file_path)
+        if self.valid():
+            self.subtitle_blocks = None
     
     
     def decode(self):
@@ -1188,7 +1194,7 @@ class Subtitle(Text):
     
     def filter(self, sequence_list):
         if len(sequence_list) > 0:
-            self.subtitle_blocks = subtitle_line_filter.filter(self.subtitle_blocks, sequence_list)
+            self.subtitle_blocks = subtitle_filter.filter(self.subtitle_blocks, sequence_list)
     
     
     def shift_times(self, offset):
@@ -1207,9 +1213,10 @@ class Subtitle(Text):
 # Chapter Class
 class Chapter(Text):
     def __init__(self, file_path):
-        Text.__init__(self, file_path)
         self.logger = logging.getLogger('mp4pack.chapter')
-        self.chapter_markers = None
+        Text.__init__(self, file_path)
+        if self.valid():
+            self.chapter_markers = None
     
     
     def decode(self):
@@ -1260,8 +1267,7 @@ class TagNameResolver(object):
         self.canonic_map = dict()
         self.mp4info_map = dict()
         
-        from config import tag_name
-        for tag in tag_name:
+        for tag in db_config['tag']:
             self.canonic_map[tag[0]] = tag
             if tag[2] != None:
                 self.mp4info_map[tag[2]] = tag
@@ -1391,7 +1397,7 @@ class ReplaceFilterSequence(FilterSequence):
     
 
 
-class SubtitleLineFilter(object):
+class SubtitleFilter(object):
     def __init__(self):
         self.logger = logging.getLogger('mp4pack.subtitlefilter')
         self.sequence = {}
@@ -1399,10 +1405,12 @@ class SubtitleLineFilter(object):
     
     def find_filter_sequence(self, name):
         result = None
+        
+        from config import subtitle_config
         if name in self.sequence:
             result = self.sequence[name]
-        elif name in subtitle_filter:
-            config = subtitle_filter[name]
+        elif name in subtitle_config:
+            config = subtitle_config[name]
             self.logger.debug('Loading ' + name + ' filter sequence')
             if config['action'] == 'drop':
                 s = DropFilterSequence(config)
@@ -1464,12 +1472,11 @@ class FileUtil(object):
             self.file_name_schema_re[media_kind] = re.compile(repository_config['Media Kind'][media_kind]['schema'])
     
     
-    def parse_info(self, file_path):
-        # <Volume>/<Media Kind>/<Kind>/<Profile>(/<Show>/<Season>)?/(IMDb<IMDB ID> <Name>|<Show> <Code> <Name>).<Extension>
+    def decode_path_info(self, file_path):
+        # <Volume>/<Media Kind>/<Kind>/<Profile>(/<Show>/<Season>)?(/<Language>)?/(IMDb<IMDB ID> <Name>|<Show> <Code> <Name>).<Extension>
         media_kind = None
         info = None
         if file_path != None:
-            match = None
             for mk, mk_re in self.file_name_schema_re.iteritems():
                 match = mk_re.search(os.path.basename(file_path))
                 if match != None:
@@ -1491,22 +1498,15 @@ class FileUtil(object):
                     info['TV Episode #'] = int(match.group(4))
                     info['Name'] = match.group(5)
                     info['kind'] = match.group(6)
-            
-            #if info['kind'] in repository_config['Kind']:
-            #    if 'volume' in repository_config['Kind'][info['kind']]['default']:
-            #        info['volume'] = repository_config['Kind'][info['kind']]['default']['volume']
-                    
-            #    if 'profile' in repository_config['Kind'][info['kind']]['default']:
-            #        info['profile'] = repository_config['Kind'][info['kind']]['default']['profile']
-            
-            if info['Name'] == None or info['Name'] == '':
-                del info['Name']
                 
-            prefix = os.path.dirname(file_path)
-            if info['kind'] in self.subtitles_kinds:
-                prefix, lang = os.path.split(prefix)
-                if lang in repository_config['Language']:
-                    info['language'] = lang
+                if info['Name'] == None or info['Name'] == '':
+                    del info['Name']
+                
+                prefix = os.path.dirname(file_path)
+                if info['kind'] in self.subtitles_kinds:
+                    prefix, lang = os.path.split(prefix)
+                    if lang in repository_config['Language']:
+                        info['language'] = lang
                     
         return info
     
@@ -1607,7 +1607,7 @@ class FileUtil(object):
     def related(self, path):
         # <Volume>/<Media Kind>/<Kind>/<Profile>(/<Show>/<Season>)?/(IMDb<IMDB ID> <Name>|<Show> <Code> <Name>).<Extension>
         related = dict()
-        info = self.parse_info(path)
+        info = self.decode_path_info(path)
         meta = {}
         for v in repository_config['Volume']:
             for k in self.subtitles_kinds:
@@ -1754,7 +1754,7 @@ class FileUtil(object):
                 if error != None and len(error) > 0:
                     self.logger.error(error)
                 if output != None and len(output) > 0:
-                    self.logger.debug(output)
+                    #self.logger.debug(output)
                     result = True
         else:
             self.logger.info(message)
@@ -1917,6 +1917,8 @@ def load_media_file(file_path):
         f = Subtitle(file_path)
     elif file_type in file_util.chapter_kinds:
         f = Chapter(file_path)
+    if f.file_info == None:
+        f = None
     return f
 
 
@@ -1958,10 +1960,10 @@ def format_track(track):
 
 
 
+file_util = FileUtil()
 tag_manager = TagManager()
 tag_name_resolver = TagNameResolver()
-subtitle_line_filter = SubtitleLineFilter()
-file_util = FileUtil()
+subtitle_filter = SubtitleFilter()
 
 ar_16_9 = float(16) / float(9)
 

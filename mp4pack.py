@@ -21,13 +21,16 @@ invisable_file_path = re.compile(r'^\..*$')
 
 
 def load_input_files(path, file_filter, recursive):
-    files = list()
+    known = list()
+    unknown = list()
     file_paths = list_input_files(path, file_filter, recursive)
-    for f in file_paths:
-        mf = load_media_file(f)
+    for fp in file_paths:
+        mf = load_media_file(fp)
         if mf != None:
-            files.append(mf)
-    return files
+            known.append(mf)
+        else:
+            unknown.append(fp)
+    return known, unknown
 
 
 def list_input_files(path, file_filter, recursive):
@@ -56,7 +59,6 @@ def load_options():
     from optparse import OptionParser
     from optparse import OptionGroup
     from config import repository_config
-    from config import subtitle_filter
     
     available_profiles = list()
     for k in repository_config['Kind'].keys():
@@ -135,7 +137,7 @@ def load_options():
 def preform_operations(files, options):
     if options.info:
         for f in files:
-            print f.info(options)
+            print f.info(options).encode('utf-8')
             
     if options.copy:
         for f in files:
@@ -183,7 +185,7 @@ def preform_operations(files, options):
 
 
 def main():
-    print 'mp4pack.py a media collection manager\nLior Galanti lior.galanti@gmail.com\n'
+    print 'mp4pack.py a media collection manager\nLior Galanti lior.galanti@gmail.com\n'.encode('utf-8')
     options, args = load_options()
     logging.basicConfig(level=log_levels[options.verbosity])
     logger = logging.getLogger('mp4pack')
@@ -195,8 +197,19 @@ def main():
     file_filter = load_file_filter(options.file_filter)
     input_path = os.path.abspath(input_path)
     logger.info('Scanning for files in ' + input_path)
-    files = load_input_files(input_path, file_filter, options.recursive)
-    preform_operations(files, options)
+    known, unknown = load_input_files(input_path, file_filter, options.recursive)
+    
+    if len(known) > 0:
+        preform_operations(known, options)
+        logger.info(u'{0} valid files were found in {1}'.format(str(len(known)), input_path))
+        for p in known:
+            logger.info(u'Found {0}'.format(p.file_path))
+        
+    if len(unknown) > 0:
+        logger.warning(u'{0} file paths could not be understood'.format(str(len(unknown))))
+        for p in unknown:
+            logger.warning(u'{0} is an unknown path'.format(p))
+    
     
     indent = repository_config['Display']['indent']
     margin = repository_config['Display']['margin']

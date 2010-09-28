@@ -4,15 +4,16 @@
 import re
 import os
 import logging
-import urllib
-import chardet
 from datetime import datetime
 import xml.etree.cElementTree as ElementTree
 
+import urllib
+import chardet
 import pymongo
 from pymongo.objectid import ObjectId
 from pymongo import Connection
-from config import tag_config
+
+from config import db_config
 
 
 class ResourceHandler(object):
@@ -24,7 +25,7 @@ class ResourceHandler(object):
     
     
     def local(self):
-        return url_to_cache.sub(tag_config['cache'], self.remote_url)
+        return url_to_cache.sub(db_config['cache'], self.remote_url)
     
     
     def cache(self):
@@ -146,7 +147,7 @@ class TmdbJsonHandler(JsonHandler):
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace('/' + tag_config['tmdb']['apikey'], '')
+        result = result.replace('/' + db_config['tmdb']['apikey'], '')
         return result
     
     
@@ -169,7 +170,7 @@ class TvdbXmlHandler(XmlHandler):
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace('/' + tag_config['tvdb']['apikey'], '')
+        result = result.replace('/' + db_config['tvdb']['apikey'], '')
         result = result.replace('/all', '')
         return result
     
@@ -178,7 +179,7 @@ class TvdbXmlHandler(XmlHandler):
 
 class TvdbImageHandler(ImageHandler):
     def __init__(self, url):
-        ImageHandler.__init__(self, tag_config['tvdb']['urls']['Banner.getImage'] % url)
+        ImageHandler.__init__(self, db_config['tvdb']['urls']['Banner.getImage'] % url)
         self.logger = logging.getLogger('mp4pack.image.tvdb')
     
     
@@ -190,7 +191,7 @@ class TagManager(object):
     def __init__(self):
         self.logger = logging.getLogger('mp4pack.tag')
         self.connection = Connection()
-        self.db = self.connection[tag_config['db']['name']]
+        self.db = self.connection[db_config['db']['name']]
         self.genre_map = None
         
         self.genres = self.db.genres
@@ -205,12 +206,11 @@ class TagManager(object):
     
     
     def base_init(self):
-        from config import itmf_genre
-        for g in itmf_genre:
+        from config import base_config
+        for g in base_config['genre']:
             self.insert_genre(g)
         
-        from config import tvshow_map
-        for s in tvshow_map:
+        for s in base_config['tvshow']:
             self.map_show(s[1], s[0])
     
     
@@ -385,7 +385,7 @@ class TagManager(object):
     
     def _update_tmdb_movie(self, tmdb_id):
         _movie = self.movies.find_one({'tmdb_id':tmdb_id})
-        url = tag_config['tmdb']['urls']['Movie.getInfo']  % (tmdb_id)
+        url = db_config['tmdb']['urls']['Movie.getInfo']  % (tmdb_id)
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element != None:
@@ -426,7 +426,7 @@ class TagManager(object):
     
     def _find_tmdb_id_by_imdb_id(self, imdb_id):
         _tmdb_id = None
-        url = tag_config['tmdb']['urls']['Movie.imdbLookup'] % (imdb_id)
+        url = db_config['tmdb']['urls']['Movie.imdbLookup'] % (imdb_id)
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element != None:
@@ -459,7 +459,7 @@ class TagManager(object):
     
     def _update_tmdb_person(self, tmdb_id):
         _person = self.people.find_one({'tmdb_id':tmdb_id})
-        url = tag_config['tmdb']['urls']['Person.getInfo'] % (tmdb_id)
+        url = db_config['tmdb']['urls']['Person.getInfo'] % (tmdb_id)
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element != None:
@@ -485,7 +485,7 @@ class TagManager(object):
     def _find_tmdb_person_id_by_name(self, name):
         result = None
         name = collapse_whitespace.sub(' ', name)
-        url = tag_config['tmdb']['urls']['Person.search'] % (format_tmdb_query(name))
+        url = db_config['tmdb']['urls']['Person.search'] % (format_tmdb_query(name))
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element != None:
@@ -545,7 +545,7 @@ class TagManager(object):
     def _update_tvdb_show_tree(self, tvdb_id):
         show = self.shows.find_one({'tvdb_id':tvdb_id})
         if show != None:
-            url = tag_config['tvdb']['urls']['Show.getInfo'] % (tvdb_id)
+            url = db_config['tvdb']['urls']['Show.getInfo'] % (tvdb_id)
             element = TvdbXmlHandler(url).element()
             show = self._update_tvdb_show(show, element)
             self._update_tvdb_episodes(show, element)

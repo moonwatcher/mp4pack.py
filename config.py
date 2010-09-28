@@ -4,373 +4,368 @@
 tmdb_apikey = 'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = '7B3B400B0146EA83'
 
-repository_config = {}
-repository_config['Display'] = {
-    'wrap':80, 
-    'indent':25, 
-    'margin':2
-}
-repository_config['Action'] = {
-    'pack': ['all', 'mkv'],
-    'transcode':['m4v', 'mkv', 'srt', 'txt'],
-    'extract':['all', 'srt', 'ass', 'txt'],
-    'update':['all', 'srt']
-}
-repository_config['Codec'] = {
-    'Audio':{
-        'ac3':'ac-3|AC3',
-        'aac':'AAC',
-        'dts':'DTS',
-        'mp3':'MPEG/L3'
+repository_config = {
+    'Display':{
+        'wrap':80, 
+        'indent':25, 
+        'margin':2
     },
-    'Subtitle':{
-        'srt':'S_TEXT/UTF8',
-        'ass':'S_TEXT/ASS'
-    }
-}
-repository_config['Language'] = {
-    'heb':'Hebrew', 
-    'eng':'English',
-    'swe':'Swedish'
-}
-repository_config['Volume'] = {
-    'alpha':'/Users/lg/Downloads/pool/alpha',
-    'epsilon':'/Users/lg/Downloads/pool/epsilon'
-}
-repository_config['Media Kind'] = {
-    'tvshow':{'schema':'^(.*) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10},
-    'movie':{'schema':'^IMDb(tt[0-9]+) ?(.*)\.([^\.]+)$', 'name':'Movie', 'stik':9},
-    #'music':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Music', 'stik':1},
-    #'audiobook':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2}
-}
-repository_config['Kind'] = {
-    'm4v':{
-        'container':'mp4',
-        'default':{'volume':'epsilon'},
-        'Profile':{
-            'universal':{
-                'description':'an SD profile that decodes on every cabac capable apple device',
-                'transcode':{
-                    'options':{
-                        '--quality':18,
-                        '--encoder':'x264',
-                        '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1',
-                        '--maxWidth':720
-                    },
-                    'flags':['--large-file'],
-                    'audio':[
-                        [
-                            {
-                                'from': {'kind':'ac3', 'type':'audio'},
-                                'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
-                            }, 
-                            {
-                                'from': {'kind':'ac3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
-                            }
-                        ],
-                        [
-                            {
-                                'from': {'kind':'aac', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            },
-                            {
-                                'from': {'kind':'mp3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            }
-                        ],
-                    ]
-                },
-                'pack':{
-                    'related':(
-                        {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                        {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                        {'kind':'txt', 'profile':'chapter'}
-                    ),
-                    'tracks':(
-                        {'type':'video'},
-                        {'type':'audio', 'kind':'ac3'},
-                        {'type':'audio', 'kind':'mp3'},
-                        {'type':'audio', 'kind':'aac'}
-                    )
-                }
-            },
-            'appletv':{
-                'description':'Intel based AppleTV profile',
-                'transcode':{
-                    'options':{
-                        '--quality':22,
-                        '--encoder':'x264',
-                        '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
-                        '--maxWidth':1280
-                    },
-                    'flags':['--large-file'],
-                    'audio':[
-                        [
-                            {
-                                'from': {'kind':'ac3', 'type':'audio'},
-                                'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
-                            }, 
-                            {
-                                'from': {'kind':'ac3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
-                            }
-                        ],
-                        [
-                            {
-                                'from': {'kind':'aac', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            }
-                        ],
-                        [
-                            {
-                                'from': {'kind':'mp3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            }
-                        ],
-                    ]
-                },
-                'pack':{
-                    'related':(
-                        {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                        {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                        {'kind':'txt', 'profile':'chapter'}
-                    ),
-                    'tracks':(
-                        {'type':'video'},
-                        {'type':'audio', 'kind':'ac3'},
-                        {'type':'audio', 'kind':'mp3'},
-                        {'type':'audio', 'kind':'aac'}
-                    )
-                }
-            },
-            'ipod':{
-                'description':'All iPod touch models profile',
-                'transcode':{
-                    'options':{
-                        '--quality':21,
-                        '--encoder':'x264',
-                        '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
-                        '--maxWidth':480
-                    },
-                    'audio':[
-                        [
-                            {
-                                'from': {'kind':'ac3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            }
-                        ],
-                        [
-                            {
-                                'from': {'kind':'aac', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            },
-                        ],
-                        [
-                            {
-                                'from': {'kind':'mp3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            }
-                        ],
-                    ]
-                },
-                'pack':{
-                    'related':(
-                        {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                        {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                        {'kind':'txt', 'profile':'chapter'}
-                    ),
-                    'tracks':(
-                        {'type':'video'},
-                        {'type':'audio', 'kind':'ac3'},
-                        {'type':'audio', 'kind':'mp3'},
-                        {'type':'audio', 'kind':'aac'}
-                    )
-                }
-            },
-            'high':{
-                'description':'High profile',
-                'transcode':{
-                    'options':{
-                        '--quality':18,
-                        '--encoder':'x264',
-                        '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
-                        '--maxWidth':1280
-                    },
-                    'flags':['--large-file'],
-                    'audio':[
-                        [
-                            {
-                                'from': {'kind':'ac3', 'type':'audio'},
-                                'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
-                            }, 
-                            {
-                                'from': {'kind':'ac3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'}
-                            }
-                        ],
-                        [
-                            {
-                                'from': {'kind':'aac', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            },
-                            {
-                                'from': {'kind':'mp3', 'type':'audio'},
-                                'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                            }
-                        ],
-                    ]
-                },
-                'pack':{
-                    'related':(
-                        {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                        {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                        {'kind':'txt', 'profile':'chapter'}
-                    ),
-                    'tracks':(
-                        {'type':'video'},
-                        {'type':'audio', 'kind':'ac3'},
-                        {'type':'audio', 'kind':'mp3'},
-                        {'type':'audio', 'kind':'aac'}
-                    )
-                }
-            }
-        }
+    'Action':{
+        'pack': ['all', 'mkv'],
+        'transcode':['m4v', 'mkv', 'srt', 'txt'],
+        'extract':['all', 'srt', 'ass', 'txt'],
+        'update':['all', 'srt']
     },
-    
-    'm4a':{
-        'container':'mp4',
-        'default':{'volume':'alpha'},
-        'Profile':{
-            'lossless':{},
-            'portable':{}
-        }
-    },
-    
-    'mkv':{
-        'container':'matroska',
-        'default':{'volume':'epsilon'},
-        'Profile':{
-            'sd':{
-                'pack':{
-                    'related':[
-                        {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                        {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                        {'kind':'txt', 'profile':'chapter'}
-                    ],
-                    'tracks':[
-                        {'type':'video'},
-                        {'type':'audio', 'kind':'ac3'},
-                        {'type':'audio', 'kind':'mp3'},
-                        {'type':'audio', 'kind':'aac'},
-                        {'type':'audio', 'kind':'dts'}
-                    ]
-                }
-            },
-            '720':{
-                'pack':{
-                    'related':[
-                        {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                        {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                        {'kind':'txt', 'profile':'chapter'}
-                    ],
-                    'tracks':[
-                        {'type':'video'},
-                        {'type':'audio', 'kind':'ac3'},
-                        {'type':'audio', 'kind':'mp3'},
-                        {'type':'audio', 'kind':'aac'},
-                        {'type':'audio', 'kind':'dts'}
-                    ]
-                }
-            },
-            '1080':{
-                'pack':{
-                    'related':[
-                        {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                        {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                        {'kind':'txt', 'profile':'chapter'}
-                    ],
-                    'tracks':[
-                        {'type':'video'},
-                        {'type':'audio', 'kind':'ac3'},
-                        {'type':'audio', 'kind':'mp3'},
-                        {'type':'audio', 'kind':'aac'},
-                        {'type':'audio', 'kind':'dts'}
-                    ]
-                }
-            }
-        }
-    },
-    
-    'srt':{
-        'container':'subtitles',
-        'default':{
-            'profile':'original', 
-            'volume':'alpha'
+    'Codec':{
+        'Audio':{
+            'ac3':'ac-3|AC3',
+            'aac':'AAC',
+            'dts':'DTS',
+            'mp3':'MPEG/L3'
         },
-        'Profile':{
-            'original':{
-                'pack':{
-                    'tracks':(
-                        {'type':'subtitles', 'language':'heb', 'kind':'srt'},
-                        {'type':'subtitles', 'language':'eng', 'kind':'srt'}
-                    )
-                }
-            },
-            'clean':{
-                'transcode':{
-                    'filter':['comment', 'typo']
-                },
-                'update':{
-                    'smart':{'language':'swe', 'Name':'Default', 'order':['heb', 'eng'], 'height':0.1},
-                    'related':[
-                        {
-                            'from': {'language':'heb', 'kind':'srt'},
-                            'to': {'height':0.1, 'Name':'Normal'}
+        'Subtitle':{
+            'srt':'S_TEXT/UTF8',
+            'ass':'S_TEXT/ASS'
+        }
+    },
+    'Language':{
+        'heb':'Hebrew', 
+        'eng':'English',
+        'swe':'Swedish'
+    },
+    'Volume':{
+        'alpha':'/Users/lg/Downloads/pool/alpha',
+        'epsilon':'/Users/lg/Downloads/pool/epsilon'
+    },
+    'Media Kind':{
+        'tvshow':{'schema':'^(.+) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10},
+        'movie':{'schema':'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', 'name':'Movie', 'stik':9},
+        #'music':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Music', 'stik':1},
+        #'audiobook':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2}
+    },
+    'Kind':{
+        'm4v':{
+            'container':'mp4',
+            'default':{'volume':'epsilon'},
+            'Profile':{
+                'universal':{
+                    'description':'an SD profile that decodes on every cabac capable apple device',
+                    'transcode':{
+                        'options':{
+                            '--quality':18,
+                            '--encoder':'x264',
+                            '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1',
+                            '--maxWidth':720
                         },
-                        {
-                            'from': {'language':'eng', 'kind':'srt'},
-                            'to': {'height':0.1, 'Name':'Normal'}
-                        }
-                    ]
+                        'flags':['--large-file'],
+                        'audio':[
+                            [
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
+                                }, 
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
+                                }
+                            ],
+                            [
+                                {
+                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                },
+                                {
+                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                }
+                            ],
+                        ]
+                    },
+                    'pack':{
+                        'related':(
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'}
+                        ),
+                        'tracks':(
+                            {'type':'video'},
+                            {'type':'audio', 'kind':'ac3'},
+                            {'type':'audio', 'kind':'mp3'},
+                            {'type':'audio', 'kind':'aac'}
+                        )
+                    }
+                },
+                'appletv':{
+                    'description':'Intel based AppleTV profile',
+                    'transcode':{
+                        'options':{
+                            '--quality':22,
+                            '--encoder':'x264',
+                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
+                            '--maxWidth':1280
+                        },
+                        'flags':['--large-file'],
+                        'audio':[
+                            [
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
+                                }, 
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
+                                }
+                            ],
+                            [
+                                {
+                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                }
+                            ],
+                            [
+                                {
+                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                }
+                            ],
+                        ]
+                    },
+                    'pack':{
+                        'related':(
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'}
+                        ),
+                        'tracks':(
+                            {'type':'video'},
+                            {'type':'audio', 'kind':'ac3'},
+                            {'type':'audio', 'kind':'mp3'},
+                            {'type':'audio', 'kind':'aac'}
+                        )
+                    }
+                },
+                'ipod':{
+                    'description':'All iPod touch models profile',
+                    'transcode':{
+                        'options':{
+                            '--quality':21,
+                            '--encoder':'x264',
+                            '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
+                            '--maxWidth':480
+                        },
+                        'audio':[
+                            [
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                }
+                            ],
+                            [
+                                {
+                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                },
+                            ],
+                            [
+                                {
+                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                }
+                            ],
+                        ]
+                    },
+                    'pack':{
+                        'related':(
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'}
+                        ),
+                        'tracks':(
+                            {'type':'video'},
+                            {'type':'audio', 'kind':'ac3'},
+                            {'type':'audio', 'kind':'mp3'},
+                            {'type':'audio', 'kind':'aac'}
+                        )
+                    }
+                },
+                'high':{
+                    'description':'High profile',
+                    'transcode':{
+                        'options':{
+                            '--quality':18,
+                            '--encoder':'x264',
+                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
+                            '--maxWidth':1280
+                        },
+                        'flags':['--large-file'],
+                        'audio':[
+                            [
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
+                                }, 
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'}
+                                }
+                            ],
+                            [
+                                {
+                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                },
+                                {
+                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                }
+                            ],
+                        ]
+                    },
+                    'pack':{
+                        'related':(
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'}
+                        ),
+                        'tracks':(
+                            {'type':'video'},
+                            {'type':'audio', 'kind':'ac3'},
+                            {'type':'audio', 'kind':'mp3'},
+                            {'type':'audio', 'kind':'aac'}
+                        )
+                    }
                 }
             }
-        }
-    },
-    
-    'ass':{
-        'container':'subtitles',
-        'default':{'profile':'original', 'volume':'alpha'},
-        'Profile':{
-            'original':{
-                'pack':{
-                    'tracks':(
-                        {'type':'subtitles', 'language':'heb', 'kind':'ass'},
-                        {'type':'subtitles', 'language':'eng', 'kind':'ass'}
-                    )
+        },
+        'm4a':{
+            'container':'mp4',
+            'default':{'volume':'alpha'},
+            'Profile':{
+                'lossless':{},
+                'portable':{}
+            }
+        },
+        'mkv':{
+            'container':'matroska',
+            'default':{'volume':'epsilon'},
+            'Profile':{
+                'sd':{
+                    'pack':{
+                        'related':[
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'}
+                        ],
+                        'tracks':[
+                            {'type':'video'},
+                            {'type':'audio', 'kind':'ac3'},
+                            {'type':'audio', 'kind':'mp3'},
+                            {'type':'audio', 'kind':'aac'},
+                            {'type':'audio', 'kind':'dts'}
+                        ]
+                    }
+                },
+                '720':{
+                    'pack':{
+                        'related':[
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'}
+                        ],
+                        'tracks':[
+                            {'type':'video'},
+                            {'type':'audio', 'kind':'ac3'},
+                            {'type':'audio', 'kind':'mp3'},
+                            {'type':'audio', 'kind':'aac'},
+                            {'type':'audio', 'kind':'dts'}
+                        ]
+                    }
+                },
+                '1080':{
+                    'pack':{
+                        'related':[
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'}
+                        ],
+                        'tracks':[
+                            {'type':'video'},
+                            {'type':'audio', 'kind':'ac3'},
+                            {'type':'audio', 'kind':'mp3'},
+                            {'type':'audio', 'kind':'aac'},
+                            {'type':'audio', 'kind':'dts'}
+                        ]
+                    }
                 }
             }
-        }
-    },
-    
-    'sub':{
-        'container':'subtitles',
-        'default':{'profile':'original', 'volume':'alpha'},
-        'Profile':{
-            'original':{}
-        }
-    },
-    
-    'txt':{
-        'container':'chapters',
-        'default':{'profile':'chapter', 'volume':'alpha'},
-        'Profile':{
-            'chapter':{}
+        },
+        'srt':{
+            'container':'subtitles',
+            'default':{
+                'profile':'original', 
+                'volume':'alpha'
+            },
+            'Profile':{
+                'original':{
+                    'pack':{
+                        'tracks':(
+                            {'type':'subtitles', 'language':'heb', 'kind':'srt'},
+                            {'type':'subtitles', 'language':'eng', 'kind':'srt'}
+                        )
+                    }
+                },
+                'clean':{
+                    'transcode':{
+                        'filter':['comment', 'typo']
+                    },
+                    'update':{
+                        'smart':{'language':'swe', 'Name':'Default', 'order':['heb', 'eng'], 'height':0.1},
+                        'related':[
+                            {
+                                'from': {'language':'heb', 'kind':'srt'},
+                                'to': {'height':0.1, 'Name':'Normal'}
+                            },
+                            {
+                                'from': {'language':'eng', 'kind':'srt'},
+                                'to': {'height':0.1, 'Name':'Normal'}
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        'ass':{
+            'container':'subtitles',
+            'default':{'profile':'original', 'volume':'alpha'},
+            'Profile':{
+                'original':{
+                    'pack':{
+                        'tracks':(
+                            {'type':'subtitles', 'language':'heb', 'kind':'ass'},
+                            {'type':'subtitles', 'language':'eng', 'kind':'ass'}
+                        )
+                    }
+                }
+            }
+        },
+        'sub':{
+            'container':'subtitles',
+            'default':{'profile':'original', 'volume':'alpha'},
+            'Profile':{
+                'original':{}
+            }
+        },
+        'txt':{
+            'container':'chapters',
+            'default':{'profile':'chapter', 'volume':'alpha'},
+            'Profile':{
+                'chapter':{}
+            }
         }
     }
 }
 
-subtitle_filter = {
+subtitle_config = {
     'comment':{
         'scope':'line',
         'action':'drop',
@@ -691,7 +686,7 @@ subtitle_filter = {
     }
 }
 
-tag_config = {
+db_config = {
     'cache':'/Volumes/moonbook/pool/cache/',
     'db':{
         'name':'mp4pack'
@@ -711,203 +706,208 @@ tag_config = {
             'Show.getInfo':'http://www.thetvdb.com/api/%s/series/%%s/all/en.xml' % (tvdb_apikey),
             'Banner.getImage':'http://www.thetvdb.com/banners/%s'
         }
-    }
+    },
+    'tag':[
+        # Tag name map
+        # Schema: canonic name, subler name, mp4info name
+        ('Track #', 'Track #', 'Track'),
+        ('Disk #', 'Disk #', 'Disk'),
+        ('Album', 'Album', 'Album'),
+        ('Album Artist', 'Album Artist', 'Album Artist'),
+        ('Artist', 'Artist', 'Artist'),
+        ('ArtistID', None, 'Artist ID'),
+        ('Tempo', 'Tempo', 'BPM'),
+        ('Cast', 'Cast', None),
+        ('Codirector', 'Codirector', None),
+        ('Category', None, 'Category'),
+        ('Comments', 'Comments', 'Comments'),
+        ('Composer', 'Composer', 'Composer'),
+        ('ComposerID', None, 'Composer ID'),
+        ('contentID', 'contentID', 'Content ID'),
+        ('Content Rating', 'Content Rating', 'Content Rating'),
+        ('Copyright', 'Copyright', 'Copyright'),
+        ('Artwork Pieces', None, 'Cover Art pieces'),
+        ('Director', 'Director', None),
+        ('Encoded By', 'Encoded By', 'Encoded by'),
+        ('Encoding Tool', 'Encoding Tool', 'Encoded with'),
+        ('Genre', 'Genre', 'Genre'),
+        ('GenreID', None, 'Genre ID'),
+        ('GenreType', None, 'GenreType'),
+        ('Grouping', 'Grouping', 'Grouping'),
+        ('HD Video', 'HD Video', 'HD Video'),
+        ('Keywords', None, 'Keywords'),
+        ('Long Description', 'Long Description', 'Long Description'),
+        ('Lyrics', 'Lyrics', 'Lyrics'),
+        ('Media Kind', 'Media Kind', 'Media Type'),
+        ('Name', 'Name', 'Name'),
+        ('Compilation', None, 'Part of Compilation'),
+        ('Gapless', 'Gapless', 'Part of Gapless Album'),
+        ('PlaylistID', None, 'Playlist ID'),
+        ('Podcast', None, 'Podcast'),
+        ('Producers', 'Producers', None),
+        ('Purchase Date', 'Purchase Date', 'Purchase Date'),
+        ('Rating', 'Rating', None),
+        ('Rating Annotation', 'Rating Annotation', None),
+        ('Release Date', 'Release Date', 'Release Date'),
+        ('Screenwriters', 'Screenwriters', None),
+        ('Description', 'Description', 'Short Description'),
+        ('Sort Album', None, 'Sort Album'),
+        ('Sort Album Artist', None, 'Sort Album Artist'),
+        ('Sort Artist', None, 'Sort Artist'),
+        ('Sort Composer', None, 'Sort Composer'),
+        ('Sort Name', None, 'Sort Name'),
+        ('Sort TV Show', None, 'Sort TV Show'),
+        ('Studio', 'Studio', None),
+        ('TV Episode #', 'TV Episode #', 'TV Episode'),
+        ('TV Episode ID', 'TV Episode ID', 'TV Episode Number'),
+        ('TV Network', 'TV Network', 'TV Network'),
+        ('TV Season', 'TV Season', 'TV Season'),
+        ('TV Show', 'TV Show', 'TV Show'),
+        ('iTunes Account', 'iTunes Account', 'iTunes Account'),
+        ('iTunes Account Type', None, 'iTunes Account Type'),
+        ('iTunes Store Country', None, 'iTunes Store Country'),
+        ('XID', 'XID', 'xid')
+    ]
 }
-tag_name = [
-    # Tag name map
-    # Schema: canonic name, subler name, mp4info name
-    ('Track #', 'Track #', 'Track'),
-    ('Disk #', 'Disk #', 'Disk'),
-    ('Album', 'Album', 'Album'),
-    ('Album Artist', 'Album Artist', 'Album Artist'),
-    ('Artist', 'Artist', 'Artist'),
-    ('ArtistID', None, 'Artist ID'),
-    ('Tempo', 'Tempo', 'BPM'),
-    ('Cast', 'Cast', None),
-    ('Codirector', 'Codirector', None),
-    ('Category', None, 'Category'),
-    ('Comments', 'Comments', 'Comments'),
-    ('Composer', 'Composer', 'Composer'),
-    ('ComposerID', None, 'Composer ID'),
-    ('contentID', 'contentID', 'Content ID'),
-    ('Content Rating', 'Content Rating', 'Content Rating'),
-    ('Copyright', 'Copyright', 'Copyright'),
-    ('Artwork Pieces', None, 'Cover Art pieces'),
-    ('Director', 'Director', None),
-    ('Encoded By', 'Encoded By', 'Encoded by'),
-    ('Encoding Tool', 'Encoding Tool', 'Encoded with'),
-    ('Genre', 'Genre', 'Genre'),
-    ('GenreID', None, 'Genre ID'),
-    ('GenreType', None, 'GenreType'),
-    ('Grouping', 'Grouping', 'Grouping'),
-    ('HD Video', 'HD Video', 'HD Video'),
-    ('Keywords', None, 'Keywords'),
-    ('Long Description', 'Long Description', 'Long Description'),
-    ('Lyrics', 'Lyrics', 'Lyrics'),
-    ('Media Kind', 'Media Kind', 'Media Type'),
-    ('Name', 'Name', 'Name'),
-    ('Compilation', None, 'Part of Compilation'),
-    ('Gapless', 'Gapless', 'Part of Gapless Album'),
-    ('PlaylistID', None, 'Playlist ID'),
-    ('Podcast', None, 'Podcast'),
-    ('Producers', 'Producers', None),
-    ('Purchase Date', 'Purchase Date', 'Purchase Date'),
-    ('Rating', 'Rating', None),
-    ('Rating Annotation', 'Rating Annotation', None),
-    ('Release Date', 'Release Date', 'Release Date'),
-    ('Screenwriters', 'Screenwriters', None),
-    ('Description', 'Description', 'Short Description'),
-    ('Sort Album', None, 'Sort Album'),
-    ('Sort Album Artist', None, 'Sort Album Artist'),
-    ('Sort Artist', None, 'Sort Artist'),
-    ('Sort Composer', None, 'Sort Composer'),
-    ('Sort Name', None, 'Sort Name'),
-    ('Sort TV Show', None, 'Sort TV Show'),
-    ('Studio', 'Studio', None),
-    ('TV Episode #', 'TV Episode #', 'TV Episode'),
-    ('TV Episode ID', 'TV Episode ID', 'TV Episode Number'),
-    ('TV Network', 'TV Network', 'TV Network'),
-    ('TV Season', 'TV Season', 'TV Season'),
-    ('TV Show', 'TV Show', 'TV Show'),
-    ('iTunes Account', 'iTunes Account', 'iTunes Account'),
-    ('iTunes Account Type', None, 'iTunes Account Type'),
-    ('iTunes Store Country', None, 'iTunes Store Country'),
-    ('XID', 'XID', 'xid')
-]
+
 genre_map = [
     # Genre map
     # allows mapping different names for genres to another
     ('science-fiction', 'sci-fi')
 ]
-itmf_genre = [
-    # ITMF Genre
-    # The standard itmf names and codes for genres
-    {'_id':'blues', 'itmf':2, 'name':'Blues'},
-    {'_id':'classic rock', 'itmf':3, 'name':'Classic Rock'},
-    {'_id':'country', 'itmf':4, 'name':'Country'},
-    {'_id':'dance', 'itmf':5, 'name':'Dance'},
-    {'_id':'disco', 'itmf':6, 'name':'Disco'},
-    {'_id':'funk', 'itmf':7, 'name':'Funk'},
-    {'_id':'grunge', 'itmf':8, 'name':'Grunge'},
-    {'_id':'hip hop', 'itmf':9, 'name':'Hip Hop'},
-    {'_id':'jazz', 'itmf':10, 'name':'Jazz'},
-    {'_id':'metal', 'itmf':11, 'name':'Metal'},
-    {'_id':'new age', 'itmf':12, 'name':'New Age'},
-    {'_id':'oldies', 'itmf':13, 'name':'Oldies'},
-    {'_id':'other', 'itmf':14, 'name':'Other'},
-    {'_id':'pop', 'itmf':15, 'name':'Pop'},
-    {'_id':'r&b', 'itmf':16, 'name':'R&B'},
-    {'_id':'rap', 'itmf':17, 'name':'Rap'},
-    {'_id':'reggae', 'itmf':18, 'name':'Reggae'},
-    {'_id':'rock', 'itmf':19, 'name':'Rock'},
-    {'_id':'techno', 'itmf':20, 'name':'Techno'},
-    {'_id':'industrial', 'itmf':21, 'name':'Industrial'},
-    {'_id':'alternative', 'itmf':22, 'name':'Alternative'},
-    {'_id':'ska', 'itmf':23, 'name':'Ska'},
-    {'_id':'death metal', 'itmf':24, 'name':'Death Metal'},
-    {'_id':'pranks', 'itmf':25, 'name':'Pranks'},
-    {'_id':'soundtrack', 'itmf':26, 'name':'Soundtrack'},
-    {'_id':'euro techno', 'itmf':27, 'name':'Euro Techno'},
-    {'_id':'ambient', 'itmf':28, 'name':'Ambient'},
-    {'_id':'trip hop', 'itmf':29, 'name':'Trip Hop'},
-    {'_id':'vocal', 'itmf':30, 'name':'Vocal'},
-    {'_id':'jazz funk', 'itmf':31, 'name':'Jazz Funk'},
-    {'_id':'fusion', 'itmf':32, 'name':'Fusion'},
-    {'_id':'trance', 'itmf':33, 'name':'Trance'},
-    {'_id':'classical', 'itmf':34, 'name':'Classical'},
-    {'_id':'instrumental', 'itmf':35, 'name':'Instrumental'},
-    {'_id':'acid', 'itmf':36, 'name':'Acid'},
-    {'_id':'house', 'itmf':37, 'name':'House'},
-    {'_id':'game', 'itmf':38, 'name':'Game'},
-    {'_id':'sound clip', 'itmf':39, 'name':'Sound Clip'},
-    {'_id':'gospel', 'itmf':40, 'name':'Gospel'},
-    {'_id':'noise', 'itmf':41, 'name':'Noise'},
-    {'_id':'alternrock', 'itmf':42, 'name':'Alternrock'},
-    {'_id':'bass', 'itmf':43, 'name':'Bass'},
-    {'_id':'soul', 'itmf':44, 'name':'Soul'},
-    {'_id':'punk', 'itmf':45, 'name':'Punk'},
-    {'_id':'space', 'itmf':46, 'name':'Space'},
-    {'_id':'meditative', 'itmf':47, 'name':'Meditative'},
-    {'_id':'instrumental pop', 'itmf':48, 'name':'Instrumental Pop'},
-    {'_id':'instrumental rock', 'itmf':49, 'name':'Instrumental Rock'},
-    {'_id':'ethnic', 'itmf':50, 'name':'Ethnic'},
-    {'_id':'gothic', 'itmf':51, 'name':'Gothic'},
-    {'_id':'darkwave', 'itmf':52, 'name':'Darkwave'},
-    {'_id':'techno industrial', 'itmf':53, 'name':'Techno Industrial'},
-    {'_id':'electronic', 'itmf':54, 'name':'Electronic'},
-    {'_id':'pop folk', 'itmf':55, 'name':'Pop Folk'},
-    {'_id':'eurodance', 'itmf':56, 'name':'Eurodance'},
-    {'_id':'dream', 'itmf':57, 'name':'Dream'},
-    {'_id':'southern rock', 'itmf':58, 'name':'Southern Rock'},
-    {'_id':'comedy', 'itmf':59, 'name':'Comedy'},
-    {'_id':'cult', 'itmf':60, 'name':'Cult'},
-    {'_id':'gangsta', 'itmf':61, 'name':'Gangsta'},
-    {'_id':'top 40', 'itmf':62, 'name':'Top 40'},
-    {'_id':'christian rap', 'itmf':63, 'name':'Christian Rap'},
-    {'_id':'pop funk', 'itmf':64, 'name':'Pop Funk'},
-    {'_id':'jungle', 'itmf':65, 'name':'Jungle'},
-    {'_id':'native American', 'itmf':66, 'name':'Native American'},
-    {'_id':'cabaret', 'itmf':67, 'name':'Cabaret'},
-    {'_id':'new wave', 'itmf':68, 'name':'New Wave'},
-    {'_id':'psychedelic', 'itmf':69, 'name':'Psychedelic'},
-    {'_id':'rave', 'itmf':70, 'name':'Rave'},
-    {'_id':'showtunes', 'itmf':71, 'name':'Showtunes'},
-    {'_id':'trailer', 'itmf':72, 'name':'Trailer'},
-    {'_id':'lo fi', 'itmf':73, 'name':'Lo Fi'},
-    {'_id':'tribal', 'itmf':74, 'name':'Tribal'},
-    {'_id':'acid punk', 'itmf':75, 'name':'Acid Punk'},
-    {'_id':'acid jazz', 'itmf':76, 'name':'Acid Jazz'},
-    {'_id':'polka', 'itmf':77, 'name':'Polka'},
-    {'_id':'retro', 'itmf':78, 'name':'Retro'},
-    {'_id':'musical', 'itmf':79, 'name':'Musical'},
-    {'_id':'rock and roll', 'itmf':80, 'name':'Rock and Roll'}
-]
-tvshow_map = [
-    # TV Show map
-    # The initial TVDB TV Show id map
-    [79501, 'Heroes'],
-    [75930, 'Alias'],
-    [76290, '24'],
-    [73800, 'Desperate Housewives'],
-    [79349, 'Dexter'],
-    [73871, 'Futurama'],
-    [73255, 'House'],
-    [73739, 'Lost'],
-    [79169, 'Seinfeld'],
-    [75299, 'The Sopranos'],
-    [73762, 'Greys Anatomy'],
-    [79126, 'The Wire'],
-    [75164, 'Samurai Jack'],
-    [74543, 'Entourage'],
-    [85527, 'Yellowstone'],
-    [79257, 'Planet Earth'],
-    [74845, 'Weeds'],
-    [75450, 'Six Feet Under'],
-    [80252, 'Flight of the Conchords'],
-    [82066, 'Fringe'],
-    [80337, 'Mad Men'],
-    [73508, 'Rome'],
-    [77398, 'The X-Files'],
-    [70682, 'Oz'],
-    [77526, 'Star Trek'],
-    [77231, 'Mission Impossible'],
-    [83268, 'Star Wars - The Clone Wars'],
-    [74805, 'The Prisoner'],
-    [85242, 'The Prisoner 2009'],
-    [83602, 'Lie To Me'],
-    [80349, 'Californication'],
-    [82109, 'Generation Kill'],
-    [70533, 'Twin Peaks'],
-    [72628, 'The Singing Detective'],
-    [80593, 'Dirty Sexy Money'],
-    [79177, 'Life on Mars'],
-    [82289, 'Life on Mars US'],
-    [118421, 'Life BBC'],
-    [130421, 'Faces of Earth'],
-    [147071, 'Wonders of the Solar System'],
-    [108611, 'White Collar'],
-    [85149, 'Berlin Alexanderplatz'],
-    [94971, 'V 2009'],
-    [82459, 'The Mentalist'],
-    [82283, 'True Blood']
-]
+
+base_config = {
+    'genre':[
+        # ITMF Genre
+        # The standard itmf names and codes for genres
+        {'_id':'blues', 'itmf':2, 'name':'Blues'},
+        {'_id':'classic rock', 'itmf':3, 'name':'Classic Rock'},
+        {'_id':'country', 'itmf':4, 'name':'Country'},
+        {'_id':'dance', 'itmf':5, 'name':'Dance'},
+        {'_id':'disco', 'itmf':6, 'name':'Disco'},
+        {'_id':'funk', 'itmf':7, 'name':'Funk'},
+        {'_id':'grunge', 'itmf':8, 'name':'Grunge'},
+        {'_id':'hip hop', 'itmf':9, 'name':'Hip Hop'},
+        {'_id':'jazz', 'itmf':10, 'name':'Jazz'},
+        {'_id':'metal', 'itmf':11, 'name':'Metal'},
+        {'_id':'new age', 'itmf':12, 'name':'New Age'},
+        {'_id':'oldies', 'itmf':13, 'name':'Oldies'},
+        {'_id':'other', 'itmf':14, 'name':'Other'},
+        {'_id':'pop', 'itmf':15, 'name':'Pop'},
+        {'_id':'r&b', 'itmf':16, 'name':'R&B'},
+        {'_id':'rap', 'itmf':17, 'name':'Rap'},
+        {'_id':'reggae', 'itmf':18, 'name':'Reggae'},
+        {'_id':'rock', 'itmf':19, 'name':'Rock'},
+        {'_id':'techno', 'itmf':20, 'name':'Techno'},
+        {'_id':'industrial', 'itmf':21, 'name':'Industrial'},
+        {'_id':'alternative', 'itmf':22, 'name':'Alternative'},
+        {'_id':'ska', 'itmf':23, 'name':'Ska'},
+        {'_id':'death metal', 'itmf':24, 'name':'Death Metal'},
+        {'_id':'pranks', 'itmf':25, 'name':'Pranks'},
+        {'_id':'soundtrack', 'itmf':26, 'name':'Soundtrack'},
+        {'_id':'euro techno', 'itmf':27, 'name':'Euro Techno'},
+        {'_id':'ambient', 'itmf':28, 'name':'Ambient'},
+        {'_id':'trip hop', 'itmf':29, 'name':'Trip Hop'},
+        {'_id':'vocal', 'itmf':30, 'name':'Vocal'},
+        {'_id':'jazz funk', 'itmf':31, 'name':'Jazz Funk'},
+        {'_id':'fusion', 'itmf':32, 'name':'Fusion'},
+        {'_id':'trance', 'itmf':33, 'name':'Trance'},
+        {'_id':'classical', 'itmf':34, 'name':'Classical'},
+        {'_id':'instrumental', 'itmf':35, 'name':'Instrumental'},
+        {'_id':'acid', 'itmf':36, 'name':'Acid'},
+        {'_id':'house', 'itmf':37, 'name':'House'},
+        {'_id':'game', 'itmf':38, 'name':'Game'},
+        {'_id':'sound clip', 'itmf':39, 'name':'Sound Clip'},
+        {'_id':'gospel', 'itmf':40, 'name':'Gospel'},
+        {'_id':'noise', 'itmf':41, 'name':'Noise'},
+        {'_id':'alternrock', 'itmf':42, 'name':'Alternrock'},
+        {'_id':'bass', 'itmf':43, 'name':'Bass'},
+        {'_id':'soul', 'itmf':44, 'name':'Soul'},
+        {'_id':'punk', 'itmf':45, 'name':'Punk'},
+        {'_id':'space', 'itmf':46, 'name':'Space'},
+        {'_id':'meditative', 'itmf':47, 'name':'Meditative'},
+        {'_id':'instrumental pop', 'itmf':48, 'name':'Instrumental Pop'},
+        {'_id':'instrumental rock', 'itmf':49, 'name':'Instrumental Rock'},
+        {'_id':'ethnic', 'itmf':50, 'name':'Ethnic'},
+        {'_id':'gothic', 'itmf':51, 'name':'Gothic'},
+        {'_id':'darkwave', 'itmf':52, 'name':'Darkwave'},
+        {'_id':'techno industrial', 'itmf':53, 'name':'Techno Industrial'},
+        {'_id':'electronic', 'itmf':54, 'name':'Electronic'},
+        {'_id':'pop folk', 'itmf':55, 'name':'Pop Folk'},
+        {'_id':'eurodance', 'itmf':56, 'name':'Eurodance'},
+        {'_id':'dream', 'itmf':57, 'name':'Dream'},
+        {'_id':'southern rock', 'itmf':58, 'name':'Southern Rock'},
+        {'_id':'comedy', 'itmf':59, 'name':'Comedy'},
+        {'_id':'cult', 'itmf':60, 'name':'Cult'},
+        {'_id':'gangsta', 'itmf':61, 'name':'Gangsta'},
+        {'_id':'top 40', 'itmf':62, 'name':'Top 40'},
+        {'_id':'christian rap', 'itmf':63, 'name':'Christian Rap'},
+        {'_id':'pop funk', 'itmf':64, 'name':'Pop Funk'},
+        {'_id':'jungle', 'itmf':65, 'name':'Jungle'},
+        {'_id':'native American', 'itmf':66, 'name':'Native American'},
+        {'_id':'cabaret', 'itmf':67, 'name':'Cabaret'},
+        {'_id':'new wave', 'itmf':68, 'name':'New Wave'},
+        {'_id':'psychedelic', 'itmf':69, 'name':'Psychedelic'},
+        {'_id':'rave', 'itmf':70, 'name':'Rave'},
+        {'_id':'showtunes', 'itmf':71, 'name':'Showtunes'},
+        {'_id':'trailer', 'itmf':72, 'name':'Trailer'},
+        {'_id':'lo fi', 'itmf':73, 'name':'Lo Fi'},
+        {'_id':'tribal', 'itmf':74, 'name':'Tribal'},
+        {'_id':'acid punk', 'itmf':75, 'name':'Acid Punk'},
+        {'_id':'acid jazz', 'itmf':76, 'name':'Acid Jazz'},
+        {'_id':'polka', 'itmf':77, 'name':'Polka'},
+        {'_id':'retro', 'itmf':78, 'name':'Retro'},
+        {'_id':'musical', 'itmf':79, 'name':'Musical'},
+        {'_id':'rock and roll', 'itmf':80, 'name':'Rock and Roll'}
+    ],
+    
+    'tvshow':[
+        # TV Show map
+        # The initial TVDB TV Show id map
+        [79501, 'Heroes'],
+        [75930, 'Alias'],
+        [76290, '24'],
+        [73800, 'Desperate Housewives'],
+        [79349, 'Dexter'],
+        [73871, 'Futurama'],
+        [73255, 'House'],
+        [73739, 'Lost'],
+        [79169, 'Seinfeld'],
+        [75299, 'The Sopranos'],
+        [73762, 'Greys Anatomy'],
+        [79126, 'The Wire'],
+        [75164, 'Samurai Jack'],
+        [74543, 'Entourage'],
+        [85527, 'Yellowstone'],
+        [79257, 'Planet Earth'],
+        [74845, 'Weeds'],
+        [75450, 'Six Feet Under'],
+        [80252, 'Flight of the Conchords'],
+        [82066, 'Fringe'],
+        [80337, 'Mad Men'],
+        [73508, 'Rome'],
+        [77398, 'The X-Files'],
+        [70682, 'Oz'],
+        [77526, 'Star Trek'],
+        [77231, 'Mission Impossible'],
+        [83268, 'Star Wars - The Clone Wars'],
+        [74805, 'The Prisoner'],
+        [85242, 'The Prisoner 2009'],
+        [83602, 'Lie To Me'],
+        [80349, 'Californication'],
+        [82109, 'Generation Kill'],
+        [70533, 'Twin Peaks'],
+        [72628, 'The Singing Detective'],
+        [80593, 'Dirty Sexy Money'],
+        [79177, 'Life on Mars'],
+        [82289, 'Life on Mars US'],
+        [118421, 'Life BBC'],
+        [130421, 'Faces of Earth'],
+        [147071, 'Wonders of the Solar System'],
+        [108611, 'White Collar'],
+        [85149, 'Berlin Alexanderplatz'],
+        [94971, 'V 2009'],
+        [82459, 'The Mentalist'],
+        [82283, 'True Blood']
+    ]
+}
