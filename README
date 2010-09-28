@@ -59,3 +59,429 @@ Options:
     --map-show=MAP      For TV Shows you must provide a mapping between the
                         numeric TVDB ID and a simplified name that will be
                         used in file names.
+
+
+mp4pack.py a media collection manager
+Lior Galanti lior.galanti@gmail.com
+
+INFO:mp4pack:Scanning for files in /Users/lg/Downloads/pool/Futurama/1
+
+
+
+  [-----------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e01 Space Pilot 3000.txt------------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e01 Space Pilot 3000.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e01 Space Pilot 3000.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e01 Space Pilot 3000.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e01 Space Pilot 3000.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e01
+  Media Kind-----------: tvshow
+  Name-----------------: Space Pilot 3000
+  TV Episode #---------: 1
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Rich Moore
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom, Dick Clark, Leonard Nimoy, Byrne Offutt
+  Description----------: Fry, a 20th-century New-York pizza delivery boy receives a prank call and is frozen in a capsule and wakes up in year 2999.
+  Director-------------: Rich Moore, Gregg Vanzo
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: Fry, a 20th-century New-York pizza delivery boy receives a prank call and is frozen in a capsule and wakes up in year 2999. He
+                         meets an alien named Leela that wants to assign his permanent career... delivery boy. Fry refuses, so he escapes. He then meets
+                         Bender, a robot who likes to drink and has suicidal tendencies. Together, they start running away from Leela, arriving to the
+                         ruins of old New York. Leela finds them, but instead of inserting the permanent chip on Fry, she removes her own. All three go to
+                         Prof. Hubert Farnsworth's house, Fry's only living relative, becoming his new space crew.
+  Media Kind-----------: TV Show
+  Name-----------------: Space Pilot 3000
+  Rating---------------: TV-PG
+  Release Date---------: 1999-03-28
+  Screenwriters--------: Matt Groening, David X. Cohen
+  TV Episode #---------: 1
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 1
+
+
+
+  [---------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e02 The Series Has Landed.txt---------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e02 The Series Has Landed.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e02 The Series Has Landed.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e02 The Series Has Landed.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e02 The Series Has Landed.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e02
+  Media Kind-----------: tvshow
+  Name-----------------: The Series Has Landed
+  TV Episode #---------: 2
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Peter Avanzino
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom
+  Description----------: After joining Planet Express, Fry, Bender, Farnsworth's assistant Amy and Captain Leela must deliver their first package to the
+                         moon.
+  Director-------------: Peter Avanzino
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: After joining Planet Express, Fry, Bender, Farnsworth's assistant Amy and Captain Leela must deliver their first package to the
+                         moon. Fry imagines himself walking on the moon, but he finds out that there is an amusement park on the moon - Luna Park. While
+                         lowering the package, Amy drops the ship keys inside it. Fry is the only one who wants to walk on the real moon, so he goes with
+                         Leela on an educational trip, yet he goes off the road and they are now marooned on the moon with almost no oxygen. Amy and Bender
+                         discover that the key that fell inside a crane game machine. Bender is thrown out of the park after putting his hand inside the
+                         machine. Fry and Leela arrive at a farm in the middle of the moon where they have to work for oxygen. After Bender sleeps with one
+                         of the robo-daughters of the farmer, the farmer starts chasing Fry, Leela and Bender. Amy appears just in time to save them.
+  Media Kind-----------: TV Show
+  Name-----------------: The Series Has Landed
+  Rating---------------: TV-PG
+  Release Date---------: 1999-04-04
+  Screenwriters--------: Ken Keeler
+  TV Episode #---------: 2
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 2
+
+
+
+  [--------------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e03 I, Roommate.txt--------------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e03 I, Roommate.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e03 I, Roommate.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e03 I, Roommate.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e03 I, Roommate.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e03
+  Media Kind-----------: tvshow
+  Name-----------------: I, Roommate
+  TV Episode #---------: 3
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Bret Haaland
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom
+  Description----------: Everyone is sick of Fry living at Planet Express, so he is forced to move out to become Bender's roommate.
+  Director-------------: Bret Haaland
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: Everyone is sick of Fry living at Planet Express, so he is forced to move out to become Bender's roommate. The only catch is that
+                         Bender's apartment is too small for the two of them. After some searching they find a great apartment. A problem arises when
+                         Bender's antenna interferes with the TV reception. Bender decides to cut off his antenna so that he can live with Fry again.
+                         However he doesn't feel right without it, so he decides to leave and go back to his old apartment where he feels lonely. Leela
+                         convinces Fry to going back to the "small" apartment.
+  Media Kind-----------: TV Show
+  Name-----------------: I, Roommate
+  Rating---------------: TV-PG
+  Release Date---------: 1999-04-06
+  Screenwriters--------: Eric Horsted
+  TV Episode #---------: 3
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 3
+
+
+
+  [------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e04 Love's Labors Lost In Space.txt------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e04 Love's Labors Lost In Space.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e04 Love's Labors Lost In Space.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e04 Love's Labors Lost In Space.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e04 Love's Labors Lost In Space.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e04
+  Media Kind-----------: tvshow
+  Name-----------------: Love's Labors Lost In Space
+  TV Episode #---------: 4
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Brian Sheesley
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom, David X. Cohen
+  Description----------: On a mission intended to save endangered animals on a collapsing planet, Leela and the crew run into legendary starship captain
+                         Zapp Brannigan.
+  Director-------------: Brian Sheesley
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: On a mission intended to save endangered animals on a collapsing planet, Leela and the crew run into legendary starship captain
+                         Zapp Brannigan. A self-proclaimed ladies man, Zapp sees Leela as a potential new conquest. When the captain refuses to aid the
+                         animal rescue, Leela and her crew try to leave Zapp's starship. But Zapp throws Fry and Bender in jail, and summons Leela to his
+                         "Lovenasium". They ultimately escape and arrive on the doomed planet, where Leela finally finds love - with a cute, and very
+                         useful, creature named Nibbler.
+  Media Kind-----------: TV Show
+  Name-----------------: Love's Labors Lost In Space
+  Rating---------------: TV-PG
+  Release Date---------: 1999-04-13
+  Screenwriters--------: Brian Kelley
+  TV Episode #---------: 4
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 4
+
+
+
+  [---------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e05 Fear Of A Bot Planet.txt----------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e05 Fear Of A Bot Planet.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e05 Fear Of A Bot Planet.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e05 Fear Of A Bot Planet.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e05 Fear Of A Bot Planet.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e05
+  Media Kind-----------: tvshow
+  Name-----------------: Fear Of A Bot Planet
+  TV Episode #---------: 5
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Peter Avanzino
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom, Tom Kenny, Byrne Offutt
+  Description----------: At Madison Cube Garden watching a blernsball game, Bender complains about the poor treatment of robots.
+  Director-------------: Peter Avanzino, Carlos Baeza, Ashley Lenz, Chris Suave
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: At Madison Cube Garden watching a blernsball game, Bender complains about the poor treatment of robots. They're only there to
+                         clean up, polish the balls or water the fields. They never get any respect. Later, Bender must deliver a package to a planet
+                         inhabited by murderous robots that kill humans on sight. He discovers a robotopia - a land where the robot is king! However, when
+                         Leela and Fry are captured, Bender must choose between protecting his celebrity status or saving his friends.
+  Media Kind-----------: TV Show
+  Name-----------------: Fear Of A Bot Planet
+  Rating---------------: TV-PG
+  Release Date---------: 1999-04-20
+  Screenwriters--------: Evan Gore, Heather Lombard
+  TV Episode #---------: 5
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 5
+
+
+
+  [---------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e06 A Fishful Of Dollars.txt----------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e06 A Fishful Of Dollars.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e06 A Fishful Of Dollars.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e06 A Fishful Of Dollars.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e06 A Fishful Of Dollars.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e06
+  Media Kind-----------: tvshow
+  Name-----------------: A Fishful Of Dollars
+  TV Episode #---------: 6
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Ron Hughart
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom, Pamela Anderson, Byrne Offutt
+  Description----------: A thousand years is a long time to save up money, and Fry's savings account has been racking up interest.
+  Director-------------: Ron Hughart, Gregg Vanzo
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: A thousand years is a long time to save up money, and Fry's savings account has been racking up interest. When Fry discovers just
+                         how much - over 4 billion dollars - Fry goes a little overboard. After completely redecorating the apartment, splurging on
+                         expensive spa days and treating his friends to innumerable luxuries, Fry discovers the ultimate expense. Anchovies. This rare
+                         delicacy as been extinct for years, and Fry must battle the evil conglomerate known as Mom, plus Pamela Anderson Lee's head in a
+                         jar, to get them!
+  Media Kind-----------: TV Show
+  Name-----------------: A Fishful Of Dollars
+  Rating---------------: TV-PG
+  Release Date---------: 1999-04-27
+  Screenwriters--------: Patric M. Verrone
+  TV Episode #---------: 6
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 6
+
+
+
+  [-------------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e07 My Three Suns.txt-------------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e07 My Three Suns.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e07 My Three Suns.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e07 My Three Suns.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e07 My Three Suns.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e07
+  Media Kind-----------: tvshow
+  Name-----------------: My Three Suns
+  TV Episode #---------: 7
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Jeffrey Lynch
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom
+  Description----------: The crew visits an arid planet in the Galaxy of Terror distinctive for it's three suns and liquid alien inhabitants.
+  Director-------------: Jeffrey Lynch, Kevin O'Brien
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: The crew visits an arid planet in the Galaxy of Terror distinctive for it's three suns and liquid alien inhabitants. Fry, after
+                         delivering a package under the scorching heat, quenches his thirst with a bottle of cool blue liquid. Fry soon finds out he drank
+                         the planet's royal leader and is named the new emperor. Fry abuses his newfound power, even appointing Bender second in command,
+                         until the aliens retaliate and the real battle for power begins.
+  Media Kind-----------: TV Show
+  Name-----------------: My Three Suns
+  Rating---------------: TV-PG
+  Release Date---------: 1999-05-04
+  Screenwriters--------: J. Stewart Burns
+  TV Episode #---------: 7
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 7
+
+
+
+  [--------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e08 A Big Piece Of Garbage.txt---------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e08 A Big Piece Of Garbage.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e08 A Big Piece Of Garbage.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e08 A Big Piece Of Garbage.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e08 A Big Piece Of Garbage.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e08
+  Media Kind-----------: tvshow
+  Name-----------------: A Big Piece Of Garbage
+  TV Episode #---------: 8
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Susie Dietter
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom, Ron Popeil, Nancy Cartwright, Byrne Offutt
+  Description----------: A big piece of garbage that was released a thousand years ago is now on the way to Earth to destroy it.
+  Director-------------: Susie Dietter
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: A big piece of garbage that was released a thousand years ago is now on the way to Earth to destroy it. After Fry, Leela and
+                         Bender fail on placing a bomb on it, the city has to build another big piece of garbage, yet that may be a problem since trash
+                         doesn't exist in year 3000.
+  Media Kind-----------: TV Show
+  Name-----------------: A Big Piece Of Garbage
+  Rating---------------: TV-PG
+  Release Date---------: 1999-05-11
+  Screenwriters--------: Lewis Morton
+  TV Episode #---------: 8
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 8
+
+
+
+  [---------------------------------------/Users/lg/Downloads/pool/Futurama/1/Futurama s01e09 Hell Is Other Robots.txt----------------------------------------]
+
+  [      related       ]
+
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/eng/Futurama s01e09 Hell Is Other Robots.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/srt/clean/Futurama/1/heb/Futurama s01e09 Hell Is Other Robots.srt
+  /Users/lg/Downloads/pool/alpha/tvshow/txt/chapter/Futurama/1/Futurama s01e09 Hell Is Other Robots.txt
+  /Users/lg/Downloads/pool/epsilon/tvshow/m4v/universal/Futurama/1/Futurama s01e09 Hell Is Other Robots.m4v
+
+  [     from path      ]
+
+  Code-----------------: s01e09
+  Media Kind-----------: tvshow
+  Name-----------------: Hell Is Other Robots
+  TV Episode #---------: 9
+  TV Season------------: 1
+  kind-----------------: txt
+  show_small_name------: Futurama
+
+  [      metadata      ]
+
+  Album----------------: Futurama
+  Artist---------------: Rich Moore
+  Cast-----------------: Billy West, Katey Sagal, John Di Maggio, Phil LaMarr, Lauren Tom, The Beastie Boys, Dan Castellaneta, Byrne Offutt
+  Description----------: During a Beasty Boys concert, Bender runs into a high school buddy, Fender.
+  Director-------------: Rich Moore
+  Disk #---------------: 1
+  Genre----------------: Animation
+  Long Description-----: During a Beasty Boys concert, Bender runs into a high school buddy, Fender. Fender invites him to a party, which turns out to be
+                         robots getting high off of electricity, or "jacking on". After one try, Bender is hooked. On a trip back from Sicily 8, the crew
+                         runs into an electrical disturbance. Bender sabotages the ship and it flies right into the field, allowing Bender to get stoned
+                         and Fry and Leela nearly get killed. Realizing what he has become, he decides to join Robotolgy, a robot religion. It soon becomes
+                         apparent the crew prefers the old Bender. To get him back to normal, they fake a delivery to Atlantic City and begin tempting
+                         Bender. Eventually, Bender gives in, and is kidnapped that night at a hotel. He wakes up with Beelzebot, the robot devil. He's in
+                         Robot Hell. The next morning, Fry and Leela use Nibbler to track Bender down to a carnival. They find the entrance to hell in a
+                         broken down ride. A trap door opens beneath them, sending them down a slide. Beelzebot gives Bender several ironic punishments in
+                         an up-tempo musical number. Fry and Leela eventually catch up and Beelzebot says if he is bested in a fiddle contest, they win
+                         Benders soul. They lose, but manage to escape anyway.
+  Media Kind-----------: TV Show
+  Name-----------------: Hell Is Other Robots
+  Rating---------------: TV-PG
+  Release Date---------: 1999-05-18
+  Screenwriters--------: Eric Kaplan
+  TV Episode #---------: 9
+  TV Network-----------: Comedy Central
+  TV Season------------: 1
+  TV Show--------------: Futurama
+  Track #--------------: 9
+jack:mp4pack.py lg%                                                                                                                                                                                            ~/workspace/mp4pack.py
