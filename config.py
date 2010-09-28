@@ -6,7 +6,7 @@ tvdb_apikey = '7B3B400B0146EA83'
 
 repository_config = {}
 repository_config['Display'] = {
-    'wrap':130, 
+    'wrap':80, 
     'indent':25, 
     'margin':2
 }
