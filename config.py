@@ -302,7 +302,7 @@ repository_config = {
         'srt':{
             'container':'subtitles',
             'default':{
-                'profile':'original', 
+                'profile':'original',
                 'volume':'alpha'
             },
             'Profile':{
@@ -360,6 +360,31 @@ repository_config = {
             'default':{'profile':'chapter', 'volume':'alpha'},
             'Profile':{
                 'chapter':{}
+            }
+        },
+        'jpg':{
+            'container':'image',
+            'default':{
+                'profile':'original',
+                'volume':'alpha'
+            },
+            'Profile':{
+                'original':{},
+                'normal':{
+                    'transcode':{
+                        
+                    }
+                }
+            }
+        },
+        'png':{
+            'container':'image',
+            'default':{
+                'profile':'original',
+                'volume':'alpha'
+            },
+            'Profile':{
+                'original':{}
             }
         }
     }

@@ -129,7 +129,10 @@ def load_options():
 #    	update srt: remux subtitles @ profile
 #    	update art: update artwork
 #    	update txt: update chapters
-        
+
+#   Image
+#   transcode jpg: transcode to jpg @ profile
+#   transcode png: transcode to png @ profile
     
     return parser.parse_args()
 

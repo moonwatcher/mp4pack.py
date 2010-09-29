@@ -927,7 +927,6 @@ class Mpeg4(AVContainer):
 
 
 
-
 # Text File
 class Text(Container):
     def __init__(self, file_path):
@@ -1256,12 +1255,19 @@ class Chapter(Text):
 
 
 
+# Image Class
+class Image(Container):
+    def __init__(self, file_path):
+        self.logger = logging.getLogger('mp4pack.image')
+        Container.__init__(self, file_path)
+    
+    
 
 
 
 
 
-
+# Tag Name Resolver Class (Singletone)
 class TagNameResolver(object):
     def __init__(self):
         self.canonic_map = dict()
@@ -1290,6 +1296,56 @@ class TagNameResolver(object):
 
 
 
+# Subtitle Filter Class (Singleton)
+class SubtitleFilter(object):
+    def __init__(self):
+        self.logger = logging.getLogger('mp4pack.subtitlefilter')
+        self.sequence = {}
+    
+    
+    def find_filter_sequence(self, name):
+        result = None
+        
+        from config import subtitle_config
+        if name in self.sequence:
+            result = self.sequence[name]
+        elif name in subtitle_config:
+            config = subtitle_config[name]
+            self.logger.debug('Loading ' + name + ' filter sequence')
+            if config['action'] == 'drop':
+                s = DropFilterSequence(config)
+                s.load()
+                self.sequence[name] = s
+                result = s
+                
+            elif config['action'] == 'replace':
+                s = ReplaceFilterSequence(config)
+                s.load()
+                self.sequence[name] = s
+                result = s
+        return result
+    
+    
+    def filter(self, blocks, sequence_list):
+        for fn in sequence_list:
+            if len(blocks) > 0:
+                fs = self.find_filter_sequence(fn)
+                if fs != None:
+                    next = list()
+                    for block in blocks:
+                        if block.is_valid() and self.filter_block(block, fs):
+                            next.append(block)
+                    blocks = next
+        return blocks
+    
+    
+    def filter_block(self, block, filter_sequence):
+        result = block.is_valid()
+        if result:
+            result = filter_sequence.filter(block)
+        return result
+        
+    
 
 
 class FilterSequence(object):
@@ -1397,67 +1453,17 @@ class ReplaceFilterSequence(FilterSequence):
     
 
 
-class SubtitleFilter(object):
-    def __init__(self):
-        self.logger = logging.getLogger('mp4pack.subtitlefilter')
-        self.sequence = {}
-    
-    
-    def find_filter_sequence(self, name):
-        result = None
-        
-        from config import subtitle_config
-        if name in self.sequence:
-            result = self.sequence[name]
-        elif name in subtitle_config:
-            config = subtitle_config[name]
-            self.logger.debug('Loading ' + name + ' filter sequence')
-            if config['action'] == 'drop':
-                s = DropFilterSequence(config)
-                s.load()
-                self.sequence[name] = s
-                result = s
-                
-            elif config['action'] == 'replace':
-                s = ReplaceFilterSequence(config)
-                s.load()
-                self.sequence[name] = s
-                result = s
-        return result
-    
-    
-    def filter(self, blocks, sequence_list):
-        for fn in sequence_list:
-            if len(blocks) > 0:
-                fs = self.find_filter_sequence(fn)
-                if fs != None:
-                    next = list()
-                    for block in blocks:
-                        if block.is_valid() and self.filter_block(block, fs):
-                            next.append(block)
-                    blocks = next
-        return blocks
-    
-    
-    def filter_block(self, block, filter_sequence):
-        result = block.is_valid()
-        if result:
-            result = filter_sequence.filter(block)
-        return result
-        
-    
 
-
-
-
-
+# File Utility Class (Singletone)
 class FileUtil(object):
     def __init__(self):
-        self.logger = logging.getLogger('mp4pack.container.util')
-        self.matroska_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'matroska' ]
-        self.mp4_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'mp4' ]
-        self.subtitles_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'subtitles' ]
-        self.chapter_kinds = [ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == 'chapters' ]
+        self.logger = logging.getLogger('mp4pack.util')
+        kc = repository_config['Kind']
+        self.matroska_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'matroska' ]
+        self.mp4_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'mp4' ]
+        self.subtitles_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'subtitles' ]
+        self.chapter_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'chapters' ]
+        self.image_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'image' ]
         
         self.audio_codec_kind = {}
         for k,v in repository_config['Codec']['Audio'].iteritems():
@@ -1609,49 +1615,32 @@ class FileUtil(object):
         related = dict()
         info = self.decode_path_info(path)
         meta = {}
-        for v in repository_config['Volume']:
-            for k in self.subtitles_kinds:
-                for p in repository_config['Kind'][k]['Profile']:
-                    for l in repository_config['Language']:
+        kc = repository_config['Kind']
+        vc = repository_config['Volume']
+        lc = repository_config['Language']
+        
+        for v in repository_config['Volume'].keys():
+            for k in kc.keys():
+                for p in kc[k]['Profile'].keys():
+                    if kc[k]['container'] == 'subtitles':
+                        for l in lc.keys():
+                            i = copy.deepcopy(info)
+                            i['volume'] = v
+                            i['kind'] = k
+                            i['profile'] = p
+                            i['language'] = l
+                            rp = self.canonic_path(i, meta)
+                            if os.path.exists(rp):
+                                related[rp] = i
+                    else:
                         i = copy.deepcopy(info)
                         i['volume'] = v
                         i['kind'] = k
                         i['profile'] = p
-                        i['language'] = l
-                        related_path = self.canonic_path(i, meta)
-                        if os.path.exists(related_path):
-                            related[related_path] = i
-            
-            for k in self.matroska_kinds:
-                for p in repository_config['Kind'][k]['Profile']:
-                    i = copy.deepcopy(info)
-                    i['volume'] = v
-                    i['kind'] = k
-                    i['profile'] = p
-                    related_path = self.canonic_path(i, meta)
-                    if os.path.exists(related_path):
-                        related[related_path] = i
-            
-            for k in self.mp4_kinds:
-                for p in repository_config['Kind'][k]['Profile']:
-                    i = copy.deepcopy(info)
-                    i['volume'] = v
-                    i['kind'] = k
-                    i['profile'] = p
-                    related_path = self.canonic_path(i, meta)
-                    if os.path.exists(related_path):
-                        related[related_path] = i
-                        
-            for k in self.chapter_kinds:
-                for p in repository_config['Kind'][k]['Profile']:
-                    i = copy.deepcopy(info)
-                    i['volume'] = v
-                    i['kind'] = k
-                    i['profile'] = p
-                    related_path = self.canonic_path(i, meta)
-                    if os.path.exists(related_path):
-                        related[related_path] = i
-                        
+                        rp = self.canonic_path(i, meta)
+                        if os.path.exists(rp):
+                            related[rp] = i
+
         return related
     
     
@@ -1789,7 +1778,7 @@ class FileUtil(object):
 
 
 
-
+# Service functions
 def timecode_to_miliseconds(timecode):
     result = None
     hours = 0
@@ -1906,6 +1895,8 @@ def format_for_subler_tag(value):
     return value
 
 
+
+# Generic file loading function
 def load_media_file(file_path):
     f = None
     file_type = os.path.splitext(file_path)[1].strip('.')
@@ -1917,12 +1908,15 @@ def load_media_file(file_path):
         f = Subtitle(file_path)
     elif file_type in file_util.chapter_kinds:
         f = Chapter(file_path)
+    elif file_type in file_util.image_kinds:
+        f = Image(file_path)
     if f.file_info == None:
         f = None
     return f
 
 
 
+# Info format helper functions
 def format_info_title(text):
     margin = repository_config['Display']['margin']
     width = repository_config['Display']['wrap']
