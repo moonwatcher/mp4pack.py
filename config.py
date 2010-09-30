@@ -11,10 +11,10 @@ repository_config = {
         'margin':2
     },
     'Action':{
-        'pack': ['all', 'mkv'],
-        'transcode':['m4v', 'mkv', 'srt', 'txt'],
-        'extract':['all', 'srt', 'ass', 'txt'],
-        'update':['all', 'srt']
+        'pack': ('mkv',),
+        'transcode':('m4v', 'mkv', 'srt', 'txt'),
+        'extract':('all', 'srt', 'ass', 'txt'),
+        'update':('srt',)
     },
     'Codec':{
         'Audio':{
@@ -57,9 +57,9 @@ repository_config = {
                             '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1',
                             '--maxWidth':720
                         },
-                        'flags':['--large-file'],
-                        'audio':[
-                            [
+                        'flags':('--large-file'),
+                        'audio':(
+                            (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
@@ -68,8 +68,8 @@ repository_config = {
                                     'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
                                 }
-                            ],
-                            [
+                            ),
+                            (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
@@ -78,8 +78,8 @@ repository_config = {
                                     'from': {'kind':'mp3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                 }
-                            ],
-                        ]
+                            ),
+                        )
                     },
                     'pack':{
                         'related':(
@@ -104,9 +104,9 @@ repository_config = {
                             '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
                             '--maxWidth':1280
                         },
-                        'flags':['--large-file'],
-                        'audio':[
-                            [
+                        'flags':('--large-file'),
+                        'audio':(
+                            (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
@@ -115,20 +115,20 @@ repository_config = {
                                     'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
                                 }
-                            ],
-                            [
+                            ),
+                            (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                 }
-                            ],
-                            [
+                            ),
+                            (
                                 {
                                     'from': {'kind':'mp3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                 }
-                            ],
-                        ]
+                            ),
+                        )
                     },
                     'pack':{
                         'related':(
@@ -153,26 +153,26 @@ repository_config = {
                             '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
                             '--maxWidth':480
                         },
-                        'audio':[
-                            [
+                        'audio':(
+                            (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                 }
-                            ],
-                            [
+                            ),
+                            (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                 },
-                            ],
-                            [
+                            ),
+                            (
                                 {
                                     'from': {'kind':'mp3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                 }
-                            ],
-                        ]
+                            ),
+                        )
                     },
                     'pack':{
                         'related':(
@@ -197,9 +197,9 @@ repository_config = {
                             '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
                             '--maxWidth':1280
                         },
-                        'flags':['--large-file'],
-                        'audio':[
-                            [
+                        'flags':('--large-file'),
+                        'audio':(
+                            (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
@@ -208,8 +208,8 @@ repository_config = {
                                     'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'}
                                 }
-                            ],
-                            [
+                            ),
+                            (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
@@ -218,8 +218,8 @@ repository_config = {
                                     'from': {'kind':'mp3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                 }
-                            ],
-                        ]
+                            ),
+                        )
                     },
                     'pack':{
                         'related':(
@@ -251,50 +251,50 @@ repository_config = {
             'Profile':{
                 'sd':{
                     'pack':{
-                        'related':[
+                        'related':(
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'}
-                        ],
-                        'tracks':[
+                        ),
+                        'tracks':(
                             {'type':'video'},
                             {'type':'audio', 'kind':'ac3'},
                             {'type':'audio', 'kind':'mp3'},
                             {'type':'audio', 'kind':'aac'},
                             {'type':'audio', 'kind':'dts'}
-                        ]
+                        )
                     }
                 },
                 '720':{
                     'pack':{
-                        'related':[
+                        'related':(
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'}
-                        ],
-                        'tracks':[
+                        ),
+                        'tracks':(
                             {'type':'video'},
                             {'type':'audio', 'kind':'ac3'},
                             {'type':'audio', 'kind':'mp3'},
                             {'type':'audio', 'kind':'aac'},
                             {'type':'audio', 'kind':'dts'}
-                        ]
+                        )
                     }
                 },
                 '1080':{
                     'pack':{
-                        'related':[
+                        'related':(
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'}
-                        ],
-                        'tracks':[
+                        ),
+                        'tracks':(
                             {'type':'video'},
                             {'type':'audio', 'kind':'ac3'},
                             {'type':'audio', 'kind':'mp3'},
                             {'type':'audio', 'kind':'aac'},
                             {'type':'audio', 'kind':'dts'}
-                        ]
+                        )
                     }
                 }
             }
@@ -316,11 +316,11 @@ repository_config = {
                 },
                 'clean':{
                     'transcode':{
-                        'filter':['comment', 'typo']
+                        'filter':('comment', 'typo')
                     },
                     'update':{
-                        'smart':{'language':'swe', 'Name':'Default', 'order':['heb', 'eng'], 'height':0.1},
-                        'related':[
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.1},
+                        'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt'},
                                 'to': {'height':0.1, 'Name':'Normal'}
@@ -329,7 +329,7 @@ repository_config = {
                                 'from': {'language':'eng', 'kind':'srt'},
                                 'to': {'height':0.1, 'Name':'Normal'}
                             }
-                        ]
+                        )
                     }
                 }
             }
@@ -395,7 +395,7 @@ subtitle_config = {
         'scope':'line',
         'action':'drop',
         'case':'insensitive',
-        'expression':[
+        'expression':(
             ur'^[-\s]*$',
             ur'\bswsub\b',
             ur'\bresync\b',
@@ -556,158 +556,158 @@ subtitle_config = {
             ur'הגהה על-ידי',
             ur'HAZY7868',
             ur'^[-\s]*$'
-        ]
+        )
     },
     'evil':{
         'scope':'block',
         'action':'drop',
         'case':'insensitive',
-        'expression':[]
+        'expression':()
     },
     'typo':{
         'scope':'line',
         'action':'replace',
         'case':'insensitive',
-        'expression':[
-            [r'\b *(,|\.|\?|%|!|\$) *\b', r'\1 '],
-            [r'\.\s*\.\s*\.\.?', r'...'],
-            [r'</?[a-z]+/?>', r''],
-            [r'\'{2}', r'"'],
-            [r'\s+\)', r')'],
-            [r'\(\s+', '('],
-            [r'\s+\]', r']'],
-            [r'\[\s+', '['],
-            [r'\[[^\]]+\]\s*', r''],
-            [r'^[^\]]+\]', r''],
-            [r'\[[^\]]+\$', r''],
-            [r'\([A-Z0-9l\s]+\)', r''],
-            [r'\([A-Z0-9l\s]+$', r''],
-            [r'^[A-Z0-9l\s]+\)', r''],
-            [r'\b[-A-Z0-9\s]+:\s*', r''],
-            [r'Theysaid', r'They said'],
-            [r'\bIast\b', r'last'],
-            [r'\bIook\b', r'look'],
-            [r'\bIetting\b', r'letting'],
-            [r'\bIet\b', r'let'],
-            [r'\bshe\'II\b', r'she\'ll'],
-            [r'\bIooking\b', r'looking'],
-            [r'\bIife\b', r'life'],
-            [r'\bIeft\b', r'left'],
-            [r'\bIike\b', r'like'],
-            [r'\bIittle\b', r'little'],
-            [r'\b(P|p)Iease\b', r'\1lease'],
-            [r'\bIadies\b', r'ladies'],
-            [r'\bIearn\b', r'learn'],
-            [r'\bIanded\b', r'landed'],
-            [r'\bIocked\b', r'locked'],
-            [r'\bIie\b', r'lie'],
-            [r'\bCIaire\b', r'Claire'],
-            [r'\bIong\b', r'long'],
-            [r'\bIine\b', r'line'],
-            [r'\byou\'II\b', r'you\'ll'],
-            [r'\bIives\b', r'lives'],
-            [r'\bIeave\b', r'leave'],
-            [r'\bIawyer\b', r'lawyer'],
-            [r'\bAIex\b', r'Alex'],
-            [r'\bIogs\b', r'logs'],
-            [r'\b(P|p)Ieasure\b', r'\1leasure'],
-            [r'\bIack\b', r'lack'],
-            [r'\bIove\b', r'love'],
-            [r'\bAIexandra\b', r'Alexandra'],
-            [r'\bIot\b', r'lot'],
-            [r'\bIanding\b', r'landing'],
-            [r'\bThey\'II\b', r'They\'ll'],
-            [r'\bIet\'s\b', r'let\'s'],
-            [r'\bIand\b', r'land'],
-            [r'\bIying\b', r'lying'],
-            [r'\bIist\b', r'list'],
-            [r'\bAIIow\b', r'Allow'],
-            [r'\bIoved\b', r'loved'],
-            [r'\bIoss\b', r'loss'],
-            [r'\bIied\b', r'lied'],
-            [r'\bIaugh\b', r'laugh'],
-            [r'\bpIace\b', r'place'],
-            [r'\b(h|H)avert\b', r'\1aven\'t'],
-            [r'\b(w|W)asrt\b', r'\1asn\'t'],
-            [r'\b(d|D)oesrt\b', r'\1oesn\'t'],
-            [r'\b(d|D)ort\b', r'\1on\'t'],
-            [r'\b(d|D)idrt\b', r'\1idn\'t'],
-            [r'\b(a|A)irt\b', r'\1in\'t'],
-            [r'\b(i|I)srt\b', r'\1sn\'t'],
-            [r'\b(w|W)ort\b', r'\1on\'t'],
-            [r'\b(c|C|w|W|s|S)ouldrt\b', r'\1ouldn\'t'],
-            [r'\barert\b', r'aren\'t'],
-            [r'\bls\b', r'Is'],
-            [r'\bLf\b', r'If'],
-            [r'\blf\b', r'If'],
-            [r'\blt\b', r'It'],
-            [r'\blt\'s\b', r'It\'s'],
-            [r'\bl\'m\b', r'I\'m'],
-            [r'\bl\'ll\b', r'I\'ll'],
-            [r'\bl\'ve\b', r'I\'ve'],
-            [r'\bl\b', r'I'],
-            [r'\bln\b', r'In'],
-            [r'\blmpossible\b', r'Impossible'],
-            [r'\bIight\b', r'light'],
-            [r'\bIevitation\b', r'levitation'],
-            [r'\bIeaving\b', r'leaving'],
-            [r'\bIooked\b', r'looked'],
-            [r'\bwe\'II\b', r'we\'ll'],
-            [r'\bIucky\b', r'lucky'],
-            [r'\bIuck\b', r'luck'],
-            [r'\bIater\b', r'later'],
-            [r'\bIift\b', r'lift'],
-            [r'\bIip\b', r'lip'],
-            [r'\bhe\'II\b', r'he\'ll'],
-            [r'\b(A|a)Iso\b', r'\1lso'],
-            [r'\bIooks\b', r'looks'],
-            [r'\b(P|p)Iayed\b', r'\1layed'],
-            [r'\bIaid\b', r'laid'],
-            [r'\bIikely\b', r'likely'],
-            [r'\bIow\b', r'low'],
-            [r'\bIeast\b', r'least'],
-            [r'\bIeader\b', r'leader'],
-            [r'\bIocate\b', r'locate'],
-            [r'\bIaw\b', r'law'],
-            [r'\bIately\b', r'lately'],
-            [r'\bFIying\b', r'Flying'],
-            [r'\bIiar\b', r'liar'],
-            [r'\b(s|S)chooI\b', r'\1chool'],
-            [r'\b(s|S)eriousIy\b', r'\1eriously'],
-            [r'\bIate\b', r'late'],
-            [r'\b(S|s)urgicaI\b', r'\1urgical'],
-            [r'\b(B|b)Iood\b', r'\1lood'],
-            [r'\b(f|F)eeIs\b', r'\1eels'],
-            [r'\b(S|s)Iept\b', r'\1lept'],
-            [r'\b(b|B)Iew\b', r'\1lew'],
-            [r'\b(T|t)aiI\b', r'\1ail'],
-            [r'\b(N|n)earIy\b', r'\1early'],
-            [r'\b(C|c)Iose\b', r'\1lose'],
-            [r'\b(C|c)Ioser\b', r'\1loser'],
-            [r'\b(E|e)viI\b', r'\1vil'],
-            [r'\b(M|m)odeI\b', r'\1odel'],
-            [r'\b(S|s)yphiIis\b', r'\1yphilis'],
-            [r'\b(R|r)eIationship\b', r'\1elationship'],
-            [r'\b(F|f)aIIing\b', r'\1alling'],
-            [r'\b(P|p)eopIe\b', r'\1eople'],
-            [r'\b(C|c|B|b)aII\b', r'\1all'],
-            [r'\b(W|w)ouId\b', r'\1ould'],
-            [r'\b(A|a)ppIe\b', r'\1pple'],
-            [r'\b(F|f)amiIiar\b', r'\1amiliar'],
-            [r'\b(R|r)eaIIy\b', r'\1eally'],
-            [r'\b(W|w|H|h|Y|y)eII\b', r'\1ell'],
-            [r'\b(P|p)robIem\b', r'\1roblem'],
-            [r'\bIonger\b', r'longer'],
-            [r'\b(G|g)irIfriend\b', r'\1irlfriend'],
-            [r'\b(F|f)Iew\b', r'\1lew'],
-            [r'\b(R|r)eaIize\b', r'\1ealize'],
-            [r'\bIive\b', r'live'],
-            [r'\b(S|s)tiII\b', r'\1till'],
-            [r'\b(W|w)iII\b', r'\1ill'],
-            [r'\bRusseII\b', r'Russell'],
-            [r'\b(S|s)maII\b', r'\1mall'],
-            [r'^[-\s]*$', r'']
-        ]
+        'expression':(
+            (r'\b *(,|\.|\?|%|!|\$) *\b', r'\1 '),
+            (r'\.\s*\.\s*\.\.?', r'...'),
+            (r'</?[a-z]+/?>', r''),
+            (r'\'{2}', r'"'),
+            (r'\s+\)', r')'),
+            (r'\(\s+', '('),
+            (r'\s+\]', r']'),
+            (r'\[\s+', '['),
+            (r'\[[^\]]+\]\s*', r''),
+            (r'^[^\]]+\]', r''),
+            (r'\[[^\]]+\$', r''),
+            (r'\([A-Z0-9l\s]+\)', r''),
+            (r'\([A-Z0-9l\s]+$', r''),
+            (r'^[A-Z0-9l\s]+\)', r''),
+            (r'\b[-A-Z0-9\s]+:\s*', r''),
+            (r'Theysaid', r'They said'),
+            (r'\bIast\b', r'last'),
+            (r'\bIook\b', r'look'),
+            (r'\bIetting\b', r'letting'),
+            (r'\bIet\b', r'let'),
+            (r'\bshe\'II\b', r'she\'ll'),
+            (r'\bIooking\b', r'looking'),
+            (r'\bIife\b', r'life'),
+            (r'\bIeft\b', r'left'),
+            (r'\bIike\b', r'like'),
+            (r'\bIittle\b', r'little'),
+            (r'\b(P|p)Iease\b', r'\1lease'),
+            (r'\bIadies\b', r'ladies'),
+            (r'\bIearn\b', r'learn'),
+            (r'\bIanded\b', r'landed'),
+            (r'\bIocked\b', r'locked'),
+            (r'\bIie\b', r'lie'),
+            (r'\bCIaire\b', r'Claire'),
+            (r'\bIong\b', r'long'),
+            (r'\bIine\b', r'line'),
+            (r'\byou\'II\b', r'you\'ll'),
+            (r'\bIives\b', r'lives'),
+            (r'\bIeave\b', r'leave'),
+            (r'\bIawyer\b', r'lawyer'),
+            (r'\bAIex\b', r'Alex'),
+            (r'\bIogs\b', r'logs'),
+            (r'\b(P|p)Ieasure\b', r'\1leasure'),
+            (r'\bIack\b', r'lack'),
+            (r'\bIove\b', r'love'),
+            (r'\bAIexandra\b', r'Alexandra'),
+            (r'\bIot\b', r'lot'),
+            (r'\bIanding\b', r'landing'),
+            (r'\bThey\'II\b', r'They\'ll'),
+            (r'\bIet\'s\b', r'let\'s'),
+            (r'\bIand\b', r'land'),
+            (r'\bIying\b', r'lying'),
+            (r'\bIist\b', r'list'),
+            (r'\bAIIow\b', r'Allow'),
+            (r'\bIoved\b', r'loved'),
+            (r'\bIoss\b', r'loss'),
+            (r'\bIied\b', r'lied'),
+            (r'\bIaugh\b', r'laugh'),
+            (r'\bpIace\b', r'place'),
+            (r'\b(h|H)avert\b', r'\1aven\'t'),
+            (r'\b(w|W)asrt\b', r'\1asn\'t'),
+            (r'\b(d|D)oesrt\b', r'\1oesn\'t'),
+            (r'\b(d|D)ort\b', r'\1on\'t'),
+            (r'\b(d|D)idrt\b', r'\1idn\'t'),
+            (r'\b(a|A)irt\b', r'\1in\'t'),
+            (r'\b(i|I)srt\b', r'\1sn\'t'),
+            (r'\b(w|W)ort\b', r'\1on\'t'),
+            (r'\b(c|C|w|W|s|S)ouldrt\b', r'\1ouldn\'t'),
+            (r'\barert\b', r'aren\'t'),
+            (r'\bls\b', r'Is'),
+            (r'\bLf\b', r'If'),
+            (r'\blf\b', r'If'),
+            (r'\blt\b', r'It'),
+            (r'\blt\'s\b', r'It\'s'),
+            (r'\bl\'m\b', r'I\'m'),
+            (r'\bl\'ll\b', r'I\'ll'),
+            (r'\bl\'ve\b', r'I\'ve'),
+            (r'\bl\b', r'I'),
+            (r'\bln\b', r'In'),
+            (r'\blmpossible\b', r'Impossible'),
+            (r'\bIight\b', r'light'),
+            (r'\bIevitation\b', r'levitation'),
+            (r'\bIeaving\b', r'leaving'),
+            (r'\bIooked\b', r'looked'),
+            (r'\bwe\'II\b', r'we\'ll'),
+            (r'\bIucky\b', r'lucky'),
+            (r'\bIuck\b', r'luck'),
+            (r'\bIater\b', r'later'),
+            (r'\bIift\b', r'lift'),
+            (r'\bIip\b', r'lip'),
+            (r'\bhe\'II\b', r'he\'ll'),
+            (r'\b(A|a)Iso\b', r'\1lso'),
+            (r'\bIooks\b', r'looks'),
+            (r'\b(P|p)Iayed\b', r'\1layed'),
+            (r'\bIaid\b', r'laid'),
+            (r'\bIikely\b', r'likely'),
+            (r'\bIow\b', r'low'),
+            (r'\bIeast\b', r'least'),
+            (r'\bIeader\b', r'leader'),
+            (r'\bIocate\b', r'locate'),
+            (r'\bIaw\b', r'law'),
+            (r'\bIately\b', r'lately'),
+            (r'\bFIying\b', r'Flying'),
+            (r'\bIiar\b', r'liar'),
+            (r'\b(s|S)chooI\b', r'\1chool'),
+            (r'\b(s|S)eriousIy\b', r'\1eriously'),
+            (r'\bIate\b', r'late'),
+            (r'\b(S|s)urgicaI\b', r'\1urgical'),
+            (r'\b(B|b)Iood\b', r'\1lood'),
+            (r'\b(f|F)eeIs\b', r'\1eels'),
+            (r'\b(S|s)Iept\b', r'\1lept'),
+            (r'\b(b|B)Iew\b', r'\1lew'),
+            (r'\b(T|t)aiI\b', r'\1ail'),
+            (r'\b(N|n)earIy\b', r'\1early'),
+            (r'\b(C|c)Iose\b', r'\1lose'),
+            (r'\b(C|c)Ioser\b', r'\1loser'),
+            (r'\b(E|e)viI\b', r'\1vil'),
+            (r'\b(M|m)odeI\b', r'\1odel'),
+            (r'\b(S|s)yphiIis\b', r'\1yphilis'),
+            (r'\b(R|r)eIationship\b', r'\1elationship'),
+            (r'\b(F|f)aIIing\b', r'\1alling'),
+            (r'\b(P|p)eopIe\b', r'\1eople'),
+            (r'\b(C|c|B|b)aII\b', r'\1all'),
+            (r'\b(W|w)ouId\b', r'\1ould'),
+            (r'\b(A|a)ppIe\b', r'\1pple'),
+            (r'\b(F|f)amiIiar\b', r'\1amiliar'),
+            (r'\b(R|r)eaIIy\b', r'\1eally'),
+            (r'\b(W|w|H|h|Y|y)eII\b', r'\1ell'),
+            (r'\b(P|p)robIem\b', r'\1roblem'),
+            (r'\bIonger\b', r'longer'),
+            (r'\b(G|g)irIfriend\b', r'\1irlfriend'),
+            (r'\b(F|f)Iew\b', r'\1lew'),
+            (r'\b(R|r)eaIize\b', r'\1ealize'),
+            (r'\bIive\b', r'live'),
+            (r'\b(S|s)tiII\b', r'\1till'),
+            (r'\b(W|w)iII\b', r'\1ill'),
+            (r'\bRusseII\b', r'Russell'),
+            (r'\b(S|s)maII\b', r'\1mall'),
+            (r'^[-\s]*$', r'')
+        )
     }
 }
 
@@ -732,7 +732,7 @@ db_config = {
             'Banner.getImage':'http://www.thetvdb.com/banners/%s'
         }
     },
-    'tag':[
+    'tag':(
         # Tag name map
         # Schema: canonic name, subler name, mp4info name
         ('Track #', 'Track #', 'Track'),
@@ -792,17 +792,17 @@ db_config = {
         ('iTunes Account Type', None, 'iTunes Account Type'),
         ('iTunes Store Country', None, 'iTunes Store Country'),
         ('XID', 'XID', 'xid')
-    ]
+    )
 }
 
-genre_map = [
+genre_map = (
     # Genre map
     # allows mapping different names for genres to another
     ('science-fiction', 'sci-fi')
-]
+)
 
 base_config = {
-    'genre':[
+    'genre':(
         # ITMF Genre
         # The standard itmf names and codes for genres
         {'_id':'blues', 'itmf':2, 'name':'Blues'},
@@ -884,55 +884,55 @@ base_config = {
         {'_id':'retro', 'itmf':78, 'name':'Retro'},
         {'_id':'musical', 'itmf':79, 'name':'Musical'},
         {'_id':'rock and roll', 'itmf':80, 'name':'Rock and Roll'}
-    ],
+    ),
     
-    'tvshow':[
+    'tvshow':(
         # TV Show map
         # The initial TVDB TV Show id map
-        [79501, 'Heroes'],
-        [75930, 'Alias'],
-        [76290, '24'],
-        [73800, 'Desperate Housewives'],
-        [79349, 'Dexter'],
-        [73871, 'Futurama'],
-        [73255, 'House'],
-        [73739, 'Lost'],
-        [79169, 'Seinfeld'],
-        [75299, 'The Sopranos'],
-        [73762, 'Greys Anatomy'],
-        [79126, 'The Wire'],
-        [75164, 'Samurai Jack'],
-        [74543, 'Entourage'],
-        [85527, 'Yellowstone'],
-        [79257, 'Planet Earth'],
-        [74845, 'Weeds'],
-        [75450, 'Six Feet Under'],
-        [80252, 'Flight of the Conchords'],
-        [82066, 'Fringe'],
-        [80337, 'Mad Men'],
-        [73508, 'Rome'],
-        [77398, 'The X-Files'],
-        [70682, 'Oz'],
-        [77526, 'Star Trek'],
-        [77231, 'Mission Impossible'],
-        [83268, 'Star Wars - The Clone Wars'],
-        [74805, 'The Prisoner'],
-        [85242, 'The Prisoner 2009'],
-        [83602, 'Lie To Me'],
-        [80349, 'Californication'],
-        [82109, 'Generation Kill'],
-        [70533, 'Twin Peaks'],
-        [72628, 'The Singing Detective'],
-        [80593, 'Dirty Sexy Money'],
-        [79177, 'Life on Mars'],
-        [82289, 'Life on Mars US'],
-        [118421, 'Life BBC'],
-        [130421, 'Faces of Earth'],
-        [147071, 'Wonders of the Solar System'],
-        [108611, 'White Collar'],
-        [85149, 'Berlin Alexanderplatz'],
-        [94971, 'V 2009'],
-        [82459, 'The Mentalist'],
-        [82283, 'True Blood']
-    ]
+        (79501, 'Heroes'),
+        (75930, 'Alias'),
+        (76290, '24'),
+        (73800, 'Desperate Housewives'),
+        (79349, 'Dexter'),
+        (73871, 'Futurama'),
+        (73255, 'House'),
+        (73739, 'Lost'),
+        (79169, 'Seinfeld'),
+        (75299, 'The Sopranos'),
+        (73762, 'Greys Anatomy'),
+        (79126, 'The Wire'),
+        (75164, 'Samurai Jack'),
+        (74543, 'Entourage'),
+        (85527, 'Yellowstone'),
+        (79257, 'Planet Earth'),
+        (74845, 'Weeds'),
+        (75450, 'Six Feet Under'),
+        (80252, 'Flight of the Conchords'),
+        (82066, 'Fringe'),
+        (80337, 'Mad Men'),
+        (73508, 'Rome'),
+        (77398, 'The X-Files'),
+        (70682, 'Oz'),
+        (77526, 'Star Trek'),
+        (77231, 'Mission Impossible'),
+        (83268, 'Star Wars - The Clone Wars'),
+        (74805, 'The Prisoner'),
+        (85242, 'The Prisoner 2009'),
+        (83602, 'Lie To Me'),
+        (80349, 'Californication'),
+        (82109, 'Generation Kill'),
+        (70533, 'Twin Peaks'),
+        (72628, 'The Singing Detective'),
+        (80593, 'Dirty Sexy Money'),
+        (79177, 'Life on Mars'),
+        (82289, 'Life on Mars US'),
+        (118421, 'Life BBC'),
+        (130421, 'Faces of Earth'),
+        (147071, 'Wonders of the Solar System'),
+        (108611, 'White Collar'),
+        (85149, 'Berlin Alexanderplatz'),
+        (94971, 'V 2009'),
+        (82459, 'The Mentalist'),
+        (82283, 'True Blood')
+    )
 }
