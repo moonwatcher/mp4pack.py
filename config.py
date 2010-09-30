@@ -1,47 +1,50 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-tmdb_apikey = 'a8b9f96dde091408a03cb4c78477bd14'
-tvdb_apikey = '7B3B400B0146EA83'
+tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
+tvdb_apikey = u'7B3B400B0146EA83'
 
 repository_config = {
     'Display':{
-        'wrap':80, 
+        'wrap':100, 
         'indent':25, 
-        'margin':2
+        'margin':2,
     },
     'Action':{
         'pack': ('mkv',),
         'transcode':('m4v', 'mkv', 'srt', 'txt'),
-        'extract':('all', 'srt', 'ass', 'txt'),
-        'update':('srt',)
+        'update':('srt',),
     },
     'Codec':{
         'Audio':{
             'ac3':'ac-3|AC3',
             'aac':'AAC',
             'dts':'DTS',
-            'mp3':'MPEG/L3'
+            'mp3':'MPEG/L3',
         },
         'Subtitle':{
             'srt':'S_TEXT/UTF8',
-            'ass':'S_TEXT/ASS'
-        }
+            'ass':'S_TEXT/ASS',
+        },
     },
     'Language':{
         'heb':'Hebrew', 
         'eng':'English',
-        'swe':'Swedish'
+        'swe':'Swedish',
     },
     'Volume':{
         'alpha':'/Users/lg/Downloads/pool/alpha',
-        'epsilon':'/Users/lg/Downloads/pool/epsilon'
+        'beta':'/Users/lg/Downloads/pool/beta',
+        'gama':'/Users/lg/Downloads/pool/gama',
+        'delta':'/Users/lg/Downloads/pool/delta',
+        'eta':'/Users/lg/Downloads/pool/eta',
+        'epsilon':'/Users/lg/Downloads/pool/epsilon',
     },
     'Media Kind':{
         'tvshow':{'schema':'^(.+) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10},
         'movie':{'schema':'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', 'name':'Movie', 'stik':9},
         #'music':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Music', 'stik':1},
-        #'audiobook':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2}
+        #'audiobook':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2},
     },
     'Kind':{
         'm4v':{
@@ -50,146 +53,123 @@ repository_config = {
             'Profile':{
                 'universal':{
                     'description':'an SD profile that decodes on every cabac capable apple device',
+                    'default':{
+                        'tvshow':{'volume':'beta'},
+                        'movie':{'volume':'gama'},
+                    },
                     'transcode':{
                         'options':{
                             '--quality':18,
                             '--encoder':'x264',
                             '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1',
-                            '--maxWidth':720
+                            '--maxWidth':720,
                         },
-                        'flags':('--large-file'),
+                        'flags':('--large-file',),
                         'audio':(
                             (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
-                                }
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
+                                },
                             ),
                             (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                                 {
                                     'from': {'kind':'mp3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                                }
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
                             ),
-                        )
-                    },
-                    'pack':{
-                        'related':(
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'}
                         ),
-                        'tracks':(
-                            {'type':'video'},
-                            {'type':'audio', 'kind':'ac3'},
-                            {'type':'audio', 'kind':'mp3'},
-                            {'type':'audio', 'kind':'aac'}
-                        )
-                    }
+                    },
                 },
                 'appletv':{
                     'description':'Intel based AppleTV profile',
+                    'default':{
+                        'tvshow':{'volume':'beta'},
+                        'movie':{'volume':'eta'},
+                    },
                     'transcode':{
                         'options':{
                             '--quality':22,
                             '--encoder':'x264',
                             '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
-                            '--maxWidth':1280
+                            '--maxWidth':1280,
                         },
-                        'flags':('--large-file'),
+                        'flags':('--large-file',),
                         'audio':(
                             (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
-                                }
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
+                                },
                             ),
                             (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                                }
-                            ),
-                            (
-                                {
-                                    'from': {'kind':'mp3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                                }
-                            ),
-                        )
-                    },
-                    'pack':{
-                        'related':(
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'}
-                        ),
-                        'tracks':(
-                            {'type':'video'},
-                            {'type':'audio', 'kind':'ac3'},
-                            {'type':'audio', 'kind':'mp3'},
-                            {'type':'audio', 'kind':'aac'}
-                        )
-                    }
-                },
-                'ipod':{
-                    'description':'All iPod touch models profile',
-                    'transcode':{
-                        'options':{
-                            '--quality':21,
-                            '--encoder':'x264',
-                            '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
-                            '--maxWidth':480
-                        },
-                        'audio':(
-                            (
-                                {
-                                    'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                                }
-                            ),
-                            (
-                                {
-                                    'from': {'kind':'aac', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
                             (
                                 {
                                     'from': {'kind':'mp3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                                }
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
                             ),
-                        )
-                    },
-                    'pack':{
-                        'related':(
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'}
                         ),
-                        'tracks':(
-                            {'type':'video'},
-                            {'type':'audio', 'kind':'ac3'},
-                            {'type':'audio', 'kind':'mp3'},
-                            {'type':'audio', 'kind':'aac'}
-                        )
-                    }
+                    },
+                },
+                'ipod':{
+                    'description':'All iPod touch models profile',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
+                    },
+                    'transcode':{
+                        'options':{
+                            '--quality':21,
+                            '--encoder':'x264',
+                            '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
+                            '--maxWidth':480,
+                        },
+                        'audio':(
+                            (
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                        ),
+                    },
                 },
                 'high':{
                     'description':'High profile',
+                    'default':{
+                        'tvshow':{'volume':'beta'},
+                        'movie':{'volume':'eta'},
+                    },
                     'transcode':{
                         'options':{
                             '--quality':18,
@@ -197,170 +177,204 @@ repository_config = {
                             '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
                             '--maxWidth':1280
                         },
-                        'flags':('--large-file'),
+                        'flags':('--large-file',),
                         'audio':(
                             (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'}
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'}
-                                }
+                                    'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'},
+                                },
                             ),
                             (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                                 {
                                     'from': {'kind':'mp3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
-                                }
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
                             ),
-                        )
-                    },
-                    'pack':{
-                        'related':(
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'}
                         ),
-                        'tracks':(
-                            {'type':'video'},
-                            {'type':'audio', 'kind':'ac3'},
-                            {'type':'audio', 'kind':'mp3'},
-                            {'type':'audio', 'kind':'aac'}
-                        )
-                    }
-                }
-            }
+                    },
+                },
+            },
         },
         'm4a':{
             'container':'mp4',
             'default':{'volume':'alpha'},
             'Profile':{
                 'lossless':{},
-                'portable':{}
-            }
+                'portable':{},
+            },
         },
         'mkv':{
             'container':'matroska',
             'default':{'volume':'epsilon'},
             'Profile':{
                 'sd':{
+                    'default':{
+                        'tvshow':{'volume':'delta'},
+                        'movie':{'volume':'delta'},
+                    },
                     'pack':{
                         'related':(
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'}
+                            {'kind':'txt', 'profile':'chapter'},
                         ),
                         'tracks':(
                             {'type':'video'},
                             {'type':'audio', 'kind':'ac3'},
                             {'type':'audio', 'kind':'mp3'},
                             {'type':'audio', 'kind':'aac'},
-                            {'type':'audio', 'kind':'dts'}
-                        )
-                    }
+                            {'type':'audio', 'kind':'dts'},
+                        ),
+                    },
                 },
                 '720':{
+                    'default':{
+                        'tvshow':{'volume':'delta'},
+                        'movie':{'volume':'delta'},
+                    },
                     'pack':{
                         'related':(
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'}
+                            {'kind':'txt', 'profile':'chapter'},
                         ),
                         'tracks':(
                             {'type':'video'},
                             {'type':'audio', 'kind':'ac3'},
                             {'type':'audio', 'kind':'mp3'},
                             {'type':'audio', 'kind':'aac'},
-                            {'type':'audio', 'kind':'dts'}
-                        )
-                    }
+                            {'type':'audio', 'kind':'dts'},
+                        ),
+                    },
                 },
                 '1080':{
+                    'default':{
+                        'tvshow':{'volume':'delta'},
+                        'movie':{'volume':'delta'},
+                    },
                     'pack':{
                         'related':(
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'}
+                            {'kind':'txt', 'profile':'chapter'},
                         ),
                         'tracks':(
                             {'type':'video'},
                             {'type':'audio', 'kind':'ac3'},
                             {'type':'audio', 'kind':'mp3'},
                             {'type':'audio', 'kind':'aac'},
-                            {'type':'audio', 'kind':'dts'}
-                        )
-                    }
-                }
-            }
+                            {'type':'audio', 'kind':'dts'},
+                        ),
+                    },
+                },
+            },
         },
         'srt':{
             'container':'subtitles',
-            'default':{
-                'profile':'original',
-                'volume':'alpha'
-            },
+            'default':{'profile':'original'},
             'Profile':{
-                'original':{
-                    'pack':{
+                'dump':{
+                    'description':'Special profile used by extract command',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
+                    },
+                    'extract':{
                         'tracks':(
                             {'type':'subtitles', 'language':'heb', 'kind':'srt'},
-                            {'type':'subtitles', 'language':'eng', 'kind':'srt'}
-                        )
-                    }
+                            {'type':'subtitles', 'language':'eng', 'kind':'srt'},
+                        ),
+                    },
                 },
-                'clean':{
-                    'transcode':{
-                        'filter':('comment', 'typo')
+                'original':{
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
                     },
                     'update':{
                         'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.1},
                         'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt'},
-                                'to': {'height':0.1, 'Name':'Normal'}
+                                'to': {'height':0.1, 'Name':'Normal'},
                             },
                             {
                                 'from': {'language':'eng', 'kind':'srt'},
-                                'to': {'height':0.1, 'Name':'Normal'}
-                            }
-                        )
-                    }
-                }
-            }
+                                'to': {'height':0.1, 'Name':'Normal'},
+                            },
+                        ),
+                    },
+                },
+                'clean':{
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
+                    },
+                    'transcode':{
+                        'filter':('comment', 'typo'),
+                    },
+                    'update':{
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.1},
+                        'related':(
+                            {
+                                'from': {'language':'heb', 'kind':'srt'},
+                                'to': {'height':0.1, 'Name':'Normal'},
+                            },
+                            {
+                                'from': {'language':'eng', 'kind':'srt'},
+                                'to': {'height':0.1, 'Name':'Normal'},
+                            },
+                        ),
+                    },
+                },
+            },
         },
         'ass':{
             'container':'subtitles',
-            'default':{'profile':'original', 'volume':'alpha'},
+            'default':{'profile':'dump'},
             'Profile':{
-                'original':{
-                    'pack':{
+                'dump':{
+                    'description':'Special profile used by extract command',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
+                    },
+                    'extract':{
                         'tracks':(
                             {'type':'subtitles', 'language':'heb', 'kind':'ass'},
-                            {'type':'subtitles', 'language':'eng', 'kind':'ass'}
-                        )
-                    }
-                }
-            }
+                            {'type':'subtitles', 'language':'eng', 'kind':'ass'},
+                        ),
+                    },
+                },
+            },
         },
         'sub':{
             'container':'subtitles',
-            'default':{'profile':'original', 'volume':'alpha'},
+            'default':{'profile':'original'},
             'Profile':{
-                'original':{}
-            }
+                'original':{},
+            },
         },
         'txt':{
             'container':'chapters',
-            'default':{'profile':'chapter', 'volume':'alpha'},
+            'default':{'profile':'chapter'},
             'Profile':{
-                'chapter':{}
-            }
+                'chapter':{
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
+                    },
+                },
+            },
         },
         'jpg':{
             'container':'image',
@@ -373,9 +387,9 @@ repository_config = {
                 'normal':{
                     'transcode':{
                         
-                    }
-                }
-            }
+                    },
+                },
+            },
         },
         'png':{
             'container':'image',
@@ -384,10 +398,10 @@ repository_config = {
                 'volume':'alpha'
             },
             'Profile':{
-                'original':{}
-            }
-        }
-    }
+                'original':{},
+            },
+        },
+    },
 }
 
 subtitle_config = {
@@ -556,13 +570,13 @@ subtitle_config = {
             ur'הגהה על-ידי',
             ur'HAZY7868',
             ur'^[-\s]*$'
-        )
+        ),
     },
     'evil':{
         'scope':'block',
         'action':'drop',
         'case':'insensitive',
-        'expression':()
+        'expression':(),
     },
     'typo':{
         'scope':'line',
@@ -706,31 +720,34 @@ subtitle_config = {
             (r'\b(W|w)iII\b', r'\1ill'),
             (r'\bRusseII\b', r'Russell'),
             (r'\b(S|s)maII\b', r'\1mall'),
-            (r'^[-\s]*$', r'')
-        )
-    }
+            (r'^[-\s]*$', r''),
+        ),
+    },
 }
 
 db_config = {
-    'cache':'/Volumes/moonbook/pool/cache/',
+    'cache':u'/Users/lg/Downloads/pool/cache/',
     'db':{
         'name':'mp4pack'
     },
     'tmdb':{
-        'apikey':'a8b9f96dde091408a03cb4c78477bd14',
+        'apikey':tmdb_apikey,
         'urls':{
-            'Movie.getInfo':'http://api.themoviedb.org/2.1/Movie.getInfo/en/json/%s/%%s' % (tmdb_apikey),
-            'Movie.imdbLookup':'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/%s/%%s' % (tmdb_apikey),
-            'Person.getInfo':'http://api.themoviedb.org/2.1/Person.getInfo/en/json/%s/%%s' % (tmdb_apikey),
-            'Person.search':'http://api.themoviedb.org/2.1/Person.search/en/json/%s/%%s' % (tmdb_apikey)
-        }
+            'Movie.getInfo':u'http://api.themoviedb.org/2.1/Movie.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
+            'Movie.imdbLookup':u'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/{0}/{{0}}'.format(tmdb_apikey),
+            'Person.getInfo':u'http://api.themoviedb.org/2.1/Person.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
+            'Person.search':u'http://api.themoviedb.org/2.1/Person.search/en/json/{0}/{{0}}'.format(tmdb_apikey),
+        },
     },
     'tvdb':{
-        'apikey':'7B3B400B0146EA83',
+        'apikey':tvdb_apikey,
+        'fuzzy':{
+            'minimum_person_name_length':3,
+        },
         'urls':{
-            'Show.getInfo':'http://www.thetvdb.com/api/%s/series/%%s/all/en.xml' % (tvdb_apikey),
-            'Banner.getImage':'http://www.thetvdb.com/banners/%s'
-        }
+            'Show.getInfo':u'http://www.thetvdb.com/api/{0}/series/{{0}}/all/en.xml'.format(tvdb_apikey),
+            'Banner.getImage':u'http://www.thetvdb.com/banners/{0}'
+        },
     },
     'tag':(
         # Tag name map
@@ -791,14 +808,14 @@ db_config = {
         ('iTunes Account', 'iTunes Account', 'iTunes Account'),
         ('iTunes Account Type', None, 'iTunes Account Type'),
         ('iTunes Store Country', None, 'iTunes Store Country'),
-        ('XID', 'XID', 'xid')
-    )
+        ('XID', 'XID', 'xid'),
+    ),
 }
 
 genre_map = (
     # Genre map
     # allows mapping different names for genres to another
-    ('science-fiction', 'sci-fi')
+    ('science-fiction', 'sci-fi'),
 )
 
 base_config = {
@@ -883,7 +900,7 @@ base_config = {
         {'_id':'polka', 'itmf':77, 'name':'Polka'},
         {'_id':'retro', 'itmf':78, 'name':'Retro'},
         {'_id':'musical', 'itmf':79, 'name':'Musical'},
-        {'_id':'rock and roll', 'itmf':80, 'name':'Rock and Roll'}
+        {'_id':'rock and roll', 'itmf':80, 'name':'Rock and Roll'},
     ),
     
     'tvshow':(
@@ -933,6 +950,6 @@ base_config = {
         (85149, 'Berlin Alexanderplatz'),
         (94971, 'V 2009'),
         (82459, 'The Mentalist'),
-        (82283, 'True Blood')
-    )
+        (82283, 'True Blood'),
+    ),
 }

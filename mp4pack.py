@@ -70,19 +70,21 @@ def load_options():
     group.add_option('-i', '--info', dest='info', action='store_true', default=False, help='Show info')
     group.add_option('-c', '--copy', dest='copy', action='store_true', default=False, help='Copy into repository')
     group.add_option('-n', '--rename', dest='rename', action='store_true', default=False, help='Rename files to standard names')
+    group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract subtitle and chapter and transcode the extracted streams')
+    
     group.add_option('--tag', dest='tag', action='store_true', default=False, help='Update meta tags')
     group.add_option('--art', dest='art', action='store_true', default=False, help='Update embedded artwork')
     group.add_option('--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout')
     
     group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack'], help='Package to ' + str(rc['Action']['pack']))
     group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode'], help='Transcode to ' + str(rc['Action']['transcode']))
-    group.add_option('-e', '--extract', metavar='KIND', dest='extract', type='choice', choices=rc['Action']['extract'], help='Extract to ' + str(rc['Action']['extract']))
     group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update'], help='Update ' + str(rc['Action']['update']))
+    
     parser.add_option_group(group)
         
     group = OptionGroup(parser, 'Modifiers')
     group.add_option('-o', '--volume', dest='volume', type='choice', choices=rc['Volume'].keys(), default=None, help='Output volume [default: auto detect]')
-    group.add_option('-p', '--profile', dest='profile', type='choice', choices=profiles, default=None, help='[default: %default]')
+    group.add_option('-p', '--profile', dest='profile', type='choice', choices=profiles, default=None, help='[default: profile dependent]')
     group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='Regex to filter selected file names')
     group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files.')
     group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursively process sub directories.')
@@ -113,19 +115,16 @@ def load_options():
 ##    	pack mkv: mux to matroska @ profile
 ##    	transcode m4v: transcode to m4v @ profile
 ##    	transcode mkv: transcode to mkv @ profile
-##    	transcode srt: extract all subtitles to 'original' profile and than transcode subtitle to srt @ profile
-##    	extract srt: extract subtitles to profile
-##    	extract ass: extract subtitles to profile
-##    	extract txt: extract chapters
+##    	extract: extract chapters and srt and ass subtitles
         
 #    Mpeg4:
 ##    	pack mkv: mux to matroska @ profile
 ##    	transcode m4v: transcode to m4v @ profile
 ##    	transcode mkv: transcode to mkv @ profile
-##    	extract txt: extract chapters
 #    	update srt: remux subtitles @ profile
 #    	update art: update artwork
 #    	update txt: update chapters
+##    	extract: extract chapters
     
 #   Image
 #   transcode jpg: transcode to jpg @ profile
@@ -143,6 +142,10 @@ def preform_operations(files, options):
     if options.info:
         for f in files:
             print unicode(f).encode('utf-8')
+            
+    if options.extract:
+        for f in files:
+            f.extract(options)
             
     if options.copy:
         for f in files:
@@ -173,10 +176,6 @@ def preform_operations(files, options):
         for f in files:
             f.transcode(options)
     
-    if options.extract is not None:
-        for f in files:
-            f.extract(options)
-            
     if options.update is not None:
         for f in files:
             f.update(options)

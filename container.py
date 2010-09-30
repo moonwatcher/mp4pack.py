@@ -173,14 +173,15 @@ class Container(object):
     
     def copy(self, options):
         info = file_util.copy_file_info(self.file_info, options)
-        dest_path = file_util.canonic_path(info, self.meta)
-        if file_util.check_and_varify(dest_path, options.overwrite):
-            command = ['rsync', self.file_path, dest_path]
-            message = u'Copy ' + self.file_path + u' --> ' + dest_path
-            file_util.execute_command(command, message, options.debug)
-            file_util.clean_if_not_exist(dest_path)
-            if options.md5:
-                self.compare_checksum(dest_path)
+        if file_util.complete_info_default_values(info):
+            dest_path = file_util.canonic_path(info, self.meta)
+            if file_util.check_and_varify(dest_path, options.overwrite):
+                command = [u'rsync', self.file_path, dest_path]
+                message = u'Copy ' + self.file_path + u' --> ' + dest_path
+                file_util.execute_command(command, message, options.debug)
+                file_util.clean_if_not_exist(dest_path)
+                if options.md5:
+                    self.compare_checksum(dest_path)
         
     
     
@@ -191,7 +192,7 @@ class Container(object):
         else:
             if file_util.check_path(dest_path, False):
                 file_util.varify_directory(dest_path)
-                command = ['mv', self.file_path, dest_path]
+                command = [u'mv', self.file_path, dest_path]
                 message = u'Rename {0} --> {1}'.format(self.file_path, dest_path)
                 file_util.execute_command(command, message, options.debug)
                 file_util.clean_if_not_exist(dest_path)
@@ -213,7 +214,7 @@ class Container(object):
     
     
     def extract(self, options):
-        pass
+        return []
     
     
     def transcode(self, options):
@@ -347,22 +348,22 @@ class AVContainer(Container):
     
     
     def extract(self, options):
-        Container.extract(self, options)
-        if options.extract in ('txt'):
-            if self.chapter_markers :
-                info = file_util.copy_file_info(self.file_info, options)
-                info['kind'] = 'txt'
+        result = Container.extract(self, options)
+        if self.chapter_markers :
+            info = file_util.copy_file_info(self.file_info, options)
+            info['kind'] = 'txt'
+            if file_util.complete_info_default_values(info):
                 dest_path = file_util.canonic_path(info, self.meta)
-                
                 if file_util.check_and_varify(dest_path, options.overwrite):
                     c = Chapter(dest_path)
                     for cm in self.chapter_markers:
                         c.add_chapter_marker(cm)
-                    
+                
                     self.logger.debug(u'Extracting chapter markers from %s to %s', self.file_path, dest_path)
                     c.write(dest_path)
-                    file_util.clean_if_not_exist(dest_path)
-        return
+                    if file_util.clean_if_not_exist(dest_path):
+                        result.append(dest_path)
+        return result
     
     
     def pack(self, options):
@@ -370,52 +371,71 @@ class AVContainer(Container):
         info = file_util.copy_file_info(self.file_info, options)
         if options.pack in ('mkv'):
             info['kind'] = 'mkv'
-            dest_path = file_util.canonic_path(info, self.meta)
-            if dest_path is not None:
-                selected_related = file_util.related_by_profile(self.related, info['profile'], info['kind'])
-                selected_tracks = file_util.tracks_by_profile(self.tracks, info['profile'], info['kind'])
-                command = None
-                if file_util.check_and_varify(dest_path, options.overwrite):
-                    command = ['mkvmerge', '--output', dest_path, '--no-chapters', '--no-attachments', '--no-subtitles', self.file_path]
-                    for t in selected_related:
-                        t_info = self.related[t]
-                        if t_info['kind'] == 'srt':
-                            command.append('--sub-charset')
-                            command.append('0:UTF-8')
-                            command.append('--language')
-                            command.append('0:' + t_info['language'])
-                            command.append(t)
-                        if t_info['kind'] == 'txt' and t_info['profile'] == 'chapter':
-                            command.append('--chapter-language')
-                            command.append('eng')
-                            command.append('--chapter-charset')
-                            command.append('UTF-8')
-                            command.append('--chapters')
-                            command.append(t)
-                            
-                    audio_tracks = []
-                    video_tracks = []
-                    for t in selected_tracks:
-                        if 'name' in t:
-                            command.append('--track-name')
-                            command.append(t['number'] + ':' + t['name'])
-                        if 'language' in t:
-                            command.append('--language')
-                            command.append(t['number'] + ':' + t['language'])
-                        if t['type'] == 'audio':
-                            audio_tracks.append(t['number'])
+            if file_util.complete_info_default_values(info):
+                dest_path = file_util.canonic_path(info, self.meta)
+                if dest_path is not None:
+                    pc = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
+                    selected_related = []
+                    selected_tracks = []
+                
+                    if 'pack' in pc:
+                        if 'related' in pc['pack']:
+                            for (path,info) in self.related.iteritems():
+                                for c in pc['pack']['related']:
+                                    if all((k in info and info[k] == v) for k,v in c.iteritems()):
+                                        selected_related.append(path)
+                                        break
+                        if 'tracks' in pc['pack']:
+                            for t in self.tracks:
+                                for c in pc['pack']['tracks']:
+                                    if all((k in t and t[k] == v) for k,v in c.iteritems()):
+                                        selected_tracks.append(t)
+                                        break
+                                    
+                    if file_util.check_and_varify(dest_path, options.overwrite):
+                        command = [u'mkvmerge', u'--output', dest_path, u'--no-chapters', u'--no-attachments', u'--no-subtitles', self.file_path]
                         
-                        elif t['type'] == 'video':
-                            video_tracks.append(t['number'])
+                        for r in selected_related:
+                            rinfo = self.related[r]
+                            if rinfo['kind'] == 'srt':
+                                command.append(u'--sub-charset')
+                                command.append(u'0:UTF-8')
+                                command.append(u'--language')
+                                command.append(u'0:{0}'.format(rinfo['language']))
+                                command.append(r)
+                            
+                            if rinfo['kind'] == 'txt' and rinfo['profile'] == 'chapter':
+                                command.append(u'--chapter-language')
+                                command.append(u'eng')
+                                command.append(u'--chapter-charset')
+                                command.append(u'UTF-8')
+                                command.append(u'--chapters')
+                                command.append(r)
+                            
+                        audio_tracks = []
+                        video_tracks = []
+                        for t in selected_tracks:
+                            if 'name' in t:
+                                command.append(u'--track-name')
+                                command.append(u'{0}:{1}'.format(t['number'], t['name']))
+                            
+                            if 'language' in t:
+                                command.append(u'--language')
+                                command.append(u'{0}:{1}'.format(t['number'], t['language']))
+                            
+                            if t['type'] == 'audio':
+                                audio_tracks.append(unicode(t['number']))
+                            elif t['type'] == 'video':
+                                video_tracks.append(unicode(t['number']))
                     
-                    command.append('--audio-tracks')
-                    command.append(','.join(audio_tracks))
-                    command.append('--video-tracks')
-                    command.append(','.join(video_tracks))
+                        command.append(u'--audio-tracks')
+                        command.append(u','.join(audio_tracks))
+                        command.append(u'--video-tracks')
+                        command.append(u','.join(video_tracks))
                     
-                    message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
-                    file_util.execute_command(command, message, options.debug)
-                    file_util.clean_if_not_exist(dest_path)
+                        message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
+                        file_util.execute_command(command, message, options.debug)
+                        file_util.clean_if_not_exist(dest_path)
                     
         return
     
@@ -425,51 +445,52 @@ class AVContainer(Container):
         info = file_util.copy_file_info(self.file_info, options)
         if options.transcode in ('mkv', 'm4v'):
             info['kind'] = options.transcode
-            info = file_util.set_default_info(info)
-            dest_path = file_util.canonic_path(info, self.meta)
-            if dest_path is not None:
-                command = None
-                if file_util.check_and_varify(dest_path, options.overwrite):
-                    command = ['HandbrakeCLI']
-                    transcode_config = repository_config['Kind'][info['kind']]['Profile'][info['profile']]['transcode']
-                    if 'flags' in transcode_config:
-                        for v in transcode_config['flags']:
-                            command.append(v)
-                            
-                    if 'options' in transcode_config:
-                        for (k,v) in transcode_config['options'].iteritems():
-                            command.append(k)
-                            command.append(str(v))
-                            
-                    found_audio = False
-                    audio_options = {'--audio':[]}
-                    for s in transcode_config['audio']:
-                        for t in self.tracks:
-                            for c in s:
-                                if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
-                                    found_audio = True
-                                    audio_options['--audio'].append(t['number'])
-                                    for (k,v) in c['to'].iteritems():
-                                        if k not in audio_options: audio_options[k] = []
-                                        audio_options[k].append(str(v))
-                                        
-                        if found_audio:
-                            break
-                            
-                    if found_audio:
-                        for (k,v) in audio_options.iteritems():
-                            if len(v) > 0:
-                                command.append(k)
-                                command.append(','.join(v))
-                                
-                    command.append('--input')
-                    command.append(self.file_path)
-                    command.append('--output')
-                    command.append(dest_path)
+            if file_util.complete_info_default_values(info):
+                dest_path = file_util.canonic_path(info, self.meta)
+                if dest_path is not None:
+                    command = None
+                    if file_util.check_and_varify(dest_path, options.overwrite):
+                        command = [u'HandbrakeCLI']
+                        tc = repository_config['Kind'][info['kind']]['Profile'][info['profile']]['transcode']
                     
-                    message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
-                    file_util.execute_command(command, message, options.debug)
-                    file_util.clean_if_not_exist(dest_path)
+                        if 'flags' in tc:
+                            for v in tc['flags']:
+                                command.append(v)
+                            
+                        if 'options' in tc:
+                            for (k,v) in tc['options'].iteritems():
+                                command.append(k)
+                                command.append(unicode(v))
+                            
+                        found_audio = False
+                        audio_options = {'--audio':[]}
+                        for s in tc['audio']:
+                            for t in self.tracks:
+                                for c in s:
+                                    if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
+                                        found_audio = True
+                                        audio_options['--audio'].append(unicode(t['number']))
+                                        for (k,v) in c['to'].iteritems():
+                                            if k not in audio_options: audio_options[k] = []
+                                            audio_options[k].append(unicode(v))
+                                        
+                            if found_audio:
+                                break
+                            
+                        if found_audio:
+                            for (k,v) in audio_options.iteritems():
+                                if v:
+                                    command.append(k)
+                                    command.append(u','.join(v))
+                                
+                        command.append(u'--input')
+                        command.append(self.file_path)
+                        command.append(u'--output')
+                        command.append(dest_path)
+                    
+                        message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
+                        file_util.execute_command(command, message, options.debug)
+                        file_util.clean_if_not_exist(dest_path)
         return
     
     
@@ -632,7 +653,7 @@ class Matroska(AVContainer):
     
     def load(self):
         AVContainer.load(self)
-        command = ['mkvinfo', self.file_path]
+        command = [u'mkvinfo', self.file_path]
         output, error = file_util.execute_command(command, None)
         mkvinfo_report = unicode(output, 'utf-8').splitlines()
         length = len(mkvinfo_report)
@@ -672,58 +693,58 @@ class Matroska(AVContainer):
     
     
     def extract(self, options):
-        AVContainer.extract(self, options)
-        new_media_files = []
-        
-        if options.extract in ('all', 'srt', 'ass'):
-            command = ['mkvextract', 'tracks', self.file_path ]
+        result = AVContainer.extract(self, options)
+        if options.profile is None or file_util.profile_valid_for_kind(options.profile, 'srt'):
+            selected_files = []
+            selected_tracks = []
             info = file_util.copy_file_info(self.file_info, options)
-            selected = []
-            kinds = []
-            if options.extract == 'all':
-                kinds.append('srt')
-                kinds.append('ass')
-            else:
-                kinds.append(options.extract)
+            if 'volume' in info: del info['volume']
+            info['profile'] = 'dump'
             
-            for k in kinds:
+            for k in ('srt', 'ass'):
+                if 'volume' in info: del info['volume']
                 info['kind'] = k
-                info = file_util.set_default_info(info)
-                selected += file_util.tracks_by_profile(self.tracks, info['profile'], k)
-                
-            for t in selected:
-                info['kind'] = t['kind']
-                info['language'] = t['language']
-                dest_path = file_util.canonic_path(info, self.meta)
-                if file_util.check_and_varify(dest_path, options.overwrite):
-                    new_media_files.append(dest_path)
-                    command.append(str(t['number']) + ':' + dest_path)
-            
-            if  new_media_files:
-                message = u'Extract tracks from {0}'.format(self.file_path)
+                if file_util.complete_info_default_values(info):
+                    pc = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
+                    if 'extract' in pc and 'tracks' in pc['extract']:
+                        for t in self.tracks:
+                            for c in pc['extract']['tracks']:
+                                if all((k in t and t[k] == v) for k,v in c.iteritems()):
+                                    selected_tracks.append(t)
+                                    break
+                                    
+            if selected_tracks:
+                command = [u'mkvextract', u'tracks', self.file_path ]
+                for t in selected_tracks:
+                    if 'volume' in info: del info['volume']
+                    info['kind'] = t['kind']
+                    info['language'] = t['language']
+                    if file_util.complete_info_default_values(info):
+                        dest_path = file_util.canonic_path(info, self.meta)
+                        if file_util.check_and_varify(dest_path, options.overwrite):
+                            selected_files.append(dest_path)
+                            command.append(u'{0}:{1}'.format(unicode(t['number']), dest_path))
+                        
+            if selected_files:
+                message = u'Extract {0} tracks from {1}'.format(unicode(len(selected_files)), self.file_path)
                 file_util.execute_command(command, message, options.debug)
-                
-            for f in new_media_files:
-                file_util.clean_if_not_exist(f)
         
-        return new_media_files
-    
-    
-    def transcode(self, options):
-        AVContainer.transcode(self, options)
-        if options.transcode == 'srt':
+            extracted_files = []
+            for f in selected_files:
+                if file_util.clean_if_not_exist(f):
+                    extracted_files.append(f)
+        
             o = copy.deepcopy(options)
-            o.transcode = None
-            o.extract = 'all'
-            new_media_files = self.extract(o)
-            o.extract = None
             o.transcode = 'srt'
-            o.profile = 'clean'
-            for f in new_media_files:
-                if os.path.exists(f):
-                    s = Subtitle(f)
-                    s.transcode(o)
-    
+            o.extract = None
+        
+            for f in extracted_files:
+                s = Subtitle(f)
+                s.transcode(o)
+                result.append(f)
+        else:
+            self.logger.warning('Skipping subtitle extraction. Profile %s invalid for srt kind.', options.profile)
+        return result
     
 
 
@@ -783,7 +804,7 @@ class Mpeg4(AVContainer):
     
     def load(self):
         AVContainer.load(self)
-        command = ['mp4info', self.file_path]
+        command = [u'mp4info', self.file_path]
         output, error = file_util.execute_command(command, None)
         mp4info_report = unicode(output, 'utf-8').splitlines()
         
@@ -801,7 +822,7 @@ class Mpeg4(AVContainer):
                 if not in_tag_section:
                     in_tag_section = True
             
-        command = ['mp4chaps', '-l', self.file_path]
+        command = [u'mp4chaps', u'-l', self.file_path]
         output, error = file_util.execute_command(command, None)
         mp4chaps_report = unicode(output, 'utf-8').splitlines()
         for idx, line in enumerate(mp4chaps_report):
@@ -814,7 +835,7 @@ class Mpeg4(AVContainer):
         tc = self.build_subler_tag_update_string()
         if tc:
             message = u'Tag {0}'.format(self.file_path)
-            command = ['SublerCLI', '-i', self.file_path, '-t', tc]
+            command = [u'SublerCLI', u'-i', self.file_path, u'-t', tc]
             file_util.execute_command(command, message, options.debug)
         else:
             self.logger.info(u'No tags need update in %s', self.file_path)
@@ -823,7 +844,7 @@ class Mpeg4(AVContainer):
     def optimize(self, options):
         AVContainer.optimize(self, options)
         message = u'Optimize {0}'.format(self.file_path)
-        command = ['mp4file', '--optimize', self.file_path]
+        command = [u'mp4file', u'--optimize', self.file_path]
         file_util.execute_command(command, message, options.debug)
     
     
@@ -831,55 +852,56 @@ class Mpeg4(AVContainer):
         AVContainer.update(self, options)
         if options.update == 'txt':
             pass
+            
         if options.update == 'srt':
             info = file_util.copy_file_info(self.file_info, options)
             info['kind'] = 'srt'
-            info = file_util.set_default_info(info)
-            pc = repository_config['Kind']['srt']['Profile'][info['profile']]
-            
-            if 'profile' in info and 'update' in pc:
-                message = u'Remove existing subtitle tracks in {0}'.format(self.file_path)
-                command = ['SublerCLI', '-r', self.file_path]
-                file_util.execute_command(command, message, options.debug)
+            if file_util.complete_info_default_values(info):
+                pc = repository_config['Kind']['srt']['Profile'][info['profile']]
                 
-                selected = {}
-                for (p,i) in self.related.iteritems():
-                    for c in pc['update']['related']:
-                        if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
-                            selected[p] = i
-                            break
+                if 'profile' in info and 'update' in pc:
+                    message = u'Remove existing subtitle tracks in {0}'.format(self.file_path)
+                    command = [u'SublerCLI', u'-r', self.file_path]
+                    file_util.execute_command(command, message, options.debug)
+                    
+                    selected = {}
+                    for (p,i) in self.related.iteritems():
+                        for c in pc['update']['related']:
+                            if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
+                                selected[p] = i
+                                break
                             
-                for (p,i) in selected.iteritems():
-                    for c in pc['update']['related']:
-                        if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
-                            message = u'Add subtitles {0} --> {1}'.format(p, self.file_path)
-                            command = [
-                                'SublerCLI', '-i', self.file_path, 
-                                '-s', p, 
-                                '-l', repository_config['Language'][i['language']], 
-                                '-n', c['to']['Name'], 
-                                '-a', str(int(round(self.playback_height() * c['to']['height'])))
-                            ]
-                            file_util.execute_command(command, message, options.debug)
-                
-                if 'smart' in pc['update']:
-                    smart_section = pc['update']['smart']
-                    found = False
-                    for code in smart_section['order']:
-                        for (p,i) in selected.iteritems():
-                            if i['language'] == code:
-                                message = u'Add smart {0} subtitles {1} --> {2}'.format(repository_config['Language'][code], p, self.file_path)
+                    for (p,i) in selected.iteritems():
+                        for c in pc['update']['related']:
+                            if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
+                                message = u'Add subtitles {0} --> {1}'.format(p, self.file_path)
                                 command = [
-                                    'SublerCLI', '-i', self.file_path, 
-                                    '-s', p, 
-                                    '-l', repository_config['Language'][smart_section['language']], 
-                                    '-n', smart_section['Name'], 
-                                    '-a', str(int(round(self.playback_height() * smart_section['height'])))
+                                    u'SublerCLI', u'-i', self.file_path, 
+                                    u'-s', p, 
+                                    u'-l', repository_config['Language'][i['language']], 
+                                    u'-n', c['to']['Name'], 
+                                    u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
                                 ]
                                 file_util.execute_command(command, message, options.debug)
-                                found = True
-                                break
-                        if found: break
+                                
+                    if 'smart' in pc['update']:
+                        smart_section = pc['update']['smart']
+                        found = False
+                        for code in smart_section['order']:
+                            for (p,i) in selected.iteritems():
+                                if i['language'] == code:
+                                    message = u'Add smart {0} subtitles {1} --> {2}'.format(repository_config['Language'][code], p, self.file_path)
+                                    command = [
+                                        u'SublerCLI', u'-i', self.file_path, 
+                                        u'-s', p, 
+                                        u'-l', repository_config['Language'][smart_section['language']], 
+                                        u'-n', smart_section['Name'], 
+                                        u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
+                                    ]
+                                    file_util.execute_command(command, message, options.debug)
+                                    found = True
+                                    break
+                            if found: break
     
     
     def build_subler_tag_update_string(self):
@@ -965,12 +987,12 @@ class Text(Container):
         self.decode()
         info = file_util.copy_file_info(self.file_info, options)
         info['kind'] = options.transcode
-        info = file_util.set_default_info(info)
-        dest_path = file_util.canonic_path(info, self.meta)
-        if file_util.check_and_varify(dest_path, options.overwrite):
-            self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
-            self.write(dest_path)
-            file_util.clean_if_not_exist(dest_path)
+        if file_util.complete_info_default_values(info):
+            dest_path = file_util.canonic_path(info, self.meta)
+            if file_util.check_and_varify(dest_path, options.overwrite):
+                self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
+                self.write(dest_path)
+                file_util.clean_if_not_exist(dest_path)
     
     
 
@@ -1155,25 +1177,23 @@ class Subtitle(Text):
         self.decode()
         info = file_util.copy_file_info(self.file_info, options)
         info['kind'] = options.transcode
-        info = file_util.set_default_info(info)
-        
-        p = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
-        if 'transcode' in p and 'filter' in p['transcode']:
-            self.filter(p['transcode']['filter'])
-            self.logger.debug(u'Filtering %s by %s', self.file_path, unicode(p['transcode']['filter']))
-        
-        if options.time_shift is not None:
-            self.shift_times(options.time_shift)
-            
-        if options.input_rate is not None and options.output_rate is not None:
-            input_frame_rate = frame_rate_to_float(options.input_rate)
-            output_frame_rate = frame_rate_to_float(options.output_rate)
-            if input_frame_rate is not None and output_frame_rate is not None:
-                factor = input_frame_rate / output_frame_rate
-                self.change_framerate(factor)
-        
+        if file_util.complete_info_default_values(info):
+            p = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
+            if 'transcode' in p and 'filter' in p['transcode']:
+                self.filter(p['transcode']['filter'])
+                self.logger.debug(u'Filtering %s by %s', self.file_path, unicode(p['transcode']['filter']))
+                
+            if options.time_shift is not None:
+                self.shift_times(options.time_shift)
+                
+            if options.input_rate is not None and options.output_rate is not None:
+                input_frame_rate = frame_rate_to_float(options.input_rate)
+                output_frame_rate = frame_rate_to_float(options.output_rate)
+                if input_frame_rate is not None and output_frame_rate is not None:
+                    factor = input_frame_rate / output_frame_rate
+                    self.change_framerate(factor)
+                    
         Text.transcode(self, options)
-        
     
     
     def filter(self, sequence_list):
@@ -1532,36 +1552,34 @@ class FileUtil(object):
     def canonic_path(self, info, meta):
         result = None
         valid = True
-        if ('Media Kind' in info and info['Media Kind'] in repository_config['Media Kind']) and ('kind' in info and info['kind'] in repository_config['Kind']):
-            if not 'volume' in info and 'volume' in repository_config['Kind'][info['kind']]['default']:
-                info['volume'] = repository_config['Kind'][info['kind']]['default']['volume']
-                
-            if not 'profile' in info and 'profile' in repository_config['Kind'][info['kind']]['default']:
-                info['profile'] = repository_config['Kind'][info['kind']]['default']['profile']
-                
+        if 'kind' in info and info['kind'] in repository_config['Kind'].keys():
             if 'volume' in info and info['volume'] in repository_config['Volume']:
-                if 'profile' in info and info['profile'] in repository_config['Kind'][info['kind']]['Profile']:
-                    result = os.path.join(repository_config['Volume'][info['volume']], info['Media Kind'], info['kind'], info['profile'])
-                
-                    if info['Media Kind'] == 'tvshow' and 'show_small_name' in info and 'TV Season' in info:
-                        result = os.path.join(result, info['show_small_name'], str(info['TV Season']))
-                
-                    if info['kind'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
-                            result = os.path.join(result, info['language'])
+                if 'profile' in info:
+                    if self.profile_valid_for_kind(info['profile'], info['kind']):
+                        result = os.path.join(repository_config['Volume'][info['volume']], info['Media Kind'], info['kind'], info['profile'])
+                        if info['Media Kind'] == 'tvshow' and 'show_small_name' in info and 'TV Season' in info:
+                            result = os.path.join(result, info['show_small_name'], str(info['TV Season']))
+                            
+                        if info['kind'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
+                                result = os.path.join(result, info['language'])
+                    else:
+                        valid = False
+                        self.logger.warning(u'Invalid profile for %s', unicode(info))
                 else:
                     valid = False
-                    if 'profile' in info:
-                        self.logger.warning(u'Invalid profile for %s', unicode(info))
-                    else:
-                        self.logger.warning(u'Unknow profile for %s', unicode(info))
+                    self.logger.warning(u'Unknow profile for %s', unicode(info))
             else:
                 valid = False
                 if 'volume' in info:
-                    self.logger.warning(u'Invalid volume for ', unicode(info))
+                    self.logger.warning(u'Invalid volume for %s', unicode(info))
                 else:
-                    self.logger.warning(u'Unknow volume for ', unicode(info))
+                    self.logger.warning(u'Unknow volume for %s', unicode(info))
         else:
             valid = False
+            if 'kind' in info:
+                self.logger.warning(u'Invalid kind for %s', unicode(info))
+            else:
+                self.logger.warning(u'Unknow kind for %s', unicode(info))
         
         if valid:
             result = os.path.join(result, self.canonic_name(info, meta))
@@ -1572,11 +1590,15 @@ class FileUtil(object):
     
     
     def clean_if_not_exist(self, path):
+        result = True
         if not os.path.exists(path):
+            result = False
             try:
                 os.removedirs(os.path.dirname(path))
             except OSError:
                 pass
+                
+        return result
     
     
     def clean(self, path):
@@ -1620,28 +1642,6 @@ class FileUtil(object):
         return related
     
     
-    def related_by_profile(self, related, profile, kind):
-        selected = []
-        if profile and kind and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'pack' in repository_config['Kind'][kind]['Profile'][profile]:
-            for (path,info) in related.iteritems():
-                for c in repository_config['Kind'][kind]['Profile'][profile]['pack']['related']:
-                    if all((k in info and info[k] == v) for k,v in c.iteritems()):
-                        selected.append(path)
-                        break
-        return selected
-    
-    
-    def tracks_by_profile(self, tracks, profile, kind):
-        selected = []
-        if profile and kind and kind in repository_config['Kind'] and profile in repository_config['Kind'][kind]['Profile'] and 'pack' in repository_config['Kind'][kind]['Profile'][profile]:
-            for t in tracks:
-                for c in repository_config['Kind'][kind]['Profile'][profile]['pack']['tracks']:
-                    if all((k in t and t[k] == v) for k,v in c.iteritems()):
-                        selected.append(t)
-                        break
-        return selected
-    
-    
     def detect_audio_codec_kind(self, codec):
         result = None
         for k,v in self.audio_codec_kind.iteritems():
@@ -1672,6 +1672,11 @@ class FileUtil(object):
             self.logger.error(str(error))
             result = False
         return result
+    
+    
+    def profile_valid_for_kind(self, profile, kind):
+        return profile and kind and kind in repository_config['Kind'].keys() and profile in repository_config['Kind'][kind]['Profile'].keys()
+            
     
     
     def check_path(self, path, overwrite=False):
@@ -1730,15 +1735,39 @@ class FileUtil(object):
         return output, error
     
     
-    def set_default_info(self, info):
-        if 'kind' in info:
-            kdc = repository_config['Kind'][info['kind']]['default']
-            if not 'volume' in info and 'volume' in kdc:
-                info['volume'] = kdc['volume']
+    def complete_info_default_values(self, info):
+        result = True
+        if 'kind' in info and info['kind'] in repository_config['Kind'].keys():
+            kc = repository_config['Kind'][info['kind']]
+            if 'profile' not in info:
+                if 'default' in kc and 'profile' in kc['default']:
+                    info['profile'] = kc['default']['profile']
+                else:
+                    result = False
+                    self.logger.warning(u'Could not assign default profile for %s', unicode(info))
+                    
+            if result and not self.profile_valid_for_kind(info['profile'], info['kind']):
+                result = False
+                self.logger.warning(u'Profile %s is invalid for kind %s', info['profile'], info['kind'])
                 
-            if not 'profile' in info and 'profile' in kdc:
-                info['profile'] = kdc['profile']
-        return info
+            if result:
+                if 'volume' not in info:
+                    if info['profile'] in kc['Profile'] and 'default' in kc['Profile'][info['profile']]:
+                        dpc = kc['Profile'][info['profile']]['default']
+                        if info['Media Kind'] in dpc:
+                            if 'volume' in dpc[info['Media Kind']]:
+                                info['volume'] = dpc[info['Media Kind']]['volume']
+                if 'volume' not in info:
+                    result = False
+                    self.logger.warning(u'Could not assign default volume for %s', unicode(info))
+        else:
+            result = False
+            if 'kind' in info:
+                self.logger.warning(u'Invalid kind for %s', unicode(info))
+            else:
+                self.logger.warning(u'Unknow kind for %s', unicode(info))
+        
+        return result
     
     
     def copy_file_info(self, info, options):
