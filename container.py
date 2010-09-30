@@ -52,13 +52,11 @@ class Container(object):
     
     
     def _load_genre(self, record):
-        if 'genre' in record.keys():
-            if len(record['genre']) > 0:
-                g = record['genre'][0]
-                self.meta['Genre'] = g['name']
-                if 'itmf_code' in g.keys():
-                    self.meta['GenreID'] = g['itmf_code']
-        return
+        if 'genre' in record.keys() and record['genre']:
+            g = record['genre'][0]
+            self.meta['Genre'] = g['name']
+            if 'itmf_code' in g.keys():
+                self.meta['GenreID'] = g['itmf_code']
     
     
     def _load_cast(self, record):
@@ -70,34 +68,29 @@ class Container(object):
             actors = [ r for r in record['cast'] if r['job'] == 'actor' ]
             
             artist = None
-            if len(directors) > 0:
-                if not artist:
-                    artist = directors[0]
+            if directors:
+                if not artist: artist = directors[0]
                 self.meta['Director'] = ', '.join([ d['name'] for d in directors ])
                 
-            if len(codirectors) > 0:
-                if not artist:
-                    artist = codirectors[0]
+            if codirectors:
+                if not artist: artist = codirectors[0]
                 self.meta['Codirector'] = ', '.join([ d['name'] for d in codirectors ])
                 
-            if len(producers) > 0:
-                if not artist:
-                    artist = producers[0]
+            if producers:
+                if not artist: artist = producers[0]
                 self.meta['Producers'] = ', '.join([ d['name'] for d in producers ])
                 
-            if len(screenwriters) > 0:
-                if not artist:
-                    artist = screenwriters[0]
+            if screenwriters:
+                if not artist: artist = screenwriters[0]
                 self.meta['Screenwriters'] = ', '.join([ d['name'] for d in screenwriters ])
                 
-            if len(actors) > 0:
-                if 'Cast' in self.meta and self.meta['Cast'] != None:
+            if actors:
+                if 'Cast' in self.meta and self.meta['Cast']:
                     self.meta['Cast'] = ', '.join([self.meta['Cast'], ', '.join([ d['name'] for d in actors ])])
                 else:
                     self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
                     
-                if not artist:
-                    artist = actors[0]
+                if not artist: artist = actors[0]
                     
             if artist:
                 self.meta['Artist'] = artist['name']
@@ -123,7 +116,7 @@ class Container(object):
                     self.meta['Description'] = record['tagline']
                 elif 'overview' in record:
                     s = sentence_end.split(record['overview'])
-                    if len(s) > 0: self.meta['Description'] = s[0].strip() + '.'
+                    if s: self.meta['Description'] = s[0].strip() + '.'
                     
                 self._load_cast(record)
                 self._load_genre(record)
@@ -147,7 +140,7 @@ class Container(object):
                 
                 if 'cast' in show.keys():
                     actors = [ r for r in show['cast'] if r['job'] == 'actor' ]
-                    if len(actors) > 0:
+                    if actors:
                         self.meta['Cast'] = ', '.join([ d['name'] for d in actors ])
                         
                 if 'show' in episode:
@@ -164,14 +157,13 @@ class Container(object):
                 if 'overview' in episode:
                     self.meta['Long Description'] = episode['overview']
                     s = sentence_end.split(episode['overview'])
-                    if len(s) > 0: self.meta['Description'] = s[0].strip() + '.'
+                    if s: self.meta['Description'] = s[0].strip() + '.'
                 if 'released' in episode:
                     self.meta['Release Date'] = episode['released'].strftime('%Y-%m-%d')
                     
                 self._load_cast(episode)
                 result = True
         return result
-    
     
     
     
@@ -217,7 +209,6 @@ class Container(object):
     
     def optimize(self, options):
         pass
-    
     
     
     
@@ -343,13 +334,14 @@ class AVContainer(Container):
     
     def playback_height(self):
         result = 0
-        if len(self.tracks) > 0:
+        if self.tracks:
             for t in self.tracks:
                 if t['type'] == 'video' and 'sar' in t:
                     if t['sar'] >= ar_16_9:
                         result = t['pixel width'] / t['sar']
                     else:
                         result = t['pixel height']
+                    break
         return result
     
     
@@ -357,7 +349,7 @@ class AVContainer(Container):
     def extract(self, options):
         Container.extract(self, options)
         if options.extract in ('txt'):
-            if len(self.chapter_markers) > 0:
+            if self.chapter_markers :
                 info = file_util.copy_file_info(self.file_info, options)
                 info['kind'] = 'txt'
                 dest_path = file_util.canonic_path(info, self.meta)
@@ -421,7 +413,7 @@ class AVContainer(Container):
                     command.append('--video-tracks')
                     command.append(','.join(video_tracks))
                     
-                    message = 'Pack ' +  self.file_path + ' --> ' + dest_path
+                    message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
                     file_util.execute_command(command, message, options.debug)
                     file_util.clean_if_not_exist(dest_path)
                     
@@ -475,7 +467,7 @@ class AVContainer(Container):
                     command.append('--output')
                     command.append(dest_path)
                     
-                    message = 'Transcode ' +  self.file_path + ' --> ' + dest_path
+                    message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
                     file_util.execute_command(command, message, options.debug)
                     file_util.clean_if_not_exist(dest_path)
         return
@@ -536,14 +528,13 @@ class ChapterMarker(object):
     
     
     def encode(self, line_buffer, index):
-        start_time_string = miliseconds_to_time(self.start_time, '.')
-        cm = u'CHAPTER' + str(index).zfill(2)
-        line_buffer.append(cm + u'=' + unicode(start_time_string, 'utf-8'))
-        line_buffer.append(cm + u'NAME=' + self.name)
+        start_time_string = unicode(miliseconds_to_time(self.start_time, '.'), 'utf-8')
+        line_buffer.append(u'CHAPTER{0}={1}'.format(str(index).zfill(2), start_time_string))
+        line_buffer.append(u'CHAPTER{0}NAME={1}'.format(str(index).zfill(2), self.name))
     
     
     def __unicode__(self):
-        return '{0} : {1}'.format(miliseconds_to_time(self.start_time), self.name)
+        return u'{0} : {1}'.format(miliseconds_to_time(self.start_time), self.name)
     
 
 
@@ -670,7 +661,7 @@ class Matroska(AVContainer):
                     
                 elif mkvinfo_chapters_re.search(mkvinfo_report[index]):
                     in_chapters = True
-                    while mkvinfo_chapter_atom_re.search(mkvinfo_report[index]) == None:
+                    while mkvinfo_chapter_atom_re.search(mkvinfo_report[index]) is None:
                         index += 1
                 else:
                     index += 1
@@ -708,8 +699,8 @@ class Matroska(AVContainer):
                     new_media_files.append(dest_path)
                     command.append(str(t['number']) + ':' + dest_path)
             
-            if len(new_media_files) > 0:
-                message = 'Extract tracks from ' + self.file_path
+            if  new_media_files:
+                message = u'Extract tracks from {0}'.format(self.file_path)
                 file_util.execute_command(command, message, options.debug)
                 
             for f in new_media_files:
@@ -831,8 +822,8 @@ class Mpeg4(AVContainer):
     
     def optimize(self, options):
         AVContainer.optimize(self, options)
+        message = u'Optimize {0}'.format(self.file_path)
         command = ['mp4file', '--optimize', self.file_path]
-        message = 'Optimize ' + self.file_path
         file_util.execute_command(command, message, options.debug)
     
     
@@ -847,7 +838,7 @@ class Mpeg4(AVContainer):
             pc = repository_config['Kind']['srt']['Profile'][info['profile']]
             
             if 'profile' in info and 'update' in pc:
-                message = 'Remove existing subtitle tracks in ' + self.file_path
+                message = u'Remove existing subtitle tracks in {0}'.format(self.file_path)
                 command = ['SublerCLI', '-r', self.file_path]
                 file_util.execute_command(command, message, options.debug)
                 
@@ -861,7 +852,7 @@ class Mpeg4(AVContainer):
                 for (p,i) in selected.iteritems():
                     for c in pc['update']['related']:
                         if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
-                            message = 'Add subtitles ' + p + ' --> ' + self.file_path
+                            message = u'Add subtitles {0} --> {1}'.format(p, self.file_path)
                             command = [
                                 'SublerCLI', '-i', self.file_path, 
                                 '-s', p, 
@@ -877,7 +868,7 @@ class Mpeg4(AVContainer):
                     for code in smart_section['order']:
                         for (p,i) in selected.iteritems():
                             if i['language'] == code:
-                                message = 'Add smart ' + repository_config['Language'][code] + ' subtitles ' + p + ' --> ' + self.file_path
+                                message = u'Add smart {0} subtitles {1} --> {2}'.format(repository_config['Language'][code], p, self.file_path)
                                 command = [
                                     'SublerCLI', '-i', self.file_path, 
                                     '-s', p, 
@@ -1031,7 +1022,7 @@ class SubtitleBlock(object):
         line_buffer.append(unicode(index))
         begin_time = miliseconds_to_time(self.begin, ',')
         end_time = miliseconds_to_time(self.end, ',')
-        line_buffer.append(unicode(begin_time) + ' --> ' + unicode(end_time))
+        line_buffer.append(u'{0} --> {1}'.format(unicode(begin_time), unicode(end_time)))
         for line in self.lines:
             line_buffer.append(line)
         line_buffer.append(u'\n')
@@ -1142,10 +1133,10 @@ class Subtitle(Text):
             lines = self.read()
             if self.file_info['kind'] == 'srt':
                 decode_srt(lines)
-            elif self.file_info['kind'] in ['ass', 'ssa']:
+            elif self.file_info['kind'] in ('ass', 'ssa'):
                 decode_ass(lines)
-            elif self.file_info['kind'] == 'sub':
-                decode_sub(lines, 25)
+            #elif self.file_info['kind'] == 'sub':
+            #    decode_sub(lines, 25)
     
     
     def encode(self):
@@ -1233,7 +1224,7 @@ class Chapter(Text):
         if self.chapter_markers:
             result = []
             for idx, m in enumerate(self.chapter_markers):
-                m.encode(result, idx)
+                m.encode(result, idx + 1)
         return result
     
     
@@ -1264,7 +1255,7 @@ class TagNameResolver(object):
         
         for tag in db_config['tag']:
             self.canonic_map[tag[0]] = tag
-            if tag[2] != None:
+            if tag[2] is not None:
                 self.mp4info_map[tag[2]] = tag
     
     
@@ -1317,7 +1308,7 @@ class SubtitleFilter(object):
     
     def filter(self, blocks, sequence_list):
         for fn in sequence_list:
-            if len(blocks) > 0:
+            if blocks:
                 fs = self.find_filter_sequence(fn)
                 if fs:
                     next = []
@@ -1491,7 +1482,7 @@ class FileUtil(object):
                     info['Name'] = match.group(5)
                     info['kind'] = match.group(6)
                 
-                if info['Name'] == None or info['Name'] == '':
+                if not info['Name']:
                     del info['Name']
                 
                 prefix = os.path.dirname(file_path)
@@ -1654,7 +1645,7 @@ class FileUtil(object):
     def detect_audio_codec_kind(self, codec):
         result = None
         for k,v in self.audio_codec_kind.iteritems():
-            if v.search(codec) != None:
+            if v.search(codec) is not None:
                 result = k
                 break
         return result
@@ -1663,7 +1654,7 @@ class FileUtil(object):
     def detect_subtitle_codec_kind(self, codec):
         result = None
         for k,v in self.subtitle_codec_kind.iteritems():
-            if v.search(codec) != None:
+            if v.search(codec) is not None:
                 result = k
                 break
         return result
@@ -1741,11 +1732,12 @@ class FileUtil(object):
     
     def set_default_info(self, info):
         if 'kind' in info:
-            if not 'volume' in info and 'volume' in repository_config['Kind'][info['kind']]['default']:
-                info['volume'] = repository_config['Kind'][info['kind']]['default']['volume']
+            kdc = repository_config['Kind'][info['kind']]['default']
+            if not 'volume' in info and 'volume' in kdc:
+                info['volume'] = kdc['volume']
                 
-            if not 'profile' in info and 'profile' in repository_config['Kind'][info['kind']]['default']:
-                info['profile'] = repository_config['Kind'][info['kind']]['default']['profile']
+            if not 'profile' in info and 'profile' in kdc:
+                info['profile'] = kdc['profile']
         return info
     
     
@@ -1754,11 +1746,11 @@ class FileUtil(object):
         if info:
             i = copy.deepcopy(info)
             i['volume'] = options.volume
-            if i['volume'] == None:
+            if i['volume'] is None:
                 del i['volume']
         
             i['profile'] = options.profile
-            if i['profile'] == None:
+            if i['profile'] is None:
                 del i['profile']
         return i
     
@@ -1786,13 +1778,13 @@ def timecode_to_miliseconds(timecode):
     else:
         match = descriptive_time_format.search(timecode)
         if match is not None:
-            if match.group(1) != None:
+            if match.group(1) is not None:
                 hours = match.group(1)
-            if match.group(2) != None:
+            if match.group(2) is not None:
                 minutes = match.group(2)
-            if match.group(3) != None:
+            if match.group(3) is not None:
                 seconds = match.group(3)
-            if match.group(4) != None:
+            if match.group(4) is not None:
                 milliseconds = match.group(4)
             valid = True
             
@@ -1847,30 +1839,6 @@ def frame_rate_to_float(frame_rate):
     else:
         frame_rate = None
     return frame_rate
-
-
-def parse_limits(limits, length):
-    begin = 0
-    stop = length
-    limits = str(limits).split(',')
-    if len(limits) >= 2:
-        if str(limits[1]).isdigit():
-            begin = int(limits[1]) - 1
-            if len(limits) >= 3 and str(limits[2]).isdigit():
-                stop = int(limits[2])
-                
-    if begin < 0:
-        begin = 0
-    elif begin > length:
-        begin = length
-        
-    if stop > length:
-        stop = length
-        
-    if stop < begin and begin < length:
-        stop = begin
-        
-    return begin, stop
 
 
 def frame_to_miliseconds(frame, frame_rate):

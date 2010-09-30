@@ -74,10 +74,10 @@ def load_options():
     group.add_option('--art', dest='art', action='store_true', default=False, help='Update embedded artwork')
     group.add_option('--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout')
     
-    group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack'], help='Package to ' + ', '.join(rc['Action']['pack']))
-    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode'], help='Transcode to ' + ', '.join(rc['Action']['transcode']))
-    group.add_option('-e', '--extract', metavar='KIND', dest='extract', type='choice', choices=rc['Action']['extract'], help='Extract to [ ' + ' | '.join(rc['Action']['extract']) + ' ]')
-    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update'], help='Update ' + ', '.join(rc['Action']['update']))
+    group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack'], help='Package to ' + str(rc['Action']['pack']))
+    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode'], help='Transcode to ' + str(rc['Action']['transcode']))
+    group.add_option('-e', '--extract', metavar='KIND', dest='extract', type='choice', choices=rc['Action']['extract'], help='Extract to ' + str(rc['Action']['extract']))
+    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update'], help='Update ' + str(rc['Action']['update']))
     parser.add_option_group(group)
         
     group = OptionGroup(parser, 'Modifiers')
