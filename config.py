@@ -36,6 +36,9 @@ repository_config = {
         'mp4file':{
             'base':[u'mp4file']
         },
+        'mp4art':{
+            'base':[u'mp4art']
+        },
     },
     'Display':{
         'wrap':100, 

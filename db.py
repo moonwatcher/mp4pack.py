@@ -9,7 +9,6 @@ from datetime import datetime
 import xml.etree.cElementTree as ElementTree
 
 import urllib
-import chardet
 import pymongo
 from pymongo.objectid import ObjectId
 from pymongo import Connection
@@ -695,7 +694,7 @@ class TagManager(object):
         return result
     
 
-
+tag_manager = TagManager()
 
 
 def is_tag(name, item):

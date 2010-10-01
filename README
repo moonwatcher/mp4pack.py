@@ -12,39 +12,35 @@ Options:
     -i, --info          Show info
     -c, --copy          Copy into repository
     -n, --rename        Rename files to standard names
+    -e, --extract       Extract subtitle and chapter and transcode the
+                        extracted streams
     --tag               Update meta tags
-    --art               Update embedded artwork
     --optimize          Optimize file layout
     -m KIND, --pack=KIND
-                        Package to ('mkv',)
+                        KIND is one of [ mkv ]
     -t KIND, --transcode=KIND
-                        Transcode to ('m4v', 'mkv', 'srt', 'txt')
-    -e KIND, --extract=KIND
-                        Extract to ('all', 'srt', 'ass', 'txt')
+                        KIND is one of [ m4v, mkv, srt, txt, jpg ]
     -u KIND, --update=KIND
-                        Update ('srt',)
+                        KIND is one of [ srt, jpg, txt ]
 
   Modifiers:
     -o VOLUME, --volume=VOLUME
-                        Output volume [default: auto detect]
+                        Output volume [ default: auto detect ]
     -p PROFILE, --profile=PROFILE
-                        [default: none]
+                        [ default: auto detect ]
     -f REGEX, --filter=REGEX
                         Regex to filter selected file names
     -w, --overwrite     Overwrite existing files.
     -r, --recursive     Recursively process sub directories.
     -v LEVEL, --verbosity=LEVEL
-                        Logging verbosity level [default: info]
+                        Logging verbosity level [ default: info ]
     -d, --debug         Only print commands without executing. Also good for
                         dumping the commands into a text file and editing
                         before execution.
     -q QUANTIZER, --quality=QUANTIZER
                         H.264 transcoding Quantizer
     --pixel-width=WIDTH
-                        Max output pixel width [default: profile dependent]
-    --media-kind=MEDIA_KIND
-                        [default: auto detect]
-    --language=CODE     Languge code used when undefined
+                        Max output pixel width [ default: set by profile ]
     --md5               Verify md5 checksum on copy
 
   Options that only apply to text subtitles:

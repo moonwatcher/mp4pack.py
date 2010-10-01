@@ -7,18 +7,8 @@ import getopt
 import fnmatch
 import logging
 
-from container import *
-
-log_levels = {
-    'debug': logging.DEBUG,
-    'info': logging.INFO,
-    'warning': logging.WARNING,
-    'error': logging.ERROR,
-    'critical': logging.CRITICAL
-}
-
-invisable_file_path = re.compile(r'^\..*$')
-
+from container import load_media_file
+from config import repository_config
 
 def load_input_files(path, file_filter, recursive):
     known = []
@@ -33,17 +23,17 @@ def load_input_files(path, file_filter, recursive):
     return known, unknown
 
 
-def list_input_files(path, file_filter, recursive):
+def list_input_files(path, file_filter, recursive, depth=1):
     result = []
     if os.path.isfile(path):
         dname, fname = os.path.split(path)
         if (file_filter == None or file_filter.search(fname) != None) and invisable_file_path.search(fname) == None:
             result.append(unicode(os.path.abspath(path), 'utf-8'))
     
-    elif recursive and os.path.isdir(path) and invisable_file_path.search(path) == None:
+    elif (recursive or depth > 0) and os.path.isdir(path) and invisable_file_path.search(path) == None:
         for p in os.listdir(path):
             p = os.path.abspath(os.path.join(path,p))
-            rec_result = list_input_files(p, file_filter, recursive)
+            rec_result = list_input_files(p, file_filter, recursive, depth - 1)
             result += rec_result
     return result
 
@@ -77,24 +67,24 @@ def load_options():
     group.add_option('--tag', dest='tag', action='store_true', default=False, help='Update meta tags')
     group.add_option('--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout')
     
-    group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack'], help='Package to ' + str(rc['Action']['pack']))
-    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode'], help='Transcode to ' + str(rc['Action']['transcode']))
-    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update'], help='Update ' + str(rc['Action']['update']))
+    group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['pack'])))
+    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['transcode'])))
+    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['update'])))
     
     parser.add_option_group(group)
         
     group = OptionGroup(parser, 'Modifiers')
-    group.add_option('-o', '--volume', dest='volume', type='choice', choices=rc['Volume'].keys(), default=None, help='Output volume [default: auto detect]')
-    group.add_option('-p', '--profile', dest='profile', type='choice', choices=profiles, default=None, help='[default: profile dependent]')
+    group.add_option('-o', '--volume', dest='volume', type='choice', choices=rc['Volume'].keys(), default=None, help='Output volume [ default: auto detect ]')
+    group.add_option('-p', '--profile', dest='profile', type='choice', choices=profiles, default=None, help='[ default: auto detect ]')
     group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='Regex to filter selected file names')
     group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files.')
     group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursively process sub directories.')
-    group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='info', type='choice', choices=log_levels.keys(), help='Logging verbosity level [default: %default]')
+    group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='info', type='choice', choices=log_levels.keys(), help='Logging verbosity level [ default: %default ]')
     group.add_option('-d', '--debug', dest='debug', action='store_true', default=False, help='Only print commands without executing. Also good for dumping the commands into a text file and editing before execution.')
     group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='H.264 transcoding Quantizer')
-    group.add_option('--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [default: profile dependent]')
-    group.add_option('--media-kind', dest='media_kind', type='choice', choices=rc['Media Kind'].keys(), help='[default: auto detect]')
-    group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined')
+    group.add_option('--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [ default: set by profile ]')
+    #group.add_option('--media-kind', dest='media_kind', type='choice', choices=rc['Media Kind'].keys(), help='[ default: auto detect ]')
+    #group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined')
     group.add_option('--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy')
     parser.add_option_group(group)
     
@@ -118,18 +108,18 @@ def load_options():
 ##    	transcode mkv: transcode to mkv @ profile
 ##    	extract: extract chapters and srt and ass subtitles
         
-#    Mpeg4:
+##    Mpeg4:
 ##    	pack mkv: mux to matroska @ profile
 ##    	transcode m4v: transcode to m4v @ profile
 ##    	transcode mkv: transcode to mkv @ profile
-#    	update srt: remux subtitles @ profile
-#    	update art: update artwork
-#    	update txt: update chapters
+##    	update srt: remux subtitles @ profile
+##    	update jpg: update artwork
+##    	update txt: update chapters
 ##    	extract: extract chapters
     
-#   Image
-#   transcode jpg: transcode to jpg @ profile
-#   transcode png: transcode to png @ profile
+##   Artwork
+##   transcode jpg: transcode to jpg @ profile
+##   transcode png: transcode to png @ profile
     
     return parser.parse_args()
 
@@ -215,6 +205,17 @@ def main():
         logger.debug('Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
 
 
+
+
+log_levels = {
+    'debug': logging.DEBUG,
+    'info': logging.INFO,
+    'warning': logging.WARNING,
+    'error': logging.ERROR,
+    'critical': logging.CRITICAL
+}
+
+invisable_file_path = re.compile(r'^\..*$')
 
 if __name__ == '__main__':
     main()

@@ -10,8 +10,7 @@ import textwrap
 
 from config import repository_config
 from config import db_config
-
-from db import TagManager
+from db import tag_manager
 
 # Container super Class
 
@@ -218,30 +217,38 @@ class Container(object):
     
     def download_artwork(self, options):
         result = False
-        info = file_util.copy_file_info(self.file_info, options)
-        if self.is_movie():
-            artwork = tag_manager.find_tmdb_movie_poster(self.file_info['imdb_id'])
-        elif self.is_tvshow():
-            artwork = tag_manager.find_tvdb_episode_poster(self.file_info['show_small_name'], self.file_info['TV Season'], self.file_info['TV Episode #'])
         
-        if artwork:
+        selected = []
+        lookup = {'kind':'jpg', 'profile':'normal'}
+        for (path,info) in self.related.iteritems():
+            if all((k in info and info[k] == v) for k,v in lookup.iteritems()):
+                selected.append(path)
+                break
+        if not selected:
             info = file_util.copy_file_info(self.file_info, options)
-            info['kind'] = artwork['kind']
-            if 'volume' in info: del info['volume']
-            if file_util.complete_info_default_values(info):
-                p = Artwork(artwork['local'], False)
-                p.file_info = info
-                p.load_meta()
-                o = copy.deepcopy(options)
-                o.profile = 'download'
-                result = p.copy(o)
-                
-                if result:
-                    self.logger.debug('Original artwork downloaded to %s', result)
-                    p = Artwork(result)
+            if self.is_movie():
+                artwork = tag_manager.find_tmdb_movie_poster(self.file_info['imdb_id'])
+            elif self.is_tvshow():
+                artwork = tag_manager.find_tvdb_episode_poster(self.file_info['show_small_name'], self.file_info['TV Season'], self.file_info['TV Episode #'])
+        
+            if artwork:
+                info = file_util.copy_file_info(self.file_info, options)
+                info['kind'] = artwork['kind']
+                if 'volume' in info: del info['volume']
+                if file_util.complete_info_default_values(info):
+                    p = Artwork(artwork['local'], False)
+                    p.file_info = info
+                    p.load_meta()
                     o = copy.deepcopy(options)
-                    o.transcode = 'jpg'
-                    p.transcode(o)
+                    o.profile = 'download'
+                    result = p.copy(o)
+                
+                    if result:
+                        self.logger.debug('Original artwork downloaded to %s', result)
+                        p = Artwork(result)
+                        o = copy.deepcopy(options)
+                        o.transcode = 'jpg'
+                        p.transcode(o)
         return result
     
     
@@ -963,6 +970,8 @@ class Mpeg4(AudioVideoContainer):
             info['kind'] = 'jpg'
             selected = []
             if file_util.complete_info_default_values(info):
+                if info['profile'] == 'normal':
+                    self.download_artwork(options)
                 lookup = {'kind':info['kind'], 'profile':info['profile']}
                 for (path,info) in self.related.iteritems():
                     if all((k in info and info[k] == v) for k,v in lookup.iteritems()):
@@ -1428,9 +1437,12 @@ class Artwork(Container):
                                 self.logger.debug(u'Not resizing. Artwork is %dx%d and profile min dimension is %d', size[0], size[1], p['transcode']['size'])
                         
                         rsize = (int(round(size[0] * factor)), int(round(size[1] * factor)))
-                        self.logger.debug(u'Resize artwork: %dx%d --> %dx%d', size[0], size[1], rsize[0], rsize[1])
-                        image = image.resize(rsize, Image.ANTIALIAS)
-                        image.save(dest_path)
+                        if size == rsize:
+                            self.copy(options)
+                        else:
+                            self.logger.debug(u'Resize artwork: %dx%d --> %dx%d', size[0], size[1], rsize[0], rsize[1])
+                            image = image.resize(rsize, Image.ANTIALIAS)
+                            image.save(dest_path)
     
 
 
@@ -1462,6 +1474,7 @@ class TagNameResolver(object):
     
     
 
+tag_name_resolver = TagNameResolver()
 
 
 # Subtitle Filter Class (Singleton)
@@ -1515,6 +1528,7 @@ class SubtitleFilter(object):
         
     
 
+subtitle_filter = SubtitleFilter()
 
 class FilterSequence(object):
     def __init__(self, config):
@@ -1897,6 +1911,7 @@ class FileUtil(object):
     
     
 
+file_util = FileUtil()
 
 
 # Service functions
@@ -2049,12 +2064,6 @@ def format_value(value):
 def format_track(track):
     return u' | '.join([u'{0}: {1}'.format(key, track[key]) for key in sorted(set(track))])
 
-
-
-file_util = FileUtil()
-tag_manager = TagManager()
-tag_name_resolver = TagNameResolver()
-subtitle_filter = SubtitleFilter()
 
 ar_16_9 = float(16) / float(9)
 
