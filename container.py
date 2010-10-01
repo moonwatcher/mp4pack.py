@@ -266,7 +266,7 @@ class Container(object):
                 command = file_util.initialize_command('rsync')
                 command.extend([self.file_path, dest_path])
                 message = u'Copy ' + self.file_path + u' --> ' + dest_path
-                file_util.execute_command(command, message, options.debug)
+                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
                 if file_util.clean_if_not_exist(dest_path):
                     result = dest_path
                     if options.md5:
@@ -284,7 +284,7 @@ class Container(object):
                 command = file_util.initialize_command('mv')
                 command.extend([self.file_path, dest_path])
                 message = u'Rename {0} --> {1}'.format(self.file_path, dest_path)
-                file_util.execute_command(command, message, options.debug)
+                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
                 file_util.clean_if_not_exist(dest_path)
             else:
                 self.logger.warning(u'Not renaming %s, destination exists: %s', self.file_path, dest_path)
@@ -528,7 +528,7 @@ class AudioVideoContainer(Container):
                         command.append(u','.join(video_tracks))
                     
                         message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
-                        file_util.execute_command(command, message, options.debug)
+                        file_util.execute_command(command, message, options.debug, pipe_stdout=False, pipe_stderr=False)
                         file_util.clean_if_not_exist(dest_path)
                     
         return
@@ -550,12 +550,16 @@ class AudioVideoContainer(Container):
                         if 'flags' in tc:
                             for v in tc['flags']:
                                 command.append(v)
-                            
+                                
                         if 'options' in tc:
-                            for (k,v) in tc['options'].iteritems():
+                            hb_config = copy.deepcopy(tc['options'])
+                            if options.pixel_width: hb_config['--maxWidth'] = options.pixel_width
+                            if options.quality: hb_config['--quality'] = options.quality
+                            
+                            for (k,v) in hb_config.iteritems():
                                 command.append(k)
                                 command.append(unicode(v))
-                            
+                                
                         found_audio = False
                         audio_options = {'--audio':[]}
                         for s in tc['audio']:
@@ -578,7 +582,7 @@ class AudioVideoContainer(Container):
                                     command.append(u','.join(v))
                         command.extend([u'--input', self.file_path, u'--output', dest_path])
                         message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
-                        file_util.execute_command(command, message, options.debug)
+                        file_util.execute_command(command, message, options.debug, pipe_stdout=False, pipe_stderr=True)
                         file_util.clean_if_not_exist(dest_path)
         return
     
@@ -818,7 +822,7 @@ class Matroska(AudioVideoContainer):
                         
             if selected_files:
                 message = u'Extract {0} tracks from {1}'.format(unicode(len(selected_files)), self.file_path)
-                file_util.execute_command(command, message, options.debug)
+                file_util.execute_command(command, message, options.debug, pipe_stdout=False, pipe_stderr=False)
         
             extracted_files = []
             for f in selected_files:
@@ -949,7 +953,7 @@ class Mpeg4(AudioVideoContainer):
             self.logger.info(u'Update %s --> %s', u', '.join(sorted(set(update.keys()))), self.file_path)
             command = file_util.initialize_command('subler')
             command.extend([u'-i', self.file_path, u'-t', tc])
-            file_util.execute_command(command, message, options.debug)
+            file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
         else:
             self.logger.info(u'No tags need update in %s', self.file_path)
     
@@ -959,7 +963,7 @@ class Mpeg4(AudioVideoContainer):
         message = u'Optimize {0}'.format(self.file_path)
         command = file_util.initialize_command('mp4file')
         command.extend([u'--optimize', self.file_path])
-        file_util.execute_command(command, message, options.debug)
+        file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
     
     
     
@@ -982,7 +986,7 @@ class Mpeg4(AudioVideoContainer):
                 message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
                 command = file_util.initialize_command('subler')
                 command.extend([u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
-                file_util.execute_command(command, message, options.debug)
+                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
             else:
                 self.logger.warning(u'No artwork available for %s', self.file_path)
     
@@ -998,7 +1002,7 @@ class Mpeg4(AudioVideoContainer):
                     message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
                     command = file_util.initialize_command('subler')
                     command.extend([u'-i', self.file_path, u'-r'])
-                    file_util.execute_command(command, message, options.debug)
+                    file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
                     
                     selected = {}
                     for (p,i) in self.related.iteritems():
@@ -1019,7 +1023,7 @@ class Mpeg4(AudioVideoContainer):
                                     u'-n', c['to']['Name'], 
                                     u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
                                 ])
-                                file_util.execute_command(command, message, options.debug)
+                                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
                                 
                     if 'smart' in pc['update']:
                         smart_section = pc['update']['smart']
@@ -1036,7 +1040,7 @@ class Mpeg4(AudioVideoContainer):
                                         u'-n', smart_section['Name'], 
                                         u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
                                     ])
-                                    file_util.execute_command(command, message, options.debug)
+                                    file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
                                     found = True
                                     break
                             if found: break
@@ -1059,7 +1063,7 @@ class Mpeg4(AudioVideoContainer):
                 message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
                 command = file_util.initialize_command('subler')
                 command.extend([u'-i', self.file_path, u'-c', selected[0], '-p'])
-                file_util.execute_command(command, message, options.debug)
+                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
             else:
                 self.logger.warning(u'No chapters available for %s', self.file_path)
     
@@ -1824,7 +1828,7 @@ class FileUtil(object):
         return copy.deepcopy(repository_config['Command'][command]['base'])
     
     
-    def execute_command(self, command, message= None, debug=False):
+    def execute_command(self, command, message= None, debug=False, pipe_stdout=True, pipe_stderr=True):
         def encode_command(command):
             cmd = []
             for e in command:
@@ -1834,31 +1838,27 @@ class FileUtil(object):
                     cmd.append(e)
             return u' '.join(cmd)
         
-        
-        output = None
-        error = None
-        
         if not debug:
             if command:
                 self.logger.debug(u'Execute: %s', encode_command(command))
                 if message:
                     self.logger.info(message)
                 from subprocess import Popen, PIPE
-                proc = Popen(command, stdout=PIPE)
+                
+                if pipe_stdout and pipe_stderr:
+                    proc = Popen(command, stdout=PIPE, stderr=PIPE)
+                elif pipe_stdout and not pipe_stderr:
+                    proc = Popen(command, stdout=PIPE)
+                elif not pipe_stdout and pipe_stderr:
+                    proc = Popen(command, stderr=PIPE)
+                elif not pipe_stdout and not pipe_stderr:
+                    proc = Popen(command)
+                
                 report = proc.communicate()
-                
-                output = report[0]
-                error = report[1]
-                
-                if error:
-                    self.logger.error(error)
-                if output:
-                    #self.logger.debug(output)
-                    result = True
         else:
             self.logger.info(message)
             print encode_command(command)
-        return output, error
+        return report
     
     
     def complete_info_default_values(self, info):
