@@ -121,8 +121,8 @@ class Container(object):
                     s = sentence_end.split(record['overview'])
                     if s: self.meta['Description'] = s[0].strip() + '.'
                     
-                self._load_cast(record)
-                self._load_genre(record)
+                self.load_cast(record)
+                self.load_genre(record)
                 result = True
                 
         elif self.is_tvshow():
@@ -135,7 +135,7 @@ class Container(object):
                 if 'network' in show:
                     self.meta['TV Network'] = show['network']
                     
-                self._load_genre(show)
+                self.load_genre(show)
                 
                 if 'cast' in show.keys():
                     actors = [ r for r in show['cast'] if r['job'] == 'actor' ]
@@ -160,7 +160,7 @@ class Container(object):
                 if 'released' in episode:
                     self.meta['Release Date'] = episode['released'].strftime('%Y-%m-%d')
                     
-                self._load_cast(episode)
+                self.load_cast(episode)
                 result = True
                 
         if not result:
@@ -170,7 +170,7 @@ class Container(object):
     
     
     
-    def _load_genre(self, record):
+    def load_genre(self, record):
         if 'genre' in record.keys() and record['genre']:
             g = record['genre'][0]
             self.meta['Genre'] = g['name']
@@ -178,7 +178,7 @@ class Container(object):
                 self.meta['GenreID'] = g['itmf_code']
     
     
-    def _load_cast(self, record):
+    def load_cast(self, record):
         if 'cast' in record.keys():
             directors = [ r for r in record['cast'] if r['job'] == 'director' ]
             codirectors = [ r for r in record['cast'] if r['job'] == 'director of photography' ]
@@ -216,7 +216,7 @@ class Container(object):
         return
     
     
-    def _download_artwork(self, options):
+    def download_artwork(self, options):
         result = False
         info = file_util.copy_file_info(self.file_info, options)
         if self.is_movie():
@@ -237,7 +237,7 @@ class Container(object):
                 result = p.copy(o)
                 
                 if result:
-                    self.logger.debug('Artwork downloaded to %s', result)
+                    self.logger.debug('Original artwork downloaded to %s', result)
                     p = Artwork(result)
                     o = copy.deepcopy(options)
                     o.transcode = 'jpg'
@@ -256,7 +256,8 @@ class Container(object):
         if file_util.complete_info_default_values(info):
             dest_path = file_util.canonic_path(info, self.meta)
             if file_util.varify_if_path_available(dest_path, options.overwrite):
-                command = [u'rsync', self.file_path, dest_path]
+                command = file_util.initialize_command('rsync')
+                command.extend([self.file_path, dest_path])
                 message = u'Copy ' + self.file_path + u' --> ' + dest_path
                 file_util.execute_command(command, message, options.debug)
                 if file_util.clean_if_not_exist(dest_path):
@@ -273,7 +274,8 @@ class Container(object):
         else:
             if file_util.check_if_path_available(dest_path, False):
                 file_util.varify_directory(dest_path)
-                command = [u'mv', self.file_path, dest_path]
+                command = file_util.initialize_command('mv')
+                command.extend([self.file_path, dest_path])
                 message = u'Rename {0} --> {1}'.format(self.file_path, dest_path)
                 file_util.execute_command(command, message, options.debug)
                 file_util.clean_if_not_exist(dest_path)
@@ -286,7 +288,7 @@ class Container(object):
     
     
     def art(self, options):
-        artwork = self._download_artwork(options)
+        artwork = self.download_artwork(options)
         if artwork:
             self.logger.debug('Artwork found and copied to %s', artwork)
         else:
@@ -383,7 +385,7 @@ class Container(object):
     
 
 
-class AVContainer(Container):
+class AudioVideoContainer(Container):
     def __init__(self, file_path):
         self.logger = logging.getLogger('mp4pack.av')
         Container.__init__(self, file_path)
@@ -478,8 +480,8 @@ class AVContainer(Container):
                                         break
                                     
                     if file_util.varify_if_path_available(dest_path, options.overwrite):
-                        command = [u'mkvmerge', u'--output', dest_path, u'--no-chapters', u'--no-attachments', u'--no-subtitles', self.file_path]
-                        
+                        command = file_util.initialize_command('mkvmerge')
+                        command.extend([u'--output', dest_path, u'--no-chapters', u'--no-attachments', u'--no-subtitles', self.file_path])
                         for r in selected_related:
                             rinfo = self.related[r]
                             if rinfo['kind'] == 'srt':
@@ -535,9 +537,9 @@ class AVContainer(Container):
                 if dest_path is not None:
                     command = None
                     if file_util.varify_if_path_available(dest_path, options.overwrite):
-                        command = [u'HandbrakeCLI']
+                        command = file_util.initialize_command('handbrake')
                         tc = repository_config['Kind'][info['kind']]['Profile'][info['profile']]['transcode']
-                    
+                        
                         if 'flags' in tc:
                             for v in tc['flags']:
                                 command.append(v)
@@ -567,12 +569,7 @@ class AVContainer(Container):
                                 if v:
                                     command.append(k)
                                     command.append(u','.join(v))
-                                
-                        command.append(u'--input')
-                        command.append(self.file_path)
-                        command.append(u'--output')
-                        command.append(dest_path)
-                    
+                        command.extend([u'--input', self.file_path, u'--output', dest_path])
                         message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
                         file_util.execute_command(command, message, options.debug)
                         file_util.clean_if_not_exist(dest_path)
@@ -646,10 +643,10 @@ class ChapterMarker(object):
 
 
 # Matroska Class
-class Matroska(AVContainer):
+class Matroska(AudioVideoContainer):
     def __init__(self, file_path):
         self.logger = logging.getLogger('mp4pack.matroska')
-        AVContainer.__init__(self, file_path)
+        AudioVideoContainer.__init__(self, file_path)
     
     
     def _line_depth(self, mkvinfo_line):
@@ -737,8 +734,9 @@ class Matroska(AVContainer):
     
     
     def load(self):
-        AVContainer.load(self)
-        command = [u'mkvinfo', self.file_path]
+        AudioVideoContainer.load(self)
+        command = file_util.initialize_command('mkvinfo')
+        command.append(self.file_path)
         output, error = file_util.execute_command(command, None)
         mkvinfo_report = unicode(output, 'utf-8').splitlines()
         length = len(mkvinfo_report)
@@ -778,7 +776,7 @@ class Matroska(AVContainer):
     
     
     def extract(self, options):
-        result = AVContainer.extract(self, options)
+        result = AudioVideoContainer.extract(self, options)
         if options.profile is None or file_util.profile_valid_for_kind(options.profile, 'srt'):
             selected_files = []
             selected_tracks = []
@@ -799,7 +797,8 @@ class Matroska(AVContainer):
                                     break
                                     
             if selected_tracks:
-                command = [u'mkvextract', u'tracks', self.file_path ]
+                command = file_util.initialize_command('mkvextract')
+                command.extend([u'tracks', self.file_path ])
                 for t in selected_tracks:
                     if 'volume' in info: del info['volume']
                     info['kind'] = t['kind']
@@ -835,10 +834,10 @@ class Matroska(AVContainer):
 
 
 # Mpeg4 Class
-class Mpeg4(AVContainer):
+class Mpeg4(AudioVideoContainer):
     def __init__(self, file_path):
         self.logger = logging.getLogger('mp4pack.mp4')
-        AVContainer.__init__(self, file_path)
+        AudioVideoContainer.__init__(self, file_path)
     
     
     def _parse_tag(self, line):
@@ -888,8 +887,9 @@ class Mpeg4(AVContainer):
     
     
     def load(self):
-        AVContainer.load(self)
-        command = [u'mp4info', self.file_path]
+        AudioVideoContainer.load(self)
+        command = file_util.initialize_command('mp4info')
+        command.append(self.file_path)
         output, error = file_util.execute_command(command, None)
         mp4info_report = unicode(output, 'utf-8').splitlines()
         
@@ -907,7 +907,8 @@ class Mpeg4(AVContainer):
                 if not in_tag_section:
                     in_tag_section = True
             
-        command = [u'mp4chaps', u'-l', self.file_path]
+        command = file_util.initialize_command('mp4chaps')
+        command.extend([u'-l', self.file_path])
         output, error = file_util.execute_command(command, None)
         mp4chaps_report = unicode(output, 'utf-8').splitlines()
         for idx, line in enumerate(mp4chaps_report):
@@ -916,7 +917,7 @@ class Mpeg4(AVContainer):
     
     
     def tag(self, options):
-        AVContainer.tag(self, options)
+        AudioVideoContainer.tag(self, options)
         tc = None
         update = {}
         if self.meta:
@@ -939,22 +940,24 @@ class Mpeg4(AVContainer):
             tc = u''.join([u'{{{0}:{1}}}'.format(t, format_for_subler_tag(update[t])) for t in sorted(set(update))])
             message = u'Tag {0} {1}'.format(self.file_path, u','.join(sorted(set(update.keys()))))
             self.logger.info(u'Update %s --> %s', u', '.join(sorted(set(update.keys()))), self.file_path)
-            command = [u'SublerCLI', u'-i', self.file_path, u'-t', tc]
+            command = file_util.initialize_command('subler')
+            command.extend([u'-i', self.file_path, u'-t', tc])
             file_util.execute_command(command, message, options.debug)
         else:
             self.logger.info(u'No tags need update in %s', self.file_path)
     
     
     def optimize(self, options):
-        AVContainer.optimize(self, options)
+        AudioVideoContainer.optimize(self, options)
         message = u'Optimize {0}'.format(self.file_path)
-        command = [u'mp4file', u'--optimize', self.file_path]
+        command = file_util.initialize_command('mp4file')
+        command.extend([u'--optimize', self.file_path])
         file_util.execute_command(command, message, options.debug)
     
     
     
     def _update_jpg(self, options):
-        AVContainer.tag(self, options)
+        AudioVideoContainer.tag(self, options)
         if options.update == 'jpg':
             info = file_util.copy_file_info(self.file_info, options)
             info['kind'] = 'jpg'
@@ -968,7 +971,8 @@ class Mpeg4(AVContainer):
                 
             if selected:
                 message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
-                command = [u'SublerCLI', u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])]
+                command = file_util.initialize_command('subler')
+                command.extend([u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
                 file_util.execute_command(command, message, options.debug)
             else:
                 self.logger.warning(u'No artwork available for %s', self.file_path)
@@ -983,7 +987,8 @@ class Mpeg4(AVContainer):
                 
                 if 'profile' in info and 'update' in pc:
                     message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
-                    command = [u'SublerCLI', u'-i', self.file_path, u'-r']
+                    command = file_util.initialize_command('subler')
+                    command.extend([u'-i', self.file_path, u'-r'])
                     file_util.execute_command(command, message, options.debug)
                     
                     selected = {}
@@ -997,13 +1002,14 @@ class Mpeg4(AVContainer):
                         for c in pc['update']['related']:
                             if all((k in i and i[k] == v) for k,v in c['from'].iteritems()):
                                 message = u'Update subtitles {0} --> {1}'.format(p, self.file_path)
-                                command = [
-                                    u'SublerCLI', u'-i', self.file_path, 
+                                command = file_util.initialize_command('subler')
+                                command.extend([
+                                    u'-i', self.file_path,
                                     u'-s', p, 
-                                    u'-l', repository_config['Language'][i['language']], 
+                                    u'-l', repository_config['Language'][i['language']],
                                     u'-n', c['to']['Name'], 
                                     u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
-                                ]
+                                ])
                                 file_util.execute_command(command, message, options.debug)
                                 
                     if 'smart' in pc['update']:
@@ -1013,13 +1019,14 @@ class Mpeg4(AVContainer):
                             for (p,i) in selected.iteritems():
                                 if i['language'] == code:
                                     message = u'Update smart {0} subtitles {1} --> {2}'.format(repository_config['Language'][code], p, self.file_path)
-                                    command = [
-                                        u'SublerCLI', u'-i', self.file_path, 
+                                    command = file_util.initialize_command('subler')
+                                    command.extend([
+                                        u'-i', self.file_path, 
                                         u'-s', p, 
-                                        u'-l', repository_config['Language'][smart_section['language']], 
+                                        u'-l', repository_config['Language'][smart_section['language']],
                                         u'-n', smart_section['Name'], 
                                         u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
-                                    ]
+                                    ])
                                     file_util.execute_command(command, message, options.debug)
                                     found = True
                                     break
@@ -1027,7 +1034,7 @@ class Mpeg4(AVContainer):
     
     
     def _update_txt(self, options):
-        AVContainer.tag(self, options)
+        AudioVideoContainer.tag(self, options)
         if options.update == 'txt':
             info = file_util.copy_file_info(self.file_info, options)
             info['kind'] = 'txt'
@@ -1041,14 +1048,15 @@ class Mpeg4(AVContainer):
                 
             if selected:
                 message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
-                command = [u'SublerCLI', u'-i', self.file_path, u'-c', selected[0], '-p']
+                command = file_util.initialize_command('subler')
+                command.extend([u'-i', self.file_path, u'-c', selected[0], '-p'])
                 file_util.execute_command(command, message, options.debug)
             else:
                 self.logger.warning(u'No chapters available for %s', self.file_path)
     
     
     def update(self, options):
-        AVContainer.update(self, options)
+        AudioVideoContainer.update(self, options)
         self._update_srt(options)
         self._update_txt(options)
         self._update_jpg(options)
@@ -1796,6 +1804,10 @@ class FileUtil(object):
         if result:
             self.varify_directory(path)
         return result
+    
+    
+    def initialize_command(self, command):
+        return copy.deepcopy(repository_config['Command'][command]['base'])
     
     
     def execute_command(self, command, message= None, debug=False):
