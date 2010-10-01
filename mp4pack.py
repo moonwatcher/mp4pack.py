@@ -64,6 +64,8 @@ def load_options():
     for k in rc['Kind'].keys():
         profiles += rc['Kind'][k]['Profile'].keys()
     
+    profiles = tuple(set(profiles))
+    
     parser = OptionParser('%prog [options] [file or directory. default: . ]')
     
     group = OptionGroup(parser, 'Actions', 'An action to preform on files found in the search path.')
@@ -73,7 +75,6 @@ def load_options():
     group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract subtitle and chapter and transcode the extracted streams')
     
     group.add_option('--tag', dest='tag', action='store_true', default=False, help='Update meta tags')
-    group.add_option('--art', dest='art', action='store_true', default=False, help='Update embedded artwork')
     group.add_option('--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout')
     
     group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack'], help='Package to ' + str(rc['Action']['pack']))
@@ -159,10 +160,6 @@ def preform_operations(files, options):
         for f in files:
             f.tag(options)
     
-    if options.art:
-        for f in files:
-            f.art(options)
-            
     if options.optimize:
         for f in files:
             f.optimize(options)
@@ -201,7 +198,7 @@ def main():
     if len(known) > 0:
         logger.info(u'%d valid files were found in %s', len(known), input_path)
         for p in known:
-            logger.info(u'Found %s', p.file_path)
+            logger.debug(u'Found %s', p.file_path)
         
     if len(unknown) > 0:
         logger.warning(u'%d file paths could not be understood', len(unknown))

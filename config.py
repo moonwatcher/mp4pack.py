@@ -12,8 +12,8 @@ repository_config = {
     },
     'Action':{
         'pack': ('mkv',),
-        'transcode':('m4v', 'mkv', 'srt', 'txt'),
-        'update':('srt',),
+        'transcode':('m4v', 'mkv', 'srt', 'txt', 'jpg'),
+        'update':('srt','jpg', 'txt'),
     },
     'Codec':{
         'Audio':{
@@ -379,26 +379,56 @@ repository_config = {
         'jpg':{
             'container':'image',
             'default':{
-                'profile':'original',
+                'profile':'normal',
                 'volume':'alpha'
             },
             'Profile':{
-                'original':{},
-                'normal':{
-                    'transcode':{
-                        
+                'download':{
+                    'description':'Special profile for fetching artwork from the web',
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
                     },
                 },
+                'normal':{
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
+                    },
+                    'transcode':{
+                        'aspect ratio':'preserve',
+                        'size':1024,
+                        'constraint':'max',
+                    },
+                },
+                'criterion':{
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
+                    },
+                    'transcode':{
+                        'aspect ratio':'preserve',
+                        'size':1024,
+                        'constraint':'min'
+                    },
+                },
+                
             },
         },
         'png':{
             'container':'image',
             'default':{
-                'profile':'original',
+                'profile':'normal',
                 'volume':'alpha'
             },
             'Profile':{
-                'original':{},
+                'download':{
+                    'description':'Special profile for fetching original artwork from the web',
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
+                    },
+                },
             },
         },
     },

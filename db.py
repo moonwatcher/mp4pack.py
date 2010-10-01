@@ -315,6 +315,34 @@ class TagManager(object):
         return show, episode
     
     
+    def find_tmdb_movie_poster(self, imdb_id):
+        poster = None
+        _movie = self.find_movie_by_imdb_id(imdb_id)
+        if _movie is not None and _movie['posters']:
+            poster = [ p for p in _movie[u'posters'] if 'selected' in p and p['selected'] == True]
+            if poster: poster = poster[0]
+            if poster and 'url' in poster:
+                ih = ImageHandler(poster['url'])
+                if ih.cache():
+                    poster['local'] = ih.local()
+                    poster['kind'] = os.path.splitext(poster['local'])[1].strip('.')
+                else:
+                    poster = None
+        return poster
+    
+    
+    def find_tvdb_episode_poster(self, show_small_name, season_number, episode_number):
+        poster = None
+        show, _episode = self.find_episode(show_small_name, season_number, episode_number)
+        if _episode is not None and 'poster' in _episode:
+            ih = TvdbImageHandler(_episode['poster'])
+            if ih.cache():
+                poster = {'local':ih.local()}
+                poster['kind'] = os.path.splitext(poster['local'])[1].strip('.')
+            else:
+                poster = None
+        return poster
+    
     
     
     def insert_genre(self, genre):
@@ -400,9 +428,13 @@ class TagManager(object):
                     if _person_ref is not None:
                         _movie[u'cast'].append(_person_ref)
                                     
-            #if u'posters' in element.keys():
-            #    _movie[u'posters'] = []
-            #    for pe in element[u'posters']:
+            if u'posters' in element.keys():
+                _movie[u'posters'] = []
+                posters = [ p['image'] for p in element[u'posters'] if p['image']['type'] == 'poster' and p['image']['size'] == 'original']
+                if posters:
+                    for p in posters:
+                        _movie[u'posters'].append(p)
+                    _movie[u'posters'][0]['selected'] = True
                     
             self.movies.save(_movie)
             self.logger.info(u'Creating Movie %s with IMDB ID %s', _movie[u'name'], _movie[u'imdb_id'])
@@ -623,7 +655,7 @@ class TagManager(object):
                     elif is_tag(u'FirstAired', item):
                         update_date_property(u'released', item.text, episode)
                     elif is_tag(u'filename', item):
-                        update_string_property(u'artwork', item.text, episode)
+                        update_string_property(u'poster', item.text, episode)
                     elif is_tag(u'Director', item):
                         director_list = self.split_tvdb_list(item.text)
                         for director in director_list:
@@ -661,6 +693,7 @@ class TagManager(object):
                     else:
                         self.logger.info(u'Ignoring weird person name %s', p)
         return result
+    
 
 
 
