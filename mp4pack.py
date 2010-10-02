@@ -188,12 +188,12 @@ def main():
     if len(known) > 0:
         logger.info(u'%d valid files were found in %s', len(known), input_path)
         for p in known:
-            logger.debug(u'Found %s', p.file_path)
+            logger.debug(u'Found valid %s', p.file_path)
         
     if len(unknown) > 0:
-        logger.warning(u'%d file paths could not be understood', len(unknown))
+        logger.warning(u'%d invalid files were found in %s', len(unknown), input_path)
         for p in unknown:
-            logger.warning(u'%s is an unknown path', p)
+            logger.info(u'Found invalid %s', p)
     
     
     indent = repository_config['Display']['indent']

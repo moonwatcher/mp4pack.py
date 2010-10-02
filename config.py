@@ -41,7 +41,7 @@ repository_config = {
         },
     },
     'Display':{
-        'wrap':100, 
+        'wrap':120, 
         'indent':25, 
         'margin':2,
     },
