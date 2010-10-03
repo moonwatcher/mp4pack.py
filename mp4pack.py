@@ -206,8 +206,6 @@ def main():
         logger.debug('Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
 
 
-
-
 log_levels = {
     'debug': logging.DEBUG,
     'info': logging.INFO,
