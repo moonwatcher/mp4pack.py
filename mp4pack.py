@@ -84,7 +84,7 @@ def load_options():
     group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='H.264 transcoding Quantizer.')
     group.add_option('--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [ default: set by profile ]')
     #group.add_option('--media-kind', dest='media_kind', type='choice', choices=rc['Media Kind'].keys(), help='[ default: auto detect ]')
-    #group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined.')
+    group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined.')
     group.add_option('--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
     parser.add_option_group(group)
     

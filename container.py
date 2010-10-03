@@ -73,16 +73,17 @@ class Container(object):
                 del self.path_info['Name']
                 
             prefix = os.path.dirname(self.file_path)
-            if self.path_info['kind'] in file_util.subtitles_kinds:
+            if self.path_info['kind'] in file_util.subtitles_kinds or self.path_info['kind'] in file_util.raw_audio_kinds or self.path_info['kind'] in file_util.timecode_kinds:
                 prefix, lang = os.path.split(prefix)
                 if lang in repository_config['Language']:
                     self.path_info['language'] = lang
     
     
     def load_file_info(self):
-        self.file_info = {}
-        self.file_info['Length'] = int(os.path.getsize(self.file_path))
-        self.file_info['Size'] = bytes_to_human_readable(self.file_info['Length'])
+        if os.path.exists(self.file_path):
+            self.file_info = {}
+            self.file_info['Length'] = int(os.path.getsize(self.file_path))
+            self.file_info['Size'] = bytes_to_human_readable(self.file_info['Length'])
     
     
     def load_related(self):
@@ -95,7 +96,7 @@ class Container(object):
         for v in repository_config['Volume'].keys():
             for k in kc.keys():
                 for p in kc[k]['Profile'].keys():
-                    if kc[k]['container'] == 'subtitles':
+                    if kc[k]['container'] in ('subtitles', 'raw audio', 'timecode'):
                         for l in lc.keys():
                             i = copy.deepcopy(self.path_info)
                             i['volume'] = v
@@ -199,7 +200,7 @@ class Container(object):
                 command = file_util.initialize_command('rsync')
                 command.extend([self.file_path, dest_path])
                 message = u'Copy ' + self.file_path + u' --> ' + dest_path
-                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+                file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                 if file_util.clean_if_not_exist(dest_path):
                     result = dest_path
                     if options.md5:
@@ -217,7 +218,7 @@ class Container(object):
                 command = file_util.initialize_command('mv')
                 command.extend([self.file_path, dest_path])
                 message = u'Rename {0} --> {1}'.format(self.file_path, dest_path)
-                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+                file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                 file_util.clean_if_not_exist(dest_path)
             else:
                 self.logger.warning(u'Not renaming %s, destination exists: %s', self.file_path, dest_path)
@@ -414,8 +415,8 @@ class Container(object):
 
 class AudioVideoContainer(Container):
     def __init__(self, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.av')
         Container.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.av')
         self.tracks = None
         self.chapter_markers = None
         self.tags = None
@@ -489,10 +490,11 @@ class AudioVideoContainer(Container):
             if file_util.complete_info_default_values(info):
                 dest_path = file_util.canonic_path(info, self.meta)
                 if file_util.varify_if_path_available(dest_path, options.overwrite):
-                    c = Chapter(dest_path)
+                    c = Chapter(dest_path, False)
+                    c.start()
                     for cm in self.chapter_markers:
                         c.add_chapter_marker(cm)
-                
+                        
                     self.logger.info(u'Extracting chapter markers from %s to %s', self.file_path, dest_path)
                     c.write(dest_path)
                     if file_util.clean_if_not_exist(dest_path):
@@ -508,10 +510,11 @@ class AudioVideoContainer(Container):
             if file_util.complete_info_default_values(info):
                 dest_path = file_util.canonic_path(info, self.meta)
                 if dest_path is not None:
+                    file_util.set_track_default_values(self.tracks, options)
                     pc = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
                     selected_related = []
                     selected_tracks = []
-                
+                    
                     if 'pack' in pc:
                         if 'related' in pc['pack']:
                             for (path,info) in self.related.iteritems():
@@ -528,24 +531,7 @@ class AudioVideoContainer(Container):
                                     
                     if file_util.varify_if_path_available(dest_path, options.overwrite):
                         command = file_util.initialize_command('mkvmerge')
-                        command.extend([u'--output', dest_path, u'--no-chapters', u'--no-attachments', u'--no-subtitles', self.file_path])
-                        for r in selected_related:
-                            rinfo = self.related[r]
-                            if rinfo['kind'] == 'srt':
-                                command.append(u'--sub-charset')
-                                command.append(u'0:UTF-8')
-                                command.append(u'--language')
-                                command.append(u'0:{0}'.format(rinfo['language']))
-                                command.append(r)
-                            
-                            if rinfo['kind'] == 'txt' and rinfo['profile'] == 'chapter':
-                                command.append(u'--chapter-language')
-                                command.append(u'eng')
-                                command.append(u'--chapter-charset')
-                                command.append(u'UTF-8')
-                                command.append(u'--chapters')
-                                command.append(r)
-                            
+                        command.extend([u'--output', dest_path, u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
                         audio_tracks = []
                         video_tracks = []
                         for t in selected_tracks:
@@ -561,17 +547,38 @@ class AudioVideoContainer(Container):
                                 audio_tracks.append(unicode(t['number']))
                             elif t['type'] == 'video':
                                 video_tracks.append(unicode(t['number']))
-                    
+                        
                         command.append(u'--audio-tracks')
                         command.append(u','.join(audio_tracks))
                         command.append(u'--video-tracks')
                         command.append(u','.join(video_tracks))
-                    
+                        command.append(self.file_path)
+                        
+                        for r in selected_related:
+                            rinfo = self.related[r]
+                            if rinfo['kind'] == 'ac3':
+                                command.append(u'--language')
+                                command.append(u'0:{0}'.format(rinfo['language']))
+                                command.append(r)
+                                
+                            if rinfo['kind'] == 'srt':
+                                command.append(u'--sub-charset')
+                                command.append(u'0:UTF-8')
+                                command.append(u'--language')
+                                command.append(u'0:{0}'.format(rinfo['language']))
+                                command.append(r)
+                            
+                            if rinfo['kind'] == 'txt' and rinfo['profile'] == 'chapter':
+                                command.append(u'--chapter-language')
+                                command.append(u'eng')
+                                command.append(u'--chapter-charset')
+                                command.append(u'UTF-8')
+                                command.append(u'--chapters')
+                                command.append(r)
+                                
                         message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
-                        file_util.execute_command(command, message, options.debug, pipe_stdout=False, pipe_stderr=False)
+                        file_util.execute_command(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                         file_util.clean_if_not_exist(dest_path)
-                    
-        return
     
     
     def transcode(self, options):
@@ -622,7 +629,7 @@ class AudioVideoContainer(Container):
                                     command.append(u','.join(v))
                         command.extend([u'--input', self.file_path, u'--output', dest_path])
                         message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
-                        file_util.execute_command(command, message, options.debug, pipe_stdout=False, pipe_stderr=True)
+                        file_util.execute_command(command, message, options.debug, pipeout=False, pipeerr=True, logger=self.logger)
                         file_util.clean_if_not_exist(dest_path)
         return
     
@@ -657,8 +664,8 @@ class AudioVideoContainer(Container):
 # Matroska Class
 class Matroska(AudioVideoContainer):
     def __init__(self, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.matroska')
         AudioVideoContainer.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.matroska')
         if autoload:
             self.load()
     
@@ -805,13 +812,27 @@ class Matroska(AudioVideoContainer):
     def extract(self, options):
         result = AudioVideoContainer.extract(self, options)
         if options.profile is None or file_util.profile_valid_for_kind(options.profile, 'srt'):
-            selected_files = []
-            selected_tracks = []
+            selected = {
+                'track':[], 
+                'path':{
+                    'subtitles':[], 
+                    'audio':[],
+                    'timecode':[]
+                },
+                'extract':{
+                    'subtitles':[], 
+                    'audio':[],
+                    'timecode':[]
+                }
+                
+            }
+            
             info = file_util.copy_path_info(self.path_info, options)
             if 'volume' in info: del info['volume']
             info['profile'] = 'dump'
             
-            for k in ('srt', 'ass'):
+            file_util.set_track_default_values(self.tracks, options)
+            for k in ('srt', 'ass', 'dts'):
                 if 'volume' in info: del info['volume']
                 info['kind'] = k
                 if file_util.complete_info_default_values(info):
@@ -820,39 +841,88 @@ class Matroska(AudioVideoContainer):
                         for t in self.tracks:
                             for c in pc['extract']['tracks']:
                                 if all((k in t and t[k] == v) for k,v in c.iteritems()):
-                                    selected_tracks.append(t)
+                                    selected['track'].append(t)
                                     break
                                     
-            if selected_tracks:
+            if selected['track']:
                 command = file_util.initialize_command('mkvextract')
                 command.extend([u'tracks', self.file_path ])
-                for t in selected_tracks:
+                
+                tc_command = file_util.initialize_command('mkvextract')
+                tc_command.extend([u'timecodes_v2', self.file_path ])
+                
+                
+                for t in selected['track']:
                     if 'volume' in info: del info['volume']
                     info['kind'] = t['kind']
                     info['language'] = t['language']
                     if file_util.complete_info_default_values(info):
                         dest_path = file_util.canonic_path(info, self.meta)
                         if file_util.varify_if_path_available(dest_path, options.overwrite):
-                            selected_files.append(dest_path)
-                            command.append(u'{0}:{1}'.format(unicode(t['number']), dest_path))
-                        
-            if selected_files:
-                message = u'Extract {0} tracks from {1}'.format(unicode(len(selected_files)), self.file_path)
-                file_util.execute_command(command, message, options.debug, pipe_stdout=False, pipe_stderr=False)
-        
-            extracted_files = []
-            for f in selected_files:
-                if file_util.clean_if_not_exist(f):
-                    extracted_files.append(f)
-        
-            o = copy.deepcopy(options)
-            o.transcode = 'srt'
-            o.extract = None
-        
-            for f in extracted_files:
-                s = Subtitle(f)
-                s.transcode(o)
-                result.append(f)
+                            if t['kind'] == 'dts':
+                                tc_info = file_util.copy_path_info(info, options)
+                                tc_info['kind'] = 'tc'
+                                if file_util.complete_info_default_values(tc_info):
+                                    tc_dest_path = file_util.canonic_path(tc_info, self.meta)
+                                    if file_util.varify_if_path_available(tc_dest_path, options.overwrite):
+                                        tc_command.append(u'{0}:{1}'.format(unicode(t['number']), tc_dest_path))
+                                        selected['path']['timecode'].append(tc_dest_path)
+                                        
+                                        command.append(u'{0}:{1}'.format(unicode(t['number']), dest_path))
+                                        selected['path'][t['type']].append(dest_path)
+                            else:
+                                command.append(u'{0}:{1}'.format(unicode(t['number']), dest_path))
+                                selected['path'][t['type']].append(dest_path)
+                                
+            if selected['path']['subtitles'] or selected['path']['audio']:
+                message = u'Extract {0} subtitle and {1} audio tracks from {2}'.format(
+                    unicode(len(selected['path']['subtitles'])), 
+                    unicode(len(selected['path']['audio'])), 
+                    self.file_path
+                )
+                file_util.execute_command(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                
+                message = u'Extract timecodes for {0} audio tracks from {1}'.format(
+                    unicode(len(selected['path']['audio'])), 
+                    self.file_path
+                )
+                file_util.execute_command(tc_command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                
+            for k in selected['path'].keys():
+                for p in selected['path'][k]:
+                    if file_util.clean_if_not_exist(p):
+                        selected['extract'][k].append(p)
+            
+            if selected['extract']['subtitles']:
+                o = copy.deepcopy(options)
+                o.transcode = 'srt'
+                o.extract = None
+                for p in selected['extract']['subtitles']:
+                    s = Subtitle(p)
+                    s.transcode(o)
+                    result.append(p)
+            
+            if selected['extract']['audio']:
+                o = copy.deepcopy(options)
+                o.transcode = 'ac3'
+                o.extract = None
+                o.profile = None
+                for p in selected['extract']['audio']:
+                    a = RawAudio(p)
+                    a.transcode(o)
+                    result.append(p)
+            
+            if selected['extract']['timecode']:
+                o = copy.deepcopy(options)
+                o.transcode = 'tc'
+                o.extract = None
+                o.profile = None
+                o.overwrite = True
+                for p in selected['extract']['timecode']:
+                    t = Timecode(p)
+                    t.transcode(o)
+                    result.append(p)
+                    
         else:
             self.logger.warning('Skipping subtitle extraction. Profile %s invalid for srt kind.', options.profile)
         return result
@@ -863,8 +933,8 @@ class Matroska(AudioVideoContainer):
 # Mpeg4 Class
 class Mpeg4(AudioVideoContainer):
     def __init__(self, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.mp4')
         AudioVideoContainer.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.mp4')
         if autoload:
             self.load()
     
@@ -985,7 +1055,7 @@ class Mpeg4(AudioVideoContainer):
             self.logger.info(u'Update %s --> %s', u', '.join(sorted(set(update.keys()))), self.file_path)
             command = file_util.initialize_command('subler')
             command.extend([u'-i', self.file_path, u'-t', tc])
-            file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+            file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
         else:
             self.logger.info(u'No tags need update in %s', self.file_path)
     
@@ -995,7 +1065,7 @@ class Mpeg4(AudioVideoContainer):
         message = u'Optimize {0}'.format(self.file_path)
         command = file_util.initialize_command('mp4file')
         command.extend([u'--optimize', self.file_path])
-        file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+        file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
     
     
     
@@ -1007,7 +1077,9 @@ class Mpeg4(AudioVideoContainer):
             selected = []
             if file_util.complete_info_default_values(info):
                 if info['profile'] == 'normal':
-                    self.download_artwork(options)
+                    if self.download_artwork(options):
+                        self.logger.debug(u'Reloading related artwork for %s', self.file_path)
+                        self.load_related()
                 lookup = {'kind':info['kind'], 'profile':info['profile']}
                 for (path,info) in self.related.iteritems():
                     if all((k in info and info[k] == v) for k,v in lookup.iteritems()):
@@ -1018,7 +1090,7 @@ class Mpeg4(AudioVideoContainer):
                 message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
                 command = file_util.initialize_command('subler')
                 command.extend([u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
-                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+                file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
             else:
                 self.logger.warning(u'No artwork available for %s', self.file_path)
     
@@ -1034,7 +1106,7 @@ class Mpeg4(AudioVideoContainer):
                     message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
                     command = file_util.initialize_command('subler')
                     command.extend([u'-i', self.file_path, u'-r'])
-                    file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+                    file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                     
                     selected = {}
                     for (p,i) in self.related.iteritems():
@@ -1055,7 +1127,7 @@ class Mpeg4(AudioVideoContainer):
                                     u'-n', c['to']['Name'], 
                                     u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
                                 ])
-                                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+                                file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                                 
                     if 'smart' in pc['update']:
                         smart_section = pc['update']['smart']
@@ -1072,7 +1144,7 @@ class Mpeg4(AudioVideoContainer):
                                         u'-n', smart_section['Name'], 
                                         u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
                                     ])
-                                    file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+                                    file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                                     found = True
                                     break
                             if found: break
@@ -1095,7 +1167,7 @@ class Mpeg4(AudioVideoContainer):
                 message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
                 command = file_util.initialize_command('subler')
                 command.extend([u'-i', self.file_path, u'-c', selected[0], '-p'])
-                file_util.execute_command(command, message, options.debug, pipe_stdout=True, pipe_stderr=False)
+                file_util.execute_command(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
             else:
                 self.logger.warning(u'No chapters available for %s', self.file_path)
     
@@ -1110,22 +1182,69 @@ class Mpeg4(AudioVideoContainer):
 
 
 
+# Raw Audio Class
+class RawAudio(Container):
+    def __init__(self, file_path, autoload=True):
+        Container.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.rawaudio')
+        if autoload:
+            self.load()
+    
+    
+    def transcode(self, options):
+        if options.transcode == 'ac3':
+            info = file_util.copy_path_info(self.path_info, options)
+            info['kind'] = options.transcode
+            info['language'] = self.path_info['language']
+            if file_util.complete_info_default_values(info):
+                dest_path = file_util.canonic_path(info, self.meta)
+                if file_util.varify_if_path_available(dest_path, options.overwrite):
+                    if self.path_info['kind'] == 'dts':
+                        tp = repository_config['Kind'][info['kind']]['Profile'][info['profile']]['transcode']
+                        
+                        dcadec_command = file_util.initialize_command('dcadec')
+                        for (k,v) in tp['dcadec'].iteritems():
+                            dcadec_command.append(k)
+                            dcadec_command.append(v)
+                        dcadec_command.append(self.file_path)
+                        
+                        aften_command = file_util.initialize_command('aften')
+                        aften_command.append('-')
+                        for (k,v) in tp['aften'].iteritems():
+                            aften_command.append(k)
+                            aften_command.append(v)
+                        aften_command.append(dest_path)
+                        
+                        self.logger.info(u'Transcode %s --> %s',self.file_path, dest_path)
+                        from subprocess import Popen, PIPE
+                        dcadec_proc = Popen(dcadec_command, stdout=PIPE)
+                        aften_proc = Popen(aften_command, stdin=dcadec_proc.stdout, stdout=PIPE)
+                        report = aften_proc.communicate()
+                        
+                        file_util.clean_if_not_exist(dest_path)
+    
+    
+
+
+
 # Text File
 class Text(Container):
     def __init__(self, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.text')
         Container.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.text')
     
     
     def read(self):
         lines = None
-        try:
-            reader = open(self.file_path, 'r')
-            content = reader.read()
-            reader.close()
-        except IOError as error:
-            self.logger.error(str(error))
-            content = None
+        content = None
+        if os.path.exists(self.file_path):
+            try:
+                reader = open(self.file_path, 'r')
+                content = reader.read()
+                reader.close()
+            except IOError as error:
+                self.logger.error(str(error))
+                content = None
         
         if content:
             encoding = chardet.detect(content)
@@ -1176,11 +1295,83 @@ class Text(Container):
 
 
 
+# Audiocode Class
+class Timecode(Text):
+    def __init__(self, file_path, autoload=True):
+        Text.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.audiocode')
+        self.timecodes = None
+        self.scope = 2
+        if autoload:
+            self.load()
+    
+    
+    def valid(self):
+        return Text.valid(self) and self.timecodes is not None
+    
+    
+    def load(self):
+        result = Text.load(self)
+        if result:
+            self.timecodes = []
+            result = Timecode.decode(self)
+        if not result:
+            self.logger.warning('Could not parse timecode file %s', self.file_path)
+            Timecode.unload(self)
+        return result
+    
+    
+    def unload(self):
+        Text.unload(self)
+        self.timecodes = None
+    
+    
+    def decode(self):
+        result = Text.decode(self)
+        self.timecodes= []
+        if result:
+            lines = self.read()
+            for line in lines:
+                if timecode_line_re.search(line) is not None:
+                    self.timecodes.append(line.strip())
+            if not self.timecodes:
+                result = False
+        return result
+    
+    
+    def read(self):
+        lines = None
+        if os.path.exists(self.file_path):
+            try:
+                reader = open(self.file_path, 'r')
+                scope = self.scope
+                lines = []
+                for line in reader:
+                    lines.append(line)
+                    scope -= 1
+                    if not scope > 0:
+                        break
+                reader.close()
+            except IOError as error:
+                self.logger.error(str(error))
+        return lines
+    
+    
+    def encode(self):
+        return self.timecodes
+    
+    
+
+
+
+
+
+
 # Subtitle Class
 class Subtitle(Text):
     def __init__(self, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.subtitle')
         Text.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.subtitle')
         self.subtitle_blocks = None
         self.statistics = None
         if autoload:
@@ -1330,7 +1521,6 @@ class Subtitle(Text):
     
     def encode(self):
         result = Text.encode(self)
-        self.decode()
         if self.subtitle_blocks:
             result = [u'\n']
             for idx, block in enumerate(self.subtitle_blocks):
@@ -1459,15 +1649,15 @@ class SubtitleBlock(object):
 # Chapter Class
 class Chapter(Text):
     def __init__(self, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.chapter')
         Text.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.chapter')
         self.chapter_markers = None
         if autoload:
             self.load()
     
     
     def valid(self):
-        return Text.valid(self) and self.chapter_markers is not None
+        return Text.valid(self) and self.chapter_markers
     
     
     def load(self):
@@ -1485,6 +1675,9 @@ class Chapter(Text):
         Text.unload(self)
         self.chapter_markers = None
     
+    
+    def start(self):
+        self.chapter_markers = []
     
     
     def decode(self):
@@ -1576,8 +1769,8 @@ class ChapterMarker(object):
 # Artwork Class
 class Artwork(Container):
     def __init__(self, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.image')
         Container.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.image')
         if autoload:
             self.load()
     
@@ -1636,6 +1829,7 @@ class Artwork(Container):
                         else:
                             self.logger.debug(u'Resize artwork: %dx%d --> %dx%d', size[0], size[1], rsize[0], rsize[1])
                             image = image.resize(rsize, Image.ANTIALIAS)
+                            self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
                             image.save(dest_path)
     
 
@@ -1674,7 +1868,7 @@ tag_name_resolver = TagNameResolver()
 # Subtitle Filter Class (Singleton)
 class SubtitleFilter(object):
     def __init__(self):
-        self.logger = logging.getLogger('mp4pack.subtitlefilter')
+        self.logger = logging.getLogger('mp4pack.filter.manager')
         self.sequence = {}
     
     
@@ -1837,6 +2031,8 @@ class FileUtil(object):
         self.subtitles_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'subtitles' ]
         self.chapter_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'chapters' ]
         self.image_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'image' ]
+        self.raw_audio_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'raw audio' ]
+        self.timecode_kinds = [ k for (k,v) in kc.iteritems() if v['container'] == 'timecode' ]
         
         self.audio_codec_kind = {}
         for k,v in repository_config['Codec']['Audio'].iteritems():
@@ -1911,6 +2107,13 @@ class FileUtil(object):
                             
                         if info['kind'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
                                 result = os.path.join(result, info['language'])
+                        
+                        if info['kind'] in self.raw_audio_kinds and 'language' in info and info['language'] in repository_config['Language']:
+                                result = os.path.join(result, info['language'])
+                        
+                        if info['kind'] in self.timecode_kinds and 'language' in info and info['language'] in repository_config['Language']:
+                                result = os.path.join(result, info['language'])
+                        
                     else:
                         valid = False
                         self.logger.warning(u'Invalid profile for %s', unicode(info))
@@ -2018,7 +2221,7 @@ class FileUtil(object):
         return copy.deepcopy(repository_config['Command'][command]['base'])
     
     
-    def execute_command(self, command, message= None, debug=False, pipe_stdout=True, pipe_stderr=True):
+    def execute_command(self, command, message= None, debug=False, pipeout=True, pipeerr=True, logger=None):
         def encode_command(command):
             cmd = []
             for e in command:
@@ -2028,25 +2231,29 @@ class FileUtil(object):
                     cmd.append(e)
             return u' '.join(cmd)
         
+        report = None
         if not debug:
             if command:
-                self.logger.debug(u'Execute: %s', encode_command(command))
+                if logger == None:
+                    logger = self.logger
+                    
+                logger.debug(u'Execute: %s', encode_command(command))
                 if message:
-                    self.logger.info(message)
+                    logger.info(message)
                 from subprocess import Popen, PIPE
                 
-                if pipe_stdout and pipe_stderr:
+                if pipeout and pipeerr:
                     proc = Popen(command, stdout=PIPE, stderr=PIPE)
-                elif pipe_stdout and not pipe_stderr:
+                elif pipeout and not pipeerr:
                     proc = Popen(command, stdout=PIPE)
-                elif not pipe_stdout and pipe_stderr:
+                elif not pipeout and pipeerr:
                     proc = Popen(command, stderr=PIPE)
-                elif not pipe_stdout and not pipe_stderr:
+                elif not pipeout and not pipeerr:
                     proc = Popen(command)
                 
                 report = proc.communicate()
         else:
-            self.logger.info(message)
+            logger.info(message)
             print encode_command(command)
         return report
     
@@ -2086,18 +2293,27 @@ class FileUtil(object):
         return result
     
     
+    def set_track_default_values(self, tracks, options):
+        if tracks:
+            for track in tracks:
+                if track:
+                    if 'type' in track and track['type'] in ('audio', 'subtitles'):
+                        if 'language' not in track or track['language'] == 'und':
+                            track['language'] = options.language
+    
+    
     def copy_path_info(self, info, options):
         result = None
         if info:
-            i = copy.deepcopy(info)
-            i['volume'] = options.volume
-            if i['volume'] is None:
-                del i['volume']
+            result = copy.deepcopy(info)
+            result['volume'] = options.volume
+            if result['volume'] is None:
+                del result['volume']
         
-            i['profile'] = options.profile
-            if i['profile'] is None:
-                del i['profile']
-        return i
+            result['profile'] = options.profile
+            if result['profile'] is None:
+                del result['profile']
+        return result
     
     
 
@@ -2225,6 +2441,10 @@ def load_media_file(file_path):
         f = Chapter(file_path)
     elif file_type in file_util.image_kinds:
         f = Artwork(file_path)
+    elif file_type in file_util.raw_audio_kinds:
+        f = RawAudio(file_path)
+    elif file_type in file_util.timecode_kinds:
+        f = Timecode(file_path)
     
     if f and not f.valid():
         f = None
@@ -2290,6 +2510,8 @@ escaped_subler_tag_characters = set(('{', '}', ':'))
 
 ogg_chapter_timestamp_re = re.compile('CHAPTER([0-9]{,2})=([0-9]{,2}:[0-9]{,2}:[0-9]{,2}\.[0-9]+)')
 ogg_chapter_name_re = re.compile('CHAPTER([0-9]{,2})NAME=(.*)', re.UNICODE)
+
+timecode_line_re = re.compile('^[0-9]+$')
 
 mkvinfo_not_embl_re = re.compile('No EBML head found')
 mkvinfo_start_re = re.compile('\+ EBML head')

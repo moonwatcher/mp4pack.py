@@ -39,6 +39,12 @@ repository_config = {
         'mp4art':{
             'base':[u'mp4art']
         },
+        'aften':{
+            'base':[u'aften']
+        },
+        'dcadec':{
+            'base':[u'dcadec']
+        },
     },
     'Display':{
         'wrap':120, 
@@ -47,7 +53,7 @@ repository_config = {
     },
     'Action':{
         'pack': ('mkv',),
-        'transcode':('m4v', 'mkv', 'srt', 'txt', 'jpg'),
+        'transcode':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'ac3', 'tc'),
         'update':('srt','jpg', 'txt'),
     },
     'Codec':{
@@ -281,6 +287,7 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
+                            {'kind':'ac3', 'profile':'dump'}
                         ),
                         'tracks':(
                             {'type':'video'},
@@ -462,6 +469,63 @@ repository_config = {
                     'default':{
                         'tvshow':{'volume':'alpha'},
                         'movie':{'volume':'alpha'},
+                    },
+                },
+            },
+        },
+        'ac3':{
+            'container':'raw audio',
+            'default':{
+                'profile':'dump',
+                'volume':'epsilon',
+            },
+            'Profile':{
+                'dump':{
+                    'description':'Special profile for dts track exctracted from matroska',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
+                    },
+                    'transcode':{
+                        'dcadec':{ '-o':'wavall', '-g':'32'},
+                        'aften':{ '-b':'448' }
+                    }
+                },
+            },
+        },
+        'dts':{
+            'container':'raw audio',
+            'default':{
+                'profile':'dump',
+                'volume':'epsilon',
+            },
+            'Profile':{
+                'dump':{
+                    'description':'Special profile for dts track exctracted from matroska',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
+                    },
+                    'extract':{
+                        'tracks':(
+                            {'type':'audio', 'kind':'dts'},
+                        ),
+                    },
+                },
+            },
+        },
+        'tc':{
+            'container':'timecode',
+            'default':{
+                'profile':'dump',
+                'volume':'epsilon',
+            },
+            'Profile':{
+                'dump':{
+                    'description':'Special profile for timecode track extracted from matroska',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
                     },
                 },
             },

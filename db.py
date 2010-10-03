@@ -35,6 +35,7 @@ class ResourceHandler(object):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
             try:
+                self.logger.info(u'Retrieve %s', self.remote_url)
                 filename, self.headers = urllib.urlretrieve(self.remote_url.encode('utf-8'), self.local_path)
             except IOError:
                 result = False
