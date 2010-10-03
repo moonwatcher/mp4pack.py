@@ -3,7 +3,7 @@
 
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = u'7B3B400B0146EA83'
-cache_path = u'/net/multivac/Volumes/alphaville/cache'
+cache_path = u'/net/multivac/Volumes/alphaville/cache/'
 
 repository_config = {
     'Volume':{
