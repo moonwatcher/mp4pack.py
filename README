@@ -41,7 +41,7 @@ Options:
                         H.264 transcoding Quantizer.
     --pixel-width=WIDTH
                         Max output pixel width [ default: set by profile ]
-    --language=CODE     Languge code used when undefined.
+    --language=CODE     Languge code used when undefined. [ default: eng ]
     --md5               Verify md5 checksum on copy.
 
   Options that only apply to text subtitles.:

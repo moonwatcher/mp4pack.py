@@ -9,6 +9,7 @@ import logging
 
 from container import load_media_file
 from config import repository_config
+from db import tag_manager
 
 def load_input_files(path, file_filter, recursive):
     known = []
@@ -84,7 +85,7 @@ def load_options():
     group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='H.264 transcoding Quantizer.')
     group.add_option('--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [ default: set by profile ]')
     #group.add_option('--media-kind', dest='media_kind', type='choice', choices=rc['Media Kind'].keys(), help='[ default: auto detect ]')
-    group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined.')
+    group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined. [ default: %default ]')
     group.add_option('--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
     parser.add_option_group(group)
     
@@ -126,10 +127,11 @@ def load_options():
 
 def preform_operations(files, options):
     if options.initialize:
-        from db import TagManager
-        t = TagManager()
-        t.base_init()
+        tag_manager.base_init()
     
+    if options.map_show:
+        tag_manager.map_show_with_pair(options.map_show)
+        
     if options.info:
         for f in files:
             print unicode(f).encode('utf-8')

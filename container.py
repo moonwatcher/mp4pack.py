@@ -1391,9 +1391,6 @@ class Timecode(Text):
 
 
 
-
-
-
 # Subtitle Class
 class Subtitle(Text):
     def __init__(self, file_path, autoload=True):

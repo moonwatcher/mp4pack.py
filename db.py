@@ -4,11 +4,11 @@
 import re
 import os
 import logging
+import urllib
 import unicodedata
 from datetime import datetime
 import xml.etree.cElementTree as ElementTree
 
-import urllib
 import pymongo
 from pymongo.objectid import ObjectId
 from pymongo import Connection
@@ -275,6 +275,16 @@ class TagManager(object):
         return self.episodes.find_one({u'tvdb_id':key})
     
     
+    
+    def map_show_with_pair(self, pair):
+        if pair is not None:
+            match = numberic_key_string_pair.search(pair)
+            if match is not None:
+                self.map_show(match.group(2), int(match.group(1)))
+            else:
+                self.logger.error(u'Could not parse %s', pair)
+    
+    
     def map_show(self, small_name, tvdb_id):
         show_by_tvdb_id = self.shows.find_one({u'tvdb_id':tvdb_id})
         show_by_small_name = self.shows.find_one({u'small_name':small_name})
@@ -283,7 +293,7 @@ class TagManager(object):
             # This is good, we can do the mapping
             show = {u'small_name':small_name, u'tvdb_id':tvdb_id, u'last_update':None}
             self.shows.save(show)
-            self.logger.info(u'Show %s was mapped to TVDB ID %d', small_name, tvdb_id)
+            self.logger.info(u'Show %s is now mapped to TVDB ID %d', small_name, tvdb_id)
         
         else: # This means at least one exists
             if not(show_by_small_name is not None and show_by_tvdb_id is not None and show_by_tvdb_id[u'_id'] == show_by_small_name[u'_id']):
@@ -292,6 +302,8 @@ class TagManager(object):
             
                 if show_by_tvdb_id is not None:
                     self.logger.error(u'Show %s is already mapped to TVDB ID %d', show_by_tvdb_id[u'small_name'], tvdb_id)
+            elif show_by_small_name is not None and show_by_tvdb_id is not None and show_by_tvdb_id[u'_id'] == show_by_small_name[u'_id']:
+                self.logger.warning(u'Show %s to TVDB ID %d mapping exists', show_by_tvdb_id[u'small_name'], tvdb_id)
         
     
     
@@ -435,7 +447,8 @@ class TagManager(object):
                     for p in posters:
                         _movie[u'posters'].append(p)
                     _movie[u'posters'][0]['selected'] = True
-                    
+            
+            _movie['last_update'] = datetime.utcnow()
             self.movies.save(_movie)
             self.logger.info(u'Creating Movie %s with IMDB ID %s', _movie[u'name'], _movie[u'imdb_id'])
         return _movie
@@ -470,6 +483,7 @@ class TagManager(object):
     
     def _make_person_stub(self, name):
         _person = {u'small_name':name.lower(), u'name':name}
+        _person['last_update'] = datetime.utcnow()
         self.people.save(_person)
         return _person
     
@@ -495,6 +509,7 @@ class TagManager(object):
                     _movie_ref = self._make_movie_ref_from_element(fe)
                     if _movie_ref is not None:
                         _person[u'filmography'].append(_movie_ref)
+            _person['last_update'] = datetime.utcnow()
             self.people.save(_person)
         return _person
     
@@ -594,7 +609,7 @@ class TagManager(object):
                 if is_tag(u'IMDB_ID', item):
                     update_string_property(u'imdb_id', item.text, show)
                 elif is_tag(u'lastupdated', item):
-                    update_int_property(u'last_update', int(item.text), show)
+                    update_int_property(u'tvdb_last_update', int(item.text), show)
                 elif is_tag(u'SeriesName', item):
                     update_string_property(u'name', item.text, show)
                 elif is_tag(u'Overview', item):
@@ -617,7 +632,8 @@ class TagManager(object):
                         _person_ref = self._make_person_ref(job=u'actor', department=u'actors', person_name=actor)
                         if _person_ref is not None:
                             show[u'cast'].append(_person_ref)
-                            
+            
+            show['last_update'] = datetime.utcnow()
             self.shows.save(show)
         return show
     
@@ -674,7 +690,7 @@ class TagManager(object):
                             _person_ref = self._make_person_ref(job=u'actor', department=u'actors', person_name=actor)
                             if _person_ref is not None:
                                 episode[u'cast'].append(_person_ref)
-                                
+                episode['last_update'] = datetime.utcnow()
                 self.episodes.save(episode)
     
     
@@ -785,6 +801,7 @@ def remove_accents(value):
     return u''.join([c for c in nkfd_form if not unicodedata.combining(c)])
 
 
+numberic_key_string_pair = re.compile(u'^([0-9]+):(.+)$', re.UNICODE)
 minimum_person_name_length = db_config['tvdb']['fuzzy']['minimum_person_name_length']
 valid_tmdb_date = re.compile(u'[0-9]{4}-[0-9]{2}-[0-9]{2}', re.UNICODE)
 tvdb_list_seperators = re.compile(ur'\||,', re.UNICODE)
