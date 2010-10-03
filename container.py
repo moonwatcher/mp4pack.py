@@ -512,29 +512,50 @@ class AudioVideoContainer(Container):
                 if dest_path is not None:
                     file_util.set_track_default_values(self.tracks, options)
                     pc = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
-                    selected_related = []
-                    selected_tracks = []
+                    selected = {
+                        'related':{},
+                        'track':{},
+                        'tc for ac3':{}
+                    }
                     
                     if 'pack' in pc:
+                        # locate related files that need to be muxed in
                         if 'related' in pc['pack']:
                             for (path,info) in self.related.iteritems():
                                 for c in pc['pack']['related']:
                                     if all((k in info and info[k] == v) for k,v in c.iteritems()):
-                                        selected_related.append(path)
+                                        if info['kind'] not in selected['related']:
+                                            selected['related'][info['kind']] = []
+                                        selected['related'][info['kind']].append(path)
                                         break
+                        #locate related tracks that need to be muxed in
                         if 'tracks' in pc['pack']:
                             for t in self.tracks:
                                 for c in pc['pack']['tracks']:
                                     if all((k in t and t[k] == v) for k,v in c.iteritems()):
-                                        selected_tracks.append(t)
+                                        if t['type'] not in selected['related']:
+                                            selected['track'][t['type']] = []
+                                        selected['track'][t['type']].append(t)
                                         break
-                                    
+                    
+                    # match a timecode for to each related ac3 file
+                    for r in selected['related']['ac3']:
+                        ac3_info = self.related[r]
+                        tc_path = None
+                        for tc in selected['related']['tc']:
+                            tc_info = copy.deepcopy(self.related[tc])
+                            del tc_info['kind']
+                            if all((k in ac3_info and ac3_info[k] == v) for k,v in tc_info.iteritems()):
+                                tc_path = tc
+                        selected['tc for ac3'][r] = tc_path
+                    
+                    self.logger.debug(selected)
+                    
                     if file_util.varify_if_path_available(dest_path, options.overwrite):
                         command = file_util.initialize_command('mkvmerge')
                         command.extend([u'--output', dest_path, u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
-                        audio_tracks = []
-                        video_tracks = []
-                        for t in selected_tracks:
+                        
+                        for t in selected['track']['audio'] + selected['track']['video']:
                             if 'name' in t:
                                 command.append(u'--track-name')
                                 command.append(u'{0}:{1}'.format(t['number'], t['name']))
@@ -542,33 +563,39 @@ class AudioVideoContainer(Container):
                             if 'language' in t:
                                 command.append(u'--language')
                                 command.append(u'{0}:{1}'.format(t['number'], t['language']))
-                            
-                            if t['type'] == 'audio':
-                                audio_tracks.append(unicode(t['number']))
-                            elif t['type'] == 'video':
-                                video_tracks.append(unicode(t['number']))
-                        
+                                
                         command.append(u'--audio-tracks')
-                        command.append(u','.join(audio_tracks))
+                        command.append(u','.join([ unicode(k['number']) for k in selected['track']['audio'] ]))
                         command.append(u'--video-tracks')
-                        command.append(u','.join(video_tracks))
+                        command.append(u','.join([ unicode(k['number']) for k in selected['track']['video'] ]))
                         command.append(self.file_path)
                         
-                        for r in selected_related:
-                            rinfo = self.related[r]
-                            if rinfo['kind'] == 'ac3':
-                                command.append(u'--language')
-                                command.append(u'0:{0}'.format(rinfo['language']))
-                                command.append(r)
+                        if 'ac3' in selected['related']:
+                            for r in selected['related']['ac3']:
+                                i = self.related[r]
+                                if r in selected['tc for ac3']:
+                                    tc = Timecode(selected['tc for ac3'][r])
+                                    delay = tc.timecodes[0]
+                                    if delay != 0:
+                                        command.append(u'--sync')
+                                        command.append(u'0:{0}'.format(delay))
                                 
-                            if rinfo['kind'] == 'srt':
+                                command.append(u'--language')
+                                command.append(u'0:{0}'.format(i['language']))
+                                command.append(r)
+                        
+                        if 'srt' in selected['related']:
+                            for r in selected['related']['srt']:
+                                i = self.related[r]
                                 command.append(u'--sub-charset')
                                 command.append(u'0:UTF-8')
                                 command.append(u'--language')
-                                command.append(u'0:{0}'.format(rinfo['language']))
+                                command.append(u'0:{0}'.format(i['language']))
                                 command.append(r)
-                            
-                            if rinfo['kind'] == 'txt' and rinfo['profile'] == 'chapter':
+                        
+                        if 'txt' in selected['related']:
+                            for r in selected['related']['txt']:
+                                i = self.related[r]
                                 command.append(u'--chapter-language')
                                 command.append(u'eng')
                                 command.append(u'--chapter-charset')
@@ -1333,7 +1360,7 @@ class Timecode(Text):
             lines = self.read()
             for line in lines:
                 if timecode_line_re.search(line) is not None:
-                    self.timecodes.append(line.strip())
+                    self.timecodes.append(int(line.strip()))
             if not self.timecodes:
                 result = False
         return result

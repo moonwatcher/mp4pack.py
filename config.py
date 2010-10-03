@@ -287,7 +287,8 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
-                            {'kind':'ac3', 'profile':'dump'}
+                            {'kind':'ac3', 'profile':'dump'},
+                            {'kind':'tc', 'profile':'dump'}
                         ),
                         'tracks':(
                             {'type':'video'},

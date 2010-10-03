@@ -9,17 +9,17 @@ Options:
   Actions:
     An action to preform on files found in the search path.
 
-    -i, --info          Show info
-    -c, --copy          Copy into repository
-    -n, --rename        Rename files to standard names
+    -i, --info          Show info.
+    -c, --copy          Copy into repository.
+    -n, --rename        Rename files to standard names.
     -e, --extract       Extract subtitle and chapter and transcode the
-                        extracted streams
-    --tag               Update meta tags
-    --optimize          Optimize file layout
+                        extracted streams.
+    --tag               Update meta tags.
+    --optimize          Optimize file layout.
     -m KIND, --pack=KIND
                         KIND is one of [ mkv ]
     -t KIND, --transcode=KIND
-                        KIND is one of [ m4v, mkv, srt, txt, jpg ]
+                        KIND is one of [ m4v, mkv, srt, txt, jpg, ac3, tc ]
     -u KIND, --update=KIND
                         KIND is one of [ srt, jpg, txt ]
 
@@ -30,7 +30,7 @@ Options:
                         [ default: auto detect ]
     -f REGEX, --filter=REGEX
                         Regex to filter selected file names
-    -w, --overwrite     Overwrite existing files.
+    -w, --overwrite     Overwrite existing files
     -r, --recursive     Recursively process sub directories.
     -v LEVEL, --verbosity=LEVEL
                         Logging verbosity level [ default: info ]
@@ -38,12 +38,13 @@ Options:
                         dumping the commands into a text file and editing
                         before execution.
     -q QUANTIZER, --quality=QUANTIZER
-                        H.264 transcoding Quantizer
+                        H.264 transcoding Quantizer.
     --pixel-width=WIDTH
                         Max output pixel width [ default: set by profile ]
-    --md5               Verify md5 checksum on copy
+    --language=CODE     Languge code used when undefined.
+    --md5               Verify md5 checksum on copy.
 
-  Options that only apply to text subtitles:
+  Options that only apply to text subtitles.:
     --input-rate=RATE   Decoding subtitles frame rate.
     --output-rate=RATE  Encoding subtitles frame rate.
     --time-shift=TIME   Subtitles shift offset in milliseconds.
