@@ -13,15 +13,11 @@ from db import tag_manager
 
 def load_input_files(path, file_filter, recursive):
     known = []
-    unknown = []
     file_paths = list_input_files(path, file_filter, recursive)
     for fp in file_paths:
         mf = load_media_file(fp)
-        if mf is not None:
-            known.append(mf)
-        else:
-            unknown.append(fp)
-    return known, unknown
+        known.append(mf)
+    return known
 
 
 def list_input_files(path, file_filter, recursive, depth=1):
@@ -130,43 +126,49 @@ def preform_operations(files, options):
     
     if options.map_show:
         tag_manager.map_show_with_pair(options.map_show)
+    
+    known = []
+    unknown = []
         
-    if options.info:
-        for f in files:
-            print unicode(f).encode('utf-8')
+    for f in files:
+        f.load()
+        if f and not f.valid():
+            unknown.append(f.file_path)
+            f.unload()
+            f = None
             
-    if options.extract:
-        for f in files:
-            f.extract(options)
+        else:
+            known.append(f)
             
-    if options.copy:
-        for f in files:
-            f.copy(options)
+            if options.info:
+                print unicode(f).encode('utf-8')
+            
+            if options.extract:
+                f.extract(options)
+            
+            if options.copy:
+                f.copy(options)
     
-    if options.rename:
-        for f in files:
-            f.rename(options)
+            if options.rename:
+                f.rename(options)
     
-    if options.tag:
-        for f in files:
-            f.tag(options)
+            if options.tag:
+                f.tag(options)
     
-    if options.optimize:
-        for f in files:
-            f.optimize(options)
+            if options.optimize:
+                f.optimize(options)
+            
+            if options.pack is not None:
+                f.pack(options)
     
+            if options.transcode is not None:
+                f.transcode(options)
     
-    if options.pack is not None:
-        for f in files:
-            f.pack(options)
-    
-    if options.transcode is not None:
-        for f in files:
-            f.transcode(options)
-    
-    if options.update is not None:
-        for f in files:
-            f.update(options)
+            if options.update is not None:
+                f.update(options)
+        
+            f.unload()
+    return known, unknown 
 
 
 def main():
@@ -182,9 +184,9 @@ def main():
     file_filter = load_file_filter(options.file_filter)
     input_path = os.path.abspath(input_path)
     logger.info('Scanning for files in %s', input_path)
-    known, unknown = load_input_files(input_path, file_filter, options.recursive)
+    known = load_input_files(input_path, file_filter, options.recursive)
     
-    preform_operations(known, options)
+    known, unknown = preform_operations(known, options)
     
     if len(known) > 0:
         logger.info(u'%d valid files were found in %s', len(known), input_path)

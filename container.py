@@ -1277,7 +1277,7 @@ class Text(Container):
             encoding = chardet.detect(content)
             self.file_info['Encoding'] = encoding['encoding']
             self.logger.debug(u'%s encoding detected for %s', encoding['encoding'], self.file_path)
-            content = unicode(content, encoding['encoding'])
+            content = unicode(content, encoding['encoding'], errors='ignore')
             lines = content.splitlines()
         return lines
     
@@ -1572,8 +1572,10 @@ class Subtitle(Text):
                     if input_frame_rate is not None and output_frame_rate is not None:
                         factor = input_frame_rate / output_frame_rate
                         self.scale_rate(factor)
-                    
-                Text.transcode(self, options)
+                
+                self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
+                self.write(dest_path)
+                file_util.clean_if_not_exist(dest_path)    
     
     
     def filter(self, sequence_list):
@@ -1904,7 +1906,7 @@ class SubtitleFilter(object):
             result = self.sequence[name]
         elif name in subtitle_config:
             config = subtitle_config[name]
-            self.logger.debug(u'Loading %s filter sequence', name)
+            self.logger.info(u'Loading %s filter sequence', name)
             if config['action'] == 'drop':
                 s = DropFilterSequence(config)
                 s.load()
@@ -1958,8 +1960,8 @@ class FilterSequence(object):
 
 class DropFilterSequence(FilterSequence):
     def __init__(self, config):
-        self.logger = logging.getLogger('mp4pack.filter.drop')
         FilterSequence.__init__(self, config)
+        self.logger = logging.getLogger('mp4pack.filter.drop')
         self.expression = []
     
     
@@ -1968,7 +1970,14 @@ class DropFilterSequence(FilterSequence):
         if 'case' in self.config and self.config['case'] == 'insensitive':
             o = o|re.IGNORECASE
         for e in self.config['expression']:
-            self.expression.append(re.compile(e,o))
+            try:
+                exp = re.compile(e,o)
+            except:
+                self.logger.warning('Failed to load filter %s', e)
+                exp = None
+            
+            if exp:
+                self.expression.append(exp)
     
     
     def filter(self, block):
@@ -1988,12 +1997,16 @@ class DropFilterSequence(FilterSequence):
                         block.add_line(line)
                         
             elif self.config['scope'] == 'block':
+                keep = True
                 for line in block.lines:
                     for e in self.expression:
                         if e.search(line) is not None:
-                            block.clear()
+                            self.logger.debug(u'Found match in %s', line)
+                            keep = False
                             break
-                    if not block.valid(): break
+                    if not keep:
+                        block.clear()
+                        break
                         
             result = block.valid()
         return result
@@ -2002,8 +2015,8 @@ class DropFilterSequence(FilterSequence):
 
 class ReplaceFilterSequence(FilterSequence):
     def __init__(self, config):
-        self.logger = logging.getLogger('mp4pack.filter.replace')
         FilterSequence.__init__(self, config)
+        self.logger = logging.getLogger('mp4pack.filter.replace')
         self.expression = []
     
     
@@ -2027,17 +2040,24 @@ class ReplaceFilterSequence(FilterSequence):
                     original = block.lines
                     block.clear()
                     for line in original:
-                        block.add_line(e[0].sub(e[1], line))
+                        filtered_line = e[0].sub(e[1], line)
+                        block.add_line(filtered_line)
+                        if line != filtered_line:
+                            self.logger.debug(u'Replaced "%s" with "%s"', line, filtered_line)
                     if not block.valid(): break
                         
             elif self.config['scope'] == 'block':
                 all_lines = u'\n'.join(block.lines)
                 block.clear()
                 for e in self.expression:
-                    all_lines = e[0].sub(e[1], all_lines).strip()
-                    if not all_lines: break
-                for line in all_lines.split(u'\n'):
-                    block.add_line(line)
+                    filtered_lines = e[0].sub(e[1], all_lines).strip()
+                    if all_lines != filtered_lines:
+                        self.logger.debug(u'Replaced "%s" with "%s"', all_lines, filtered_lines)
+                    if not filtered_lines: 
+                        break
+                if filtered_lines:
+                    for line in all_lines.split(u'\n'):
+                        block.add_line(line)
                     
             result = block.valid()
         return result
@@ -2089,6 +2109,8 @@ class FileUtil(object):
             result = meta['Name']
         elif 'Name' in info:
             result = info['Name']
+        if result:
+            result = illegal_characters_for_filename.sub(u'', result)
         return result
     
     
@@ -2456,22 +2478,22 @@ def load_media_file(file_path):
     f = None
     file_type = os.path.splitext(file_path)[1].strip('.')
     if file_type in file_util.mp4_kinds:
-        f = Mpeg4(file_path)
+        f = Mpeg4(file_path, autoload=False)
     elif file_type in file_util.matroska_kinds:
-        f = Matroska(file_path)
+        f = Matroska(file_path, autoload=False)
     elif file_type in file_util.subtitles_kinds:
-        f = Subtitle(file_path)
+        f = Subtitle(file_path, autoload=False)
     elif file_type in file_util.chapter_kinds:
-        f = Chapter(file_path)
+        f = Chapter(file_path, autoload=False)
     elif file_type in file_util.image_kinds:
-        f = Artwork(file_path)
+        f = Artwork(file_path, autoload=False)
     elif file_type in file_util.raw_audio_kinds:
-        f = RawAudio(file_path)
+        f = RawAudio(file_path, autoload=False)
     elif file_type in file_util.timecode_kinds:
-        f = Timecode(file_path)
+        f = Timecode(file_path, autoload=False)
     
-    if f and not f.valid():
-        f = None
+    #if f and not f.valid():
+    #    f = None
     
     return f
 
@@ -2571,3 +2593,4 @@ ass_formation_line = re.compile('^Format\s*:\s*(.*)$')
 ass_condense_line_breaks = re.compile(r'(\\N)+')
 ass_event_command_re = re.compile(r'\{\\[^\}]+\}')
 sub_line_begin = re.compile('^{(\d+)}{(\d+)}')
+illegal_characters_for_filename = re.compile(ur'[\\\/?<>:*|^\.]')
