@@ -92,7 +92,7 @@ def load_options():
     
     group = OptionGroup(parser, 'Service', 'Options for initializing the repository.')
     group.add_option('--initialize', dest='initialize', action='store_true', default=False, help='Run only once to initialize the system.')
-    group.add_option('--map-show', metavar="MAP", dest='map_show', help='TV Shows require a mapping between the numeric TVDB ID and a name suitable for file names.')
+    group.add_option('--map-show', metavar="MAP", dest='map_show', help='Map TV Show name to TVDB ID. format: <id>:<name>')
     parser.add_option_group(group)
     
 ##    Subtitle:

@@ -10,8 +10,8 @@ repository_config = {
         'alpha':'/Volumes/alphaville/alpha',
         'beta':'/Volumes/nyc/beta',
         'gama':'/Volumes/cambridge/gama',
-        'delta':'/net/vito/fairfield/delta',
-        'eta':'/net/vito/tlv/eta',
+        'delta':'/net/vito/media/fairfield/delta',
+        'eta':'/net/vito/media/tlv/eta',
         'epsilon':'/Volumes/alphaville/epsilon',
     },
     'Command':{
@@ -271,6 +271,8 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
+                            {'kind':'ac3', 'profile':'dump'},
+                            {'kind':'tc', 'profile':'dump'},
                         ),
                         'tracks':(
                             {'type':'video'},
@@ -292,7 +294,7 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
                             {'kind':'ac3', 'profile':'dump'},
-                            {'kind':'tc', 'profile':'dump'}
+                            {'kind':'tc', 'profile':'dump'},
                         ),
                         'tracks':(
                             {'type':'video'},
@@ -313,6 +315,8 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
+                            {'kind':'ac3', 'profile':'dump'},
+                            {'kind':'tc', 'profile':'dump'}
                         ),
                         'tracks':(
                             {'type':'video'},
@@ -740,7 +744,7 @@ subtitle_config = {
             (r'\[\s+', '['),
             (r'\[[^\]]+\]\s*', ''),
             (r'^[^\]]+\]', ''),
-            (r'\[[^\]]+\$', ''),
+            (r'\[[^\]]+$', ''),
             (r'\([A-Z0-9l\s]+\)', ''),
             (r'\([A-Z0-9l\s]+$', ''),
             (r'^[A-Z0-9l\s]+\)', ''),
@@ -1057,6 +1061,9 @@ base_config = {
         (79488, u'30 rock'),
         (74205, u'band of brothers'),
         (124561, u'world war 2 in high definition'),
+        (81189, u'breaking bad'),
+        (71663, u'the simpsons'),
+        (85040, u'caprica'),
         
     ),
 }

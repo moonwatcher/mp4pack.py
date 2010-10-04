@@ -539,15 +539,16 @@ class AudioVideoContainer(Container):
                                         break
                     
                     # match a timecode for to each related ac3 file
-                    for r in selected['related']['ac3']:
-                        ac3_info = self.related[r]
-                        tc_path = None
-                        for tc in selected['related']['tc']:
-                            tc_info = copy.deepcopy(self.related[tc])
-                            del tc_info['kind']
-                            if all((k in ac3_info and ac3_info[k] == v) for k,v in tc_info.iteritems()):
-                                tc_path = tc
-                        selected['tc for ac3'][r] = tc_path
+                    if 'ac3' in selected['related']:
+                        for r in selected['related']['ac3']:
+                            ac3_info = self.related[r]
+                            tc_path = None
+                            for tc in selected['related']['tc']:
+                                tc_info = copy.deepcopy(self.related[tc])
+                                del tc_info['kind']
+                                if all((k in ac3_info and ac3_info[k] == v) for k,v in tc_info.iteritems()):
+                                    tc_path = tc
+                            selected['tc for ac3'][r] = tc_path
                     
                     self.logger.debug(selected)
                     
