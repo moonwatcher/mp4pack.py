@@ -617,9 +617,10 @@ class TagManager(object):
                 elif is_tag(u'ContentRating', item):
                     update_string_property(u'content_rating', item.text, show)
                 elif is_tag(u'Network', item):
-                    _network = self.find_network(item.text)
-                    update_string_property(u'network_id', _network[u'_id'], show)
-                    update_string_property(u'network', _network[u'name'], show)
+                    if item.text:
+                        _network = self.find_network(item.text)
+                        update_string_property(u'network_id', _network[u'_id'], show)
+                        update_string_property(u'network', _network[u'name'], show)
                 elif is_tag(u'Genre', item):
                     show[u'genre'] = []
                     genre_list = self.split_tvdb_list(item.text)

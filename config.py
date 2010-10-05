@@ -86,8 +86,8 @@ repository_config = {
         'jpa':'Japanese',
     },
     'Media Kind':{
-        'tvshow':{'schema':'^(.+) (s([0-9]+)e([0-9]+))(?: (.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10},
-        'movie':{'schema':'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', 'name':'Movie', 'stik':9},
+        'tvshow':{'schema':ur'^(.+) (s([0-9]+)e([0-9]+))(?:\s*(.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10},
+        'movie':{'schema':ur'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', 'name':'Movie', 'stik':9},
         #'music':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Music', 'stik':1},
         #'audiobook':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2},
     },
@@ -356,10 +356,10 @@ repository_config = {
                         'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt'},
-                                'to': {'height':0.1, 'Name':'Normal'},
+                                'to': {'height':0.1, 'Name':'Normal', 'profile':'original'},
                             },
                             {
-                                'from': {'language':'eng', 'kind':'srt'},
+                                'from': {'language':'eng', 'kind':'srt', 'profile':'original'},
                                 'to': {'height':0.1, 'Name':'Normal'},
                             },
                         ),
@@ -377,11 +377,11 @@ repository_config = {
                         'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.1},
                         'related':(
                             {
-                                'from': {'language':'heb', 'kind':'srt'},
+                                'from': {'language':'heb', 'kind':'srt', 'profile':'clean'},
                                 'to': {'height':0.1, 'Name':'Normal'},
                             },
                             {
-                                'from': {'language':'eng', 'kind':'srt'},
+                                'from': {'language':'eng', 'kind':'srt', 'profile':'clean'},
                                 'to': {'height':0.1, 'Name':'Normal'},
                             },
                         ),
@@ -463,7 +463,17 @@ repository_config = {
                         'constraint':'min'
                     },
                 },
-                
+                'legacy':{
+                    'default':{
+                        'tvshow':{'volume':'alpha'},
+                        'movie':{'volume':'alpha'},
+                    },
+                    'transcode':{
+                        'aspect ratio':'preserve',
+                        'size':1024,
+                        'constraint':'min'
+                    },
+                },
             },
         },
         'png':{

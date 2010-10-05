@@ -16,7 +16,7 @@ def load_input_files(path, file_filter, recursive):
     file_paths = list_input_files(path, file_filter, recursive)
     for fp in file_paths:
         mf = load_media_file(fp)
-        known.append(mf)
+        if mf: known.append(mf)
     return known
 
 
@@ -216,7 +216,7 @@ log_levels = {
     'critical': logging.CRITICAL
 }
 
-invisable_file_path = re.compile(r'^\..*$')
+invisable_file_path = re.compile(ur'^\.', re.UNICODE)
 
 if __name__ == '__main__':
     main()

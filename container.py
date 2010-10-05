@@ -1413,6 +1413,8 @@ class Subtitle(Text):
             self.subtitle_blocks = []
             self.statistics = {}
             result = Subtitle.decode(self)
+        else:
+            self.logger.warning('Could not parse text file %s', self.file_path)
         if not result:
             self.logger.warning('Could not parse subtitle file %s', self.file_path)
             Subtitle.unload(self)
@@ -2344,7 +2346,7 @@ class FileUtil(object):
         if tracks:
             for track in tracks:
                 if track:
-                    if 'type' in track and track['type'] in ('audio', 'subtitles'):
+                    if 'type' in track and track['type'] in ('audio', 'subtitles', 'video'):
                         if 'language' not in track or track['language'] == 'und':
                             track['language'] = options.language
     
