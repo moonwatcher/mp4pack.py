@@ -657,7 +657,7 @@ class AudioVideoContainer(Container):
                                     command.append(u','.join(v))
                         command.extend([u'--input', self.file_path, u'--output', dest_path])
                         message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
-                        file_util.execute(command, message, options.debug, pipeout=False, pipeerr=True, logger=self.logger)
+                        file_util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                         file_util.clean_if_not_exist(dest_path)
         return
     
@@ -1386,7 +1386,10 @@ class Timecode(Text):
     
     
     def encode(self):
-        return self.timecodes
+        timecode_strings = []
+        for tc in self.timecodes:
+            timecode_strings.append(unicode(tc))
+        return timecode_strings
     
     
 
