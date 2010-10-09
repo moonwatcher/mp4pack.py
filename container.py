@@ -413,6 +413,7 @@ class Container(object):
     
 
 
+
 class AudioVideoContainer(Container):
     def __init__(self, file_path, autoload=True):
         Container.__init__(self, file_path, autoload)
@@ -420,6 +421,7 @@ class AudioVideoContainer(Container):
         self.tracks = None
         self.chapter_markers = None
         self.tags = None
+        self.hbtracks = None
     
     
     def valid(self):
@@ -432,6 +434,16 @@ class AudioVideoContainer(Container):
             self.tracks = []
             self.chapter_markers = []
             self.tags = {}
+            self.hbtracks = []
+            
+            #command = file_util.initialize_command('handbrake')
+            #command.expand(['--scan', '--input', self.file_path])
+            #output, error = file_util.execute(command, None)
+            #hb_scan_report = unicode(error, 'utf-8').splitlines()
+            #if hb_scan_report:
+                
+            
+            
         else:
             AudioVideoContainer.unload(self)
         return result
@@ -459,7 +471,8 @@ class AudioVideoContainer(Container):
                     track['kind'] = file_util.detect_audio_codec_kind(track['codec'])
                 elif track['type'] == 'subtitles':
                     track['kind'] = file_util.detect_subtitle_codec_kind(track['codec'])
-                
+            
+            track['index'] = len(tracks) + 1
             self.tracks.append(track)
     
     
@@ -642,7 +655,7 @@ class AudioVideoContainer(Container):
                                 for c in s:
                                     if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
                                         found_audio = True
-                                        audio_options['--audio'].append(unicode(t['number']))
+                                        audio_options['--audio'].append(unicode(t['index']))
                                         for (k,v) in c['to'].iteritems():
                                             if k not in audio_options: audio_options[k] = []
                                             audio_options[k].append(unicode(v))
@@ -2559,6 +2572,10 @@ sentence_end = re.compile(ur'[.!?]')
 word_end = re.compile(ur'\s')
 
 escaped_subler_tag_characters = set(('{', '}', ':'))
+
+hb_scan_video_stream_re = re.compile('Stream #[0-9]+\.([0-9]+)\(([a-z]+)\): Video: ([^,]), ([^,]), ([0-9]+)x([0-9]+), PAR ([0-9]+):([0-9]+), DAR ([0-9]+):([0-9]+), ([0-9\.]+) fps,.*')
+hb_scan_audio_stream_re = re.compile('Stream #[0-9]+\.([0-9]+)\(([a-z]+)\): Audio: ([^,]), ([0-9]+) Hz, ([0-9]+) channels, PAR ([0-9]+):([0-9]+), DAR ([0-9]+):([0-9]+), ([0-9\.]+) fps,.*')
+hb_scan_subtitle_stream_re = re.compile('Stream #[0-9]+\.([0-9]+)\(([a-z]+)\): Video: ([^,]), ([^,]), ([0-9]+)x([0-9]+), PAR ([0-9]+):([0-9]+), DAR ([0-9]+):([0-9]+), ([0-9\.]+) fps,.*')
 
 ogg_chapter_timestamp_re = re.compile('CHAPTER([0-9]{,2})=([0-9]{,2}:[0-9]{,2}:[0-9]{,2}\.[0-9]+)')
 ogg_chapter_name_re = re.compile('CHAPTER([0-9]{,2})NAME=(.*)', re.UNICODE)
