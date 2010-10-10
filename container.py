@@ -472,7 +472,7 @@ class AudioVideoContainer(Container):
                 elif track['type'] == 'subtitles':
                     track['kind'] = file_util.detect_subtitle_codec_kind(track['codec'])
             
-            track['index'] = len(tracks) + 1
+            track['index'] = len(self.tracks)
             self.tracks.append(track)
     
     
@@ -2169,16 +2169,13 @@ class FileUtil(object):
                         result = os.path.join(repository_config['Volume'][info['volume']], info['Media Kind'], info['kind'], info['profile'])
                         if info['Media Kind'] == 'tvshow' and 'show_small_name' in info and 'TV Season' in info:
                             result = os.path.join(result, info['show_small_name'], str(info['TV Season']))
-                            
-                        if info['kind'] in self.subtitles_kinds and 'language' in info and info['language'] in repository_config['Language']:
-                                result = os.path.join(result, info['language'])
                         
-                        if info['kind'] in self.raw_audio_kinds and 'language' in info and info['language'] in repository_config['Language']:
+                        if ( info['kind'] in self.subtitles_kinds or info['kind'] in self.raw_audio_kinds or info['kind'] in self.timecode_kinds ):
+                            if 'language' in info and info['language'] in repository_config['Language']:
                                 result = os.path.join(result, info['language'])
-                        
-                        if info['kind'] in self.timecode_kinds and 'language' in info and info['language'] in repository_config['Language']:
-                                result = os.path.join(result, info['language'])
-                        
+                            else:
+                                valid = False
+                                self.logger.warning(u'Unknown language for %s', unicode(info))
                     else:
                         valid = False
                         self.logger.warning(u'Invalid profile for %s', unicode(info))

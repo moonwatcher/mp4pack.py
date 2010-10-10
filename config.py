@@ -107,7 +107,7 @@ repository_config = {
         'cat':'Catalan',
         'cha':'Chamorro',
         'che':'Chechen',
-        'zho':'Chinese',
+        'chi':'Chinese',
         'chu':'Church Slavic',
         'chv':'Chuvash',
         'cor':'Cornish',
@@ -433,7 +433,7 @@ repository_config = {
                 'sd':{
                     'default':{
                         'tvshow':{'volume':'delta'},
-                        'movie':{'volume':'delta'},
+                        'movie':{'volume':'eta'},
                     },
                     'pack':{
                         'related':(
@@ -455,7 +455,7 @@ repository_config = {
                 '720':{
                     'default':{
                         'tvshow':{'volume':'delta'},
-                        'movie':{'volume':'delta'},
+                        'movie':{'volume':'eta'},
                     },
                     'pack':{
                         'related':(
@@ -477,7 +477,7 @@ repository_config = {
                 '1080':{
                     'default':{
                         'tvshow':{'volume':'delta'},
-                        'movie':{'volume':'delta'},
+                        'movie':{'volume':'eta'},
                     },
                     'pack':{
                         'related':(
@@ -543,15 +543,15 @@ repository_config = {
                         'filter':('noise', 'typo', 'leftover'),
                     },
                     'update':{
-                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.1},
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.15},
                         'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.1, 'Name':'Normal'},
+                                'to': {'height':0.15, 'Name':'Normal'},
                             },
                             {
                                 'from': {'language':'eng', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.1, 'Name':'Normal'},
+                                'to': {'height':0.15, 'Name':'Normal'},
                             },
                         ),
                     },
@@ -676,7 +676,7 @@ repository_config = {
                     },
                     'transcode':{
                         'dcadec':{ '-o':'wavall', '-g':'32'},
-                        'aften':{ '-b':'448' }
+                        'aften':{ '-b':'640' }
                     }
                 },
             },
@@ -821,12 +821,14 @@ subtitle_config = {
             ur'\bLAKOTA\b',
             ur'\bnzigi\b'
             ur'\bqwer90\b',
+            ur'roni_eliav',
             ur':סנכרון',
             ur':תרגום',
             ur':שיפוץ',
             ur':לפרטים',
             ur'סונכרן',
             ur'תורגם על ידי',
+            ur'תורגם חלקית',
             ur'סנכרן לגרסה זו',
             ur'תורגם ע"י',
             ur'תורגם משמיעה',
@@ -904,7 +906,7 @@ subtitle_config = {
             ur'\bמצוות פושל\b',
             ur'\bassem נקרע ע"י\b',
             ur'\bKawa: סנכרון\b',
-            ur'אוהבת לנצח, שרון'
+            ur'אוהבת לנצח, שרון',
         ),
     },
     'typo':{
