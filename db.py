@@ -13,7 +13,7 @@ import pymongo
 from pymongo.objectid import ObjectId
 from pymongo import Connection
 
-from config import db_config
+from config import repository_config
 
 
 class ResourceHandler(object):
@@ -25,7 +25,7 @@ class ResourceHandler(object):
     
     
     def local(self):
-        return url_to_cache.sub(db_config['cache'], self.remote_url)
+        return url_to_cache.sub(repository_config['Database']['cache'], self.remote_url)
     
     
     def cache(self):
@@ -40,7 +40,7 @@ class ResourceHandler(object):
             except IOError:
                 result = False
                 self.clean()
-                self.logger.error(u'Failed to retrieve %s', self.remote_url)
+                self.logger.warning(u'Failed to retrieve %s', self.remote_url)
         return result
     
     
@@ -52,7 +52,7 @@ class ResourceHandler(object):
                 value = urlhandle.read()
         except IOError:
             value = None
-            self.logger.error(u'Failed to read %s', self.local_path)
+            self.logger.warning(u'Failed to read %s', self.local_path)
         return value
     
     
@@ -121,7 +121,7 @@ class XmlHandler(ResourceHandler):
             except SyntaxError:
                 element = None
                 self.clean()
-                self.logger.error(u'Failed to load xml document %s', self.local_path)
+                self.logger.warning(u'Failed to load xml document %s', self.local_path)
         return element
     
 
@@ -129,12 +129,12 @@ class XmlHandler(ResourceHandler):
 class TmdbJsonHandler(JsonHandler):
     def __init__(self, url):
         JsonHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.json.tmdb')
+        self.logger = logging.getLogger('mp4pack.tmdb')
     
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(db_config['tmdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(repository_config['Database']['tmdb']['apikey']), u'')
         return result
     
     
@@ -152,12 +152,12 @@ class TmdbJsonHandler(JsonHandler):
 class TvdbXmlHandler(XmlHandler):
     def __init__(self, url):
         XmlHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.xml.tvdb')
+        self.logger = logging.getLogger('mp4pack.tvdb')
     
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(db_config['tvdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(repository_config['Database']['tvdb']['apikey']), u'')
         result = result.replace(u'/all', u'')
         return result
     
@@ -166,8 +166,8 @@ class TvdbXmlHandler(XmlHandler):
 
 class TvdbImageHandler(ImageHandler):
     def __init__(self, url):
-        ImageHandler.__init__(self, db_config['tvdb']['urls']['Banner.getImage'].format(url))
-        self.logger = logging.getLogger('mp4pack.image.tvdb')
+        ImageHandler.__init__(self, repository_config['Database']['tvdb']['urls']['Banner.getImage'].format(url))
+        self.logger = logging.getLogger('mp4pack.image')
     
     
 
@@ -176,8 +176,8 @@ class TvdbImageHandler(ImageHandler):
 class TagManager(object):
     def __init__(self):
         self.logger = logging.getLogger('mp4pack.tag')
-        self.connection = Connection()
-        self.db = self.connection[db_config['db']['name']]
+        self.connection = Connection(repository_config['Database']['uri'])
+        self.db = self.connection[repository_config['Database']['name']]
         self.genre_map = None
         self.genres = self.db.genres
         self.departments = self.db.departments
@@ -410,7 +410,7 @@ class TagManager(object):
     
     def _update_tmdb_movie(self, tmdb_id):
         _movie = self.movies.find_one({u'tmdb_id':tmdb_id})
-        url = db_config['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
+        url = repository_config['Database']['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element is not None:
@@ -456,7 +456,7 @@ class TagManager(object):
     
     def _find_tmdb_id_by_imdb_id(self, imdb_id):
         _tmdb_id = None
-        url = db_config['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
+        url = repository_config['Database']['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element is not None:
@@ -490,7 +490,7 @@ class TagManager(object):
     
     def _update_tmdb_person(self, tmdb_id):
         _person = self.people.find_one({u'tmdb_id':tmdb_id})
-        url = db_config['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
+        url = repository_config['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element is not None:
@@ -517,7 +517,7 @@ class TagManager(object):
     def _find_tmdb_person_id_by_name(self, name):
         result = None
         n = collapse_whitespace.sub(u' ', name).lower()
-        url = db_config['tmdb']['urls']['Person.search'].format(format_tmdb_query(n))
+        url = repository_config['Database']['tmdb']['urls']['Person.search'].format(format_tmdb_query(n))
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element is not None:
@@ -591,7 +591,7 @@ class TagManager(object):
     def _update_tvdb_show_tree(self, tvdb_id):
         show = self.shows.find_one({u'tvdb_id':tvdb_id})
         if show is not None:
-            url = db_config['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
+            url = repository_config['Database']['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
             element = TvdbXmlHandler(url).element()
             show = self._update_tvdb_show(show, element)
             self._update_tvdb_episodes(show, element)
@@ -803,7 +803,7 @@ def remove_accents(value):
 
 
 numberic_key_string_pair = re.compile(u'^([0-9]+):(.+)$', re.UNICODE)
-minimum_person_name_length = db_config['tvdb']['fuzzy']['minimum_person_name_length']
+minimum_person_name_length = repository_config['Database']['tvdb']['fuzzy']['minimum_person_name_length']
 valid_tmdb_date = re.compile(u'[0-9]{4}-[0-9]{2}-[0-9]{2}', re.UNICODE)
 tvdb_list_seperators = re.compile(ur'\||,', re.UNICODE)
 strip_space_around_seperator = re.compile(ur'\s*\|\s*', re.UNICODE)

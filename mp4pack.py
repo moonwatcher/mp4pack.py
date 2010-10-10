@@ -11,6 +11,24 @@ from container import load_media_file
 from config import repository_config
 from db import tag_manager
 
+def sanity_check(logger):
+    result = True
+    command_config = repository_config['Command']
+    
+    from subprocess import Popen, PIPE
+    for c in command_config:
+        command = ['which', command_config[c]['binary']]
+        proc = Popen(command, stdout=PIPE, stderr=PIPE)
+        report = proc.communicate()
+        if report[0]:
+            command_config[c]['path'] = report[0].splitlines()[0]
+        else:
+            result = False
+            command_config[c]['path'] = None
+            logger.error(u'Command %s could not be located. Is it installed?', command_config[c]['binary'])
+    return result
+
+
 def load_input_files(path, file_filter, recursive):
     known = []
     file_paths = list_input_files(path, file_filter, recursive)
@@ -50,7 +68,6 @@ def load_options():
     profiles = []
     for k in rc['Kind'].keys():
         profiles += rc['Kind'][k]['Profile'].keys()
-    
     profiles = tuple(set(profiles))
     
     parser = OptionParser('%prog [options] [file or directory. default: . ]')
@@ -60,14 +77,11 @@ def load_options():
     group.add_option('-c', '--copy', dest='copy', action='store_true', default=False, help='Copy into repository.')
     group.add_option('-n', '--rename', dest='rename', action='store_true', default=False, help='Rename files to standard names.')
     group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract subtitle and chapter and transcode the extracted streams.')
-    
     group.add_option('--tag', dest='tag', action='store_true', default=False, help='Update meta tags.')
     group.add_option('--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout.')
-    
-    group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['pack'])))
-    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['transcode'])))
-    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['update'])))
-    
+    group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['pack']['kind'])))
+    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['transcode']['kind'])))
+    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['update']['kind'])))
     parser.add_option_group(group)
         
     group = OptionGroup(parser, 'Modifiers')
@@ -95,29 +109,11 @@ def load_options():
     group.add_option('--map-show', metavar="MAP", dest='map_show', help='Map TV Show name to TVDB ID. format: <id>:<name>')
     parser.add_option_group(group)
     
-##    Subtitle:
-##    	transcode srt: encode a new subtitle file @ profile
-        
-##    Matroska:
-##    	pack mkv: mux to matroska @ profile
-##    	transcode m4v: transcode to m4v @ profile
-##    	transcode mkv: transcode to mkv @ profile
-##    	extract: extract chapters and srt and ass subtitles
-        
-##    Mpeg4:
-##    	pack mkv: mux to matroska @ profile
-##    	transcode m4v: transcode to m4v @ profile
-##    	transcode mkv: transcode to mkv @ profile
-##    	update srt: remux subtitles @ profile
-##    	update jpg: update artwork
-##    	update txt: update chapters
-##    	extract: extract chapters
+    options, args = parser.parse_args()
     
-##   Artwork
-##   transcode jpg: transcode to jpg @ profile
-##   transcode png: transcode to png @ profile
+    o = rc['Options'] = options
     
-    return parser.parse_args()
+    return options, args
 
 
 def preform_operations(files, options):
@@ -176,36 +172,36 @@ def main():
     options, args = load_options()
     logging.basicConfig(level=log_levels[options.verbosity])
     logger = logging.getLogger('mp4pack')
-    input_path = '.'
-    
-    if len(args) > 0:
-        input_path = args[0]
-    
-    file_filter = load_file_filter(options.file_filter)
-    input_path = os.path.abspath(input_path)
-    logger.info('Scanning for files in %s', input_path)
-    known = load_input_files(input_path, file_filter, options.recursive)
-    
-    known, unknown = preform_operations(known, options)
-    
-    if len(known) > 0:
-        logger.info(u'%d valid files were found in %s', len(known), input_path)
-        for p in known:
-            logger.debug(u'Found valid %s', p.file_path)
-        
-    if len(unknown) > 0:
-        logger.warning(u'%d invalid files were found in %s', len(unknown), input_path)
-        for p in unknown:
-            logger.info(u'Found invalid %s', p)
-    
-    
     indent = repository_config['Display']['indent']
     margin = repository_config['Display']['margin']
-    for idx, arg in enumerate(args):
-        logger.debug('Positional %d: %s', idx, arg)
-        
-    for k, v in options.__dict__.iteritems():
-        logger.debug('Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
+    
+    if sanity_check(logger):
+        input_path = '.'
+        if len(args) > 0: input_path = args[0]
+            
+        file_filter = load_file_filter(options.file_filter)
+        input_path = os.path.abspath(input_path)
+        logger.info('Scanning for files in %s', input_path)
+        known = load_input_files(input_path, file_filter, options.recursive)
+        known, unknown = preform_operations(known, options)
+        if len(known) > 0:
+            logger.info(u'%d valid files were found in %s', len(known), input_path)
+            for p in known:
+                logger.debug(u'Found valid %s', p.file_path)
+                
+        if len(unknown) > 0:
+            logger.warning(u'%d invalid files were found in %s', len(unknown), input_path)
+            for p in unknown:
+                logger.info(u'Found invalid %s', p)
+                
+        for idx, arg in enumerate(args):
+            logger.debug('Positional %d: %s', idx, arg)
+            
+        for k,v in options.__dict__.iteritems():
+            logger.debug('Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
+    else:
+        for k,v in repository_config['Command'].iteritems():
+            logger.info('Command {0:-<{2}}: {1}'.format(k, v['path'], indent - 2 - margin))
 
 
 log_levels = {

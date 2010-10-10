@@ -6,53 +6,78 @@ tvdb_apikey = u'7B3B400B0146EA83'
 cache_path = u'/net/multivac/Volumes/alphaville/cache/'
 
 repository_config = {
+    'Options':None,
+    'Database':{
+        'cache':cache_path,
+        'uri':'mongodb://mp4pack:poohbear@multivac.lan/mp4pack',
+        'name':'mp4pack',
+        'tmdb':{
+            'apikey':tmdb_apikey,
+            'urls':{
+                'Movie.getInfo':u'http://api.themoviedb.org/2.1/Movie.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Movie.imdbLookup':u'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Person.getInfo':u'http://api.themoviedb.org/2.1/Person.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Person.search':u'http://api.themoviedb.org/2.1/Person.search/en/json/{0}/{{0}}'.format(tmdb_apikey),
+            },
+        },
+        'tvdb':{
+            'apikey':tvdb_apikey,
+            'fuzzy':{
+                'minimum_person_name_length':3,
+            },
+            'urls':{
+                'Show.getInfo':u'http://www.thetvdb.com/api/{0}/series/{{0}}/all/en.xml'.format(tvdb_apikey),
+                'Banner.getImage':u'http://www.thetvdb.com/banners/{0}'
+            },
+        },
+    },
     'Volume':{
-        'alpha':'/Volumes/alphaville/alpha',
-        'beta':'/Volumes/nyc/beta',
-        'gama':'/Volumes/cambridge/gama',
-        'delta':'/net/vito/media/fairfield/delta',
-        'eta':'/net/vito/media/tlv/eta',
-        'epsilon':'/Volumes/alphaville/epsilon',
+        'alpha':'/pool/alpha',
+        'beta':'/pool/beta',
+        'gama':'/pool/gama',
+        'delta':'/pool/delta',
+        'eta':'/pool/eta',
+        'epsilon':'/pool/epsilon',
     },
     'Command':{
         'rsync':{
-            'base':[u'rsync']
+            'binary':u'rsync',
         },
         'mv':{
-            'base':[u'mv']
+            'binary':u'mv',
         },
         'handbrake':{
-            'base':[u'HandbrakeCLI']
+            'binary':u'HandbrakeCLI',
         },
         'subler':{
-            'base':[u'SublerCLI']
+            'binary':u'SublerCLI',
         },
         'mkvmerge':{
-            'base':[u'mkvmerge']
+            'binary':u'mkvmerge',
         },
         'mkvinfo':{
-            'base':[u'mkvinfo']
+            'binary':u'mkvinfo',
         },
         'mkvextract':{
-            'base':[u'mkvextract']
+            'binary':u'mkvextract',
         },
         'mp4info':{
-            'base':[u'mp4info']
+            'binary':u'mp4info',
         },
         'mp4chaps':{
-            'base':[u'mp4chaps']
+            'binary':u'mp4chaps',
         },
         'mp4file':{
-            'base':[u'mp4file']
+            'binary':u'mp4file',
         },
         'mp4art':{
-            'base':[u'mp4art']
+            'binary':u'mp4art',
         },
         'aften':{
-            'base':[u'aften']
+            'binary':u'aften',
         },
         'dcadec':{
-            'base':[u'dcadec']
+            'binary':u'dcadec',
         },
     },
     'Display':{
@@ -61,9 +86,36 @@ repository_config = {
         'margin':2,
     },
     'Action':{
-        'pack': ('mkv',),
-        'transcode':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'ac3', 'tc'),
-        'update':('srt','jpg', 'txt'),
+        'info':{
+            'depend':('mkvinfo', 'mp4info', 'mp4chaps',),
+        },
+        'copy':{
+            'depend':('rsync',),
+        },
+        'rename':{
+            'depend':('mv',),
+        },
+        'extract':{
+            'depend':('mkvinfo', 'mkvextract',),
+        },
+        'tag':{
+            'depend':('subler',),
+        },
+        'optimize':{
+            'depend':('mp4file',),
+        },
+        'pack':{
+            'depend':('mkvmerge',),
+            'kind':('mkv',),
+        },
+        'transcode':{
+            'depend':('handbrake',),
+            'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'ac3', 'tc'),
+        },
+        'update':{
+            'depend':('subler',),
+            'kind':('srt','jpg', 'txt'),
+        },
     },
     'Codec':{
         'Audio':{
@@ -719,6 +771,67 @@ repository_config = {
             },
         },
     },
+    'Tag':(
+        # Tag name map
+        # Schema: canonic name, subler name, mp4info name
+        ('Track #', 'Track #', 'Track'),
+        ('Disk #', 'Disk #', 'Disk'),
+        ('Album', 'Album', 'Album'),
+        ('Album Artist', 'Album Artist', 'Album Artist'),
+        ('Artist', 'Artist', 'Artist'),
+        ('ArtistID', None, 'Artist ID'),
+        ('Tempo', 'Tempo', 'BPM'),
+        ('Cast', 'Cast', None),
+        ('Codirector', 'Codirector', None),
+        ('Category', None, 'Category'),
+        ('Comments', 'Comments', 'Comments'),
+        ('Composer', 'Composer', 'Composer'),
+        ('ComposerID', None, 'Composer ID'),
+        ('contentID', 'contentID', 'Content ID'),
+        ('Content Rating', 'Content Rating', 'Content Rating'),
+        ('Copyright', 'Copyright', 'Copyright'),
+        ('Artwork Pieces', None, 'Cover Art pieces'),
+        ('Director', 'Director', None),
+        ('Encoded By', 'Encoded By', 'Encoded by'),
+        ('Encoding Tool', 'Encoding Tool', 'Encoded with'),
+        ('Genre', 'Genre', 'Genre'),
+        ('GenreID', None, 'Genre ID'),
+        ('GenreType', None, 'GenreType'),
+        ('Grouping', 'Grouping', 'Grouping'),
+        ('HD Video', 'HD Video', 'HD Video'),
+        ('Keywords', None, 'Keywords'),
+        ('Long Description', 'Long Description', 'Long Description'),
+        ('Lyrics', 'Lyrics', 'Lyrics'),
+        ('Media Kind', 'Media Kind', 'Media Type'),
+        ('Name', 'Name', 'Name'),
+        ('Compilation', None, 'Part of Compilation'),
+        ('Gapless', 'Gapless', 'Part of Gapless Album'),
+        ('PlaylistID', None, 'Playlist ID'),
+        ('Podcast', None, 'Podcast'),
+        ('Producers', 'Producers', None),
+        ('Purchase Date', 'Purchase Date', 'Purchase Date'),
+        ('Rating', 'Rating', None),
+        ('Rating Annotation', 'Rating Annotation', None),
+        ('Release Date', 'Release Date', 'Release Date'),
+        ('Screenwriters', 'Screenwriters', None),
+        ('Description', 'Description', 'Short Description'),
+        ('Sort Album', None, 'Sort Album'),
+        ('Sort Album Artist', None, 'Sort Album Artist'),
+        ('Sort Artist', None, 'Sort Artist'),
+        ('Sort Composer', None, 'Sort Composer'),
+        ('Sort Name', None, 'Sort Name'),
+        ('Sort TV Show', None, 'Sort TV Show'),
+        ('Studio', 'Studio', None),
+        ('TV Episode #', 'TV Episode #', 'TV Episode'),
+        ('TV Episode ID', 'TV Episode ID', 'TV Episode Number'),
+        ('TV Network', 'TV Network', 'TV Network'),
+        ('TV Season', 'TV Season', 'TV Season'),
+        ('TV Show', 'TV Show', 'TV Show'),
+        ('iTunes Account', 'iTunes Account', 'iTunes Account'),
+        ('iTunes Account Type', None, 'iTunes Account Type'),
+        ('iTunes Store Country', None, 'iTunes Store Country'),
+        ('XID', 'XID', 'xid'),
+    ),
 }
 
 subtitle_config = {
@@ -1013,93 +1126,6 @@ subtitle_config = {
     },
 }
 
-db_config = {
-    'cache':cache_path,
-    'db':{
-        'name':'mp4pack'
-    },
-    'tmdb':{
-        'apikey':tmdb_apikey,
-        'urls':{
-            'Movie.getInfo':u'http://api.themoviedb.org/2.1/Movie.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
-            'Movie.imdbLookup':u'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/{0}/{{0}}'.format(tmdb_apikey),
-            'Person.getInfo':u'http://api.themoviedb.org/2.1/Person.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
-            'Person.search':u'http://api.themoviedb.org/2.1/Person.search/en/json/{0}/{{0}}'.format(tmdb_apikey),
-        },
-    },
-    'tvdb':{
-        'apikey':tvdb_apikey,
-        'fuzzy':{
-            'minimum_person_name_length':3,
-        },
-        'urls':{
-            'Show.getInfo':u'http://www.thetvdb.com/api/{0}/series/{{0}}/all/en.xml'.format(tvdb_apikey),
-            'Banner.getImage':u'http://www.thetvdb.com/banners/{0}'
-        },
-    },
-    'tag':(
-        # Tag name map
-        # Schema: canonic name, subler name, mp4info name
-        ('Track #', 'Track #', 'Track'),
-        ('Disk #', 'Disk #', 'Disk'),
-        ('Album', 'Album', 'Album'),
-        ('Album Artist', 'Album Artist', 'Album Artist'),
-        ('Artist', 'Artist', 'Artist'),
-        ('ArtistID', None, 'Artist ID'),
-        ('Tempo', 'Tempo', 'BPM'),
-        ('Cast', 'Cast', None),
-        ('Codirector', 'Codirector', None),
-        ('Category', None, 'Category'),
-        ('Comments', 'Comments', 'Comments'),
-        ('Composer', 'Composer', 'Composer'),
-        ('ComposerID', None, 'Composer ID'),
-        ('contentID', 'contentID', 'Content ID'),
-        ('Content Rating', 'Content Rating', 'Content Rating'),
-        ('Copyright', 'Copyright', 'Copyright'),
-        ('Artwork Pieces', None, 'Cover Art pieces'),
-        ('Director', 'Director', None),
-        ('Encoded By', 'Encoded By', 'Encoded by'),
-        ('Encoding Tool', 'Encoding Tool', 'Encoded with'),
-        ('Genre', 'Genre', 'Genre'),
-        ('GenreID', None, 'Genre ID'),
-        ('GenreType', None, 'GenreType'),
-        ('Grouping', 'Grouping', 'Grouping'),
-        ('HD Video', 'HD Video', 'HD Video'),
-        ('Keywords', None, 'Keywords'),
-        ('Long Description', 'Long Description', 'Long Description'),
-        ('Lyrics', 'Lyrics', 'Lyrics'),
-        ('Media Kind', 'Media Kind', 'Media Type'),
-        ('Name', 'Name', 'Name'),
-        ('Compilation', None, 'Part of Compilation'),
-        ('Gapless', 'Gapless', 'Part of Gapless Album'),
-        ('PlaylistID', None, 'Playlist ID'),
-        ('Podcast', None, 'Podcast'),
-        ('Producers', 'Producers', None),
-        ('Purchase Date', 'Purchase Date', 'Purchase Date'),
-        ('Rating', 'Rating', None),
-        ('Rating Annotation', 'Rating Annotation', None),
-        ('Release Date', 'Release Date', 'Release Date'),
-        ('Screenwriters', 'Screenwriters', None),
-        ('Description', 'Description', 'Short Description'),
-        ('Sort Album', None, 'Sort Album'),
-        ('Sort Album Artist', None, 'Sort Album Artist'),
-        ('Sort Artist', None, 'Sort Artist'),
-        ('Sort Composer', None, 'Sort Composer'),
-        ('Sort Name', None, 'Sort Name'),
-        ('Sort TV Show', None, 'Sort TV Show'),
-        ('Studio', 'Studio', None),
-        ('TV Episode #', 'TV Episode #', 'TV Episode'),
-        ('TV Episode ID', 'TV Episode ID', 'TV Episode Number'),
-        ('TV Network', 'TV Network', 'TV Network'),
-        ('TV Season', 'TV Season', 'TV Season'),
-        ('TV Show', 'TV Show', 'TV Show'),
-        ('iTunes Account', 'iTunes Account', 'iTunes Account'),
-        ('iTunes Account Type', None, 'iTunes Account Type'),
-        ('iTunes Store Country', None, 'iTunes Store Country'),
-        ('XID', 'XID', 'xid'),
-    ),
-}
-
 genre_map = (
     # Genre map
     # allows mapping different names for genres to another
@@ -1190,7 +1216,6 @@ base_config = {
         {'_id':'musical', 'itmf':79, 'name':'Musical'},
         {'_id':'rock and roll', 'itmf':80, 'name':'Rock and Roll'},
     ),
-    
     'tvshow':(
         # TV Show map
         # The initial TVDB TV Show id map
