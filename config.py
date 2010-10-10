@@ -363,23 +363,26 @@ repository_config = {
                             (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
-                                }, 
-                                {
-                                    'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
                                 },
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
+                                }, 
                             ),
                             (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
+                            ),
+                            (
                                 {
                                     'from': {'kind':'mp3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
+                            
                         ),
                     },
                 },
@@ -401,12 +404,12 @@ repository_config = {
                             (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
-                                }, 
-                                {
-                                    'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
                                 },
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
+                                }, 
                             ),
                             (
                                 {
@@ -476,18 +479,20 @@ repository_config = {
                             (
                                 {
                                     'from': {'kind':'ac3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
-                                }, 
-                                {
-                                    'from': {'kind':'ac3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'},
                                 },
+                                {
+                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
+                                }, 
                             ),
                             (
                                 {
                                     'from': {'kind':'aac', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
+                            ),
+                            (
                                 {
                                     'from': {'kind':'mp3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
