@@ -118,15 +118,27 @@ repository_config = {
         },
     },
     'Codec':{
-        'Audio':{
-            'ac3':'ac-3|AC3',
-            'aac':'AAC',
-            'dts':'DTS',
-            'mp3':'MPEG/L3',
+        'audio':{
+            'ac3':{
+                'schema':ur'ac-3|AC3',
+            },
+            'aac':{
+                'schema':ur'AAC',
+            },
+            'dts':{
+                'schema':ur'DTS',
+            },
+            'mp3':{
+                'schema':ur'MPEG/L3',
+            },
         },
-        'Subtitle':{
-            'srt':'S_TEXT/UTF8',
-            'ass':'S_TEXT/ASS',
+        'subtitles':{
+            'srt':{
+                'schema':ur'S_TEXT/UTF8',
+            },
+            'ass':{
+                'schema':ur'S_TEXT/ASS',
+            },
         },
     },
     'Language':{
@@ -307,10 +319,26 @@ repository_config = {
         'zul':'Zulu',
     },
     'Media Kind':{
-        'tvshow':{'schema':ur'^(.+) (s([0-9]+)e([0-9]+))(?:\s*(.*))?\.([^\.]+)$', 'name':'TV Show', 'stik':10},
-        'movie':{'schema':ur'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', 'name':'Movie', 'stik':9},
-        #'music':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Music', 'stik':1},
-        #'audiobook':{'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$', 'name':'Audiobook', 'stik':2},
+        'tvshow':{
+            'name':'TV Show',
+            'stik':10,
+            'schema':ur'^(.+) (s([0-9]+)e([0-9]+))(?:\s*(.*))?\.([^\.]+)$', 
+        },
+        'movie':{
+            'name':'Movie', 
+            'stik':9,
+            'schema':ur'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', 
+        },
+        #'music':{
+        #    'name':'Music',
+        #    'stik':1,
+        #    'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$',
+        #},
+        #'audiobook':{
+        #    'name':'Audiobook',
+        #    'stik':2,
+        #    'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$',
+        #},
     },
     'Kind':{
         'm4v':{

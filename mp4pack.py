@@ -7,38 +7,21 @@ import getopt
 import fnmatch
 import logging
 
-from container import load_media_file
+from container import make_media_file
 from config import repository_config
-from db import tag_manager
-
-def sanity_check(logger):
-    result = True
-    command_config = repository_config['Command']
-    
-    from subprocess import Popen, PIPE
-    for c in command_config:
-        command = ['which', command_config[c]['binary']]
-        proc = Popen(command, stdout=PIPE, stderr=PIPE)
-        report = proc.communicate()
-        if report[0]:
-            command_config[c]['path'] = report[0].splitlines()[0]
-        else:
-            result = False
-            command_config[c]['path'] = None
-            logger.error(u'Command %s could not be located. Is it installed?', command_config[c]['binary'])
-    return result
+from db import theEntityManager
 
 
-def load_input_files(path, file_filter, recursive):
+def make_files(path, file_filter, recursive):
     known = []
-    file_paths = list_input_files(path, file_filter, recursive)
+    file_paths = find_files_in_path(path, file_filter, recursive)
     for fp in file_paths:
-        mf = load_media_file(fp)
+        mf = make_media_file(fp)
         if mf: known.append(mf)
     return known
 
 
-def list_input_files(path, file_filter, recursive, depth=1):
+def find_files_in_path(path, file_filter, recursive, depth=1):
     result = []
     if os.path.isfile(path):
         dname, fname = os.path.split(path)
@@ -48,23 +31,16 @@ def list_input_files(path, file_filter, recursive, depth=1):
     elif (recursive or depth > 0) and os.path.isdir(path) and invisable_file_path.search(path) == None:
         for p in os.listdir(path):
             p = os.path.abspath(os.path.join(path,p))
-            rec_result = list_input_files(p, file_filter, recursive, depth - 1)
+            rec_result = find_files_in_path(p, file_filter, recursive, depth - 1)
             result += rec_result
-    return result
-
-
-def load_file_filter(file_filter):
-    result = None
-    if file_filter is not None:
-        result = re.compile(file_filter, re.UNICODE)
     return result
 
 
 def load_options():
     from optparse import OptionParser
     from optparse import OptionGroup
-    from config import repository_config as rc
     
+    rc = repository_config
     profiles = []
     for k in rc['Kind'].keys():
         profiles += rc['Kind'][k]['Profile'].keys()
@@ -116,54 +92,80 @@ def load_options():
     return options, args
 
 
+def load_config(logger):
+    result = True
+    command_config = repository_config['Command']
+    
+    from subprocess import Popen, PIPE
+    for c in command_config:
+        command = ['which', command_config[c]['binary']]
+        proc = Popen(command, stdout=PIPE, stderr=PIPE)
+        report = proc.communicate()
+        if report[0]:
+            command_config[c]['path'] = report[0].splitlines()[0]
+        else:
+            result = False
+            command_config[c]['path'] = None
+            logger.error(u'Command %s could not be located. Is it installed?', command_config[c]['binary'])
+            
+    for k,v in repository_config['Media Kind'].iteritems():
+        v['detect'] = re.compile(v['schema'], re.UNICODE)
+        
+    for (t, ks) in repository_config['Codec'].iteritems():
+        for k,v in ks.iteritems():
+            v['detect'] = re.compile(v['schema'], re.UNICODE)
+            
+    return result
+
+
 def preform_operations(files, options):
     if options.initialize:
-        tag_manager.base_init()
+        theEntityManager.base_init()
     
     if options.map_show:
-        tag_manager.map_show_with_pair(options.map_show)
+        theEntityManager.map_show_with_pair(options.map_show)
     
     known = []
     unknown = []
         
     for f in files:
         f.load()
-        if f and not f.valid():
+        if f and f.valid():
+            known.append(f)
+            
+            if options.rename:
+                f.rename(options)
+                
+            if options.extract:
+                f.extract(options)
+                
+            if options.copy:
+                f.copy(options)
+                
+            if options.pack is not None:
+                f.pack(options)
+                
+            if options.transcode is not None:
+                f.transcode(options)
+                
+            if options.tag:
+                f.tag(options)
+                
+            if options.update is not None:
+                f.update(options)
+                
+            if options.optimize:
+                f.optimize(options)
+                
+            if options.info:
+                print unicode(f).encode('utf-8')
+                
+            f.unload()
+        else:
             unknown.append(f.file_path)
             f.unload()
             f = None
             
-        else:
-            known.append(f)
-            
-            if options.info:
-                print unicode(f).encode('utf-8')
-            
-            if options.extract:
-                f.extract(options)
-            
-            if options.copy:
-                f.copy(options)
-    
-            if options.rename:
-                f.rename(options)
-    
-            if options.tag:
-                f.tag(options)
-    
-            if options.optimize:
-                f.optimize(options)
-            
-            if options.pack is not None:
-                f.pack(options)
-    
-            if options.transcode is not None:
-                f.transcode(options)
-    
-            if options.update is not None:
-                f.update(options)
-        
-            f.unload()
     return known, unknown 
 
 
@@ -175,14 +177,16 @@ def main():
     indent = repository_config['Display']['indent']
     margin = repository_config['Display']['margin']
     
-    if sanity_check(logger):
+    if load_config(logger):
         input_path = '.'
         if len(args) > 0: input_path = args[0]
-            
-        file_filter = load_file_filter(options.file_filter)
+        ffilter = None
+        if options.file_filter is not None:
+            ffilter = re.compile(options.file_filter, re.UNICODE)
         input_path = os.path.abspath(input_path)
+        
         logger.info('Scanning for files in %s', input_path)
-        known = load_input_files(input_path, file_filter, options.recursive)
+        known = make_files(input_path, ffilter, options.recursive)
         known, unknown = preform_operations(known, options)
         if len(known) > 0:
             logger.info(u'%d valid files were found in %s', len(known), input_path)

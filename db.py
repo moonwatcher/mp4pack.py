@@ -173,7 +173,7 @@ class TvdbImageHandler(ImageHandler):
 
 
 
-class TagManager(object):
+class EntityManager(object):
     def __init__(self):
         self.logger = logging.getLogger('mp4pack.tag')
         self.connection = Connection(repository_config['Database']['uri'])
@@ -623,12 +623,12 @@ class TagManager(object):
                         update_string_property(u'network', _network[u'name'], show)
                 elif is_tag(u'Genre', item):
                     show[u'genre'] = []
-                    genre_list = self.split_tvdb_list(item.text)
+                    genre_list = self._split_tvdb_list(item.text)
                     for g in genre_list:
                         show[u'genre'].append(self._make_genre_item(g))
                 elif is_tag(u'Actors', item):
                     show[u'cast'] = []
-                    actor_list = self.split_tvdb_list(item.text)
+                    actor_list = self._split_tvdb_list(item.text)
                     for actor in actor_list:
                         _person_ref = self._make_person_ref(job=u'actor', department=u'actors', person_name=actor)
                         if _person_ref is not None:
@@ -674,19 +674,19 @@ class TagManager(object):
                     elif is_tag(u'filename', item):
                         update_string_property(u'poster', item.text, episode)
                     elif is_tag(u'Director', item):
-                        director_list = self.split_tvdb_list(item.text)
+                        director_list = self._split_tvdb_list(item.text)
                         for director in director_list:
                             _person_ref = self._make_person_ref(job=u'director', department=u'directing', person_name=director)
                             if _person_ref is not None:
                                 episode[u'cast'].append(_person_ref)
                     elif is_tag(u'Writer', item):
-                        writer_list = self.split_tvdb_list(item.text)
+                        writer_list = self._split_tvdb_list(item.text)
                         for writer in writer_list:
                             _person_ref = self._make_person_ref(job=u'screenplay', department=u'writing', person_name=writer)
                             if _person_ref is not None:
                                 episode[u'cast'].append(_person_ref)
                     elif is_tag(u'GuestStars', item):
-                        actor_list = self.split_tvdb_list(item.text)
+                        actor_list = self._split_tvdb_list(item.text)
                         for actor in actor_list:
                             _person_ref = self._make_person_ref(job=u'actor', department=u'actors', person_name=actor)
                             if _person_ref is not None:
@@ -695,7 +695,7 @@ class TagManager(object):
                 self.episodes.save(episode)
     
     
-    def split_tvdb_list(self, value):
+    def _split_tvdb_list(self, value):
         result = []
         if value is not None:
             value = tvdb_list_seperators.sub(u'|', value)
@@ -712,7 +712,6 @@ class TagManager(object):
         return result
     
 
-tag_manager = TagManager()
 
 
 def is_tag(name, item):
@@ -801,6 +800,10 @@ def remove_accents(value):
     nkfd_form = unicodedata.normalize('NFKD', value)
     return u''.join([c for c in nkfd_form if not unicodedata.combining(c)])
 
+
+
+# Singletone
+theEntityManager = EntityManager()
 
 numberic_key_string_pair = re.compile(u'^([0-9]+):(.+)$', re.UNICODE)
 minimum_person_name_length = repository_config['Database']['tvdb']['fuzzy']['minimum_person_name_length']
