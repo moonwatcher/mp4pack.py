@@ -508,12 +508,22 @@ class AudioVideoContainer(Container):
             self.chapter_markers.append(chapter_marker)
     
     
+    def video_width(self):
+        result = 0
+        if self.tracks:
+            for t in self.tracks:
+                if t['type'] == 'video' and 'pixel width' in t:
+                    result = t['pixel width']
+                    break
+        return result
+    
+    
     def playback_height(self):
         result = 0
         if self.tracks:
             for t in self.tracks:
                 if t['type'] == 'video' and 'sar' in t:
-                    if t['sar'] >= ar_16_9:
+                    if t['sar'] >= repository_config['Default']['display aspect ratio']:
                         result = t['pixel width'] / t['sar']
                     else:
                         result = t['pixel height']
@@ -1096,6 +1106,12 @@ class Mpeg4(AudioVideoContainer):
         AudioVideoContainer.tag(self, options)
         tc = None
         update = {}
+        width = self.video_width()
+        if width > repository_config['Default']['hd video min width']:
+            update['HD Video'] = 'yes'
+        else:
+            update['HD Video'] = 'no'
+            
         if self.meta:
             for k in [k for (k,v) in self.meta.iteritems() if k not in self.tags or self.tags[k] != v]:
                 update[k] = self.meta[k]
@@ -2553,7 +2569,6 @@ illegal_characters_for_filename = re.compile(ur'[\\\/?<>:*|^\.]')
 
 IEC_BYTE_POWER_NAME = {0:'Byte', 1:'KiB', 2:'MiB', 3:'GiB', 4:'TiB'}
 
-ar_16_9 = float(16) / float(9)
 full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
 descriptive_time_format = re.compile('(?:([0-9]{,2})h)?(?:([0-9]{,2})m)?(?:([0-9]{,2})s)?(?:([0-9]+))?')
 sentence_end = re.compile(ur'[.!?]')

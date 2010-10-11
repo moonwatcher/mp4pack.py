@@ -7,6 +7,10 @@ cache_path = u'/net/multivac/Volumes/alphaville/cache/'
 
 repository_config = {
     'Options':None,
+    'Default':{
+        'hd video min width':720,
+        'display aspect ratio':float(float(16)/float(9)),
+    },
     'Database':{
         'cache':cache_path,
         'uri':'mongodb://mp4pack:poohbear@multivac.lan/mp4pack',
