@@ -2141,18 +2141,18 @@ class FileUtil(object):
         if 'Media Kind' in info and info['Media Kind'] in repository_config['Media Kind'] and 'kind' in info and info['kind'] in repository_config['Kind']:
             if info['Media Kind'] == 'tvshow':
                 if 'show_small_name' in info and 'Code' in info:
-                    result = ''.join([info['show_small_name'], ' ', info['Code']])
+                    result = u''.join([info['show_small_name'], u' ', info['Code']])
                     valid = True
             elif info['Media Kind'] == 'movie':
                 if 'imdb_id' in info:
-                    result = ''.join(['IMDb', info['imdb_id']])
+                    result = u''.join([u'IMDb', info['imdb_id']])
                     valid = True
         if valid:
             easy_name = self.easy_name(info, meta)
             if easy_name is not None:
-                result = ''.join([result, ' ', easy_name])
+                result = u''.join([result, u' ', easy_name])
             
-            result = ''.join([result, '.', info['kind']])
+            result = u''.join([result, u'.', info['kind']])
         
         if not valid:
             result = None
