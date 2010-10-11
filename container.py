@@ -151,16 +151,16 @@ class Container(object):
                 if 'name' in record:
                     self.meta['Name'] = record['name']
                 if 'overview' in record:
-                    self.meta['Long Description'] = record['overview']
+                    self.meta['Long Description'] = whitespace_re.sub(u' ', record['overview']).strip()
                 if 'content_rating' in record:
                     self.meta['Rating'] = record['content_rating']
                 if 'released' in record:
                     self.meta['Release Date'] = record['released'].strftime('%Y-%m-%d')
                 if 'tagline' in record:
-                    self.meta['Description'] = record['tagline']
+                    self.meta['Description'] = whitespace_re.sub(u' ', record['tagline']).strip()
                 elif 'overview' in record:
-                    s = sentence_end.split(record['overview'])
-                    if s: self.meta['Description'] = s[0].strip() + '.'
+                    s = sentence_end.split(whitespace_re.sub(u' ', record['overview']).strip())
+                    if s: self.meta['Description'] = s[0].strip('"').strip("'").strip() + '.'
                     
                 self.load_cast(record)
                 self.load_genre(record)
@@ -195,9 +195,10 @@ class Container(object):
                 if 'name' in episode:
                     self.meta['Name'] = episode['name']
                 if 'overview' in episode:
-                    self.meta['Long Description'] = episode['overview']
-                    s = sentence_end.split(episode['overview'])
-                    if s: self.meta['Description'] = s[0].strip() + '.'
+                    overview = whitespace_re.sub(u' ', episode['overview']).strip()
+                    self.meta['Long Description'] = overview
+                    s = sentence_end.split(overview)
+                    if s: self.meta['Description'] = s[0].strip('"').strip("'").strip() + '.'
                 if 'released' in episode:
                     self.meta['Release Date'] = episode['released'].strftime('%Y-%m-%d')
                     
@@ -2574,3 +2575,4 @@ descriptive_time_format = re.compile('(?:([0-9]{,2})h)?(?:([0-9]{,2})m)?(?:([0-9
 sentence_end = re.compile(ur'[.!?]')
 word_end = re.compile(ur'\s')
 escaped_subler_tag_characters = set(('{', '}', ':'))
+whitespace_re = re.compile(ur'\s+', re.UNICODE)
