@@ -159,8 +159,8 @@ class Container(object):
                 if 'tagline' in record:
                     self.meta['Description'] = whitespace_re.sub(u' ', record['tagline']).strip()
                 elif 'overview' in record:
-                    s = sentence_end.split(whitespace_re.sub(u' ', record['overview']).strip())
-                    if s: self.meta['Description'] = s[0].strip('"').strip("'").strip() + '.'
+                    s = sentence_end.split(whitespace_re.sub(u' ', record['overview']).strip('\'".,'))
+                    if s: self.meta['Description'] = s[0].strip('"\' ').strip() + '.'
                     
                 self.load_cast(record)
                 self.load_genre(record)
@@ -197,8 +197,8 @@ class Container(object):
                 if 'overview' in episode:
                     overview = whitespace_re.sub(u' ', episode['overview']).strip()
                     self.meta['Long Description'] = overview
-                    s = sentence_end.split(overview)
-                    if s: self.meta['Description'] = s[0].strip('"').strip("'").strip() + '.'
+                    s = sentence_end.split(overview.strip('\'".,'))
+                    if s: self.meta['Description'] = s[0].strip('"\' ').strip() + '.'
                 if 'released' in episode:
                     self.meta['Release Date'] = episode['released'].strftime('%Y-%m-%d')
                     
