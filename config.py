@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
+from subprocess import Popen, PIPE
+
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = u'7B3B400B0146EA83'
 cache_path = u'/net/multivac/Volumes/alphaville/cache/'
@@ -1310,3 +1313,22 @@ base_config = {
         
     ),
 }
+
+
+command_config = repository_config['Command']
+for c in command_config:
+    command = ['which', command_config[c]['binary']]
+    proc = Popen(command, stdout=PIPE, stderr=PIPE)
+    report = proc.communicate()
+    if report[0]:
+        command_config[c]['path'] = report[0].splitlines()[0]
+    else:
+        result = False
+        command_config[c]['path'] = None
+        
+for k,v in repository_config['Media Kind'].iteritems():
+    v['detect'] = re.compile(v['schema'], re.UNICODE)
+    
+for (t, ks) in repository_config['Codec'].iteritems():
+    for k,v in ks.iteritems():
+        v['detect'] = re.compile(v['schema'], re.UNICODE)

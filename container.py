@@ -532,6 +532,9 @@ class AudioVideoContainer(Container):
         return result
     
     
+    def audio_tracks(self):
+        return [ t for t in mf.tracks if 'type' in t and t['type'] == 'audio']
+    
     
     def extract(self, options):
         result = Container.extract(self, options)
@@ -688,11 +691,11 @@ class AudioVideoContainer(Container):
                         found_audio = False
                         audio_options = {'--audio':[]}
                         for s in tc['audio']:
-                            for t in self.tracks:
+                            for idx, t in enumerate(self.audio_tracks()):
                                 for c in s:
                                     if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
                                         found_audio = True
-                                        audio_options['--audio'].append(unicode(t['index']))
+                                        audio_options['--audio'].append(idx + 1)
                                         for (k,v) in c['to'].iteritems():
                                             if k not in audio_options: audio_options[k] = []
                                             audio_options[k].append(unicode(v))

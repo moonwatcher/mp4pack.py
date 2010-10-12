@@ -95,26 +95,10 @@ def load_options():
 def load_config(logger):
     result = True
     command_config = repository_config['Command']
-    
-    from subprocess import Popen, PIPE
     for c in command_config:
-        command = ['which', command_config[c]['binary']]
-        proc = Popen(command, stdout=PIPE, stderr=PIPE)
-        report = proc.communicate()
-        if report[0]:
-            command_config[c]['path'] = report[0].splitlines()[0]
-        else:
-            result = False
-            command_config[c]['path'] = None
+        if command_config[c]['path'] == None:
             logger.error(u'Command %s could not be located. Is it installed?', command_config[c]['binary'])
-            
-    for k,v in repository_config['Media Kind'].iteritems():
-        v['detect'] = re.compile(v['schema'], re.UNICODE)
-        
-    for (t, ks) in repository_config['Codec'].iteritems():
-        for k,v in ks.iteritems():
-            v['detect'] = re.compile(v['schema'], re.UNICODE)
-            
+            result = False
     return result
 
 
