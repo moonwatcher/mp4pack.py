@@ -586,7 +586,7 @@ class AudioVideoContainer(Container):
                             for t in self.tracks:
                                 for c in pc['pack']['tracks']:
                                     if all((k in t and t[k] == v) for k,v in c.iteritems()):
-                                        if t['type'] not in selected['related']:
+                                        if t['type'] not in selected['track']:
                                             selected['track'][t['type']] = []
                                         selected['track'][t['type']].append(t)
                                         break
