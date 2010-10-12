@@ -44,14 +44,19 @@ Options:
     --language=CODE     Languge code used when undefined. [ default: eng ]
     --md5               Verify md5 checksum on copy.
 
-  Options that only apply to text subtitles.:
+  Options that only apply to subtitles.:
     --input-rate=RATE   Decoding subtitles frame rate.
     --output-rate=RATE  Encoding subtitles frame rate.
     --time-shift=TIME   Subtitles shift offset in milliseconds.
 
-  Service:
-    Options for initializing the repository.
+  Database:
+    Options for maintaining database records.
 
     --initialize        Run only once to initialize the system.
-    --map-show=MAP      TV Shows require a mapping between the numeric TVDB ID
-                        and a name suitable for file names.
+    --map-show=MAP      Map TV Show name to TVDB ID. format: <id>:<name>
+    --refresh-movie=IMDb
+                        Refresh the movie entry.
+    --refresh-tvshow=NAME
+                        Refresh the tv show and episode entries.
+    --refresh-person=TMDb
+                        Refresh the person entry.

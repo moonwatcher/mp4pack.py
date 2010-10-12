@@ -80,10 +80,14 @@ def load_options():
     group.add_option('--time-shift', metavar='TIME', dest='time_shift', type='int', default=None, help='Subtitles shift offset in milliseconds.')
     parser.add_option_group(group)
     
-    group = OptionGroup(parser, 'Service', 'Options for initializing the repository.')
+    group = OptionGroup(parser, 'Database', 'Options for maintaining database records.')
     group.add_option('--initialize', dest='initialize', action='store_true', default=False, help='Run only once to initialize the system.')
     group.add_option('--map-show', metavar="MAP", dest='map_show', help='Map TV Show name to TVDB ID. format: <id>:<name>')
+    group.add_option('--refresh-movie', metavar='IMDb', dest='refresh_movie', default=None, help='Refresh the movie entry.')
+    group.add_option('--refresh-tvshow', metavar='NAME', dest='refresh_tvshow', default=None, help='Refresh the tv show and episode entries.')
+    group.add_option('--refresh-person', metavar='TMDb', type='int', dest='refresh_person', default=None, help='Refresh the person entry.')
     parser.add_option_group(group)
+    
     
     options, args = parser.parse_args()
     
@@ -108,6 +112,15 @@ def preform_operations(files, options):
     
     if options.map_show:
         theEntityManager.map_show_with_pair(options.map_show)
+    
+    if options.refresh_movie:
+        theEntityManager.find_movie_by_imdb_id(options.refresh_movie, True)
+    
+    if options.refresh_tvshow:
+        theEntityManager.find_show(options.refresh_tvshow, True)
+    
+    if options.refresh_person:
+        print theEntityManager.find_person_by_tmdb_id(options.refresh_person, True)
     
     known = []
     unknown = []

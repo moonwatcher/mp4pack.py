@@ -1325,7 +1325,7 @@ for c in command_config:
     else:
         result = False
         command_config[c]['path'] = None
-        
+    
 for k,v in repository_config['Media Kind'].iteritems():
     v['detect'] = re.compile(v['schema'], re.UNICODE)
     

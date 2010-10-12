@@ -65,6 +65,11 @@ class ResourceHandler(object):
                 pass
     
     
+    def refresh(self):
+        self.clean()
+        self.cache()
+    
+    
 
 
 class JsonHandler(ResourceHandler):
@@ -241,38 +246,40 @@ class EntityManager(object):
         return _genre 
     
     
-    def find_movie_by_imdb_id(self, imdb_id):
+    def find_movie_by_imdb_id(self, imdb_id, refresh=False):
         _movie = self.movies.find_one({u'imdb_id': imdb_id})
         if _movie is None:
             _tmdb_id = self._find_tmdb_id_by_imdb_id(imdb_id)
             if _tmdb_id is not None:
                 _movie = self.find_movie_by_tmdb_id(_tmdb_id)
+        elif refresh and u'tmdb_id' in _movie:
+            _movie = self.find_movie_by_tmdb_id(_movie['tmdb_id'], refresh)
         return _movie
     
     
-    def find_movie_by_tmdb_id(self, tmdb_id):
-        _movie = self.movies.find_one({u'tmdb_id': tmdb_id})
-        if _movie is None:
-            _movie = self.update_tmdb_movie(tmdb_id)
+    def find_movie_by_tmdb_id(self, tmdb_id, refresh=False):
+        _movie = self.movies.find_one({u'tmdb_id': int(tmdb_id)})
+        if _movie is None or refresh:
+            _movie = self.update_tmdb_movie(tmdb_id, refresh)
         return _movie
     
     
-    def find_person_by_tmdb_id(self, tmdb_id):
-        _person = self.people.find_one({u'tmdb_id':tmdb_id})
-        if _person is None:            
-            _person = self.update_tmdb_person(tmdb_id)
+    def find_person_by_tmdb_id(self, tmdb_id, refresh=False):
+        _person = self.people.find_one({u'tmdb_id':int(tmdb_id)})
+        if _person is None or refresh:
+            _person = self.update_tmdb_person(tmdb_id, refresh)
         return _person
     
     
     def find_show_by_tvdb_id(self, tvdb_id):
-        _show = self.shows.find_one({u'tvdb_id': tvdb_id})
+        _show = self.shows.find_one({u'tvdb_id':int(tvdb_id)})
         if _show is None:
             _show = self.update_tvdb_show_tree(tvdb_id)
         return _show
     
     
-    def find_episode_by_tvdb_id(self, key):
-        return self.episodes.find_one({u'tvdb_id':key})
+    def find_episode_by_tvdb_id(self, tvdb_id):
+        return self.episodes.find_one({u'tvdb_id':int(tvdb_id)})
     
     
     
@@ -286,7 +293,7 @@ class EntityManager(object):
     
     
     def map_show(self, small_name, tvdb_id):
-        show_by_tvdb_id = self.shows.find_one({u'tvdb_id':tvdb_id})
+        show_by_tvdb_id = self.shows.find_one({u'tvdb_id':int(tvdb_id)})
         show_by_small_name = self.shows.find_one({u'small_name':small_name})
         
         if show_by_small_name is None and show_by_tvdb_id is None:
@@ -307,12 +314,12 @@ class EntityManager(object):
         
     
     
-    def find_show(self, small_name):
+    def find_show(self, small_name, refresh=True):
         show = self.shows.find_one({u'small_name': small_name})
         if show is not None:
-            if show[u'last_update'] is None and u'tvdb_id' in show:
+            if (show[u'last_update'] is None or refresh) and u'tvdb_id' in show:
                 self.logger.info(u'Updating show %s', small_name)
-                self.update_tvdb_show_tree(show[u'tvdb_id'])
+                self.update_tvdb_show_tree(show[u'tvdb_id'], refresh)
                 self.logger.info(u'Done updating show %s', small_name)
         else:
             self.logger.error(u'Show %s does not exist', small_name)
@@ -410,18 +417,22 @@ class EntityManager(object):
     
     # Update nodes
     
-    def update_tmdb_movie(self, tmdb_id):
-        _movie = self.movies.find_one({u'tmdb_id':tmdb_id})
+    def update_tmdb_movie(self, tmdb_id, refresh=False):
+        _movie = self.movies.find_one({u'tmdb_id':int(tmdb_id)})
+        new_record = False
         url = repository_config['Database']['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(url)
+        if refresh: handler.refresh()
+            
         element = handler.element()
         if element is not None:
             element = element[0]
             if _movie is None:
                 _movie = {u'cast':[], u'genre':[], u'posters':[]}
-                
-            update_int_property(u'tmdb_id', element[u'id'], _movie)
-            self.movies.save(_movie)
+                update_int_property(u'tmdb_id', element[u'id'], _movie)
+                new_record = True
+                self.movies.save(_movie)
+            
             update_int_property(u'imdb_id', element[u'imdb_id'], _movie)
             update_string_property(u'name', element[u'name'], _movie)
             update_string_property(u'overview', element[u'overview'], _movie)
@@ -452,15 +463,20 @@ class EntityManager(object):
             
             _movie['last_update'] = datetime.utcnow()
             self.movies.save(_movie)
-            self.logger.info(u'Creating Movie %s with IMDB ID %s', _movie[u'name'], _movie[u'imdb_id'])
+            if new_record:
+                self.logger.info(u'Created record for movie %s with IMDb ID %s', _movie[u'name'], _movie[u'imdb_id'])
+            else:
+                self.logger.info(u'Updated record for movie %s with IMDb ID %s', _movie[u'name'], _movie[u'imdb_id'])
         return _movie
     
     
-    def update_tvdb_show_tree(self, tvdb_id):
-        show = self.shows.find_one({u'tvdb_id':tvdb_id})
+    def update_tvdb_show_tree(self, tvdb_id, refresh=False):
+        show = self.shows.find_one({u'tvdb_id':int(tvdb_id)})
         if show is not None:
             url = repository_config['Database']['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
-            element = TvdbXmlHandler(url).element()
+            handler = TvdbXmlHandler(url)
+            if refresh: handler.refresh()
+            element = handler.element()
             show = self.update_tvdb_show(show, element)
             self.update_tvdb_episodes(show, element)
         else:
@@ -504,6 +520,7 @@ class EntityManager(object):
                             
             show['last_update'] = datetime.utcnow()
             self.shows.save(show)
+            self.logger.info(u'Updated record for TV show %s with TVDb ID %s', show[u'small_name'], show[u'tvdb_id'])
         return show
     
     
@@ -561,7 +578,41 @@ class EntityManager(object):
                                 episode[u'cast'].append(_person_ref)
                 episode['last_update'] = datetime.utcnow()
                 self.episodes.save(episode)
+                self.logger.info(u'Updated record for TV show %s episode %d season %d: %s', episode[u'show_small_name'], episode[u'episode_number'], episode[u'season_number'], episode[u'name'])
     
+    
+    def update_tmdb_person(self, tmdb_id, refresh=False):
+        _person = self.people.find_one({u'tmdb_id':int(tmdb_id)})
+        new_record = False
+        url = repository_config['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
+        handler = TmdbJsonHandler(url)
+        if refresh: handler.refresh()
+        element = handler.element()
+        if element is not None:
+            element = element[0]
+            if _person is None:
+                _person = {u'filmography':[]}
+                update_int_property(u'tmdb_id', element[u'id'], _person)
+                new_record = True
+                self.people.save(_person)
+            update_string_property(u'name', element[u'name'], _person)
+            update_string_property(u'small_name', element[u'name'].lower(), _person)
+            update_date_property(u'birthday', element[u'birthday'], _person)
+            update_string_property(u'biography', element[u'biography'], _person)
+            
+            if u'filmography' in element.keys():
+                _person[u'filmography'] = []
+                for fe in element[u'filmography']:
+                    _movie_ref = self._make_movie_ref_from_element(fe)
+                    if _movie_ref is not None:
+                        _person[u'filmography'].append(_movie_ref)
+            _person['last_update'] = datetime.utcnow()
+            self.people.save(_person)
+            if new_record:
+                self.logger.info(u'Created record for person %s with TMDb ID %s', _person[u'name'], _person[u'tmdb_id'])
+            else:
+                self.logger.info(u'Updated record for person %s with TMDb ID %s', _person[u'name'], _person[u'tmdb_id'])
+        return _person
     
     
     def _find_tmdb_id_by_imdb_id(self, imdb_id):
@@ -595,32 +646,6 @@ class EntityManager(object):
         _person = {u'small_name':name.lower(), u'name':name}
         _person['last_update'] = datetime.utcnow()
         self.people.save(_person)
-        return _person
-    
-    
-    def update_tmdb_person(self, tmdb_id):
-        _person = self.people.find_one({u'tmdb_id':tmdb_id})
-        url = repository_config['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
-        handler = TmdbJsonHandler(url)
-        element = handler.element()
-        if element is not None:
-            element = element[0]
-            if _person is None:
-                _person = {u'filmography':[]}
-            update_int_property(u'tmdb_id', element[u'id'], _person)
-            update_string_property(u'name', element[u'name'], _person)
-            update_string_property(u'small_name', element[u'name'].lower(), _person)
-            update_date_property(u'birthday', element[u'birthday'], _person)
-            update_string_property(u'biography', element[u'biography'], _person)
-            
-            if u'filmography' in element.keys():
-                _person[u'filmography'] = []
-                for fe in element[u'filmography']:
-                    _movie_ref = self._make_movie_ref_from_element(fe)
-                    if _movie_ref is not None:
-                        _person[u'filmography'].append(_movie_ref)
-            _person['last_update'] = datetime.utcnow()
-            self.people.save(_person)
         return _person
     
     
