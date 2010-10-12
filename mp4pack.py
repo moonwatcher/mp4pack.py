@@ -74,7 +74,7 @@ def load_options():
     group.add_option('--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
     parser.add_option_group(group)
     
-    group = OptionGroup(parser, 'Options that only apply to subtitles.')
+    group = OptionGroup(parser, 'Subtitle', 'Options for manipulating subtitles.')
     group.add_option('--input-rate', metavar='RATE', dest='input_rate', default=None, help='Decoding subtitles frame rate.')
     group.add_option('--output-rate', metavar='RATE', dest='output_rate', default=None, help='Encoding subtitles frame rate.')
     group.add_option('--time-shift', metavar='TIME', dest='time_shift', type='int', default=None, help='Subtitles shift offset in milliseconds.')

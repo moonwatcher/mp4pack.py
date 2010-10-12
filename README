@@ -44,7 +44,9 @@ Options:
     --language=CODE     Languge code used when undefined. [ default: eng ]
     --md5               Verify md5 checksum on copy.
 
-  Options that only apply to subtitles.:
+  Subtitle:
+    Options for manipulating subtitles.
+
     --input-rate=RATE   Decoding subtitles frame rate.
     --output-rate=RATE  Encoding subtitles frame rate.
     --time-shift=TIME   Subtitles shift offset in milliseconds.
