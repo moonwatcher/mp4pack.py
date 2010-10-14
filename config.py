@@ -86,6 +86,9 @@ repository_config = {
         'dcadec':{
             'binary':u'dcadec',
         },
+        'mediainfo':{
+            'binary':u'mediainfo',
+        }
     },
     'Display':{
         'wrap':120, 

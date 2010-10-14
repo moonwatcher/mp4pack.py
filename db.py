@@ -314,7 +314,7 @@ class EntityManager(object):
         
     
     
-    def find_show(self, small_name, refresh=True):
+    def find_show(self, small_name, refresh=False):
         show = self.shows.find_one({u'small_name': small_name})
         if show is not None:
             if (show[u'last_update'] is None or refresh) and u'tvdb_id' in show:

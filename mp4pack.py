@@ -26,7 +26,7 @@ def find_files_in_path(path, file_filter, recursive, depth=1):
     if os.path.isfile(path):
         dname, fname = os.path.split(path)
         if (file_filter == None or file_filter.search(fname) != None) and invisable_file_path.search(fname) == None:
-            result.append(unicode(os.path.abspath(path), 'utf-8'))
+            result.append(os.path.abspath(path))
     
     elif (recursive or depth > 0) and os.path.isdir(path) and invisable_file_path.search(path) == None:
         for p in os.listdir(path):
@@ -175,14 +175,14 @@ def main():
     margin = repository_config['Display']['margin']
     
     if load_config(logger):
-        input_path = '.'
-        if len(args) > 0: input_path = args[0]
+        input_path = u'.'
+        if len(args) > 0: input_path = unicode(args[0], 'utf-8')
         ffilter = None
         if options.file_filter is not None:
             ffilter = re.compile(options.file_filter, re.UNICODE)
         input_path = os.path.abspath(input_path)
         
-        logger.info('Scanning for files in %s', input_path)
+        logger.info(u'Scanning for files in %s', input_path)
         known = make_files(input_path, ffilter, options.recursive)
         known, unknown = preform_operations(known, options)
         if len(known) > 0:
@@ -196,13 +196,13 @@ def main():
                 logger.info(u'Found invalid %s', p)
                 
         for idx, arg in enumerate(args):
-            logger.debug('Positional %d: %s', idx, arg)
+            logger.debug(u'Positional %d: %s', idx, arg)
             
         for k,v in options.__dict__.iteritems():
-            logger.debug('Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
+            logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
     else:
         for k,v in repository_config['Command'].iteritems():
-            logger.info('Command {0:-<{2}}: {1}'.format(k, v['path'], indent - 2 - margin))
+            logger.info(u'Command {0:-<{2}}: {1}'.format(k, v['path'], indent - 2 - margin))
 
 
 log_levels = {
