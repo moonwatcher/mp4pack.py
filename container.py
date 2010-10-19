@@ -210,6 +210,13 @@ class Container(object):
         return result
     
     
+    def load_media_info(self):
+        mediainfo = {'General':{}, 'Audio':[], 'Video':[], 'Text':[], 'Menu':{}}
+        command = theFileUtil.initialize_command('mediainfo', self.logger)
+        command.extend(['--Language=raw', '-f', self.file_path])
+        output, error = theFileUtil.execute(command, None)
+        mediainfo_report = unicode(output, 'utf-8').splitlines()
+    
     
     def info(self, options):
         return unicode(self)
@@ -435,6 +442,11 @@ class Container(object):
         return result
     
     
+    mediainfo_general_block = re.compile('^General$')
+    mediainfo_video_block = re.compile('^Video(?: #([0-9]+))?$')
+    mediainfo_audio_block = re.compile('^Audio(?: #([0-9]+))?$')
+    mediainfo_text_block = re.compile('^Text(?: #([0-9]+))?$')
+    mediainfo_menu_block = re.compile('^Menu$')
 
 
 class AudioVideoContainer(Container):
@@ -1292,14 +1304,6 @@ class RawAudio(AudioVideoContainer):
         self.logger = logging.getLogger('mp4pack.rawaudio')
         if autoload:
             self.load()
-    
-    
-    def load(self):
-        #command = theFileUtil.initialize_command('mediainfo', self.logger)
-        #command.append(self.file_path)
-        #output, error = theFileUtil.execute(command, None)
-        #mediainfo_report = unicode(output, 'utf-8').splitlines()
-        pass
     
     
     def transcode(self, options):

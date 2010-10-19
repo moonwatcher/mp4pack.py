@@ -759,12 +759,12 @@ repository_config = {
         'ac3':{
             'container':'raw audio',
             'default':{
-                'profile':'dump',
+                'profile':'multi',
                 'volume':'epsilon',
             },
             'Profile':{
-                'dump':{
-                    'description':'Special profile for dts track exctracted from matroska',
+				'multi':{
+                    'description':'Special profile for multi channel ac3 track from dts',
                     'default':{
                         'tvshow':{'volume':'epsilon'},
                         'movie':{'volume':'epsilon'},
@@ -772,6 +772,17 @@ repository_config = {
                     'transcode':{
                         'dcadec':{ '-o':'wavall', '-g':'32'},
                         'aften':{ '-b':'640' }
+                    }
+                },
+				'stereo':{
+                	'description':'Special profile for stereo ac3 track from dts',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
+                    },
+                    'transcode':{
+                        'dcadec':{ '-o':'aif'},
+                        'aften':{ '-b':'240' }
                     }
                 },
             },
