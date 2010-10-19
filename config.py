@@ -199,7 +199,7 @@ repository_config = {
         'fao':'Faroese',
         'fij':'Fijian',
         'fin':'Finnish',
-        'fra':'French',
+        'fre':'French',
         'ful':'Fulah',
         'kat':'Georgian',
         'deu':'German',
