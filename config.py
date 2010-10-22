@@ -535,8 +535,8 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
-                            {'kind':'ac3', 'profile':'dump'},
-                            {'kind':'tc', 'profile':'dump'},
+                            {'kind':'ac3'},
+                            {'kind':'tc'},
                         ),
                         'tracks':(
                             {'type':'video'},
@@ -557,8 +557,8 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
-                            {'kind':'ac3', 'profile':'dump'},
-                            {'kind':'tc', 'profile':'dump'},
+                            {'kind':'ac3'},
+                            {'kind':'tc'},
                         ),
                         'tracks':(
                             {'type':'video'},
@@ -579,8 +579,8 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'heb'},
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
-                            {'kind':'ac3', 'profile':'dump'},
-                            {'kind':'tc', 'profile':'dump'}
+                            {'kind':'ac3'},
+                            {'kind':'tc'},
                         ),
                         'tracks':(
                             {'type':'video'},
@@ -782,7 +782,7 @@ repository_config = {
                     },
                     'transcode':{
                         'dcadec':{ '-o':'aif'},
-                        'aften':{ '-b':'240' }
+                        'aften':{ '-b':'256' }
                     }
                 },
             },
@@ -815,13 +815,21 @@ repository_config = {
                 'volume':'epsilon',
             },
             'Profile':{
-                'dump':{
+                'multi':{
                     'description':'Special profile for timecode track extracted from matroska',
                     'default':{
                         'tvshow':{'volume':'epsilon'},
                         'movie':{'volume':'epsilon'},
                     },
                 },
+                'stereo':{
+                    'description':'Special profile for timecode track extracted from matroska',
+                    'default':{
+                        'tvshow':{'volume':'epsilon'},
+                        'movie':{'volume':'epsilon'},
+                    },
+                },
+                
             },
         },
     },
