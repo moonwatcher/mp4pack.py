@@ -7,10 +7,15 @@ import hashlib
 import chardet
 import copy
 import textwrap
+import plistlib
+import xml.sax.saxutils
 
+from datetime import datetime
 from config import repository_config
+from config import media_property
 from db import theEntityManager
-
+from subprocess import Popen, PIPE
+import xml.etree.cElementTree as ElementTree
 
 # Generic file loading function
 def make_media_file(file_path):
@@ -40,6 +45,7 @@ class Container(object):
         self.logger = logging.getLogger('mp4pack.container')
         self.file_path = file_path
         self.path_info = None
+        self.info = None
         self.file_info = None
         self.related = None
         self.meta = None
@@ -54,6 +60,7 @@ class Container(object):
         Container.load_path_info(self)
         if self.path_info is not None:
             result = True
+            self.load_info()
             self.load_file_info()
             self.load_related()
             self.load_meta()
@@ -66,9 +73,16 @@ class Container(object):
     
     def unload(self):
         self.path_info = None
+        self.info = None
         self.file_info = None
         self.related = None
         self.meta = None
+    
+    
+    def load_info(self):
+        self.info = None
+        if self.file_path:
+            theFileUtil.load_info(self.file_path)
     
     
     def load_path_info(self):
@@ -208,14 +222,6 @@ class Container(object):
             self.meta = None
             
         return result
-    
-    
-    def load_media_info(self):
-        mediainfo = {'General':{}, 'Audio':[], 'Video':[], 'Text':[], 'Menu':{}}
-        command = theFileUtil.initialize_command('mediainfo', self.logger)
-        command.extend(['--Language=raw', '-f', self.file_path])
-        output, error = theFileUtil.execute(command, None)
-        mediainfo_report = unicode(output, 'utf-8').splitlines()
     
     
     def info(self, options):
@@ -442,11 +448,6 @@ class Container(object):
         return result
     
     
-    mediainfo_general_block = re.compile('^General$')
-    mediainfo_video_block = re.compile('^Video(?: #([0-9]+))?$')
-    mediainfo_audio_block = re.compile('^Audio(?: #([0-9]+))?$')
-    mediainfo_text_block = re.compile('^Text(?: #([0-9]+))?$')
-    mediainfo_menu_block = re.compile('^Menu$')
 
 
 class AudioVideoContainer(Container):
@@ -1408,6 +1409,8 @@ class Text(Container):
     
 
 
+
+
 # Audiocode Class
 class Timecode(Text):
     def __init__(self, file_path, autoload=True):
@@ -1478,6 +1481,8 @@ class Timecode(Text):
     
     
     timecode_line_re = re.compile('^[0-9]+$')
+
+
 
 
 # Subtitle Class
@@ -1768,6 +1773,8 @@ class SubtitleBlock(object):
     
 
 
+
+
 # Chapter Class
 class Chapter(Text):
     def __init__(self, file_path, autoload=True):
@@ -1890,6 +1897,8 @@ class ChapterMarker(object):
     
 
 
+
+
 # Artwork Class
 class Artwork(Container):
     def __init__(self, file_path, autoload=True):
@@ -1956,6 +1965,8 @@ class Artwork(Container):
                             self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
                             image.save(dest_path)
     
+
+
 
 
 # Subtitle Filter Class (Singleton)
@@ -2130,6 +2141,8 @@ class ReplaceFilterSequence(FilterSequence):
     
 
 
+
+
 # File Utility Class (Singletone)
 class FileUtil(object):
     def __init__(self):
@@ -2153,6 +2166,159 @@ class FileUtil(object):
             if tag[2] is not None:
                 self.mp4info_tag_map[tag[2]] = tag
         
+        
+        
+        self.property_map = {}
+        for key in ('name', 'mediainfo', 'mp4info'):
+            self.property_map[key] = {}
+            for block in ('file', 'tag'):
+                self.property_map[key][block] = {}
+                for p in media_property[block]:
+                    if key in p and p[key] is not None:
+                        self.property_map[key][block][p[key]] = p
+            
+            self.property_map[key]['track'] = {}
+            for block in ('audio', 'video', 'text'):
+                self.property_map[key]['track'][block] = {}
+                for p in media_property['track']['common']:
+                    if key in p and p[key] is not None:
+                        self.property_map[key]['track'][block][p[key]] = p
+                    
+                for p in media_property['track'][block]:
+                    if key in p and p[key] is not None:
+                        self.property_map[key]['track'][block][p[key]] = p
+        
+        self.property_map['plist'] = {}
+        for block in ('name', 'plist'):
+            self.property_map[block]['itunemovi'] = {}
+            for p in media_property['itunemovi']:
+                self.property_map[block]['itunemovi'][p[block]] = p
+    
+    
+    def format_mediainfo_value(self, kind, value):
+        result = value
+        if kind == 'int':
+            result = int(value)
+        elif kind == 'float':
+            result = float(value)
+        elif kind == 'date':
+            match = self.full_utc_datetime.search(value)
+            if match:
+                tm = []
+                for idx,p in enumerate(match.groups()):
+                    if p is None:
+                        if idx > 2: tm.append(0)
+                        else: tm.append(1)
+                    else: tm.append(int(p))
+                result = datetime(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5])
+        elif kind == 'bool':
+            if self.true_value.search(value) is not None:
+                result = True
+            else:
+                result = False
+        return result
+    
+    
+    def load_mp4info(self, path, info):
+        proc = Popen(['/Users/lg/workspace/mp4v2/stage/399/bin/mp4info', path], stdout=PIPE, stderr=PIPE)
+        report = proc.communicate()
+        mp4info_report = unicode(report[0], 'utf-8').splitlines()
+        for line in mp4info_report:
+            match = self.mp4info_tag.search(line)
+            if match is not None:
+                tag = match.groups()
+                if tag[0] in self.property_map['mp4info']['tag']:
+                    n = self.property_map['mp4info']['tag'][tag[0]]
+                    info['tag'][n['name']] = tag[1]
+    
+    
+    def load_info(self, path):
+        info = None
+        command = theFileUtil.initialize_command('mediainfo', self.logger)
+        command.extend([u'--Language=raw', u'--Output=XML', u'-f', path])
+        proc_mediainfo = Popen(command, stdout=PIPE, stderr=PIPE)
+        proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
+        report = proc_grep.communicate()
+        element = ElementTree.fromstring(report[0])
+        file_nodes = element.findall(u'File')
+        if file_nodes:
+            track_nodes = file_nodes[0].findall(u'track')
+            if track_nodes:
+                info = {'file':{}, 'tag':{}, 'track':[], 'menu':[]}
+                for tn in track_nodes:
+                    if 'type' in tn.attrib:
+                        track_type = tn.attrib['type'].lower()
+                        if track_type == 'general':
+                            for t in tn:
+                                if t.tag in self.property_map['mediainfo']['tag']:
+                                    p = self.property_map['mediainfo']['tag'][t.tag]
+                                    info['tag'][p['name']] = t.text
+                                elif t.tag in self.property_map['mediainfo']['file']:
+                                    p = self.property_map['mediainfo']['file'][t.tag]
+                                    info['file'][p['name']] = t.text
+                        elif track_type in self.property_map['mediainfo']['track']:
+                            track = {}
+                            for t in tn:
+                                if t.tag in self.property_map['mediainfo']['track'][track_type]:
+                                    p = self.property_map['mediainfo']['track'][track_type][t.tag]
+                                    value = self.format_mediainfo_value(p['type'], t.text)
+                                    track[p['name']] = value
+                            if track:
+                                track['type'] = track_type
+                                info['track'].append(track)
+                        elif track_type == 'menu':
+                            for t in tn:
+                                match = self.mediainfo_chapter_timecode.search(t.tag)
+                                if match != None:
+                                    c = {}
+                                    tc = match.groups()
+                                    c['time'] = (int(tc[0]) * 3600 + int(tc[1]) * 60 + int(tc[2])) * 1000 + int(tc[3])
+                                    c['name'] = t.text
+                                    info['menu'].append(c)
+                
+                # Add tag info from mp4info
+                if 'format' in info['file'] and info['file']['format'] == 'MPEG-4':
+                    self.load_mp4info(path, info)
+                
+                # Handle Special Atoms
+                if 'itunmovi' in info['tag']:
+                    info['tag']['itunmovi'] = xml.sax.saxutils.unescape(self.clean_xml.sub(u'', info['tag']['itunmovi']), {u'&quot;':u'"'}).strip()
+                    if info['tag']['itunmovi']:
+                        plist = plistlib.readPlistFromString(info['tag']['itunmovi'].encode('utf-8'))
+                        for k,v in self.property_map['plist']['itunemovi'].iteritems():
+                            if k in plist:
+                                l = [ n['name'] for n in plist[k]]
+                                if l: info['tag'][v['name']] = l
+                if 'itunextc' in info['tag']:
+                    match = self.itunextc_structure.search(info['tag']['itunextc'])
+                    if match is not None:
+                        info['tag']['rating standard'] = match.group(1)
+                        info['tag']['rating'] = match.group(2)
+                        info['tag']['rating score'] = match.group(3)
+                        info['tag']['rating annotation'] = match.group(4)
+                if 'track position' in info['tag']:
+                    info['tag']['track #'] = u'{0} / {1}'.format(info['tag']['track position'], info['tag']['track total'])
+                if 'disk position' in info['tag']:
+                    info['tag']['disk #'] = u'{0} / {1}'.format(info['tag']['disk position'], info['tag']['disk total'])
+                if 'cover' in info['tag']:
+                    info['tag']['cover'] = info['tag']['cover'].count('Yes')
+                if 'genre type' in info['tag']:
+                        info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
+                
+                # Format info fields
+                for k,v in info['tag'].iteritems():
+                    value = self.format_mediainfo_value(self.property_map['name']['tag'][k]['type'], v)
+                    info['tag'][k] = value
+                for k,v in info['file'].iteritems():
+                    value = self.format_mediainfo_value(self.property_map['name']['file'][k]['type'], v)
+                    info['file'][k] = value
+        return info
+    
+    
+    
+    
+    
+    
     
     
     def canonic_tag_name_from_mp4info(self, name):
@@ -2544,6 +2710,14 @@ class FileUtil(object):
     iec_byte_power_name = {0:'Byte', 1:'KiB', 2:'MiB', 3:'GiB', 4:'TiB'}
     sentence_end = re.compile(ur'[.!?]')
     whitespace_re = re.compile(ur'\s+', re.UNICODE)
+    
+    
+    clean_xml = re.compile(ur'\s+/\s+(?:\t)*', re.UNICODE)
+    itunextc_structure = re.compile(ur'([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)?')
+    true_value = re.compile(ur'yes|true|1', re.IGNORECASE)
+    full_utc_datetime = re.compile(u'(?:UTC )?([0-9]{4})(?:-([0-9]{2})(?:-([0-9]{2})(?: ([0-9]{2}):([0-9]{2}):([0-9]{2}))?)?)?', re.UNICODE)
+    mediainfo_chapter_timecode = re.compile(u'_([0-9]{2})_([0-9]{2})_([0-9]{2})\.([0-9]{3})')
+    mp4info_tag = re.compile(u' ([^:]+): (.*)$')
 
 
 # Singleton
