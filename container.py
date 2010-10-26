@@ -33,6 +33,8 @@ def make_media_file(file_path):
         f = Artwork(file_path, autoload=False)
     elif file_type in theFileUtil.container['raw audio']['kind']:
         f = RawAudio(file_path, autoload=False)
+    elif file_type in theFileUtil.container['avi']['kind']:
+        f = Avi(file_path, autoload=False)
         
     return f
 
@@ -108,7 +110,7 @@ class Container(object):
                         prefix = os.path.dirname(self.file_path)
                         if self.path_info['kind'] in theFileUtil.kind_with_language:
                             prefix, lang = os.path.split(prefix)
-                            if lang in theFileUtil.property_map['iso3']['language']:
+                            if lang in theFileUtil.property_map['iso3t']['language']:
                                 self.path_info['language'] = lang
     
     
@@ -119,7 +121,7 @@ class Container(object):
             for k in repository_config['Kind']:
                 for p in repository_config['Kind'][k]['Profile']:
                     if repository_config['Kind'][k]['container'] in ('subtitles', 'raw audio'):
-                        for l in theFileUtil.property_map['iso3']['language']:
+                        for l in theFileUtil.property_map['iso3t']['language']:
                             i = copy.deepcopy(self.path_info)
                             i['volume'] = v
                             i['kind'] = k
@@ -181,10 +183,12 @@ class Container(object):
                     self.meta['album'] = episode['show']
                 if 'season_number' in episode:
                     self.meta['tv season'] = episode['season_number']
-                    self.meta['disk #'] = episode['season_number']
+                    self.meta['disk position'] = episode['season_number']
+                    self.meta['disk total'] = 0
                 if 'episode_number' in episode:
                     self.meta['tv episode #'] = episode['episode_number']
-                    self.meta['track #'] = episode['episode_number']
+                    self.meta['track position'] = episode['episode_number']
+                    self.meta['track total'] = 0
                 if 'name' in episode:
                     self.meta['name'] = episode['name']
                 if 'overview' in episode:
@@ -193,8 +197,11 @@ class Container(object):
                     s = FileUtil.sentence_end.split(overview.strip('\'".,'))
                     if s: self.meta['description'] = s[0].strip('"\' ').strip() + '.'
                 if 'released' in episode:
-                    self.meta['release date'] = episode['released'].strftime('%Y-%m-%d')
+                    self.meta['release date'] = episode['released']
                     
+                self.meta['track #'] = u'{0} / {1}'.format(self.meta['track position'], self.meta['track total'])
+                self.meta['disk #'] = u'{0} / {1}'.format(self.meta['disk position'], self.meta['disk total'])
+                
                 self.load_cast(episode, False, True)
                 result = True
                 
@@ -424,19 +431,22 @@ class Container(object):
         result = None
         result = theFileUtil.format_info_title(self.file_path)
         if self.related:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'file'), self.print_file_info()))
-        if self.related:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'related'), self.print_related()))
+        if self.related:
+            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'file'), self.print_file_info()))
         if self.path_info:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'path info'), self.print_path_info()))
-        if self.meta:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'metadata'), self.print_meta()))
-        if self.info['track']:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tracks'), self.print_tracks()))
-        if self.info['tag']:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
+        
         if self.info['menu']:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'chapter markers'), self.print_chapter_markers()))
+        
+        if self.info['tag']:
+            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
+        if self.meta:
+            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'metadata'), self.print_meta()))
+        
+        if self.info['track']:
+            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tracks'), self.print_tracks()))
         return result
     
     
@@ -452,26 +462,43 @@ class AudioVideoContainer(Container):
         return Container.valid(self) and self.info['track']
     
     
-    def video_width(self):
-        result = 0
+    def load(self):
+        result = Container.load(self)
+        if result and self.meta:
+            self.meta['hd video'] = self.hd_video()
+        return result
+    
+    
+    def main_video_track(self):
+        result = None
         if self.info['track']:
             for t in self.info['track']:
-                if t['type'] == 'video' and 'width' in t:
-                    result = t['width']
-                    break
+                if t['type'] == 'video':
+                    if not result or t['bit rate'] > result['bit rate']:
+                        result = t
         return result
+    
+    
+    def video_width(self):
+        result = 0
+        v = self.main_video_track()
+        if v: result = v['width']
+        return result
+    
+    
+    def hd_video(self):
+        return self.video_width() > repository_config['Default']['hd video min width']
     
     
     def playback_height(self):
         result = 0
-        if self.info['track']:
-            for t in self.info['track']:
-                if t['type'] == 'video' and 'pixel aspect ratio' in t:
-                    if t['pixel aspect ratio'] >= repository_config['Default']['display aspect ratio']:
-                        result = t['width'] / t['pixel aspect ratio']
-                    else:
-                        result = t['height']
-                    break
+        v = self.main_video_track()
+        if v:
+            if v['display aspect ratio'] >= repository_config['Default']['display aspect ratio']:
+                result = v['width'] / v['display aspect ratio']
+            else:
+                result = v['height']
+            
         return result
     
     
@@ -492,7 +519,7 @@ class AudioVideoContainer(Container):
                     for marker in self.info['menu']:
                         c.add_chapter_marker(marker['time'], marker['name'])
                         
-                    self.logger.info(u'Extracting chapter markers from %s to %s', self.file_path, dest_path)
+                    self.logger.info(u'Extracting chapter markers from %s --> %s', self.file_path, dest_path)
                     c.write(dest_path)
                     if theFileUtil.clean_if_not_exist(dest_path):
                         result.append(dest_path)
@@ -508,10 +535,7 @@ class AudioVideoContainer(Container):
                 dest_path = theFileUtil.canonic_path(info, self.meta)
                 if dest_path is not None:
                     pc = repository_config['Kind'][info['kind']]['Profile'][info['profile']]
-                    selected = {
-                        'related':{},
-                        'track':{}
-                    }
+                    selected = { 'related':{}, 'track':{} }
                     
                     if 'pack' in pc:
                         # locate related files that need to be muxed in
@@ -537,35 +561,53 @@ class AudioVideoContainer(Container):
                     
                     if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                         command = theFileUtil.initialize_command('mkvmerge', self.logger)
-                        command.extend([u'--output', dest_path, u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
+                        command.extend([u'--output', dest_path, u'--no-global-tags', u'--no-track-tags', u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
                         
-                        for t in selected['track']['audio'] + selected['track']['video']:
+                        if 'name' in self.meta and self.meta['name']:
+                            command.append(u'--title')
+                            command.append(self.meta['name'])
+                            
+                        for t in selected['track']['video']:
                             if 'name' in t:
                                 command.append(u'--track-name')
-                                command.append(u'{0}:{1}'.format(t['number'], t['name']))
-                            
+                                command.append(u'{0}:{1}'.format(t['id'], t['name']))
                             if 'language' in t:
                                 command.append(u'--language')
-                                command.append(u'{0}:{1}'.format(t['number'], t['language']))
+                                command.append(u'{0}:{1}'.format(t['id'], t['language']))
+                                
+                        for t in selected['track']['audio']:
+                            if 'channels' in t:
+                                if t['channels'] < 2: tname = 'Mono'
+                                elif t['channels'] > 2: tname = 'Surround'
+                                else: tname = 'Stereo'
+                                command.append(u'--track-name')
+                                command.append(u'{0}:{1}'.format(t['id'], tname))
+                            if 'language' in t:
+                                command.append(u'--language')
+                                command.append(u'{0}:{1}'.format(t['id'], t['language']))
                                 
                         command.append(u'--audio-tracks')
-                        command.append(u','.join([ unicode(k['number']) for k in selected['track']['audio'] ]))
+                        command.append(u','.join([ unicode(k['id']) for k in selected['track']['audio'] ]))
                         command.append(u'--video-tracks')
-                        command.append(u','.join([ unicode(k['number']) for k in selected['track']['video'] ]))
+                        command.append(u','.join([ unicode(k['id']) for k in selected['track']['video'] ]))
                         command.append(self.file_path)
                         
                         if 'ac3' in selected['related']:
                             for r in selected['related']['ac3']:
-                                i = self.related[r]
-                                #if r in selected['tc for ac3']:
-                                #    tc = Timecode(selected['tc for ac3'][r])
-                                #    delay = tc.timecodes[0]
-                                #    if delay != 0:
-                                #        command.append(u'--sync')
-                                #        command.append(u'0:{0}'.format(delay))
-                                
+                                # try to locate the DTS sound track from which the AC-3 track was transcoded
+                                # if a match is found duplicate the delay
+                                # checking exact duration ir sample cound migth be more accurate
+                                lookup = {'codec':'DTS', 'language':self.related[r]['language']}
+                                for t in self.info['track']:
+                                    if all((k in t and t[k] == v) for k,v in lookup.iteritems()):
+                                        if 'delay' in t and t['delay'] != 0:
+                                            self.logger.debug(u'Found a matching DTS track with non trivial delay of %d', t['delay'])
+                                            command.append(u'--sync')
+                                            command.append(u'0:{0}'.format(t['delay']))
+                                            break
+                                            
                                 command.append(u'--language')
-                                command.append(u'0:{0}'.format(i['language']))
+                                command.append(u'0:{0}'.format(self.related[r]['language']))
                                 command.append(r)
                         
                         if 'srt' in selected['related']:
@@ -652,6 +694,16 @@ class AudioVideoContainer(Container):
 
 
 # Matroska Class
+class Avi(AudioVideoContainer):
+    def __init__(self, file_path, autoload=True):
+        AudioVideoContainer.__init__(self, file_path, autoload)
+        self.logger = logging.getLogger('mp4pack.avi')
+        if autoload:
+            self.load()
+    
+
+
+# Matroska Class
 class Matroska(AudioVideoContainer):
     def __init__(self, file_path, autoload=True):
         AudioVideoContainer.__init__(self, file_path, autoload)
@@ -665,21 +717,12 @@ class Matroska(AudioVideoContainer):
         if options.profile is None or theFileUtil.profile_valid_for_kind(options.profile, 'srt'):
             selected = {
                 'track':[], 
-                'path':{
-                    'subtitles':[], 
-                    'audio':[],
-                },
-                'extract':{
-                    'subtitles':[], 
-                    'audio':[],
-                }
-                
+                'path':{ 'text':[], 'audio':[] },
+                'extract':{ 'text':[], 'audio':[] }
             }
-            
             info = theFileUtil.copy_path_info(self.path_info, options)
             if 'volume' in info: del info['volume']
             info['profile'] = 'dump'
-            
             for k in ('srt', 'ass', 'dts'):
                 if 'volume' in info: del info['volume']
                 info['kind'] = k
@@ -689,13 +732,13 @@ class Matroska(AudioVideoContainer):
                         for t in self.info['track']:
                             for c in pc['extract']['tracks']:
                                 if all((k in t and t[k] == v) for k,v in c.iteritems()):
+                                    t['kind'] = k
                                     selected['track'].append(t)
                                     break
                                     
             if selected['track']:
                 command = theFileUtil.initialize_command('mkvextract', self.logger)
                 command.extend([u'tracks', self.file_path ])
-                
                 for t in selected['track']:
                     if 'volume' in info: del info['volume']
                     info['kind'] = t['kind']
@@ -703,37 +746,27 @@ class Matroska(AudioVideoContainer):
                     if theFileUtil.complete_info_default_values(info):
                         dest_path = theFileUtil.canonic_path(info, self.meta)
                         if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
-                            if t['kind'] == 'dts':
-                                tc_info = theFileUtil.copy_path_info(info, options)
-                                tc_info['kind'] = 'tc'
-                                if theFileUtil.complete_info_default_values(tc_info):
-                                    tc_dest_path = theFileUtil.canonic_path(tc_info, self.meta)
-                                    if theFileUtil.varify_if_path_available(tc_dest_path, options.overwrite):
-                                        
-                                        command.append(u'{0}:{1}'.format(unicode(t['number']), dest_path))
-                                        selected['path'][t['type']].append(dest_path)
-                            else:
-                                command.append(u'{0}:{1}'.format(unicode(t['number']), dest_path))
-                                selected['path'][t['type']].append(dest_path)
+                            command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
+                            selected['path'][t['type']].append(dest_path)
                                 
-            if selected['path']['subtitles'] or selected['path']['audio']:
+            if selected['path']['text'] or selected['path']['audio']:
                 message = u'Extract {0} subtitle and {1} audio tracks from {2}'.format(
-                    unicode(len(selected['path']['subtitles'])), 
+                    unicode(len(selected['path']['text'])), 
                     unicode(len(selected['path']['audio'])), 
                     self.file_path
                 )
                 theFileUtil.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                 
-            for k in selected['path'].keys():
+            for k in selected['path']:
                 for p in selected['path'][k]:
                     if theFileUtil.clean_if_not_exist(p):
                         selected['extract'][k].append(p)
             
-            if selected['extract']['subtitles']:
+            if selected['extract']['text']:
                 o = copy.deepcopy(options)
                 o.transcode = 'srt'
                 o.extract = None
-                for p in selected['extract']['subtitles']:
+                for p in selected['extract']['text']:
                     s = Subtitle(p)
                     s.transcode(o)
                     result.append(p)
@@ -767,15 +800,12 @@ class Mpeg4(AudioVideoContainer):
         AudioVideoContainer.tag(self, options)
         tc = None
         update = {}
-        width = self.video_width()
-        if width > repository_config['Default']['hd video min width']:
-            update['hd video'] = 'yes'
-        else:
-            update['hd video'] = 'no'
-            
         if self.meta:
-            for k in [k for k,v in self.meta.iteritems() if k not in self.info['tag'] or self.info['tag'][k] != v]:
-                update[k] = self.meta[k]
+            for k in [ 
+                k for k,v in self.meta.iteritems()
+                if theFileUtil.property_map['name']['tag'][k]['subler'] 
+                and (k not in self.info['tag'] or self.info['tag'][k] != v)
+            ]: update[k] = self.meta[k]
                     
         elif self.path_info:
             if self.is_movie():
@@ -790,9 +820,8 @@ class Mpeg4(AudioVideoContainer):
                 if 'name' in self.path_info and not('name' in self.info['tag'] and self.path_info['name'] == self.info['tag']['name']):
                     update['name'] = self.path_info['name']
         if update:
-            tc = u''.join([u'{{{0}:{1}}}'.format(theFileUtil.property_map['name']['tag'][t]['subler'], theFileUtil.escape_for_subler_tag(update[t])) for t in sorted(set(update))])
-            message = u'Tag {0} {1}'.format(self.file_path, u','.join(sorted(set(update.keys()))))
-            self.logger.info(u'Update %s --> %s', u', '.join(sorted(set(update.keys()))), self.file_path)
+            tc = u''.join([theFileUtil.format_key_value_for_subler(t, update[t]) for t in sorted(set(update))])
+            message = u'Update tags: {0} --> {1}'.format(u', '.join([theFileUtil.property_map['name']['tag'][t]['print'] for t in sorted(set(update.keys()))]), self.file_path)
             command = theFileUtil.initialize_command('subler', self.logger)
             command.extend([u'-i', self.file_path, u'-t', tc])
             theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
@@ -863,7 +892,7 @@ class Mpeg4(AudioVideoContainer):
                                 command.extend([
                                     u'-i', self.file_path,
                                     u'-s', p, 
-                                    u'-l', theFileUtil.property_map['iso3']['language'][i['language']]['print'],
+                                    u'-l', theFileUtil.property_map['iso3t']['language'][i['language']]['print'],
                                     u'-n', c['to']['Name'], 
                                     u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
                                 ])
@@ -875,12 +904,12 @@ class Mpeg4(AudioVideoContainer):
                         for code in smart_section['order']:
                             for (p,i) in selected.iteritems():
                                 if i['language'] == code:
-                                    message = u'Update smart {0} subtitles {1} --> {2}'.format(theFileUtil.property_map['iso3']['language'][code]['print'], p, self.file_path)
+                                    message = u'Update smart {0} subtitles {1} --> {2}'.format(theFileUtil.property_map['iso3t']['language'][code]['print'], p, self.file_path)
                                     command = theFileUtil.initialize_command('subler', self.logger)
                                     command.extend([
                                         u'-i', self.file_path, 
                                         u'-s', p, 
-                                        u'-l', theFileUtil.property_map['iso3']['language'][smart_section['language']]['print'],
+                                        u'-l', theFileUtil.property_map['iso3t']['language'][smart_section['language']]['print'],
                                         u'-n', smart_section['Name'], 
                                         u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
                                     ])
@@ -1575,7 +1604,7 @@ class DropFilterSequence(FilterSequence):
                     keep = True
                     for e in self.expression:
                         if e.search(line) is not None:
-                            self.logger.debug(u'Found match in %s', line)
+                            self.logger.debug(u'Drop %s', line)
                             keep = False
                             break
                     if keep:
@@ -1586,7 +1615,7 @@ class DropFilterSequence(FilterSequence):
                 for line in block.lines:
                     for e in self.expression:
                         if e.search(line) is not None:
-                            self.logger.debug(u'Found match in %s', line)
+                            self.logger.debug(u'Drop %s', line)
                             keep = False
                             break
                     if not keep:
@@ -1628,7 +1657,7 @@ class ReplaceFilterSequence(FilterSequence):
                         filtered_line = e[0].sub(e[1], line)
                         block.add_line(filtered_line)
                         if line != filtered_line:
-                            self.logger.debug(u'Replaced "%s" with "%s"', line, filtered_line)
+                            self.logger.debug(u'Replaced "%s" --> "%s"', line, filtered_line)
                     if not block.valid(): break
                         
             elif self.config['scope'] == 'block':
@@ -1637,7 +1666,7 @@ class ReplaceFilterSequence(FilterSequence):
                 for e in self.expression:
                     filtered_lines = e[0].sub(e[1], all_lines).strip()
                     if all_lines != filtered_lines:
-                        self.logger.debug(u'Replaced "%s" with "%s"', all_lines, filtered_lines)
+                        self.logger.debug(u'Replaced "%s" --> "%s"', all_lines, filtered_lines)
                     if not filtered_lines: 
                         break
                 if filtered_lines:
@@ -1704,12 +1733,13 @@ class FileUtil(object):
                 for p in media_property[block]:
                     self.property_map[key][block][p[key]] = p
         
-        for key in ('name', 'iso3'):
+        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
             if key not in self.property_map:
                 self.property_map[key] = {}
             self.property_map[key]['language'] = {}
             for p in media_property['language']:
-                self.property_map[key]['language'][p[key]] = p
+                if key in p:
+                    self.property_map[key]['language'][p[key]] = p
     
     
     def convert_mediainfo_value(self, kind, value):
@@ -1737,7 +1767,9 @@ class FileUtil(object):
     
     
     def load_mp4info(self, path, info):
-        proc = Popen(['/Users/lg/workspace/mp4v2/stage/399/bin/mp4info', path], stdout=PIPE, stderr=PIPE)
+        command = theFileUtil.initialize_command('mp4info', self.logger)
+        command.append(path)
+        proc = Popen(command, stdout=PIPE, stderr=PIPE)
         report = proc.communicate()
         mp4info_report = unicode(report[0], 'utf-8').splitlines()
         for line in mp4info_report:
@@ -1769,7 +1801,7 @@ class FileUtil(object):
                             for t in tn:
                                 if t.tag in self.property_map['mediainfo']['tag']:
                                     p = self.property_map['mediainfo']['tag'][t.tag]
-                                    info['tag'][p['name']] = t.text
+                                    info['tag'][p['name']] = xml.sax.saxutils.unescape(t.text, {u'&quot;':u'"'})
                                 elif t.tag in self.property_map['mediainfo']['file']:
                                     p = self.property_map['mediainfo']['file'][t.tag]
                                     info['file'][p['name']] = t.text
@@ -1825,7 +1857,8 @@ class FileUtil(object):
                 if 'cover' in info['tag']:
                     info['tag']['cover'] = info['tag']['cover'].count('Yes')
                 if 'genre type' in info['tag']:
-                        info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
+                    info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
+                    info['tag']['genre'] =  self.property_map['code']['gnre'][info['tag']['genre type']['print']]
                 
                 # Format info fields
                 for k,v in info['tag'].iteritems():
@@ -1887,7 +1920,7 @@ class FileUtil(object):
                             result = os.path.join(result, info['tv show key'], str(info['tv season']))
                         
                         if info['kind'] in self.kind_with_language:
-                            if 'language' in info and info['language'] in self.property_map['iso3']['language']:
+                            if 'language' in info and info['language'] in self.property_map['iso3t']['language']:
                                 result = os.path.join(result, info['language'])
                             else:
                                 valid = False
@@ -2130,10 +2163,32 @@ class FileUtil(object):
         return '{0:02d}:{1:02d}:{2:02d}{3}{4:03d}'.format(hours, minutes, seconds, millisecond_sep, milliseconds)
     
     
-    def escape_for_subler_tag(self, value):
-        if value and isinstance(value, unicode) and FileUtil.escaped_subler_tag_characters.issubset(value):
-            value = value.replace(u'{',u'&#123;').replace(u'}',u'&#125;').replace(u':',u'&#58;')
-        return value
+    def format_key_value_for_subler(self, key, value):
+        m = self.property_map['name']['tag'][key]
+        if 'subler' in m:
+            pkey = m['subler']
+            if m['type'] == 'enum':
+                pvalue = self.property_map['code'][m['atom']][value]['print']
+            elif m['type'] in ('string', 'list'):
+                if m['type'] == 'list':
+                    pvalue = u', '.join(value)
+                else:
+                    if key == 'language':
+                        pvalue = self.property_map['iso3t']['language'][value]['print']
+                    else:
+                        pvalue = unicode(value)
+                pvalue = pvalue.replace(u'{',u'&#123;').replace(u'}',u'&#125;').replace(u':',u'&#58;')
+            elif m['type'] == 'bool':
+                if value: pvalue = u'yes'
+                else: pvalue = u'no'
+            elif m['type'] == 'date':
+                pvalue = value.strftime('%Y-%m-%d %H:%M:%S')
+            elif m['type'] == 'int':
+                pvalue = unicode(value)
+            else:
+                pvalue = value
+                
+        return u'{{{0}:{1}}}'.format(pkey, pvalue)
     
     
     def bytes_to_human_readable(self, value):
@@ -2185,7 +2240,7 @@ class FileUtil(object):
                 if m['type'] == 'list': pvalue = u', '.join(value)
                 else:
                     if key == 'language':
-                        pvalue = self.property_map['iso3']['language'][value]['print']
+                        pvalue = self.property_map['iso3t']['language'][value]['print']
                     else:
                         pvalue = unicode(value)
                 if len(pvalue) > FileUtil.format_wrap_width:

@@ -584,7 +584,7 @@ media_property = {
             'atom':'iTunMOVI',
             'mediainfo':None,
             'mp4info': None,
-            'subler':'Directors',
+            'subler':'Director',
             'print':'Directors',
             'type':'list',
         },
@@ -945,1117 +945,1303 @@ media_property = {
             'name':'unknown',
             'print':'Unknown',
             'iso2':None,
-            'iso3':'und'
+            'iso3t':'und',
+            'iso3b':'und'
         },
         {
             'name':'afar',
             'print':'Afar',
             'iso2':'aa',
-            'iso3':'aar',
+            'iso3t':'aar',
+            'iso3b':'aar'
         },
         {
             'name':'abkhazian',
             'print':'Abkhazian',
             'iso2':'ab',
-            'iso3':'abk',
+            'iso3t':'abk',
+            'iso3b':'abk'
         },
         {
             'name':'afrikaans',
             'print':'Afrikaans',
             'iso2':'af',
-            'iso3':'afr',
+            'iso3t':'afr',
+            'iso3b':'afr'
         },
         {
             'name':'akan',
             'print':'Akan',
             'iso2':'ak',
-            'iso3':'aka',
+            'iso3t':'aka',
+            'iso3b':'aka'
         },
         {
             'name':'albanian',
             'print':'Albanian',
             'iso2':'sq',
-            'iso3':'alb',
+            'iso3t':'sqi',
+            'iso3b':'alb'
         },
         {
             'name':'amharic',
             'print':'Amharic',
             'iso2':'am',
-            'iso3':'amh',
+            'iso3t':'amh',
+            'iso3b':'amh'
         },
         {
             'name':'arabic',
             'print':'Arabic',
             'iso2':'ar',
-            'iso3':'ara',
+            'iso3t':'ara',
+            'iso3b':'ara'
         },
         {
             'name':'aragonese',
             'print':'Aragonese',
             'iso2':'an',
-            'iso3':'arg',
+            'iso3t':'arg',
+            'iso3b':'arg'
         },
         {
             'name':'armenian',
             'print':'Armenian',
             'iso2':'hy',
-            'iso3':'arm',
+            'iso3t':'hye',
+            'iso3b':'arm'
         },
         {
             'name':'assamese',
             'print':'Assamese',
             'iso2':'as',
-            'iso3':'asm',
+            'iso3t':'asm',
+            'iso3b':'asm'
         },
         {
             'name':'avaric',
             'print':'Avaric',
             'iso2':'av',
-            'iso3':'ava',
+            'iso3t':'ava',
+            'iso3b':'ava'
         },
         {
             'name':'avestan',
             'print':'Avestan',
             'iso2':'ae',
-            'iso3':'ave',
+            'iso3t':'ave',
+            'iso3b':'ave'
         },
         {
             'name':'aymara',
             'print':'Aymara',
             'iso2':'ay',
-            'iso3':'aym',
+            'iso3t':'aym',
+            'iso3b':'aym'
         },
         {
             'name':'azerbaijani',
             'print':'Azerbaijani',
             'iso2':'az',
-            'iso3':'aze',
+            'iso3t':'aze',
+            'iso3b':'aze'
         },
         {
             'name':'bashkir',
             'print':'Bashkir',
             'iso2':'ba',
-            'iso3':'bak',
+            'iso3t':'bak',
+            'iso3b':'bak'
         },
         {
             'name':'bambara',
             'print':'Bambara',
             'iso2':'bm',
-            'iso3':'bam',
+            'iso3t':'bam',
+            'iso3b':'bam'
         },
         {
             'name':'basque',
             'print':'Basque',
             'iso2':'eu',
-            'iso3':'baq',
+            'iso3t':'eus',
+            'iso3b':'baq'
         },
         {
             'name':'belarusian',
             'print':'Belarusian',
             'iso2':'be',
-            'iso3':'bel',
+            'iso3t':'bel',
+            'iso3b':'bel'
         },
         {
             'name':'bengali',
             'print':'Bengali',
             'iso2':'bn',
-            'iso3':'ben',
+            'iso3t':'ben',
+            'iso3b':'ben'
         },
         {
             'name':'bihari',
             'print':'Bihari',
             'iso2':'bh',
-            'iso3':'bih',
+            'iso3t':'bih',
+            'iso3b':'bih'
         },
         {
             'name':'bislama',
             'print':'Bislama',
             'iso2':'bi',
-            'iso3':'bis',
+            'iso3t':'bis',
+            'iso3b':'bis'
         },
         {
             'name':'bosnian',
             'print':'Bosnian',
             'iso2':'bs',
-            'iso3':'bos',
+            'iso3t':'bos',
+            'iso3b':'bos'
         },
         {
             'name':'breton',
             'print':'Breton',
             'iso2':'br',
-            'iso3':'bre',
+            'iso3t':'bre',
+            'iso3b':'bre'
         },
         {
             'name':'bulgarian',
             'print':'Bulgarian',
             'iso2':'bg',
-            'iso3':'bul',
+            'iso3t':'bul',
+            'iso3b':'bul'
         },
         {
             'name':'burmese',
             'print':'Burmese',
             'iso2':'my',
-            'iso3':'bur',
+            'iso3t':'mya',
+            'iso3b':'bur'
         },
         {
             'name':'catalan',
             'print':'Catalan',
             'iso2':'ca',
-            'iso3':'cat',
+            'iso3t':'cat',
+            'iso3b':'cat'
         },
         {
             'name':'chamorro',
             'print':'Chamorro',
             'iso2':'ch',
-            'iso3':'cha',
+            'iso3t':'cha',
+            'iso3b':'cha'
         },
         {
             'name':'chechen',
             'print':'Chechen',
             'iso2':'ce',
-            'iso3':'che',
+            'iso3t':'che',
+            'iso3b':'che'
         },
         {
             'name':'chinese',
             'print':'Chinese',
             'iso2':'zh',
-            'iso3':'chi',
+            'iso3t':'zho',
+            'iso3b':'chi'
         },
         {
             'name':'church slavic',
             'print':'Church Slavic',
             'iso2':'cu',
-            'iso3':'chu',
+            'iso3t':'chu',
+            'iso3b':'chu'
         },
         {
             'name':'chuvash',
             'print':'Chuvash',
             'iso2':'cv',
-            'iso3':'chv',
+            'iso3t':'chv',
+            'iso3b':'chv'
         },
         {
             'name':'cornish',
             'print':'Cornish',
             'iso2':'kw',
-            'iso3':'cor',
+            'iso3t':'cor',
+            'iso3b':'cor'
         },
         {
             'name':'corsican',
             'print':'Corsican',
             'iso2':'co',
-            'iso3':'cos',
+            'iso3t':'cos',
+            'iso3b':'cos'
         },
         {
             'name':'cree',
             'print':'Cree',
             'iso2':'cr',
-            'iso3':'cre',
+            'iso3t':'cre',
+            'iso3b':'cre'
         },
         {
             'name':'czech',
             'print':'Czech',
             'iso2':'cs',
-            'iso3':'cze',
+            'iso3t':'ces',
+            'iso3b':'cze'
         },
         {
             'name':'danish',
             'print':'Danish',
             'iso2':'da',
-            'iso3':'dan',
+            'iso3t':'dan',
+            'iso3b':'dan'
         },
         {
             'name':'divehi',
             'print':'Divehi',
             'iso2':'dv',
-            'iso3':'div',
+            'iso3t':'div',
+            'iso3b':'div'
         },
         {
             'name':'dutch',
             'print':'Dutch',
             'iso2':'nl',
-            'iso3':'dut',
+            'iso3t':'nld',
+            'iso3b':'dut'
         },
         {
             'name':'dzongkha',
             'print':'Dzongkha',
             'iso2':'dz',
-            'iso3':'dzo',
+            'iso3t':'dzo',
+            'iso3b':'dzo'
         },
         {
             'name':'english',
             'print':'English',
             'iso2':'en',
-            'iso3':'eng',
+            'iso3t':'eng',
+            'iso3b':'eng'
         },
         {
             'name':'esperanto',
             'print':'Esperanto',
             'iso2':'eo',
-            'iso3':'epo',
+            'iso3t':'epo',
+            'iso3b':'epo'
         },
         {
             'name':'estonian',
             'print':'Estonian',
             'iso2':'et',
-            'iso3':'est',
+            'iso3t':'est',
+            'iso3b':'est'
         },
         {
             'name':'ewe',
             'print':'Ewe',
             'iso2':'ee',
-            'iso3':'ewe',
+            'iso3t':'ewe',
+            'iso3b':'ewe'
         },
         {
             'name':'faroese',
             'print':'Faroese',
             'iso2':'fo',
-            'iso3':'fao',
+            'iso3t':'fao',
+            'iso3b':'fao'
         },
         {
             'name':'fijian',
             'print':'Fijian',
             'iso2':'fj',
-            'iso3':'fij',
+            'iso3t':'fij',
+            'iso3b':'fij'
         },
         {
             'name':'finnish',
             'print':'Finnish',
             'iso2':'fi',
-            'iso3':'fin',
+            'iso3t':'fin',
+            'iso3b':'fin'
         },
         {
             'name':'french',
             'print':'French',
             'iso2':'fr',
-            'iso3':'fre',
+            'iso3t':'fra',
+            'iso3b':'fre'
         },
         {
             'name':'western frisian',
             'print':'Western Frisian',
             'iso2':'fy',
-            'iso3':'fry',
+            'iso3t':'fry',
+            'iso3b':'fry'
         },
         {
             'name':'fulah',
             'print':'Fulah',
             'iso2':'ff',
-            'iso3':'ful',
+            'iso3t':'ful',
+            'iso3b':'ful'
         },
         {
             'name':'georgian',
             'print':'Georgian',
             'iso2':'ka',
-            'iso3':'geo',
+            'iso3t':'kat',
+            'iso3b':'geo'
         },
         {
             'name':'german',
             'print':'German',
             'iso2':'de',
-            'iso3':'ger',
+            'iso3t':'deu',
+            'iso3b':'ger'
         },
         {
-            'name':'gaelic',
+            'name':'gaelic (scots)',
             'print':'Gaelic (Scots)',
             'iso2':'gd',
-            'iso3':'gla',
+            'iso3t':'gla',
+            'iso3b':'gla'
         },
         {
             'name':'irish',
             'print':'Irish',
             'iso2':'ga',
-            'iso3':'gle',
+            'iso3t':'gle',
+            'iso3b':'gle'
         },
         {
             'name':'galician',
             'print':'Galician',
             'iso2':'gl',
-            'iso3':'glg',
+            'iso3t':'glg',
+            'iso3b':'glg'
         },
         {
             'name':'manx',
             'print':'Manx',
             'iso2':'gv',
-            'iso3':'glv',
+            'iso3t':'glv',
+            'iso3b':'glv'
         },
         {
-            'name':'greek',
+            'name':'greek, modern',
             'print':'Greek, Modern',
             'iso2':'el',
-            'iso3':'gre',
+            'iso3t':'ell',
+            'iso3b':'gre'
         },
         {
             'name':'guarani',
             'print':'Guarani',
             'iso2':'gn',
-            'iso3':'grn',
+            'iso3t':'grn',
+            'iso3b':'grn'
         },
         {
             'name':'gujarati',
             'print':'Gujarati',
             'iso2':'gu',
-            'iso3':'guj',
+            'iso3t':'guj',
+            'iso3b':'guj'
         },
         {
             'name':'haitian',
             'print':'Haitian',
             'iso2':'ht',
-            'iso3':'hat',
+            'iso3t':'hat',
+            'iso3b':'hat'
         },
         {
             'name':'hausa',
             'print':'Hausa',
             'iso2':'ha',
-            'iso3':'hau',
+            'iso3t':'hau',
+            'iso3b':'hau'
         },
         {
             'name':'hebrew',
             'print':'Hebrew',
             'iso2':'he',
-            'iso3':'heb',
+            'iso3t':'heb',
+            'iso3b':'heb'
         },
         {
             'name':'herero',
             'print':'Herero',
             'iso2':'hz',
-            'iso3':'her',
+            'iso3t':'her',
+            'iso3b':'her'
         },
         {
             'name':'hindi',
             'print':'Hindi',
             'iso2':'hi',
-            'iso3':'hin',
+            'iso3t':'hin',
+            'iso3b':'hin'
         },
         {
             'name':'hiri motu',
             'print':'Hiri Motu',
             'iso2':'ho',
-            'iso3':'hmo',
+            'iso3t':'hmo',
+            'iso3b':'hmo'
         },
         {
             'name':'hungarian',
             'print':'Hungarian',
             'iso2':'hu',
-            'iso3':'hun',
+            'iso3t':'hun',
+            'iso3b':'hun'
         },
         {
             'name':'igbo',
             'print':'Igbo',
             'iso2':'ig',
-            'iso3':'ibo',
+            'iso3t':'ibo',
+            'iso3b':'ibo'
         },
         {
             'name':'icelandic',
             'print':'Icelandic',
             'iso2':'is',
-            'iso3':'ice',
+            'iso3t':'isl',
+            'iso3b':'ice'
         },
         {
             'name':'ido',
             'print':'Ido',
             'iso2':'io',
-            'iso3':'ido',
+            'iso3t':'ido',
+            'iso3b':'ido'
         },
         {
             'name':'sichuan yi',
             'print':'Sichuan Yi',
             'iso2':'ii',
-            'iso3':'iii',
+            'iso3t':'iii',
+            'iso3b':'iii'
         },
         {
             'name':'inuktitut',
             'print':'Inuktitut',
             'iso2':'iu',
-            'iso3':'iku',
+            'iso3t':'iku',
+            'iso3b':'iku'
         },
         {
             'name':'interlingue',
             'print':'Interlingue',
             'iso2':'ie',
-            'iso3':'ile',
+            'iso3t':'ile',
+            'iso3b':'ile'
         },
         {
             'name':'interlingua',
             'print':'Interlingua',
             'iso2':'ia',
-            'iso3':'ina',
+            'iso3t':'ina',
+            'iso3b':'ina'
         },
         {
             'name':'indonesian',
             'print':'Indonesian',
             'iso2':'id',
-            'iso3':'ind',
+            'iso3t':'ind',
+            'iso3b':'ind'
         },
         {
             'name':'inupiaq',
             'print':'Inupiaq',
             'iso2':'ik',
-            'iso3':'ipk',
+            'iso3t':'ipk',
+            'iso3b':'ipk'
         },
         {
             'name':'italian',
             'print':'Italian',
             'iso2':'it',
-            'iso3':'ita',
+            'iso3t':'ita',
+            'iso3b':'ita'
         },
         {
             'name':'javanese',
             'print':'Javanese',
             'iso2':'jv',
-            'iso3':'jav',
+            'iso3t':'jav',
+            'iso3b':'jav'
         },
         {
             'name':'japanese',
             'print':'Japanese',
             'iso2':'ja',
-            'iso3':'jpn',
+            'iso3t':'jpn',
+            'iso3b':'jpn'
         },
         {
-            'name':'kalaallisut',
+            'name':'kalaallisut (greenlandic)',
             'print':'Kalaallisut (Greenlandic)',
             'iso2':'kl',
-            'iso3':'kal',
+            'iso3t':'kal',
+            'iso3b':'kal'
         },
         {
             'name':'kannada',
             'print':'Kannada',
             'iso2':'kn',
-            'iso3':'kan',
+            'iso3t':'kan',
+            'iso3b':'kan'
         },
         {
             'name':'kashmiri',
             'print':'Kashmiri',
             'iso2':'ks',
-            'iso3':'kas',
+            'iso3t':'kas',
+            'iso3b':'kas'
         },
         {
             'name':'kanuri',
             'print':'Kanuri',
             'iso2':'kr',
-            'iso3':'kau',
+            'iso3t':'kau',
+            'iso3b':'kau'
         },
         {
             'name':'kazakh',
             'print':'Kazakh',
             'iso2':'kk',
-            'iso3':'kaz',
+            'iso3t':'kaz',
+            'iso3b':'kaz'
         },
         {
             'name':'central khmer',
             'print':'Central Khmer',
             'iso2':'km',
-            'iso3':'khm',
+            'iso3t':'khm',
+            'iso3b':'khm'
         },
         {
             'name':'kikuyu',
             'print':'Kikuyu',
             'iso2':'ki',
-            'iso3':'kik',
+            'iso3t':'kik',
+            'iso3b':'kik'
         },
         {
             'name':'kinyarwanda',
             'print':'Kinyarwanda',
             'iso2':'rw',
-            'iso3':'kin',
+            'iso3t':'kin',
+            'iso3b':'kin'
         },
         {
             'name':'kirghiz',
             'print':'Kirghiz',
             'iso2':'ky',
-            'iso3':'kir',
+            'iso3t':'kir',
+            'iso3b':'kir'
         },
         {
             'name':'komi',
             'print':'Komi',
             'iso2':'kv',
-            'iso3':'kom',
+            'iso3t':'kom',
+            'iso3b':'kom'
         },
         {
             'name':'kongo',
             'print':'Kongo',
             'iso2':'kg',
-            'iso3':'kon',
+            'iso3t':'kon',
+            'iso3b':'kon'
         },
         {
             'name':'korean',
             'print':'Korean',
             'iso2':'ko',
-            'iso3':'kor',
+            'iso3t':'kor',
+            'iso3b':'kor'
         },
         {
             'name':'kuanyama',
             'print':'Kuanyama',
             'iso2':'kj',
-            'iso3':'kua',
+            'iso3t':'kua',
+            'iso3b':'kua'
         },
         {
             'name':'kurdish',
             'print':'Kurdish',
             'iso2':'ku',
-            'iso3':'kur',
+            'iso3t':'kur',
+            'iso3b':'kur'
         },
         {
             'name':'lao',
             'print':'Lao',
             'iso2':'lo',
-            'iso3':'lao',
+            'iso3t':'lao',
+            'iso3b':'lao'
         },
         {
             'name':'latin',
             'print':'Latin',
             'iso2':'la',
-            'iso3':'lat',
+            'iso3t':'lat',
+            'iso3b':'lat'
         },
         {
             'name':'latvian',
             'print':'Latvian',
             'iso2':'lv',
-            'iso3':'lav',
+            'iso3t':'lav',
+            'iso3b':'lav'
         },
         {
             'name':'limburgan',
             'print':'Limburgan',
             'iso2':'li',
-            'iso3':'lim',
+            'iso3t':'lim',
+            'iso3b':'lim'
         },
         {
             'name':'lingala',
             'print':'Lingala',
             'iso2':'ln',
-            'iso3':'lin',
+            'iso3t':'lin',
+            'iso3b':'lin'
         },
         {
             'name':'lithuanian',
             'print':'Lithuanian',
             'iso2':'lt',
-            'iso3':'lit',
+            'iso3t':'lit',
+            'iso3b':'lit'
         },
         {
             'name':'luxembourgish',
             'print':'Luxembourgish',
             'iso2':'lb',
-            'iso3':'ltz',
+            'iso3t':'ltz',
+            'iso3b':'ltz'
         },
         {
             'name':'luba-katanga',
             'print':'Luba-Katanga',
             'iso2':'lu',
-            'iso3':'lub'
+            'iso3t':'lub',
+            'iso3b':'lub'
         },
         {
             'name':'ganda',
             'print':'Ganda',
             'iso2':'lg',
-            'iso3':'lug',
+            'iso3t':'lug',
+            'iso3b':'lug'
         },
         {
             'name':'macedonian',
             'print':'Macedonian',
             'iso2':'mk',
-            'iso3':'mac',
+            'iso3t':'mkd',
+            'iso3b':'mac'
         },
         {
             'name':'marshallese',
             'print':'Marshallese',
             'iso2':'mh',
-            'iso3':'mah',
+            'iso3t':'mah',
+            'iso3b':'mah'
         },
         {
             'name':'malayalam',
             'print':'Malayalam',
             'iso2':'ml',
-            'iso3':'mal',
+            'iso3t':'mal',
+            'iso3b':'mal'
         },
         {
             'name':'maori',
             'print':'Maori',
             'iso2':'mi',
-            'iso3':'mao',
+            'iso3t':'mri',
+            'iso3b':'mao'
         },
         {
             'name':'marathi',
             'print':'Marathi',
             'iso2':'mr',
-            'iso3':'mar',
+            'iso3t':'mar',
+            'iso3b':'mar'
         },
         {
             'name':'malay',
             'print':'Malay',
             'iso2':'ms',
-            'iso3':'msa',
+            'iso3t':'msa',
+            'iso3b':'msa'
         },
         {
             'name':'malagasy',
             'print':'Malagasy',
             'iso2':'mg',
-            'iso3':'mlg',
+            'iso3t':'mlg',
+            'iso3b':'mlg'
         },
         {
             'name':'maltese',
             'print':'Maltese',
             'iso2':'mt',
-            'iso3':'mlt',
+            'iso3t':'mlt',
+            'iso3b':'mlt'
         },
         {
             'name':'moldavian',
             'print':'Moldavian',
             'iso2':'mo',
-            'iso3':'mol',
+            'iso3t':'mol',
+            'iso3b':'mol'
         },
         {
             'name':'mongolian',
             'print':'Mongolian',
             'iso2':'mn',
-            'iso3':'mon',
+            'iso3t':'mon',
+            'iso3b':'mon'
         },
         {
             'name':'nauru',
             'print':'Nauru',
             'iso2':'na',
-            'iso3':'nau',
+            'iso3t':'nau',
+            'iso3b':'nau'
         },
         {
             'name':'navajo',
             'print':'Navajo',
             'iso2':'nv',
-            'iso3':'nav',
+            'iso3t':'nav',
+            'iso3b':'nav'
         },
         {
-            'name':'south ndebele',
+            'name':'ndebele, south',
             'print':'Ndebele, South',
             'iso2':'nr',
-            'iso3':'nbl',
+            'iso3t':'nbl',
+            'iso3b':'nbl'
         },
         {
-            'name':'north ndebele',
+            'name':'ndebele, north',
             'print':'Ndebele, North',
             'iso2':'nd',
-            'iso3':'nde',
+            'iso3t':'nde',
+            'iso3b':'nde'
         },
         {
             'name':'ndonga',
             'print':'Ndonga',
             'iso2':'ng',
-            'iso3':'ndo',
+            'iso3t':'ndo',
+            'iso3b':'ndo'
         },
         {
             'name':'nepali',
             'print':'Nepali',
             'iso2':'ne',
-            'iso3':'nep',
+            'iso3t':'nep',
+            'iso3b':'nep'
         },
         {
             'name':'norwegian nynorsk',
             'print':'Norwegian Nynorsk',
             'iso2':'nn',
-            'iso3':'nno',
+            'iso3t':'nno',
+            'iso3b':'nno'
         },
         {
-            'name':'norwegian bokmal',
+            'name':'norwegian bokmål',
             'print':'Norwegian Bokmål',
             'iso2':'nb',
-            'iso3':'nob'
+            'iso3t':'nob',
+            'iso3b':'nob'
         },
         {
             'name':'norwegian',
             'print':'Norwegian',
             'iso2':'no',
-            'iso3':'nor',
+            'iso3t':'nor',
+            'iso3b':'nor'
         },
         {
-            'name':'chichewa',
+            'name':'chichewa; nyanja',
             'print':'Chichewa; Nyanja',
             'iso2':'ny',
-            'iso3':'nya'
+            'iso3t':'nya',
+            'iso3b':'nya'
         },
         {
-            'name':'occitan',
+            'name':'occitan (post 1500); provençal',
             'print':'Occitan (post 1500); Provençal',
             'iso2':'oc',
-            'iso3':'oci'
+            'iso3t':'oci',
+            'iso3b':'oci'
         },
         {
             'name':'ojibwa',
             'print':'Ojibwa',
             'iso2':'oj',
-            'iso3':'oji',
+            'iso3t':'oji',
+            'iso3b':'oji'
         },
         {
             'name':'oriya',
             'print':'Oriya',
             'iso2':'or',
-            'iso3':'ori',
+            'iso3t':'ori',
+            'iso3b':'ori'
         },
         {
             'name':'oromo',
             'print':'Oromo',
             'iso2':'om',
-            'iso3':'orm',
+            'iso3t':'orm',
+            'iso3b':'orm'
         },
         {
-            'name':'ossetian',
+            'name':'ossetian; ossetic',
             'print':'Ossetian; Ossetic',
             'iso2':'os',
-            'iso3':'oss'
+            'iso3t':'oss',
+            'iso3b':'oss'
         },
         {
             'name':'panjabi',
             'print':'Panjabi',
             'iso2':'pa',
-            'iso3':'pan',
+            'iso3t':'pan',
+            'iso3b':'pan'
         },
         {
             'name':'persian',
             'print':'Persian',
             'iso2':'fa',
-            'iso3':'per',
+            'iso3t':'fas',
+            'iso3b':'per'
         },
         {
             'name':'pali',
             'print':'Pali',
             'iso2':'pi',
-            'iso3':'pli',
+            'iso3t':'pli',
+            'iso3b':'pli'
         },
         {
             'name':'polish',
             'print':'Polish',
             'iso2':'pl',
-            'iso3':'pol',
+            'iso3t':'pol',
+            'iso3b':'pol'
         },
         {
             'name':'portuguese',
             'print':'Portuguese',
             'iso2':'pt',
-            'iso3':'por',
+            'iso3t':'por',
+            'iso3b':'por'
         },
         {
             'name':'pushto',
             'print':'Pushto',
             'iso2':'ps',
-            'iso3':'pus',
+            'iso3t':'pus',
+            'iso3b':'pus'
         },
         {
             'name':'quechua',
             'print':'Quechua',
             'iso2':'qu',
-            'iso3':'que',
+            'iso3t':'que',
+            'iso3b':'que'
         },
         {
             'name':'romansh',
             'print':'Romansh',
             'iso2':'rm',
-            'iso3':'roh',
+            'iso3t':'roh',
+            'iso3b':'roh'
         },
         {
             'name':'romanian',
             'print':'Romanian',
             'iso2':'ro',
-            'iso3':'rum',
+            'iso3t':'ron',
+            'iso3b':'rum'
         },
         {
             'name':'rundi',
             'print':'Rundi',
             'iso2':'rn',
-            'iso3':'run',
+            'iso3t':'run',
+            'iso3b':'run'
         },
         {
             'name':'russian',
             'print':'Russian',
             'iso2':'ru',
-            'iso3':'rus',
+            'iso3t':'rus',
+            'iso3b':'rus'
         },
         {
             'name':'sango',
             'print':'Sango',
             'iso2':'sg',
-            'iso3':'sag',
+            'iso3t':'sag',
+            'iso3b':'sag'
         },
         {
             'name':'sanskrit',
             'print':'Sanskrit',
             'iso2':'sa',
-            'iso3':'san',
+            'iso3t':'san',
+            'iso3b':'san'
         },
         {
             'name':'serbian',
             'print':'Serbian',
             'iso2':'sr',
-            'iso3':'scc',
+            'iso3t':'srp',
+            'iso3b':'scc'
         },
         {
             'name':'croatian',
             'print':'Croatian',
             'iso2':'hr',
-            'iso3':'scr',
+            'iso3t':'hrv',
+            'iso3b':'scr'
         },
         {
             'name':'sinhala',
             'print':'Sinhala',
             'iso2':'si',
-            'iso3':'sin',
+            'iso3t':'sin',
+            'iso3b':'sin'
         },
         {
             'name':'slovak',
             'print':'Slovak',
             'iso2':'sk',
-            'iso3':'slo',
+            'iso3t':'slk',
+            'iso3b':'slo'
         },
         {
             'name':'slovenian',
             'print':'Slovenian',
             'iso2':'sl',
-            'iso3':'slv',
+            'iso3t':'slv',
+            'iso3b':'slv'
         },
         {
-            'name':'northern Sami',
+            'name':'northern sami',
             'print':'Northern Sami',
             'iso2':'se',
-            'iso3':'sme',
+            'iso3t':'sme',
+            'iso3b':'sme'
         },
         {
             'name':'samoan',
             'print':'Samoan',
             'iso2':'sm',
-            'iso3':'smo',
+            'iso3t':'smo',
+            'iso3b':'smo'
         },
         {
             'name':'shona',
             'print':'Shona',
             'iso2':'sn',
-            'iso3':'sna',
+            'iso3t':'sna',
+            'iso3b':'sna'
         },
         {
             'name':'sindhi',
             'print':'Sindhi',
             'iso2':'sd',
-            'iso3':'snd',
+            'iso3t':'snd',
+            'iso3b':'snd'
         },
         {
             'name':'somali',
             'print':'Somali',
             'iso2':'so',
-            'iso3':'som',
+            'iso3t':'som',
+            'iso3b':'som'
         },
         {
-            'name':'southern sotho',
+            'name':'sotho, southern',
             'print':'Sotho, Southern',
             'iso2':'st',
-            'iso3':'sot',
+            'iso3t':'sot',
+            'iso3b':'sot'
         },
         {
             'name':'spanish',
             'print':'Spanish',
             'iso2':'es',
-            'iso3':'spa',
+            'iso3t':'spa',
+            'iso3b':'spa'
         },
         {
             'name':'sardinian',
             'print':'Sardinian',
             'iso2':'sc',
-            'iso3':'srd',
+            'iso3t':'srd',
+            'iso3b':'srd'
         },
         {
             'name':'swati',
             'print':'Swati',
             'iso2':'ss',
-            'iso3':'ssw',
+            'iso3t':'ssw',
+            'iso3b':'ssw'
         },
         {
             'name':'sundanese',
             'print':'Sundanese',
             'iso2':'su',
-            'iso3':'sun',
+            'iso3t':'sun',
+            'iso3b':'sun'
         },
         {
             'name':'swahili',
             'print':'Swahili',
             'iso2':'sw',
-            'iso3':'swa',
+            'iso3t':'swa',
+            'iso3b':'swa'
         },
         {
             'name':'swedish',
             'print':'Swedish',
             'iso2':'sv',
-            'iso3':'swe',
+            'iso3t':'swe',
+            'iso3b':'swe'
         },
         {
             'name':'tahitian',
             'print':'Tahitian',
             'iso2':'ty',
-            'iso3':'tah',
+            'iso3t':'tah',
+            'iso3b':'tah'
         },
         {
             'name':'tamil',
             'print':'Tamil',
             'iso2':'ta',
-            'iso3':'tam',
+            'iso3t':'tam',
+            'iso3b':'tam'
         },
         {
             'name':'tatar',
             'print':'Tatar',
             'iso2':'tt',
-            'iso3':'tat',
+            'iso3t':'tat',
+            'iso3b':'tat'
         },
         {
             'name':'telugu',
             'print':'Telugu',
             'iso2':'te',
-            'iso3':'tel',
+            'iso3t':'tel',
+            'iso3b':'tel'
         },
         {
             'name':'tajik',
             'print':'Tajik',
             'iso2':'tg',
-            'iso3':'tgk',
+            'iso3t':'tgk',
+            'iso3b':'tgk'
         },
         {
             'name':'tagalog',
             'print':'Tagalog',
             'iso2':'tl',
-            'iso3':'tgl',
+            'iso3t':'tgl',
+            'iso3b':'tgl'
         },
         {
             'name':'thai',
             'print':'Thai',
             'iso2':'th',
-            'iso3':'tha',
+            'iso3t':'tha',
+            'iso3b':'tha'
         },
         {
             'name':'tibetan',
             'print':'Tibetan',
             'iso2':'bo',
-            'iso3':'tib',
+            'iso3t':'bod',
+            'iso3b':'tib'
         },
         {
             'name':'tigrinya',
             'print':'Tigrinya',
             'iso2':'ti',
-            'iso3':'tir',
+            'iso3t':'tir',
+            'iso3b':'tir'
         },
         {
-            'name':'tonga',
+            'name':'tonga (tonga islands)',
             'print':'Tonga (Tonga Islands)',
             'iso2':'to',
-            'iso3':'ton',
+            'iso3t':'ton',
+            'iso3b':'ton'
         },
         {
             'name':'tswana',
             'print':'Tswana',
             'iso2':'tn',
-            'iso3':'tsn',
+            'iso3t':'tsn',
+            'iso3b':'tsn'
         },
         {
             'name':'tsonga',
             'print':'Tsonga',
             'iso2':'ts',
-            'iso3':'tso',
+            'iso3t':'tso',
+            'iso3b':'tso'
         },
         {
             'name':'turkmen',
             'print':'Turkmen',
             'iso2':'tk',
-            'iso3':'tuk',
+            'iso3t':'tuk',
+            'iso3b':'tuk'
         },
         {
             'name':'turkish',
             'print':'Turkish',
             'iso2':'tr',
-            'iso3':'tur',
+            'iso3t':'tur',
+            'iso3b':'tur'
         },
         {
             'name':'twi',
             'print':'Twi',
             'iso2':'tw',
-            'iso3':'twi',
+            'iso3t':'twi',
+            'iso3b':'twi'
         },
         {
             'name':'uighur',
             'print':'Uighur',
             'iso2':'ug',
-            'iso3':'uig',
+            'iso3t':'uig',
+            'iso3b':'uig'
         },
         {
             'name':'ukrainian',
             'print':'Ukrainian',
             'iso2':'uk',
-            'iso3':'ukr',
+            'iso3t':'ukr',
+            'iso3b':'ukr'
         },
         {
             'name':'urdu',
             'print':'Urdu',
             'iso2':'ur',
-            'iso3':'urd',
+            'iso3t':'urd',
+            'iso3b':'urd'
         },
         {
             'name':'uzbek',
             'print':'Uzbek',
             'iso2':'uz',
-            'iso3':'uzb',
+            'iso3t':'uzb',
+            'iso3b':'uzb'
         },
         {
             'name':'venda',
             'print':'Venda',
             'iso2':'ve',
-            'iso3':'ven',
+            'iso3t':'ven',
+            'iso3b':'ven'
         },
         {
             'name':'vietnamese',
             'print':'Vietnamese',
             'iso2':'vi',
-            'iso3':'vie',
+            'iso3t':'vie',
+            'iso3b':'vie'
         },
         {
-            'name':'volapuk',
+            'name':'volapük',
             'print':'Volapük',
             'iso2':'vo',
-            'iso3':'vol'
+            'iso3t':'vol',
+            'iso3b':'vol'
         },
         {
             'name':'welsh',
             'print':'Welsh',
             'iso2':'cy',
-            'iso3':'wel',
+            'iso3t':'cym',
+            'iso3b':'wel'
         },
         {
             'name':'walloon',
             'print':'Walloon',
             'iso2':'wa',
-            'iso3':'wln',
+            'iso3t':'wln',
+            'iso3b':'wln'
         },
         {
             'name':'wolof',
             'print':'Wolof',
             'iso2':'wo',
-            'iso3':'wol',
+            'iso3t':'wol',
+            'iso3b':'wol'
         },
         {
             'name':'xhosa',
             'print':'Xhosa',
             'iso2':'xh',
-            'iso3':'xho',
+            'iso3t':'xho',
+            'iso3b':'xho'
         },
         {
             'name':'yiddish',
             'print':'Yiddish',
             'iso2':'yi',
-            'iso3':'yid',
+            'iso3t':'yid',
+            'iso3b':'yid'
         },
         {
             'name':'yoruba',
             'print':'Yoruba',
             'iso2':'yo',
-            'iso3':'yor',
+            'iso3t':'yor',
+            'iso3b':'yor'
         },
         {
             'name':'zhuang',
             'print':'Zhuang',
             'iso2':'za',
-            'iso3':'zha',
+            'iso3t':'zha',
+            'iso3b':'zha'
         },
         {
             'name':'zulu',
             'print':'Zulu',
             'iso2':'zu',
-            'iso3':'zul',
+            'iso3t':'zul',
+            'iso3b':'zul'
         },
     ),
     'itunemovi':(
@@ -2409,7 +2595,7 @@ repository_config = {
         },
         'transcode':{
             'depend':('handbrake',),
-            'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'ac3', 'tc'),
+            'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'ac3'),
         },
         'update':{
             'depend':('subler',),
@@ -2424,8 +2610,8 @@ repository_config = {
                 'universal':{
                     'description':'an SD profile that decodes on every cabac capable apple device',
                     'default':{
-                        'tvshow':{'volume':'beta'},
-                        'movie':{'volume':'gama'},
+                        10:{'volume':'beta'},
+                        9:{'volume':'gama'},
                     },
                     'transcode':{
                         'options':{
@@ -2438,35 +2624,40 @@ repository_config = {
                         'audio':(
                             (
                                 {
-                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
                                 },
                                 {
-                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                             ),
                             (
                                 {
-                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'from': {'codec':'AAC', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
                             (
                                 {
-                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
-                            
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
                         ),
                     },
                 },
                 'appletv':{
                     'description':'Intel based AppleTV profile',
                     'default':{
-                        'tvshow':{'volume':'beta'},
-                        'movie':{'volume':'eta'},
+                        10:{'volume':'beta'},
+                        9:{'volume':'eta'},
                     },
                     'transcode':{
                         'options':{
@@ -2479,24 +2670,30 @@ repository_config = {
                         'audio':(
                             (
                                 {
-                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
                                 },
                                 {
-                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                             ),
                             (
                                 {
-                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'from': {'codec':'AAC', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
                             (
                                 {
-                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
                                 },
                             ),
                         ),
@@ -2505,8 +2702,8 @@ repository_config = {
                 'ipod':{
                     'description':'All iPod touch models profile',
                     'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'transcode':{
                         'options':{
@@ -2518,20 +2715,26 @@ repository_config = {
                         'audio':(
                             (
                                 {
-                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
                             (
                                 {
-                                    'from': {'kind':'aac', 'type':'audio'},
+                                    'from': {'codec':'AAC', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
                             (
                                 {
-                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
                                 },
                             ),
                         ),
@@ -2540,8 +2743,8 @@ repository_config = {
                 'high':{
                     'description':'High profile',
                     'default':{
-                        'tvshow':{'volume':'beta'},
-                        'movie':{'volume':'eta'},
+                        10:{'volume':'beta'},
+                        9:{'volume':'eta'},
                     },
                     'transcode':{
                         'options':{
@@ -2554,23 +2757,17 @@ repository_config = {
                         'audio':(
                             (
                                 {
-                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'},
                                 },
                                 {
-                                    'from': {'kind':'ac3', 'type':'audio'},
+                                    'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                             ),
                             (
                                 {
-                                    'from': {'kind':'aac', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'kind':'mp3', 'type':'audio'},
+                                    'from': {'codec':'AAC', 'type':'audio'},
                                     'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
                                 },
                             ),
@@ -2593,8 +2790,8 @@ repository_config = {
             'Profile':{
                 'sd':{
                     'default':{
-                        'tvshow':{'volume':'delta'},
-                        'movie':{'volume':'eta'},
+                        10:{'volume':'delta'},
+                        9:{'volume':'eta'},
                     },
                     'pack':{
                         'related':(
@@ -2602,21 +2799,20 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
                             {'kind':'ac3'},
-                            {'kind':'tc'},
                         ),
                         'tracks':(
                             {'type':'video'},
-                            {'type':'audio', 'kind':'ac3'},
-                            {'type':'audio', 'kind':'mp3'},
-                            {'type':'audio', 'kind':'aac'},
-                            {'type':'audio', 'kind':'dts'},
+                            {'type':'audio', 'codec':'AC-3'},
+                            {'type':'audio', 'codec':'MPEG Audio'},
+                            {'type':'audio', 'codec':'AAC'},
+                            {'type':'audio', 'codec':'DTS'},
                         ),
                     },
                 },
                 '720':{
                     'default':{
-                        'tvshow':{'volume':'delta'},
-                        'movie':{'volume':'eta'},
+                        10:{'volume':'delta'},
+                        9:{'volume':'eta'},
                     },
                     'pack':{
                         'related':(
@@ -2624,21 +2820,19 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
                             {'kind':'ac3'},
-                            {'kind':'tc'},
                         ),
                         'tracks':(
                             {'type':'video'},
-                            {'type':'audio', 'kind':'ac3'},
-                            {'type':'audio', 'kind':'mp3'},
-                            {'type':'audio', 'kind':'aac'},
-                            {'type':'audio', 'kind':'dts'},
+                            {'type':'audio', 'codec':'AC-3'},
+                            {'type':'audio', 'codec':'AAC'},
+                            {'type':'audio', 'codec':'DTS'},
                         ),
                     },
                 },
                 '1080':{
                     'default':{
-                        'tvshow':{'volume':'delta'},
-                        'movie':{'volume':'eta'},
+                        10:{'volume':'delta'},
+                        9:{'volume':'eta'},
                     },
                     'pack':{
                         'related':(
@@ -2646,15 +2840,25 @@ repository_config = {
                             {'kind':'srt', 'profile':'clean', 'language':'eng'},
                             {'kind':'txt', 'profile':'chapter'},
                             {'kind':'ac3'},
-                            {'kind':'tc'},
                         ),
                         'tracks':(
                             {'type':'video'},
-                            {'type':'audio', 'kind':'ac3'},
-                            {'type':'audio', 'kind':'mp3'},
-                            {'type':'audio', 'kind':'aac'},
-                            {'type':'audio', 'kind':'dts'},
+                            {'type':'audio', 'codec':'AC-3'},
+                            {'type':'audio', 'codec':'AAC'},
+                            {'type':'audio', 'codec':'DTS'},
                         ),
+                    },
+                },
+            },
+        },
+        'avi':{
+            'container':'avi',
+            'default':{'volume':'epsilon', 'profile':'sd'},
+            'Profile':{
+                'sd':{
+                    'default':{
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                 },
             },
@@ -2666,27 +2870,27 @@ repository_config = {
                 'dump':{
                     'description':'Special profile used by extract command',
                     'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'extract':{
                         'tracks':(
-                            {'type':'subtitles', 'language':'heb', 'kind':'srt'},
-                            {'type':'subtitles', 'language':'eng', 'kind':'srt'},
+                            {'type':'text', 'language':'heb', 'codec':'UTF-8'},
+                            {'type':'text', 'language':'eng', 'codec':'UTF-8'},
                         ),
                     },
                 },
                 'original':{
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                     'update':{
                         'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.1},
                         'related':(
                             {
-                                'from': {'language':'heb', 'kind':'srt'},
-                                'to': {'height':0.1, 'Name':'Normal', 'profile':'original'},
+                                'from': {'language':'heb', 'kind':'srt', 'profile':'original'},
+                                'to': {'height':0.1, 'Name':'Normal', },
                             },
                             {
                                 'from': {'language':'eng', 'kind':'srt', 'profile':'original'},
@@ -2697,8 +2901,8 @@ repository_config = {
                 },
                 'clean':{
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                     'transcode':{
                         'filter':('noise', 'typo', 'leftover'),
@@ -2726,13 +2930,13 @@ repository_config = {
                 'dump':{
                     'description':'Special profile used by extract command',
                     'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'extract':{
                         'tracks':(
-                            {'type':'subtitles', 'language':'heb', 'kind':'ass'},
-                            {'type':'subtitles', 'language':'eng', 'kind':'ass'},
+                            {'type':'text', 'language':'heb', 'codec':'ASS'},
+                            {'type':'text', 'language':'eng', 'codec':'ASS'},
                         ),
                     },
                 },
@@ -2751,8 +2955,8 @@ repository_config = {
             'Profile':{
                 'chapter':{
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                 },
             },
@@ -2767,14 +2971,14 @@ repository_config = {
                 'download':{
                     'description':'Special profile for fetching artwork from the web',
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                 },
                 'normal':{
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                     'transcode':{
                         'aspect ratio':'preserve',
@@ -2784,8 +2988,8 @@ repository_config = {
                 },
                 'criterion':{
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                     'transcode':{
                         'aspect ratio':'preserve',
@@ -2795,8 +2999,8 @@ repository_config = {
                 },
                 'legacy':{
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                     'transcode':{
                         'aspect ratio':'preserve',
@@ -2816,8 +3020,8 @@ repository_config = {
                 'download':{
                     'description':'Special profile for fetching original artwork from the web',
                     'default':{
-                        'tvshow':{'volume':'alpha'},
-                        'movie':{'volume':'alpha'},
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
                     },
                 },
             },
@@ -2832,8 +3036,8 @@ repository_config = {
                 'multi':{
                     'description':'Special profile for multi channel ac3 track from dts',
                     'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'transcode':{
                         'dcadec':{ '-o':'wavall', '-g':'32'},
@@ -2843,8 +3047,8 @@ repository_config = {
                 'stereo':{
                     'description':'Special profile for stereo ac3 track from dts',
                     'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'transcode':{
                         'dcadec':{ '-o':'aif'},
@@ -2863,12 +3067,12 @@ repository_config = {
                 'dump':{
                     'description':'Special profile for dts track exctracted from matroska',
                     'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'extract':{
                         'tracks':(
-                            {'type':'audio', 'kind':'dts'},
+                            {'type':'audio', 'codec':'DTS'},
                         ),
                     },
                 },
