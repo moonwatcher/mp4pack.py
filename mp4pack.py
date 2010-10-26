@@ -33,7 +33,7 @@ def find_files_in_path(path, file_filter, recursive, depth=1):
             p = os.path.abspath(os.path.join(path,p))
             rec_result = find_files_in_path(p, file_filter, recursive, depth - 1)
             result += rec_result
-    return result
+    return sorted(set(result))
 
 
 def load_options():
