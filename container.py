@@ -1858,8 +1858,6 @@ class FileUtil(object):
                     info['tag']['cover'] = info['tag']['cover'].count('Yes')
                 if 'genre type' in info['tag']:
                     info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
-                    info['tag']['genre'] =  self.property_map['code']['gnre'][info['tag']['genre type']]['print']
-                
                 # Format info fields
                 for k,v in info['tag'].iteritems():
                     value = self.convert_mediainfo_value(self.property_map['name']['tag'][k]['type'], v)
