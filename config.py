@@ -7,84 +7,126 @@ from subprocess import Popen, PIPE
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = u'7B3B400B0146EA83'
 cache_path = u'/net/multivac/Volumes/alphaville/cache/'
+db_uri = u'mongodb://mp4pack:poohbear@multivac.lan/mp4pack'
 
 
 media_property = {
     'file':(
         {
+            'name':'encoding',
+            'print':'Encoding',
+            'mediainfo':None,
+            'type':'string',
+        },
+        {
             'name':'path',
             'print':'Path',
             'mediainfo':'CompleteName',
-            'type':'string'
+            'type':'string',
         },
         {
             'name':'directory',
             'print':'Directory',
             'mediainfo':'FolderName',
-            'type':'string'
+            'type':'string',
         },
         {
             'name':'name',
             'print':'Name',
             'mediainfo':'FileName',
-            'type':'string'
+            'type':'string',
         },
         {
             'name':'extension',
             'print':'Extension',
             'mediainfo':'FileExtension',
-            'type':'string'
+            'type':'string',
         },
         {
             'name':'format',
             'print':'Format',
             'mediainfo':'Format',
-            'type':'string'
+            'type':'string',
         },
         {
             'name':'size',
             'print':'Size',
             'mediainfo':'FileSize',
-            'type':'int'
+            'type':'int',
         },
         {
             'name':'duration',
             'print':'Duration',
             'mediainfo':'Duration',
-            'type':'int'
+            'type':'int',
         },
         {
             'name':'bit rate',
             'print':'Bit Rate',
             'mediainfo':'OverallBitRate',
-            'type':'int'
+            'type':'int',
         },
         {
             'name':'encode date',
             'print':'Encode Date',
             'mediainfo':'Encoded_Date',
-            'type':'date'
+            'type':'date',
         },
         {
             'name':'modified date',
             'print':'Modified Date',
             'mediainfo':'File_Modified_Date',
-            'type':'date'
+            'type':'date',
         },
         {
             'name':'tag date',
             'print':'Tag Date',
             'mediainfo':'Tagged_Date',
-            'type':'date'
+            'type':'date',
         },
     ),
     'tag':(
+        {
+            'name':'language',
+            'print':'Language',
+            'mediainfo':None,
+            'mp4info': None,
+            'subler':None,
+            'type':'string'
+        },
+        {
+            'name':'imdb id',
+            'print':'IMDb',
+            'mediainfo':None,
+            'mp4info': None,
+            'subler':None,
+            'type':'string'
+        },
+        {
+            'name':'kind',
+            'atom':None,
+            'print':'Kind',
+            'mediainfo':None,
+            'mp4info': None,
+            'subler':None,
+            'type':'string',
+        },
+        {
+            'name':'tv show key',
+            'atom':None,
+            'print':'TV Show Key',
+            'mediainfo':None,
+            'mp4info': None,
+            'subler':None,
+            'type':'string',
+        },
         {
             'name':'name',
             'atom':'©nam',
             'mediainfo':'Title',
             'mp4info': None,
             'subler':'Name',
+            'print':'Name',
             'type':'string',
         },
         {
@@ -93,6 +135,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Artist',
             'subler':'Artist',
+            'print':'Artist',
             'type':'string',
         },
         {
@@ -101,6 +144,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Album Artist',
             'subler':'Album Artist',
+            'print':'Album Artist',
             'type':'string',
         },
         {
@@ -109,6 +153,7 @@ media_property = {
             'mediainfo':'Album',
             'mp4info': None,
             'subler':'Album',
+            'print':'Album',
             'type':'string',
         },
         {
@@ -117,6 +162,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Grouping',
             'subler':'Grouping',
+            'print':'Grouping',
             'type':'string',
         },
         {
@@ -125,6 +171,7 @@ media_property = {
             'mediainfo':'ScreenplayBy',
             'mp4info': None,
             'subler':'Composer',
+            'print':'Composer',
             'type':'string',
         },
         {
@@ -133,6 +180,7 @@ media_property = {
             'mediainfo':'Comment',
             'mp4info': None,
             'subler':'Comments',
+            'print':'Comment',
             'type':'string',
         },
         {
@@ -140,8 +188,9 @@ media_property = {
             'atom':'gnre',
             'mediainfo':None,
             'mp4info': 'GenreType',
-            'subler':'GenreType',
-            'type':'string',
+            'subler':None,
+            'print':'Genre Type',
+            'type':'enum',
         },
         {
             'name':'genre',
@@ -149,6 +198,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Genre',
             'subler':'Genre',
+            'print':'Genre',
             'type':'string',
         },
         {
@@ -157,6 +207,7 @@ media_property = {
             'mediainfo':'Encoded_Date',
             'mp4info': None,
             'subler':'Release Date',
+            'print':'Release Date',
             'type':'date',
         },
         {
@@ -165,6 +216,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'BPM',
             'subler':'Tempo',
+            'print':'Tempo',
             'type':'int',
         },
         {
@@ -173,6 +225,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Part of Compilation',
             'subler':None,
+            'print':'Compilation',
             'type':'bool',
         },
         {
@@ -181,6 +234,7 @@ media_property = {
             'mediainfo':'tvsh',
             'mp4info': None,
             'subler':'TV Show',
+            'print':'TV Show',
             'type':'string',
         },
         {
@@ -189,14 +243,16 @@ media_property = {
             'mediainfo':'tven',
             'mp4info': None,
             'subler':'TV Episode ID',
+            'print':'TV Episode ID',
             'type':'string',
         },
         {
-            'name':'tv season #',
+            'name':'tv season',
             'atom':'tvsn',
             'mediainfo':'tvsn',
             'mp4info': None,
             'subler':'TV Season',
+            'print':'TV Season',
             'type':'int',
         },
         {
@@ -205,6 +261,7 @@ media_property = {
             'mediainfo':'tves',
             'mp4info': None,
             'subler':'TV Episode #',
+            'print':'TV Episode',
             'type':'int',
         },
         {
@@ -213,6 +270,7 @@ media_property = {
             'mediainfo':'tvnn',
             'mp4info': None,
             'subler':'TV Network',
+            'print':'TV Network',
             'type':'string',
         },
         {
@@ -221,6 +279,7 @@ media_property = {
             'mediainfo':'sonm',
             'mp4info': None,
             'subler':None,
+            'print':'Sort Name',
             'type':'string',
         },
         {
@@ -229,6 +288,7 @@ media_property = {
             'mediainfo':'soar',
             'mp4info': None,
             'subler':None,
+            'print':'Sort Artist',
             'type':'string',
         },
         {
@@ -237,6 +297,7 @@ media_property = {
             'mediainfo':'soaa',
             'mp4info': None,
             'subler':None,
+            'print':'Sort Album Artist',
             'type':'string',
         },
         {
@@ -245,6 +306,7 @@ media_property = {
             'mediainfo':'soal',
             'mp4info': None,
             'subler':None,
+            'print':'Sort Album',
             'type':'string',
         },
         {
@@ -253,6 +315,7 @@ media_property = {
             'mediainfo':'soco',
             'mp4info': None,
             'subler':None,
+            'print':'Sort Composer',
             'type':'string',
         },
         {
@@ -261,6 +324,7 @@ media_property = {
             'mediainfo':'sosn',
             'mp4info': None,
             'subler':None,
+            'print':'Sort TV Show',
             'type':'string',
         },
         {
@@ -269,6 +333,7 @@ media_property = {
             'mediainfo':'desc',
             'mp4info': None,
             'subler':'Description',
+            'print':'Description',
             'type':'string',
         },
         {
@@ -277,6 +342,7 @@ media_property = {
             'mediainfo':'ldes',
             'mp4info': None,
             'subler':'Long Description',
+            'print':'Long Description',
             'type':'string',
         },
         {
@@ -285,6 +351,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Lyrics',
             'subler':'Lyrics',
+            'print':'Lyrics',
             'type':'string',
         },
         {
@@ -293,6 +360,7 @@ media_property = {
             'mediainfo':'Copyright',
             'mp4info': None,
             'subler':'Copyright',
+            'print':'Copyright',
             'type':'string',
         },
         {
@@ -301,6 +369,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Encoded with',
             'subler':'Encoding Tool',
+            'print':'Encoding Tool',
             'type':'string',
         },
         {
@@ -309,6 +378,7 @@ media_property = {
             'mediainfo':'Encoded_Application',
             'mp4info': None,
             'subler':'Encoded by',
+            'print':'Encoded by',
             'type':'string',
         },
         {
@@ -317,6 +387,7 @@ media_property = {
             'mediainfo':'purd',
             'mp4info': None,
             'subler':'Purchase Date',
+            'print':'Purchase Date',
             'type':'date',
         },
         {
@@ -325,6 +396,7 @@ media_property = {
             'mediainfo':'pcst',
             'mp4info': None,
             'subler':None,
+            'print':'Podcast',
             'type':'bool',
         },
         {
@@ -333,6 +405,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':None,
+            'print':'Podcast URL',
             'type':'string',
         },
         {
@@ -341,6 +414,7 @@ media_property = {
             'mediainfo':'keyw',
             'mp4info': None,
             'subler':None,
+            'print':'Keywords',
             'type':'string',
         },
         {
@@ -349,6 +423,7 @@ media_property = {
             'mediainfo':'catg',
             'mp4info': None,
             'subler':None,
+            'print':'Category',
             'type':'string',
         },
         {
@@ -357,6 +432,7 @@ media_property = {
             'mediainfo':'hdvd',
             'mp4info': None,
             'subler':'HD Video',
+            'print':'HD Video',
             'type':'bool',
         },
         {
@@ -365,6 +441,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': 'Part of Gapless Album',
             'subler':'Gapless',
+            'print':'Gapless',
             'type':'bool',
         },
         {
@@ -373,6 +450,7 @@ media_property = {
             'mediainfo':'xid',
             'mp4info': None,
             'subler':'XID',
+            'print':'XID',
             'type':'string',
         },
         {
@@ -381,6 +459,7 @@ media_property = {
             'mediainfo':'cnID',
             'mp4info': None,
             'subler':'contentID',
+            'print':'Content ID',
             'type':'int',
         },
         {
@@ -389,6 +468,7 @@ media_property = {
             'mediainfo':'apID',
             'mp4info': None,
             'subler':'iTunes Account',
+            'print':'iTunes Account',
             'type':'string',
         },
         {
@@ -397,6 +477,7 @@ media_property = {
             'mediainfo':'atID',
             'mp4info': None,
             'subler':None,
+            'print':'Artist ID',
             'type':'int',
         },
         {
@@ -405,6 +486,7 @@ media_property = {
             'mediainfo':'cmID',
             'mp4info': None,
             'subler':None,
+            'print':'Composer ID',
             'type':'int',
         },
         {
@@ -413,6 +495,7 @@ media_property = {
             'mediainfo':'plID',
             'mp4info': None,
             'subler':None,
+            'print':'Playlist ID',
             'type':'int',
         },
         {
@@ -421,6 +504,7 @@ media_property = {
             'mediainfo':'geID',
             'mp4info': None,
             'subler':None,
+            'print':'Genre ID',
             'type':'int',
         },
         {
@@ -429,7 +513,8 @@ media_property = {
             'mediainfo':'sfID',
             'mp4info': None,
             'subler':None,
-            'type':'int',
+            'print':'iTunes Store Country',
+            'type':'enum',
         },
         {
             'name':'itunes account type',
@@ -437,7 +522,8 @@ media_property = {
             'mediainfo':'akID',
             'mp4info': None,
             'subler':None,
-            'type':'int',
+            'print':'iTunes Account Type',
+            'type':'enum',
         },
         {
             'name':'episode global id',
@@ -445,6 +531,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':None,
+            'print':'Episode Global ID',
             'type':'int',
         },
         {
@@ -453,6 +540,7 @@ media_property = {
             'mediainfo':'stik',
             'mp4info': None,
             'subler':'Media Kind',
+            'print':'Media Kind',
             'type':'enum',
         },
         {
@@ -461,6 +549,7 @@ media_property = {
             'mediainfo':'rtng',
             'mp4info': None,
             'subler':'Content Rating',
+            'print':'Content Rating',
             'type':'enum',
         },
         {
@@ -469,6 +558,7 @@ media_property = {
             'mediainfo':'iTunEXTC',
             'mp4info': None,
             'subler':None,
+            'print':'iTunEXTC',
             'type':'string',
         },
         {
@@ -477,6 +567,7 @@ media_property = {
             'mediainfo':'iTunMOVI',
             'mp4info': None,
             'subler':None,
+            'print':'iTunMOVI',
             'type':'string',
         },
         {
@@ -485,6 +576,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Cast',
+            'print':'Cast',
             'type':'list',
         },
         {
@@ -493,6 +585,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Directors',
+            'print':'Directors',
             'type':'list',
         },
         {
@@ -501,6 +594,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Codirectors',
+            'print':'Codirectors',
             'type':'list',
         },
         {
@@ -509,6 +603,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Producers',
+            'print':'Producers',
             'type':'list',
         },
         {
@@ -517,6 +612,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Screenwriters',
+            'print':'Screenwriters',
             'type':'list',
         },
         {
@@ -525,6 +621,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Studio',
+            'print':'Studio',
             'type':'list',
         },
         {
@@ -533,6 +630,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':None,
+            'print':'Rating Standard',
             'type':'string',
         },
         {
@@ -541,6 +639,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Rating',
+            'print':'Rating',
             'type':'string',
         },
         {
@@ -549,7 +648,8 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':None,
-            'type':'string',
+            'print':'Rating Score',
+            'type':'int',
         },
         {
             'name':'rating annotation',
@@ -557,6 +657,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Rating Annotation',
+            'print':'Rating Annotation',
             'type':'string',
         },
         {
@@ -565,6 +666,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Track #',
+            'print':'Track',
             'type':'string',
         },
         {
@@ -573,6 +675,7 @@ media_property = {
             'mediainfo':None,
             'mp4info': None,
             'subler':'Disk #',
+            'print':'Disk',
             'type':'string',
         },
         {
@@ -581,6 +684,7 @@ media_property = {
             'mediainfo':'Track_Position',
             'mp4info': None,
             'subler':None,
+            'print':'Track Position',
             'type':'int',
         },
         {
@@ -589,6 +693,7 @@ media_property = {
             'mediainfo':'Track_Position_Total',
             'mp4info': None,
             'subler':None,
+            'print':'Track Total',
             'type':'int',
         },
         {
@@ -597,6 +702,7 @@ media_property = {
             'mediainfo':'Part_Position',
             'mp4info': None,
             'subler':None,
+            'print':'Disk Position',
             'type':'int',
         },
         {
@@ -605,6 +711,7 @@ media_property = {
             'mediainfo':'Part_Position_Total',
             'mp4info': None,
             'subler':None,
+            'print':'Disk Total',
             'type':'int',
         },
         {
@@ -613,11 +720,18 @@ media_property = {
             'mediainfo':'Cover',
             'mp4info': None,
             'subler':None,
-            'type':'string',
+            'print':'Cover Pieces',
+            'type':'int',
         },
     ),
     'track':{
         'common':(
+            {
+                'name':'type',
+                'print':'Type',
+                'mediainfo':None,
+                'type':'string'
+            },
             {
                 'name':'id',
                 'print':'ID',
@@ -755,12 +869,6 @@ media_property = {
                 'type':'float'
             },
             {
-                'name':'display aspect ratio string',
-                'print':'Display Aspect Ratio String',
-                'mediainfo':'DisplayAspectRatio_String',
-                'type':'string'
-            },
-            {
                 'name':'frame rate mode',
                 'print':'Frame Rate Mode',
                 'mediainfo':'FrameRate_Mode',
@@ -815,40 +923,23 @@ media_property = {
                 'type':'string'
             },
         ),
-        'text':(),
+        'text':(
+        ),
+        'image':(
+            {
+                'name':'width',
+                'print':'Width',
+                'mediainfo':'Width',
+                'type':'int'
+            },
+            {
+                'name':'height',
+                'print':'Height',
+                'mediainfo':'Height',
+                'type':'int'
+            },
+        )
     },
-    'itunemovi':(
-        {
-            'name':'cast',
-            'print':'Cast',
-            'plist':'cast'
-        },
-        {
-            'name':'directors',
-            'print':'Directors',
-            'plist':'directors'
-        },
-        {
-            'name':'codirectors',
-            'print':'Codirectors',
-            'plist':'codirectors'
-        },
-        {
-            'name':'producers',
-            'print':'Producers',
-            'plist':'producers'
-        },
-        {
-            'name':'screenwriters',
-            'print':'Screenwriters',
-            'plist':'screenwriters'
-        },
-        {
-            'name':'studio',
-            'print':'Studio',
-            'plist':'studio'
-        },
-    ),
     'language':(
         {
             'name':'unknown',
@@ -1967,7 +2058,39 @@ media_property = {
             'iso3':'zul',
         },
     ),
-    'genre':(
+    'itunemovi':(
+        {
+            'name':'cast',
+            'print':'Cast',
+            'plist':'cast'
+        },
+        {
+            'name':'directors',
+            'print':'Directors',
+            'plist':'directors'
+        },
+        {
+            'name':'codirectors',
+            'print':'Codirectors',
+            'plist':'codirectors'
+        },
+        {
+            'name':'producers',
+            'print':'Producers',
+            'plist':'producers'
+        },
+        {
+            'name':'screenwriters',
+            'print':'Screenwriters',
+            'plist':'screenwriters'
+        },
+        {
+            'name':'studio',
+            'print':'Studio',
+            'plist':'studio'
+        },
+    ),
+    'gnre':(
         {'name':'blues','code':1, 'print':'Blues'},
         {'name':'classic rock','code':2, 'print':'Classic Rock'},
         {'name':'country','code':3, 'print':'Country'},
@@ -2119,12 +2242,14 @@ media_property = {
         {
             'name':'movie',
             'print':'Movie',
-            'code':9
+            'code':9,
+            'schema':re.compile(ur'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', re.UNICODE), 
         },
         {
             'name':'tvshow',
             'print':'TV Show',
-            'code':10
+            'code':10,
+            'schema':re.compile(ur'^(.+) (s([0-9]+)e([0-9]+))(?:\s*(.*))?\.([^\.]+)$', re.UNICODE),
         },
         {
             'name':'booklet',
@@ -2137,7 +2262,7 @@ media_property = {
             'code':14
         },
     ),
-    'sfid':(
+    'sfID':(
         {'name':'usa', 'print':'United States', 'code':143441},
         {'name':'fra', 'print':'France', 'code':143442},
         {'name':'ger', 'print':'Germany', 'code':143443},
@@ -2166,12 +2291,11 @@ media_property = {
         {'name':'clean', 'print':'Clean', 'code':2},
         {'name':'explicit', 'print':'Explicit', 'code':4},
     ),
-    'akid':(
+    'akID':(
         {'name':'itunes', 'print':'iTunes', 'code':0},
         {'name':'aol', 'print':'AOL', 'code':1},
     ),
 }
-
 
 repository_config = {
     'Options':None,
@@ -2181,7 +2305,7 @@ repository_config = {
     },
     'Database':{
         'cache':cache_path,
-        'uri':'mongodb://mp4pack:poohbear@multivac.lan/mp4pack',
+        'uri':db_uri,
         'name':'mp4pack',
         'tmdb':{
             'apikey':tmdb_apikey,
@@ -2291,229 +2415,6 @@ repository_config = {
             'depend':('subler',),
             'kind':('srt','jpg', 'txt'),
         },
-    },
-    'Codec':{
-        'audio':{
-            'ac3':{
-                'schema':ur'ac-3|AC3',
-            },
-            'aac':{
-                'schema':ur'AAC',
-            },
-            'dts':{
-                'schema':ur'DTS',
-            },
-            'mp3':{
-                'schema':ur'MPEG/L3',
-            },
-        },
-        'subtitles':{
-            'srt':{
-                'schema':ur'S_TEXT/UTF8',
-            },
-            'ass':{
-                'schema':ur'S_TEXT/ASS',
-            },
-        },
-    },
-    'Language':{
-        'und':'Unknown',
-        'aar':'Afar',
-        'abk':'Abkhazian',
-        'afr':'Afrikaans',
-        'aka':'Akan',
-        'sqi':'Albanian',
-        'amh':'Amharic',
-        'ara':'Arabic',
-        'arg':'Aragonese',
-        'hye':'Armenian',
-        'asm':'Assamese',
-        'ava':'Avaric',
-        'ave':'Avestan',
-        'aym':'Aymara',
-        'aze':'Azerbaijani',
-        'bak':'Bashkir',
-        'bam':'Bambara',
-        'eus':'Basque',
-        'bel':'Belarusian',
-        'ben':'Bengali',
-        'bih':'Bihari',
-        'bis':'Bislama',
-        'bos':'Bosnian',
-        'bre':'Breton',
-        'bul':'Bulgarian',
-        'mya':'Burmese',
-        'cat':'Catalan',
-        'cha':'Chamorro',
-        'che':'Chechen',
-        'chi':'Chinese',
-        'chu':'Church Slavic',
-        'chv':'Chuvash',
-        'cor':'Cornish',
-        'cos':'Corsican',
-        'cre':'Cree',
-        'ces':'Czech',
-        'dan':'Danish',
-        'div':'Divehi',
-        'nld':'Dutch',
-        'dzo':'Dzongkha',
-        'eng':'English',
-        'epo':'Esperanto',
-        'est':'Estonian',
-        'ewe':'Ewe',
-        'fao':'Faroese',
-        'fij':'Fijian',
-        'fin':'Finnish',
-        'fre':'French',
-        'ful':'Fulah',
-        'kat':'Georgian',
-        'deu':'German',
-        'gle':'Irish',
-        'glg':'Galician',
-        'glv':'Manx',
-        'grn':'Guarani',
-        'guj':'Gujarati',
-        'hat':'Haitian',
-        'hau':'Hausa',
-        'heb':'Hebrew',
-        'her':'Herero',
-        'hin':'Hindi',
-        'hmo':'Hiri Motu',
-        'hun':'Hungarian',
-        'ibo':'Igbo',
-        'isl':'Icelandic',
-        'ido':'Ido',
-        'iii':'Sichuan Yi',
-        'iku':'Inuktitut',
-        'ile':'Interlingue',
-        'ina':'Interlingua',
-        'ind':'Indonesian',
-        'ipk':'Inupiaq',
-        'ita':'Italian',
-        'jav':'Javanese',
-        'jpn':'Japanese',
-        'kan':'Kannada',
-        'kas':'Kashmiri',
-        'kau':'Kanuri',
-        'kaz':'Kazakh',
-        'khm':'Central Khmer',
-        'kik':'Kikuyu',
-        'kin':'Kinyarwanda',
-        'kir':'Kirghiz',
-        'kom':'Komi',
-        'kon':'Kongo',
-        'kor':'Korean',
-        'kua':'Kuanyama',
-        'kur':'Kurdish',
-        'lao':'Lao',
-        'lat':'Latin',
-        'lav':'Latvian',
-        'lim':'Limburgan',
-        'lin':'Lingala',
-        'lit':'Lithuanian',
-        'ltz':'Luxembourgish',
-        'lub':'Luba-Katanga',
-        'lug':'Ganda',
-        'mkd':'Macedonian',
-        'mah':'Marshallese',
-        'mal':'Malayalam',
-        'mri':'Maori',
-        'mar':'Marathi',
-        'msa':'Malay',
-        'mlg':'Malagasy',
-        'mlt':'Maltese',
-        'mol':'Moldavian',
-        'mon':'Mongolian',
-        'nau':'Nauru',
-        'nav':'Navajo',
-        'ndo':'Ndonga',
-        'nep':'Nepali',
-        'nno':'Norwegian Nynorsk',
-        'nob':'Norwegian Bokmål',
-        'nor':'Norwegian',
-        'oji':'Ojibwa',
-        'ori':'Oriya',
-        'orm':'Oromo',
-        'pan':'Panjabi',
-        'fas':'Persian',
-        'pli':'Pali',
-        'pol':'Polish',
-        'por':'Portuguese',
-        'pus':'Pushto',
-        'que':'Quechua',
-        'roh':'Romansh',
-        'ron':'Romanian',
-        'run':'Rundi',
-        'rus':'Russian',
-        'sag':'Sango',
-        'san':'Sanskrit',
-        'srp':'Serbian',
-        'hrv':'Croatian',
-        'sin':'Sinhala',
-        'slk':'Slovak',
-        'slv':'Slovenian',
-        'sme':'Northern Sami',
-        'smo':'Samoan',
-        'sna':'Shona',
-        'snd':'Sindhi',
-        'som':'Somali',
-        'spa':'Spanish',
-        'srd':'Sardinian',
-        'ssw':'Swati',
-        'sun':'Sundanese',
-        'swa':'Swahili',
-        'swe':'Swedish',
-        'tah':'Tahitian',
-        'tam':'Tamil',
-        'tat':'Tatar',
-        'tel':'Telugu',
-        'tgk':'Tajik',
-        'tgl':'Tagalog',
-        'tha':'Thai',
-        'bod':'Tibetan',
-        'tir':'Tigrinya',
-        'tsn':'Tswana',
-        'tso':'Tsonga',
-        'tuk':'Turkmen',
-        'tur':'Turkish',
-        'twi':'Twi',
-        'uig':'Uighur',
-        'ukr':'Ukrainian',
-        'urd':'Urdu',
-        'uzb':'Uzbek',
-        'ven':'Venda',
-        'vie':'Vietnamese',
-        'vol':'Volapük',
-        'cym':'Welsh',
-        'wln':'Walloon',
-        'wol':'Wolof',
-        'xho':'Xhosa',
-        'yid':'Yiddish',
-        'yor':'Yoruba',
-        'zha':'Zhuang',
-        'zul':'Zulu',
-    },
-    'Media Kind':{
-        'tvshow':{
-            'name':'TV Show',
-            'stik':10,
-            'schema':ur'^(.+) (s([0-9]+)e([0-9]+))(?:\s*(.*))?\.([^\.]+)$', 
-        },
-        'movie':{
-            'name':'Movie', 
-            'stik':9,
-            'schema':ur'^IMDb(tt[0-9]+)(?: (.*))?\.([^\.]+)$', 
-        },
-        #'music':{
-        #    'name':'Music',
-        #    'stik':1,
-        #    'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$',
-        #},
-        #'audiobook':{
-        #    'name':'Audiobook',
-        #    'stik':2,
-        #    'schema':'^([0-9]+)(?:-([0-9]+))?(?: (.*))?\.([^\.]+)$',
-        #},
     },
     'Kind':{
         'm4v':{
@@ -2973,92 +2874,7 @@ repository_config = {
                 },
             },
         },
-        'tc':{
-            'container':'timecode',
-            'default':{
-                'profile':'dump',
-                'volume':'epsilon',
-            },
-            'Profile':{
-                'multi':{
-                    'description':'Special profile for timecode track extracted from matroska',
-                    'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
-                    },
-                },
-                'stereo':{
-                    'description':'Special profile for timecode track extracted from matroska',
-                    'default':{
-                        'tvshow':{'volume':'epsilon'},
-                        'movie':{'volume':'epsilon'},
-                    },
-                },
-                
-            },
-        },
     },
-    'Tag':(
-        # Tag name map
-        # Schema: canonic name, subler name, mp4info name
-        ('Track #', 'Track #', 'Track'),
-        ('Disk #', 'Disk #', 'Disk'),
-        ('Album', 'Album', 'Album'),
-        ('Album Artist', 'Album Artist', 'Album Artist'),
-        ('Artist', 'Artist', 'Artist'),
-        ('ArtistID', None, 'Artist ID'),
-        ('Tempo', 'Tempo', 'BPM'),
-        ('Cast', 'Cast', None),
-        ('Codirector', 'Codirector', None),
-        ('Category', None, 'Category'),
-        ('Comments', 'Comments', 'Comments'),
-        ('Composer', 'Composer', 'Composer'),
-        ('ComposerID', None, 'Composer ID'),
-        ('contentID', 'contentID', 'Content ID'),
-        ('Content Rating', 'Content Rating', 'Content Rating'),
-        ('Copyright', 'Copyright', 'Copyright'),
-        ('Artwork Pieces', None, 'Cover Art pieces'),
-        ('Director', 'Director', None),
-        ('Encoded By', 'Encoded By', 'Encoded by'),
-        ('Encoding Tool', 'Encoding Tool', 'Encoded with'),
-        ('Genre', 'Genre', 'Genre'),
-        ('GenreID', None, 'Genre ID'),
-        ('GenreType', None, 'GenreType'),
-        ('Grouping', 'Grouping', 'Grouping'),
-        ('HD Video', 'HD Video', 'HD Video'),
-        ('Keywords', None, 'Keywords'),
-        ('Long Description', 'Long Description', 'Long Description'),
-        ('Lyrics', 'Lyrics', 'Lyrics'),
-        ('Media Kind', 'Media Kind', 'Media Type'),
-        ('Name', 'Name', 'Name'),
-        ('Compilation', None, 'Part of Compilation'),
-        ('Gapless', 'Gapless', 'Part of Gapless Album'),
-        ('PlaylistID', None, 'Playlist ID'),
-        ('Podcast', None, 'Podcast'),
-        ('Producers', 'Producers', None),
-        ('Purchase Date', 'Purchase Date', 'Purchase Date'),
-        ('Rating', 'Rating', None),
-        ('Rating Annotation', 'Rating Annotation', None),
-        ('Release Date', 'Release Date', 'Release Date'),
-        ('Screenwriters', 'Screenwriters', None),
-        ('Description', 'Description', 'Short Description'),
-        ('Sort Album', None, 'Sort Album'),
-        ('Sort Album Artist', None, 'Sort Album Artist'),
-        ('Sort Artist', None, 'Sort Artist'),
-        ('Sort Composer', None, 'Sort Composer'),
-        ('Sort Name', None, 'Sort Name'),
-        ('Sort TV Show', None, 'Sort TV Show'),
-        ('Studio', 'Studio', None),
-        ('TV Episode #', 'TV Episode #', 'TV Episode'),
-        ('TV Episode ID', 'TV Episode ID', 'TV Episode Number'),
-        ('TV Network', 'TV Network', 'TV Network'),
-        ('TV Season', 'TV Season', 'TV Season'),
-        ('TV Show', 'TV Show', 'TV Show'),
-        ('iTunes Account', 'iTunes Account', 'iTunes Account'),
-        ('iTunes Account Type', None, 'iTunes Account Type'),
-        ('iTunes Store Country', None, 'iTunes Store Country'),
-        ('XID', 'XID', 'xid'),
-    ),
 }
 
 subtitle_config = {
@@ -3079,39 +2895,38 @@ subtitle_config = {
             ur'www\.allsubs\.org',
             ur'\bswsub\b',
             ur'\bresync\b',
-            ur'\b[A-Za-z0-9\.]+@gmail.\s*com\b',
+            ur'\b[a-za-z0-9\.]+@gmail.\s*com\b',
             ur'cync\sby\slanmao',
             ur'www\.1000fr\.com',
             ur'www\.tvsubtitles\.net',
             ur'ytet-vicky8800',
             ur'www\.ydy\.com',
             ur'sync:gagegao',
-            ur'FRM-lanma',
+            ur'frm-lanma',
             ur'nowa\swizja',
             ur'ssmink',
-            ur'\bLiNX\b',
+            ur'\blinx\b',
             ur'torec',
             ur'\byanx26\b',
-            ur'\bGreenScorpion\b',
-            ur'\bNeoTrix\b',
-            ur'\bQsubs\b',
+            ur'\bgreenscorpion\b',
+            ur'\bneotrix\b',
             ur'\bglfinish\b',
-            ur'\bShloogy\b',
+            ur'\bshloogy\b',
             ur'\.co\.il',
-            ur'\bY0NaTaN\b',
-            ur'\beLAD\b',
+            ur'\by0natan\b',
+            ur'\belad\b',
             ur'sratim',
             ur'donkey cr3w',
-            ur'R-Subs',
-            ur'\[D-S\]',
+            ur'r-subs',
+            ur'\[d-s\]',
             ur'ponkoit',
             ur'\bsubbie\b',
-            ur'\bXsesA\b',
-            ur'Napisy pobrane',
+            ur'\bxsesa\b',
+            ur'napisy pobrane',
             ur'\bphaelox\b',
             ur'divxstation',
-            ur'\bPetaBit\b',
-            ur'\bRONKEY\b',
+            ur'\bpetabit\b',
+            ur'\bronkey\b',
             ur'chococat3@walla',
             ur'warez',
             ur'\bdrsub\b',
@@ -3122,35 +2937,34 @@ subtitle_config = {
             ur'\boofir\b',
             ur'\bkrok\b',
             ur'\bqsubd\b',
-            ur'\bqsubs\b',
             ur'\bariel046\b',
             ur'\bzipc\b',
             ur'\btecnodrom\b',
             ur'visiontext subtitles',
             ur'english sdh',
             ur'srulikg',
-            ur'LH Translators Team',
+            ur'lh translators team',
             ur'[-=\s]+sub-zero[-=\s]+',
             ur'lionetwork',
-            ur'^EriC$',
-            ur'SubZ3ro',
-            ur'^David-Z$',
+            ur'^eric$',
+            ur'subz3ro',
+            ur'^david-z$',
             ur'drziv@yahoo',
             ur'elran_o',
-            ur'MCsnagel',
+            ur'mcsnagel',
             ur'\boutwit\b',
             ur'^gimly$',
             ur'\btinyurl\b',
-            ur'\bFoxRiver\b',
+            ur'\bfoxriver\b',
             ur'\bextremesubs\b',
-            ur'megalomania Tree',
+            ur'megalomania tree',
             ur'xmonwow',
             ur'\bciwan\b',
             ur'\bnata4ever\b',
             ur'\byosefff\b',
             ur'\bhentaiman\b',
             ur'\bfoxi9\b',
-            ur'\bGamby\b',
+            ur'\bgamby\b',
             ur'\bbrassica nigra\b',
             ur'\bqsubs\b',
             ur'\bsharetw\b',
@@ -3188,8 +3002,8 @@ subtitle_config = {
             ur'שנוכל להמשיך לתרגם',
             ur'הפרק מוקדש',
             ur'מצוות טורק',
-            ur'Shayx ע"י',
-            ur'PUSEL :סנכרון',
+            ur'shayx ע"י',
+            ur'pusel :סנכרון',
             ur'תרגום: רותם ושמעון',
             ur'שיפוץ: השייח\' הסעודי',
             ur'שופץ ע"י השייח\' הסעודי',
@@ -3209,9 +3023,9 @@ subtitle_config = {
             ur':כתוביות',
             ur'^בלעדית עבור$',
             ur'הורד מהאתר',
-            ur'על ההגהה Workbook',
+            ur'על ההגהה workbook',
             ur'מוקדש לכל אוהבי האוס אי שם',
-            ur'TheTerminator נערך ותוקן בשיתוף עם',
+            ur'theterminator נערך ותוקן בשיתוף עם',
             ur'התרגום נעשה על ידי המוריד',
             ur'תורגם וסונוכרן משמיעה ע"י',
             ur'\bצפייה מהנה\b',
@@ -3225,13 +3039,13 @@ subtitle_config = {
             ur'אנא תרמו לנו כדי',
             ur'הגהה על-ידי',
             ur'^עריכה לשונית$',
-            ur'^White Fang-תרגום: עמית יקיר ו$',
+            ur'^white fang-תרגום: עמית יקיר ו$',
             ur'ערן טלמור',
             ur'\bעדי-בלי-בצל\b',
             ur'\bבקרו אותנו בפורום\b',
             ur'הודה בוז',
             ur'\b-תודה מיוחדת ל\b',
-            ur'^Extreme מקבוצת$',
+            ur'^extreme מקבוצת$',
             ur'ialfan-ו mb0:עברית',
             ur'י ביצה קשה',
             ur'^ב$',
@@ -3244,7 +3058,7 @@ subtitle_config = {
             ur'ליונהארט',
             ur'\bמצוות פושל\b',
             ur'\bassem נקרע ע"י\b',
-            ur'\bKawa: סנכרון\b',
+            ur'\bkawa: סנכרון\b',
             ur'אוהבת לנצח, שרון',
         ),
     },
@@ -3359,136 +3173,6 @@ genre_map = (
 )
 
 base_config = {
-    'genre':(
-        # ITMF Genre
-        # The standard itmf names and codes for genres
-        {'_id':'blues','itmf':1, 'name':'Blues'},
-        {'_id':'classic rock','itmf':2, 'name':'Classic Rock'},
-        {'_id':'country','itmf':3, 'name':'Country'},
-        {'_id':'dance','itmf':4, 'name':'Dance'},
-        {'_id':'disco','itmf':5, 'name':'Disco'},
-        {'_id':'funk','itmf':6, 'name':'Funk'},
-        {'_id':'grunge','itmf':7, 'name':'Grunge'},
-        {'_id':'hip hop','itmf':8, 'name':'Hip Hop'},
-        {'_id':'jazz','itmf':9, 'name':'Jazz'},
-        {'_id':'metal','itmf':10, 'name':'Metal'},
-        {'_id':'new age','itmf':11, 'name':'New Age'},
-        {'_id':'oldies','itmf':12, 'name':'Oldies'},
-        {'_id':'other','itmf':13, 'name':'Other'},
-        {'_id':'pop','itmf':14, 'name':'Pop'},
-        {'_id':'r&b','itmf':15, 'name':'R&B'},
-        {'_id':'rap','itmf':16, 'name':'Rap'},
-        {'_id':'reggae','itmf':17, 'name':'Reggae'},
-        {'_id':'rock','itmf':18, 'name':'Rock'},
-        {'_id':'techno','itmf':19, 'name':'Techno'},
-        {'_id':'industrial','itmf':20, 'name':'Industrial'},
-        {'_id':'alternative','itmf':21, 'name':'Alternative'},
-        {'_id':'ska','itmf':22, 'name':'Ska'},
-        {'_id':'death metal','itmf':23, 'name':'Death Metal'},
-        {'_id':'pranks','itmf':24, 'name':'Pranks'},
-        {'_id':'soundtrack','itmf':25, 'name':'Soundtrack'},
-        {'_id':'euro techno','itmf':26, 'name':'Euro Techno'},
-        {'_id':'ambient','itmf':27, 'name':'Ambient'},
-        {'_id':'trip hop','itmf':28, 'name':'Trip Hop'},
-        {'_id':'vocal','itmf':29, 'name':'Vocal'},
-        {'_id':'jazz funk','itmf':30, 'name':'Jazz Funk'},
-        {'_id':'fusion','itmf':31, 'name':'Fusion'},
-        {'_id':'trance','itmf':32, 'name':'Trance'},
-        {'_id':'classical','itmf':33, 'name':'Classical'},
-        {'_id':'instrumental','itmf':34, 'name':'Instrumental'},
-        {'_id':'acid','itmf':35, 'name':'Acid'},
-        {'_id':'house','itmf':36, 'name':'House'},
-        {'_id':'game','itmf':37, 'name':'Game'},
-        {'_id':'sound clip','itmf':38, 'name':'Sound Clip'},
-        {'_id':'gospel','itmf':39, 'name':'Gospel'},
-        {'_id':'noise','itmf':40, 'name':'Noise'},
-        {'_id':'alternrock','itmf':41, 'name':'Alternrock'},
-        {'_id':'bass','itmf':42, 'name':'Bass'},
-        {'_id':'soul','itmf':43, 'name':'Soul'},
-        {'_id':'punk','itmf':44, 'name':'Punk'},
-        {'_id':'space','itmf':45, 'name':'Space'},
-        {'_id':'meditative','itmf':46, 'name':'Meditative'},
-        {'_id':'instrumental pop','itmf':47, 'name':'Instrumental Pop'},
-        {'_id':'instrumental rock','itmf':48, 'name':'Instrumental Rock'},
-        {'_id':'ethnic','itmf':49, 'name':'Ethnic'},
-        {'_id':'gothic','itmf':50, 'name':'Gothic'},
-        {'_id':'darkwave','itmf':51, 'name':'Darkwave'},
-        {'_id':'techno industrial','itmf':52, 'name':'Techno Industrial'},
-        {'_id':'electronic','itmf':53, 'name':'Electronic'},
-        {'_id':'pop folk','itmf':54, 'name':'Pop Folk'},
-        {'_id':'eurodance','itmf':55, 'name':'Eurodance'},
-        {'_id':'dream','itmf':56, 'name':'Dream'},
-        {'_id':'southern rock','itmf':57, 'name':'Southern Rock'},
-        {'_id':'comedy','itmf':58, 'name':'Comedy'},
-        {'_id':'cult','itmf':59, 'name':'Cult'},
-        {'_id':'gangsta','itmf':60, 'name':'Gangsta'},
-        {'_id':'top 40','itmf':61, 'name':'Top 40'},
-        {'_id':'christian rap','itmf':62, 'name':'Christian Rap'},
-        {'_id':'pop funk','itmf':63, 'name':'Pop Funk'},
-        {'_id':'jungle','itmf':64, 'name':'Jungle'},
-        {'_id':'native American','itmf':65, 'name':'Native American'},
-        {'_id':'cabaret','itmf':66, 'name':'Cabaret'},
-        {'_id':'new wave','itmf':67, 'name':'New Wave'},
-        {'_id':'psychedelic','itmf':68, 'name':'Psychedelic'},
-        {'_id':'rave','itmf':69, 'name':'Rave'},
-        {'_id':'showtunes','itmf':70, 'name':'Showtunes'},
-        {'_id':'trailer','itmf':71, 'name':'Trailer'},
-        {'_id':'lo fi','itmf':72, 'name':'Lo Fi'},
-        {'_id':'tribal','itmf':73, 'name':'Tribal'},
-        {'_id':'acid punk','itmf':74, 'name':'Acid Punk'},
-        {'_id':'acid jazz','itmf':75, 'name':'Acid Jazz'},
-        {'_id':'polka','itmf':76, 'name':'Polka'},
-        {'_id':'retro','itmf':77, 'name':'Retro'},
-        {'_id':'musical','itmf':78, 'name':'Musical'},
-        {'_id':'rock and roll','itmf':79, 'name':'Rock and Roll'},
-        {'_id':'hard rock','itmf':80, 'name':'Hard Rock'},
-        {'_id':'folk','itmf':81, 'name':'Folk'},
-        {'_id':'folk rock','itmf':82, 'name':'Folk-Rock'},
-        {'_id':'national folk','itmf':83, 'name':'National Folk'},
-        {'_id':'swing','itmf':84, 'name':'Swing'},
-        {'_id':'fast fusion','itmf':85, 'name':'Fast Fusion'},
-        {'_id':'bebob','itmf':86, 'name':'Bebob'},
-        {'_id':'latin','itmf':87, 'name':'Latin'},
-        {'_id':'revival','itmf':88, 'name':'Revival'},
-        {'_id':'celtic','itmf':89, 'name':'Celtic'},
-        {'_id':'bluegrass','itmf':90, 'name':'Bluegrass'},
-        {'_id':'avantgarde','itmf':91, 'name':'Avantgarde'},
-        {'_id':'gothicrock','itmf':92, 'name':'Gothic Rock'},
-        {'_id':'progressive rock','itmf':93, 'name':'Progresive Rock'},
-        {'_id':'psychedelic rock','itmf':94, 'name':'Psychedelic Rock'},
-        {'_id':'symphonic rock','itmf':95, 'name':'Symphonic Rock'},
-        {'_id':'slow rock','itmf':96, 'name':'Slow Rock'},
-        {'_id':'big band','itmf':97, 'name':'Big Band'},
-        {'_id':'chorus','itmf':98, 'name':'Chorus'},
-        {'_id':'easy listening','itmf':99, 'name':'Easy Listening'},
-        {'_id':'acoustic','itmf':100, 'name':'Acoustic'},
-        {'_id':'humour','itmf':101, 'name':'Humor'},
-        {'_id':'speech','itmf':102, 'name':'Speech'},
-        {'_id':'chanson','itmf':103, 'name':'Chason'},
-        {'_id':'opera','itmf':104, 'name':'Opera'},
-        {'_id':'chamber music','itmf':105, 'name':'Chamber Music'},
-        {'_id':'sonata','itmf':106, 'name':'Sonata'},
-        {'_id':'symphony','itmf':107, 'name':'Symphony'},
-        {'_id':'booty bass','itmf':108, 'name':'Booty Bass'},
-        {'_id':'primus','itmf':109, 'name':'Primus'},
-        {'_id':'porn groove','itmf':110, 'name':'Porn Groove'},
-        {'_id':'satire','itmf':111, 'name':'Satire'},
-        {'_id':'slow jam','itmf':112, 'name':'Slow Jam'},
-        {'_id':'club','itmf':113, 'name':'Club'},
-        {'_id':'tango','itmf':114, 'name':'Tango'},
-        {'_id':'samba','itmf':115, 'name':'Samba'},
-        {'_id':'folklore','itmf':116, 'name':'Folklore'},
-        {'_id':'ballad','itmf':117, 'name':'Ballad'},
-        {'_id':'power ballad','itmf':118, 'name':'Power Ballad'},
-        {'_id':'rhythmic soul','itmf':119, 'name':'Rhythmic Soul'},
-        {'_id':'freestyle','itmf':120, 'name':'Freestyle'},
-        {'_id':'duet','itmf':121, 'name':'Duet'},
-        {'_id':'punk rock','itmf':122, 'name':'Punk Rock'},
-        {'_id':'drum solo','itmf':123, 'name':'Drum Solo'},
-        {'_id':'a capella','itmf':124, 'name':'A capella'},
-        {'_id':'euro house','itmf':125, 'name':'Euro-House'},
-        {'_id':'dance hall','itmf':126, 'name':'Dance Hall'},
-    ),
     'tvshow':(
         # TV Show map
         # The initial TVDB TV Show id map
@@ -3543,7 +3227,6 @@ base_config = {
         (81189, u'breaking bad'),
         (71663, u'the simpsons'),
         (85040, u'caprica'),
-        
     ),
 }
 
@@ -3558,10 +3241,3 @@ for c in command_config:
     else:
         result = False
         command_config[c]['path'] = None
-    
-for k,v in repository_config['Media Kind'].iteritems():
-    v['detect'] = re.compile(v['schema'], re.UNICODE)
-    
-for (t, ks) in repository_config['Codec'].iteritems():
-    for k,v in ks.iteritems():
-        v['detect'] = re.compile(v['schema'], re.UNICODE)

@@ -196,10 +196,11 @@ class EntityManager(object):
     
     
     def base_init(self):
-        from config import base_config
-        for g in base_config['genre']:
-            self.insert_genre(g)
+        from config import media_property
+        for g in media_property['gnre']:
+            self.insert_genre({'_id':g['name'], 'code':g['code'], 'name':g['print']})
         
+        from config import base_config
         for s in base_config['tvshow']:
             self.map_show(s[1], s[0])
     
@@ -370,20 +371,18 @@ class EntityManager(object):
         if result is None:
             self.genres.save(genre)
             result = genre
-            if u'itmf' in genre.keys():
-                self.logger.info(u'Creating genre %s with iTMF code %d', genre[u'name'], genre[u'itmf'])
+            if u'code' in genre:
+                self.logger.info(u'Creating genre %s with code %d', genre[u'name'], genre[u'code'])
             else:
                 self.logger.info(u'Creating genre %s', genre[u'name'])
         return result
     
     
-    def make_genre(self, name, itmf=None, small_name=None):
+    def make_genre(self, name, small_name=None):
         result = None
         if small_name is None:
             small_name = name.lower()
         result = {u'_id':small_name, u'name':name}
-        if itmf is not None:
-            result[u'itmf'] = itmf
         result = self.insert_genre(result)
         return result
     
@@ -409,8 +408,8 @@ class EntityManager(object):
         _genre_ref = {}
         _genre_ref[u'id'] = _genre[u'_id']
         _genre_ref[u'name'] = _genre[u'name']
-        if u'itmf' in _genre:
-            _genre_ref[u'itmf'] = _genre[u'itmf']
+        if u'code' in _genre:
+            _genre_ref[u'code'] = _genre[u'code']
         return _genre_ref
     
     
