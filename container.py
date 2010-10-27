@@ -391,10 +391,7 @@ class Container(object):
     
     
     def print_meta(self):
-        result = None
-        if self.meta:
-            result = (u'\n'.join([theFileUtil.format_key_value(key, self.meta[key], theFileUtil.property_map['name']['tag']) for key in sorted(set(self.meta))]))
-        return result
+        return theFileUtil.format_display_block(self.meta, theFileUtil.property_map['name']['tag'])
     
     
     def print_related(self):
@@ -405,22 +402,19 @@ class Container(object):
     
     
     def print_path_info(self):
-        result = None
-        if self.path_info:
-            result = (u'\n'.join([theFileUtil.format_key_value(key, self.path_info[key], theFileUtil.property_map['name']['tag']) for key in sorted(set(self.path_info))]))
-        return result
+        return theFileUtil.format_display_block(self.path_info, theFileUtil.property_map['name']['tag'])
     
     
     def print_file_info(self):
-         return (u'\n'.join([theFileUtil.format_key_value(t, self.info['file'][t], theFileUtil.property_map['name']['file']) for t in sorted(set(self.info['file']))]))
+        return theFileUtil.format_display_block(self.info['file'], theFileUtil.property_map['name']['file'])
     
     
     def print_tracks(self):
-        return (u'\n\n\n'.join([theFileUtil.format_track(track) for track in self.info['track']]))
+        return (u'\n\n\n'.join([theFileUtil.format_display_block(track, theFileUtil.property_map['name']['track'][track['type']]) for track in self.info['track']]))
     
     
     def print_tags(self):
-        return (u'\n'.join([theFileUtil.format_key_value(t, self.info['tag'][t], theFileUtil.property_map['name']['tag']) for t in sorted(set(self.info['tag']))]))
+        return theFileUtil.format_display_block(self.info['tag'], theFileUtil.property_map['name']['tag'])
     
     
     def print_chapter_markers(self):
@@ -429,16 +423,16 @@ class Container(object):
     
     def __unicode__(self):
         result = None
-        result = theFileUtil.format_info_title(self.file_path)
+        result = theFileUtil.format_info_title(self.info['file']['name'])
         if self.related:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'related'), self.print_related()))
         if self.related:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'file'), self.print_file_info()))
+            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'file info'), self.print_file_info()))
         if self.path_info:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'path info'), self.print_path_info()))
         
         if self.info['menu']:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'chapter markers'), self.print_chapter_markers()))
+            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'menu'), self.print_chapter_markers()))
         
         if self.info['tag']:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
@@ -1814,6 +1808,10 @@ class FileUtil(object):
                                     track[p['name']] = value
                             if track:
                                 track['type'] = track_type
+                                if track_type == 'video':
+                                     if 'encoder settings' in track and 'encoder' in track and track['encoder'].count('x264'):
+                                         track['encoder settings'] = track['encoder settings'].split(' / ')
+                                
                                 # check to see if language is not set and set it to default
                                 #if track['type'] in theFileUtil.stream_type_with_language:
                                 #    if 'language' not in track or track['language'] == 'und':
@@ -1850,6 +1848,7 @@ class FileUtil(object):
                         info['tag']['rating'] = match.group(2)
                         info['tag']['rating score'] = match.group(3)
                         info['tag']['rating annotation'] = match.group(4)
+                
                 if 'track position' in info['tag']:
                     info['tag']['track #'] = u'{0} / {1}'.format(info['tag']['track position'], info['tag']['track total'])
                 if 'disk position' in info['tag']:
@@ -2189,17 +2188,6 @@ class FileUtil(object):
         return u'{{{0}:{1}}}'.format(pkey, pvalue)
     
     
-    def bytes_to_human_readable(self, value):
-        result = None
-        if value:
-            p = 0
-            v = float(value)
-            while v > 1024 and p < 4:
-                p += 1
-                v /= 1024.0
-                
-            result = '{0:.2f} {1}'.format(v, FileUtil.iec_byte_power_name[p])
-        return result
     
     
     def frame_rate_to_float(self, frame_rate):
@@ -2218,6 +2206,14 @@ class FileUtil(object):
     
     
     
+    def format_display_block(self, block, mapping):
+        result = None
+        result = [ theFileUtil.format_key_value(k, v, mapping) for k,v in block.iteritems() ]
+        result = [ v for v in sorted(set(result)) if v ]
+        if result:
+            result = u'\n'.join(result)
+        return result
+    
     
     def format_info_title(self, text):
         return FileUtil.format_info_title_display.format(text)
@@ -2227,45 +2223,100 @@ class FileUtil(object):
         return FileUtil.format_info_subtitle_display.format(text)
     
     
+    def format_byte_as_iec_60027_2(self, value):
+        result = None
+        if value:
+            p = 0
+            v = float(value)
+            while v > 1024 and p < 4:
+                p += 1
+                v /= 1024.0
+            result = '{0:.2f} {1}'.format(v, FileUtil.binary_iec_60027_2_prefix[p])
+        return result
+    
+    
+    def format_bit_as_si(self, value):
+        result = None
+        if value:
+            p = 0
+            v = float(value)
+            while v > 1000 and p < 4:
+                p += 1
+                v /= 1000.0
+            result = '{0:.2f} {1}'.format(v, FileUtil.decimal_si_prefix[p])
+        return result
+    
+    
     def format_key_value(self, key, value, mapping=None):
+        pkey = None
+        pvalue = None
+        result = None
         if mapping:
             m = mapping[key]
-            pkey = m['print']
-            if m['type'] == 'enum':
-                pvalue = self.property_map['code'][m['atom']][value]['print']
-                
-            elif m['type'] in ('string', 'list'):
-                if m['type'] == 'list': pvalue = u', '.join(value)
-                else:
-                    if key == 'language':
-                        pvalue = self.property_map['iso3t']['language'][value]['print']
+            if not ('display' in m and not m['display']):
+                pkey = m['print']
+                ptype = m['type']
+                if ptype == 'enum':
+                    pvalue = self.property_map['code'][m['atom']][value]['print']
+                    
+                elif ptype in ('string', 'list'):
+                    if ptype == 'list':
+                        pvalue = u', '.join(value)
+                    else:
+                        if key == 'language':
+                            pvalue = self.property_map['iso3t']['language'][value]['print']
+                        else:
+                            pvalue = unicode(value)
+                    if len(pvalue) > FileUtil.format_wrap_width:
+                        lines = textwrap.wrap(pvalue, FileUtil.format_wrap_width)
+                        pvalue = FileUtil.format_indent.join(lines)
+                        
+                elif ptype == 'float':
+                    pvalue = u'{0:.3f}'.format(value)
+                    
+                elif ptype == 'bool':
+                    if value:
+                        pvalue = u'yes'
+                    else:
+                        pvalue = u'no'
+                        
+                elif ptype == 'int':
+                    if 'format' in m:
+                        pformat = m['format']
+                        if pformat == 'bitrate':
+                            pvalue = '{0}/s'.format(self.format_bit_as_si(value))
+                        elif pformat == 'millisecond':
+                            pvalue = self.miliseconds_to_time(value)
+                        elif pformat == 'byte':
+                            pvalue = self.format_byte_as_iec_60027_2(value)
+                        elif pformat == 'bit':
+                            pvalue = '{0} bit'.format(value)
+                        elif pformat == 'frequency':
+                            pvalue = '{0} Hz'.format(value)
+                        elif pformat == 'pixel':
+                            pvalue = '{0} px'.format(value)
+                        else:
+                            pvalue = unicode(value)
                     else:
                         pvalue = unicode(value)
-                if len(pvalue) > FileUtil.format_wrap_width:
-                    lines = textwrap.wrap(pvalue, FileUtil.format_wrap_width)
-                    pvalue = FileUtil.format_indent.join(lines)
-                    
-            elif m['type'] == 'float':
-                pvalue = u'{0:.3f}'.format(value)
-                
-            elif m['type'] == 'bool':
-                if value: pvalue = u'yes'
-                else: pvalue = u'no'
+                        
+                else:
+                    pvalue = value
                 
             else:
-                pvalue = value
+                pass
         else:
             pkey = key
             pvalue = value
-        return FileUtil.format_key_value_display.format(pkey, pvalue)
+            
+        if pvalue:
+            result = FileUtil.format_key_value_display.format(pkey, pvalue)
+        return result
     
     
     def format_value(self, value):
         return FileUtil.format_value_display.format(value)
     
-    
-    def format_track(self, track):
-        return (u'\n'.join([theFileUtil.format_key_value(p, track[p], self.property_map['name']['track'][track['type']]) for p in sorted(set(track))]))
     
     
     format_indent = u'\n' + u' '* repository_config['Display']['indent']
@@ -2280,7 +2331,8 @@ class FileUtil(object):
     full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
     illegal_characters_for_filename = re.compile(ur'[\\\/?<>:*|^\.]')
     escaped_subler_tag_characters = set(('{', '}', ':'))
-    iec_byte_power_name = {0:'Byte', 1:'KiB', 2:'MiB', 3:'GiB', 4:'TiB'}
+    binary_iec_60027_2_prefix = {0:'Byte', 1:'KiB', 2:'MiB', 3:'GiB', 4:'TiB'}
+    decimal_si_prefix = {0:'bit', 1:'kbit', 2:'Mbit', 3:'Gbit', 4:'Tbit'}
     sentence_end = re.compile(ur'[.!?]')
     whitespace_re = re.compile(ur'\s+', re.UNICODE)
     

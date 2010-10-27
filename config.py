@@ -29,18 +29,21 @@ media_property = {
             'print':'Directory',
             'mediainfo':'FolderName',
             'type':'string',
+            'display':False,
         },
         {
             'name':'name',
             'print':'Name',
             'mediainfo':'FileName',
             'type':'string',
+            'display':False,
         },
         {
             'name':'extension',
             'print':'Extension',
             'mediainfo':'FileExtension',
             'type':'string',
+            'display':False,
         },
         {
             'name':'format',
@@ -53,24 +56,27 @@ media_property = {
             'print':'Size',
             'mediainfo':'FileSize',
             'type':'int',
+            'format':'byte',
         },
         {
             'name':'duration',
             'print':'Duration',
             'mediainfo':'Duration',
             'type':'int',
+            'format':'millisecond',
         },
         {
             'name':'bit rate',
             'print':'Bit Rate',
             'mediainfo':'OverallBitRate',
             'type':'int',
+            'format':'bitrate',
         },
         {
             'name':'encode date',
             'print':'Encode Date',
             'mediainfo':'Encoded_Date',
-            'type':'date',
+            'type':'date'
         },
         {
             'name':'modified date',
@@ -560,6 +566,7 @@ media_property = {
             'subler':None,
             'print':'iTunEXTC',
             'type':'string',
+            'display':False
         },
         {
             'name':'itunmovi',
@@ -569,6 +576,8 @@ media_property = {
             'subler':None,
             'print':'iTunMOVI',
             'type':'string',
+            'format':'xml',
+            'display':False
         },
         {
             'name':'cast',
@@ -730,85 +739,89 @@ media_property = {
                 'name':'type',
                 'print':'Type',
                 'mediainfo':None,
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'id',
                 'print':'ID',
                 'mediainfo':'ID',
-                'type':'int'
+                'type':'int',
             },
             {
                 'name':'position',
                 'print':'Position',
                 'mediainfo':'StreamKindPos',
-                'type':'int'
+                'type':'int',
             },
             {
                 'name':'codec',
                 'print':'Codec',
                 'mediainfo':'Format',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'codec profile',
                 'print':'Codec Profile',
                 'mediainfo':'Format_Profile',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'duration',
                 'print':'Duration',
                 'mediainfo':'Duration',
-                'type':'int'
+                'type':'int',
+                'format':'millisecond',
             },
             {
                 'name':'bit rate',
                 'print':'Bit Rate',
                 'mediainfo':'BitRate',
-                'type':'int'
+                'type':'int',
+                'format':'bitrate',
             },
             {
                 'name':'bit rate mode',
                 'print':'Bit Rate Mode',
                 'mediainfo':'BitRate_Mode',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'bit depth',
                 'print':'Bit Depth',
                 'mediainfo':'BitDepth',
-                'type':'int'
+                'type':'int',
+                'format':'bit',
             },
             {
                 'name':'stream size',
                 'print':'Stream Size',
                 'mediainfo':'StreamSize',
-                'type':'int'
+                'type':'int',
+                'format':'byte',
             },
             {
                 'name':'language',
                 'print':'Language',
                 'mediainfo':'Language_String3',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'encoded date',
                 'print':'Encoded Date',
                 'mediainfo':'Encoded_Date',
-                'type':'date'
+                'type':'date',
             },
             {
                 'name':'name',
                 'print':'Name',
                 'mediainfo':'Title',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'delay',
                 'print':'Delay',
                 'mediainfo':'Delay',
-                'type':'int'
+                'type':'int',
             },
         ),
         'audio':(
@@ -816,31 +829,32 @@ media_property = {
                 'name':'channels',
                 'print':'Channels',
                 'mediainfo':'Channel_s_',
-                'type':'int'
+                'type':'int',
             },
             {
                 'name':'channel position',
                 'print':'Channel Position',
                 'mediainfo':'ChannelPositions',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'sample rate',
                 'print':'Sample Rate',
                 'mediainfo':'SamplingRate',
-                'type':'int'
+                'type':'int',
+                'format':'frequency',
             },
             {
                 'name':'sample count',
                 'print':'Sample Count',
                 'mediainfo':'SamplingCount',
-                'type':'int'
+                'type':'int',
             },
             {
                 'name':'dialnorm',
                 'print':'Dialnorm',
                 'mediainfo':'dialnorm',
-                'type':'int'
+                'type':'int',
             },
         ),
         'video':(
@@ -848,79 +862,85 @@ media_property = {
                 'name':'width',
                 'print':'Width',
                 'mediainfo':'Width',
-                'type':'int'
+                'type':'int',
+                'format':'pixel',
             },
             {
                 'name':'height',
                 'print':'Height',
                 'mediainfo':'Height',
-                'type':'int'
+                'type':'int',
+                'format':'pixel',
             },
             {
                 'name':'pixel aspect ratio',
                 'print':'Pixel Aspect Ratio',
                 'mediainfo':'PixelAspectRatio',
-                'type':'float'
+                'type':'float',
             },
             {
                 'name':'display aspect ratio',
                 'print':'Display Aspect Ratio',
                 'mediainfo':'DisplayAspectRatio',
-                'type':'float'
+                'type':'float',
             },
             {
                 'name':'frame rate mode',
                 'print':'Frame Rate Mode',
                 'mediainfo':'FrameRate_Mode',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'frame rate',
                 'print':'Frame Rate',
                 'mediainfo':'FrameRate',
-                'type':'float'
+                'type':'float',
+                'format':'framerate',
             },
             {
                 'name':'frame rate minimum',
                 'print':'Frame Rate Minimum',
                 'mediainfo':'FrameRate_Minimum',
-                'type':'float'
+                'type':'float',
+                'format':'framerate',
             },
             {
                 'name':'frame rate maximum',
                 'print':'Frame Rate Maximum',
                 'mediainfo':'FrameRate_Maximum',
-                'type':'float'
+                'type':'float',
+                'format':'framerate',
             },
             {
                 'name':'frame count',
                 'print':'Frame Count',
                 'mediainfo':'FrameCount',
-                'type':'int'
+                'type':'int',
             },
             {
                 'name':'color space',
                 'print':'Color Space',
                 'mediainfo':'ColorSpace',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'bpf',
                 'print':'Bits / Pixel * Frame',
                 'mediainfo':'Bits-_Pixel_Frame_',
-                'type':'float'
+                'type':'float',
             },
             {
                 'name':'encoder',
                 'print':'Encoder',
                 'mediainfo':'Encoded_Library',
-                'type':'string'
+                'type':'string',
             },
             {
                 'name':'encoder settings',
                 'print':'Encoder Settings',
                 'mediainfo':'Encoded_Library_Settings',
-                'type':'string'
+                'type':'list',
+                'display':False,
             },
         ),
         'text':(
@@ -930,13 +950,15 @@ media_property = {
                 'name':'width',
                 'print':'Width',
                 'mediainfo':'Width',
-                'type':'int'
+                'type':'int',
+                'format':'pixel',
             },
             {
                 'name':'height',
                 'print':'Height',
                 'mediainfo':'Height',
-                'type':'int'
+                'type':'int',
+                'format':'pixel',
             },
         )
     },
