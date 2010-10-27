@@ -146,7 +146,7 @@ class Container(object):
         if self.is_movie():
             record = theEntityManager.find_movie_by_imdb_id(self.path_info['imdb id'])
             if record:
-                self.meta = {'media kind':theFileUtil.property_map['name']['stik']['movie']['code']}
+                self.meta = {'media kind':9}
                 
                 if 'name' in record:
                     self.meta['name'] = record['name']
@@ -169,7 +169,7 @@ class Container(object):
         elif self.is_tvshow():
             show, episode = theEntityManager.find_episode(self.path_info['tv show key'], self.path_info['tv season'], self.path_info['tv episode #'])
             if show and episode:
-                self.meta = {'media kind':theFileUtil.property_map['name']['stik']['tvshow']['code']}
+                self.meta = {'media kind':10}
                 
                 if 'content_rating' in show:
                     self.meta['rating'] = show['content_rating']
@@ -309,12 +309,12 @@ class Container(object):
         self.meta['artist'] = None
         if self.is_movie():
             for job in ('directors', 'producers', 'screenwriters', 'codirectors', 'cast'):
-                if self.meta[job]:
+                if job in self.meta and self.meta[job]:
                     self.meta['artist'] = self.meta[job][0]
                     break
         elif self.is_tvshow():
             for job in ('screenwriters', 'directors', 'producers', 'codirectors', 'cast'):
-                if self.meta[job]:
+                if job in self.meta and self.meta[job]:
                     self.meta['artist'] = self.meta[job][0]
                     break
     
