@@ -1,7 +1,7 @@
 mp4pack.py a media collection manager
 Lior Galanti lior.galanti@gmail.com
 
-Usage: mp4pack.py [options] [file or directory. default: . ]
+Usage: mp4pack [options] [file or directory. default: . ]
 
 Options:
   -h, --help            show this help message and exit
@@ -19,7 +19,7 @@ Options:
     -m KIND, --pack=KIND
                         KIND is one of [ mkv ]
     -t KIND, --transcode=KIND
-                        KIND is one of [ m4v, mkv, srt, txt, jpg, ac3, tc ]
+                        KIND is one of [ m4v, mkv, srt, txt, jpg, ac3 ]
     -u KIND, --update=KIND
                         KIND is one of [ srt, jpg, txt ]
 
@@ -42,6 +42,7 @@ Options:
     --pixel-width=WIDTH
                         Max output pixel width [ default: set by profile ]
     --language=CODE     Languge code used when undefined. [ default: eng ]
+    --reindex           Rebuild index for encountered files.
     --md5               Verify md5 checksum on copy.
 
   Subtitle:
@@ -62,3 +63,5 @@ Options:
                         Refresh the tv show and episode entries.
     --refresh-person=TMDb
                         Refresh the person entry.
+    --choose-movie-poster=MAP
+                        Choose tmdb movie poster. Takes IMDb:TMDb

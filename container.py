@@ -105,8 +105,9 @@ class Container(object):
             if self.record and 'entity' in self.record:
                 if refresh:
                     self.drop_index()
-                if not refresh and (not ('physical' in self.record['entity']) or not self.record['entity']['physical']):
-                    refresh = True
+                else:
+                    if 'physical' not in self.record['entity'] or not self.record['entity']['physical']:
+                        refresh = True
                 if refresh:
                     self.refresh_index()
         return result
