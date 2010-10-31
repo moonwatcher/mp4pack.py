@@ -564,7 +564,7 @@ class EntityManager(object):
             
             if 'cast' in element.keys():
                 for person in element['cast']:
-                    self.store_tmdb_person(person['id'])
+                    self.find_person_by_tmdb_id(person['id'])
             if new_record:
                 self.logger.info(u'Created record for movie %s with tmdb:%s imdb:%s', movie['tmdb_record']['name'], movie['tmdb_id'], movie['imdb_id'])
             else:
