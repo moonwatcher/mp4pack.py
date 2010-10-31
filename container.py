@@ -1188,8 +1188,8 @@ class Subtitle(Text):
         return Text.valid(self) and self.subtitle_blocks is not None
     
     
-    def load(self):
-        result = Text.load(self)
+    def load(self, refresh=False):
+        result = Text.load(self, refresh=False)
         if result:
             self.subtitle_blocks = []
             self.statistics = {}
@@ -1481,8 +1481,8 @@ class Chapter(Text):
         return Text.valid(self) and self.chapter_markers
     
     
-    def load(self):
-        result = Text.load(self)
+    def load(self, refresh=False):
+        result = Text.load(self, refresh=False)
         if result:
             self.chapter_markers = []
             result = Chapter.decode(self)
