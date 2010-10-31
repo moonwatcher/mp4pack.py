@@ -262,14 +262,14 @@ class Container(object):
     
     
     def queue_for_index(self, path):
-        if not in self.unindexed:
+        if path not in self.unindexed:
             self.unindexed.append(path)
-        if not in self.ghost:
+        if path not in self.ghost:
             self.ghost.append(path)
     
     
     def drop_from_index(self, path):
-        if not in self.ghost:
+        if path not in self.ghost:
             self.ghost.append(path)
     
     
