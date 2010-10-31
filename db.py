@@ -233,7 +233,7 @@ class EntityManager(object):
     def refresh_tmdb_genres(self):
         url = repository_config['Database']['tmdb']['urls']['Genres.getList']
         handler = TmdbJsonHandler(url)
-        #handler.refresh()
+        handler.refresh()
         element_list = handler.element()
         if element_list is not None:
             count = 0
@@ -348,6 +348,7 @@ class EntityManager(object):
             self.logger.info(u'Created genre %s with tmdb %s', genre[u'name'], genre[u'tmdb_id'])
         elif u'tmdb_id' not in genre:
             genre[u'tmdb_id'] = tmdb_id
+            genre[u'url'] = url
             self.logger.info(u'Added tmdb id %s to genre %s', genre[u'tmdb_id'], genre[u'name'])
         self.genres.save(genre)
         return genre
