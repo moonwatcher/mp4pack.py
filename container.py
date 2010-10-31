@@ -50,6 +50,7 @@ class Container(object):
         self.meta = None
         
         self.unindexed = []
+        self.ghost = []
     
     
     def valid(self):
@@ -103,38 +104,12 @@ class Container(object):
             
             if self.record and 'entity' in self.record:
                 if refresh:
-                    self.clear_physical()
+                    self.drop_index()
                 if not refresh and (not ('physical' in self.record['entity']) or not self.record['entity']['physical']):
                     refresh = True
                 if refresh:
-                    self.refresh_record()
+                    self.refresh_index()
         return result
-    
-    
-    def refresh_record(self, related=None):
-        # <Volume>/<Media Kind>/<Kind>/<Profile>/(<Show>/<Season>/(language/)?<Show> <Code> <Name>|(language/)?IMDb<IMDB ID> <Name>).<Extension>
-        # Reload to make sure we have the latest
-        if self.record:
-            if 'physical' not in self.record['entity']:
-                self.record['entity']['physical'] = {}
-            
-            if related is None:
-                related = theFileUtil.scan_repository_for_related(self.file_path, self.record['entity'])
-            
-            if related:
-                discovered = 0
-                for path in related:
-                    if path not in self.record['entity']['physical']:
-                        related_path_info = theFileUtil.decode_path(path)
-                        if theFileUtil.check_if_in_repository(related_path_info):
-                            self.logger.debug(u'Indexing %s.', path)
-                            self.record['entity']['physical'][path] = {}
-                            self.record['entity']['physical'][path]['path info'] = related_path_info
-                            self.record['entity']['physical'][path]['info'] = theFileUtil.decode_info(path)
-                            discovered += 1
-                if discovered:
-                    self.save_record()
-                    self.logger.debug(u'Indexed %s files related to %s in repository.', discovered, self.file_path)
     
     
     def load_info(self, refresh=False):
@@ -150,7 +125,6 @@ class Container(object):
                     self.record['entity']['physical'][self.file_path]['info'] = self.info
                     self.save_record()
                     self.logger.info(u'Refreshed info about %s', self.file_path)
-            
         return self.info is not None
     
     
@@ -161,7 +135,6 @@ class Container(object):
             movie = self.record['entity']
             if 'tmdb_record' in movie:
                 self.meta = {'media kind':9}
-                
                 if 'name' in movie['tmdb_record']:
                     self.meta['name'] = movie['tmdb_record']['name']
                 if 'overview' in movie['tmdb_record'] and movie['tmdb_record']['overview'] != 'No overview found.':
@@ -175,7 +148,6 @@ class Container(object):
                 elif 'overview' in movie['tmdb_record'] and movie['tmdb_record']['overview'] != 'No overview found.':
                     s = FileUtil.sentence_end.split(FileUtil.whitespace_re.sub(u' ', movie['tmdb_record']['overview']).strip('\'".,'))
                     if s: self.meta['description'] = s[0].strip('"\' ').strip() + '.'
-                    
                 self.load_cast(movie['tmdb_record'])
                 self.load_genre(movie['tmdb_record'])
                 result = True
@@ -185,7 +157,6 @@ class Container(object):
             episode = self.record['entity']
             if show and 'tvdb_record' in show and episode and 'tvdb_record' in episode:
                 self.meta = {'media kind':10}
-                
                 if 'name' in show['tvdb_record']:
                     self.meta['tv show'] = show['tvdb_record']['name']
                     self.meta['album'] = show['tvdb_record']['name']
@@ -193,7 +164,6 @@ class Container(object):
                     self.meta['rating'] = show['tvdb_record']['certification']
                 if 'tv_network' in show['tvdb_record']:
                     self.meta['tv network'] = show['tvdb_record']['tv_network']
-                    
                 self.load_genre(show['tvdb_record'])
                 self.load_cast(show['tvdb_record'], True, False)
                 if 'tv_season' in episode['tvdb_record']:
@@ -213,13 +183,10 @@ class Container(object):
                     if s: self.meta['description'] = s[0].strip('"\' ').strip() + '.'
                 if 'released' in episode['tvdb_record']:
                     self.meta['release date'] = episode['tvdb_record']['released']
-                    
                 self.meta['track #'] = u'{0} / {1}'.format(self.meta['track position'], self.meta['track total'])
                 self.meta['disk #'] = u'{0} / {1}'.format(self.meta['disk position'], self.meta['disk total'])
-                
                 self.load_cast(episode['tvdb_record'], False, True)
                 result = True
-                
         if not result:
             self.meta = None
         else:
@@ -229,19 +196,46 @@ class Container(object):
     
     def unload(self):
         if self.unindexed:
-            self.clear_physical(self.unindexed)
-            self.refresh_record(self.unindexed)
+            self.drop_index(self.ghost)
+            self.refresh_index(self.unindexed)
         self.path_info = None
         self.record = None
         self.info = None
         self.meta = None
     
     
-    def clear_physical(self, related=None):
+    
+    
+    def refresh_index(self, queue=None):
+        # <Volume>/<Media Kind>/<Kind>/<Profile>/(<Show>/<Season>/(language/)?<Show> <Code> <Name>|(language/)?IMDb<IMDB ID> <Name>).<Extension>
+        if self.record:
+            if 'physical' not in self.record['entity']:
+                self.record['entity']['physical'] = {}
+            
+            if queue is None:
+                queue = theFileUtil.scan_repository_for_related(self.file_path, self.record['entity'])
+            
+            if queue:
+                discovered = 0
+                for path in queue:
+                    if path not in self.record['entity']['physical']:
+                        related_path_info = theFileUtil.decode_path(path)
+                        if theFileUtil.check_if_in_repository(related_path_info):
+                            self.logger.debug(u'Indexing %s.', path)
+                            self.record['entity']['physical'][path] = {}
+                            self.record['entity']['physical'][path]['path info'] = related_path_info
+                            self.record['entity']['physical'][path]['info'] = theFileUtil.decode_info(path)
+                            discovered += 1
+                if discovered:
+                    self.save_record()
+                    self.logger.debug(u'Indexed %s files related to %s in repository.', discovered, self.file_path)
+    
+    
+    def drop_index(self, queue=None):
         if self.record and 'entity' in self.record and 'physical' in self.record['entity']:
             need_save = False
-            if related:
-                for p in related:
+            if queue:
+                for p in queue:
                     if p in self.record['entity']['physical']:
                         self.logger.debug(u'Dropping physical index for %s', p)
                         del self.record['entity']['physical'][p]
@@ -253,9 +247,12 @@ class Container(object):
                 self.logger.debug(u'Dropping all physical index for %s', self.file_path)
                 del self.record['entity']['physical']
                 need_save = True
-                
             if need_save: self.save_record()
     
+    
+    
+    
+   
     
     def save_record(self):
         if self.is_movie():
@@ -264,11 +261,28 @@ class Container(object):
             theEntityManager.save_tv_episode(self.record['entity'])
     
     
+    def queue_for_index(self, path):
+        if not in self.unindexed:
+            self.unindexed.append(path)
+        if not in self.ghost:
+            self.ghost.append(path)
+    
+    
+    def drop_from_index(self, path):
+        if not in self.ghost:
+            self.ghost.append(path)
+    
+    
+    
+    
+    
     def related(self):
         related = {}
         for k,v in self.record['entity']['physical'].iteritems():
             related[k] = v['path info']
         return related
+    
+    
     
     
     def info(self, options):
@@ -287,7 +301,7 @@ class Container(object):
                 theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                 if theFileUtil.clean_if_not_exist(dest_path):
                     result = dest_path
-                    self.unindexed.append(dest_path)
+                    self.queue_for_index(dest_path)
                     if options.md5:
                         self.compare_checksum(dest_path)
         return result
@@ -295,11 +309,9 @@ class Container(object):
     
     def delete(self):
         if self.valid():
-            if self.file_path in self.record['entity']['physical']:
-                del self.record['entity']['physical'][self.file_path]
-                self.logger.debug(u'Dropping file %s from entity index',self.file_path)
-            theFileUtil.clean(self.file_path)
+            self.drop_from_index(self.file_path)
             self.logger.debug(u'Delete %s',self.file_path)
+            theFileUtil.clean(self.file_path)
     
     
     def rename(self, options):
@@ -314,6 +326,8 @@ class Container(object):
                 command.extend([self.file_path, dest_path])
                 message = u'Rename {0} --> {1}'.format(self.file_path, dest_path)
                 theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                self.drop_from_index(self.file_path)
+                self.queue_for_index(dest_path)
             else:
                 self.logger.warning(u'Not renaming %s, destination exists: %s', self.file_path, dest_path)
     
@@ -340,6 +354,7 @@ class Container(object):
     
     def update(self, options):
         pass
+    
     
     
     
@@ -612,7 +627,7 @@ class AudioVideoContainer(Container):
                     c.write(dest_path)
                     if theFileUtil.clean_if_not_exist(dest_path):
                         result.append(dest_path)
-                        self.unindexed.append(dest_path)
+                        self.queue_for_index(dest_path)
         return result
     
     
@@ -730,7 +745,7 @@ class AudioVideoContainer(Container):
                         message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
                         theFileUtil.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                         if theFileUtil.clean_if_not_exist(dest_path):
-                            self.unindexed.append(dest_path)
+                            self.queue_for_index(dest_path)
     
     
     def transcode(self, options):
@@ -784,7 +799,7 @@ class AudioVideoContainer(Container):
                         message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
                         theFileUtil.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                         if theFileUtil.clean_if_not_exist(dest_path):
-                            self.unindexed.append(dest_path)
+                            self.queue_for_index(dest_path)
                             result = dest_path
         return result
     
@@ -934,6 +949,8 @@ class Mpeg4(AudioVideoContainer):
             command = theFileUtil.initialize_command('subler', self.logger)
             command.extend([u'-i', self.file_path, u'-t', tc])
             theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+            self.queue_for_index(self.file_path)
+            
         else:
             self.logger.info(u'No tags need update in %s', self.file_path)
     
@@ -944,6 +961,8 @@ class Mpeg4(AudioVideoContainer):
         command = theFileUtil.initialize_command('mp4file', self.logger)
         command.extend([u'--optimize', self.file_path])
         theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+        self.queue_for_index(self.file_path)
+        
     
     
     
@@ -965,6 +984,7 @@ class Mpeg4(AudioVideoContainer):
                 command = theFileUtil.initialize_command('subler', self.logger)
                 command.extend([u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
                 theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                self.queue_for_index(self.file_path)
             else:
                 self.logger.warning(u'No artwork available for %s', self.file_path)
     
@@ -1020,6 +1040,8 @@ class Mpeg4(AudioVideoContainer):
                                     found = True
                                     break
                             if found: break
+                    if selected:
+                        self.queue_for_index(self.file_path)
     
     
     def _update_txt(self, options):
@@ -1039,6 +1061,7 @@ class Mpeg4(AudioVideoContainer):
                 command = theFileUtil.initialize_command('subler', self.logger)
                 command.extend([u'-i', self.file_path, u'-c', selected[0], '-p'])
                 theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                self.queue_for_index(self.file_path)
             else:
                 self.logger.warning(u'No chapters available for %s', self.file_path)
     
@@ -1093,7 +1116,7 @@ class RawAudio(AudioVideoContainer):
                         report = aften_proc.communicate()
                         
                         if theFileUtil.clean_if_not_exist(dest_path):
-                            self.unindexed.append(dest_path)
+                            self.queue_for_index(dest_path)
                             result = dest_path
             return result
     
@@ -1164,6 +1187,7 @@ class Text(Container):
                 self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
                 self.write(dest_path)
                 if theFileUtil.clean_if_not_exist(dest_path):
+                    self.queue_for_index(dest_path)
                     result = dest_path
         return result
     
@@ -1358,8 +1382,8 @@ class Subtitle(Text):
                 self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
                 self.write(dest_path)
                 if theFileUtil.clean_if_not_exist(dest_path):
+                    self.queue_for_index(dest_path)
                     result = dest_path
-                    self.unindexed.append(dest_path)
         return result
     
     
@@ -1617,8 +1641,8 @@ class Artwork(Container):
                             image.save(dest_path)
                         
                         if theFileUtil.clean_if_not_exist(dest_path):
+                            self.queue_for_index(dest_path)
                             result = dest_path
-                            self.unindexed.append(dest_path)
         return result
     
 
