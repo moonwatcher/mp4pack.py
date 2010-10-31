@@ -3410,12 +3410,6 @@ subtitle_config = {
     },
 }
 
-genre_map = (
-    # Genre map
-    # allows mapping different names for genres to another
-    ('science-fiction', 'sci-fi'),
-)
-
 base_config = {
     'tvshow':(
         # TV Show map

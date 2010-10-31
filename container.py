@@ -119,7 +119,7 @@ class Container(object):
                 self.record['entity']['physical'] = {}
             
             if related is None:
-                related = theFileUtil.scan_repository_for_related(self.file_path)
+                related = theFileUtil.scan_repository_for_related(self.file_path, self.record['entity'])
             
             if related:
                 discovered = 0
@@ -277,9 +277,9 @@ class Container(object):
     
     def copy(self, options):
         result = None
-        info = theFileUtil.copy_path_info(self.path_info, options)
-        if theFileUtil.complete_path_info_default_values(info):
-            dest_path = theFileUtil.canonic_path(info, self.info)
+        path_info = theFileUtil.copy_path_info(self.path_info, options)
+        if theFileUtil.complete_path_info_default_values(path_info):
+            dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
             if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                 command = theFileUtil.initialize_command('rsync', self.logger)
                 command.extend([self.file_path, dest_path])
@@ -304,11 +304,7 @@ class Container(object):
     
     def rename(self, options):
         dest_name = None
-        self.load_meta()
-        if self.meta and 'name' in self.meta:
-            dest_name = self.meta['name']
-            
-        dest_path = os.path.join(os.path.dirname(self.file_path), theFileUtil.canonic_name(self.path_info, dest_name))
+        dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_name())
         if os.path.exists(dest_path) and os.path.samefile(self.file_path, dest_path):
             self.logger.debug(u'No renaming needed for %s',dest_path)
         else:
@@ -409,11 +405,11 @@ class Container(object):
     
     def download_artwork(self, options):
         result = False
-        info = theFileUtil.copy_path_info(self.path_info, options)
-        info['kind'] = 'jpg'
-        if theFileUtil.complete_path_info_default_values(info):
+        path_info = theFileUtil.copy_path_info(self.path_info, options)
+        path_info['kind'] = 'jpg'
+        if theFileUtil.complete_path_info_default_values(path_info):
             selected = []
-            lookup = {'kind':'jpg', 'profile':info['profile']}
+            lookup = {'kind':'jpg', 'profile':path_info['profile']}
             for (path, phy) in self.record['entity']['physical'].iteritems():
                 if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
                     selected.append(path)
@@ -425,10 +421,10 @@ class Container(object):
                 elif self.is_tvshow():
                     artwork = theEntityManager.find_tvdb_episode_poster(self.path_info['tv show key'], self.path_info['tv season'], self.path_info['tv episode #'])
                 if artwork and 'cache' in artwork:
-                    info['kind'] = artwork['cache']['kind']
-                    if 'volume' in info: del info['volume']
+                    path_info['kind'] = artwork['cache']['kind']
+                    if 'volume' in path_info: del path_info['volume']
                     image = Artwork(artwork['cache']['path'], False)
-                    image.path_info = info
+                    image.path_info = path_info
                     image.load_record()
                     o = copy.deepcopy(options)
                     o.transcode = 'jpg'
@@ -471,16 +467,16 @@ class Container(object):
         )
     
     
-    def easy_name(self):
-        return theFileUtil.easy_name(self.path_info)
+    def simple_name(self):
+        return theFileUtil.simple_name(self.path_info, self.record['entity'])
     
     
     def canonic_name(self):
-        return theFileUtil.canonic_name(self.path_info)
+        return theFileUtil.canonic_name(self.path_info, self.record['entity'])
     
     
     def canonic_path(self):
-        return theFileUtil.canonic_path(self.path_info)
+        return theFileUtil.canonic_path(self.path_info, self.record['entity'])
     
     
     
@@ -535,8 +531,9 @@ class Container(object):
         if self.info['tag']:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
         
-        #if self.meta:
-        #    result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'metadata'), self.print_meta()))
+        self.load_meta()
+        if self.meta:
+            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'metadata'), self.print_meta()))
         
         if self.info['track']:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tracks'), self.print_tracks()))
@@ -605,7 +602,7 @@ class AudioVideoContainer(Container):
             path_info = theFileUtil.copy_path_info(self.path_info, options)
             path_info['kind'] = 'txt'
             if theFileUtil.complete_path_info_default_values(path_info):
-                dest_path = theFileUtil.canonic_path(path_info)
+                dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                 if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                     c = Chapter(dest_path, False)
                     c.start()
@@ -626,7 +623,7 @@ class AudioVideoContainer(Container):
             path_info['kind'] = 'mkv'
             if theFileUtil.complete_path_info_default_values(path_info):
                 self.load_meta()
-                dest_path = theFileUtil.canonic_path(path_info)
+                dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                 if dest_path is not None:
                     pc = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                     selected = { 'related':{}, 'track':{} }
@@ -743,7 +740,7 @@ class AudioVideoContainer(Container):
         if options.transcode in ('mkv', 'm4v'):
             path_info['kind'] = options.transcode
             if theFileUtil.complete_path_info_default_values(path_info):
-                dest_path = theFileUtil.canonic_path(path_info)
+                dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                 if dest_path is not None:
                     command = None
                     if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
@@ -848,7 +845,7 @@ class Matroska(AudioVideoContainer):
                 path_info['kind'] = t['kind']
                 path_info['language'] = t['language']
                 if theFileUtil.complete_path_info_default_values(path_info):
-                    dest_path = theFileUtil.canonic_path(path_info)
+                    dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                     if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                         command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
                         selected['path'][t['type']].append(dest_path)
@@ -1071,7 +1068,7 @@ class RawAudio(AudioVideoContainer):
             path_info['kind'] = options.transcode
             path_info['language'] = self.path_info['language']
             if theFileUtil.complete_path_info_default_values(path_info):
-                dest_path = theFileUtil.canonic_path(path_info)
+                dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                 if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                     if self.path_info['kind'] == 'dts':
                         tp = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]['transcode']
@@ -1162,7 +1159,7 @@ class Text(Container):
         path_info = theFileUtil.copy_path_info(self.path_info, options)
         path_info['kind'] = options.transcode
         if theFileUtil.complete_path_info_default_values(path_info):
-            dest_path = theFileUtil.canonic_path(path_info)
+            dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
             if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                 self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
                 self.write(dest_path)
@@ -1342,7 +1339,7 @@ class Subtitle(Text):
         path_info = theFileUtil.copy_path_info(self.path_info, options)
         path_info['kind'] = options.transcode
         if theFileUtil.complete_path_info_default_values(path_info):
-            dest_path = theFileUtil.canonic_path(path_info)
+            dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
             if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                 p = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                 if 'transcode' in p and 'filter' in p['transcode']:
@@ -1585,7 +1582,7 @@ class Artwork(Container):
         path_info = theFileUtil.copy_path_info(self.path_info, options)
         path_info['kind'] = options.transcode
         if theFileUtil.complete_path_info_default_values(path_info):
-            dest_path = theFileUtil.canonic_path(path_info)
+            dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
             if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                 p = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                 if 'transcode' in p:
@@ -2049,7 +2046,7 @@ class FileUtil(object):
         return path_info
     
     
-    def scan_repository_for_related(self, path):
+    def scan_repository_for_related(self, path, entity):
         related = None
         if path:
             path_info = self.decode_path(path)
@@ -2065,7 +2062,7 @@ class FileUtil(object):
                                 related_path_info['kind'] = k
                                 related_path_info['profile'] = p
                                 related_path_info['language'] = l
-                                related_path = theFileUtil.canonic_path(related_path_info)
+                                related_path = theFileUtil.canonic_path(related_path_info, entity)
                                 if os.path.exists(related_path):
                                     related.append(related_path)
                         else:
@@ -2073,7 +2070,7 @@ class FileUtil(object):
                             related_path_info['volume'] = v
                             related_path_info['kind'] = k
                             related_path_info['profile'] = p
-                            related_path = theFileUtil.canonic_path(related_path_info)
+                            related_path = theFileUtil.canonic_path(related_path_info, entity)
                             if os.path.exists(related_path):
                                 related.append(related_path)
         return related
@@ -2134,18 +2131,18 @@ class FileUtil(object):
     
     
     
-    def easy_name(self, path_info, name=None):
+    def simple_name(self, path_info, entity=None):
         result = None
-        if name:
-            result = name
+        if entity and 'simple_name' in entity:
+            result = entity['simple_name']
         elif 'name' in path_info:
             result = path_info['name']
         if result:
-            result = self.illegal_characters_for_filename.sub(u'', result)
+            result = self.characters_to_exclude_from_filename.sub(u'', result)
         return result
     
     
-    def canonic_name(self, path_info, name=None):
+    def canonic_name(self, path_info, entity=None):
         result = None
         valid = False
         
@@ -2159,7 +2156,7 @@ class FileUtil(object):
                     result = u''.join([u'IMDb', path_info['imdb id']])
                     valid = True
         if valid:
-            name = self.easy_name(path_info, name)
+            name = self.simple_name(path_info, entity)
             if name is not None:
                 result = u''.join([result, u' ', name])
             result = u''.join([result, u'.', path_info['kind']])
@@ -2169,7 +2166,7 @@ class FileUtil(object):
         return result
     
     
-    def canonic_path(self, path_info, name=None):
+    def canonic_path(self, path_info, entity=None):
         result = None
         valid = True
         if 'kind' in path_info and path_info['kind'] in repository_config['Kind']:
@@ -2211,7 +2208,7 @@ class FileUtil(object):
                 self.logger.warning(u'Unknow kind for %s', unicode(path_info))
         
         if valid:
-            result = os.path.join(result, self.canonic_name(path_info, name))
+            result = os.path.join(result, self.canonic_name(path_info, entity))
             result = os.path.abspath(result)
         else:
             result = None
@@ -2565,7 +2562,7 @@ class FileUtil(object):
     format_value_display = u'{0}{{0}}'.format(u' ' * repository_config['Display']['margin'])
     
     full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
-    illegal_characters_for_filename = re.compile(ur'[\\\/?<>:*|^\.]')
+    characters_to_exclude_from_filename = re.compile(ur'[\\\/?<>:*|\'"^\.]')
     escaped_subler_tag_characters = set(('{', '}', ':'))
     binary_iec_60027_2_prefix = {0:'Byte', 1:'KiB', 2:'MiB', 3:'GiB', 4:'TiB'}
     decimal_si_prefix = {0:'bit', 1:'kbit', 2:'Mbit', 3:'Gbit', 4:'Tbit'}

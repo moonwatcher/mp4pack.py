@@ -210,19 +210,23 @@ class EntityManager(object):
         self.jobs.create_index(u'small_name', unique=True)
         self.networks.create_index(u'small_name', unique=True)
         
-        self.movies.create_index(u'imdb_id', unique=True)
+        self.movies.create_index(u'imdb_id')
         self.movies.create_index(u'tmdb_id')
+        self.movies.create_index(u'small_name')
+        self.movies.create_index(u'simple_name')
         
         self.people.create_index(u'tmdb_id')
         self.people.create_index(u'small_name')
         self.people.create_index(u'simple_name')
         
-        self.shows.create_index(u'tvdb_id', unique=True)
-        self.shows.create_index(u'small_name', unique=True)
+        self.shows.create_index(u'tv_show_key')
+        self.shows.create_index(u'tvdb_id')
+        self.shows.create_index(u'small_name')
+        self.shows.create_index(u'simple_name')
         
         self.episodes.create_index(
             [
-                (u'tv_show_small_name', pymongo.DESCENDING),
+                (u'tv_show_key', pymongo.DESCENDING),
                 (u'tv_season', pymongo.DESCENDING),
                 (u'tv_episode', pymongo.DESCENDING)
             ], unique=True
@@ -265,26 +269,31 @@ class EntityManager(object):
                 self.logger.error(u'Could not parse %s', pair)
     
     
-    def map_show(self, small_name, tvdb_id):
-        show_by_tvdb_id = self.shows.find_one({u'tvdb_id':int(tvdb_id)})
-        show_by_small_name = self.shows.find_one({u'small_name':small_name})
-        if show_by_small_name is None and show_by_tvdb_id is None:
+    def map_show(self, name, tvdb_id):
+        tv_show_key = remove_accents(make_small_name(name))
+        tvdb_id = int(tvdb_id)
+        
+        show_by_tvdb_id = self.shows.find_one({u'tvdb_id':tvdb_id})
+        show_by_key = self.shows.find_one({u'tv_show_key':tv_show_key})
+        if show_by_key is None and show_by_tvdb_id is None:
             # This is good, we can do the mapping
-            show = {u'small_name':small_name, u'tvdb_id':tvdb_id, u'last_update':None}
+            show = {u'tv_show_key':tv_show_key, u'tvdb_id':tvdb_id, u'last_update':None}
             self.shows.save(show)
-            self.logger.info(u'Show %s is now mapped to tvdb %d', small_name, tvdb_id)
+            self.logger.info(u'TV Show %s is now mapped to tvdb %d', tv_show_key, tvdb_id)
         else: # This means at least one exists
-            if not(show_by_small_name is not None and show_by_tvdb_id is not None and show_by_tvdb_id[u'_id'] == show_by_small_name[u'_id']):
-                if show_by_small_name is not None:
-                    self.logger.error(u'Show %s is already mapped to tvdb %d', small_name, show_by_small_name[u'tvdb_id'])
+            if show_by_key is not None and show_by_tvdb_id is not None and show_by_tvdb_id[u'_id'] == show_by_key[u'_id']:
+                # Both exist and are identical, so no mapping is needed
+                self.logger.debug(u'TV Show %s to tvdb %d mapping exists', tv_show_key, tvdb_id)
+            else:
+                # Mapping is impossible. Either one or both exist and mapped to somethign else
+                if show_by_key is not None:
+                    self.logger.error(u'Show %s is already mapped to tvdb %d', show_by_key[u'tv_show_key'], show_by_key[u'tvdb_id'])
                 if show_by_tvdb_id is not None:
-                    self.logger.error(u'Show %s is already mapped to tvdb %d', show_by_tvdb_id[u'small_name'], tvdb_id)
-            elif show_by_small_name is not None and show_by_tvdb_id is not None and show_by_tvdb_id[u'_id'] == show_by_small_name[u'_id']:
-                self.logger.warning(u'Show %s to tvdb %d mapping exists', show_by_tvdb_id[u'small_name'], tvdb_id)
+                    self.logger.error(u'Show %s is already mapped to tvdb %d', show_by_tvdb_id[u'tv_show_key'], show_by_tvdb_id[u'tvdb_id'])
     
     
     def store_network(self, name):
-        small_name = name.lower().strip()
+        small_name = make_small_name(name)
         network = self.networks.find_one({u'small_name': small_name})
         if network is None:
             network = {u'small_name':small_name, u'name':name}
@@ -294,7 +303,7 @@ class EntityManager(object):
     
     
     def store_job(self, name):
-        small_name = name.lower()
+        small_name = make_small_name(name)
         job = self.jobs.find_one({u'small_name': small_name})
         if job is None:
             job = {u'small_name':small_name, u'name':name}
@@ -304,7 +313,7 @@ class EntityManager(object):
     
     
     def store_department(self, name):
-        small_name = name.lower()
+        small_name = make_small_name(name)
         department = self.departments.find_one({u'small_name': small_name})
         if department is None:
             department = {u'small_name':small_name, u'name':name}
@@ -314,10 +323,10 @@ class EntityManager(object):
     
     
     def map_genre(self, name, reference):
-        small_reference_name = reference.lower()
+        small_reference_name = make_small_name(reference)
         reference_genre = self.genres.find_one({u'small_name':small_reference_name})
         if reference_genre is not None:
-            small_name = name.lower()
+            small_name = make_small_name(name)
             genre = self.genres.find_one({u'small_name':small_name})
             if genre is None:
                 # mapped genre does not exist
@@ -341,7 +350,7 @@ class EntityManager(object):
     
     
     def store_tmdb_genre(self, name, tmdb_id, url):
-        small_name = name.lower()
+        small_name = make_small_name(name)
         genre = self.genres.find_one({u'small_name':small_name})
         if genre is None:
             genre = {u'small_name':small_name, u'name':name, u'tmdb_id':tmdb_id, u'url':url}
@@ -355,7 +364,7 @@ class EntityManager(object):
     
     
     def store_itmf_genre(self, name, itmf):
-        small_name = name.lower()
+        small_name = make_small_name(name)
         genre = self.genres.find_one({u'small_name':small_name})
         if genre is None:
             genre = {u'small_name':small_name, u'name':name, u'itmf':itmf}
@@ -368,7 +377,7 @@ class EntityManager(object):
     
     
     def store_genre(self, name):
-        small_name = name.lower()
+        small_name = make_small_name(name)
         genre = self.genres.find_one({u'small_name':small_name})
         if genre is None:
             genre = {u'small_name':small_name, u'name':name}
@@ -420,23 +429,23 @@ class EntityManager(object):
         return person
     
     
-    def find_show(self, small_name, refresh=False):
-        show = self.shows.find_one({u'small_name': small_name})
+    def find_show(self, tv_show_key, refresh=False):
+        show = self.shows.find_one({u'tv_show_key': tv_show_key})
         if show is not None:
             if ( show[u'last_update'] is None or refresh ) and u'tvdb_id' in show:
-                self.logger.info(u'Updating show %s', small_name)
+                self.logger.info(u'Updating show %s', tv_show_key)
                 show, episodes = self.store_tvdb_show(show[u'tvdb_id'], refresh)
-                self.logger.info(u'Done updating show %s', small_name)
+                self.logger.info(u'Done updating show %s', tv_show_key)
         else:
-            self.logger.error(u'Show %s does not exist', small_name)
+            self.logger.error(u'Show %s does not exist', tv_show_key)
         return show
     
     
-    def find_episode(self, tv_show_small_name, tv_season, tv_episode, refresh=False):
-        show = self.find_show(tv_show_small_name)
+    def find_episode(self, tv_show_key, tv_season, tv_episode, refresh=False):
+        show = self.find_show(tv_show_key)
         episode = None
         if show is not None:
-            episode = self.episodes.find_one({u'tv_show_small_name':tv_show_small_name, u'tv_season':tv_season, u'tv_episode':tv_episode})
+            episode = self.episodes.find_one({u'tv_show_key':tv_show_key, u'tv_season':tv_season, u'tv_episode':tv_episode})
             #if episode is None:
             #    self.logger.info(u'Could not find episode, updating show %s', tv_show_small_name)
             #    self.store_tvdb_show(show[u'tvdb_id'], refresh)
@@ -449,8 +458,7 @@ class EntityManager(object):
         if pair is not None:
             match = string_key_string_pair.search(pair)
             if match is not None:
-                self.choose_tmdb_movie_poster(match.group(1), match.group(2), refresh
-                )
+                self.choose_tmdb_movie_poster(match.group(1), match.group(2), refresh)
             else:
                 self.logger.error(u'Could not parse %s', pair)
     
@@ -490,9 +498,9 @@ class EntityManager(object):
         return poster
     
     
-    def find_tvdb_episode_poster(self, tv_show_small_name, tv_season, tv_episode):
+    def find_tvdb_episode_poster(self, tv_show_key, tv_season, tv_episode):
         poster = None
-        show, episode = self.find_episode(tv_show_small_name, tv_season, tv_episode)
+        show, episode = self.find_episode(tv_show_key, tv_season, tv_episode)
         if episode is not None and 'tvdb_record' in episode:
             if episode['tvdb_record']['posters']:
                 poster = episode['tvdb_record']['posters'][0]
@@ -517,7 +525,7 @@ class EntityManager(object):
                 person = { 'tmdb_id':tmdb_id }
                 new_record = True
             person['name'] = element['name'].strip()
-            person['small_name'] = person['name'].lower()
+            person['small_name'] = make_small_name(person['name'])
             person['simple_name'] = remove_accents(person['small_name'])
             person['last_update'] = datetime.utcnow()
             person['tmdb_record'] = element
@@ -545,7 +553,8 @@ class EntityManager(object):
                 new_record = True
             movie['imdb_id'] = element['imdb_id']
             movie['name'] = element['name']
-            movie['small_name'] = element['name'].lower().strip()
+            movie['small_name'] = make_small_name(element['name'])
+            movie['simple_name'] = remove_accents(movie['small_name'])
             movie['last_update'] = datetime.utcnow()
             movie['tmdb_record'] = element
             
@@ -594,7 +603,7 @@ class EntityManager(object):
     def find_person_by_name(self, name):
         person = None
         name = collapse_whitespace.sub(u' ', name).strip()
-        small_name = name.lower()
+        small_name = make_small_name(name)
         if small_name:
             person = self.people.find_one({'small_name':small_name})
             if person is None:
@@ -639,7 +648,7 @@ class EntityManager(object):
     def make_person_stub(self, name):
         person = {
             'name':name.strip(),
-            'small_name':name.strip().lower()
+            'small_name':make_small_name(name)
         }
         person['last_update'] = datetime.utcnow()
         self.people.save(person)
@@ -741,7 +750,9 @@ class EntityManager(object):
                                         reference['department'] = 'Actors'
                                         show['tvdb_record']['cast'].append(reference)
                 show['last_update'] = datetime.utcnow()
-                show['name'] = show['tvdb_record']['name']
+                update_string_property(u'name', show['tvdb_record']['name'], show)
+                update_string_property(u'small_name', make_small_name(show['name']), show)
+                update_string_property(u'simple_name', remove_accents(show['small_name']), show)
                 self.shows.save(show)
                 self.logger.info(u'Updated record for TV show %s with tvdb %s', show[u'small_name'], show[u'tvdb_id'])
             
@@ -767,15 +778,17 @@ class EntityManager(object):
                 if tv_episode_name: tv_episode_name = tv_episode_name.strip()
                 
                 if tv_episode and tv_episode > 0 and tv_episode_name:
-                    episode = self.episodes.find_one({u'tv_show_small_name':show['small_name'], 'tv_season':tv_season, 'tv_episode':tv_episode})
+                    episode = self.episodes.find_one({u'tv_show_key':show['tv_show_key'], 'tv_season':tv_season, 'tv_episode':tv_episode})
                     if episode is None:
                         episode = {
-                            'tv_show_small_name':show['small_name'],
+                            'tv_show_key':show['tv_show_key'],
                             'tvdb_show_id':show['tvdb_id'],
                             'tv_season':tv_season,
-                            'tv_episode':tv_episode,
-                            'name':tv_episode_name
+                            'tv_episode':tv_episode
                         }
+                    update_string_property(u'name', tv_episode_name, episode)
+                    update_string_property(u'small_name', make_small_name(episode['name']), episode)
+                    update_string_property(u'simple_name', remove_accents(episode['small_name']), episode)
                     episode['tvdb_record'] = {'cast':[], 'posters':[]}
                     for item in node.getchildren():
                         if item.tag == 'IMDB_ID':
@@ -845,14 +858,14 @@ class EntityManager(object):
                     episode['last_update'] = datetime.utcnow()
                     self.episodes.save(episode)
                     self.logger.info(u'Updated record for TV Show %s season %d episode %d: %s', 
-                        show['tvdb_record']['name'],
-                        episode['tvdb_record'][u'tv_season'],
-                        episode['tvdb_record'][u'tv_episode'],
-                        episode['tvdb_record'][u'name']
+                        show[u'name'],
+                        episode[u'tv_season'],
+                        episode[u'tv_episode'],
+                        episode[u'name']
                     )
                 else:
                     self.logger.warning(u'Ignoring bogus episode for TV Show %s season %d episode %d: %s', 
-                        show['tvdb_record']['name'],
+                        show[u'name'],
                         tv_season,
                         tv_episode,
                         tv_episode_name
@@ -911,6 +924,8 @@ def update_float_property(key, value, entity):
 def update_string_property(key, value, entity):
     result = False
     if key and value:
+        if not isinstance(value, unicode):
+            value = unicode(value, 'utf-8')
         value = value.strip()
         if value:
             result = True
@@ -968,6 +983,25 @@ def remove_accents(value):
     return u''.join([c for c in nkfd_form if not unicodedata.combining(c)])
 
 
+def make_small_name(name):
+    result = None
+    if name:
+        name = collapse_whitespace.sub(u' ', name).strip()
+        result = characters_to_exclude_from_filename.sub(u'', name)
+        if not result:
+            result = replace_invalid_characters(name)
+        result = result.lower()
+    return result
+
+
+def replace_invalid_characters(value):
+    if value:
+        value = value.replace(u'?', u'question mark')
+        value = value.replace(u'*', u'asterisk')
+        value = value.replace(u'.', u'period')
+        value = value.replace(u':', u'colon')
+    return value
+
 
 # Singletone
 theEntityManager = EntityManager()
@@ -981,3 +1015,4 @@ collapse_whitespace = re.compile(ur'\s+', re.UNICODE)
 url_to_cache = re.compile(ur'http://', re.UNICODE)
 image_http_type = re.compile(ur'image/.*', re.UNICODE)
 tvdb_person_name_junk = re.compile(ur'\([^\)]+(?:\)|$)', re.UNICODE)
+characters_to_exclude_from_filename = re.compile(ur'[\\\/?<>:*|\'"^\.]')
