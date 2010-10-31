@@ -25,10 +25,10 @@ def find_files_in_path(path, file_filter, recursive, depth=1):
     result = []
     if os.path.isfile(path):
         dname, fname = os.path.split(path)
-        if (file_filter == None or file_filter.search(fname) != None) and invisable_file_path.search(fname) == None:
+        if (file_filter == None or file_filter.search(fname) != None) and invisable_file_path.search(os.path.basename(path)) == None:
             result.append(os.path.abspath(path))
     
-    elif (recursive or depth > 0) and os.path.isdir(path) and invisable_file_path.search(path) == None:
+    elif (recursive or depth > 0) and os.path.isdir(path) and invisable_file_path.search(os.path.basename(path)) == None:
         for p in os.listdir(path):
             p = os.path.abspath(os.path.join(path,p))
             rec_result = find_files_in_path(p, file_filter, recursive, depth - 1)
@@ -71,6 +71,7 @@ def load_options():
     group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='H.264 transcoding Quantizer.')
     group.add_option('--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [ default: set by profile ]')
     group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined. [ default: %default ]')
+    group.add_option('--reindex', metavar='REINDEX', dest='reindex', action='store_true', default=False, help='Rebuild index for encountered files.')
     group.add_option('--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
     parser.add_option_group(group)
     
@@ -86,6 +87,7 @@ def load_options():
     group.add_option('--refresh-movie', metavar='IMDb', dest='refresh_movie', default=None, help='Refresh the movie entry.')
     group.add_option('--refresh-tvshow', metavar='NAME', dest='refresh_tvshow', default=None, help='Refresh the tv show and episode entries.')
     group.add_option('--refresh-person', metavar='TMDb', type='int', dest='refresh_person', default=None, help='Refresh the person entry.')
+    group.add_option('--choose-movie-poster', metavar='MAP', dest='choose_movie_poster', default=None, help='Choose tmdb movie poster. Takes IMDb:TMDb')
     parser.add_option_group(group)
     
     
@@ -120,13 +122,16 @@ def preform_operations(files, options):
         theEntityManager.find_show(options.refresh_tvshow, True)
     
     if options.refresh_person:
-        print theEntityManager.find_person_by_tmdb_id(options.refresh_person, True)
+        theEntityManager.find_person_by_tmdb_id(options.refresh_person, True)
+    
+    if options.choose_movie_poster:
+        theEntityManager.choose_tmdb_movie_poster_with_pair(options.choose_movie_poster, True)
     
     known = []
     unknown = []
         
     for f in files:
-        f.load()
+        f.load(options.reindex)
         if f and f.valid():
             known.append(f)
             

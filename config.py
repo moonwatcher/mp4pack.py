@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import os
 from subprocess import Popen, PIPE
 
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
@@ -95,6 +96,22 @@ media_property = {
         {
             'name':'language',
             'print':'Language',
+            'mediainfo':None,
+            'mp4info': None,
+            'subler':None,
+            'type':'string'
+        },
+        {
+            'name':'profile',
+            'print':'Profile',
+            'mediainfo':None,
+            'mp4info': None,
+            'subler':None,
+            'type':'string'
+        },
+        {
+            'name':'volume',
+            'print':'Volume',
             'mediainfo':None,
             'mp4info': None,
             'subler':None,
@@ -2522,6 +2539,7 @@ repository_config = {
                 'Movie.imdbLookup':u'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/{0}/{{0}}'.format(tmdb_apikey),
                 'Person.getInfo':u'http://api.themoviedb.org/2.1/Person.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
                 'Person.search':u'http://api.themoviedb.org/2.1/Person.search/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Genres.getList':u'http://api.themoviedb.org/2.1/Genres.getList/en/json/{0}'.format(tmdb_apikey),
             },
         },
         'tvdb':{
@@ -2536,12 +2554,12 @@ repository_config = {
         },
     },
     'Volume':{
-        'alpha':'/pool/alpha',
-        'beta':'/pool/beta',
-        'gama':'/pool/gama',
-        'delta':'/pool/delta',
-        'eta':'/pool/eta',
-        'epsilon':'/pool/epsilon',
+        'alpha':{'path':'/pool/alpha'},
+        'beta':{'path':'/pool/beta'},
+        'gama':{'path':'/pool/gama'},
+        'delta':{'path':'/pool/delta'},
+        'eta':{'path':'/pool/eta'},
+        'epsilon':{'path':'/pool/epsilon'},
     },
     'Command':{
         'rsync':{
@@ -3457,13 +3475,15 @@ base_config = {
 }
 
 
-command_config = repository_config['Command']
-for c in command_config:
-    command = ['which', command_config[c]['binary']]
+for k,v in repository_config['Volume'].iteritems():
+    v['realpath'] = os.path.realpath(v['path'])
+    
+for c in repository_config['Command']:
+    command = ['which', repository_config['Command'][c]['binary']]
     proc = Popen(command, stdout=PIPE, stderr=PIPE)
     report = proc.communicate()
     if report[0]:
-        command_config[c]['path'] = report[0].splitlines()[0]
+        repository_config['Command'][c]['path'] = report[0].splitlines()[0]
     else:
         result = False
-        command_config[c]['path'] = None
+        repository_config['Command'][c]['path'] = None
