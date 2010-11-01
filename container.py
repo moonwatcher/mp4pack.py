@@ -668,14 +668,16 @@ class AudioVideoContainer(Container):
                         command = theFileUtil.initialize_command('mkvmerge', self.logger)
                         command.extend([u'--output', dest_path, u'--no-global-tags', u'--no-track-tags', u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
                         
-                        if 'name' in self.record['entity'] and self.record['entity']['name']:
-                            command.append(u'--title')
-                            command.append(self.record['entity']['name'])
+                        if 'name' in self.record['entity']:
+                            full_name = name = theFileUtil.full_name(self.path_info, self.record)
+                            if full_name:
+                                command.append(u'--title')
+                                command.append(full_name)
                             
                         for t in selected['track']['video']:
-                            if 'name' in t:
-                                command.append(u'--track-name')
-                                command.append(u'{0}:{1}'.format(t['id'], t['name']))
+                            #if 'name' in t:
+                            #    command.append(u'--track-name')
+                            #    command.append(u'{0}:{1}'.format(t['id'], t['name']))
                             if 'language' in t:
                                 command.append(u'--language')
                                 command.append(u'{0}:{1}'.format(t['id'], theFileUtil.find_language(t['language'])['iso2']))
@@ -2151,6 +2153,16 @@ class FileUtil(object):
             result = path_info['name']
         if result:
             result = self.characters_to_exclude_from_filename.sub(u'', result)
+        return result
+    
+    
+    def full_name(self, path_info, record):
+        result = None
+        if 'media kind' in path_info:
+            if path_info['media kind'] == 10: # TV Show
+                result = u''.join([record['tv show']['name'], u' s', u'{0:02d}'.format(record['entity']['tv_season']), u'e', u'{0:02d}'.format(record['entity']['tv_episode']), u' ',record['entity']['name']])
+            elif path_info['media kind'] == 9: # Movie
+                result = u''.join([u'IMDb', record['entity']['imdb id'], u' ', record['entity']['name']])
         return result
     
     
