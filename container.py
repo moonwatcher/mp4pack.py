@@ -165,8 +165,6 @@ class Container(object):
                     self.meta['rating'] = show['tvdb_record']['certification']
                 if 'tv_network' in show['tvdb_record']:
                     self.meta['tv network'] = show['tvdb_record']['tv_network']
-                self.load_genre(show['tvdb_record'])
-                self.load_cast(show['tvdb_record'], True, False)
                 if 'tv_season' in episode['tvdb_record']:
                     self.meta['tv season'] = episode['tvdb_record']['tv_season']
                     self.meta['disk position'] = episode['tvdb_record']['tv_season']
@@ -186,6 +184,8 @@ class Container(object):
                     self.meta['release date'] = episode['tvdb_record']['released']
                 self.meta['track #'] = u'{0} / {1}'.format(self.meta['track position'], self.meta['track total'])
                 self.meta['disk #'] = u'{0} / {1}'.format(self.meta['disk position'], self.meta['disk total'])
+                self.load_genre(show['tvdb_record'])
+                self.load_cast(show['tvdb_record'], True, False)
                 self.load_cast(episode['tvdb_record'], False, True)
                 result = True
         if not result:
@@ -407,12 +407,12 @@ class Container(object):
     def pick_artist(self):
         self.meta['artist'] = None
         if self.is_movie():
-            for job in ('directors', 'producers', 'screenwriters', 'codirectors', 'cast'):
+            for job in ['directors', 'producers', 'screenwriters', 'codirectors', 'cast']:
                 if job in self.meta and self.meta[job]:
                     self.meta['artist'] = self.meta[job][0]
                     break
         elif self.is_tvshow():
-            for job in ('screenwriters', 'directors', 'producers', 'codirectors', 'cast'):
+            for job in ['screenwriters', 'directors', 'producers', 'codirectors', 'cast']:
                 if job in self.meta and self.meta[job]:
                     self.meta['artist'] = self.meta[job][0]
                     break
@@ -546,7 +546,7 @@ class Container(object):
         if self.info['tag']:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
         
-        #self.load_meta()
+        self.load_meta()
         if self.meta:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'metadata'), self.print_meta()))
         

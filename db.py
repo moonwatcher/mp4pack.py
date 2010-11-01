@@ -673,6 +673,9 @@ class EntityManager(object):
                     ]
                     if thumbs:
                         reference['profile'] = thumbs[0]
+            else:
+                # Person has no tmdb record
+                reference['name'] = person['name']
         return reference
     
     
