@@ -547,7 +547,7 @@ class Container(object):
         if self.info['tag']:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
         
-        self.load_meta()
+        #self.load_meta()
         if self.meta:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'metadata'), self.print_meta()))
         
@@ -638,7 +638,6 @@ class AudioVideoContainer(Container):
         if options.pack in ('mkv'):
             path_info['kind'] = 'mkv'
             if theFileUtil.complete_path_info_default_values(path_info):
-                self.load_meta()
                 dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                 if dest_path is not None:
                     pc = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
@@ -670,9 +669,9 @@ class AudioVideoContainer(Container):
                         command = theFileUtil.initialize_command('mkvmerge', self.logger)
                         command.extend([u'--output', dest_path, u'--no-global-tags', u'--no-track-tags', u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
                         
-                        if 'name' in self.meta and self.meta['name']:
+                        if 'name' in self.record['entity'] and self.record['entity']['name']:
                             command.append(u'--title')
-                            command.append(self.meta['name'])
+                            command.append(self.record['entity']['name'])
                             
                         for t in selected['track']['video']:
                             if 'name' in t:
@@ -1201,44 +1200,36 @@ class Subtitle(Text):
         Text.__init__(self, file_path, autoload)
         self.logger = logging.getLogger('mp4pack.subtitle')
         self.subtitle_blocks = None
-        self.statistics = None
         if autoload:
             self.load()
     
     
-    def valid(self):
-        return Text.valid(self) and self.subtitle_blocks is not None
-    
-    
-    def load(self, refresh=False):
-        result = Text.load(self, refresh=False)
+    def load_info(self, refresh=False):
+        result = Text.load_info(self, refresh)
         if result:
-            self.subtitle_blocks = []
-            self.statistics = {}
-            result = Subtitle.decode(self)
+            if not('statistics' in self.info and not refresh):
+                result = Subtitle.decode(self)
+                if result:
+                    statistics = {'Blocks':0, 'Lines':0, 'Sentences':0, 'Words':0, 'Characters':0}
+                    statistics['Blocks'] = len(self.subtitle_blocks)
+                    for block in self.subtitle_blocks:
+                        block.calculate_statistics()
+                        for (k,v) in block.statistics.iteritems():
+                            statistics[k] += block.statistics[k]
+                    self.info['statistics'] = statistics
+                    self.save_record()
+                    self.logger.info(u'Refreshed statistics for %s', self.file_path)
+                else:
+                    self.logger.warning('Could not parse subtitle file %s', self.file_path)
         else:
             self.logger.warning('Could not parse text file %s', self.file_path)
-        if not result:
-            self.logger.warning('Could not parse subtitle file %s', self.file_path)
-            Subtitle.unload(self)
         return result
     
     
     def unload(self):
         Text.unload(self)
         self.subtitle_blocks = None
-        self.statistics = None
     
-    
-    
-    def calculate_statistics(self):
-        self.statistics = {'Blocks':0, 'Lines':0, 'Sentences':0, 'Words':0, 'Characters':0}
-        self.statistics['Blocks'] = len(self.subtitle_blocks)
-        
-        for block in self.subtitle_blocks:
-            block.calculate_statistics()
-            for (k,v) in block.statistics.iteritems():
-                self.statistics[k] += block.statistics[k]
     
     
     def decode(self):
@@ -1332,11 +1323,10 @@ class Subtitle(Text):
         
         
         result = Text.decode(self)
-        if result:
+        if result and self.subtitle_blocks is None:
             lines = self.read()
             if lines:
                 self.subtitle_blocks = []
-                self.statistics = []
                 if self.path_info['kind'] == 'srt':
                     decode_srt(lines)
                 elif self.path_info['kind'] in ('ass', 'ssa'):
@@ -1407,14 +1397,12 @@ class Subtitle(Text):
     
     
     def print_subtitle_statistics(self):
-        self.calculate_statistics()
-        return (u'\n'.join([theFileUtil.format_key_value(key, self.statistics[key]) for key in sorted(set(self.statistics))]))
+        return (u'\n'.join([theFileUtil.format_key_value(key, self.info['statistics'][key]) for key in sorted(set(self.info['statistics']))]))
     
     
     def __unicode__(self):
         result = Text.__unicode__(self)
-        if self.subtitle_blocks:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'subtitle statistics'), self.print_subtitle_statistics()))
+        result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'subtitle statistics'), self.print_subtitle_statistics()))
         return result
     
     
