@@ -8,7 +8,6 @@ import chardet
 import copy
 import textwrap
 import plistlib
-import xml.sax.saxutils
 
 from datetime import datetime
 from config import repository_config
@@ -1935,7 +1934,7 @@ class FileUtil(object):
                             for t in tn:
                                 if t.tag in self.property_map['mediainfo']['tag']:
                                     p = self.property_map['mediainfo']['tag'][t.tag]
-                                    info['tag'][p['name']] = xml.sax.saxutils.unescape(t.text, {u'&quot;':u'"'})
+                                    info['tag'][p['name']] = t.text
                                 elif t.tag in self.property_map['mediainfo']['file']:
                                     p = self.property_map['mediainfo']['file'][t.tag]
                                     info['file'][p['name']] = t.text
@@ -1973,14 +1972,14 @@ class FileUtil(object):
                     self.parse_mp4info(path, info)
                 
                 # Handle Special Atoms
-                if 'itunmovi' in info['tag']:
-                    info['tag']['itunmovi'] = xml.sax.saxutils.unescape(self.clean_xml.sub(u'', info['tag']['itunmovi']), {u'&quot;':u'"'}).strip()
-                    if info['tag']['itunmovi']:
-                        plist = plistlib.readPlistFromString(info['tag']['itunmovi'].encode('utf-8'))
-                        for k,v in self.property_map['plist']['itunemovi'].iteritems():
-                            if k in plist:
-                                l = [ unicode(n['name']) for n in plist[k]]
-                                if l: info['tag'][v['name']] = l
+                if 'itunmovi' in info['tag'] and info['tag']['itunmovi']:
+                    info['tag']['itunmovi'] = info['tag']['itunmovi'].replace('&quot;', '"')
+                    info['tag']['itunmovi'] = self.clean_xml.sub(u'', info['tag']['itunmovi']).strip()
+                    plist = plistlib.readPlistFromString(info['tag']['itunmovi'].encode('utf-8'))
+                    for k,v in self.property_map['plist']['itunemovi'].iteritems():
+                        if k in plist:
+                            l = [ unicode(n['name']) for n in plist[k]]
+                            if l: info['tag'][v['name']] = l
                 if 'itunextc' in info['tag']:
                     match = self.itunextc_structure.search(info['tag']['itunextc'])
                     if match is not None:
