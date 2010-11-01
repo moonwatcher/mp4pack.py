@@ -316,7 +316,6 @@ class Container(object):
     
     
     def rename(self, options):
-        dest_name = None
         dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_name())
         if os.path.exists(dest_path) and os.path.samefile(self.file_path, dest_path):
             self.logger.debug(u'No renaming needed for %s',dest_path)
@@ -1952,9 +1951,9 @@ class FileUtil(object):
                                          track['encoder settings'] = track['encoder settings'].split(' / ')
                                 
                                 # check to see if language is not set and set it to default
-                                #if track['type'] in theFileUtil.stream_type_with_language:
-                                #    if 'language' not in track or track['language'] == 'und':
-                                #        track['language'] = repository_config['Options'].language
+                                if track['type'] in theFileUtil.stream_type_with_language:
+                                    if 'language' not in track or track['language'] == 'und':
+                                        track['language'] = repository_config['Options'].language
                                 
                                 info['track'].append(track)
                         elif track_type == 'menu':

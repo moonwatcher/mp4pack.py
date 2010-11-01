@@ -2669,7 +2669,7 @@ repository_config = {
                                 },
                                 {
                                     'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                             ),
                             (
@@ -2715,7 +2715,7 @@ repository_config = {
                                 },
                                 {
                                     'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
                                 }, 
                             ),
                             (
@@ -2802,8 +2802,8 @@ repository_config = {
                                 },
                                 {
                                     'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ac3', '--ab':'auto', '--mixdown':'auto'},
-                                }, 
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
+                                },
                             ),
                             (
                                 {
