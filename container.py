@@ -2161,7 +2161,7 @@ class FileUtil(object):
             if path_info['media kind'] == 10: # TV Show
                 result = u''.join([record['tv show']['name'], u' s', u'{0:02d}'.format(record['entity']['tv_season']), u'e', u'{0:02d}'.format(record['entity']['tv_episode']), u' ',record['entity']['name']])
             elif path_info['media kind'] == 9: # Movie
-                result = u''.join([u'IMDb', record['entity']['imdb id'], u' ', record['entity']['name']])
+                result = u''.join([u'IMDb', record['entity']['imdb_id'], u' ', record['entity']['name']])
         return result
     
     
