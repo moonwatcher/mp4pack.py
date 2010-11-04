@@ -74,6 +74,7 @@ def load_options():
     group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined. [ default: %default ]')
     group.add_option('--reindex', metavar='REINDEX', dest='reindex', action='store_true', default=False, help='Rebuild index for encountered files.')
     group.add_option('--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
+    group.add_option('--download', dest='download', action='store_true', default=False, help='Download if no local copy found')
     parser.add_option_group(group)
     
     group = OptionGroup(parser, 'Subtitle', 'Options for manipulating subtitles.')

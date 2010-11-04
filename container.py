@@ -973,7 +973,8 @@ class Mpeg4(AudioVideoContainer):
             path_info['kind'] = 'png'
             selected = []
             if theFileUtil.complete_path_info_default_values(path_info):
-                self.download_artwork(options)
+                if options.download:
+                    self.download_artwork(options)
                 lookup = {'kind':path_info['kind'], 'profile':path_info['profile']}
                 for (path, phy) in self.record['entity']['physical'].iteritems():
                     if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
@@ -996,7 +997,8 @@ class Mpeg4(AudioVideoContainer):
             path_info['kind'] = 'jpg'
             selected = []
             if theFileUtil.complete_path_info_default_values(path_info):
-                self.download_artwork(options)
+                if options.download:
+                    self.download_artwork(options)
                 lookup = {'kind':path_info['kind'], 'profile':path_info['profile']}
                 for (path, phy) in self.record['entity']['physical'].iteritems():
                     if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
