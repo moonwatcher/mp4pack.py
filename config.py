@@ -2527,6 +2527,7 @@ repository_config = {
     'Default':{
         'hd video min width':720,
         'display aspect ratio':float(float(16)/float(9)),
+        'threads':8,
     },
     'Database':{
         'cache':cache_path,

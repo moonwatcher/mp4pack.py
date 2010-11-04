@@ -1133,7 +1133,14 @@ class RawAudio(AudioVideoContainer):
                     if option:
                         message = u'Transcode audio {0} --> {1}'.format(self.file_path, dest_path)
                         command = theFileUtil.initialize_command('ffmpeg', self.logger)
-                        command.extend([u'-i', self.file_path, u'-acodec', u'ac3', u'-ac', u'{0}'.format(track['channels']), u'-ab', u'{0}k'.format(option['to']['-ab']), dest_path])
+                        command.extend([
+                            u'-threads',u'{0}'.format(repository_config['Default']['threads']),
+                            u'-i', self.file_path,
+                            u'-acodec', u'ac3',
+                            u'-ac', u'{0}'.format(track['channels']),
+                            u'-ab', u'{0}k'.format(option['to']['-ab']),
+                            dest_path
+                        ])
                         theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                         if theFileUtil.clean_if_not_exist(dest_path):
                             self.queue_for_index(dest_path)
@@ -1571,16 +1578,30 @@ class ChapterMarker(object):
     def __init__(self, time=None, name=None):
         self.time = time
         self.name = name
+        match = ChapterMarker.mediainfo_chapter_name_with_lang_re.search(self.name)
+        if match:
+            self.name = match.group(2)
+        match = ChapterMarker.rubish_chapter_re.search(self.name)
+        if match:
+            self.name = None
     
     
     def encode(self, line_buffer, index):
-        line_buffer.append(u'CHAPTER{0}={1}'.format(str(index).zfill(2), unicode(theFileUtil.miliseconds_to_time(self.time, '.'), 'utf-8')))
-        line_buffer.append(u'CHAPTER{0}NAME={1}'.format(str(index).zfill(2), self.name))
+        line_buffer.append(ChapterMarker.ogg_chapter_timestamp_format.format(str(index).zfill(2), unicode(theFileUtil.miliseconds_to_time(self.time, '.'), 'utf-8')))
+        name = self.name
+        if name is None:
+            name = ChapterMarker.default_chapter_name_format.format(index)
+        line_buffer.append(ChapterMarker.ogg_chapter_name_format.format(str(index).zfill(2), name))
     
     
     def __unicode__(self):
         return u'{0} : {1}'.format(theFileUtil.miliseconds_to_time(self.time), self.name)
     
+    ogg_chapter_timestamp_format = u'CHAPTER{0}={1}'
+    ogg_chapter_name_format = u'CHAPTER{0}NAME={1}'
+    default_chapter_name_format = u'Chapter {0}'
+    mediainfo_chapter_name_with_lang_re = re.compile(u'^(?:([a-z]{2,3}):)?(.*)$', re.UNICODE)
+    rubish_chapter_re = re.compile('([0-9]{,2}:[0-9]{,2}:[0-9]{,2}[\.,][0-9]+|[0-9]+|chapter[\s0-9]+)')
 
 
 
