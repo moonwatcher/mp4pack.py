@@ -2589,12 +2589,6 @@ repository_config = {
         'mp4art':{
             'binary':u'mp4art',
         },
-        'aften':{
-            'binary':u'aften',
-        },
-        'dcadec':{
-            'binary':u'dcadec',
-        },
         'mediainfo':{
             'binary':u'mediainfo',
         },
