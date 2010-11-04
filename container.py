@@ -861,9 +861,12 @@ class Matroska(AudioVideoContainer):
                 path_info['language'] = t['language']
                 if theFileUtil.complete_path_info_default_values(path_info):
                     dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
-                    if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
-                        command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
-                        selected['path'][t['type']].append(dest_path)
+                    if dest_path not in selected['path'][t['type']]:
+                        if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
+                            command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
+                            selected['path'][t['type']].append(dest_path)
+                    else:
+                        self.logger.warning('Skipping track %s of type %s because %s is taken', t['id'], t['type'], dest_path)
                             
         if selected['path']['text'] or selected['path']['audio']:
             message = u'Extract {0} subtitle and {1} audio tracks from {2}'.format(
@@ -1119,32 +1122,23 @@ class RawAudio(AudioVideoContainer):
             if theFileUtil.complete_path_info_default_values(path_info):
                 dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                 if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
-                    if self.path_info['kind'] == 'dts':
-                        tp = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]['transcode']
-                        
-                        dcadec_command = theFileUtil.initialize_command('dcadec', self.logger)
-                        for (k,v) in tp['dcadec'].iteritems():
-                            dcadec_command.append(k)
-                            dcadec_command.append(v)
-                        dcadec_command.append(self.file_path)
-                        
-                        aften_command = theFileUtil.initialize_command('aften', self.logger)
-                        aften_command.append('-')
-                        for (k,v) in tp['aften'].iteritems():
-                            aften_command.append(k)
-                            aften_command.append(v)
-                        aften_command.append(dest_path)
-                        
-                        self.logger.info(u'Transcode %s --> %s',self.file_path, dest_path)
-                        from subprocess import Popen, PIPE
-                        dcadec_proc = Popen(dcadec_command, stdout=PIPE)
-                        aften_proc = Popen(aften_command, stdin=dcadec_proc.stdout, stdout=PIPE)
-                        report = aften_proc.communicate()
-                        
+                    track = self.info['track'][0]
+                    option = None
+                    pc = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                    if 'transcode' in pc and 'audio' in pc['transcode']:
+                        for c in pc['transcode']['audio']:
+                            if all((k in track and track[k] == v) for k,v in c['from'].iteritems()):
+                                option = c
+                                break
+                    if option:
+                        message = u'Transcode audio {0} --> {1}'.format(self.file_path, dest_path)
+                        command = theFileUtil.initialize_command('ffmpeg', self.logger)
+                        command.extend([u'-i', self.file_path, u'-acodec', u'ac3', u'-ac', u'{0}'.format(track['channels']), u'-ab', u'{0}k'.format(option['to']['-ab']), dest_path])
+                        theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                         if theFileUtil.clean_if_not_exist(dest_path):
                             self.queue_for_index(dest_path)
                             result = dest_path
-            return result
+        return result
     
     
 

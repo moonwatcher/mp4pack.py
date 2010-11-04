@@ -2597,6 +2597,9 @@ repository_config = {
         },
         'mediainfo':{
             'binary':u'mediainfo',
+        },
+        'ffmpeg':{
+            'binary':u'ffmpeg',
         }
     },
     'Display':{
@@ -2606,7 +2609,7 @@ repository_config = {
     },
     'Action':{
         'info':{
-            'depend':('mediainfo',),
+            'depend':('mediainfo', 'mp4info',),
         },
         'copy':{
             'depend':('rsync',),
@@ -3006,24 +3009,6 @@ repository_config = {
                         9:{'volume':'alpha'},
                     },
                 },
-                'download':{
-                    'description':'Special profile for fetching artwork from the web',
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                },
-                'legacy':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'transcode':{
-                        'aspect ratio':'preserve',
-                        'size':1024,
-                        'constraint':'min'
-                    },
-                },
             },
         },
         'png':{
@@ -3035,13 +3020,6 @@ repository_config = {
             'Profile':{
                 'original':{
                     'description':'Full size image. No resize.',
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                },
-                'download':{
-                    'description':'Special profile for fetching original artwork from the web',
                     'default':{
                         10:{'volume':'alpha'},
                         9:{'volume':'alpha'},
@@ -3074,32 +3052,45 @@ repository_config = {
         'ac3':{
             'container':'raw audio',
             'default':{
-                'profile':'multi',
+                'profile':'original',
                 'volume':'epsilon',
             },
             'Profile':{
-                'multi':{
-                    'description':'Special profile for multi channel ac3 track from dts',
+                'original':{
+                    'description':'Special profile for ac3 track from dts',
                     'default':{
                         10:{'volume':'epsilon'},
                         9:{'volume':'epsilon'},
                     },
                     'transcode':{
-                        'dcadec':{ '-o':'wavall', '-g':'32'},
-                        'aften':{ '-b':'640' }
+                        'audio':(
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':6},
+                                'to': {'-ab':640},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':5},
+                                'to': {'-ab':640},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':4},
+                                'to': {'-ab':640},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':3},
+                                'to': {'-ab':448},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':2},
+                                'to': {'-ab':256},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':1},
+                                'to': {'-ab':192},
+                            },
+                        ),
                     }
-                },
-                'stereo':{
-                    'description':'Special profile for stereo ac3 track from dts',
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'transcode':{
-                        'dcadec':{ '-o':'aif'},
-                        'aften':{ '-b':'256' }
-                    }
-                },
+                }
             },
         },
         'dts':{
