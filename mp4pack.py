@@ -13,12 +13,13 @@ from db import theEntityManager
 
 
 def make_files(path, file_filter, recursive):
-    known = []
+    media_files = []
     file_paths = find_files_in_path(path, file_filter, recursive)
-    for fp in file_paths:
-        mf = make_media_file(fp)
-        if mf: known.append(mf)
-    return known
+    for file_path in file_paths:
+        media_file = make_media_file(file_path)
+        if media_file:
+            media_files.append(media_file)
+    return media_files
 
 
 def find_files_in_path(path, file_filter, recursive, depth=1):
@@ -46,9 +47,9 @@ def load_options():
         profiles += rc['Kind'][k]['Profile'].keys()
     profiles = tuple(set(profiles))
     
-    parser = OptionParser('%prog [options] [file or directory. default: . ]')
+    parser = OptionParser('%prog [options] [file or directory]')
     
-    group = OptionGroup(parser, 'Actions', 'An action to preform on files found in the search path.')
+    group = OptionGroup(parser, 'Operations', 'An operation to preform on files found in the search path.')
     group.add_option('-i', '--info', dest='info', action='store_true', default=False, help='Show info.')
     group.add_option('-c', '--copy', dest='copy', action='store_true', default=False, help='Copy into repository.')
     group.add_option('-n', '--rename', dest='rename', action='store_true', default=False, help='Rename files to standard names.')
@@ -108,103 +109,127 @@ def load_config(logger):
     return result
 
 
-def preform_operations(files, options):
+def preform_operations(media_files, options):
     if options.initialize:
         theEntityManager.base_init()
-    
+        
     if options.map_show:
         theEntityManager.map_show_with_pair(options.map_show)
-    
+        
     if options.refresh_movie:
         theEntityManager.find_movie_by_imdb_id(options.refresh_movie, True)
-    
+        
     if options.refresh_tvshow:
         theEntityManager.find_show(options.refresh_tvshow, True)
-    
+        
     if options.refresh_person:
         theEntityManager.find_person_by_tmdb_id(options.refresh_person, True)
-    
+        
     if options.choose_movie_poster:
         theEntityManager.choose_tmdb_movie_poster_with_pair(options.choose_movie_poster, True)
-    
-    known = []
-    unknown = []
         
-    for f in files:
-        f.load(options.reindex)
-        if f and f.valid():
-            known.append(f)
-            
-            if options.rename:
-                f.rename(options)
+    valid_files = []
+    invalid_files = []
+    
+    if media_files:
+        for f in media_files:
+            f.load(options.reindex)
+            if f and f.valid():
+                valid_files.append(f)
                 
-            if options.extract:
-                f.extract(options)
-                
-            if options.copy:
-                f.copy(options)
-                
-            if options.pack is not None:
-                f.pack(options)
-                
-            if options.transcode is not None:
-                f.transcode(options)
-                
-            if options.tag:
-                f.tag(options)
-                
-            if options.update is not None:
-                f.update(options)
-                
-            if options.optimize:
-                f.optimize(options)
-                
-            if options.info:
-                print unicode(f).encode('utf-8')
-                
-            f.unload()
-        else:
-            unknown.append(f.file_path)
-            f.unload()
-            f = None
-            
-    return known, unknown 
+                if options.rename:
+                    f.rename(options)
+                    
+                if options.extract:
+                    f.extract(options)
+                    
+                if options.copy:
+                    f.copy(options)
+                    
+                if options.pack is not None:
+                    f.pack(options)
+                    
+                if options.transcode is not None:
+                    f.transcode(options)
+                    
+                if options.tag:
+                    f.tag(options)
+                    
+                if options.update is not None:
+                    f.update(options)
+                    
+                if options.optimize:
+                    f.optimize(options)
+                    
+                if options.info:
+                    print unicode(f).encode('utf-8')
+                    
+                f.unload()
+            else:
+                invalid_files.append(f.file_path)
+                f.unload()
+                f = None
+    return valid_files, invalid_files 
 
 
 def main():
-    print 'mp4pack.py a media collection manager\nLior Galanti lior.galanti@gmail.com\n'.encode('utf-8')
+    print 'mp4pack. a media collection manager\nLior Galanti lior.galanti@gmail.com\n'.encode('utf-8')
+    
+    # Initialize options and scan arguments
     options, args = load_options()
+    
+    # Initialize logging
     logging.basicConfig(level=log_levels[options.verbosity])
     logger = logging.getLogger('mp4pack')
     indent = repository_config['Display']['indent']
     margin = repository_config['Display']['margin']
     
     if load_config(logger):
-        input_path = u'.'
-        if len(args) > 0: input_path = unicode(args[0], 'utf-8')
-        ffilter = None
-        if options.file_filter is not None:
-            ffilter = re.compile(options.file_filter, re.UNICODE)
-        input_path = os.path.abspath(input_path)
+        media_files = None
         
-        logger.info(u'Scanning for files in %s', input_path)
-        known = make_files(input_path, ffilter, options.recursive)
-        known, unknown = preform_operations(known, options)
-        if len(known) > 0:
-            logger.info(u'%d valid files were found in %s', len(known), input_path)
-            for p in known:
-                logger.debug(u'Found valid %s', p.file_path)
+        # Check for input path
+        input_path = None
+        if args:
+            input_path = unicode(args[0], 'utf-8')
+            if os.path.exists(input_path):
+                input_path = os.path.abspath(input_path)
+            else:
+                logger.error(u'Path %s does not exist', input_path)
+                input_path = None
                 
-        if len(unknown) > 0:
-            logger.warning(u'%d invalid files were found in %s', len(unknown), input_path)
-            for p in unknown:
-                logger.info(u'Found invalid %s', p)
+        # Check for file filter
+        if input_path:
+            file_filter = None
+            if options.file_filter is not None:
+                logger.info(u'Filtering file that match %s', options.file_filter)
+                file_filter = re.compile(options.file_filter, re.UNICODE)
+            
+            logger.info(u'Looking up files in %s', input_path)
+            media_files = make_files(input_path, file_filter, options.recursive)
+            
+        # Preform operations on valid files, if any
+        valid_files, invalid_files = preform_operations(media_files, options)
+        
+        # Report valid files
+        if valid_files:
+            logger.info(u'%d valid files were found in %s', len(valid_files), input_path)
+            for path in valid_files:
+                logger.debug(u'Found valid %s', path.file_path)
                 
+        # Report invalid files
+        if invalid_files:
+            logger.warning(u'%d invalid files were found in %s', len(invalid_files), input_path)
+            for path in invalid_files:
+                logger.info(u'Found invalid %s', path)
+                    
+        # Report positional arguments
         for idx, arg in enumerate(args):
             logger.debug(u'Positional %d: %s', idx, arg)
             
+        # Report options
         for k,v in options.__dict__.iteritems():
             logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
+            
     else:
         for k,v in repository_config['Command'].iteritems():
             logger.info(u'Command {0:-<{2}}: {1}'.format(k, v['path'], indent - 2 - margin))

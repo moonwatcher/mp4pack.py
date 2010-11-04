@@ -420,10 +420,10 @@ class Container(object):
     def download_artwork(self, options):
         result = False
         path_info = theFileUtil.copy_path_info(self.path_info, options)
-        path_info['kind'] = 'jpg'
+        path_info['kind'] = 'png'
         if theFileUtil.complete_path_info_default_values(path_info):
             selected = []
-            lookup = {'kind':'jpg', 'profile':path_info['profile']}
+            lookup = {'kind':'png', 'profile':path_info['profile']}
             for (path, phy) in self.record['entity']['physical'].iteritems():
                 if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
                     selected.append(path)
@@ -441,7 +441,7 @@ class Container(object):
                     image.path_info = path_info
                     image.load_record()
                     o = copy.deepcopy(options)
-                    o.transcode = 'jpg'
+                    o.transcode = 'png'
                     result = image.transcode(o)
                     image.unload()
                     if result:
@@ -545,7 +545,7 @@ class Container(object):
         if self.info['tag']:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
         
-        self.load_meta()
+        #self.load_meta()
         if self.meta:
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'metadata'), self.print_meta()))
         
@@ -966,6 +966,29 @@ class Mpeg4(AudioVideoContainer):
     
     
     
+    def _update_png(self, options):
+        AudioVideoContainer.tag(self, options)
+        if options.update == 'png':
+            path_info = theFileUtil.copy_path_info(self.path_info, options)
+            path_info['kind'] = 'png'
+            selected = []
+            if theFileUtil.complete_path_info_default_values(path_info):
+                self.download_artwork(options)
+                lookup = {'kind':path_info['kind'], 'profile':path_info['profile']}
+                for (path, phy) in self.record['entity']['physical'].iteritems():
+                    if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
+                        selected.append(path)
+                        break
+            if selected:
+                message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
+                command = theFileUtil.initialize_command('subler', self.logger)
+                command.extend([u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
+                theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                self.queue_for_index(self.file_path)
+            else:
+                self.logger.warning(u'No artwork available for %s', self.file_path)
+    
+    
     def _update_jpg(self, options):
         AudioVideoContainer.tag(self, options)
         if options.update == 'jpg':
@@ -1070,6 +1093,7 @@ class Mpeg4(AudioVideoContainer):
         AudioVideoContainer.update(self, options)
         self._update_srt(options)
         self._update_txt(options)
+        self._update_png(options)
         self._update_jpg(options)
     
     
@@ -1306,22 +1330,6 @@ class Subtitle(Text):
                             self.subtitle_blocks.append(block)
         
         
-        def decode_sub(lines, frame_rate):
-            frame_rate = theFileUtil.frame_rate_to_float(frame_rate)
-            for line in lines:
-                if Subtitle.sub_line_begin.search(line):
-                    line = line.split('}',2)
-                    subtitle_text = line[2].strip().replace('|', '\N')
-                    block = SubtitleBlock()
-                    block.set_begin_miliseconds(theFileUtil.frame_to_miliseconds(line[0].strip('{'), frame_rate))
-                    block.set_end_miliseconds(theFileUtil.frame_to_miliseconds(line[1].strip('{'), frame_rate))
-                    for line in subtitle_text:
-                        block.add_line(line)
-                        
-                    if block.valid():
-                        self.subtitle_blocks.append(block)
-        
-        
         result = Text.decode(self)
         if result and self.subtitle_blocks is None:
             lines = self.read()
@@ -1331,9 +1339,6 @@ class Subtitle(Text):
                     decode_srt(lines)
                 elif self.path_info['kind'] in ('ass', 'ssa'):
                     decode_ass(lines)
-                #elif self.path_info['kind'] == 'sub':
-                #    decode_sub(lines, 25)
-            
             if not self.subtitle_blocks:
                 result = False
         return result
@@ -1357,12 +1362,16 @@ class Subtitle(Text):
             dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
             if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                 p = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                
+                # Check if profile dictates filtering
                 if 'transcode' in p and 'filter' in p['transcode']:
                     self.filter(p['transcode']['filter'])
                 
+                # Check if time shift is necessary
                 if options.time_shift is not None:
                     self.shift(options.time_shift)
                 
+                # Check if frame rate conversion is necessary
                 if options.input_rate is not None and options.output_rate is not None:
                     input_frame_rate = theFileUtil.frame_rate_to_float(options.input_rate)
                     output_frame_rate = theFileUtil.frame_rate_to_float(options.output_rate)
@@ -1411,10 +1420,9 @@ class Subtitle(Text):
     ass_formation_line = re.compile('^Format\s*:\s*(.*)$')
     ass_condense_line_breaks = re.compile(r'(\\N)+')
     ass_event_command_re = re.compile(r'\{\\[^\}]+\}')
-    sub_line_begin = re.compile('^{(\d+)}{(\d+)}')
 
 
-class SubtitleBlock(object):
+class SubtitleBlock(object): 
     def __init__(self):
         self.begin = None
         self.end = None
@@ -1621,13 +1629,12 @@ class Artwork(Container):
                                 self.logger.debug(u'Not resizing. Artwork is %dx%d and profile min dimension is %d', size[0], size[1], p['transcode']['size'])
                         
                         rsize = (int(round(size[0] * factor)), int(round(size[1] * factor)))
-                        if size == rsize:
-                            self.copy(options)
-                        else:
+                        if size != rsize:
                             self.logger.debug(u'Resize artwork: %dx%d --> %dx%d', size[0], size[1], rsize[0], rsize[1])
                             image = image.resize(rsize, Image.ANTIALIAS)
-                            self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
-                            image.save(dest_path)
+                            
+                        self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
+                        image.save(dest_path)
                         
                         if theFileUtil.clean_if_not_exist(dest_path):
                             self.queue_for_index(dest_path)

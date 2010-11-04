@@ -2577,17 +2577,11 @@ repository_config = {
         'mkvmerge':{
             'binary':u'mkvmerge',
         },
-        'mkvinfo':{
-            'binary':u'mkvinfo',
-        },
         'mkvextract':{
             'binary':u'mkvextract',
         },
         'mp4info':{
             'binary':u'mp4info',
-        },
-        'mp4chaps':{
-            'binary':u'mp4chaps',
         },
         'mp4file':{
             'binary':u'mp4file',
@@ -2612,7 +2606,7 @@ repository_config = {
     },
     'Action':{
         'info':{
-            'depend':('mkvinfo', 'mp4info', 'mp4chaps',),
+            'depend':('mediainfo',),
         },
         'copy':{
             'depend':('rsync',),
@@ -2621,7 +2615,7 @@ repository_config = {
             'depend':('mv',),
         },
         'extract':{
-            'depend':('mkvinfo', 'mkvextract',),
+            'depend':('mkvextract',),
         },
         'tag':{
             'depend':('subler',),
@@ -2635,11 +2629,11 @@ repository_config = {
         },
         'transcode':{
             'depend':('handbrake',),
-            'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'ac3'),
+            'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'png', 'ac3'),
         },
         'update':{
             'depend':('subler',),
-            'kind':('srt','jpg', 'txt'),
+            'kind':('srt', 'png', 'jpg', 'txt'),
         },
     },
     'Kind':{
@@ -2983,16 +2977,12 @@ repository_config = {
                 },
             },
         },
-        'sub':{
-            'container':'subtitles',
-            'default':{'profile':'original'},
-            'Profile':{
-                'original':{},
-            },
-        },
         'txt':{
             'container':'chapters',
-            'default':{'profile':'chapter'},
+            'default':{
+                'profile':'chapter',
+                'volume':'alpha'
+            },
             'Profile':{
                 'chapter':{
                     'default':{
@@ -3005,12 +2995,53 @@ repository_config = {
         'jpg':{
             'container':'image',
             'default':{
+                'profile':'original',
+                'volume':'alpha'
+            },
+            'Profile':{
+                'original':{
+                    'description':'Full size image. No resize.',
+                    'default':{
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
+                    },
+                },
+                'download':{
+                    'description':'Special profile for fetching artwork from the web',
+                    'default':{
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
+                    },
+                },
+                'legacy':{
+                    'default':{
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
+                    },
+                    'transcode':{
+                        'aspect ratio':'preserve',
+                        'size':1024,
+                        'constraint':'min'
+                    },
+                },
+            },
+        },
+        'png':{
+            'container':'image',
+            'default':{
                 'profile':'normal',
                 'volume':'alpha'
             },
             'Profile':{
+                'original':{
+                    'description':'Full size image. No resize.',
+                    'default':{
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
+                    },
+                },
                 'download':{
-                    'description':'Special profile for fetching artwork from the web',
+                    'description':'Special profile for fetching original artwork from the web',
                     'default':{
                         10:{'volume':'alpha'},
                         9:{'volume':'alpha'},
@@ -3036,33 +3067,6 @@ repository_config = {
                         'aspect ratio':'preserve',
                         'size':1024,
                         'constraint':'min'
-                    },
-                },
-                'legacy':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'transcode':{
-                        'aspect ratio':'preserve',
-                        'size':1024,
-                        'constraint':'min'
-                    },
-                },
-            },
-        },
-        'png':{
-            'container':'image',
-            'default':{
-                'profile':'normal',
-                'volume':'alpha'
-            },
-            'Profile':{
-                'download':{
-                    'description':'Special profile for fetching original artwork from the web',
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
                     },
                 },
             },
