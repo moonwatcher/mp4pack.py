@@ -907,7 +907,7 @@ class Matroska(AudioVideoContainer):
                 ta = a.transcode(o)
                 a.delete()
                 a.unload()
-                if theFileUtil.clean_if_not_exist(ts):
+                if theFileUtil.clean_if_not_exist(ta):
                     result.append(ta)
         return result
     
