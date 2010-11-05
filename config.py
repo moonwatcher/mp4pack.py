@@ -2652,7 +2652,7 @@ repository_config = {
                             '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1',
                             '--maxWidth':720,
                         },
-                        'flags':('--large-file','--strict-anamorphic'),
+                        'flags':('--large-file','--loose-anamorphic'),
                         'audio':(
                             (
                                 {
@@ -2698,7 +2698,7 @@ repository_config = {
                             '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:wpredb=0:wpredp=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
                             '--maxWidth':1280,
                         },
-                        'flags':('--large-file','--strict-anamorphic'),
+                        'flags':('--large-file','--loose-anamorphic'),
                         'audio':(
                             (
                                 {
@@ -2744,7 +2744,7 @@ repository_config = {
                             '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
                             '--maxWidth':480,
                         },
-                        'flags':('--large-file','--strict-anamorphic'),
+                        'flags':('--large-file','--loose-anamorphic'),
                         'audio':(
                             (
                                 {
@@ -2786,7 +2786,7 @@ repository_config = {
                             '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:wpredb=0:wpredp=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
                             '--maxWidth':1280
                         },
-                        'flags':('--large-file','--strict-anamorphic'),
+                        'flags':('--large-file','--loose-anamorphic'),
                         'audio':(
                             (
                                 {
