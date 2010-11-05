@@ -2695,7 +2695,7 @@ repository_config = {
                         'options':{
                             '--quality':22,
                             '--encoder':'x264',
-                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:wpredb=0:wpredp=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
+                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
                             '--maxWidth':1280,
                         },
                         'flags':('--large-file','--loose-anamorphic'),
@@ -2783,7 +2783,7 @@ repository_config = {
                         'options':{
                             '--quality':18,
                             '--encoder':'x264',
-                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:wpredb=0:wpredp=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
+                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
                             '--maxWidth':1280
                         },
                         'flags':('--large-file','--loose-anamorphic'),
