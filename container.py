@@ -741,6 +741,7 @@ class AudioVideoContainer(Container):
                                 command.append(u'UTF-8')
                                 command.append(u'--chapters')
                                 command.append(r)
+                                break
                                 
                         message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
                         theFileUtil.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
@@ -1398,8 +1399,12 @@ class Subtitle(Text):
     
     def shift(self, offset):
         self.logger.debug(u'Shifting time codes on %s by %s', self.file_path, unicode(offset))
-        for block in self.subtitle_blocks:
+        block_buffer = self.subtitle_blocks
+        self.subtitle_blocks = []
+        for block in block_buffer:
             block.shift(offset)
+            if block.valid():
+                self.subtitle_blocks.append(block)
     
     
     def scale_rate(self, factor):
@@ -1472,7 +1477,7 @@ class SubtitleBlock(object):
     
     
     def valid(self):
-        return self.begin and self.end and self.begin < self.end and self.lines
+        return self.begin and self.begin > 0 and self.end and self.end > 0 and self.begin < self.end and self.lines
     
     
     def encode(self, line_buffer, index):
