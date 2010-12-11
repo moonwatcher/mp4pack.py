@@ -2919,15 +2919,15 @@ repository_config = {
                         9:{'volume':'alpha'},
                     },
                     'update':{
-                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.1},
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.18},
                         'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt', 'profile':'original'},
-                                'to': {'height':0.1, 'Name':'Normal', },
+                                'to': {'height':0.142, 'Name':'Normal', },
                             },
                             {
                                 'from': {'language':'eng', 'kind':'srt', 'profile':'original'},
-                                'to': {'height':0.1, 'Name':'Normal'},
+                                'to': {'height':0.142, 'Name':'Normal'},
                             },
                         ),
                     },
@@ -2941,15 +2941,15 @@ repository_config = {
                         'filter':('noise', 'typo', 'leftover'),
                     },
                     'update':{
-                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.2},
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.18},
                         'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.15, 'Name':'Normal'},
+                                'to': {'height':0.142, 'Name':'Normal'},
                             },
                             {
                                 'from': {'language':'eng', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.15, 'Name':'Normal'},
+                                'to': {'height':0.142, 'Name':'Normal'},
                             },
                         ),
                     },
