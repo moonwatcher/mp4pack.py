@@ -8,8 +8,18 @@ import fnmatch
 import logging
 
 from container import make_media_file
-from config import repository_config
 from db import theEntityManager
+from config import theConfiguration as configuration
+
+
+def standardize_path(path):
+    result = path
+    realpath = os.path.realpath(os.path.abspath(path))
+    for k,v in configuration.volume_map.iteritems():
+        if os.path.commonprefix([k, realpath]) == k:
+            result = realpath.replace(k, v['path'])
+            break
+    return result
 
 
 def make_files(path, file_filter, recursive):
@@ -27,7 +37,7 @@ def find_files_in_path(path, file_filter, recursive, depth=1):
     if os.path.isfile(path):
         dname, fname = os.path.split(path)
         if (file_filter == None or file_filter.search(fname) != None) and invisable_file_path.search(os.path.basename(path)) == None:
-            result.append(os.path.abspath(path))
+            result.append(standardize_path(path))
     
     elif (recursive or depth > 0) and os.path.isdir(path) and invisable_file_path.search(os.path.basename(path)) == None:
         for p in os.listdir(path):
@@ -41,7 +51,7 @@ def load_options():
     from optparse import OptionParser
     from optparse import OptionGroup
     
-    rc = repository_config
+    rc = configuration.repository
     profiles = []
     for k in rc['Kind'].keys():
         profiles += rc['Kind'][k]['Profile'].keys()
@@ -102,9 +112,8 @@ def load_options():
 
 def load_config(logger):
     result = True
-    command_config = repository_config['Command']
-    for c in command_config:
-        if command_config[c]['path'] == None:
+    for c in configuration.repository['Command']:
+        if configuration.repository['Command'][c]['path'] == None:
             logger.error(u'Command %s could not be located. Is it installed?', command_config[c]['binary'])
             result = False
     return result
@@ -182,8 +191,8 @@ def main():
     # Initialize logging
     logging.basicConfig(level=log_levels[options.verbosity])
     logger = logging.getLogger('mp4pack')
-    indent = repository_config['Display']['indent']
-    margin = repository_config['Display']['margin']
+    indent = configuration.repository['Display']['indent']
+    margin = configuration.repository['Display']['margin']
     
     if load_config(logger):
         media_files = None
@@ -232,7 +241,7 @@ def main():
             logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
             
     else:
-        for k,v in repository_config['Command'].iteritems():
+        for k,v in configuration.repository['Command'].iteritems():
             logger.info(u'Command {0:-<{2}}: {1}'.format(k, v['path'], indent - 2 - margin))
 
 

@@ -13,7 +13,8 @@ import pymongo
 from pymongo.objectid import ObjectId
 from pymongo import Connection
 
-from config import repository_config
+from config import theConfiguration as configuration
+
 
 
 class ResourceHandler(object):
@@ -25,7 +26,7 @@ class ResourceHandler(object):
     
     
     def local(self):
-        return url_to_cache.sub(repository_config['Database']['cache'], self.remote_url)
+        return url_to_cache.sub(configuration.repository['Database']['cache'], self.remote_url)
     
     
     def cache(self):
@@ -139,7 +140,7 @@ class TmdbJsonHandler(JsonHandler):
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(repository_config['Database']['tmdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(configuration.repository['Database']['tmdb']['apikey']), u'')
         return result
     
     
@@ -162,7 +163,7 @@ class TvdbXmlHandler(XmlHandler):
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(repository_config['Database']['tvdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(configuration.repository['Database']['tvdb']['apikey']), u'')
         result = result.replace(u'/all', u'')
         return result
     
@@ -171,7 +172,7 @@ class TvdbXmlHandler(XmlHandler):
 
 class TvdbImageHandler(ImageHandler):
     def __init__(self, url):
-        ImageHandler.__init__(self, repository_config['Database']['tvdb']['urls']['Banner.getImage'].format(url))
+        ImageHandler.__init__(self, configuration.repository['Database']['tvdb']['urls']['Banner.getImage'].format(url))
         self.logger = logging.getLogger('mp4pack.image')
     
     
@@ -181,8 +182,8 @@ class TvdbImageHandler(ImageHandler):
 class EntityManager(object):
     def __init__(self):
         self.logger = logging.getLogger('mp4pack.em')
-        self.connection = Connection(repository_config['Database']['uri'])
-        self.db = self.connection[repository_config['Database']['name']]
+        self.connection = Connection(configuration.repository['Database']['uri'])
+        self.db = self.connection[configuration.repository['Database']['name']]
         self.genres = self.db.genres
         self.departments = self.db.departments
         self.jobs = self.db.jobs
@@ -235,7 +236,7 @@ class EntityManager(object):
     
     
     def refresh_tmdb_genres(self):
-        url = repository_config['Database']['tmdb']['urls']['Genres.getList']
+        url = configuration.repository['Database']['tmdb']['urls']['Genres.getList']
         handler = TmdbJsonHandler(url)
         handler.refresh()
         element_list = handler.element()
@@ -252,9 +253,8 @@ class EntityManager(object):
     
     
     def refresh_itmf_genres(self):
-        from config import media_property
         count = 0
-        for genre in media_property['gnre']:
+        for genre in configuration.property['gnre']:
             count += 1
             self.store_itmf_genre(genre['print'], genre['code'])
         self.logger.info(u'Refreshed %s iTMF genres', count)
@@ -515,7 +515,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         person = self.people.find_one({u'tmdb_id':tmdb_id})
-        url = repository_config['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
+        url = configuration.repository['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -542,7 +542,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         movie = self.movies.find_one({u'tmdb_id':tmdb_id})
-        url = repository_config['Database']['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
+        url = configuration.repository['Database']['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -584,7 +584,7 @@ class EntityManager(object):
     
     def find_tmdb_movie_id_by_imdb_id(self, imdb_id):
         tmdb_id = None
-        url = repository_config['Database']['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
+        url = configuration.repository['Database']['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element is not None:
@@ -621,7 +621,7 @@ class EntityManager(object):
     def find_tmdb_person_id_by_name(self, name):
         person = None
         clean = collapse_whitespace.sub(u' ', name).lower()
-        url = repository_config['Database']['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
+        url = configuration.repository['Database']['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
         handler = TmdbJsonHandler(url)
         element = handler.element()
         if element is not None:
@@ -695,7 +695,7 @@ class EntityManager(object):
         tvdb_id = int(tvdb_id)
         show = self.shows.find_one({'tvdb_id':tvdb_id})
         if show is not None:
-            url = repository_config['Database']['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
+            url = configuration.repository['Database']['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
             handler = TvdbXmlHandler(url)
             if refresh: handler.refresh()
             element = handler.element()
@@ -1011,7 +1011,7 @@ theEntityManager = EntityManager()
 
 string_key_string_pair = re.compile(u'^([^:]+):(.*)$', re.UNICODE)
 numberic_key_string_pair = re.compile(u'^([0-9]+):(.+)$', re.UNICODE)
-minimum_person_name_length = repository_config['Database']['tvdb']['fuzzy']['minimum_person_name_length']
+minimum_person_name_length = configuration.repository['Database']['tvdb']['fuzzy']['minimum_person_name_length']
 tvdb_list_seperators = re.compile(ur'\||,', re.UNICODE)
 strip_space_around_seperator = re.compile(ur'\s*\|\s*', re.UNICODE)
 collapse_whitespace = re.compile(ur'\s+', re.UNICODE)

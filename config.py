@@ -11,6 +11,7 @@ cache_path = u'/net/multivac/Volumes/alphaville/cache/'
 db_uri = u'mongodb://mp4pack:poohbear@multivac.lan/mp4pack'
 
 
+
 media_property = {
     'file':(
         {
@@ -2559,12 +2560,49 @@ repository_config = {
         },
     },
     'Volume':{
-        'alpha':{'path':'/pool/alpha'},
-        'beta':{'path':'/pool/beta'},
-        'gama':{'path':'/pool/gama'},
-        'delta':{'path':'/pool/delta'},
-        'eta':{'path':'/pool/eta'},
-        'epsilon':{'path':'/pool/epsilon'},
+        'alpha':{
+            'path':'/pool/alpha',
+            'alternative':(
+                '/net/multivac/Volumes/alphaville/alpha',
+                '/Volumes/alphaville/alpha',
+            )
+        },
+        'beta':{
+            'path':'/pool/beta',
+            'alternative':(
+                '/net/multivac/Volumes/nyc/beta',
+                '/Volumes/nyc/beta',
+            )
+        },
+        'gama':{
+            'path':'/pool/gama',
+            'alternative':(
+                '/net/multivac/Volumes/cambridge/gama',
+                '/Volumes/cambridge/gama',
+            )
+            
+        },
+        'delta':{
+            'path':'/pool/delta',
+            'alternative':(
+                '/net/vito/media/fairfield/delta',
+                '/Volumes/fairfield/delta',
+            )
+        },
+        'eta':{
+            'path':'/pool/eta',
+            'alternative':(
+                '/net/vito/media/tlv/eta',
+                '/Volumes/tlv/eta',
+            )
+        },
+        'epsilon':{
+            'path':'/pool/epsilon',
+            'alternative':(
+                '/net/vito/media/nagasaki/epsilon',
+                '/Volumes/nagasaki/epsilon',
+            )
+        },
     },
     'Command':{
         'rsync':{
@@ -2905,7 +2943,7 @@ repository_config = {
             'default':{'profile':'original'},
             'Profile':{
                 'dump':{
-                    'description':'Special profile used by extract command',
+                    'description':'Special profile used for extracting.',
                     'default':{
                         10:{'volume':'epsilon'},
                         9:{'volume':'epsilon'},
@@ -2923,15 +2961,15 @@ repository_config = {
                         9:{'volume':'alpha'},
                     },
                     'update':{
-                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.18},
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
                         'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt', 'profile':'original'},
-                                'to': {'height':0.142, 'Name':'Normal', },
+                                'to': {'height':0.132, 'Name':'Normal', },
                             },
                             {
                                 'from': {'language':'eng', 'kind':'srt', 'profile':'original'},
-                                'to': {'height':0.142, 'Name':'Normal'},
+                                'to': {'height':0.132, 'Name':'Normal'},
                             },
                         ),
                     },
@@ -2945,15 +2983,15 @@ repository_config = {
                         'filter':('noise', 'typo', 'leftover'),
                     },
                     'update':{
-                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.18},
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
                         'related':(
                             {
                                 'from': {'language':'heb', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.142, 'Name':'Normal'},
+                                'to': {'height':0.132, 'Name':'Normal'},
                             },
                             {
                                 'from': {'language':'eng', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.142, 'Name':'Normal'},
+                                'to': {'height':0.132, 'Name':'Normal'},
                             },
                         ),
                     },
@@ -3464,15 +3502,109 @@ base_config = {
 }
 
 
-for k,v in repository_config['Volume'].iteritems():
-    v['realpath'] = os.path.realpath(v['path'])
+class Configuration(object):
+    def __init__(self):
+        self.property = media_property
+        self.property_map = {}
+        self.repository = repository_config
+        self.subtitle = subtitle_config
+        self.container = {}
+        
+        self.locate_commands()
+        self.load_default()
+        
+        self.volume_map = {}
+        for k,v in self.repository['Volume'].iteritems():
+            v['realpath'] = os.path.realpath(v['path'])
+            alt = []
+            alt.append(v['path'])
+            alt.append(v['realpath'])
+            alt.extend(v['alternative'])
+            alt = tuple(set(alt))
+            for p in alt:
+                self.volume_map[p] = v
     
-for c in repository_config['Command']:
-    command = ['which', repository_config['Command'][c]['binary']]
-    proc = Popen(command, stdout=PIPE, stderr=PIPE)
-    report = proc.communicate()
-    if report[0]:
-        repository_config['Command'][c]['path'] = report[0].splitlines()[0]
-    else:
-        result = False
-        repository_config['Command'][c]['path'] = None
+    
+    def load_default(self):
+        self.build_property_map()
+        
+        self.track_with_language = ('audio', 'subtitles', 'video')
+        self.kind_with_language = self.container['subtitles']['kind'] + self.container['raw audio']['kind']
+        self.supported_media_kind = [ mk for mk in self.property['stik'] if 'schema' in mk ]
+    
+    
+    def build_property_map(self):
+        for key in ('name', 'mediainfo', 'mp4info'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            
+            # Build file and tag propery map
+            for block in ('file', 'tag'):
+                if block not in self.property_map[key]:
+                    self.property_map[key][block] = {}
+                    
+                for p in self.property[block]:
+                    if key in p and p[key] is not None:
+                        self.property_map[key][block][p[key]] = p
+            
+            # Build track property map
+            self.property_map[key]['track'] = {}
+            for block in ('audio', 'video', 'text', 'image'):
+                if block not in self.property_map[key]['track']:
+                    self.property_map[key]['track'][block] = {}
+                for p in self.property['track']['common']:
+                    if key in p and p[key] is not None:
+                        self.property_map[key]['track'][block][p[key]] = p
+                    
+                for p in self.property['track'][block]:
+                    if key in p and p[key] is not None:
+                        self.property_map[key]['track'][block][p[key]] = p
+        
+        # Build itunemovi plist properties map
+        for key in ('name', 'plist'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            self.property_map[key]['itunemovi'] = {}
+            for p in self.property['itunemovi']:
+                self.property_map[key]['itunemovi'][p[key]] = p
+        
+        # Build special iTunes atom map
+        for key in ('name', 'code'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
+                if block not in self.property_map[key]:
+                    self.property_map[key][block] = {}
+                for p in self.property[block]:
+                    self.property_map[key][block][p[key]] = p
+        
+        # Build language code map
+        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            self.property_map[key]['language'] = {}
+            for p in self.property['language']:
+                if key in p:
+                    self.property_map[key]['language'][p[key]] = p
+        
+        # Build container kind map
+        for c in tuple(set([ v['container'] for k,v in self.repository['Kind'].iteritems() ])):
+            self.container[c] = {'kind':[ k for (k,v) in self.repository['Kind'].iteritems() if v['container'] == c ]}
+    
+    
+    def locate_commands(self):
+        for c in self.repository['Command']:
+            command = ['which', self.repository['Command'][c]['binary']]
+            proc = Popen(command, stdout=PIPE, stderr=PIPE)
+            report = proc.communicate()
+            if report[0]:
+                self.repository['Command'][c]['path'] = report[0].splitlines()[0]
+            else:
+                result = False
+                self.repository['Command'][c]['path'] = None
+    
+    
+
+
+# singleton
+theConfiguration = Configuration()

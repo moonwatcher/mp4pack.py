@@ -10,29 +10,29 @@ import textwrap
 import plistlib
 
 from datetime import datetime
-from config import repository_config
-from config import media_property
 from db import theEntityManager
 from subprocess import Popen, PIPE
 import xml.etree.cElementTree as ElementTree
+
+from config import theConfiguration as configuration
 
 # Generic file loading function
 def make_media_file(file_path):
     f = None
     file_type = os.path.splitext(file_path)[1].strip('.')
-    if file_type in theFileUtil.container['mp4']['kind']:
+    if file_type in configuration.container['mp4']['kind']:
         f = Mpeg4(file_path, autoload=False)
-    elif file_type in theFileUtil.container['matroska']['kind']:
+    elif file_type in configuration.container['matroska']['kind']:
         f = Matroska(file_path, autoload=False)
-    elif file_type in theFileUtil.container['subtitles']['kind']:
+    elif file_type in configuration.container['subtitles']['kind']:
         f = Subtitle(file_path, autoload=False)
-    elif file_type in theFileUtil.container['chapters']['kind']:
+    elif file_type in configuration.container['chapters']['kind']:
         f = Chapter(file_path, autoload=False)
-    elif file_type in theFileUtil.container['image']['kind']:
+    elif file_type in configuration.container['image']['kind']:
         f = Artwork(file_path, autoload=False)
-    elif file_type in theFileUtil.container['raw audio']['kind']:
+    elif file_type in configuration.container['raw audio']['kind']:
         f = RawAudio(file_path, autoload=False)
-    elif file_type in theFileUtil.container['avi']['kind']:
+    elif file_type in configuration.container['avi']['kind']:
         f = Avi(file_path, autoload=False)
         
     return f
@@ -366,7 +366,7 @@ class Container(object):
         if 'cast' in record:
             
             if initialize:
-                for i in theFileUtil.property_map['name']['itunemovi']:
+                for i in configuration.property_map['name']['itunemovi']:
                     self.meta[i] = []
                     
             self.meta['directors'].extend([ 
@@ -391,7 +391,7 @@ class Container(object):
             ])
             
             if finalize:
-                for i in theFileUtil.property_map['name']['itunemovi']:
+                for i in configuration.property_map['name']['itunemovi']:
                     if not self.meta[i]:
                         del self.meta[i]
         return
@@ -490,7 +490,7 @@ class Container(object):
     
     
     def print_meta(self):
-        return theFileUtil.format_display_block(self.meta, theFileUtil.property_map['name']['tag'])
+        return theFileUtil.format_display_block(self.meta, configuration.property_map['name']['tag'])
     
     
     def print_related(self):
@@ -502,19 +502,19 @@ class Container(object):
     
     
     def print_path_info(self):
-        return theFileUtil.format_display_block(self.path_info, theFileUtil.property_map['name']['tag'])
+        return theFileUtil.format_display_block(self.path_info, configuration.property_map['name']['tag'])
     
     
     def print_file_info(self):
-        return theFileUtil.format_display_block(self.info['file'], theFileUtil.property_map['name']['file'])
+        return theFileUtil.format_display_block(self.info['file'], configuration.property_map['name']['file'])
     
     
     def print_tracks(self):
-        return (u'\n\n\n'.join([theFileUtil.format_display_block(track, theFileUtil.property_map['name']['track'][track['type']]) for track in self.info['track']]))
+        return (u'\n\n\n'.join([theFileUtil.format_display_block(track, configuration.property_map['name']['track'][track['type']]) for track in self.info['track']]))
     
     
     def print_tags(self):
-        return theFileUtil.format_display_block(self.info['tag'], theFileUtil.property_map['name']['tag'])
+        return theFileUtil.format_display_block(self.info['tag'], configuration.property_map['name']['tag'])
     
     
     def print_chapter_markers(self):
@@ -586,14 +586,14 @@ class AudioVideoContainer(Container):
     
     
     def hd_video(self):
-        return self.video_width() > repository_config['Default']['hd video min width']
+        return self.video_width() > configuration.repository['Default']['hd video min width']
     
     
     def playback_height(self):
         result = 0
         v = self.main_video_track()
         if v:
-            if v['display aspect ratio'] >= repository_config['Default']['display aspect ratio']:
+            if v['display aspect ratio'] >= configuration.repository['Default']['display aspect ratio']:
                 result = v['width'] / v['display aspect ratio']
             else:
                 result = v['height']
@@ -635,7 +635,7 @@ class AudioVideoContainer(Container):
             if theFileUtil.complete_path_info_default_values(path_info):
                 dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
                 if dest_path is not None:
-                    pc = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                    pc = configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                     selected = { 'related':{}, 'track':{} }
                     
                     if 'pack' in pc:
@@ -758,7 +758,7 @@ class AudioVideoContainer(Container):
                     command = None
                     if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                         command = theFileUtil.initialize_command('handbrake', self.logger)
-                        tc = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]['transcode']
+                        tc = configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]['transcode']
                         
                         if 'flags' in tc:
                             for v in tc['flags']:
@@ -841,7 +841,7 @@ class Matroska(AudioVideoContainer):
             if 'volume' in path_info: del path_info['volume']
             path_info['kind'] = k
             if theFileUtil.complete_path_info_default_values(path_info):
-                pc = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                pc = configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                 if 'extract' in pc and 'tracks' in pc['extract']:
                     for t in self.info['track']:
                         for c in pc['extract']['tracks']:
@@ -928,7 +928,7 @@ class Mpeg4(AudioVideoContainer):
         if self.meta:
             for k in [ 
                 k for k,v in self.meta.iteritems()
-                if theFileUtil.property_map['name']['tag'][k]['subler'] 
+                if configuration.property_map['name']['tag'][k]['subler'] 
                 and (k not in self.info['tag'] or self.info['tag'][k] != v)
             ]: update[k] = self.meta[k]
                     
@@ -946,7 +946,7 @@ class Mpeg4(AudioVideoContainer):
                     update['name'] = self.path_info['name']
         if update:
             tc = u''.join([theFileUtil.format_key_value_for_subler(t, update[t]) for t in sorted(set(update))])
-            message = u'Update tags: {0} --> {1}'.format(u', '.join([theFileUtil.property_map['name']['tag'][t]['print'] for t in sorted(set(update.keys()))]), self.file_path)
+            message = u'Update tags: {0} --> {1}'.format(u', '.join([configuration.property_map['name']['tag'][t]['print'] for t in sorted(set(update.keys()))]), self.file_path)
             command = theFileUtil.initialize_command('subler', self.logger)
             command.extend([u'-i', self.file_path, u'-t', tc])
             theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
@@ -1020,7 +1020,7 @@ class Mpeg4(AudioVideoContainer):
             path_info = theFileUtil.copy_path_info(self.path_info, options)
             path_info['kind'] = 'srt'
             if theFileUtil.complete_path_info_default_values(path_info):
-                pc = repository_config['Kind']['srt']['Profile'][path_info['profile']]
+                pc = configuration.repository['Kind']['srt']['Profile'][path_info['profile']]
                 
                 if 'profile' in path_info and 'update' in pc:
                     message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
@@ -1041,7 +1041,7 @@ class Mpeg4(AudioVideoContainer):
                         command.extend([
                             u'-i', self.file_path,
                             u'-s', p, 
-                            u'-l', theFileUtil.property_map['iso3t']['language'][i['language']]['print'],
+                            u'-l', configuration.property_map['iso3t']['language'][i['language']]['print'],
                             u'-n', c['to']['Name'], 
                             u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
                         ])
@@ -1053,12 +1053,12 @@ class Mpeg4(AudioVideoContainer):
                         for code in smart_section['order']:
                             for (p,i) in selected.iteritems():
                                 if i['language'] == code:
-                                    message = u'Update smart {0} subtitles {1} --> {2}'.format(theFileUtil.property_map['iso3t']['language'][code]['print'], p, self.file_path)
+                                    message = u'Update smart {0} subtitles {1} --> {2}'.format(configuration.property_map['iso3t']['language'][code]['print'], p, self.file_path)
                                     command = theFileUtil.initialize_command('subler', self.logger)
                                     command.extend([
                                         u'-i', self.file_path, 
                                         u'-s', p, 
-                                        u'-l', theFileUtil.property_map['iso3t']['language'][smart_section['language']]['print'],
+                                        u'-l', configuration.property_map['iso3t']['language'][smart_section['language']]['print'],
                                         u'-n', smart_section['Name'],
                                         u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
                                     ])
@@ -1122,7 +1122,7 @@ class RawAudio(AudioVideoContainer):
                 if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
                     track = self.info['track'][0]
                     option = None
-                    pc = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                    pc = configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                     if 'transcode' in pc and 'audio' in pc['transcode']:
                         for c in pc['transcode']['audio']:
                             if all((k in track and track[k] == v) for k,v in c['from'].iteritems()):
@@ -1132,7 +1132,7 @@ class RawAudio(AudioVideoContainer):
                         message = u'Transcode audio {0} --> {1}'.format(self.file_path, dest_path)
                         command = theFileUtil.initialize_command('ffmpeg', self.logger)
                         command.extend([
-                            u'-threads',u'{0}'.format(repository_config['Default']['threads']),
+                            u'-threads',u'{0}'.format(configuration.repository['Default']['threads']),
                             u'-i', self.file_path,
                             u'-acodec', u'ac3',
                             u'-ac', u'{0}'.format(track['channels']),
@@ -1362,7 +1362,7 @@ class Subtitle(Text):
         if theFileUtil.complete_path_info_default_values(path_info):
             dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
             if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
-                p = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                p = configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                 
                 # Check if profile dictates filtering
                 if 'transcode' in p and 'filter' in p['transcode']:
@@ -1625,7 +1625,7 @@ class Artwork(Container):
         if theFileUtil.complete_path_info_default_values(path_info):
             dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
             if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
-                p = repository_config['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                p = configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
                 if 'transcode' in p:
                     if 'size' in p['transcode']:
                         from PIL import Image
@@ -1674,12 +1674,10 @@ class SubtitleFilter(object):
     
     def find_filter_sequence(self, name):
         result = None
-        
-        from config import subtitle_config
         if name in self.sequence:
             result = self.sequence[name]
-        elif name in subtitle_config:
-            config = subtitle_config[name]
+        elif name in configuration.subtitle:
+            config = configuration.subtitle[name]
             self.logger.info(u'Loading %s filter sequence', name)
             if config['action'] == 'drop':
                 s = DropFilterSequence(config)
@@ -1843,63 +1841,6 @@ class ReplaceFilterSequence(FilterSequence):
 class FileUtil(object):
     def __init__(self):
         self.logger = logging.getLogger('mp4pack.util')
-        
-        # Container / Kind map
-        kc = repository_config['Kind']
-        self.container = {}
-        for c in tuple(set([ v['container'] for k,v in repository_config['Kind'].iteritems() ])):
-            self.container[c] = {'kind':[ k for (k,v) in repository_config['Kind'].iteritems() if v['container'] == c ]}
-        
-        self.stream_type_with_language = ('audio', 'subtitles', 'video')
-        self.kind_with_language = self.container['subtitles']['kind'] + self.container['raw audio']['kind']
-        self.supported_media_kind = [ mk for mk in media_property['stik'] if 'schema' in mk ]
-        
-        self.property_map = {}
-        for key in ('name', 'mediainfo', 'mp4info'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            for block in ('file', 'tag'):
-                if block not in self.property_map[key]:
-                    self.property_map[key][block] = {}
-                for p in media_property[block]:
-                    if key in p and p[key] is not None:
-                        self.property_map[key][block][p[key]] = p
-            
-            self.property_map[key]['track'] = {}
-            for block in ('audio', 'video', 'text', 'image'):
-                if block not in self.property_map[key]['track']:
-                    self.property_map[key]['track'][block] = {}
-                for p in media_property['track']['common']:
-                    if key in p and p[key] is not None:
-                        self.property_map[key]['track'][block][p[key]] = p
-                    
-                for p in media_property['track'][block]:
-                    if key in p and p[key] is not None:
-                        self.property_map[key]['track'][block][p[key]] = p
-        
-        for key in ('name', 'plist'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            self.property_map[key]['itunemovi'] = {}
-            for p in media_property['itunemovi']:
-                self.property_map[key]['itunemovi'][p[key]] = p
-        
-        for key in ('name', 'code'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
-                if block not in self.property_map[key]:
-                    self.property_map[key][block] = {}
-                for p in media_property[block]:
-                    self.property_map[key][block][p[key]] = p
-        
-        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            self.property_map[key]['language'] = {}
-            for p in media_property['language']:
-                if key in p:
-                    self.property_map[key]['language'][p[key]] = p
     
     
     def convert_mediainfo_value(self, kind, value):
@@ -1936,8 +1877,8 @@ class FileUtil(object):
             match = self.mp4info_tag.search(line)
             if match is not None:
                 tag = match.groups()
-                if tag[0] in self.property_map['mp4info']['tag']:
-                    n = self.property_map['mp4info']['tag'][tag[0]]
+                if tag[0] in configuration.property_map['mp4info']['tag']:
+                    n = configuration.property_map['mp4info']['tag'][tag[0]]
                     info['tag'][n['name']] = tag[1]
     
     
@@ -1959,17 +1900,17 @@ class FileUtil(object):
                         track_type = tn.attrib['type'].lower()
                         if track_type == 'general':
                             for t in tn:
-                                if t.tag in self.property_map['mediainfo']['tag']:
-                                    p = self.property_map['mediainfo']['tag'][t.tag]
+                                if t.tag in configuration.property_map['mediainfo']['tag']:
+                                    p = configuration.property_map['mediainfo']['tag'][t.tag]
                                     info['tag'][p['name']] = t.text
-                                elif t.tag in self.property_map['mediainfo']['file']:
-                                    p = self.property_map['mediainfo']['file'][t.tag]
+                                elif t.tag in configuration.property_map['mediainfo']['file']:
+                                    p = configuration.property_map['mediainfo']['file'][t.tag]
                                     info['file'][p['name']] = t.text
-                        elif track_type in self.property_map['mediainfo']['track']:
+                        elif track_type in configuration.property_map['mediainfo']['track']:
                             track = {}
                             for t in tn:
-                                if t.tag in self.property_map['mediainfo']['track'][track_type]:
-                                    p = self.property_map['mediainfo']['track'][track_type][t.tag]
+                                if t.tag in configuration.property_map['mediainfo']['track'][track_type]:
+                                    p = configuration.property_map['mediainfo']['track'][track_type][t.tag]
                                     value = self.convert_mediainfo_value(p['type'], t.text)
                                     track[p['name']] = value
                             if track:
@@ -1979,9 +1920,9 @@ class FileUtil(object):
                                          track['encoder settings'] = track['encoder settings'].split(' / ')
                                 
                                 # check to see if language is not set and set it to default
-                                if track['type'] in theFileUtil.stream_type_with_language:
+                                if track['type'] in configuration.track_with_language:
                                     if 'language' not in track or track['language'] == 'und':
-                                        track['language'] = repository_config['Options'].language
+                                        track['language'] = configuration.repository['Options'].language
                                 
                                 info['track'].append(track)
                         elif track_type == 'menu':
@@ -2003,7 +1944,7 @@ class FileUtil(object):
                     info['tag']['itunmovi'] = info['tag']['itunmovi'].replace('&quot;', '"')
                     info['tag']['itunmovi'] = self.clean_xml.sub(u'', info['tag']['itunmovi']).strip()
                     plist = plistlib.readPlistFromString(info['tag']['itunmovi'].encode('utf-8'))
-                    for k,v in self.property_map['plist']['itunemovi'].iteritems():
+                    for k,v in configuration.property_map['plist']['itunemovi'].iteritems():
                         if k in plist:
                             l = [ unicode(n['name']) for n in plist[k]]
                             if l: info['tag'][v['name']] = l
@@ -2025,10 +1966,10 @@ class FileUtil(object):
                     info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
                 # Format info fields
                 for k,v in info['tag'].iteritems():
-                    value = self.convert_mediainfo_value(self.property_map['name']['tag'][k]['type'], v)
+                    value = self.convert_mediainfo_value(configuration.property_map['name']['tag'][k]['type'], v)
                     info['tag'][k] = value
                 for k,v in info['file'].iteritems():
-                    value = self.convert_mediainfo_value(self.property_map['name']['file'][k]['type'], v)
+                    value = self.convert_mediainfo_value(configuration.property_map['name']['file'][k]['type'], v)
                     info['file'][k] = value
         return info
     
@@ -2039,7 +1980,7 @@ class FileUtil(object):
         path_info = {}
         if path:
             basename = os.path.basename(path)
-            for mk in self.supported_media_kind:
+            for mk in configuration.supported_media_kind:
                 match = mk['schema'].search(basename)
                 if match is not None:
                     path_info = {'media kind':mk['code']}
@@ -2055,7 +1996,7 @@ class FileUtil(object):
                         path_info['name'] = match.group(5)
                         path_info['kind'] = match.group(6)
                     prefix = os.path.dirname(path)
-                    if path_info['kind'] in self.kind_with_language:
+                    if path_info['kind'] in configuration.track_with_language:
                         prefix, iso = os.path.split(prefix)
                         lang = self.find_language(iso)
                         if lang: path_info['language'] = lang['iso3t']
@@ -2064,7 +2005,7 @@ class FileUtil(object):
             if 'media kind' in path_info and extended:
                 # media kind was detected and parsed
                 suffix = os.path.realpath(path)
-                for k,v in repository_config['Volume'].iteritems():
+                for k,v in configuration.repository['Volume'].iteritems():
                     if os.path.commonprefix([v['realpath'], suffix]) == v['realpath']:
                         path_info['volume'] = k
                         suffix = os.path.relpath(suffix, v['realpath'])
@@ -2075,9 +2016,9 @@ class FileUtil(object):
                     fragments = suffix.split('/')
                     if (
                         len(fragments) > 3 and
-                        fragments[0] in self.property_map['name']['stik'] and path_info['media kind'] == self.property_map['name']['stik'][fragments[0]]['code'] and
-                        fragments[1] in repository_config['Kind'] and path_info['kind'] == fragments[1] and
-                        fragments[2] in repository_config['Kind'][path_info['kind']]['Profile']
+                        fragments[0] in configuration.property_map['name']['stik'] and path_info['media kind'] == configuration.property_map['name']['stik'][fragments[0]]['code'] and
+                        fragments[1] in configuration.repository['Kind'] and path_info['kind'] == fragments[1] and
+                        fragments[2] in configuration.repository['Kind'][path_info['kind']]['Profile']
                     ): path_info['profile'] = fragments[2]
                     
         if 'name' in path_info and not path_info['name']:
@@ -2092,11 +2033,11 @@ class FileUtil(object):
             path_info = self.decode_path(path)
             related = []
             self.logger.debug(u'Scanning repository for file related to %s.', path)
-            for v in repository_config['Volume']:
-                for k in repository_config['Kind']:
-                    for p in repository_config['Kind'][k]['Profile']:
-                        if k in theFileUtil.kind_with_language:
-                            for l in theFileUtil.property_map['iso3t']['language']:
+            for v in configuration.repository['Volume']:
+                for k in configuration.repository['Kind']:
+                    for p in configuration.repository['Kind'][k]['Profile']:
+                        if k in configuration.track_with_language:
+                            for l in configuration.property_map['iso3t']['language']:
                                 related_path_info = copy.deepcopy(path_info)
                                 related_path_info['volume'] = v
                                 related_path_info['kind'] = k
@@ -2123,8 +2064,8 @@ class FileUtil(object):
     
     def complete_path_info_default_values(self, path_info):
         result = True
-        if 'kind' in path_info and path_info['kind'] in repository_config['Kind'].keys():
-            kc = repository_config['Kind'][path_info['kind']]
+        if 'kind' in path_info and path_info['kind'] in configuration.repository['Kind'].keys():
+            kc = configuration.repository['Kind'][path_info['kind']]
             if 'profile' not in path_info:
                 if 'default' in kc and 'profile' in kc['default']:
                     path_info['profile'] = kc['default']['profile']
@@ -2219,15 +2160,15 @@ class FileUtil(object):
     def canonic_path(self, path_info, entity=None):
         result = None
         valid = True
-        if 'kind' in path_info and path_info['kind'] in repository_config['Kind']:
-            if 'volume' in path_info and path_info['volume'] in repository_config['Volume']:
+        if 'kind' in path_info and path_info['kind'] in configuration.repository['Kind']:
+            if 'volume' in path_info and path_info['volume'] in configuration.repository['Volume']:
                 if 'profile' in path_info:
                     if self.profile_valid_for_kind(path_info['profile'], path_info['kind']):
-                        result = os.path.join(repository_config['Volume'][path_info['volume']]['path'], self.property_map['code']['stik'][path_info['media kind']]['name'], path_info['kind'], path_info['profile'])
+                        result = os.path.join(configuration.repository['Volume'][path_info['volume']]['path'], configuration.property_map['code']['stik'][path_info['media kind']]['name'], path_info['kind'], path_info['profile'])
                         if path_info['media kind'] == 10 and 'tv show key' in path_info and 'tv season' in path_info:
                             result = os.path.join(result, path_info['tv show key'], str(path_info['tv season']))
                         
-                        if path_info['kind'] in self.kind_with_language:
+                        if path_info['kind'] in configuration.track_with_language:
                             if 'language' in path_info:
                                 lang = self.find_language(path_info['language'])
                                 if lang:
@@ -2302,7 +2243,7 @@ class FileUtil(object):
     
     
     def profile_valid_for_kind(self, profile, kind):
-        return profile and kind and kind in repository_config['Kind'].keys() and profile in repository_config['Kind'][kind]['Profile'].keys()
+        return profile and kind and kind in configuration.repository['Kind'].keys() and profile in configuration.repository['Kind'][kind]['Profile'].keys()
         
     
     
@@ -2327,8 +2268,8 @@ class FileUtil(object):
     
     def initialize_command(self, command, logger):
         result = None
-        if command in repository_config['Command']:
-            c = repository_config['Command'][command]
+        if command in configuration.repository['Command']:
+            c = configuration.repository['Command'][command]
             if 'path' in c:
                 result = [c['path'],]
             else:
@@ -2377,12 +2318,12 @@ class FileUtil(object):
     def find_language(self, iso):
         result = None
         if len(iso) == 3:
-            if iso in self.property_map['iso3t']['language']:
-                result = self.property_map['iso3t']['language'][iso]
-            elif iso in self.property_map['iso3b']['language']:
-                result = self.property_map['iso3b']['language'][iso]
-        elif len(iso) == 2 and iso in self.property_map['iso2']['language']:
-            result = self.property_map['iso2']['language'][iso]
+            if iso in configuration.property_map['iso3t']['language']:
+                result = configuration.property_map['iso3t']['language'][iso]
+            elif iso in configuration.property_map['iso3b']['language']:
+                result = configuration.property_map['iso3b']['language'][iso]
+        elif len(iso) == 2 and iso in configuration.property_map['iso2']['language']:
+            result = configuration.property_map['iso2']['language'][iso]
         return result
     
     
@@ -2443,17 +2384,17 @@ class FileUtil(object):
     
     
     def format_key_value_for_subler(self, key, value):
-        m = self.property_map['name']['tag'][key]
+        m = configuration.property_map['name']['tag'][key]
         if 'subler' in m:
             pkey = m['subler']
             if m['type'] == 'enum':
-                pvalue = self.property_map['code'][m['atom']][value]['print']
+                pvalue = configuration.property_map['code'][m['atom']][value]['print']
             elif m['type'] in ('string', 'list'):
                 if m['type'] == 'list':
                     pvalue = u', '.join(value)
                 else:
                     if key == 'language':
-                        pvalue = self.property_map['iso3t']['language'][value]['print']
+                        pvalue = configuration.property_map['iso3t']['language'][value]['print']
                     else:
                         pvalue = unicode(value)
                 pvalue = pvalue.replace(u'{',u'&#123;').replace(u'}',u'&#125;').replace(u':',u'&#58;')
@@ -2539,7 +2480,7 @@ class FileUtil(object):
                 pkey = m['print']
                 ptype = m['type']
                 if ptype == 'enum':
-                    pvalue = self.property_map['code'][m['atom']][value]['print']
+                    pvalue = configuration.property_map['code'][m['atom']][value]['print']
                     
                 elif ptype in ('string', 'list'):
                     if ptype == 'list':
@@ -2602,14 +2543,14 @@ class FileUtil(object):
     
     
     
-    format_indent = u'\n' + u' '* repository_config['Display']['indent']
-    format_wrap_width = repository_config['Display']['wrap']
+    format_indent = u'\n' + u' '* configuration.repository['Display']['indent']
+    format_wrap_width = configuration.repository['Display']['wrap']
     
     format_khz_display = u'{0}kHz'
-    format_info_title_display = u'\n\n\n{1}[{{0:-^{0}}}]'.format(repository_config['Display']['wrap'] + repository_config['Display']['indent'], u' ' * repository_config['Display']['margin'])
-    format_info_subtitle_display = u'\n{1}[{{0:^{0}}}]\n'.format(repository_config['Display']['indent'] - repository_config['Display']['margin'] - 3, u' ' * repository_config['Display']['margin'])
-    format_key_value_display = u'{1}{{0:-<{0}}}: {{1}}'.format(repository_config['Display']['indent'] - repository_config['Display']['margin'] - 2, u' ' * repository_config['Display']['margin'])
-    format_value_display = u'{0}{{0}}'.format(u' ' * repository_config['Display']['margin'])
+    format_info_title_display = u'\n\n\n{1}[{{0:-^{0}}}]'.format(configuration.repository['Display']['wrap'] + configuration.repository['Display']['indent'], u' ' * configuration.repository['Display']['margin'])
+    format_info_subtitle_display = u'\n{1}[{{0:^{0}}}]\n'.format(configuration.repository['Display']['indent'] - configuration.repository['Display']['margin'] - 3, u' ' * configuration.repository['Display']['margin'])
+    format_key_value_display = u'{1}{{0:-<{0}}}: {{1}}'.format(configuration.repository['Display']['indent'] - configuration.repository['Display']['margin'] - 2, u' ' * configuration.repository['Display']['margin'])
+    format_value_display = u'{0}{{0}}'.format(u' ' * configuration.repository['Display']['margin'])
     
     full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')
     characters_to_exclude_from_filename = re.compile(ur'[\\\/?<>:*|\'"^\.]')
