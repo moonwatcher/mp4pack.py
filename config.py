@@ -2961,6 +2961,7 @@ repository_config = {
                         9:{'volume':'alpha'},
                     },
                     'update':{
+                        'reset':True,
                         'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
                         'related':(
                             {
@@ -2983,6 +2984,7 @@ repository_config = {
                         'filter':('noise', 'typo', 'leftover'),
                     },
                     'update':{
+                        'reset':True,
                         'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
                         'related':(
                             {
@@ -2994,6 +2996,15 @@ repository_config = {
                                 'to': {'height':0.132, 'Name':'Normal'},
                             },
                         ),
+                    },
+                },
+                'remove':{
+                    'default':{
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
+                    },
+                    'update':{
+                        'reset':True,
                     },
                 },
             },
@@ -3029,6 +3040,19 @@ repository_config = {
                         10:{'volume':'alpha'},
                         9:{'volume':'alpha'},
                     },
+                    'update':{
+                        'reset':True,
+                        'related':{'kind':'txt', 'profile':'chapter'}
+                    }
+                },
+                'remove':{
+                    'default':{
+                        10:{'volume':'alpha'},
+                        9:{'volume':'alpha'},
+                    },
+                    'update':{
+                        'reset':True,
+                    }
                 },
             },
         },

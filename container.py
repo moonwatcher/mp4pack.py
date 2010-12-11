@@ -1022,51 +1022,57 @@ class Mpeg4(AudioVideoContainer):
             if theFileUtil.complete_path_info_default_values(path_info):
                 pc = configuration.repository['Kind']['srt']['Profile'][path_info['profile']]
                 
+                has_changed = False
                 if 'profile' in path_info and 'update' in pc:
-                    message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
-                    command = theFileUtil.initialize_command('subler', self.logger)
-                    command.extend([u'-i', self.file_path, u'-r'])
-                    theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                    
-                    selected = {}
-                    for (path, phy) in self.record['entity']['physical'].iteritems():
-                        for c in pc['update']['related']:
-                            if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c['from'].iteritems()):
-                                selected[path] = phy['path info']
-                                break
-                                
-                    for (p,i) in selected.iteritems():
-                        message = u'Update subtitles {0} --> {1}'.format(p, self.file_path)
+                    if pc['update']['reset']:
+                        message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
                         command = theFileUtil.initialize_command('subler', self.logger)
-                        command.extend([
-                            u'-i', self.file_path,
-                            u'-s', p, 
-                            u'-l', configuration.property_map['iso3t']['language'][i['language']]['print'],
-                            u'-n', c['to']['Name'], 
-                            u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
-                        ])
+                        command.extend([u'-i', self.file_path, u'-r'])
                         theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                                
-                    if 'smart' in pc['update']:
-                        smart_section = pc['update']['smart']
-                        found = False
-                        for code in smart_section['order']:
-                            for (p,i) in selected.iteritems():
-                                if i['language'] == code:
-                                    message = u'Update smart {0} subtitles {1} --> {2}'.format(configuration.property_map['iso3t']['language'][code]['print'], p, self.file_path)
-                                    command = theFileUtil.initialize_command('subler', self.logger)
-                                    command.extend([
-                                        u'-i', self.file_path, 
-                                        u'-s', p, 
-                                        u'-l', configuration.property_map['iso3t']['language'][smart_section['language']]['print'],
-                                        u'-n', smart_section['Name'],
-                                        u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
-                                    ])
-                                    theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                                    found = True
+                        has_changed = True
+                    
+                    if 'related' in pc['update']:
+                        selected = {}
+                        for (path, phy) in self.record['entity']['physical'].iteritems():
+                            for c in pc['update']['related']:
+                                if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c['from'].iteritems()):
+                                    selected[path] = phy['path info']
                                     break
-                            if found: break
-                    if selected:
+                                
+                        for (p,i) in selected.iteritems():
+                            message = u'Update subtitles {0} --> {1}'.format(p, self.file_path)
+                            command = theFileUtil.initialize_command('subler', self.logger)
+                            command.extend([
+                                u'-i', self.file_path,
+                                u'-s', p, 
+                                u'-l', configuration.property_map['iso3t']['language'][i['language']]['print'],
+                                u'-n', c['to']['Name'], 
+                                u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
+                            ])
+                            theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                            has_changed = True
+                            
+                        if 'smart' in pc['update']:
+                            smart_section = pc['update']['smart']
+                            found = False
+                            for code in smart_section['order']:
+                                for (p,i) in selected.iteritems():
+                                    if i['language'] == code:
+                                        message = u'Update smart {0} subtitles {1} --> {2}'.format(configuration.property_map['iso3t']['language'][code]['print'], p, self.file_path)
+                                        command = theFileUtil.initialize_command('subler', self.logger)
+                                        command.extend([
+                                            u'-i', self.file_path, 
+                                            u'-s', p, 
+                                            u'-l', configuration.property_map['iso3t']['language'][smart_section['language']]['print'],
+                                            u'-n', smart_section['Name'],
+                                            u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
+                                        ])
+                                        theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                                        found = True
+                                        has_changed = True
+                                        break
+                                if found: break
+                    if has_changed:
                         self.queue_for_index(self.file_path)
     
     
@@ -1077,19 +1083,28 @@ class Mpeg4(AudioVideoContainer):
             path_info['kind'] = 'txt'
             selected = []
             if theFileUtil.complete_path_info_default_values(path_info):
-                lookup = {'kind':path_info['kind'], 'profile':path_info['profile']}
-                for (path, phy) in self.record['entity']['physical'].iteritems():
-                    if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
-                        selected.append(path)
-                        break
-            if selected:
-                message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
-                command = theFileUtil.initialize_command('subler', self.logger)
-                command.extend([u'-i', self.file_path, u'-c', selected[0], '-p'])
-                theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                self.queue_for_index(self.file_path)
-            else:
-                self.logger.warning(u'No chapters available for %s', self.file_path)
+                pc = configuration.repository['Kind']['txt']['Profile'][path_info['profile']]
+                if 'update' in pc:
+                    if pc['update']['reset'] and self.info['menu']:
+                        message = u'Drop existing chapters in {0}'.format(self.file_path)
+                        command = theFileUtil.initialize_command('subler', self.logger)
+                        command.extend([u'-i', self.file_path, u'-r', u'-c', u'/dev/null'])
+                        theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                    if 'related' in pc['update']:
+                        lookup = pc['update']['related']
+                        for (path, phy) in self.record['entity']['physical'].iteritems():
+                            if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
+                                selected.append(path)
+                                break
+                                
+                        if selected:
+                            message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
+                            command = theFileUtil.initialize_command('subler', self.logger)
+                            command.extend([u'-i', self.file_path, u'-c', selected[0], '-p'])
+                            theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                            self.queue_for_index(self.file_path)
+                        else:
+                            self.logger.warning(u'No chapters available for %s', self.file_path)
     
     
     def update(self, options):
@@ -1996,7 +2011,7 @@ class FileUtil(object):
                         path_info['name'] = match.group(5)
                         path_info['kind'] = match.group(6)
                     prefix = os.path.dirname(path)
-                    if path_info['kind'] in configuration.track_with_language:
+                    if path_info['kind'] in configuration.kind_with_language:
                         prefix, iso = os.path.split(prefix)
                         lang = self.find_language(iso)
                         if lang: path_info['language'] = lang['iso3t']
@@ -2036,7 +2051,7 @@ class FileUtil(object):
             for v in configuration.repository['Volume']:
                 for k in configuration.repository['Kind']:
                     for p in configuration.repository['Kind'][k]['Profile']:
-                        if k in configuration.track_with_language:
+                        if k in configuration.kind_with_language:
                             for l in configuration.property_map['iso3t']['language']:
                                 related_path_info = copy.deepcopy(path_info)
                                 related_path_info['volume'] = v
@@ -2168,7 +2183,7 @@ class FileUtil(object):
                         if path_info['media kind'] == 10 and 'tv show key' in path_info and 'tv season' in path_info:
                             result = os.path.join(result, path_info['tv show key'], str(path_info['tv season']))
                         
-                        if path_info['kind'] in configuration.track_with_language:
+                        if path_info['kind'] in configuration.kind_with_language:
                             if 'language' in path_info:
                                 lang = self.find_language(path_info['language'])
                                 if lang:
