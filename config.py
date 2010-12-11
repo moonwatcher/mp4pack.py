@@ -712,6 +712,7 @@ media_property = {
             'subler':None,
             'print':'Track Position',
             'type':'int',
+            'display':False,
         },
         {
             'name':'track total',
@@ -721,6 +722,7 @@ media_property = {
             'subler':None,
             'print':'Track Total',
             'type':'int',
+            'display':False
         },
         {
             'name':'disk position',
@@ -730,6 +732,7 @@ media_property = {
             'subler':None,
             'print':'Disk Position',
             'type':'int',
+            'display':False,
         },
         {
             'name':'disk total',
@@ -739,6 +742,7 @@ media_property = {
             'subler':None,
             'print':'Disk Total',
             'type':'int',
+            'display':False,
         },
         {
             'name':'cover',
@@ -957,7 +961,7 @@ media_property = {
                 'print':'Encoder Settings',
                 'mediainfo':'Encoded_Library_Settings',
                 'type':'list',
-                'display':False,
+                'display':True,
             },
         ),
         'text':(
@@ -2649,7 +2653,7 @@ repository_config = {
                         'options':{
                             '--quality':18,
                             '--encoder':'x264',
-                            '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1',
+                            '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1:b-pyramid=none',
                             '--maxWidth':720,
                         },
                         'flags':('--large-file','--loose-anamorphic'),
@@ -2695,7 +2699,7 @@ repository_config = {
                         'options':{
                             '--quality':22,
                             '--encoder':'x264',
-                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:subme=9:vbv-maxrate=9500:vbv-bufsize=9500:cabac=1',
+                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:8x8dct=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
                             '--maxWidth':1280,
                         },
                         'flags':('--large-file','--loose-anamorphic'),
@@ -2741,7 +2745,7 @@ repository_config = {
                         'options':{
                             '--quality':21,
                             '--encoder':'x264',
-                            '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0',
+                            '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0:b-pyramid=none',
                             '--maxWidth':480,
                         },
                         'flags':('--large-file','--loose-anamorphic'),
@@ -2783,7 +2787,7 @@ repository_config = {
                         'options':{
                             '--quality':18,
                             '--encoder':'x264',
-                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=0:trellis=0:b_pyramid=0:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
+                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
                             '--maxWidth':1280
                         },
                         'flags':('--large-file','--loose-anamorphic'),
