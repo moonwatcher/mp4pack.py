@@ -205,7 +205,6 @@ class Container(object):
     
     
     
-    
     def refresh_index(self, queue=None):
         # <Volume>/<Media Kind>/<Kind>/<Profile>/(<Show>/<Season>/(language/)?<Show> <Code> <Name>|(language/)?IMDb<IMDB ID> <Name>).<Extension>
         if self.record:
@@ -249,10 +248,6 @@ class Container(object):
                 need_save = True
             if need_save: self.save_record()
     
-    
-    
-    
-   
     
     def save_record(self):
         if self.is_movie():
@@ -308,7 +303,7 @@ class Container(object):
     
     
     def delete(self):
-        if self.valid():
+        if self.path_info:
             self.drop_from_index(self.file_path)
             self.logger.debug(u'Delete %s',self.file_path)
             theFileUtil.clean(self.file_path)
@@ -623,7 +618,9 @@ class AudioVideoContainer(Container):
                     for marker in self.info['menu']:
                         c.add_chapter_marker(marker['time'], marker['name'])
                     self.logger.info(u'Extracting chapter markers from %s --> %s', self.file_path, dest_path)
+                    c.delete()
                     c.write(dest_path)
+                    c.unload()
                     if theFileUtil.clean_if_not_exist(dest_path):
                         result.append(dest_path)
                         self.queue_for_index(dest_path)
@@ -1525,6 +1522,7 @@ class Chapter(Text):
     
     def start(self):
         self.chapter_markers = []
+        self.path_info = theFileUtil.decode_path(self.file_path)
     
     
     def decode(self):
