@@ -594,10 +594,9 @@ class AudioVideoContainer(Container):
         v = self.main_video_track()
         if v:
             if v['display aspect ratio'] >= configuration.repository['Default']['display aspect ratio']:
-                result = v['width'] / v['display aspect ratio']
+                result = float(v['width']) / float(configuration.repository['Default']['display aspect ratio'])
             else:
-                result = v['height']
-            
+                result = float(v['height'])
         return result
     
     
