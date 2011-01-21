@@ -1,27 +1,29 @@
-mp4pack.py a media collection manager
+mp4pack. a media collection manager
 Lior Galanti lior.galanti@gmail.com
 
-Usage: mp4pack [options] [file or directory. default: . ]
+Usage: mp4pack.py [options] [file or directory]
 
 Options:
   -h, --help            show this help message and exit
 
-  Actions:
-    An action to preform on files found in the search path.
+  Operations:
+    An operation to preform on files found in the search path.
 
     -i, --info          Show info.
     -c, --copy          Copy into repository.
     -n, --rename        Rename files to standard names.
     -e, --extract       Extract subtitle and chapter and transcode the
                         extracted streams.
-    --tag               Update meta tags.
-    --optimize          Optimize file layout.
-    -m KIND, --pack=KIND
+    -T, --tag           Update meta tags.
+    -O, --optimize      Optimize file layout.
+    -P KIND, --pack=KIND
                         KIND is one of [ mkv ]
     -t KIND, --transcode=KIND
-                        KIND is one of [ m4v, mkv, srt, txt, jpg, ac3 ]
+                        KIND is one of [ m4v, mkv, srt, txt, jpg, png, ac3 ]
+    -C KIND, --transform=KIND
+                        KIND is one of [ m4v ]
     -u KIND, --update=KIND
-                        KIND is one of [ srt, jpg, txt ]
+                        KIND is one of [ srt, png, jpg, txt, m4v ]
 
   Modifiers:
     -o VOLUME, --volume=VOLUME
@@ -39,11 +41,13 @@ Options:
                         before execution.
     -q QUANTIZER, --quality=QUANTIZER
                         H.264 transcoding Quantizer.
-    --pixel-width=WIDTH
+    -W WIDTH, --pixel-width=WIDTH
                         Max output pixel width [ default: set by profile ]
-    --language=CODE     Languge code used when undefined. [ default: eng ]
-    --reindex           Rebuild index for encountered files.
-    --md5               Verify md5 checksum on copy.
+    -l CODE, --language=CODE
+                        Languge code used when undefined. [ default: eng ]
+    -U, --update-index  Rebuild index for encountered files.
+    -5, --md5           Verify md5 checksum on copy.
+    -D, --download      Download if no local copy found
 
   Subtitle:
     Options for manipulating subtitles.
@@ -51,6 +55,8 @@ Options:
     --input-rate=RATE   Decoding subtitles frame rate.
     --output-rate=RATE  Encoding subtitles frame rate.
     --time-shift=TIME   Subtitles shift offset in milliseconds.
+    --NTSC              Convert PAL to NTSC framerate
+    --PAL               Convert NTSC to PAL framerate
 
   Database:
     Options for maintaining database records.
