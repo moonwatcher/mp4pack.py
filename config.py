@@ -2671,9 +2671,13 @@ repository_config = {
             'depend':('handbrake',),
             'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'png', 'ac3'),
         },
+        'transform':{
+            'depend':('handbrake',),
+            'kind':('m4v',),
+        },
         'update':{
             'depend':('subler',),
-            'kind':('srt', 'png', 'jpg', 'txt'),
+            'kind':('srt', 'png', 'jpg', 'txt', 'm4v'),
         },
     },
     'Kind':{

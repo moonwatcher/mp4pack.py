@@ -4,8 +4,9 @@ import sys
 import os
 import re
 import getopt
-import fnmatch
 import logging
+import copy
+
 
 from container import make_media_file
 from db import theEntityManager
@@ -64,10 +65,11 @@ def load_options():
     group.add_option('-c', '--copy', dest='copy', action='store_true', default=False, help='Copy into repository.')
     group.add_option('-n', '--rename', dest='rename', action='store_true', default=False, help='Rename files to standard names.')
     group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract subtitle and chapter and transcode the extracted streams.')
-    group.add_option('--tag', dest='tag', action='store_true', default=False, help='Update meta tags.')
-    group.add_option('--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout.')
-    group.add_option('-m', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['pack']['kind'])))
+    group.add_option('-T', '--tag', dest='tag', action='store_true', default=False, help='Update meta tags.')
+    group.add_option('-O', '--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout.')
+    group.add_option('-P', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['pack']['kind'])))
     group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['transcode']['kind'])))
+    group.add_option('-C', '--transform', metavar='KIND', dest='transform', type='choice', choices=rc['Action']['transform']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['transform']['kind'])))
     group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['update']['kind'])))
     parser.add_option_group(group)
         
@@ -80,17 +82,19 @@ def load_options():
     group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='info', type='choice', choices=log_levels.keys(), help='Logging verbosity level [ default: %default ]')
     group.add_option('-d', '--debug', dest='debug', action='store_true', default=False, help='Only print commands without executing. Also good for dumping the commands into a text file and editing before execution.')
     group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='H.264 transcoding Quantizer.')
-    group.add_option('--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [ default: set by profile ]')
-    group.add_option('--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined. [ default: %default ]')
-    group.add_option('--reindex', metavar='REINDEX', dest='reindex', action='store_true', default=False, help='Rebuild index for encountered files.')
-    group.add_option('--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
-    group.add_option('--download', dest='download', action='store_true', default=False, help='Download if no local copy found')
+    group.add_option('-W', '--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [ default: set by profile ]')
+    group.add_option('-l', '--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined. [ default: %default ]')
+    group.add_option('-U', '--update-index', metavar='REINDEX', dest='reindex', action='store_true', default=False, help='Rebuild index for encountered files.')
+    group.add_option('-5', '--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
+    group.add_option('-D', '--download', dest='download', action='store_true', default=False, help='Download if no local copy found')
     parser.add_option_group(group)
     
     group = OptionGroup(parser, 'Subtitle', 'Options for manipulating subtitles.')
     group.add_option('--input-rate', metavar='RATE', dest='input_rate', default=None, help='Decoding subtitles frame rate.')
     group.add_option('--output-rate', metavar='RATE', dest='output_rate', default=None, help='Encoding subtitles frame rate.')
     group.add_option('--time-shift', metavar='TIME', dest='time_shift', type='int', default=None, help='Subtitles shift offset in milliseconds.')
+    group.add_option('--NTSC', dest='NTSC', action='store_true', default=False, help='Convert PAL to NTSC framerate')
+    group.add_option('--PAL', dest='PAL', action='store_true', default=False, help='Convert NTSC to PAL framerate')
     parser.add_option_group(group)
     
     group = OptionGroup(parser, 'Database', 'Options for maintaining database records.')
@@ -114,8 +118,39 @@ def load_config(logger):
     result = True
     for c in configuration.repository['Command']:
         if configuration.repository['Command'][c]['path'] == None:
-            logger.error(u'Command %s could not be located. Is it installed?', command_config[c]['binary'])
+            logger.error(u'Command %s could not be located. Is it installed?', configuration.repository['Command'][c]['binary'])
             result = False
+    return result
+
+
+def transform(f, options):
+    result = None
+    o = copy.deepcopy(options)
+    o.transcode = o.transform
+    o.transform = None
+    result = f.transcode(o)
+    if result:
+        nf = make_media_file(result)
+        nf.load()
+        if nf and nf.valid():
+            o.transcode = None
+            
+            o.tag = True
+            nf.tag(o)
+            o.tag = False
+            
+            o.update = 'srt'
+            o.profile = 'clean'
+            nf.update(o)
+            
+            o.update = 'txt'
+            o.profile = 'chapter'
+            nf.update(o)
+            
+            o.update = 'png'
+            o.download = True
+            o.profile = 'normal'
+            nf.update(o)
     return result
 
 
@@ -161,7 +196,10 @@ def preform_operations(media_files, options):
                     
                 if options.transcode is not None:
                     f.transcode(options)
-                    
+                
+                if options.transform is not None:
+                    transform(f, options)
+                
                 if options.tag:
                     f.tag(options)
                     

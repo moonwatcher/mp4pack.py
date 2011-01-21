@@ -346,6 +346,10 @@ class Container(object):
         pass
     
     
+    def transform(self, options):
+        pass
+    
+    
     def update(self, options):
         pass
     
@@ -965,7 +969,6 @@ class Mpeg4(AudioVideoContainer):
         
     
     
-    
     def _update_png(self, options):
         AudioVideoContainer.tag(self, options)
         if options.update == 'png':
@@ -1387,12 +1390,21 @@ class Subtitle(Text):
                     self.shift(options.time_shift)
                 
                 # Check if frame rate conversion is necessary
-                if options.input_rate is not None and options.output_rate is not None:
+                input_frame_rate = None
+                output_frame_rate = None
+                if (options.input_rate is not None and options.output_rate is not None):
                     input_frame_rate = theFileUtil.frame_rate_to_float(options.input_rate)
                     output_frame_rate = theFileUtil.frame_rate_to_float(options.output_rate)
-                    if input_frame_rate is not None and output_frame_rate is not None:
-                        factor = input_frame_rate / output_frame_rate
-                        self.scale_rate(factor)
+                elif (options.NTSC):
+                    input_frame_rate = pal_framerate
+                    output_frame_rate = ntsc_framerate
+                elif (options.PAL):
+                    input_frame_rate = ntsc_framerate
+                    output_frame_rate = pal_framerate
+                    
+                if input_frame_rate is not None and output_frame_rate is not None:
+                    factor = input_frame_rate / output_frame_rate
+                    self.scale_rate(factor)
                 
                 self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
                 self.write(dest_path)
@@ -1439,6 +1451,8 @@ class Subtitle(Text):
     ass_formation_line = re.compile('^Format\s*:\s*(.*)$')
     ass_condense_line_breaks = re.compile(r'(\\N)+')
     ass_event_command_re = re.compile(r'\{\\[^\}]+\}')
+    pal_framerate = 25.0
+    ntsc_framerate = 23.976
 
 
 class SubtitleBlock(object): 
