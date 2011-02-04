@@ -951,7 +951,7 @@ class Mpeg4(AudioVideoContainer):
             tc = u''.join([theFileUtil.format_key_value_for_subler(t, update[t]) for t in sorted(set(update))])
             message = u'Update tags: {0} --> {1}'.format(u', '.join([configuration.property_map['name']['tag'][t]['print'] for t in sorted(set(update.keys()))]), self.file_path)
             command = theFileUtil.initialize_command('subler', self.logger)
-            command.extend([u'-i', self.file_path, u'-t', tc])
+            command.extend([u'-o', self.file_path, u'-t', tc])
             theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
             self.queue_for_index(self.file_path)
             
@@ -986,7 +986,7 @@ class Mpeg4(AudioVideoContainer):
             if selected:
                 message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
                 command = theFileUtil.initialize_command('subler', self.logger)
-                command.extend([u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
+                command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
                 theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                 self.queue_for_index(self.file_path)
             else:
@@ -1010,7 +1010,7 @@ class Mpeg4(AudioVideoContainer):
             if selected:
                 message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
                 command = theFileUtil.initialize_command('subler', self.logger)
-                command.extend([u'-i', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
+                command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
                 theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                 self.queue_for_index(self.file_path)
             else:
@@ -1029,7 +1029,7 @@ class Mpeg4(AudioVideoContainer):
                     if pc['update']['reset']:
                         message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
                         command = theFileUtil.initialize_command('subler', self.logger)
-                        command.extend([u'-i', self.file_path, u'-r'])
+                        command.extend([u'-o', self.file_path, u'-r'])
                         theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                         has_changed = True
                     
@@ -1045,8 +1045,8 @@ class Mpeg4(AudioVideoContainer):
                             message = u'Update subtitles {0} --> {1}'.format(p, self.file_path)
                             command = theFileUtil.initialize_command('subler', self.logger)
                             command.extend([
-                                u'-i', self.file_path,
-                                u'-s', p, 
+                                u'-o', self.file_path,
+                                u'-i', p, 
                                 u'-l', configuration.property_map['iso3t']['language'][i['language']]['print'],
                                 u'-n', c['to']['Name'], 
                                 u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
@@ -1063,8 +1063,8 @@ class Mpeg4(AudioVideoContainer):
                                         message = u'Update smart {0} subtitles {1} --> {2}'.format(configuration.property_map['iso3t']['language'][code]['print'], p, self.file_path)
                                         command = theFileUtil.initialize_command('subler', self.logger)
                                         command.extend([
-                                            u'-i', self.file_path, 
-                                            u'-s', p, 
+                                            u'-o', self.file_path, 
+                                            u'-i', p, 
                                             u'-l', configuration.property_map['iso3t']['language'][smart_section['language']]['print'],
                                             u'-n', smart_section['Name'],
                                             u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
@@ -1090,7 +1090,7 @@ class Mpeg4(AudioVideoContainer):
                     if pc['update']['reset'] and self.info['menu']:
                         message = u'Drop existing chapters in {0}'.format(self.file_path)
                         command = theFileUtil.initialize_command('subler', self.logger)
-                        command.extend([u'-i', self.file_path, u'-r', u'-c', u'/dev/null'])
+                        command.extend([u'-o', self.file_path, u'-r', u'-c', u'/dev/null'])
                         theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                     if 'related' in pc['update']:
                         lookup = pc['update']['related']
@@ -1102,7 +1102,7 @@ class Mpeg4(AudioVideoContainer):
                         if selected:
                             message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
                             command = theFileUtil.initialize_command('subler', self.logger)
-                            command.extend([u'-i', self.file_path, u'-c', selected[0], '-p'])
+                            command.extend([u'-o', self.file_path, u'-c', selected[0], '-p'])
                             theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                             self.queue_for_index(self.file_path)
                         else:
