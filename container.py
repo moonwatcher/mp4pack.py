@@ -633,7 +633,23 @@ class AudioVideoContainer(Container):
     def pack(self, options):
         Container.pack(self, options)
         path_info = theFileUtil.copy_path_info(self.path_info, options)
-        if options.pack in ('mkv'):
+        
+        if options.pack in ('m4v'):
+            path_info['kind'] = 'm4v'
+            if theFileUtil.complete_path_info_default_values(path_info):
+                dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])
+                if dest_path is not None:
+                    pc = configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                    if theFileUtil.varify_if_path_available(dest_path, options.overwrite):
+                        command = theFileUtil.initialize_command('subler', self.logger)
+                        command.extend([u'-o', dest_path, u'-i', self.file_path])
+                        
+                        message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
+                        theFileUtil.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                        if theFileUtil.clean_if_not_exist(dest_path):
+                            self.queue_for_index(dest_path)
+                            
+        elif options.pack in ('mkv'):
             path_info['kind'] = 'mkv'
             if theFileUtil.complete_path_info_default_values(path_info):
                 dest_path = theFileUtil.canonic_path(path_info, self.record['entity'])

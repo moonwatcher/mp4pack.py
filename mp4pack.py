@@ -106,7 +106,6 @@ def load_options():
     group.add_option('--choose-movie-poster', metavar='MAP', dest='choose_movie_poster', default=None, help='Choose tmdb movie poster. Takes IMDb:TMDb')
     parser.add_option_group(group)
     
-    
     options, args = parser.parse_args()
     
     o = rc['Options'] = options
@@ -150,6 +149,7 @@ def transform(f, options):
             o.update = 'png'
             o.download = True
             o.profile = 'normal'
+            o.download = True
             nf.update(o)
     return result
 

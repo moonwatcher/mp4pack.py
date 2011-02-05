@@ -2665,7 +2665,7 @@ repository_config = {
         },
         'pack':{
             'depend':('mkvmerge',),
-            'kind':('mkv',),
+            'kind':('mkv','m4v', ),
         },
         'transcode':{
             'depend':('handbrake',),
