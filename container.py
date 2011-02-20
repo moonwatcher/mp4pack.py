@@ -1890,7 +1890,16 @@ class FileUtil(object):
     def convert_mediainfo_value(self, kind, value):
         result = value
         if kind == 'int' or kind == 'enum':
-            result = int(value)
+            try:
+                result = int(value)
+            except ValueError as error:
+                # Fix for broken mediainfo output for Channel_s_, what kind of integer is '7 / 6'?
+                if value == '7 / 6':
+                    self.logger.warning('Correcting bogus mediainfo value \'7 / 6\' to 7')
+                    result = 7
+                else:
+                    self.logger.error('Could not decode Integer: %s', value)
+                    result = None
         elif kind == 'float':
             result = float(value)
         elif kind == 'date':

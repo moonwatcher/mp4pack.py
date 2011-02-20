@@ -2683,7 +2683,7 @@ repository_config = {
     'Kind':{
         'm4v':{
             'container':'mp4',
-            'default':{'volume':'epsilon'},
+            'default':{'volume':'epsilon', 'profile':'appletv'},
             'Profile':{
                 'universal':{
                     'description':'an SD profile that decodes on every cabac capable apple device',

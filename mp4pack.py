@@ -146,6 +146,7 @@ def transform(f, options):
             o.profile = 'chapter'
             nf.update(o)
             
+            o.volume = 'alpha'
             o.update = 'png'
             o.download = True
             o.profile = 'normal'
