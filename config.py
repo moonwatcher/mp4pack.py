@@ -12,6 +12,8 @@ db_uri = u'mongodb://mp4pack:poohbear@multivac.lan/mp4pack'
 
 
 
+# Default base configuration
+
 media_property = {
     'file':(
         {
@@ -2528,7 +2530,6 @@ media_property = {
 }
 
 repository_config = {
-    'Options':None,
     'Default':{
         'hd video min width':720,
         'display aspect ratio':float(float(16)/float(9)),
@@ -3532,33 +3533,26 @@ base_config = {
 
 class Configuration(object):
     def __init__(self):
+        self.options = None
         self.property = media_property
-        self.property_map = {}
         self.repository = repository_config
         self.subtitle = subtitle_config
-        self.container = {}
+        self.property_map = {}
         
         self.locate_commands()
         self.load_default()
-        
-        self.volume_map = {}
-        for k,v in self.repository['Volume'].iteritems():
-            v['realpath'] = os.path.realpath(v['path'])
-            alt = []
-            alt.append(v['path'])
-            alt.append(v['realpath'])
-            alt.extend(v['alternative'])
-            alt = tuple(set(alt))
-            for p in alt:
-                self.volume_map[p] = v
     
     
     def load_default(self):
         self.build_property_map()
         
         self.track_with_language = ('audio', 'subtitles', 'video')
-        self.kind_with_language = self.container['subtitles']['kind'] + self.container['raw audio']['kind']
+        self.kind_with_language = self.property_map['container']['subtitles']['kind'] + self.property_map['container']['raw audio']['kind']
         self.supported_media_kind = [ mk for mk in self.property['stik'] if 'schema' in mk ]
+        self.available_profiles = []
+        for v in self.repository['Kind'].values():
+            self.available_profiles.extend(v['Profile'].keys())
+        self.available_profiles = tuple(set(self.available_profiles))
     
     
     def build_property_map(self):
@@ -3616,8 +3610,21 @@ class Configuration(object):
                     self.property_map[key]['language'][p[key]] = p
         
         # Build container kind map
+        self.property_map['container'] = {}
         for c in tuple(set([ v['container'] for k,v in self.repository['Kind'].iteritems() ])):
-            self.container[c] = {'kind':[ k for (k,v) in self.repository['Kind'].iteritems() if v['container'] == c ]}
+            self.property_map['container'][c] = {'kind':[ k for (k,v) in self.repository['Kind'].iteritems() if v['container'] == c ]}
+            
+        # Build volume map
+        self.property_map['volume'] = {}
+        for k,v in self.repository['Volume'].iteritems():
+            v['realpath'] = os.path.realpath(v['path'])
+            alt = []
+            alt.append(v['path'])
+            alt.append(v['realpath'])
+            alt.extend(v['alternative'])
+            alt = tuple(set(alt))
+            for p in alt:
+                self.property_map['volume'][p] = v
     
     
     def locate_commands(self):

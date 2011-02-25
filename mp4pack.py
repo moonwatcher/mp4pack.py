@@ -16,7 +16,7 @@ from config import theConfiguration as configuration
 def standardize_path(path):
     result = path
     realpath = os.path.realpath(os.path.abspath(path))
-    for k,v in configuration.volume_map.iteritems():
+    for k,v in configuration.property_map['volume'].iteritems():
         if os.path.commonprefix([k, realpath]) == k:
             result = realpath.replace(k, v['path'])
             break
@@ -53,11 +53,6 @@ def load_options():
     from optparse import OptionGroup
     
     rc = configuration.repository
-    profiles = []
-    for k in rc['Kind'].keys():
-        profiles += rc['Kind'][k]['Profile'].keys()
-    profiles = tuple(set(profiles))
-    
     parser = OptionParser('%prog [options] [file or directory]')
     
     group = OptionGroup(parser, 'Operations', 'An operation to preform on files found in the search path.')
@@ -75,7 +70,7 @@ def load_options():
         
     group = OptionGroup(parser, 'Modifiers')
     group.add_option('-o', '--volume', dest='volume', type='choice', choices=rc['Volume'].keys(), default=None, help='Output volume [ default: auto detect ]')
-    group.add_option('-p', '--profile', dest='profile', type='choice', choices=profiles, default=None, help='[ default: auto detect ]')
+    group.add_option('-p', '--profile', dest='profile', type='choice', choices=configuration.available_profiles, default=None, help='[ default: auto detect ]')
     group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='Regex to filter selected file names')
     group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files')
     group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursively process sub directories.')
@@ -107,8 +102,7 @@ def load_options():
     parser.add_option_group(group)
     
     options, args = parser.parse_args()
-    
-    o = rc['Options'] = options
+    o = configuration.options = options
     
     return options, args
 

@@ -20,19 +20,19 @@ from config import theConfiguration as configuration
 def make_media_file(file_path):
     f = None
     file_type = os.path.splitext(file_path)[1].strip('.')
-    if file_type in configuration.container['mp4']['kind']:
+    if file_type in configuration.property_map['container']['mp4']['kind']:
         f = Mpeg4(file_path, autoload=False)
-    elif file_type in configuration.container['matroska']['kind']:
+    elif file_type in configuration.property_map['container']['matroska']['kind']:
         f = Matroska(file_path, autoload=False)
-    elif file_type in configuration.container['subtitles']['kind']:
+    elif file_type in configuration.property_map['container']['subtitles']['kind']:
         f = Subtitle(file_path, autoload=False)
-    elif file_type in configuration.container['chapters']['kind']:
+    elif file_type in configuration.property_map['container']['chapters']['kind']:
         f = Chapter(file_path, autoload=False)
-    elif file_type in configuration.container['image']['kind']:
+    elif file_type in configuration.property_map['container']['image']['kind']:
         f = Artwork(file_path, autoload=False)
-    elif file_type in configuration.container['raw audio']['kind']:
+    elif file_type in configuration.property_map['container']['raw audio']['kind']:
         f = RawAudio(file_path, autoload=False)
-    elif file_type in configuration.container['avi']['kind']:
+    elif file_type in configuration.property_map['container']['avi']['kind']:
         f = Avi(file_path, autoload=False)
         
     return f
@@ -1975,7 +1975,7 @@ class FileUtil(object):
                                 # check to see if language is not set and set it to default
                                 if track['type'] in configuration.track_with_language:
                                     if 'language' not in track or track['language'] == 'und':
-                                        track['language'] = configuration.repository['Options'].language
+                                        track['language'] = configuration.options.language
                                 
                                 info['track'].append(track)
                         elif track_type == 'menu':
