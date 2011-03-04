@@ -1895,8 +1895,8 @@ class FileUtil(object):
             except ValueError as error:
                 # Fix for broken mediainfo output for Channel_s_, what kind of integer is '7 / 6'?
                 if value == '7 / 6':
-                    self.logger.warning('Correcting bogus mediainfo value \'7 / 6\' to 7')
-                    result = 7
+                    self.logger.warning('Correcting bogus mediainfo value \'7 / 6\' to 6')
+                    result = 6
                 else:
                     self.logger.error('Could not decode Integer: %s', value)
                     result = None
