@@ -193,6 +193,7 @@ class EntityManager(object):
         self.seasons = self.db.seasons
         self.episodes = self.db.episodes
         self.people = self.db.people
+        self.sync_delay = configuration.repository['Default']['sync delay']
     
     
     def base_init(self):
@@ -233,6 +234,15 @@ class EntityManager(object):
             ], unique=True
         )
         self.logger.info(u'Created mongodb indexes')
+    
+    
+    def suppress_sync(self, sync, last_update):
+        if sync:
+            delta = datetime.utcnow() - last_update
+            if delta < self.sync_delay:
+                self.logger.debug(u'Supressing online sync. Time since last sync too short: %s', unicode(delta))
+                sync = False
+        return sync
     
     
     def refresh_tmdb_genres(self):
@@ -407,7 +417,7 @@ class EntityManager(object):
         if movie is None:
             tmdb_id = self.find_tmdb_movie_id_by_imdb_id(imdb_id)
             if tmdb_id is not None:
-                movie = self.find_movie_by_tmdb_id(tmdb_id)
+                movie = self.find_movie_by_tmdb_id(tmdb_id, refresh)
         elif refresh and u'tmdb_id' in movie:
             movie = self.find_movie_by_tmdb_id(movie[u'tmdb_id'], refresh)
         return movie
@@ -416,7 +426,7 @@ class EntityManager(object):
     def find_movie_by_tmdb_id(self, tmdb_id, refresh=False):
         tmdb_id = int(tmdb_id)
         movie = self.movies.find_one({u'tmdb_id':tmdb_id})
-        if movie is None or refresh:
+        if movie is None or self.suppress_sync(refresh, movie['last_update']):
             movie = self.store_tmdb_movie(tmdb_id, refresh)
         return movie
     
@@ -424,15 +434,15 @@ class EntityManager(object):
     def find_person_by_tmdb_id(self, tmdb_id, refresh=False):
         tmdb_id = int(tmdb_id)
         person = self.people.find_one({u'tmdb_id':tmdb_id})
-        if person is None or refresh:
+        if person is None or self.suppress_sync(refresh, person['last_update']):
             person = self.store_tmdb_person(tmdb_id, refresh)
         return person
     
     
     def find_show(self, tv_show_key, refresh=False):
         show = self.shows.find_one({u'tv_show_key': tv_show_key})
-        if show is not None:
-            if ( show[u'last_update'] is None or refresh ) and u'tvdb_id' in show:
+        if show is not None and u'tvdb_id' in show:
+            if show[u'last_update'] is None or self.suppress_sync(refresh, show['last_update']):
                 self.logger.info(u'Updating show %s', tv_show_key)
                 show, episodes = self.store_tvdb_show(show[u'tvdb_id'], refresh)
                 self.logger.info(u'Done updating show %s', tv_show_key)
@@ -442,7 +452,7 @@ class EntityManager(object):
     
     
     def find_episode(self, tv_show_key, tv_season, tv_episode, refresh=False):
-        show = self.find_show(tv_show_key)
+        show = self.find_show(tv_show_key, refresh)
         episode = None
         if show is not None:
             episode = self.episodes.find_one({u'tv_show_key':tv_show_key, u'tv_season':tv_season, u'tv_episode':tv_episode})
@@ -574,7 +584,7 @@ class EntityManager(object):
             
             if 'cast' in element.keys():
                 for person in element['cast']:
-                    self.find_person_by_tmdb_id(person['id'])
+                    self.find_person_by_tmdb_id(person['id'], refresh)
             if new_record:
                 self.logger.info(u'Created record for movie %s with tmdb:%s imdb:%s', movie['tmdb_record']['name'], movie['tmdb_id'], movie['imdb_id'])
             else:
@@ -600,7 +610,7 @@ class EntityManager(object):
         return genre
     
     
-    def find_person_by_name(self, name):
+    def find_person_by_name(self, name, refresh=False):
         person = None
         name = collapse_whitespace.sub(u' ', name).strip()
         small_name = make_small_name(name)
@@ -609,12 +619,24 @@ class EntityManager(object):
             if person is None:
                 simple_name = remove_accents(small_name)
                 person = self.people.find_one({'simple_name':simple_name})
-                if person is None:
-                    tmdb_id = self.find_tmdb_person_id_by_name(name)
-                    if tmdb_id:
-                        person = self.store_tmdb_person(tmdb_id)
-                    else:
-                        person = self.make_person_stub(name)
+        
+        if person and 'tmdb_id' in person:
+            person = self.find_person_by_tmdb_id(person['tmdb_id'], refresh)
+        else:
+            if person is None:
+                tmdb_id = self.find_tmdb_person_id_by_name(name)
+                if tmdb_id:
+                    person = self.find_person_by_tmdb_id(tmdb_id, refresh)
+                else:
+                    person = self.make_person_stub(name)
+            elif self.suppress_sync(refresh, person['last_update']):
+                tmdb_id = self.find_tmdb_person_id_by_name(name)
+                if tmdb_id:
+                    # Person was a stub, update tmdb id and refresh
+                    person['tmdb_id'] = tmdb_id
+                    self.people.save(person)
+                    self.logger.info('Updated existing stub person record for %s with new tmdb id %d', name, tmdb_id)
+                    person = self.find_person_by_tmdb_id(tmdb_id, True)
         return person
     
     
@@ -745,7 +767,7 @@ class EntityManager(object):
                         people_names = self.split_tvdb_list(item.text)
                         if people_names:
                             for person_name in people_names:
-                                person = self.find_person_by_name(person_name)
+                                person = self.find_person_by_name(person_name, refresh)
                                 if person:
                                     reference = self.make_person_reference(person)
                                     if reference:
@@ -764,14 +786,14 @@ class EntityManager(object):
             if node:
                 episodes = []
                 for episode in node:
-                    e = self.store_tvdb_episode(show, episode)
+                    e = self.store_tvdb_episode(show, episode, refresh)
                     if e: episodes.append(e)
         else:
             self.logger.error(u'Show %d does not exist', tvdb_id)
         return show, episodes
     
     
-    def store_tvdb_episode(self, show, node):
+    def store_tvdb_episode(self, show, node, refresh=False):
         episode = None
         if node:
             tv_season = int(node.find('SeasonNumber').text)
@@ -829,7 +851,7 @@ class EntityManager(object):
                             people_names = self.split_tvdb_list(item.text)
                             if people_names:
                                 for person_name in people_names:
-                                    person = self.find_person_by_name(person_name)
+                                    person = self.find_person_by_name(person_name, refresh)
                                     if person:
                                         reference = self.make_person_reference(person)
                                         if reference:
@@ -840,7 +862,7 @@ class EntityManager(object):
                             people_names = self.split_tvdb_list(item.text)
                             if people_names:
                                 for person_name in people_names:
-                                    person = self.find_person_by_name(person_name)
+                                    person = self.find_person_by_name(person_name, refresh)
                                     if person:
                                         reference = self.make_person_reference(person)
                                         if reference:
@@ -851,7 +873,7 @@ class EntityManager(object):
                             people_names = self.split_tvdb_list(item.text)
                             if people_names:
                                 for person_name in people_names:
-                                    person = self.find_person_by_name(person_name)
+                                    person = self.find_person_by_name(person_name, refresh)
                                     if person:
                                         reference = self.make_person_reference(person)
                                         if reference:
@@ -897,6 +919,7 @@ class EntityManager(object):
     
 
 
+        
 
 def update_int_property(key, value, entity):
     result = False

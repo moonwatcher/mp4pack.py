@@ -82,6 +82,7 @@ def load_options():
     group.add_option('-U', '--update-index', metavar='REINDEX', dest='reindex', action='store_true', default=False, help='Rebuild index for encountered files.')
     group.add_option('-5', '--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
     group.add_option('-D', '--download', dest='download', action='store_true', default=False, help='Download if no local copy found')
+    group.add_option('-S', '--sync', dest='sync', action='store_true', default=False, help='Sync record with online service')
     parser.add_option_group(group)
     
     group = OptionGroup(parser, 'Subtitle', 'Options for manipulating subtitles.')
@@ -173,7 +174,7 @@ def preform_operations(media_files, options):
     
     if media_files:
         for f in media_files:
-            f.load(options.reindex)
+            f.load(options.reindex, options.sync)
             if f and f.valid():
                 valid_files.append(f)
                 

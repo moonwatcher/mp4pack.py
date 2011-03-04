@@ -4,6 +4,7 @@
 import re
 import os
 from subprocess import Popen, PIPE
+from datetime import timedelta
 
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = u'7B3B400B0146EA83'
@@ -2534,6 +2535,7 @@ repository_config = {
         'hd video min width':720,
         'display aspect ratio':float(float(16)/float(9)),
         'threads':8,
+        'sync delay':timedelta(days=7),
     },
     'Database':{
         'cache':cache_path,
@@ -2736,7 +2738,7 @@ repository_config = {
                     'description':'Intel based AppleTV profile',
                     'default':{
                         10:{'volume':'beta'},
-                        9:{'volume':'eta'},
+                        9:{'volume':'gama'},
                     },
                     'transcode':{
                         'options':{
@@ -2870,8 +2872,8 @@ repository_config = {
             'Profile':{
                 'sd':{
                     'default':{
-                        10:{'volume':'delta'},
-                        9:{'volume':'eta'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'pack':{
                         'related':(
@@ -2891,8 +2893,8 @@ repository_config = {
                 },
                 '720':{
                     'default':{
-                        10:{'volume':'delta'},
-                        9:{'volume':'eta'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'pack':{
                         'related':(
@@ -2911,8 +2913,8 @@ repository_config = {
                 },
                 '1080':{
                     'default':{
-                        10:{'volume':'delta'},
-                        9:{'volume':'eta'},
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
                     },
                     'pack':{
                         'related':(

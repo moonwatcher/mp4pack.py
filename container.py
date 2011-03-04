@@ -60,11 +60,11 @@ class Container(object):
         return theFileUtil.check_if_in_repository(self.path_info)
     
     
-    def load(self, refresh=False):
+    def load(self, refresh=False, download=False):
         result = False
         result = Container.load_path_info(self)
         if result:
-            result = self.load_record(refresh)
+            result = self.load_record(refresh, download)
             if result:
                 result = self.load_info()
             else:
@@ -83,18 +83,18 @@ class Container(object):
         return self.path_info is not None
     
     
-    def load_record(self, refresh=False):
+    def load_record(self, refresh=False, download=False):
         result = False
         if self.path_info:
             if self.is_movie():
-                entity = theEntityManager.find_movie_by_imdb_id(self.path_info['imdb id'])
+                entity = theEntityManager.find_movie_by_imdb_id(self.path_info['imdb id'], download)
                 if entity:
                     self.record = {}
                     self.record['entity'] = entity
                     result = True
                     
             elif self.is_tvshow():
-                show, episode = theEntityManager.find_episode(self.path_info['tv show key'], self.path_info['tv season'], self.path_info['tv episode #'])
+                show, episode = theEntityManager.find_episode(self.path_info['tv show key'], self.path_info['tv season'], self.path_info['tv episode #'], download)
                 if show and episode:
                     self.record = {}
                     self.record['entity'] = episode
@@ -1548,8 +1548,8 @@ class Chapter(Text):
         return Text.valid(self) and self.chapter_markers
     
     
-    def load(self, refresh=False):
-        result = Text.load(self, refresh=False)
+    def load(self, refresh=False, download=False):
+        result = Text.load(self, refresh, download)
         if result:
             self.chapter_markers = []
             result = Chapter.decode(self)
