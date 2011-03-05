@@ -240,7 +240,7 @@ class EntityManager(object):
         if sync:
             delta = datetime.utcnow() - last_update
             if delta < self.sync_delay:
-                self.logger.debug(u'Supressing online sync. Time since last sync too short: %s', unicode(delta))
+                self.logger.debug(u'Supressing online sync. Next update possible in %s', unicode(self.sync_delay - delta))
                 sync = False
         return sync
     

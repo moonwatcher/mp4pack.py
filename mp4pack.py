@@ -53,53 +53,51 @@ def load_options():
     from optparse import OptionGroup
     
     rc = configuration.repository
-    parser = OptionParser('%prog [options] [file or directory]')
+    parser = OptionParser('%prog [options] [path to file or directory]')
     
-    group = OptionGroup(parser, 'Operations', 'An operation to preform on files found in the search path.')
-    group.add_option('-i', '--info', dest='info', action='store_true', default=False, help='Show info.')
-    group.add_option('-c', '--copy', dest='copy', action='store_true', default=False, help='Copy into repository.')
-    group.add_option('-n', '--rename', dest='rename', action='store_true', default=False, help='Rename files to standard names.')
-    group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract subtitle and chapter and transcode the extracted streams.')
-    group.add_option('-T', '--tag', dest='tag', action='store_true', default=False, help='Update meta tags.')
-    group.add_option('-O', '--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout.')
+    group = OptionGroup(parser, 'Action')
+    group.add_option('-i', '--info', dest='info', action='store_true', default=False, help='Show info')
+    group.add_option('-c', '--copy', dest='copy', action='store_true', default=False, help='Copy into repository')
+    group.add_option('-n', '--rename', dest='rename', action='store_true', default=False, help='Rename files to standard names')
+    group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract streams for processing')
+    group.add_option('-T', '--tag', dest='tag', action='store_true', default=False, help='Update file tags')
+    group.add_option('-O', '--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout')
     group.add_option('-P', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['pack']['kind'])))
     group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['transcode']['kind'])))
     group.add_option('-C', '--transform', metavar='KIND', dest='transform', type='choice', choices=rc['Action']['transform']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['transform']['kind'])))
     group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update']['kind'], help='KIND is one of [ {0} ]'.format(', '.join(rc['Action']['update']['kind'])))
     parser.add_option_group(group)
         
-    group = OptionGroup(parser, 'Modifiers')
-    group.add_option('-o', '--volume', dest='volume', type='choice', choices=rc['Volume'].keys(), default=None, help='Output volume [ default: auto detect ]')
-    group.add_option('-p', '--profile', dest='profile', type='choice', choices=configuration.available_profiles, default=None, help='[ default: auto detect ]')
-    group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='Regex to filter selected file names')
+    group = OptionGroup(parser, 'Modifier')
+    group.add_option('-o', '--volume', dest='volume', type='choice', choices=rc['Volume'].keys(), default=None, help='Output volume')
+    group.add_option('-p', '--profile', dest='profile', type='choice', choices=configuration.available_profiles, default=None, help='Output profile')
+    group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='File name regex filter')
     group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files')
-    group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursively process sub directories.')
-    group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='info', type='choice', choices=log_levels.keys(), help='Logging verbosity level [ default: %default ]')
-    group.add_option('-d', '--debug', dest='debug', action='store_true', default=False, help='Only print commands without executing. Also good for dumping the commands into a text file and editing before execution.')
-    group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='H.264 transcoding Quantizer.')
-    group.add_option('-W', '--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Max output pixel width [ default: set by profile ]')
-    group.add_option('-l', '--language', metavar='CODE', dest='language', default='eng', help='Languge code used when undefined. [ default: %default ]')
-    group.add_option('-U', '--update-index', metavar='REINDEX', dest='reindex', action='store_true', default=False, help='Rebuild index for encountered files.')
-    group.add_option('-5', '--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum on copy.')
-    group.add_option('-D', '--download', dest='download', action='store_true', default=False, help='Download if no local copy found')
+    group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursively process sub directories')
     group.add_option('-S', '--sync', dest='sync', action='store_true', default=False, help='Sync record with online service')
+    group.add_option('-U', '--reindex', dest='reindex', action='store_true', default=False, help='Rebuild file index')
+    group.add_option('-D', '--download', dest='download', action='store_true', default=False, help='Download if no local')
+    group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float', help='x264 transcoding Quantizer')
+    group.add_option('-W', '--pixel-width', metavar='WIDTH', type='int', dest='pixel_width', help='Override max output pixel width')
     parser.add_option_group(group)
     
-    group = OptionGroup(parser, 'Subtitle', 'Options for manipulating subtitles.')
-    group.add_option('--input-rate', metavar='RATE', dest='input_rate', default=None, help='Decoding subtitles frame rate.')
-    group.add_option('--output-rate', metavar='RATE', dest='output_rate', default=None, help='Encoding subtitles frame rate.')
-    group.add_option('--time-shift', metavar='TIME', dest='time_shift', type='int', default=None, help='Subtitles shift offset in milliseconds.')
+    group = OptionGroup(parser, 'Subtitle', 'Only apply to subtitles')
+    group.add_option('--time-shift', metavar='TIME', dest='time_shift', type='int', default=None, help='Subtitles shift offset in milliseconds')
     group.add_option('--NTSC', dest='NTSC', action='store_true', default=False, help='Convert PAL to NTSC framerate')
     group.add_option('--PAL', dest='PAL', action='store_true', default=False, help='Convert NTSC to PAL framerate')
+    group.add_option('--input-rate', metavar='RATE', dest='input_rate', default=None, help='Decoding subtitles frame rate')
+    group.add_option('--output-rate', metavar='RATE', dest='output_rate', default=None, help='Encoding subtitles frame rate')
     parser.add_option_group(group)
     
-    group = OptionGroup(parser, 'Database', 'Options for maintaining database records.')
-    group.add_option('--initialize', dest='initialize', action='store_true', default=False, help='Run only once to initialize the system.')
-    group.add_option('--map-show', metavar="MAP", dest='map_show', help='Map TV Show name to TVDB ID. format: <id>:<name>')
-    group.add_option('--refresh-movie', metavar='IMDb', dest='refresh_movie', default=None, help='Refresh the movie entry.')
-    group.add_option('--refresh-tvshow', metavar='NAME', dest='refresh_tvshow', default=None, help='Refresh the tv show and episode entries.')
-    group.add_option('--refresh-person', metavar='TMDb', type='int', dest='refresh_person', default=None, help='Refresh the person entry.')
-    group.add_option('--choose-movie-poster', metavar='MAP', dest='choose_movie_poster', default=None, help='Choose tmdb movie poster. Takes IMDb:TMDb')
+    group = OptionGroup(parser, 'Enviroment')
+    group.add_option('--map-show', metavar="MAP", dest='map_show', help='Map show name to tvdb id [id]:[name]')
+    group.add_option('--choose-movie-poster', metavar='MAP', dest='choose_movie_poster', default=None, help='Choose tmdb movie poster [imdb]:[tmdb]')
+    group.add_option('--initialize', dest='initialize', action='store_true', default=False, help='Run only once to initialize the system')
+    group.add_option('--refresh-person', metavar='TMDb', type='int', dest='refresh_person', default=None, help='Refresh the person entry')
+    group.add_option('-l', '--language', metavar='CODE', dest='language', default='eng', help='Languge code to use when und [ default: %default ]')
+    group.add_option('-5', '--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum after copy')
+    group.add_option('-d', '--debug', dest='debug', action='store_true', default=False, help='Only print commands without executing')
+    group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='info', type='choice', choices=log_levels.keys(), help='Logging verbosity level [ default: %default ]')
     parser.add_option_group(group)
     
     options, args = parser.parse_args()
@@ -157,12 +155,6 @@ def preform_operations(media_files, options):
     if options.map_show:
         theEntityManager.map_show_with_pair(options.map_show)
         
-    if options.refresh_movie:
-        theEntityManager.find_movie_by_imdb_id(options.refresh_movie, True)
-        
-    if options.refresh_tvshow:
-        theEntityManager.find_show(options.refresh_tvshow, True)
-        
     if options.refresh_person:
         theEntityManager.find_person_by_tmdb_id(options.refresh_person, True)
         
@@ -217,8 +209,6 @@ def preform_operations(media_files, options):
 
 
 def main():
-    print 'mp4pack. a media collection manager\nLior Galanti lior.galanti@gmail.com\n'.encode('utf-8')
-    
     # Initialize options and scan arguments
     options, args = load_options()
     
