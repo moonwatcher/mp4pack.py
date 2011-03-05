@@ -2947,7 +2947,7 @@ repository_config = {
         },
         'srt':{
             'container':'subtitles',
-            'default':{'profile':'original'},
+            'default':{'profile':'clean'},
             'Profile':{
                 'dump':{
                     'description':'Special profile used for extracting.',
