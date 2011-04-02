@@ -2203,7 +2203,7 @@ class FileUtil(object):
     
     def sort_field(self, value):
         if value:
-            match = prefix_to_remove_from_sort.search(value)
+            match = self.prefix_to_remove_from_sort.search(value)
             if match:
                 value = match.group(2).strip()
                 if not value:
