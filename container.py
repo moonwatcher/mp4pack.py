@@ -586,8 +586,8 @@ class AudioVideoContainer(Container):
     
     def load_meta(self):
         Container.load_meta(self)
-        if self.meta:
-            self.meta['hd video'] = self.hd_video()
+        #if self.meta:
+        #    self.meta['hd video'] = self.hd_video()
         
     
     
@@ -974,7 +974,14 @@ class Mpeg4(AudioVideoContainer):
                 else:
                     self.logger.debug('Setting tag %s to %s', k, self.meta[k])
                 update[k] = self.meta[k]
-                    
+            
+            # check the HD Video flag
+            is_hd_video = self.hd_video()
+            if is_hd_video and (('hd video' not in self.info['tag']) or ('hd video' in self.info['tag'] and not self.info['tag']['hd video'])):
+                update['hd video'] = is_hd_video
+            elif not is_hd_video and ('hd video' in self.info['tag'] and self.info['tag']['hd video']):
+                update['hd video'] = is_hd_video
+                
         elif self.path_info:
             if self.is_movie():
                 if 'name' in self.path_info and self.path_info['name'] != self.info['tag']['name']:
