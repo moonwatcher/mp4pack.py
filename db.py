@@ -919,7 +919,7 @@ class EntityManager(object):
     
 
 
-        
+
 
 def update_int_property(key, value, entity):
     result = False

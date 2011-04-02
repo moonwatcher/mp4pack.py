@@ -231,7 +231,7 @@ media_property = {
         {
             'name':'release date',
             'atom':'©day',
-            'mediainfo':'Encoded_Date',
+            'mediainfo':'Recorded_Date',
             'mp4info': None,
             'subler':'Release Date',
             'print':'Release Date',
@@ -2535,7 +2535,7 @@ repository_config = {
         'hd video min width':720,
         'display aspect ratio':float(float(16)/float(9)),
         'threads':8,
-        'sync delay':timedelta(days=7),
+        'sync delay':timedelta(days=14),
     },
     'Database':{
         'cache':cache_path,

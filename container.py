@@ -128,6 +128,27 @@ class Container(object):
         return self.info is not None
     
     
+    def pick_artist(self):
+        self.meta['artist'] = None
+        if self.is_movie():
+            for job in ['directors', 'producers', 'screenwriters', 'codirectors', 'cast']:
+                if job in self.meta and self.meta[job]:
+                    self.meta['artist'] = self.meta[job][0]
+                    break
+        elif self.is_tvshow():
+            self.meta['artist'] = self.record['tv show']['tvdb_record']['name']
+            self.meta['album artist'] = self.record['tv show']['tvdb_record']['name']
+            self.meta['sort artist'] = self.record['tv show']['tvdb_record']['name']
+            self.meta['sort album artist'] = self.record['tv show']['tvdb_record']['name']
+            
+            # Seems like using on of those as an artist messes up the grouping on iOS
+            # Looking at an iTunes file the artist and album artist should have the tv show name
+            # for job in ['screenwriters', 'directors', 'producers', 'codirectors', 'cast']:
+            #    if job in self.meta and self.meta[job]:
+            #        self.meta['artist'] = self.meta[job][0]
+            #        break
+    
+    
     def load_meta(self):
         result = False
         self.meta = None
@@ -157,32 +178,43 @@ class Container(object):
             episode = self.record['entity']
             if show and 'tvdb_record' in show and episode and 'tvdb_record' in episode:
                 self.meta = {'media kind':10}
+                
                 if 'name' in show['tvdb_record']:
                     self.meta['tv show'] = show['tvdb_record']['name']
-                    self.meta['album'] = show['tvdb_record']['name']
-                if 'certification' in show['tvdb_record']:
-                    self.meta['rating'] = show['tvdb_record']['certification']
-                if 'tv_network' in show['tvdb_record']:
-                    self.meta['tv network'] = show['tvdb_record']['tv_network']
+                    self.meta['sort tv show'] = show['tvdb_record']['name']
+                if 'name' in show['tvdb_record'] and 'tv_season' in episode['tvdb_record']:
+                    album_name = u'{0}, Season {1}'.format(show['tvdb_record']['name'], unicode(episode['tvdb_record']['tv_season']))
+                    self.meta['album'] = album_name
+                    self.meta['sort album'] = album_name
+                if 'tv_episode' in episode['tvdb_record'] and 'tv_season' in episode['tvdb_record']:
+                    self.meta['tv episode id'] = u's{0:02}e{1:02}'.format(episode['tvdb_record']['tv_season'], episode['tvdb_record']['tv_episode'])
                 if 'tv_season' in episode['tvdb_record']:
                     self.meta['tv season'] = episode['tvdb_record']['tv_season']
                     self.meta['disk position'] = episode['tvdb_record']['tv_season']
                     self.meta['disk total'] = 0
+                    self.meta['disk #'] = u'{0} / {1}'.format(self.meta['disk position'], self.meta['disk total'])
                 if 'tv_episode' in episode['tvdb_record']:
                     self.meta['tv episode #'] = episode['tvdb_record']['tv_episode']
                     self.meta['track position'] = episode['tvdb_record']['tv_episode']
                     self.meta['track total'] = 0
+                    self.meta['track #'] = u'{0} / {1}'.format(self.meta['track position'], self.meta['track total'])
                 if 'name' in episode['tvdb_record']:
                     self.meta['name'] = episode['tvdb_record']['name']
+                    self.meta['sort name'] = episode['tvdb_record']['name']
+                    
+                if 'certification' in show['tvdb_record']:
+                    self.meta['rating'] = show['tvdb_record']['certification']
+                if 'tv_network' in show['tvdb_record']:
+                    self.meta['tv network'] = show['tvdb_record']['tv_network']
+                if 'released' in episode['tvdb_record']:
+                    self.meta['release date'] = episode['tvdb_record']['released']
+                    
                 if 'overview' in episode['tvdb_record']:
                     overview = FileUtil.whitespace_re.sub(u' ', episode['tvdb_record']['overview']).strip()
                     self.meta['long description'] = overview
                     s = FileUtil.sentence_end.split(overview.strip('\'".,'))
                     if s: self.meta['description'] = s[0].strip('"\' ').strip() + '.'
-                if 'released' in episode['tvdb_record']:
-                    self.meta['release date'] = episode['tvdb_record']['released']
-                self.meta['track #'] = u'{0} / {1}'.format(self.meta['track position'], self.meta['track total'])
-                self.meta['disk #'] = u'{0} / {1}'.format(self.meta['disk position'], self.meta['disk total'])
+                    
                 self.load_genre(show['tvdb_record'])
                 self.load_cast(show['tvdb_record'], True, False)
                 self.load_cast(episode['tvdb_record'], False, True)
@@ -401,19 +433,6 @@ class Container(object):
         return
         
     
-    
-    def pick_artist(self):
-        self.meta['artist'] = None
-        if self.is_movie():
-            for job in ['directors', 'producers', 'screenwriters', 'codirectors', 'cast']:
-                if job in self.meta and self.meta[job]:
-                    self.meta['artist'] = self.meta[job][0]
-                    break
-        elif self.is_tvshow():
-            for job in ['screenwriters', 'directors', 'producers', 'codirectors', 'cast']:
-                if job in self.meta and self.meta[job]:
-                    self.meta['artist'] = self.meta[job][0]
-                    break
     
     
     def download_artwork(self, options):
@@ -945,11 +964,16 @@ class Mpeg4(AudioVideoContainer):
         tc = None
         update = {}
         if self.meta:
-            for k in [ 
+            for k in [
                 k for k,v in self.meta.iteritems()
                 if configuration.property_map['name']['tag'][k]['subler'] 
                 and (k not in self.info['tag'] or self.info['tag'][k] != v)
-            ]: update[k] = self.meta[k]
+            ]: 
+                if k in self.info['tag']:
+                    self.logger.debug('Updating tag %s from %s to %s', k, self.info['tag'][k], self.meta[k])
+                else:
+                    self.logger.debug('Setting tag %s to %s', k, self.meta[k])
+                update[k] = self.meta[k]
                     
         elif self.path_info:
             if self.is_movie():
@@ -1912,6 +1936,8 @@ class FileUtil(object):
                         else: tm.append(1)
                     else: tm.append(int(p))
                 result = datetime(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5])
+            else:
+                self.logger.debug('Unknow datetime format for %s', value)
         elif kind == 'bool':
             if self.true_value.search(value) is not None:
                 result = True
@@ -2017,6 +2043,10 @@ class FileUtil(object):
                     info['tag']['cover'] = info['tag']['cover'].count('Yes')
                 if 'genre type' in info['tag']:
                     info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
+                    if 'genre' not in info['tag']:
+                        info['tag']['genre'] = configuration.property_map['code']['gnre'][info['tag']['genre type']]['print']
+                    
+                    
                 # Format info fields
                 for k,v in info['tag'].iteritems():
                     value = self.convert_mediainfo_value(configuration.property_map['name']['tag'][k]['type'], v)
@@ -2024,6 +2054,12 @@ class FileUtil(object):
                 for k,v in info['file'].iteritems():
                     value = self.convert_mediainfo_value(configuration.property_map['name']['file'][k]['type'], v)
                     info['file'][k] = value
+                    
+                # Fix description and long description
+                if 'description' in info['tag']:
+                    info['tag']['description'] = info['tag']['description'].replace('&quot;', '"')
+                if 'long description' in info['tag']:
+                    info['tag']['long description'] = info['tag']['long description'].replace('&quot;', '"')
         return info
     
     
