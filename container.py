@@ -138,8 +138,8 @@ class Container(object):
         elif self.is_tvshow():
             self.meta['artist'] = self.record['tv show']['tvdb_record']['name']
             self.meta['album artist'] = self.record['tv show']['tvdb_record']['name']
-            self.meta['sort artist'] = self.record['tv show']['tvdb_record']['name']
-            self.meta['sort album artist'] = self.record['tv show']['tvdb_record']['name']
+            self.meta['sort artist'] = theFileUtil.sort_field(self.record['tv show']['tvdb_record']['name'])
+            self.meta['sort album artist'] = theFileUtil.sort_field(self.record['tv show']['tvdb_record']['name'])
             
             # Seems like using on of those as an artist messes up the grouping on iOS
             # Looking at an iTunes file the artist and album artist should have the tv show name
@@ -181,11 +181,11 @@ class Container(object):
                 
                 if 'name' in show['tvdb_record']:
                     self.meta['tv show'] = show['tvdb_record']['name']
-                    self.meta['sort tv show'] = show['tvdb_record']['name']
+                    self.meta['sort tv show'] = theFileUtil.sort_field(show['tvdb_record']['name'])
                 if 'name' in show['tvdb_record'] and 'tv_season' in episode['tvdb_record']:
                     album_name = u'{0}, Season {1}'.format(show['tvdb_record']['name'], unicode(episode['tvdb_record']['tv_season']))
                     self.meta['album'] = album_name
-                    self.meta['sort album'] = album_name
+                    self.meta['sort album'] = theFileUtil.sort_field(album_name)
                 if 'tv_episode' in episode['tvdb_record'] and 'tv_season' in episode['tvdb_record']:
                     self.meta['tv episode id'] = u's{0:02}e{1:02}'.format(episode['tvdb_record']['tv_season'], episode['tvdb_record']['tv_episode'])
                 if 'tv_season' in episode['tvdb_record']:
@@ -200,7 +200,7 @@ class Container(object):
                     self.meta['track #'] = u'{0} / {1}'.format(self.meta['track position'], self.meta['track total'])
                 if 'name' in episode['tvdb_record']:
                     self.meta['name'] = episode['tvdb_record']['name']
-                    self.meta['sort name'] = episode['tvdb_record']['name']
+                    self.meta['sort name'] = theFileUtil.sort_field(episode['tvdb_record']['name'])
                     
                 if 'certification' in show['tvdb_record']:
                     self.meta['rating'] = show['tvdb_record']['certification']
@@ -2201,6 +2201,16 @@ class FileUtil(object):
     
     
     
+    def sort_field(self, value):
+        if value:
+            match = prefix_to_remove_from_sort.search(value)
+            if match:
+                value = match.group(2).strip()
+                if not value:
+                    value = None
+        return value
+    
+    
     def simple_name(self, path_info, entity=None):
         result = None
         if entity and 'simple_name' in entity:
@@ -2631,7 +2641,6 @@ class FileUtil(object):
         return FileUtil.format_value_display.format(value)
     
     
-    
     format_indent = u'\n' + u' '* configuration.repository['Display']['indent']
     format_wrap_width = configuration.repository['Display']['wrap']
     
@@ -2650,6 +2659,7 @@ class FileUtil(object):
     whitespace_re = re.compile(ur'\s+', re.UNICODE)
     
     
+    prefix_to_remove_from_sort = re.compile('^(the |a )(.+)$', re.IGNORECASE)
     clean_xml = re.compile(ur'\s+/\s+(?:\t)*', re.UNICODE)
     itunextc_structure = re.compile(ur'([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)?')
     true_value = re.compile(ur'yes|true|1', re.IGNORECASE)
