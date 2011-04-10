@@ -1443,11 +1443,11 @@ class Subtitle(Text):
                     input_frame_rate = theFileUtil.frame_rate_to_float(options.input_rate)
                     output_frame_rate = theFileUtil.frame_rate_to_float(options.output_rate)
                 elif (options.NTSC):
-                    input_frame_rate = pal_framerate
-                    output_frame_rate = ntsc_framerate
+                    input_frame_rate = Subtitle.pal_framerate
+                    output_frame_rate = Subtitle.ntsc_framerate
                 elif (options.PAL):
-                    input_frame_rate = ntsc_framerate
-                    output_frame_rate = pal_framerate
+                    input_frame_rate = Subtitle.ntsc_framerate
+                    output_frame_rate = Subtitle.pal_framerate
                     
                 if input_frame_rate is not None and output_frame_rate is not None:
                     factor = input_frame_rate / output_frame_rate
