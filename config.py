@@ -308,6 +308,7 @@ media_property = {
             'subler':'Sort Name',
             'print':'Sort Name',
             'type':'string',
+            'display':False,
         },
         {
             'name':'sort artist',
@@ -317,6 +318,7 @@ media_property = {
             'subler':'Sort Artist',
             'print':'Sort Artist',
             'type':'string',
+            'display':False,
         },
         {
             'name':'sort album artist',
@@ -326,6 +328,7 @@ media_property = {
             'subler':'Sort Album Artist',
             'print':'Sort Album Artist',
             'type':'string',
+            'display':False,
         },
         {
             'name':'sort album',
@@ -335,6 +338,7 @@ media_property = {
             'subler':'Sort Album',
             'print':'Sort Album',
             'type':'string',
+            'display':False,
         },
         {
             'name':'sort composer',
@@ -344,6 +348,7 @@ media_property = {
             'subler':'Sort Composer',
             'print':'Sort Composer',
             'type':'string',
+            'display':False,
         },
         {
             'name':'sort tv show',
@@ -353,6 +358,7 @@ media_property = {
             'subler':'Sort TV Show',
             'print':'Sort TV Show',
             'type':'string',
+            'display':False,
         },
         {
             'name':'description',
@@ -407,6 +413,7 @@ media_property = {
             'subler':'Encoded by',
             'print':'Encoded by',
             'type':'string',
+            'display':False,
         },
         {
             'name':'purchase date',
@@ -662,6 +669,7 @@ media_property = {
             'subler':None,
             'print':'Rating Standard',
             'type':'string',
+            'display':False,
         },
         {
             'name':'rating',
@@ -680,6 +688,7 @@ media_property = {
             'subler':None,
             'print':'Rating Score',
             'type':'int',
+            'display':False,
         },
         {
             'name':'rating annotation',
@@ -689,6 +698,7 @@ media_property = {
             'subler':'Rating Annotation',
             'print':'Rating Annotation',
             'type':'string',
+            'display':False,
         },
         {
             'name':'track #',
@@ -835,6 +845,7 @@ media_property = {
                 'print':'Encoded Date',
                 'mediainfo':'Encoded_Date',
                 'type':'date',
+                'display':False,
             },
             {
                 'name':'name',
@@ -965,7 +976,7 @@ media_property = {
                 'print':'Encoder Settings',
                 'mediainfo':'Encoded_Library_Settings',
                 'type':'list',
-                'display':True,
+                'display':False,
             },
         ),
         'text':(
