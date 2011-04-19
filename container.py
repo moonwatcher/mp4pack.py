@@ -561,7 +561,9 @@ class Container(object):
             result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'menu'), self.print_chapter_markers()))
         
         if self.info['tag']:
-            result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), self.print_tags()))
+            tag_block = self.print_tags()
+            if tag_block:
+                result = u'\n'.join((result, theFileUtil.format_info_subtitle(u'tags'), tag_block))
         
         #self.load_meta()
         if self.meta:
@@ -1924,10 +1926,10 @@ class FileUtil(object):
             try:
                 result = int(value)
             except ValueError as error:
-                # Fix for broken mediainfo output for Channel_s_, what kind of integer is '7 / 6'?
-                if value == '7 / 6':
-                    self.logger.warning('Correcting bogus mediainfo value \'7 / 6\' to 6')
-                    result = 6
+                # Sometimes mediainfo would report a pair of integers, sparated by a /
+                if self.mediainfo_integer_list.match(value):
+                    result = min([int(v) for v in value.split('/')])
+                    self.logger.warning('Picking minimal value %d from mediainfo list of integers %s', result, value)
                 else:
                     self.logger.error('Could not decode Integer: %s', value)
                     result = None
@@ -2541,6 +2543,8 @@ class FileUtil(object):
         result = [ v for v in sorted(set(result)) if v ]
         if result:
             result = u'\n'.join(result)
+        else:
+            result = None
         return result
     
     
@@ -2666,6 +2670,7 @@ class FileUtil(object):
     whitespace_re = re.compile(ur'\s+', re.UNICODE)
     
     
+    mediainfo_integer_list = re.compile('[0-9]+(?:\s*/\s*[0-9]+)+')
     prefix_to_remove_from_sort = re.compile('^(the |a )(.+)$', re.IGNORECASE)
     clean_xml = re.compile(ur'\s+/\s+(?:\t)*', re.UNICODE)
     itunextc_structure = re.compile(ur'([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)?')
