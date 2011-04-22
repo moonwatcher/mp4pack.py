@@ -2709,7 +2709,7 @@ repository_config = {
                         'options':{
                             '--quality':18,
                             '--encoder':'x264',
-                            '--x264opts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1:b-pyramid=none',
+                            '--encopts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1:b-pyramid=none',
                             '--maxWidth':720,
                         },
                         'flags':('--large-file','--loose-anamorphic'),
@@ -2755,7 +2755,7 @@ repository_config = {
                         'options':{
                             '--quality':22,
                             '--encoder':'x264',
-                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:8x8dct=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
+                            '--encopts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:8x8dct=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
                             '--maxWidth':1280,
                         },
                         'flags':('--large-file','--loose-anamorphic'),
@@ -2801,7 +2801,7 @@ repository_config = {
                         'options':{
                             '--quality':21,
                             '--encoder':'x264',
-                            '--x264opts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0:b-pyramid=none',
+                            '--encopts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0:b-pyramid=none',
                             '--maxWidth':480,
                         },
                         'flags':('--large-file','--loose-anamorphic'),
@@ -2843,7 +2843,7 @@ repository_config = {
                         'options':{
                             '--quality':18,
                             '--encoder':'x264',
-                            '--x264opts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
+                            '--encopts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
                             '--maxWidth':1280
                         },
                         'flags':('--large-file','--loose-anamorphic'),

@@ -76,6 +76,7 @@ def load_options():
     group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files')
     group.add_option('-W', '--width', metavar='WIDTH', type='int', dest='pixel_width', help='Override profile output pixel width')
     group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='File name regex filter')
+    group.add_option('--crop', dest='crop', metavar='T:B:L:R', help='Set HandBrake cropping values [default: autocrop]')
     parser.add_option_group(group)
     
     group = OptionGroup(parser, 'Subtitles')

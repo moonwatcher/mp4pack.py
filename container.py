@@ -808,6 +808,7 @@ class AudioVideoContainer(Container):
                             hb_config = copy.deepcopy(tc['options'])
                             if options.pixel_width: hb_config['--maxWidth'] = options.pixel_width
                             if options.quality: hb_config['--quality'] = options.quality
+                            if options.crop: hb_config['--crop'] = options.crop
                             
                             for (k,v) in hb_config.iteritems():
                                 command.append(k)
