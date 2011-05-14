@@ -713,7 +713,7 @@ class AudioVideoContainer(Container):
                         for t in selected['track']['video']:
                             if full_name:
                                 command.append(u'--track-name')
-                                command.append(full_name)
+                                command.append(u'{0}:{1}'.format(t['id'], full_name))
                             if 'language' in t:
                                 command.append(u'--language')
                                 command.append(u'{0}:{1}'.format(t['id'], theFileUtil.find_language(t['language'])['iso2']))
