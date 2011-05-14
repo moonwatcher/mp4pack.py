@@ -704,16 +704,16 @@ class AudioVideoContainer(Container):
                         command = theFileUtil.initialize_command('mkvmerge', self.logger)
                         command.extend([u'--output', dest_path, u'--no-global-tags', u'--no-track-tags', u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
                         
+                        full_name = None
                         if 'name' in self.record['entity']:
-                            full_name = name = theFileUtil.full_name(self.path_info, self.record)
+                            full_name = theFileUtil.full_name(self.path_info, self.record)
                             if full_name:
                                 command.append(u'--title')
                                 command.append(full_name)
-                            
                         for t in selected['track']['video']:
-                            #if 'name' in t:
-                            #    command.append(u'--track-name')
-                            #    command.append(u'{0}:{1}'.format(t['id'], t['name']))
+                            if full_name:
+                                command.append(u'--track-name')
+                                command.append(full_name)
                             if 'language' in t:
                                 command.append(u'--language')
                                 command.append(u'{0}:{1}'.format(t['id'], theFileUtil.find_language(t['language'])['iso2']))
