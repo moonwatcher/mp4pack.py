@@ -2617,6 +2617,12 @@ repository_config = {
                 '/Volumes/nagasaki/epsilon',
             )
         },
+        'kapa':{
+            'path':'/pool/kapa',
+            'alternative':(
+                '/Volumes/moonbook/kapa',
+            )
+        },
     },
     'Command':{
         'rsync':{

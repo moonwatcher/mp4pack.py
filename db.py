@@ -276,7 +276,7 @@ class EntityManager(object):
         if pair is not None:
             match = numberic_key_string_pair.search(pair)
             if match is not None:
-                self.map_show(match.group(2), int(match.group(1)))
+                self.map_show(unicode(match.group(2)), int(match.group(1)))
             else:
                 self.logger.error(u'Could not parse %s', pair)
     
