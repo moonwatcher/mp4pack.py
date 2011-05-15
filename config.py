@@ -2751,6 +2751,68 @@ repository_config = {
                         ),
                     },
                 },
+                'A4':{
+                    'description':'All A4 based apple devices',
+                    'default':{
+                        10:{'volume':'epsilon'},
+                        9:{'volume':'epsilon'},
+                    },
+                    'transcode':{
+                        'options':{
+                            '--quality':18,
+                            '--encoder':'x264',
+                            '--encopts':'mixed-refs=1:ref=3:bframes=3:me=umh:b-adapt=2:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
+                            '--maxWidth':1280,
+                        },
+                        'flags':('--large-file','--loose-anamorphic'),
+                        'audio':(
+                            (
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
+                                },
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                        ),
+                    },
+                },
                 'appletv':{
                     'description':'Intel based AppleTV profile',
                     'default':{
@@ -2862,6 +2924,22 @@ repository_config = {
                                 {
                                     'from': {'codec':'AC-3', 'type':'audio'},
                                     'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
                                 },
                             ),
                             (
