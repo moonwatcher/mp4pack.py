@@ -1012,8 +1012,8 @@ class Mpeg4(AudioVideoContainer):
     def optimize(self, options):
         AudioVideoContainer.optimize(self, options)
         message = u'Optimize {0}'.format(self.file_path)
-        command = theFileUtil.initialize_command('mp4file', self.logger)
-        command.extend([u'--optimize', self.file_path])
+        command = theFileUtil.initialize_command('subler', self.logger)
+        command.extend([u'-O', u'-o', self.file_path])
         theFileUtil.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
         self.queue_for_index(self.file_path)
         
