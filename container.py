@@ -1433,7 +1433,10 @@ class Subtitle(Text):
                 
                 # Check if profile dictates filtering
                 if 'transcode' in p and 'filter' in p['transcode']:
-                    self.filter(p['transcode']['filter'])
+                    # Check filtering by language
+                    if path_info['language'] in p['transcode']['filter']:
+                        self.logger.debug(u'Apply filters for language %s: %s', path_info['language'], p['transcode']['filter'][path_info['language']])
+                        self.filter(p['transcode']['filter'][path_info['language']])
                 
                 # Check if time shift is necessary
                 if options.time_shift is not None:
