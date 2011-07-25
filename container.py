@@ -162,7 +162,7 @@ class Container(object):
                     self.meta['long description'] = FileUtil.whitespace_re.sub(u' ', movie['tmdb_record']['overview']).strip()
                 if 'certification' in movie['tmdb_record']:
                     self.meta['rating'] = movie['tmdb_record']['certification']
-                if 'released' in movie['tmdb_record']:
+                if 'released' in movie['tmdb_record'] and movie['tmdb_record']['released']:
                     self.meta['release date'] = datetime.strptime(movie['tmdb_record']['released'], '%Y-%m-%d')
                 if 'tagline' in movie['tmdb_record'] and movie['tmdb_record']['tagline']:
                     self.meta['description'] = FileUtil.whitespace_re.sub(u' ', movie['tmdb_record']['tagline']).strip()
