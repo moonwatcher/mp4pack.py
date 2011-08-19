@@ -3492,6 +3492,7 @@ subtitle_config = {
             ur'\bkuniva\b',
             ur'hdbits.org',
             ur'addic7ed',
+            ur'hdsubs',
         ),
     },
     'typo':{
