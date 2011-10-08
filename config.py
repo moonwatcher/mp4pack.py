@@ -3608,65 +3608,6 @@ subtitle_config = {
     },
 }
 
-base_config = {
-    'tvshow':(
-        # TV Show map
-        # The initial TVDB TV Show id map
-        (79501, u'heroes'),
-        (75930, u'alias'),
-        (76290, u'24'),
-        (73800, u'desperate housewives'),
-        (79349, u'dexter'),
-        (73871, u'futurama'),
-        (73255, u'house'),
-        (73739, u'lost'),
-        (79169, u'seinfeld'),
-        (75299, u'the sopranos'),
-        (73762, u'greys anatomy'),
-        (79126, u'the wire'),
-        (75164, u'samurai jack'),
-        (74543, u'entourage'),
-        (85527, u'yellowstone'),
-        (79257, u'planet earth'),
-        (74845, u'weeds'),
-        (75450, u'six feet under'),
-        (80252, u'flight of the conchords'),
-        (82066, u'fringe'),
-        (80337, u'mad men'),
-        (73508, u'rome'),
-        (77398, u'the x files'),
-        (70682, u'oz'),
-        (77526, u'star trek'),
-        (77231, u'mission impossible'),
-        (83268, u'star wars the clone wars'),
-        (74805, u'the prisoner'),
-        (85242, u'the prisoner 2009'),
-        (83602, u'lie to me'),
-        (80349, u'californication'),
-        (82109, u'generation kill'),
-        (70533, u'twin peaks'),
-        (72628, u'the singing detective'),
-        (80593, u'dirty sexy money'),
-        (79177, u'life on mars uk'),
-        (82289, u'life on mars us'),
-        (118421, u'life bbc'),
-        (130421, u'faces of earth'),
-        (147071, u'wonders of the solar system'),
-        (108611, u'white collar'),
-        (85149, u'berlin alexanderplatz'),
-        (94971, u'v 2009'),
-        (82459, u'the mentalist'),
-        (82283, u'true blood'),
-        (79488, u'30 rock'),
-        (74205, u'band of brothers'),
-        (124561, u'world war 2 in high definition'),
-        (81189, u'breaking bad'),
-        (71663, u'the simpsons'),
-        (85040, u'caprica'),
-    ),
-}
-
-
 class Configuration(object):
     def __init__(self):
         self.options = None
@@ -3777,5 +3718,3 @@ class Configuration(object):
     
 
 
-# singleton
-theConfiguration = Configuration()

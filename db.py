@@ -13,177 +13,12 @@ import pymongo
 from pymongo.objectid import ObjectId
 from pymongo import Connection
 
-from config import theConfiguration as configuration
-
-
-
-class ResourceHandler(object):
-    def __init__(self, url):
-        self.logger = logging.getLogger('mp4pack.resource')
-        self.remote_url = url
-        self.local_path = self.local()
-        self.headers = None
-    
-    
-    def local(self):
-        return url_to_cache.sub(configuration.repository['Database']['cache'], self.remote_url)
-    
-    
-    def cache(self):
-        result = True
-        if not os.path.exists(self.local_path):
-            dirname = os.path.dirname(self.local_path)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            try:
-                self.logger.debug(u'Retrieve %s', self.remote_url)
-                filename, self.headers = urllib.urlretrieve(self.remote_url.encode('utf-8'), self.local_path)
-            except IOError:
-                result = False
-                self.clean()
-                self.logger.warning(u'Failed to retrieve %s', self.remote_url)
-        return result
-    
-    
-    def read(self):
-        value = None
-        try:
-            if self.cache():
-                urlhandle = urllib.urlopen(self.local_path.encode('utf-8'))
-                value = urlhandle.read()
-        except IOError:
-            value = None
-            self.logger.warning(u'Failed to read %s', self.local_path)
-        return value
-    
-    
-    def clean(self):
-        if os.path.isfile(self.local_path):
-            os.remove(self.local_path)
-            try:
-                os.removedirs(os.path.dirname(self.local_path))
-            except OSError:
-                pass
-    
-    
-    def refresh(self):
-        self.clean()
-        self.cache()
-    
-    
-
-
-class JsonHandler(ResourceHandler):
-    def __init__(self, url):
-        ResourceHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.json')
-    
-    
-    def element(self):
-        element = None
-        json_text = self.read()
-        if json_text is not None:
-            try:
-                from StringIO import StringIO
-                io = StringIO(json_text)
-                import json
-                element = json.load(io)
-            except ValueError:
-                element = None
-                self.clean()
-                self.logger.error(u'Failed to load json document %s', self.local_path)
-        return element
-    
-
-
-class ImageHandler(ResourceHandler):
-    def __init__(self, url):
-        ResourceHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.image')
-    
-    
-    def cache(self):
-        result = ResourceHandler.cache(self)
-        if self.headers is not None and image_http_type.search(self.headers.type) is None:
-            self.clean()
-            result = False
-        return result
-    
-    
-
-
-class XmlHandler(ResourceHandler):
-    def __init__(self, url):
-        ResourceHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.xml')
-    
-    
-    def element(self):
-        element = None
-        xml = self.read()
-        if xml is not None:
-            try:
-                element = ElementTree.fromstring(xml)
-            except SyntaxError:
-                element = None
-                self.clean()
-                self.logger.warning(u'Failed to load xml document %s', self.local_path)
-        return element
-    
-
-
-class TmdbJsonHandler(JsonHandler):
-    def __init__(self, url):
-        JsonHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.tmdb')
-    
-    
-    def local(self):
-        result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(configuration.repository['Database']['tmdb']['apikey']), u'')
-        return result
-    
-    
-    def element(self):
-        element = JsonHandler.element(self)
-        if not element or element[0] == u'Nothing found.':
-            element = None
-            self.clean()
-            self.logger.debug(u'Nothing found in %s', self.remote_url)
-        return element
-    
-    
-
-
-class TvdbXmlHandler(XmlHandler):
-    def __init__(self, url):
-        XmlHandler.__init__(self, url)
-        self.logger = logging.getLogger('mp4pack.tvdb')
-    
-    
-    def local(self):
-        result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(configuration.repository['Database']['tvdb']['apikey']), u'')
-        result = result.replace(u'/all', u'')
-        return result
-    
-    
-
-
-class TvdbImageHandler(ImageHandler):
-    def __init__(self, url):
-        ImageHandler.__init__(self, configuration.repository['Database']['tvdb']['urls']['Banner.getImage'].format(url))
-        self.logger = logging.getLogger('mp4pack.image')
-    
-    
-
-
-
 class EntityManager(object):
-    def __init__(self):
+    def __init__(self, configuration):
         self.logger = logging.getLogger('mp4pack.em')
-        self.connection = Connection(configuration.repository['Database']['uri'])
-        self.db = self.connection[configuration.repository['Database']['name']]
+        self.configuration = configuration
+        self.connection = Connection(self.configuration.repository['Database']['uri'])
+        self.db = self.connection[self.configuration.repository['Database']['name']]
         self.genres = self.db.genres
         self.departments = self.db.departments
         self.jobs = self.db.jobs
@@ -193,7 +28,7 @@ class EntityManager(object):
         self.seasons = self.db.seasons
         self.episodes = self.db.episodes
         self.people = self.db.people
-        self.sync_delay = configuration.repository['Default']['sync delay']
+        self.sync_delay = self.configuration.repository['Default']['sync delay']
     
     
     def base_init(self):
@@ -248,8 +83,8 @@ class EntityManager(object):
     
     
     def refresh_tmdb_genres(self):
-        url = configuration.repository['Database']['tmdb']['urls']['Genres.getList']
-        handler = TmdbJsonHandler(url)
+        url = self.configuration.repository['Database']['tmdb']['urls']['Genres.getList']
+        handler = TmdbJsonHandler(self, url)
         handler.refresh()
         element_list = handler.element()
         if element_list is not None:
@@ -266,7 +101,7 @@ class EntityManager(object):
     
     def refresh_itmf_genres(self):
         count = 0
-        for genre in configuration.property['gnre']:
+        for genre in self.configuration.property['gnre']:
             count += 1
             self.store_itmf_genre(genre['print'], genre['code'])
         self.logger.info(u'Refreshed %s iTMF genres', count)
@@ -487,7 +322,7 @@ class EntityManager(object):
                 movie['poster'] = poster['image']['id']
                 self.movies.save(movie)
                 if refresh:
-                    handler = ImageHandler(poster['image']['url'])
+                    handler = ImageHandler(self, poster['image']['url'])
                     handler.refresh()
                 self.logger.info(u'Poster %s selected for movie %s imdb:%s', movie['poster'], movie['name'], imdb_id)
             else:
@@ -504,7 +339,7 @@ class EntityManager(object):
             posters = [ p for p in movie[u'tmdb_record'][u'posters'] if p['image']['size'] == 'original' and p['image']['id'] == movie['poster'] ]
             if posters:
                 poster = posters[0]
-                handler = ImageHandler(poster['image']['url'])
+                handler = ImageHandler(self, poster['image']['url'])
                 if handler.cache():
                     poster['cache'] = {'path':handler.local(), 'kind':os.path.splitext(handler.local())[1].strip('.')}
         return poster
@@ -516,7 +351,7 @@ class EntityManager(object):
         if episode is not None and 'tvdb_record' in episode:
             if episode['tvdb_record']['posters']:
                 poster = episode['tvdb_record']['posters'][0]
-                handler = TvdbImageHandler(poster['image']['url'])
+                handler = TvdbImageHandler(self, poster['image']['url'])
                 if handler.cache():
                     poster['cache'] = {'path':handler.local(), 'kind':os.path.splitext(handler.local())[1].strip('.')}
         return poster
@@ -527,8 +362,8 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         person = self.people.find_one({u'tmdb_id':tmdb_id})
-        url = configuration.repository['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
-        handler = TmdbJsonHandler(url)
+        url = self.configuration.repository['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
+        handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
         if element is not None:
@@ -554,8 +389,8 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         movie = self.movies.find_one({u'tmdb_id':tmdb_id})
-        url = configuration.repository['Database']['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
-        handler = TmdbJsonHandler(url)
+        url = self.configuration.repository['Database']['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
+        handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
         if element is not None:
@@ -596,8 +431,8 @@ class EntityManager(object):
     
     def find_tmdb_movie_id_by_imdb_id(self, imdb_id):
         tmdb_id = None
-        url = configuration.repository['Database']['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
-        handler = TmdbJsonHandler(url)
+        url = self.configuration.repository['Database']['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
+        handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
             element = element[0]
@@ -645,8 +480,8 @@ class EntityManager(object):
     def find_tmdb_person_id_by_name(self, name):
         person = None
         clean = collapse_whitespace.sub(u' ', name).lower()
-        url = configuration.repository['Database']['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
-        handler = TmdbJsonHandler(url)
+        url = self.configuration.repository['Database']['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
+        handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
             for potential in element:
@@ -719,8 +554,8 @@ class EntityManager(object):
         tvdb_id = int(tvdb_id)
         show = self.shows.find_one({'tvdb_id':tvdb_id})
         if show is not None:
-            url = configuration.repository['Database']['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
-            handler = TvdbXmlHandler(url)
+            url = self.configuration.repository['Database']['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
+            handler = TvdbXmlHandler(self, url)
             if refresh: handler.refresh()
             element = handler.element()
             
@@ -911,7 +746,7 @@ class EntityManager(object):
             if value:
                 person_list = value.split(u'|')
                 for p in person_list:
-                    cp = clean_tvdb_person_name(p)
+                    cp = self.clean_tvdb_person_name(p)
                     if cp is not None:
                         result.append(cp)
                     else:
@@ -919,7 +754,180 @@ class EntityManager(object):
         return result
     
     
+    def clean_tvdb_person_name(self, value):
+        result = None
+        if value is not None:
+            value = self.tvdb_person_name_junk.sub(u'', value)
+            value = value.strip()
+            if len(value) < self.configuration.repository['Database']['tvdb']['fuzzy']['minimum_person_name_length']:
+                value = None
+        return value
+    
+    
+    tvdb_person_name_junk = re.compile(ur'\([^\)]+(?:\)|$)', re.UNICODE)
 
+
+
+class ResourceHandler(object):
+    def __init__(self, entity_manager, url):
+        self.logger = logging.getLogger('mp4pack.resource')
+        self.entity_manager = entity_manager
+        self.remote_url = url
+        self.local_path = self.local()
+        self.headers = None
+    
+    
+    def local(self):
+        return url_to_cache.sub(self.entity_manager.configuration.repository['Database']['cache'], self.remote_url)
+    
+    
+    def cache(self):
+        result = True
+        if not os.path.exists(self.local_path):
+            dirname = os.path.dirname(self.local_path)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            try:
+                self.logger.debug(u'Retrieve %s', self.remote_url)
+                filename, self.headers = urllib.urlretrieve(self.remote_url.encode('utf-8'), self.local_path)
+            except IOError:
+                result = False
+                self.clean()
+                self.logger.warning(u'Failed to retrieve %s', self.remote_url)
+        return result
+    
+    
+    def read(self):
+        value = None
+        try:
+            if self.cache():
+                urlhandle = urllib.urlopen(self.local_path.encode('utf-8'))
+                value = urlhandle.read()
+        except IOError:
+            value = None
+            self.logger.warning(u'Failed to read %s', self.local_path)
+        return value
+    
+    
+    def clean(self):
+        if os.path.isfile(self.local_path):
+            os.remove(self.local_path)
+            try:
+                os.removedirs(os.path.dirname(self.local_path))
+            except OSError:
+                pass
+    
+    
+    def refresh(self):
+        self.clean()
+        self.cache()
+    
+    
+
+
+class JsonHandler(ResourceHandler):
+    def __init__(self, entity_manager, url):
+        ResourceHandler.__init__(self, entity_manager, url)
+        self.logger = logging.getLogger('mp4pack.json')
+    
+    
+    def element(self):
+        element = None
+        json_text = self.read()
+        if json_text is not None:
+            try:
+                from StringIO import StringIO
+                io = StringIO(json_text)
+                import json
+                element = json.load(io)
+            except ValueError:
+                element = None
+                self.clean()
+                self.logger.error(u'Failed to load json document %s', self.local_path)
+        return element
+    
+
+
+class ImageHandler(ResourceHandler):
+    def __init__(self, entity_manager, url):
+        ResourceHandler.__init__(self, entity_manager, url)
+        self.logger = logging.getLogger('mp4pack.image')
+    
+    
+    def cache(self):
+        result = ResourceHandler.cache(self)
+        if self.headers is not None and image_http_type.search(self.headers.type) is None:
+            self.clean()
+            result = False
+        return result
+    
+    
+
+
+class XmlHandler(ResourceHandler):
+    def __init__(self, entity_manager, url):
+        ResourceHandler.__init__(self, entity_manager, url)
+        self.logger = logging.getLogger('mp4pack.xml')
+    
+    
+    def element(self):
+        element = None
+        xml = self.read()
+        if xml is not None:
+            try:
+                element = ElementTree.fromstring(xml)
+            except SyntaxError:
+                element = None
+                self.clean()
+                self.logger.warning(u'Failed to load xml document %s', self.local_path)
+        return element
+    
+
+
+class TmdbJsonHandler(JsonHandler):
+    def __init__(self, entity_manager, url):
+        JsonHandler.__init__(self, entity_manager, url)
+        self.logger = logging.getLogger('mp4pack.tmdb')
+    
+    
+    def local(self):
+        result = ResourceHandler.local(self)
+        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.repository['Database']['tmdb']['apikey']), u'')
+        return result
+    
+    
+    def element(self):
+        element = JsonHandler.element(self)
+        if not element or element[0] == u'Nothing found.':
+            element = None
+            self.clean()
+            self.logger.debug(u'Nothing found in %s', self.remote_url)
+        return element
+    
+    
+
+
+class TvdbXmlHandler(XmlHandler):
+    def __init__(self, entity_manager, url):
+        XmlHandler.__init__(self, entity_manager, url)
+        self.logger = logging.getLogger('mp4pack.tvdb')
+    
+    
+    def local(self):
+        result = ResourceHandler.local(self)
+        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.repository['Database']['tvdb']['apikey']), u'')
+        result = result.replace(u'/all', u'')
+        return result
+    
+    
+
+
+class TvdbImageHandler(ImageHandler):
+    def __init__(self, entity_manager, url):
+        ImageHandler.__init__(self, entity_manager, self.entity_manager.configuration.repository['Database']['tvdb']['urls']['Banner.getImage'].format(url))
+        self.logger = logging.getLogger('mp4pack.image')
+    
+    
 
 
 
@@ -987,17 +995,6 @@ def update_timestamp_property(key, value, entity):
     return result
 
 
-def clean_tvdb_person_name(value):
-    result = None
-    if value is not None:
-        value = tvdb_person_name_junk.sub(u'', value)
-        value = value.strip()
-        if len(value) < minimum_person_name_length:
-            value = None
-    return value
-    
-
-
 def format_tmdb_query(value):
     result = None
     if value is not None:
@@ -1031,16 +1028,12 @@ def replace_invalid_characters(value):
     return value
 
 
-# Singletone
-theEntityManager = EntityManager()
 
 string_key_string_pair = re.compile(u'^([^:]+):(.*)$', re.UNICODE)
 numberic_key_string_pair = re.compile(u'^([0-9]+):(.+)$', re.UNICODE)
-minimum_person_name_length = configuration.repository['Database']['tvdb']['fuzzy']['minimum_person_name_length']
 tvdb_list_seperators = re.compile(ur'\||,', re.UNICODE)
 strip_space_around_seperator = re.compile(ur'\s*\|\s*', re.UNICODE)
 collapse_whitespace = re.compile(ur'\s+', re.UNICODE)
 url_to_cache = re.compile(ur'http://', re.UNICODE)
 image_http_type = re.compile(ur'image/.*', re.UNICODE)
-tvdb_person_name_junk = re.compile(ur'\([^\)]+(?:\)|$)', re.UNICODE)
 characters_to_exclude_from_filename = re.compile(ur'[\\\/?<>:*|\'"^\.]')

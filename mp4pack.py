@@ -8,47 +8,177 @@ import logging
 import copy
 
 
-from container import make_media_file
-from db import theEntityManager
-from config import theConfiguration as configuration
+from container import ContainerFactory
+from db import EntityManager
+from config import Configuration
 
-
-def standardize_path(path):
-    result = path
-    realpath = os.path.realpath(os.path.abspath(path))
-    for k,v in configuration.property_map['volume'].iteritems():
-        if os.path.commonprefix([k, realpath]) == k:
-            result = realpath.replace(k, v['path'])
-            break
-    return result
-
-
-def make_files(path, file_filter, recursive):
-    media_files = []
-    file_paths = find_files_in_path(path, file_filter, recursive)
-    for file_path in file_paths:
-        media_file = make_media_file(file_path)
-        if media_file:
-            media_files.append(media_file)
-    return media_files
-
-
-def find_files_in_path(path, file_filter, recursive, depth=1):
-    result = []
-    if os.path.isfile(path):
-        dname, fname = os.path.split(path)
-        if (file_filter == None or file_filter.search(fname) != None) and invisable_file_path.search(os.path.basename(path)) == None:
-            result.append(standardize_path(path))
+class MPKProcess(object):
+    def __init__(self, configuration):
+        self.logger = logging.getLogger('mpk Process')
+        self.configuration = configuration
+        self.options = configuration.options
+        self.entity_manager = None
+        self.container_factory = None
+        self.valid = False
+        self.file_filter = None
+        self.media_files = None
+        
+        self.valid = self.load_config()
+        if self.valid:
+            self.entity_manager = EntityManager(self.configuration)
+            self.container_factory = ContainerFactory(self.entity_manager)
+            self.file_filter = self.load_file_filter()
     
-    elif (recursive or depth > 0) and os.path.isdir(path) and invisable_file_path.search(os.path.basename(path)) == None:
-        for p in os.listdir(path):
-            p = os.path.abspath(os.path.join(path,p))
-            rec_result = find_files_in_path(p, file_filter, recursive, depth - 1)
-            result += rec_result
-    return sorted(set(result))
+    
+    def load_config(self):
+        result = True
+        for c in self.configuration.repository['Command']:
+            if self.configuration.repository['Command'][c]['path'] == None:
+                self.logger.error(u'Command %s could not be located. Is it installed?', self.configuration.repository['Command'][c]['binary'])
+                result = False
+        return result
+    
+    
+    def load_file_filter(self):
+        result = None
+        if self.options.file_filter is not None:
+            self.logger.info(u'Filtering file that match %s', self.options.file_filter)
+            result = re.compile(self.options.file_filter, re.UNICODE)
+        return result
+    
+    
+    def load_files(self, path):
+        self.media_files = []
+        file_paths = self.find_files_in_path(path, self.options.recursive)
+        for file_path in file_paths:
+            media_file = self.container_factory.create_media_file(file_path)
+            if media_file:
+                self.media_files.append(media_file)
+    
+    
+    def transform_media_file(self, media_file):
+        result_path = None
+        o = copy.deepcopy(self.configuration.options)
+        o.transcode = o.transform
+        o.transform = None
+        result_path = media_file.transcode(o)
+        if result_path:
+            new_media_file = self.container_factory.create_media_file(result_path)
+            new_media_file.load()
+            if new_media_file and new_media_file.valid():
+                o.transcode = None
+                
+                # tag the new file
+                o.tag = True
+                new_media_file.tag(o)
+                o.tag = False
+                
+                # update clean subtitles in the new file
+                o.update = 'srt'
+                o.profile = 'clean'
+                new_media_file.update(o)
+                
+                # update chapters in the new file
+                o.update = 'txt'
+                o.profile = 'chapter'
+                new_media_file.update(o)
+                
+                # update artwork on the new file
+                o.volume = 'alpha'
+                o.update = 'png'
+                o.profile = 'normal'
+                o.download = True
+                new_media_file.update(o)
+        return result_path
+    
+    
+    def execute(self):
+        if self.options.initialize:
+            self.entity_manager.base_init()
+            
+        if self.options.map_show:
+            self.entity_manager.map_show_with_pair(self.options.map_show)
+            
+        if self.options.choose_movie_poster:
+            self.entity_manager.choose_tmdb_movie_poster_with_pair(self.options.choose_movie_poster, True)
+            
+        valid_files = []
+        invalid_files = []
+        
+        if self.media_files:
+            for f in self.media_files:
+                f.load(self.options.reindex, self.options.sync)
+                if f and f.valid():
+                    valid_files.append(f)
+                    
+                    if self.options.rename:
+                        f.rename(self.options)
+                        
+                    if self.options.extract:
+                        f.extract(self.options)
+                        
+                    if self.options.copy:
+                        f.copy(self.options)
+                        
+                    if self.options.pack is not None:
+                        f.pack(self.options)
+                        
+                    if self.options.transcode is not None:
+                        f.transcode(self.options)
+                        
+                    if self.options.transform is not None:
+                        self.transform_media_file(f)
+                        
+                    if self.options.tag:
+                        f.tag(self.options)
+                        
+                    if self.options.update is not None:
+                        f.update(self.options)
+                        
+                    if self.options.optimize:
+                        f.optimize(self.options)
+                        
+                    if self.options.info:
+                        print unicode(f).encode('utf-8')
+                        
+                    f.unload()
+                else:
+                    invalid_files.append(f.file_path)
+                    f.unload()
+                    f = None
+        return valid_files, invalid_files 
+    
+    
+    
+    def standardize_path(self, path):
+        result = path
+        realpath = os.path.realpath(os.path.abspath(path))
+        for k,v in self.configuration.property_map['volume'].iteritems():
+            if os.path.commonprefix([k, realpath]) == k:
+                result = realpath.replace(k, v['path'])
+                break
+        return result
+    
+    
+    def find_files_in_path(self, path, recursive, depth=1):
+        result = []
+        if os.path.isfile(path):
+            dname, fname = os.path.split(path)
+            if (self.file_filter == None or self.file_filter.search(fname) != None) and self.invisable_file_path.search(os.path.basename(path)) == None:
+                result.append(self.standardize_path(path))
+                
+        elif (recursive or depth > 0) and os.path.isdir(path) and self.invisable_file_path.search(os.path.basename(path)) == None:
+            for p in os.listdir(path):
+                p = os.path.abspath(os.path.join(path,p))
+                rec_result = self.find_files_in_path(p, recursive, depth - 1)
+                result += rec_result
+        return sorted(set(result))
+    
+    
+    invisable_file_path = re.compile(ur'^\.', re.UNICODE)
 
 
-def load_options():
+def load_options(configuration):
     from optparse import OptionParser
     from optparse import OptionGroup
     
@@ -101,113 +231,16 @@ def load_options():
     parser.add_option_group(group)
     
     options, args = parser.parse_args()
-    o = configuration.options = options
+    configuration.options = options
     
     return options, args
 
 
-def load_config(logger):
-    result = True
-    for c in configuration.repository['Command']:
-        if configuration.repository['Command'][c]['path'] == None:
-            logger.error(u'Command %s could not be located. Is it installed?', configuration.repository['Command'][c]['binary'])
-            result = False
-    return result
-
-
-def transform(f, options):
-    result = None
-    o = copy.deepcopy(options)
-    o.transcode = o.transform
-    o.transform = None
-    result = f.transcode(o)
-    if result:
-        nf = make_media_file(result)
-        nf.load()
-        if nf and nf.valid():
-            o.transcode = None
-            
-            o.tag = True
-            nf.tag(o)
-            o.tag = False
-            
-            o.update = 'srt'
-            o.profile = 'clean'
-            nf.update(o)
-            
-            o.update = 'txt'
-            o.profile = 'chapter'
-            nf.update(o)
-            
-            o.volume = 'alpha'
-            o.update = 'png'
-            o.download = True
-            o.profile = 'normal'
-            o.download = True
-            nf.update(o)
-    return result
-
-
-def preform_operations(media_files, options):
-    if options.initialize:
-        theEntityManager.base_init()
-        
-    if options.map_show:
-        theEntityManager.map_show_with_pair(options.map_show)
-        
-    if options.choose_movie_poster:
-        theEntityManager.choose_tmdb_movie_poster_with_pair(options.choose_movie_poster, True)
-        
-    valid_files = []
-    invalid_files = []
-    
-    if media_files:
-        for f in media_files:
-            f.load(options.reindex, options.sync)
-            if f and f.valid():
-                valid_files.append(f)
-                
-                if options.rename:
-                    f.rename(options)
-                    
-                if options.extract:
-                    f.extract(options)
-                    
-                if options.copy:
-                    f.copy(options)
-                    
-                if options.pack is not None:
-                    f.pack(options)
-                    
-                if options.transcode is not None:
-                    f.transcode(options)
-                
-                if options.transform is not None:
-                    transform(f, options)
-                
-                if options.tag:
-                    f.tag(options)
-                    
-                if options.update is not None:
-                    f.update(options)
-                    
-                if options.optimize:
-                    f.optimize(options)
-                    
-                if options.info:
-                    print unicode(f).encode('utf-8')
-                    
-                f.unload()
-            else:
-                invalid_files.append(f.file_path)
-                f.unload()
-                f = None
-    return valid_files, invalid_files 
-
-
 def main():
     # Initialize options and scan arguments
-    options, args = load_options()
+    configuration = Configuration()
+    options, args = load_options(configuration)
+    
     
     # Initialize logging
     logging.basicConfig(level=log_levels[options.verbosity])
@@ -215,9 +248,9 @@ def main():
     indent = configuration.repository['Display']['indent']
     margin = configuration.repository['Display']['margin']
     
-    if load_config(logger):
-        media_files = None
-        
+    mpk_process = MPKProcess(configuration)
+    
+    if mpk_process.valid:
         # Check for input path
         input_path = None
         if args:
@@ -230,16 +263,11 @@ def main():
                 
         # Check for file filter
         if input_path:
-            file_filter = None
-            if options.file_filter is not None:
-                logger.info(u'Filtering file that match %s', options.file_filter)
-                file_filter = re.compile(options.file_filter, re.UNICODE)
-            
             logger.info(u'Looking up files in %s', input_path)
-            media_files = make_files(input_path, file_filter, options.recursive)
+            mpk_process.load_files(input_path)
             
         # Preform operations on valid files, if any
-        valid_files, invalid_files = preform_operations(media_files, options)
+        valid_files, invalid_files = mpk_process.execute()
         
         # Report valid files
         if valid_files:
