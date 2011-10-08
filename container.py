@@ -446,7 +446,7 @@ class Container(object):
                 if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
                     selected.append(path)
                     break
-            if not selected:
+            if not selected or options.sync:
                 artwork = None
                 if self.is_movie():
                     artwork = theEntityManager.find_tmdb_movie_poster(self.path_info['imdb id'])
