@@ -2552,7 +2552,6 @@ repository_config = {
     },
     'Repository':{
         'aeon':{
-            'name':'aeon',
             'local':{
                 'mongodb':{
                     'name':'mp4pack',
@@ -2628,7 +2627,6 @@ repository_config = {
             },
         },
         'flux':{
-            'name':'flux',
             'local':{
                 'mongodb':{
                     'name':'mp4pack',
@@ -2688,57 +2686,6 @@ repository_config = {
                 'Show.getInfo':u'http://www.thetvdb.com/api/{0}/series/{{0}}/all/en.xml'.format(tvdb_apikey),
                 'Banner.getImage':u'http://www.thetvdb.com/banners/{0}'
             },
-        },
-    },
-    'Volume':{
-        'alpha':{
-            'path':'/pool/alpha',
-            'alternative':(
-                '/net/multivac/Volumes/alphaville/alpha',
-                '/Volumes/alphaville/alpha',
-            )
-        },
-        'beta':{
-            'path':'/pool/beta',
-            'alternative':(
-                '/net/multivac/Volumes/nyc/beta',
-                '/Volumes/nyc/beta',
-            )
-        },
-        'gama':{
-            'path':'/pool/gama',
-            'alternative':(
-                '/net/multivac/Volumes/cambridge/gama',
-                '/Volumes/cambridge/gama',
-            )
-            
-        },
-        'delta':{
-            'path':'/pool/delta',
-            'alternative':(
-                '/net/vito/media/fairfield/delta',
-                '/Volumes/fairfield/delta',
-            )
-        },
-        'eta':{
-            'path':'/pool/eta',
-            'alternative':(
-                '/net/vito/media/tlv/eta',
-                '/Volumes/tlv/eta',
-            )
-        },
-        'epsilon':{
-            'path':'/pool/epsilon',
-            'alternative':(
-                '/net/vito/media/nagasaki/epsilon',
-                '/Volumes/nagasaki/epsilon',
-            )
-        },
-        'kapa':{
-            'path':'/pool/kapa',
-            'alternative':(
-                '/Volumes/moonbook/kapa',
-            )
         },
     },
     'Command':{
@@ -3772,7 +3719,6 @@ class Configuration(object):
         self.load_command()
         self.load_action()
         self.load_kind()
-        self.load_volume()
         self.load_repository()
         self.load_property_map()
         
@@ -3845,16 +3791,16 @@ class Configuration(object):
             self.kind[k] = copy.deepcopy(v)
     
     
-    def load_volume(self):
-        self.volume = {}
-        for k,v in self.default_repository_config['Volume'].iteritems():
-            self.volume[k] = copy.deepcopy(v)
-    
-    
     def load_repository(self):
         self.repository = {}
-        for k,v in self.default_repository_config['Repository'].iteritems():
-            self.repository[k] = copy.deepcopy(v)
+        self.volume = {}
+        for repo_k,repo_v in self.default_repository_config['Repository'].iteritems():
+            self.repository[repo_k] = copy.deepcopy(repo_v)
+            self.repository[repo_k]['name'] = repo_k
+            if 'volume' in self.repository[repo_k]:
+                for vol_k, vol_v in self.repository[repo_k]['volume'].iteritems():
+                    vol_v['repository'] = self.repository[repo_k]['name']
+                    self.volume[vol_k] = vol_v
     
     
     def load_property_map(self):
