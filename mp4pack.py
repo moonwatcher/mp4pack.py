@@ -23,7 +23,7 @@ class MPKProcess(object):
         self.file_filter = None
         self.media_files = None
         
-        self.valid = self.load_config()
+        self.valid = self.sanity_check()
         if self.valid:
             self.entity_manager = EntityManager(self.configuration)
             self.container_factory = ContainerFactory(self.entity_manager)
