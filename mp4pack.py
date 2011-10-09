@@ -30,13 +30,8 @@ class MPKProcess(object):
             self.file_filter = self.load_file_filter()
     
     
-    def load_config(self):
-        result = True
-        for c in self.configuration.command:
-            if self.configuration.command[c]['path'] == None:
-                self.logger.error(u'Command %s could not be located. Is it installed?', self.configuration.command[c]['binary'])
-                result = False
-        return result
+    def sanity_check(self):
+        return True
     
     
     def load_file_filter(self):
