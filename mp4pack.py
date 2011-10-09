@@ -234,17 +234,17 @@ def load_options(configuration):
 
 
 def main():
-    # To debug the Configuration class we need to initialize the logger before we read the options
-    # logging.basicConfig(level=log_levels['debug'])
-    # logger = logging.getLogger('mpk')
+    logging.basicConfig()
+    
+    # Setting the log level to be used before we read options
+    logging.getLogger().setLevel(log_levels['warning'])
     
     # Initialize options and scan arguments
     configuration = Configuration()
     options, args = load_options(configuration)
     
-    
-    # Initialize logging
-    logging.basicConfig(level=log_levels[options.verbosity])
+    # Set the log level from options
+    logging.getLogger().setLevel(log_levels[options.verbosity])
     logger = logging.getLogger('mpk')
     
     mpk_process = MPKProcess(configuration)

@@ -2601,7 +2601,6 @@ repository_config = {
                         '/net/multivac/Volumes/cambridge/gama',
                         '/Volumes/cambridge/gama',
                     )
-
                 },
                 'delta':{
                     'path':'/pool/delta',
@@ -3708,6 +3707,24 @@ class Configuration(object):
         self.load_default_config()
     
     
+    def load_options(self, options):
+        self.options = options
+        
+        if self.options.location in self.repository:
+            self.local_repository = self.repository[self.options.location]
+        if self.options.repository in self.repository:
+            self.active_repository = self.repository[self.options.repository]
+        
+        # mark the volumes as remote or local
+        for v in self.volume.values():
+            if v['repository'] == self.local_repository['name']:
+                v['local'] = True
+                v['remote'] = False
+            else:
+                v['local'] = False
+                v['remote'] = True
+    
+    
     def load_default_config(self):
         self.subtitle = subtitle_config
         self.tmdb = self.default_repository_config['Database']['tmdb']
@@ -3750,11 +3767,6 @@ class Configuration(object):
         self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format(self.format['indent width'] - self.format['margin width'] - 3, u' ' * self.format['margin width'])
         self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format(self.format['indent width'] - self.format['margin width'] - 2, u' ' * self.format['margin width'])
         self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
-        
-        
-        
-        
-        
     
     
     def load_command(self):
@@ -3782,7 +3794,7 @@ class Configuration(object):
                     self.action[k]['active'] = True
                     self.logger.debug(u'Action %s dependencies are satisfied', k)
                 else:
-                    self.logger.warning(u'Action %s has unsatisfied dependencies', k)
+                    self.logger.warning(u'Action %s has unsatisfied dependencies: %s', k, ', '.join(list(set(v['depend']) - self.available_commands)))
     
     
     def load_kind(self):
@@ -3875,13 +3887,6 @@ class Configuration(object):
             for p in alt:
                 self.property_map['volume'][p] = v
     
-    
-    def load_options(self, options):
-        self.options = options
-        if options.location in self.repository:
-            self.local_repository = self.repository[options.location]
-        if options.repository in self.repository:
-            self.active_repository = self.repository[options.repository]
     
     
     def get_active_mongodb_config(self):
