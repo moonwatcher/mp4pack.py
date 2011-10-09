@@ -14,7 +14,7 @@ from config import Configuration
 
 class MPKProcess(object):
     def __init__(self, configuration):
-        self.logger = logging.getLogger('mpk Process')
+        self.logger = logging.getLogger('MPK Process')
         self.configuration = configuration
         self.options = configuration.options
         self.entity_manager = None
@@ -32,9 +32,9 @@ class MPKProcess(object):
     
     def load_config(self):
         result = True
-        for c in self.configuration.repository['Command']:
-            if self.configuration.repository['Command'][c]['path'] == None:
-                self.logger.error(u'Command %s could not be located. Is it installed?', self.configuration.repository['Command'][c]['binary'])
+        for c in self.configuration.command:
+            if self.configuration.command[c]['path'] == None:
+                self.logger.error(u'Command %s could not be located. Is it installed?', self.configuration.command[c]['binary'])
                 result = False
         return result
     
@@ -182,7 +182,6 @@ def load_options(configuration):
     from optparse import OptionParser
     from optparse import OptionGroup
     
-    rc = configuration.repository
     parser = OptionParser('%prog [options] [path to file or directory]')
     
     group = OptionGroup(parser, 'Actions')
@@ -192,14 +191,14 @@ def load_options(configuration):
     group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract streams for processing')
     group.add_option('-T', '--tag', dest='tag', action='store_true', default=False, help='Update file tags')
     group.add_option('-O', '--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout')
-    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=rc['Action']['transcode']['kind'], help='KIND is one of [{0}]'.format(', '.join(rc['Action']['transcode']['kind'])))
-    group.add_option('-c', '--transform', metavar='KIND', dest='transform', type='choice', choices=rc['Action']['transform']['kind'], help='KIND is one of [{0}]'.format(', '.join(rc['Action']['transform']['kind'])))
-    group.add_option('-P', '--pack', metavar='KIND', dest='pack', type='choice', choices=rc['Action']['pack']['kind'], help='KIND is one of [{0}]'.format(', '.join(rc['Action']['pack']['kind'])))
-    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=rc['Action']['update']['kind'], help='KIND is one of [{0}]'.format(', '.join(rc['Action']['update']['kind'])))
+    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=configuration.action['transcode']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['transcode']['kind'])))
+    group.add_option('-c', '--transform', metavar='KIND', dest='transform', type='choice', choices=configuration.action['transform']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['transform']['kind'])))
+    group.add_option('-P', '--pack', metavar='KIND', dest='pack', type='choice', choices=configuration.action['pack']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['pack']['kind'])))
+    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=configuration.action['update']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['update']['kind'])))
     parser.add_option_group(group)
         
     group = OptionGroup(parser, 'Action modifiers')
-    group.add_option('-o', '--volume', dest='volume', type='choice', choices=rc['Volume'].keys(), default=None)
+    group.add_option('-o', '--volume', dest='volume', type='choice', choices=configuration.volume.keys(), default=None)
     group.add_option('-p', '--profile', dest='profile', type='choice', choices=configuration.available_profiles, default=None)
     group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float')
     group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursively process sub directories')
@@ -218,6 +217,9 @@ def load_options(configuration):
     parser.add_option_group(group)
     
     group = OptionGroup(parser, 'Environment')
+    group.add_option('-L', '--location', dest='location', default='aeon', help='Name of local repository')
+    group.add_option('-R', '--repository', dest='repository', metavar='REPO', type='choice', choices=configuration.repository.keys(), default='aeon', help='REPO is one of [{0}]'.format(', '.join(configuration.repository.keys())))
+    
     group.add_option('-S', '--sync', dest='sync', action='store_true', default=False, help='Sync encountered records with online service')
     group.add_option('-U', '--reindex', dest='reindex', action='store_true', default=False, help='Rebuild physical file index')
     group.add_option('-D', '--download', dest='download', action='store_true', default=False, help='Download if local is unavailable')
@@ -231,12 +233,16 @@ def load_options(configuration):
     parser.add_option_group(group)
     
     options, args = parser.parse_args()
-    configuration.options = options
+    configuration.load_options(options)
     
     return options, args
 
 
 def main():
+    # To debug the Configuration class we need to initialize the logger before we read the options
+    # logging.basicConfig(level=log_levels['debug'])
+    # logger = logging.getLogger('mpk')
+    
     # Initialize options and scan arguments
     configuration = Configuration()
     options, args = load_options(configuration)
@@ -244,9 +250,7 @@ def main():
     
     # Initialize logging
     logging.basicConfig(level=log_levels[options.verbosity])
-    logger = logging.getLogger('mp4pack')
-    indent = configuration.repository['Display']['indent']
-    margin = configuration.repository['Display']['margin']
+    logger = logging.getLogger('mpk')
     
     mpk_process = MPKProcess(configuration)
     
@@ -287,11 +291,11 @@ def main():
             
         # Report options
         for k,v in options.__dict__.iteritems():
-            logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, indent - 2 - margin))
+            logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, configuration.format['indent width'] - 2 - configuration.format['margin width']))
             
     else:
-        for k,v in configuration.repository['Command'].iteritems():
-            logger.info(u'Command {0:-<{2}}: {1}'.format(k, v['path'], indent - 2 - margin))
+        for k,v in configuration.command.iteritems():
+            logger.info(u'Command {0:-<{2}}: {1}'.format(k, v['path'], configuration.format['indent width'] - 2 - configuration.format['margin width']))
 
 
 log_levels = {

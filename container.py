@@ -49,7 +49,7 @@ class ContainerFactory(object):
 # Container super class
 class Container(object):
     def __init__(self, factory, file_path, autoload=True):
-        self.logger = logging.getLogger('mp4pack.container')
+        self.logger = logging.getLogger('Container')
         self.factory = factory
         self.file_path = file_path
         self.path_info = None
@@ -76,6 +76,8 @@ class Container(object):
             result = self.load_record(refresh, download)
             if result:
                 result = self.load_info()
+                if not result:
+                    self.logger.warning(u'Could not load info for %s',self.file_path)
             else:
                 self.logger.warning(u'Could not load db record for %s',self.file_path)
         else:
@@ -310,14 +312,11 @@ class Container(object):
     
     
     
-    
-    
     def related(self):
         related = {}
         for k,v in self.record['entity']['physical'].iteritems():
             related[k] = v['path info']
         return related
-    
     
     
     
@@ -589,10 +588,12 @@ class Container(object):
 class AudioVideoContainer(Container):
     def __init__(self, factory, file_path, autoload=True):
         Container.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.av')
+        self.logger = logging.getLogger('A/V Container')
     
     
     def valid(self):
+        if not self.info['track']:
+            self.logger.warning(u'Failed to decode track information for %s',self.file_path)
         return Container.valid(self) and self.info['track']
     
     
@@ -621,15 +622,15 @@ class AudioVideoContainer(Container):
     
     
     def hd_video(self):
-        return self.video_width() > self.factory.configuration.repository['Default']['hd video min width']
+        return self.video_width() > self.factory.configuration.runtime['hd video min width']
     
     
     def playback_height(self):
         result = 0
         v = self.main_video_track()
         if v:
-            if v['display aspect ratio'] >= self.factory.configuration.repository['Default']['display aspect ratio']:
-                result = float(v['width']) / float(self.factory.configuration.repository['Default']['display aspect ratio'])
+            if v['display aspect ratio'] >= self.factory.configuration.runtime['display aspect ratio']:
+                result = float(v['width']) / float(self.factory.configuration.runtime['display aspect ratio'])
             else:
                 result = float(v['height'])
         return result
@@ -670,7 +671,7 @@ class AudioVideoContainer(Container):
             if self.factory.util.complete_path_info_default_values(path_info):
                 dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
                 if dest_path is not None:
-                    pc = self.factory.configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                    pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
                     if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                         command = self.factory.util.initialize_command('subler', self.logger)
                         command.extend([u'-o', dest_path, u'-i', self.file_path])
@@ -685,7 +686,7 @@ class AudioVideoContainer(Container):
             if self.factory.util.complete_path_info_default_values(path_info):
                 dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
                 if dest_path is not None:
-                    pc = self.factory.configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                    pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
                     selected = { 'related':{}, 'track':{} }
                     
                     if 'pack' in pc:
@@ -808,7 +809,7 @@ class AudioVideoContainer(Container):
                     command = None
                     if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                         command = self.factory.util.initialize_command('handbrake', self.logger)
-                        tc = self.factory.configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]['transcode']
+                        tc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]['transcode']
                         
                         if 'flags' in tc:
                             for v in tc['flags']:
@@ -862,7 +863,7 @@ class AudioVideoContainer(Container):
 class Text(Container):
     def __init__(self, factory, file_path, autoload=True):
         Container.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.text')
+        self.logger = logging.getLogger('Text')
     
     
     def read(self):
@@ -932,7 +933,7 @@ class Text(Container):
 class Artwork(Container):
     def __init__(self, factory, file_path, autoload=True):
         Container.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.image')
+        self.logger = logging.getLogger('Artwork')
         if autoload:
             self.load()
     
@@ -944,7 +945,7 @@ class Artwork(Container):
         if self.factory.util.complete_path_info_default_values(path_info):
             dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
             if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                p = self.factory.configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                p = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
                 if 'transcode' in p:
                     if 'size' in p['transcode']:
                         from PIL import Image
@@ -986,7 +987,7 @@ class Artwork(Container):
 class Avi(AudioVideoContainer):
     def __init__(self, factory, file_path, autoload=True):
         AudioVideoContainer.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.avi')
+        self.logger = logging.getLogger('Avi')
         if autoload:
             self.load()
     
@@ -996,7 +997,7 @@ class Avi(AudioVideoContainer):
 class Matroska(AudioVideoContainer):
     def __init__(self, factory, file_path, autoload=True):
         AudioVideoContainer.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.matroska')
+        self.logger = logging.getLogger('Matroska')
         if autoload:
             self.load()
     
@@ -1015,7 +1016,7 @@ class Matroska(AudioVideoContainer):
             if 'volume' in path_info: del path_info['volume']
             path_info['kind'] = k
             if self.factory.util.complete_path_info_default_values(path_info):
-                pc = self.factory.configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
                 if 'extract' in pc and 'tracks' in pc['extract']:
                     for t in self.info['track']:
                         for c in pc['extract']['tracks']:
@@ -1090,7 +1091,7 @@ class Matroska(AudioVideoContainer):
 class Mpeg4(AudioVideoContainer):
     def __init__(self, factory, file_path, autoload=True):
         AudioVideoContainer.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.mp4')
+        self.logger = logging.getLogger('MP4')
         if autoload:
             self.load()
     
@@ -1205,7 +1206,7 @@ class Mpeg4(AudioVideoContainer):
             path_info = self.factory.util.copy_path_info(self.path_info, options)
             path_info['kind'] = 'srt'
             if self.factory.util.complete_path_info_default_values(path_info):
-                pc = self.factory.configuration.repository['Kind']['srt']['Profile'][path_info['profile']]
+                pc = self.factory.configuration.kind['srt']['Profile'][path_info['profile']]
                 
                 has_changed = False
                 if 'profile' in path_info and 'update' in pc:
@@ -1268,7 +1269,7 @@ class Mpeg4(AudioVideoContainer):
             path_info['kind'] = 'txt'
             selected = []
             if self.factory.util.complete_path_info_default_values(path_info):
-                pc = self.factory.configuration.repository['Kind']['txt']['Profile'][path_info['profile']]
+                pc = self.factory.configuration.kind['txt']['Profile'][path_info['profile']]
                 if 'update' in pc:
                     if pc['update']['reset'] and self.info['menu']:
                         message = u'Drop existing chapters in {0}'.format(self.file_path)
@@ -1306,7 +1307,7 @@ class Mpeg4(AudioVideoContainer):
 class RawAudio(AudioVideoContainer):
     def __init__(self, factory, file_path, autoload=True):
         AudioVideoContainer.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.rawaudio')
+        self.logger = logging.getLogger('Raw Audio')
         if autoload:
             self.load()
     
@@ -1322,7 +1323,7 @@ class RawAudio(AudioVideoContainer):
                 if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                     track = self.info['track'][0]
                     option = None
-                    pc = self.factory.configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                    pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
                     if 'transcode' in pc and 'audio' in pc['transcode']:
                         for c in pc['transcode']['audio']:
                             if all((k in track and track[k] == v) for k,v in c['from'].iteritems()):
@@ -1332,7 +1333,7 @@ class RawAudio(AudioVideoContainer):
                         message = u'Transcode audio {0} --> {1}'.format(self.file_path, dest_path)
                         command = self.factory.util.initialize_command('ffmpeg', self.logger)
                         command.extend([
-                            u'-threads',u'{0}'.format(self.factory.configuration.repository['Default']['threads']),
+                            u'-threads',u'{0}'.format(self.factory.configuration.runtime['threads']),
                             u'-i', self.file_path,
                             u'-acodec', u'ac3',
                             u'-ac', u'{0}'.format(track['channels']),
@@ -1352,7 +1353,7 @@ class RawAudio(AudioVideoContainer):
 class Subtitle(Text):
     def __init__(self, factory, file_path, autoload=True):
         Text.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.subtitle')
+        self.logger = logging.getLogger('Subtitle')
         self.subtitle_blocks = None
         if autoload:
             self.load()
@@ -1491,7 +1492,7 @@ class Subtitle(Text):
         if self.factory.util.complete_path_info_default_values(path_info):
             dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
             if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                p = self.factory.configuration.repository['Kind'][path_info['kind']]['Profile'][path_info['profile']]
+                p = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
                 
                 # Check if profile dictates filtering
                 if 'transcode' in p and 'filter' in p['transcode']:
@@ -1574,7 +1575,7 @@ class Subtitle(Text):
 class Chapter(Text):
     def __init__(self, factory, file_path, autoload=True):
         Text.__init__(self, factory, file_path, autoload)
-        self.logger = logging.getLogger('mp4pack.chapter')
+        self.logger = logging.getLogger('Chapter')
         self.chapter_markers = None
         if autoload:
             self.load()
@@ -1754,7 +1755,7 @@ class SubtitleBlock(object):
 
 class FilterSequence(object):
     def __init__(self, config):
-        self.logger = logging.getLogger('mp4pack.filter')
+        self.logger = logging.getLogger('Filter Sequence')
         self.config = config
     
     
@@ -1769,7 +1770,7 @@ class FilterSequence(object):
 class DropFilterSequence(FilterSequence):
     def __init__(self, config):
         FilterSequence.__init__(self, config)
-        self.logger = logging.getLogger('mp4pack.filter.drop')
+        self.logger = logging.getLogger('Drop Filter Sequence')
         self.expression = []
     
     
@@ -1824,7 +1825,7 @@ class DropFilterSequence(FilterSequence):
 class ReplaceFilterSequence(FilterSequence):
     def __init__(self, config):
         FilterSequence.__init__(self, config)
-        self.logger = logging.getLogger('mp4pack.filter.replace')
+        self.logger = logging.getLogger('Replace Filter Sequence')
         self.expression = []
     
     
@@ -1875,7 +1876,7 @@ class ReplaceFilterSequence(FilterSequence):
 
 class SubtitleFilter(object):
     def __init__(self, factory):
-        self.logger = logging.getLogger('mp4pack.filter.manager')
+        self.logger = logging.getLogger('Subtitle Filter')
         self.factory = factory
         self.sequence = {}
     
@@ -1924,17 +1925,8 @@ class SubtitleFilter(object):
 
 class FileUtil(object):
     def __init__(self, factory):
-        self.logger = logging.getLogger('mp4pack.util')
+        self.logger = logging.getLogger('File Utilities')
         self.factory = factory
-        
-        self.format_indent = u'\n' + u' ' * self.factory.configuration.repository['Display']['indent']
-        self.format_wrap_width = self.factory.configuration.repository['Display']['wrap']
-        
-        self.format_info_title_display = u'\n\n\n{1}[{{0:-^{0}}}]'.format(self.factory.configuration.repository['Display']['wrap'] + self.factory.configuration.repository['Display']['indent'], u' ' * self.factory.configuration.repository['Display']['margin'])
-        self.format_info_subtitle_display = u'\n{1}[{{0:^{0}}}]\n'.format(self.factory.configuration.repository['Display']['indent'] - self.factory.configuration.repository['Display']['margin'] - 3, u' ' * self.factory.configuration.repository['Display']['margin'])
-        self.format_key_value_display = u'{1}{{0:-<{0}}}: {{1}}'.format(self.factory.configuration.repository['Display']['indent'] - self.factory.configuration.repository['Display']['margin'] - 2, u' ' * self.factory.configuration.repository['Display']['margin'])
-        self.format_value_display = u'{0}{{0}}'.format(u' ' * self.factory.configuration.repository['Display']['margin'])
-        
     
     
     def convert_mediainfo_value(self, kind, value):
@@ -2120,7 +2112,7 @@ class FileUtil(object):
             if 'media kind' in path_info and extended:
                 # media kind was detected and parsed
                 suffix = os.path.realpath(path)
-                for k,v in self.factory.configuration.repository['Volume'].iteritems():
+                for k,v in self.factory.configuration.volume.iteritems():
                     if os.path.commonprefix([v['realpath'], suffix]) == v['realpath']:
                         path_info['volume'] = k
                         suffix = os.path.relpath(suffix, v['realpath'])
@@ -2132,8 +2124,8 @@ class FileUtil(object):
                     if (
                         len(fragments) > 3 and
                         fragments[0] in self.factory.configuration.property_map['name']['stik'] and path_info['media kind'] == self.factory.configuration.property_map['name']['stik'][fragments[0]]['code'] and
-                        fragments[1] in self.factory.configuration.repository['Kind'] and path_info['kind'] == fragments[1] and
-                        fragments[2] in self.factory.configuration.repository['Kind'][path_info['kind']]['Profile']
+                        fragments[1] in self.factory.configuration.kind and path_info['kind'] == fragments[1] and
+                        fragments[2] in self.factory.configuration.kind[path_info['kind']]['Profile']
                     ): path_info['profile'] = fragments[2]
                     
         if 'name' in path_info and not path_info['name']:
@@ -2148,9 +2140,9 @@ class FileUtil(object):
             path_info = self.decode_path(path)
             related = []
             self.logger.debug(u'Scanning repository for file related to %s.', path)
-            for v in self.factory.configuration.repository['Volume']:
-                for k in self.factory.configuration.repository['Kind']:
-                    for p in self.factory.configuration.repository['Kind'][k]['Profile']:
+            for v in self.factory.configuration.volume:
+                for k in self.factory.configuration.kind:
+                    for p in self.factory.configuration.kind[k]['Profile']:
                         if k in self.factory.configuration.kind_with_language:
                             for l in self.factory.configuration.property_map['iso3t']['language']:
                                 related_path_info = copy.deepcopy(path_info)
@@ -2179,8 +2171,8 @@ class FileUtil(object):
     
     def complete_path_info_default_values(self, path_info):
         result = True
-        if 'kind' in path_info and path_info['kind'] in self.factory.configuration.repository['Kind'].keys():
-            kc = self.factory.configuration.repository['Kind'][path_info['kind']]
+        if 'kind' in path_info and path_info['kind'] in self.factory.configuration.kind.keys():
+            kc = self.factory.configuration.kind[path_info['kind']]
             if 'profile' not in path_info:
                 if 'default' in kc and 'profile' in kc['default']:
                     path_info['profile'] = kc['default']['profile']
@@ -2285,11 +2277,11 @@ class FileUtil(object):
     def canonic_path(self, path_info, entity=None):
         result = None
         valid = True
-        if 'kind' in path_info and path_info['kind'] in self.factory.configuration.repository['Kind']:
-            if 'volume' in path_info and path_info['volume'] in self.factory.configuration.repository['Volume']:
+        if 'kind' in path_info and path_info['kind'] in self.factory.configuration.kind:
+            if 'volume' in path_info and path_info['volume'] in self.factory.configuration.volume:
                 if 'profile' in path_info:
                     if self.profile_valid_for_kind(path_info['profile'], path_info['kind']):
-                        result = os.path.join(self.factory.configuration.repository['Volume'][path_info['volume']]['path'], self.factory.configuration.property_map['code']['stik'][path_info['media kind']]['name'], path_info['kind'], path_info['profile'])
+                        result = os.path.join(self.factory.configuration.volume[path_info['volume']]['path'], self.factory.configuration.property_map['code']['stik'][path_info['media kind']]['name'], path_info['kind'], path_info['profile'])
                         if path_info['media kind'] == 10 and 'tv show key' in path_info and 'tv season' in path_info:
                             result = os.path.join(result, path_info['tv show key'], str(path_info['tv season']))
                         
@@ -2368,7 +2360,7 @@ class FileUtil(object):
     
     
     def profile_valid_for_kind(self, profile, kind):
-        return profile and kind and kind in self.factory.configuration.repository['Kind'].keys() and profile in self.factory.configuration.repository['Kind'][kind]['Profile'].keys()
+        return profile and kind and kind in self.factory.configuration.kind.keys() and profile in self.factory.configuration.kind[kind]['Profile'].keys()
         
     
     
@@ -2393,8 +2385,8 @@ class FileUtil(object):
     
     def initialize_command(self, command, logger):
         result = None
-        if command in self.factory.configuration.repository['Command']:
-            c = self.factory.configuration.repository['Command'][command]
+        if command in self.factory.configuration.command:
+            c = self.factory.configuration.command[command]
             if 'path' in c:
                 result = [c['path'],]
             else:
@@ -2566,11 +2558,11 @@ class FileUtil(object):
     
     
     def format_info_title(self, text):
-        return self.format_info_title_display.format(text)
+        return self.factory.configuration.format['info title display'].format(text)
     
     
     def format_info_subtitle(self, text):
-        return self.format_info_subtitle_display.format(text)
+        return self.factory.configuration.format['info subtitle display'].format(text)
     
     
     def format_byte_as_iec_60027_2(self, value):
@@ -2618,9 +2610,9 @@ class FileUtil(object):
                             pvalue = lang['print']
                         else:
                             pvalue = unicode(value)
-                    if len(pvalue) > self.format_wrap_width:
-                        lines = textwrap.wrap(pvalue, self.format_wrap_width)
-                        pvalue = self.format_indent.join(lines)
+                    if len(pvalue) > self.factory.configuration.format['wrap width']:
+                        lines = textwrap.wrap(pvalue, self.factory.configuration.format['wrap width'])
+                        pvalue = self.factory.configuration.format['indent'].join(lines)
                         
                 elif ptype == 'float':
                     pvalue = u'{0:.3f}'.format(value)
@@ -2661,12 +2653,12 @@ class FileUtil(object):
             pvalue = value
             
         if pvalue:
-            result = self.format_key_value_display.format(pkey, pvalue)
+            result = self.factory.configuration.format['key value display'].format(pkey, pvalue)
         return result
     
     
     def format_value(self, value):
-        return self.format_value_display.format(value)
+        return self.factory.configuration.format['value display'].format(value)
     
     format_khz_display = u'{0}kHz'
     full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')

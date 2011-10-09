@@ -15,10 +15,14 @@ from pymongo import Connection
 
 class EntityManager(object):
     def __init__(self, configuration):
-        self.logger = logging.getLogger('mp4pack.em')
+        self.logger = logging.getLogger('Entity Manager')
         self.configuration = configuration
-        self.connection = Connection(self.configuration.repository['Database']['uri'])
-        self.db = self.connection[self.configuration.repository['Database']['name']]
+        
+        mongo_config = self.configuration.get_active_mongodb_config()
+        self.connection = Connection(mongo_config['uri'])
+        self.db = self.connection[mongo_config['name']]
+        self.sync_delay = self.configuration.runtime['sync delay']
+        
         self.genres = self.db.genres
         self.departments = self.db.departments
         self.jobs = self.db.jobs
@@ -28,7 +32,6 @@ class EntityManager(object):
         self.seasons = self.db.seasons
         self.episodes = self.db.episodes
         self.people = self.db.people
-        self.sync_delay = self.configuration.repository['Default']['sync delay']
     
     
     def base_init(self):
@@ -83,7 +86,7 @@ class EntityManager(object):
     
     
     def refresh_tmdb_genres(self):
-        url = self.configuration.repository['Database']['tmdb']['urls']['Genres.getList']
+        url = self.configuration.tmdb['urls']['Genres.getList']
         handler = TmdbJsonHandler(self, url)
         handler.refresh()
         element_list = handler.element()
@@ -101,7 +104,7 @@ class EntityManager(object):
     
     def refresh_itmf_genres(self):
         count = 0
-        for genre in self.configuration.property['gnre']:
+        for genre in self.configuration.genre:
             count += 1
             self.store_itmf_genre(genre['print'], genre['code'])
         self.logger.info(u'Refreshed %s iTMF genres', count)
@@ -362,7 +365,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         person = self.people.find_one({u'tmdb_id':tmdb_id})
-        url = self.configuration.repository['Database']['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
+        url = self.configuration.tmdb['urls']['Person.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -389,7 +392,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         movie = self.movies.find_one({u'tmdb_id':tmdb_id})
-        url = self.configuration.repository['Database']['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
+        url = self.configuration.tmdb['urls']['Movie.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -431,7 +434,7 @@ class EntityManager(object):
     
     def find_tmdb_movie_id_by_imdb_id(self, imdb_id):
         tmdb_id = None
-        url = self.configuration.repository['Database']['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
+        url = self.configuration.tmdb['urls']['Movie.imdbLookup'].format(imdb_id)
         handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
@@ -480,7 +483,7 @@ class EntityManager(object):
     def find_tmdb_person_id_by_name(self, name):
         person = None
         clean = collapse_whitespace.sub(u' ', name).lower()
-        url = self.configuration.repository['Database']['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
+        url = self.configuration.tmdb['urls']['Person.search'].format(format_tmdb_query(clean))
         handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
@@ -554,7 +557,7 @@ class EntityManager(object):
         tvdb_id = int(tvdb_id)
         show = self.shows.find_one({'tvdb_id':tvdb_id})
         if show is not None:
-            url = self.configuration.repository['Database']['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
+            url = self.configuration.tvdb['urls']['Show.getInfo'].format(tvdb_id)
             handler = TvdbXmlHandler(self, url)
             if refresh: handler.refresh()
             element = handler.element()
@@ -759,7 +762,7 @@ class EntityManager(object):
         if value is not None:
             value = self.tvdb_person_name_junk.sub(u'', value)
             value = value.strip()
-            if len(value) < self.configuration.repository['Database']['tvdb']['fuzzy']['minimum_person_name_length']:
+            if len(value) < self.configuration.tvdb['fuzzy']['minimum_person_name_length']:
                 value = None
         return value
     
@@ -770,7 +773,7 @@ class EntityManager(object):
 
 class ResourceHandler(object):
     def __init__(self, entity_manager, url):
-        self.logger = logging.getLogger('mp4pack.resource')
+        self.logger = logging.getLogger('Resource Handler')
         self.entity_manager = entity_manager
         self.remote_url = url
         self.local_path = self.local()
@@ -778,7 +781,7 @@ class ResourceHandler(object):
     
     
     def local(self):
-        return url_to_cache.sub(self.entity_manager.configuration.repository['Database']['cache'], self.remote_url)
+        return url_to_cache.sub(self.entity_manager.configuration.get_local_cache_path(), self.remote_url)
     
     
     def cache(self):
@@ -828,7 +831,7 @@ class ResourceHandler(object):
 class JsonHandler(ResourceHandler):
     def __init__(self, entity_manager, url):
         ResourceHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('mp4pack.json')
+        self.logger = logging.getLogger('Json Handler')
     
     
     def element(self):
@@ -851,7 +854,7 @@ class JsonHandler(ResourceHandler):
 class ImageHandler(ResourceHandler):
     def __init__(self, entity_manager, url):
         ResourceHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('mp4pack.image')
+        self.logger = logging.getLogger('Image Handler')
     
     
     def cache(self):
@@ -867,7 +870,7 @@ class ImageHandler(ResourceHandler):
 class XmlHandler(ResourceHandler):
     def __init__(self, entity_manager, url):
         ResourceHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('mp4pack.xml')
+        self.logger = logging.getLogger('Xml Handler')
     
     
     def element(self):
@@ -887,12 +890,12 @@ class XmlHandler(ResourceHandler):
 class TmdbJsonHandler(JsonHandler):
     def __init__(self, entity_manager, url):
         JsonHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('mp4pack.tmdb')
+        self.logger = logging.getLogger('Tmdb Json Handler')
     
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.repository['Database']['tmdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.tmdb['apikey']), u'')
         return result
     
     
@@ -910,12 +913,12 @@ class TmdbJsonHandler(JsonHandler):
 class TvdbXmlHandler(XmlHandler):
     def __init__(self, entity_manager, url):
         XmlHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('mp4pack.tvdb')
+        self.logger = logging.getLogger('Tvdb Xml Handler')
     
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.repository['Database']['tvdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.tvdb['apikey']), u'')
         result = result.replace(u'/all', u'')
         return result
     
@@ -924,8 +927,8 @@ class TvdbXmlHandler(XmlHandler):
 
 class TvdbImageHandler(ImageHandler):
     def __init__(self, entity_manager, url):
-        ImageHandler.__init__(self, entity_manager, self.entity_manager.configuration.repository['Database']['tvdb']['urls']['Banner.getImage'].format(url))
-        self.logger = logging.getLogger('mp4pack.image')
+        ImageHandler.__init__(self, entity_manager, self.entity_manager.configuration.tvdb['urls']['Banner.getImage'].format(url))
+        self.logger = logging.getLogger('Tvdb Image Handler')
     
     
 

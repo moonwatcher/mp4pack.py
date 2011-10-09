@@ -3,6 +3,8 @@
 
 import re
 import os
+import copy
+import logging
 from subprocess import Popen, PIPE
 from datetime import timedelta
 
@@ -2548,10 +2550,71 @@ repository_config = {
         'threads':8,
         'sync delay':timedelta(days=14),
     },
+    'Repository':{
+        'aeon':{
+            'name':'aeon',
+            'local':{
+                'mongodb':{
+                    'name':'mp4pack',
+                    'uri':u'mongodb://mp4pack:poohbear@multivac.lan/mp4pack',
+                },
+                'cache':{
+                    'uri':u'/net/multivac/Volumes/alphaville/cache/',
+                },
+                'pool':{
+                    'uri':u'/pool',
+                }
+            },
+            'remote':{
+                'mongodb':{
+                    'name':'mp4pack',
+                    'uri':u'mongodb://mp4pack:poohbear@localhost:27017/mp4pack',
+                },
+                'cache':{
+                    'uri':u'/net/multivac/Volumes/alphaville/cache/',
+                    'host':u'galanti.no-ip.info',
+                    'port':u'22040',
+                },
+                'pool':{
+                    'uri':u'/pool',
+                    'host':u'galanti.no-ip.info',
+                    'port':u'22040',
+                }
+            }
+        },
+        'flux':{
+            'name':'flux',
+            'local':{
+                'mongodb':{
+                    'name':'mp4pack',
+                    'uri':u'mongodb://mp4pack:poohbear@diego.lan/mp4pack',
+                },
+                'cache':{
+                    'uri':u'/net/diego/var/cache/mpk/',
+                },
+                'pool':{
+                    'uri':u'/pool',
+                }
+            },
+            'remote':{
+                'mongodb':{
+                    'name':'mp4pack',
+                    'uri':u'mongodb://mp4pack:poohbear@localhost:27017/mp4pack',
+                },
+                'cache':{
+                    'uri':u'/net/diego/var/cache/mpk/',
+                    'host':u'gilgalanti.no-ip.info',
+                    'port':u'22040',
+                },
+                'pool':{
+                    'uri':u'/pool',
+                    'host':u'gilgalanti.no-ip.info',
+                    'port':u'22040',
+                }
+            }
+        },
+    },
     'Database':{
-        'cache':cache_path,
-        'uri':db_uri,
-        'name':'mp4pack',
         'tmdb':{
             'apikey':tmdb_apikey,
             'urls':{
@@ -3610,29 +3673,138 @@ subtitle_config = {
 
 class Configuration(object):
     def __init__(self):
-        self.options = None
-        self.property = media_property
-        self.repository = repository_config
-        self.subtitle = subtitle_config
-        self.property_map = {}
+        self.logger = logging.getLogger('Configuration')
+        self.default_repository_config = repository_config
+        self.default_media_property_config = media_property
+        self.default_subtitle_config = subtitle_config
         
-        self.locate_commands()
-        self.load_default()
+        self.kind = None
+        self.volume = None
+        self.command = None
+        self.action = None
+        self.format = None
+        self.runtime = None
+        self.subtitle = None
+        self.repository = None
+        
+        self.options = None
+        self.property_map = None
+        
+        self.local_repository = None
+        self.active_repository = None
+        
+        self.track_with_language = None
+        self.kind_with_language = None
+        self.supported_media_kind = None
+        self.available_profiles = None
+        self.available_commands = None
+        
+        self.subtitle = None
+        self.tmdb = None
+        self.tvdb = None
+        self.genre = None
+        
+        self.load_default_config()
     
     
-    def load_default(self):
-        self.build_property_map()
+    def load_default_config(self):
+        self.subtitle = subtitle_config
+        self.tmdb = self.default_repository_config['Database']['tmdb']
+        self.tvdb = self.default_repository_config['Database']['tvdb']
+        self.genre = self.default_media_property_config['gnre']
+        
+        self.load_format()
+        self.load_runtime()
+        self.load_command()
+        self.load_action()
+        self.load_kind()
+        self.load_volume()
+        self.load_repository()
+        self.load_property_map()
         
         self.track_with_language = ('audio', 'subtitles', 'video')
         self.kind_with_language = self.property_map['container']['subtitles']['kind'] + self.property_map['container']['raw audio']['kind']
-        self.supported_media_kind = [ mk for mk in self.property['stik'] if 'schema' in mk ]
+        self.supported_media_kind = [ mk for mk in self.default_media_property_config['stik'] if 'schema' in mk ]
+        
         self.available_profiles = []
-        for v in self.repository['Kind'].values():
+        for v in self.kind.values():
             self.available_profiles.extend(v['Profile'].keys())
         self.available_profiles = tuple(set(self.available_profiles))
+        
     
     
-    def build_property_map(self):
+    def load_runtime(self):
+        self.runtime = {}
+        for k,v in self.default_repository_config['Default'].iteritems():
+            self.runtime[k] = v
+    
+    
+    def load_format(self):
+        self.format = {}
+        self.format['wrap width'] = self.default_repository_config['Display']['wrap']
+        self.format['indent width'] = self.default_repository_config['Display']['indent']
+        self.format['margin width'] = self.default_repository_config['Display']['margin']
+        
+        self.format['indent'] = u'\n' + u' ' * self.format['indent width']
+        self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format(self.format['wrap width'] + self.format['indent width'], u' ' * self.format['margin width'])
+        self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format(self.format['indent width'] - self.format['margin width'] - 3, u' ' * self.format['margin width'])
+        self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format(self.format['indent width'] - self.format['margin width'] - 2, u' ' * self.format['margin width'])
+        self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
+        
+        
+        
+        
+        
+    
+    
+    def load_command(self):
+        self.command = {}
+        self.available_commands = []
+        for k,v in self.default_repository_config['Command'].iteritems():
+            self.command[k] = copy.deepcopy(v)
+            
+            cmd = ['which', v['binary']]
+            proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            report = proc.communicate()
+            if report[0]:
+                self.command[k]['path'] = report[0].splitlines()[0]
+                self.available_commands.append(k)
+        self.available_commands = set(self.available_commands)
+    
+    
+    def load_action(self):
+        self.action = {}
+        for k,v in self.default_repository_config['Action'].iteritems():
+            self.action[k] = copy.deepcopy(v)
+            self.action[k]['active'] = False
+            if 'depend' in v:
+                if set(v['depend']).issubset(self.available_commands):
+                    self.action[k]['active'] = True
+                    self.logger.debug(u'Action %s dependencies are satisfied', k)
+                else:
+                    self.logger.warning(u'Action %s has unsatisfied dependencies', k)
+    
+    
+    def load_kind(self):
+        self.kind = {}
+        for k,v in self.default_repository_config['Kind'].iteritems():
+            self.kind[k] = copy.deepcopy(v)
+    
+    
+    def load_volume(self):
+        self.volume = {}
+        for k,v in self.default_repository_config['Volume'].iteritems():
+            self.volume[k] = copy.deepcopy(v)
+    
+    
+    def load_repository(self):
+        self.repository = {}
+        for k,v in self.default_repository_config['Repository'].iteritems():
+            self.repository[k] = copy.deepcopy(v)
+    
+    
+    def load_property_map(self):
+        self.property_map = {}
         for key in ('name', 'mediainfo', 'mp4info'):
             if key not in self.property_map:
                 self.property_map[key] = {}
@@ -3642,7 +3814,7 @@ class Configuration(object):
                 if block not in self.property_map[key]:
                     self.property_map[key][block] = {}
                     
-                for p in self.property[block]:
+                for p in self.default_media_property_config[block]:
                     if key in p and p[key] is not None:
                         self.property_map[key][block][p[key]] = p
             
@@ -3651,11 +3823,11 @@ class Configuration(object):
             for block in ('audio', 'video', 'text', 'image'):
                 if block not in self.property_map[key]['track']:
                     self.property_map[key]['track'][block] = {}
-                for p in self.property['track']['common']:
+                for p in self.default_media_property_config['track']['common']:
                     if key in p and p[key] is not None:
                         self.property_map[key]['track'][block][p[key]] = p
                     
-                for p in self.property['track'][block]:
+                for p in self.default_media_property_config['track'][block]:
                     if key in p and p[key] is not None:
                         self.property_map[key]['track'][block][p[key]] = p
         
@@ -3664,7 +3836,7 @@ class Configuration(object):
             if key not in self.property_map:
                 self.property_map[key] = {}
             self.property_map[key]['itunemovi'] = {}
-            for p in self.property['itunemovi']:
+            for p in self.default_media_property_config['itunemovi']:
                 self.property_map[key]['itunemovi'][p[key]] = p
         
         # Build special iTunes atom map
@@ -3674,7 +3846,7 @@ class Configuration(object):
             for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
                 if block not in self.property_map[key]:
                     self.property_map[key][block] = {}
-                for p in self.property[block]:
+                for p in self.default_media_property_config[block]:
                     self.property_map[key][block][p[key]] = p
         
         # Build language code map
@@ -3682,18 +3854,18 @@ class Configuration(object):
             if key not in self.property_map:
                 self.property_map[key] = {}
             self.property_map[key]['language'] = {}
-            for p in self.property['language']:
+            for p in self.default_media_property_config['language']:
                 if key in p:
                     self.property_map[key]['language'][p[key]] = p
         
         # Build container kind map
         self.property_map['container'] = {}
-        for c in tuple(set([ v['container'] for k,v in self.repository['Kind'].iteritems() ])):
-            self.property_map['container'][c] = {'kind':[ k for (k,v) in self.repository['Kind'].iteritems() if v['container'] == c ]}
+        for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
+            self.property_map['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
             
         # Build volume map
         self.property_map['volume'] = {}
-        for k,v in self.repository['Volume'].iteritems():
+        for k,v in self.volume.iteritems():
             v['realpath'] = os.path.realpath(v['path'])
             alt = []
             alt.append(v['path'])
@@ -3704,17 +3876,26 @@ class Configuration(object):
                 self.property_map['volume'][p] = v
     
     
-    def locate_commands(self):
-        for c in self.repository['Command']:
-            command = ['which', self.repository['Command'][c]['binary']]
-            proc = Popen(command, stdout=PIPE, stderr=PIPE)
-            report = proc.communicate()
-            if report[0]:
-                self.repository['Command'][c]['path'] = report[0].splitlines()[0]
-            else:
-                result = False
-                self.repository['Command'][c]['path'] = None
+    def load_options(self, options):
+        self.options = options
+        if options.location in self.repository:
+            self.local_repository = self.repository[options.location]
+        if options.repository in self.repository:
+            self.active_repository = self.repository[options.repository]
     
     
+    def get_active_mongodb_config(self):
+        if self.local_repository['name'] == self.active_repository['name']:
+            self.logger.debug(u'Configuring local mongodb access to %s', self.active_repository['name'])
+            return self.active_repository['local']['mongodb']
+        else:
+            self.logger.debug(u'Configuring remote mongodb access to %s', self.active_repository['name'])
+            return self.active_repository['remote']['mongodb']
+    
+    
+    def get_local_cache_path(self):
+        return self.local_repository['local']['cache']['uri']
+    
+
 
 
