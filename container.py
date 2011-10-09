@@ -331,14 +331,15 @@ class Container(object):
             dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
             if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                 command = self.factory.util.initialize_command('rsync', self.logger)
-                command.extend([self.file_path, dest_path])
-                message = u'Copy ' + self.file_path + u' --> ' + dest_path
-                self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                if self.factory.util.clean_if_not_exist(dest_path):
-                    result = dest_path
-                    self.queue_for_index(dest_path)
-                    if options.md5:
-                        self.compare_checksum(dest_path)
+                if command:
+                    command.extend([self.file_path, dest_path])
+                    message = u'Copy ' + self.file_path + u' --> ' + dest_path
+                    self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                    if self.factory.util.clean_if_not_exist(dest_path):
+                        result = dest_path
+                        self.queue_for_index(dest_path)
+                        if options.md5:
+                            self.compare_checksum(dest_path)
         return result
     
     
@@ -357,11 +358,12 @@ class Container(object):
             if self.factory.util.check_if_path_available(dest_path, False):
                 self.factory.util.varify_directory(dest_path)
                 command = self.factory.util.initialize_command('mv', self.logger)
-                command.extend([self.file_path, dest_path])
-                message = u'Rename {0} --> {1}'.format(self.file_path, dest_path)
-                self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                self.drop_from_index(self.file_path)
-                self.queue_for_index(dest_path)
+                if command:
+                    command.extend([self.file_path, dest_path])
+                    message = u'Rename {0} --> {1}'.format(self.file_path, dest_path)
+                    self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                    self.drop_from_index(self.file_path)
+                    self.queue_for_index(dest_path)
             else:
                 self.logger.warning(u'Not renaming %s, destination exists: %s', self.file_path, dest_path)
     
@@ -674,12 +676,13 @@ class AudioVideoContainer(Container):
                     pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
                     if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                         command = self.factory.util.initialize_command('subler', self.logger)
-                        command.extend([u'-o', dest_path, u'-i', self.file_path])
-                        
-                        message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
-                        self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
-                        if self.factory.util.clean_if_not_exist(dest_path):
-                            self.queue_for_index(dest_path)
+                        if command:
+                            command.extend([u'-o', dest_path, u'-i', self.file_path])
+                            
+                            message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
+                            self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                            if self.factory.util.clean_if_not_exist(dest_path):
+                                self.queue_for_index(dest_path)
                             
         elif options.pack in ('mkv'):
             path_info['kind'] = 'mkv'
@@ -713,88 +716,89 @@ class AudioVideoContainer(Container):
                     
                     if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                         command = self.factory.util.initialize_command('mkvmerge', self.logger)
-                        command.extend([u'--output', dest_path, u'--no-global-tags', u'--no-track-tags', u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
-                        
-                        full_name = None
-                        if 'name' in self.record['entity']:
-                            full_name = self.factory.util.full_name(self.path_info, self.record)
-                            if full_name:
-                                command.append(u'--title')
-                                command.append(full_name)
-                        for t in selected['track']['video']:
-                            if full_name:
-                                command.append(u'--track-name')
-                                command.append(u'{0}:{1}'.format(t['id'], full_name))
-                            if 'language' in t:
-                                command.append(u'--language')
-                                command.append(u'{0}:{1}'.format(t['id'], self.factory.util.find_language(t['language'])['iso2']))
+                        if command:
+                            command.extend([u'--output', dest_path, u'--no-global-tags', u'--no-track-tags', u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
+                            
+                            full_name = None
+                            if 'name' in self.record['entity']:
+                                full_name = self.factory.util.full_name(self.path_info, self.record)
+                                if full_name:
+                                    command.append(u'--title')
+                                    command.append(full_name)
+                            for t in selected['track']['video']:
+                                if full_name:
+                                    command.append(u'--track-name')
+                                    command.append(u'{0}:{1}'.format(t['id'], full_name))
+                                if 'language' in t:
+                                    command.append(u'--language')
+                                    command.append(u'{0}:{1}'.format(t['id'], self.factory.util.find_language(t['language'])['iso2']))
                                 
-                        for t in selected['track']['audio']:
-                            if 'channels' in t:
-                                if t['channels'] < 2: tname = 'Mono'
-                                elif t['channels'] > 2: tname = 'Surround'
-                                else: tname = 'Stereo'
-                                command.append(u'--track-name')
-                                command.append(u'{0}:{1}'.format(t['id'], tname))
-                            if 'language' in t:
-                                command.append(u'--language')
-                                command.append(u'{0}:{1}'.format(t['id'], self.factory.util.find_language(t['language'])['iso2']))
-                                
-                        command.append(u'--audio-tracks')
-                        command.append(u','.join([ unicode(k['id']) for k in selected['track']['audio'] ]))
-                        command.append(u'--video-tracks')
-                        command.append(u','.join([ unicode(k['id']) for k in selected['track']['video'] ]))
-                        command.append(self.file_path)
-                        
-                        if 'ac3' in selected['related']:
-                            for r in selected['related']['ac3']:
-                                # try to locate the DTS sound track from which the AC-3 track was transcoded
-                                # if a match is found duplicate the delay
-                                # checking exact duration ir sample cound migth be more accurate
-                                ac3_record = self.record['entity']['physical'][r]
-                                lookup = {'codec':'DTS', 'language':ac3_record['path info']['language']}
-                                for t in self.info['track']:
-                                    if all((k in t and t[k] == v) for k,v in lookup.iteritems()):
-                                        if 'delay' in t and t['delay'] != 0:
-                                            self.logger.debug(u'Found a matching DTS track with non trivial delay of %d', t['delay'])
-                                            command.append(u'--sync')
-                                            command.append(u'0:{0}'.format(t['delay']))
-                                            break
-                                if 'channels' in ac3_record['info']['track'][0]:
-                                    channels = ac3_record['info']['track'][0]['channels']
-                                    if channels < 2: tname = 'Mono'
-                                    elif channels > 2: tname = 'Surround'
+                            for t in selected['track']['audio']:
+                                if 'channels' in t:
+                                    if t['channels'] < 2: tname = 'Mono'
+                                    elif t['channels'] > 2: tname = 'Surround'
                                     else: tname = 'Stereo'
                                     command.append(u'--track-name')
-                                    command.append(u'0:{0}'.format(tname))
-                                command.append(u'--language')
-                                command.append(u'0:{0}'.format(self.factory.util.find_language(ac3_record['path info']['language'])['iso2']))
-                                command.append(r)
-                        
-                        if 'srt' in selected['related']:
-                            for r in selected['related']['srt']:
-                                path_info = self.record['entity']['physical'][r]['path info']
-                                command.append(u'--sub-charset')
-                                command.append(u'0:UTF-8')
-                                command.append(u'--language')
-                                command.append(u'0:{0}'.format(self.factory.util.find_language(path_info['language'])['iso2']))
-                                command.append(r)
-                        
-                        if 'txt' in selected['related']:
-                            for r in selected['related']['txt']:
-                                path_info = self.record['entity']['physical'][r]['path info']
-                                command.append(u'--chapter-language')
-                                command.append(u'en')
-                                command.append(u'--chapter-charset')
-                                command.append(u'UTF-8')
-                                command.append(u'--chapters')
-                                command.append(r)
-                                break
+                                    command.append(u'{0}:{1}'.format(t['id'], tname))
+                                if 'language' in t:
+                                    command.append(u'--language')
+                                    command.append(u'{0}:{1}'.format(t['id'], self.factory.util.find_language(t['language'])['iso2']))
                                 
-                        message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
-                        self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
-                        if self.factory.util.clean_if_not_exist(dest_path):
-                            self.queue_for_index(dest_path)
+                            command.append(u'--audio-tracks')
+                            command.append(u','.join([ unicode(k['id']) for k in selected['track']['audio'] ]))
+                            command.append(u'--video-tracks')
+                            command.append(u','.join([ unicode(k['id']) for k in selected['track']['video'] ]))
+                            command.append(self.file_path)
+                            
+                            if 'ac3' in selected['related']:
+                                for r in selected['related']['ac3']:
+                                    # try to locate the DTS sound track from which the AC-3 track was transcoded
+                                    # if a match is found duplicate the delay
+                                    # checking exact duration ir sample cound migth be more accurate
+                                    ac3_record = self.record['entity']['physical'][r]
+                                    lookup = {'codec':'DTS', 'language':ac3_record['path info']['language']}
+                                    for t in self.info['track']:
+                                        if all((k in t and t[k] == v) for k,v in lookup.iteritems()):
+                                            if 'delay' in t and t['delay'] != 0:
+                                                self.logger.debug(u'Found a matching DTS track with non trivial delay of %d', t['delay'])
+                                                command.append(u'--sync')
+                                                command.append(u'0:{0}'.format(t['delay']))
+                                                break
+                                    if 'channels' in ac3_record['info']['track'][0]:
+                                        channels = ac3_record['info']['track'][0]['channels']
+                                        if channels < 2: tname = 'Mono'
+                                        elif channels > 2: tname = 'Surround'
+                                        else: tname = 'Stereo'
+                                        command.append(u'--track-name')
+                                        command.append(u'0:{0}'.format(tname))
+                                    command.append(u'--language')
+                                    command.append(u'0:{0}'.format(self.factory.util.find_language(ac3_record['path info']['language'])['iso2']))
+                                    command.append(r)
+                                    
+                            if 'srt' in selected['related']:
+                                for r in selected['related']['srt']:
+                                    path_info = self.record['entity']['physical'][r]['path info']
+                                    command.append(u'--sub-charset')
+                                    command.append(u'0:UTF-8')
+                                    command.append(u'--language')
+                                    command.append(u'0:{0}'.format(self.factory.util.find_language(path_info['language'])['iso2']))
+                                    command.append(r)
+                                    
+                            if 'txt' in selected['related']:
+                                for r in selected['related']['txt']:
+                                    path_info = self.record['entity']['physical'][r]['path info']
+                                    command.append(u'--chapter-language')
+                                    command.append(u'en')
+                                    command.append(u'--chapter-charset')
+                                    command.append(u'UTF-8')
+                                    command.append(u'--chapters')
+                                    command.append(r)
+                                    break
+                                
+                            message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
+                            self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                            if self.factory.util.clean_if_not_exist(dest_path):
+                                self.queue_for_index(dest_path)
     
     
     def transcode(self, options):
@@ -809,48 +813,49 @@ class AudioVideoContainer(Container):
                     command = None
                     if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                         command = self.factory.util.initialize_command('handbrake', self.logger)
-                        tc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]['transcode']
-                        
-                        if 'flags' in tc:
-                            for v in tc['flags']:
-                                command.append(v)
-                                
-                        if 'options' in tc:
-                            hb_config = copy.deepcopy(tc['options'])
-                            if options.pixel_width: hb_config['--maxWidth'] = options.pixel_width
-                            if options.quality: hb_config['--quality'] = options.quality
-                            if options.crop: hb_config['--crop'] = options.crop
+                        if command:
+                            tc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]['transcode']
                             
-                            for (k,v) in hb_config.iteritems():
-                                command.append(k)
-                                command.append(unicode(v))
+                            if 'flags' in tc:
+                                for v in tc['flags']:
+                                    command.append(v)
+                                    
+                            if 'options' in tc:
+                                hb_config = copy.deepcopy(tc['options'])
+                                if options.pixel_width: hb_config['--maxWidth'] = options.pixel_width
+                                if options.quality: hb_config['--quality'] = options.quality
+                                if options.crop: hb_config['--crop'] = options.crop
                                 
-                        found_audio = False
-                        audio_options = {'--audio':[]}
-                        for s in tc['audio']:
-                            for idx, t in enumerate(self.audio_tracks()):
-                                for c in s:
-                                    if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
-                                        found_audio = True
-                                        audio_options['--audio'].append(unicode(idx + 1))
-                                        for (k,v) in c['to'].iteritems():
-                                            if k not in audio_options: audio_options[k] = []
-                                            audio_options[k].append(unicode(v))
-                                        
-                            if found_audio:
-                                break
-                            
-                        if found_audio:
-                            for (k,v) in audio_options.iteritems():
-                                if v:
+                                for (k,v) in hb_config.iteritems():
                                     command.append(k)
-                                    command.append(u','.join(v))
-                        command.extend([u'--input', self.file_path, u'--output', dest_path])
-                        message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
-                        self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
-                        if self.factory.util.clean_if_not_exist(dest_path):
-                            self.queue_for_index(dest_path)
-                            result = dest_path
+                                    command.append(unicode(v))
+                                    
+                            found_audio = False
+                            audio_options = {'--audio':[]}
+                            for s in tc['audio']:
+                                for idx, t in enumerate(self.audio_tracks()):
+                                    for c in s:
+                                        if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
+                                            found_audio = True
+                                            audio_options['--audio'].append(unicode(idx + 1))
+                                            for (k,v) in c['to'].iteritems():
+                                                if k not in audio_options: audio_options[k] = []
+                                                audio_options[k].append(unicode(v))
+                                        
+                                if found_audio:
+                                    break
+                                    
+                            if found_audio:
+                                for (k,v) in audio_options.iteritems():
+                                    if v:
+                                        command.append(k)
+                                        command.append(u','.join(v))
+                            command.extend([u'--input', self.file_path, u'--output', dest_path])
+                            message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
+                            self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                            if self.factory.util.clean_if_not_exist(dest_path):
+                                self.queue_for_index(dest_path)
+                                result = dest_path
         return result
     
     
@@ -1027,19 +1032,20 @@ class Matroska(AudioVideoContainer):
                                 
         if selected['track']:
             command = self.factory.util.initialize_command('mkvextract', self.logger)
-            command.extend([u'tracks', self.file_path ])
-            for t in selected['track']:
-                if 'volume' in path_info: del path_info['volume']
-                path_info['kind'] = t['kind']
-                path_info['language'] = t['language']
-                if self.factory.util.complete_path_info_default_values(path_info):
-                    dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-                    if dest_path not in selected['path'][t['type']]:
-                        if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                            command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
-                            selected['path'][t['type']].append(dest_path)
-                    else:
-                        self.logger.warning('Skipping track %s of type %s because %s is taken', t['id'], t['type'], dest_path)
+            if command:
+                command.extend([u'tracks', self.file_path ])
+                for t in selected['track']:
+                    if 'volume' in path_info: del path_info['volume']
+                    path_info['kind'] = t['kind']
+                    path_info['language'] = t['language']
+                    if self.factory.util.complete_path_info_default_values(path_info):
+                        dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
+                        if dest_path not in selected['path'][t['type']]:
+                            if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+                                command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
+                                selected['path'][t['type']].append(dest_path)
+                        else:
+                            self.logger.warning('Skipping track %s of type %s because %s is taken', t['id'], t['type'], dest_path)
                             
         if selected['path']['text'] or selected['path']['audio']:
             message = u'Extract {0} subtitle and {1} audio tracks from {2}'.format(
@@ -1135,9 +1141,10 @@ class Mpeg4(AudioVideoContainer):
             tc = u''.join([self.factory.util.format_key_value_for_subler(t, update[t]) for t in sorted(set(update))])
             message = u'Update tags: {0} --> {1}'.format(u', '.join([self.factory.configuration.property_map['name']['tag'][t]['print'] for t in sorted(set(update.keys()))]), self.file_path)
             command = self.factory.util.initialize_command('subler', self.logger)
-            command.extend([u'-o', self.file_path, u'-t', tc])
-            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-            self.queue_for_index(self.file_path)
+            if command:
+                command.extend([u'-o', self.file_path, u'-t', tc])
+                self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                self.queue_for_index(self.file_path)
             
         else:
             self.logger.info(u'No tags need update in %s', self.file_path)
@@ -1147,9 +1154,10 @@ class Mpeg4(AudioVideoContainer):
         AudioVideoContainer.optimize(self, options)
         message = u'Optimize {0}'.format(self.file_path)
         command = self.factory.util.initialize_command('subler', self.logger)
-        command.extend([u'-O', u'-o', self.file_path])
-        self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-        self.queue_for_index(self.file_path)
+        if command:
+            command.extend([u'-O', u'-o', self.file_path])
+            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+            self.queue_for_index(self.file_path)
         
     
     
@@ -1170,9 +1178,10 @@ class Mpeg4(AudioVideoContainer):
             if selected:
                 message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
                 command = self.factory.util.initialize_command('subler', self.logger)
-                command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
-                self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                self.queue_for_index(self.file_path)
+                if command:
+                    command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
+                    self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                    self.queue_for_index(self.file_path)
             else:
                 self.logger.warning(u'No artwork available for %s', self.file_path)
     
@@ -1194,9 +1203,10 @@ class Mpeg4(AudioVideoContainer):
             if selected:
                 message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
                 command = self.factory.util.initialize_command('subler', self.logger)
-                command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
-                self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                self.queue_for_index(self.file_path)
+                if command:
+                    command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
+                    self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                    self.queue_for_index(self.file_path)
             else:
                 self.logger.warning(u'No artwork available for %s', self.file_path)
     
@@ -1213,10 +1223,11 @@ class Mpeg4(AudioVideoContainer):
                     if pc['update']['reset']:
                         message = u'Drop existing subtitle tracks in {0}'.format(self.file_path)
                         command = self.factory.util.initialize_command('subler', self.logger)
-                        command.extend([u'-o', self.file_path, u'-r'])
-                        self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                        has_changed = True
-                    
+                        if command:
+                            command.extend([u'-o', self.file_path, u'-r'])
+                            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                            has_changed = True
+                            
                     if 'related' in pc['update']:
                         selected = {}
                         for (path, phy) in self.record['entity']['physical'].iteritems():
@@ -1228,34 +1239,36 @@ class Mpeg4(AudioVideoContainer):
                         for (p,i) in selected.iteritems():
                             message = u'Update subtitles {0} --> {1}'.format(p, self.file_path)
                             command = self.factory.util.initialize_command('subler', self.logger)
-                            command.extend([
-                                u'-o', self.file_path,
-                                u'-i', p, 
-                                u'-l', self.factory.configuration.property_map['iso3t']['language'][i['language']]['print'],
-                                u'-n', c['to']['Name'], 
-                                u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
-                            ])
-                            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                            has_changed = True
-                            
+                            if command:
+                                command.extend([
+                                    u'-o', self.file_path,
+                                    u'-i', p, 
+                                    u'-l', self.factory.configuration.property_map['iso3t']['language'][i['language']]['print'],
+                                    u'-n', c['to']['Name'], 
+                                    u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
+                                ])
+                                self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                                has_changed = True
+                                
                         if 'smart' in pc['update']:
                             smart_section = pc['update']['smart']
                             found = False
                             for code in smart_section['order']:
                                 for (p,i) in selected.iteritems():
                                     if i['language'] == code:
+                                        found = True
                                         message = u'Update smart {0} subtitles {1} --> {2}'.format(self.factory.configuration.property_map['iso3t']['language'][code]['print'], p, self.file_path)
                                         command = self.factory.util.initialize_command('subler', self.logger)
-                                        command.extend([
-                                            u'-o', self.file_path, 
-                                            u'-i', p, 
-                                            u'-l', self.factory.configuration.property_map['iso3t']['language'][smart_section['language']]['print'],
-                                            u'-n', smart_section['Name'],
-                                            u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
-                                        ])
-                                        self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                                        found = True
-                                        has_changed = True
+                                        if command:
+                                            command.extend([
+                                                u'-o', self.file_path, 
+                                                u'-i', p, 
+                                                u'-l', self.factory.configuration.property_map['iso3t']['language'][smart_section['language']]['print'],
+                                                u'-n', smart_section['Name'],
+                                                u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
+                                            ])
+                                            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                                            has_changed = True
                                         break
                                 if found: break
                     if has_changed:
@@ -1274,8 +1287,9 @@ class Mpeg4(AudioVideoContainer):
                     if pc['update']['reset'] and self.info['menu']:
                         message = u'Drop existing chapters in {0}'.format(self.file_path)
                         command = self.factory.util.initialize_command('subler', self.logger)
-                        command.extend([u'-o', self.file_path, u'-r', u'-c', u'/dev/null'])
-                        self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                        if command:
+                            command.extend([u'-o', self.file_path, u'-r', u'-c', u'/dev/null'])
+                            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                     if 'related' in pc['update']:
                         lookup = pc['update']['related']
                         for (path, phy) in self.record['entity']['physical'].iteritems():
@@ -1286,9 +1300,10 @@ class Mpeg4(AudioVideoContainer):
                         if selected:
                             message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
                             command = self.factory.util.initialize_command('subler', self.logger)
-                            command.extend([u'-o', self.file_path, u'-c', selected[0], '-p'])
-                            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                            self.queue_for_index(self.file_path)
+                            if command:
+                                command.extend([u'-o', self.file_path, u'-c', selected[0], '-p'])
+                                self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                                self.queue_for_index(self.file_path)
                         else:
                             self.logger.warning(u'No chapters available for %s', self.file_path)
     
@@ -1332,18 +1347,19 @@ class RawAudio(AudioVideoContainer):
                     if option:
                         message = u'Transcode audio {0} --> {1}'.format(self.file_path, dest_path)
                         command = self.factory.util.initialize_command('ffmpeg', self.logger)
-                        command.extend([
-                            u'-threads',u'{0}'.format(self.factory.configuration.runtime['threads']),
-                            u'-i', self.file_path,
-                            u'-acodec', u'ac3',
-                            u'-ac', u'{0}'.format(track['channels']),
-                            u'-ab', u'{0}k'.format(option['to']['-ab']),
-                            dest_path
-                        ])
-                        self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                        if self.factory.util.clean_if_not_exist(dest_path):
-                            self.queue_for_index(dest_path)
-                            result = dest_path
+                        if command:
+                            command.extend([
+                                u'-threads',u'{0}'.format(self.factory.configuration.runtime['threads']),
+                                u'-i', self.file_path,
+                                u'-acodec', u'ac3',
+                                u'-ac', u'{0}'.format(track['channels']),
+                                u'-ab', u'{0}k'.format(option['to']['-ab']),
+                                dest_path
+                            ])
+                            self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                            if self.factory.util.clean_if_not_exist(dest_path):
+                                self.queue_for_index(dest_path)
+                                result = dest_path
         return result
     
     
@@ -1983,102 +1999,103 @@ class FileUtil(object):
     def decode_info(self, path):
         info = None
         command = self.initialize_command('mediainfo', self.logger)
-        command.extend([u'--Language=raw', u'--Output=XML', u'-f', path])
-        proc_mediainfo = Popen(command, stdout=PIPE, stderr=PIPE)
-        proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
-        report = proc_grep.communicate()
-        element = ElementTree.fromstring(report[0])
-        file_nodes = element.findall(u'File')
-        if file_nodes:
-            track_nodes = file_nodes[0].findall(u'track')
-            if track_nodes:
-                info = {'file':{}, 'tag':{}, 'track':[], 'menu':[]}
-                for tn in track_nodes:
-                    if 'type' in tn.attrib:
-                        track_type = tn.attrib['type'].lower()
-                        if track_type == 'general':
-                            for t in tn:
-                                if t.tag in self.factory.configuration.property_map['mediainfo']['tag']:
-                                    p = self.factory.configuration.property_map['mediainfo']['tag'][t.tag]
-                                    info['tag'][p['name']] = t.text
-                                elif t.tag in self.factory.configuration.property_map['mediainfo']['file']:
-                                    p = self.factory.configuration.property_map['mediainfo']['file'][t.tag]
-                                    info['file'][p['name']] = t.text
-                        elif track_type in self.factory.configuration.property_map['mediainfo']['track']:
-                            track = {}
-                            for t in tn:
-                                if t.tag in self.factory.configuration.property_map['mediainfo']['track'][track_type]:
-                                    p = self.factory.configuration.property_map['mediainfo']['track'][track_type][t.tag]
-                                    value = self.convert_mediainfo_value(p['type'], t.text)
-                                    track[p['name']] = value
-                            if track:
-                                track['type'] = track_type
-                                if track_type == 'video':
-                                     if 'encoder settings' in track and 'encoder' in track and track['encoder'].count('x264'):
-                                         track['encoder settings'] = track['encoder settings'].split(' / ')
+        if command:
+            command.extend([u'--Language=raw', u'--Output=XML', u'-f', path])
+            proc_mediainfo = Popen(command, stdout=PIPE, stderr=PIPE)
+            proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
+            report = proc_grep.communicate()
+            element = ElementTree.fromstring(report[0])
+            file_nodes = element.findall(u'File')
+            if file_nodes:
+                track_nodes = file_nodes[0].findall(u'track')
+                if track_nodes:
+                    info = {'file':{}, 'tag':{}, 'track':[], 'menu':[]}
+                    for tn in track_nodes:
+                        if 'type' in tn.attrib:
+                            track_type = tn.attrib['type'].lower()
+                            if track_type == 'general':
+                                for t in tn:
+                                    if t.tag in self.factory.configuration.property_map['mediainfo']['tag']:
+                                        p = self.factory.configuration.property_map['mediainfo']['tag'][t.tag]
+                                        info['tag'][p['name']] = t.text
+                                    elif t.tag in self.factory.configuration.property_map['mediainfo']['file']:
+                                        p = self.factory.configuration.property_map['mediainfo']['file'][t.tag]
+                                        info['file'][p['name']] = t.text
+                            elif track_type in self.factory.configuration.property_map['mediainfo']['track']:
+                                track = {}
+                                for t in tn:
+                                    if t.tag in self.factory.configuration.property_map['mediainfo']['track'][track_type]:
+                                        p = self.factory.configuration.property_map['mediainfo']['track'][track_type][t.tag]
+                                        value = self.convert_mediainfo_value(p['type'], t.text)
+                                        track[p['name']] = value
+                                if track:
+                                    track['type'] = track_type
+                                    if track_type == 'video':
+                                         if 'encoder settings' in track and 'encoder' in track and track['encoder'].count('x264'):
+                                             track['encoder settings'] = track['encoder settings'].split(' / ')
                                 
-                                # check to see if language is not set and set it to default
-                                if track['type'] in self.factory.configuration.track_with_language:
-                                    if 'language' not in track or track['language'] == 'und':
-                                        track['language'] = self.factory.configuration.options.language
+                                    # check to see if language is not set and set it to default
+                                    if track['type'] in self.factory.configuration.track_with_language:
+                                        if 'language' not in track or track['language'] == 'und':
+                                            track['language'] = self.factory.configuration.options.language
                                 
-                                info['track'].append(track)
-                        elif track_type == 'menu':
-                            for t in tn:
-                                match = self.mediainfo_chapter_timecode.search(t.tag)
-                                if match != None:
-                                    c = {}
-                                    tc = match.groups()
-                                    c['time'] = (int(tc[0]) * 3600 + int(tc[1]) * 60 + int(tc[2])) * 1000 + int(tc[3])
-                                    c['name'] = t.text
-                                    info['menu'].append(c)
+                                    info['track'].append(track)
+                            elif track_type == 'menu':
+                                for t in tn:
+                                    match = self.mediainfo_chapter_timecode.search(t.tag)
+                                    if match != None:
+                                        c = {}
+                                        tc = match.groups()
+                                        c['time'] = (int(tc[0]) * 3600 + int(tc[1]) * 60 + int(tc[2])) * 1000 + int(tc[3])
+                                        c['name'] = t.text
+                                        info['menu'].append(c)
                 
-                # Add tag info from mp4info
-                if 'format' in info['file'] and info['file']['format'] == 'MPEG-4':
-                    self.parse_mp4info(path, info)
+                    # Add tag info from mp4info
+                    if 'format' in info['file'] and info['file']['format'] == 'MPEG-4':
+                        self.parse_mp4info(path, info)
                 
-                # Handle Special Atoms
-                if 'itunmovi' in info['tag'] and info['tag']['itunmovi']:
-                    info['tag']['itunmovi'] = info['tag']['itunmovi'].replace('&quot;', '"')
-                    info['tag']['itunmovi'] = self.clean_xml.sub(u'', info['tag']['itunmovi']).strip()
-                    plist = plistlib.readPlistFromString(info['tag']['itunmovi'].encode('utf-8'))
-                    for k,v in self.factory.configuration.property_map['plist']['itunemovi'].iteritems():
-                        if k in plist:
-                            l = [ unicode(n['name']) for n in plist[k]]
-                            if l: info['tag'][v['name']] = l
-                if 'itunextc' in info['tag']:
-                    match = self.itunextc_structure.search(info['tag']['itunextc'])
-                    if match is not None:
-                        info['tag']['rating standard'] = match.group(1)
-                        info['tag']['rating'] = match.group(2)
-                        info['tag']['rating score'] = match.group(3)
-                        info['tag']['rating annotation'] = match.group(4)
+                    # Handle Special Atoms
+                    if 'itunmovi' in info['tag'] and info['tag']['itunmovi']:
+                        info['tag']['itunmovi'] = info['tag']['itunmovi'].replace('&quot;', '"')
+                        info['tag']['itunmovi'] = self.clean_xml.sub(u'', info['tag']['itunmovi']).strip()
+                        plist = plistlib.readPlistFromString(info['tag']['itunmovi'].encode('utf-8'))
+                        for k,v in self.factory.configuration.property_map['plist']['itunemovi'].iteritems():
+                            if k in plist:
+                                l = [ unicode(n['name']) for n in plist[k]]
+                                if l: info['tag'][v['name']] = l
+                    if 'itunextc' in info['tag']:
+                        match = self.itunextc_structure.search(info['tag']['itunextc'])
+                        if match is not None:
+                            info['tag']['rating standard'] = match.group(1)
+                            info['tag']['rating'] = match.group(2)
+                            info['tag']['rating score'] = match.group(3)
+                            info['tag']['rating annotation'] = match.group(4)
                 
-                if 'track position' in info['tag']:
-                    info['tag']['track #'] = u'{0} / {1}'.format(info['tag']['track position'], info['tag']['track total'])
-                if 'disk position' in info['tag']:
-                    info['tag']['disk #'] = u'{0} / {1}'.format(info['tag']['disk position'], info['tag']['disk total'])
-                if 'cover' in info['tag']:
-                    info['tag']['cover'] = info['tag']['cover'].count('Yes')
-                if 'genre type' in info['tag']:
-                    info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
-                    if 'genre' not in info['tag']:
-                        info['tag']['genre'] = self.factory.configuration.property_map['code']['gnre'][info['tag']['genre type']]['print']
+                    if 'track position' in info['tag']:
+                        info['tag']['track #'] = u'{0} / {1}'.format(info['tag']['track position'], info['tag']['track total'])
+                    if 'disk position' in info['tag']:
+                        info['tag']['disk #'] = u'{0} / {1}'.format(info['tag']['disk position'], info['tag']['disk total'])
+                    if 'cover' in info['tag']:
+                        info['tag']['cover'] = info['tag']['cover'].count('Yes')
+                    if 'genre type' in info['tag']:
+                        info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
+                        if 'genre' not in info['tag']:
+                            info['tag']['genre'] = self.factory.configuration.property_map['code']['gnre'][info['tag']['genre type']]['print']
                     
                     
-                # Format info fields
-                for k,v in info['tag'].iteritems():
-                    value = self.convert_mediainfo_value(self.factory.configuration.property_map['name']['tag'][k]['type'], v)
-                    info['tag'][k] = value
-                for k,v in info['file'].iteritems():
-                    value = self.convert_mediainfo_value(self.factory.configuration.property_map['name']['file'][k]['type'], v)
-                    info['file'][k] = value
+                    # Format info fields
+                    for k,v in info['tag'].iteritems():
+                        value = self.convert_mediainfo_value(self.factory.configuration.property_map['name']['tag'][k]['type'], v)
+                        info['tag'][k] = value
+                    for k,v in info['file'].iteritems():
+                        value = self.convert_mediainfo_value(self.factory.configuration.property_map['name']['file'][k]['type'], v)
+                        info['file'][k] = value
                     
-                # Fix description and long description
-                if 'description' in info['tag']:
-                    info['tag']['description'] = info['tag']['description'].replace('&quot;', '"')
-                if 'long description' in info['tag']:
-                    info['tag']['long description'] = info['tag']['long description'].replace('&quot;', '"')
+                    # Fix description and long description
+                    if 'description' in info['tag']:
+                        info['tag']['description'] = info['tag']['description'].replace('&quot;', '"')
+                    if 'long description' in info['tag']:
+                        info['tag']['long description'] = info['tag']['long description'].replace('&quot;', '"')
         return info
     
     
