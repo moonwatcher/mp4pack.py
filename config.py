@@ -2580,7 +2580,52 @@ repository_config = {
                     'host':u'galanti.no-ip.info',
                     'port':u'22040',
                 }
-            }
+            },
+            'volume':{
+                'alpha':{
+                    'path':'/pool/alpha',
+                    'alternative':(
+                        '/net/multivac/Volumes/alphaville/alpha',
+                        '/Volumes/alphaville/alpha',
+                    )
+                },
+                'beta':{
+                    'path':'/pool/beta',
+                    'alternative':(
+                        '/net/multivac/Volumes/nyc/beta',
+                        '/Volumes/nyc/beta',
+                    )
+                },
+                'gama':{
+                    'path':'/pool/gama',
+                    'alternative':(
+                        '/net/multivac/Volumes/cambridge/gama',
+                        '/Volumes/cambridge/gama',
+                    )
+
+                },
+                'delta':{
+                    'path':'/pool/delta',
+                    'alternative':(
+                        '/net/vito/media/fairfield/delta',
+                        '/Volumes/fairfield/delta',
+                    )
+                },
+                'eta':{
+                    'path':'/pool/eta',
+                    'alternative':(
+                        '/net/vito/media/tlv/eta',
+                        '/Volumes/tlv/eta',
+                    )
+                },
+                'epsilon':{
+                    'path':'/pool/epsilon',
+                    'alternative':(
+                        '/net/vito/media/nagasaki/epsilon',
+                        '/Volumes/nagasaki/epsilon',
+                    )
+                },
+            },
         },
         'flux':{
             'name':'flux',
@@ -2611,7 +2656,16 @@ repository_config = {
                     'host':u'gilgalanti.no-ip.info',
                     'port':u'22040',
                 }
-            }
+            },
+            'volume':{
+                'yellow':{
+                    'path':'/pool/yellow',
+                    'alternative':(
+                        '/net/diego/pool/yellow',
+                    )
+                },
+            },
+            
         },
     },
     'Database':{

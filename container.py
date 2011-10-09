@@ -1966,17 +1966,18 @@ class FileUtil(object):
     
     def parse_mp4info(self, path, info):
         command = self.initialize_command('mp4info', self.logger)
-        command.append(path)
-        proc = Popen(command, stdout=PIPE, stderr=PIPE)
-        report = proc.communicate()
-        mp4info_report = unicode(report[0], 'utf-8').splitlines()
-        for line in mp4info_report:
-            match = self.mp4info_tag.search(line)
-            if match is not None:
-                tag = match.groups()
-                if tag[0] in self.factory.configuration.property_map['mp4info']['tag']:
-                    n = self.factory.configuration.property_map['mp4info']['tag'][tag[0]]
-                    info['tag'][n['name']] = tag[1]
+        if command:
+            command.append(path)
+            proc = Popen(command, stdout=PIPE, stderr=PIPE)
+            report = proc.communicate()
+            mp4info_report = unicode(report[0], 'utf-8').splitlines()
+            for line in mp4info_report:
+                match = self.mp4info_tag.search(line)
+                if match is not None:
+                    tag = match.groups()
+                    if tag[0] in self.factory.configuration.property_map['mp4info']['tag']:
+                        n = self.factory.configuration.property_map['mp4info']['tag'][tag[0]]
+                        info['tag'][n['name']] = tag[1]
     
     
     def decode_info(self, path):
