@@ -2632,7 +2632,7 @@ repository_config = {
                     'uri':u'mongodb://mp4pack:poohbear@diego.lan/mp4pack',
                 },
                 'cache':{
-                    'uri':u'/net/diego/cache',
+                    'uri':u'/cache/',
                 },
                 'pool':{
                     'uri':u'/pool',
@@ -2659,6 +2659,18 @@ repository_config = {
                     'path':'/pool/yellow',
                     'alternative':(
                         '/net/diego/pool/yellow',
+                    )
+                },
+                'green':{
+                    'path':'/pool/green',
+                    'alternative':(
+                        '/net/diego/pool/green',
+                    )
+                },
+                'orange':{
+                    'path':'/pool/orange',
+                    'alternative':(
+                        '/net/diego/pool/orange',
                     )
                 },
             },
