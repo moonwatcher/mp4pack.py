@@ -10,10 +10,6 @@ from datetime import timedelta
 
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = u'7B3B400B0146EA83'
-cache_path = u'/net/multivac/Volumes/alphaville/cache/'
-db_uri = u'mongodb://mp4pack:poohbear@multivac.lan/mp4pack'
-
-
 
 # Default base configuration
 
@@ -161,8 +157,8 @@ media_property = {
         {
             'name':'artist',
             'atom':'@ART',
-            'mediainfo':None,
-            'mp4info': 'Artist',
+            'mediainfo':'Performer',
+            'mp4info': None, #'Artist',
             'subler':'Artist',
             'print':'Artist',
             'type':'string',
@@ -170,8 +166,8 @@ media_property = {
         {
             'name':'album artist',
             'atom':'aART',
-            'mediainfo':None,
-            'mp4info': 'Album Artist',
+            'mediainfo':'Album_Performer',
+            'mp4info': None, #'Album Artist',
             'subler':'Album Artist',
             'print':'Album Artist',
             'type':'string',
@@ -188,8 +184,8 @@ media_property = {
         {
             'name':'grouping',
             'atom':'grup',
-            'mediainfo':None,
-            'mp4info': 'Grouping',
+            'mediainfo':'Grouping',
+            'mp4info': None, #'Grouping',
             'subler':'Grouping',
             'print':'Grouping',
             'type':'string',
@@ -242,8 +238,8 @@ media_property = {
         {
             'name':'tempo',
             'atom':'tmpo',
-            'mediainfo':None,
-            'mp4info': 'BPM',
+            'mediainfo':'BPM',
+            'mp4info': None, #'BPM',
             'subler':'Tempo',
             'print':'Tempo',
             'type':'int',
@@ -251,8 +247,8 @@ media_property = {
         {
             'name':'compilation',
             'atom':'cpil',
-            'mediainfo':None,
-            'mp4info': 'Part of Compilation',
+            'mediainfo':'Compilation',
+            'mp4info': None, #'Part of Compilation',
             'subler':None,
             'print':'Compilation',
             'type':'bool',
@@ -401,7 +397,7 @@ media_property = {
         {
             'name':'encoding tool',
             'atom':'©too',
-            'mediainfo':None,
+            'mediainfo':None, # mediainfo seems to mix @enc and @too into Encoded_Application
             'mp4info': 'Encoded with',
             'subler':'Encoding Tool',
             'print':'Encoding Tool',
@@ -410,8 +406,8 @@ media_property = {
         {
             'name':'encoded by',
             'atom':'@enc',
-            'mediainfo':'Encoded_Application',
-            'mp4info': None,
+            'mediainfo':None, # mediainfo seems to mix @enc and @too into Encoded_Application
+            'mp4info': 'Encoded by',
             'subler':'Encoded by',
             'print':'Encoded by',
             'type':'string',
