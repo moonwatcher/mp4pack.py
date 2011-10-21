@@ -1,54 +1,68 @@
-Usage: mpk [options] [path to file or directory]
+usage: mpk [-h] [-i] [-n] [-C] [-e] [-T] [-O] [-t KIND] [-c KIND] [-P KIND]
+           [-u KIND] [-o VOL] [-p PROFILE] [-S] [-U] [-D] [-r] [-w] [-f REGEX]
+           [-l CODE] [-L LOC] [-R REPO] [-5] [-q QUANTIZER] [-W WIDTH]
+           [--crop T:B:L:R] [--NTSC] [--PAL] [--shift TIME]
+           [--input-rate RATE] [--output-rate RATE] [-M MAP] [--poster MAP]
+           [--initialize] [-d] [-v LEVEL]
+           PATH [PATH ...]
 
-Options:
+positional arguments:
+  PATH                  file or directory paths to scan
+
+optional arguments:
   -h, --help            show this help message and exit
 
-  Actions:
-    -i, --info          Show info
-    -n, --rename        Rename files to standard names
-    -C, --copy          Copy into repository
-    -e, --extract       Extract streams for processing
-    -T, --tag           Update file tags
-    -O, --optimize      Optimize file layout
-    -t KIND, --transcode=KIND
-                        KIND is one of [m4v, mkv, srt, txt, jpg, png, ac3]
-    -c KIND, --transform=KIND
-                        KIND is one of [m4v]
-    -P KIND, --pack=KIND
-                        KIND is one of [mkv, m4v]
-    -u KIND, --update=KIND
-                        KIND is one of [srt, png, jpg, txt, m4v]
+media file processing operations:
+  -i, --info            show info
+  -n, --rename          rename files to standard names
+  -C, --copy            copy into repository
+  -e, --extract         extract streams for processing
+  -T, --tag             update file tags
+  -O, --optimize        optimize file layout
+  -t KIND, --transcode KIND
+                        KIND is one of m4v, mkv, srt, txt, jpg, png, ac3
+  -c KIND, --transform KIND
+                        KIND is one of m4v
+  -P KIND, --pack KIND  KIND is one of mkv, m4v
+  -u KIND, --update KIND
+                        KIND is one of srt, png, jpg, txt, m4v
 
-  Action modifiers:
-    -o VOLUME, --volume=VOLUME
-    -p PROFILE, --profile=PROFILE
-    -q QUANTIZER, --quality=QUANTIZER
-    -r, --recursive     Recursively process sub directories
-    -w, --overwrite     Overwrite existing files
-    -W WIDTH, --width=WIDTH
-                        Override profile output pixel width
-    -f REGEX, --filter=REGEX
-                        File name regex filter
+media processing modifiers:
+  -o VOL, --volume VOL
+  -p PROFILE, --profile PROFILE
+  -S, --sync            sync encountered records with online service
+  -U, --reindex         rebuild physical file index
+  -D, --download        download if local is unavailable
+  -r, --recursive       recursively process sub directories
+  -w, --overwrite       overwrite existing files
+  -f REGEX, --filter REGEX
+                        file name regex filter
+  -l CODE, --language CODE
+                        languge code to use when und [default: eng]
+  -L LOC, --location LOC
+                        name of local repository
+  -R REPO, --repository REPO
+                        REPO is one of flux, aeon
+  -5, --md5             verify md5 checksum after copy
 
-  Subtitles:
-    --NTSC              Convert PAL to NTSC framerate
-    --PAL               Convert NTSC to PAL framerate
-    --shift=TIME        Shift offset in millisec
-    --input-rate=RATE   Subtitles decoding frame rate
-    --output-rate=RATE  Subtitles encoding frame rate
+video processing:
+  -q QUANTIZER, --quality QUANTIZER
+  -W WIDTH, --width WIDTH
+                        override profile output pixel width
+  --crop T:B:L:R        set HandBrake cropping values [default: autocrop]
 
-  Environment:
-    -S, --sync          Sync encountered records with online service
-    -U, --reindex       Rebuild physical file index
-    -D, --download      Download if local is unavailable
-    -M MAP, --map-show=MAP
-                        Map show to tvdb id [tvdb id]:[show name]
-    --choose-movie-poster=MAP
-                        Choose tmdb movie poster [imdb]:[tmdb]
-    -l CODE, --language=CODE
-                        Languge code to use when und [default: eng]
-    --initialize        Run only once to initialize the system
-    -5, --md5           Verify md5 checksum after copy
-    -d, --debug         Only print commands without executing
-    -v LEVEL, --verbosity=LEVEL
-                        Logging verbosity level [default: info]
+subtitle processing:
+  --NTSC                convert from PAL to NTSC framerate
+  --PAL                 convert from NTSC to PAL framerate
+  --shift TIME          shift offset in milliseconds
+  --input-rate RATE     subtitles decoding frame rate
+  --output-rate RATE    subtitles encoding frame rate
+
+environment and repository:
+  -M MAP, --map-show MAP
+                        map show to tvdb id [tvdb id]:[show name]
+  --poster MAP          choose tmdb movie poster [imdb]:[tmdb]
+  --initialize          run only once to initialize the system
+  -d, --debug           only print commands without executing
+  -v LEVEL, --verbosity LEVEL
+                        logging verbosity level [default: info]
