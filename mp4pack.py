@@ -12,41 +12,61 @@ from container import ContainerFactory
 from db import EntityManager
 from config import Configuration
 
-class MPKProcess(object):
+class QueueProcessor(object):
     def __init__(self, configuration):
-        self.logger = logging.getLogger('MPK Process')
+        self.logger = logging.getLogger('Queue')
         self.configuration = configuration
-        self.options = configuration.options
         self.entity_manager = None
         self.container_factory = None
         self.valid = False
         self.file_filter = None
         self.media_files = None
         
+        # Initialize the runtime environment
         self.valid = self.sanity_check()
         if self.valid:
             self.entity_manager = EntityManager(self.configuration)
             self.container_factory = ContainerFactory(self.entity_manager)
             self.file_filter = self.load_file_filter()
+            
+        # Collect media files from all provided paths
+        files_paths = []
+        if self.configuration.options.path:
+            for p in self.configuration.options.path:
+                input_path = unicode(p, 'utf-8')
+                if os.path.exists(input_path):
+                    input_path = os.path.abspath(input_path)
+                else:
+                    self.logger.error(u'Path %s does not exist', input_path)
+                    input_path = None
+                    
+                if input_path:
+                    self.logger.info(u'Scanning %s', input_path)
+                    files_paths.extend(self.find_files_in_path(input_path, self.configuration.options.recursive))
+                    
+        # Sort paths and make sure they are unique
+        if files_paths:
+            files_paths = sorted(set(files_paths))
+            self.load_media_files(files_paths)
     
     
     def sanity_check(self):
+        # Any tests we want to preform before executing the queue go here...
         return True
     
     
     def load_file_filter(self):
         result = None
-        if self.options.file_filter is not None:
-            self.logger.info(u'Filtering file that match %s', self.options.file_filter)
-            result = re.compile(self.options.file_filter, re.UNICODE)
+        if self.configuration.options.file_filter is not None:
+            self.logger.info(u'Filtering file that match %s', self.configuration.options.file_filter)
+            result = re.compile(self.configuration.options.file_filter, re.UNICODE)
         return result
     
     
-    def load_files(self, path):
+    def load_media_files(self, file_paths):
         self.media_files = []
-        file_paths = self.find_files_in_path(path, self.options.recursive)
-        for file_path in file_paths:
-            media_file = self.container_factory.create_media_file(file_path)
+        for p in file_paths:
+            media_file = self.container_factory.create_media_file(p)
             if media_file:
                 self.media_files.append(media_file)
     
@@ -88,64 +108,73 @@ class MPKProcess(object):
     
     
     def execute(self):
-        if self.options.initialize:
+        # Global operations not related to media files
+        if self.configuration.options.initialize:
             self.entity_manager.base_init()
             
-        if self.options.map_show:
-            self.entity_manager.map_show_with_pair(self.options.map_show)
+        if self.configuration.options.map_show:
+            self.entity_manager.map_show_with_pair(self.configuration.options.map_show)
             
-        if self.options.choose_movie_poster:
-            self.entity_manager.choose_tmdb_movie_poster_with_pair(self.options.choose_movie_poster, True)
+        if self.configuration.options.poster:
+            self.entity_manager.choose_tmdb_movie_poster_with_pair(self.configuration.options.poster, True)
             
-        valid_files = []
-        invalid_files = []
-        
+        # Process media files, one at a time
         if self.media_files:
             for f in self.media_files:
-                f.load(self.options.reindex, self.options.sync)
+                f.load(self.configuration.options.reindex, self.configuration.options.sync)
+                
+                # Only process the file if it is valid
                 if f and f.valid():
-                    valid_files.append(f)
-                    
-                    if self.options.rename:
-                        f.rename(self.options)
+                    if self.configuration.options.rename:
+                        f.rename(self.configuration.options)
                         
-                    if self.options.extract:
-                        f.extract(self.options)
+                    if self.configuration.options.extract:
+                        f.extract(self.configuration.options)
                         
-                    if self.options.copy:
-                        f.copy(self.options)
+                    if self.configuration.options.copy:
+                        f.copy(self.configuration.options)
                         
-                    if self.options.pack is not None:
-                        f.pack(self.options)
+                    if self.configuration.options.pack is not None:
+                        f.pack(self.configuration.options)
                         
-                    if self.options.transcode is not None:
-                        f.transcode(self.options)
+                    if self.configuration.options.transcode is not None:
+                        f.transcode(self.configuration.options)
                         
-                    if self.options.transform is not None:
+                    if self.configuration.options.transform is not None:
                         self.transform_media_file(f)
                         
-                    if self.options.tag:
-                        f.tag(self.options)
+                    if self.configuration.options.tag:
+                        f.tag(self.configuration.options)
                         
-                    if self.options.update is not None:
-                        f.update(self.options)
+                    if self.configuration.options.update is not None:
+                        f.update(self.configuration.options)
                         
-                    if self.options.optimize:
-                        f.optimize(self.options)
+                    if self.configuration.options.optimize:
+                        f.optimize(self.configuration.options)
                         
-                    if self.options.info:
-                        print unicode(f).encode('utf-8')
+                    if self.configuration.options.info:
+                        print f.report_info(self.configuration.options).encode('utf-8')
                         
-                    f.unload()
-                else:
-                    invalid_files.append(f.file_path)
-                    f.unload()
-                    f = None
-        return valid_files, invalid_files 
+                # Unload the file to save memory during the process
+                f.unload()
     
     
+    def find_files_in_path(self, path, recursive, depth=1):
+        result = []
+        if os.path.isfile(path):
+            dname, fname = os.path.split(path)
+            if (self.file_filter == None or self.file_filter.search(fname) != None) and self.invisable_file_path.search(os.path.basename(path)) == None:
+                result.append(self.canonical_path(path))
+                
+        elif (recursive or depth > 0) and os.path.isdir(path) and self.invisable_file_path.search(os.path.basename(path)) == None:
+            for p in os.listdir(path):
+                p = os.path.abspath(os.path.join(path,p))
+                rec_result = self.find_files_in_path(p, recursive, depth - 1)
+                result += rec_result
+        return result
     
-    def standardize_path(self, path):
+    
+    def canonical_path(self, path):
         result = path
         realpath = os.path.realpath(os.path.abspath(path))
         for k,v in self.configuration.property_map['volume'].iteritems():
@@ -155,142 +184,106 @@ class MPKProcess(object):
         return result
     
     
-    def find_files_in_path(self, path, recursive, depth=1):
-        result = []
-        if os.path.isfile(path):
-            dname, fname = os.path.split(path)
-            if (self.file_filter == None or self.file_filter.search(fname) != None) and self.invisable_file_path.search(os.path.basename(path)) == None:
-                result.append(self.standardize_path(path))
+    def print_execution_report(self):
+        processed_media_files = [f for f in self.media_files if f.processed()]
+        unprocessed_media_files = [f for f in self.media_files if not f.processed()]
+        
+        # Report procsessed files
+        if processed_media_files:
+            self.logger.info(u'%d files processed', len(processed_media_files))
+            for f in processed_media_files:
+                self.logger.debug(u'Processing %s took %s', f.file_path, unicode(f.processing_duration()))
                 
-        elif (recursive or depth > 0) and os.path.isdir(path) and self.invisable_file_path.search(os.path.basename(path)) == None:
-            for p in os.listdir(path):
-                p = os.path.abspath(os.path.join(path,p))
-                rec_result = self.find_files_in_path(p, recursive, depth - 1)
-                result += rec_result
-        return sorted(set(result))
+        # Report ignored files
+        if unprocessed_media_files:
+            self.logger.warning(u'%d files were not processed', len(unprocessed_media_files))
+            for f in unprocessed_media_files:
+                self.logger.info(u'Ignored %s', f.file_path)
     
     
     invisable_file_path = re.compile(ur'^\.', re.UNICODE)
 
 
-def load_options(configuration):
-    from optparse import OptionParser
-    from optparse import OptionGroup
+def parse_command_line_arguments(configuration):
+    from argparse import ArgumentParser
     
-    parser = OptionParser('%prog [options] [path to file or directory]')
+    parser = ArgumentParser()
     
-    group = OptionGroup(parser, 'Actions')
-    group.add_option('-i', '--info', dest='info', action='store_true', default=False, help='Show info')
-    group.add_option('-n', '--rename', dest='rename', action='store_true', default=False, help='Rename files to standard names')
-    group.add_option('-C', '--copy', dest='copy', action='store_true', default=False, help='Copy into repository')
-    group.add_option('-e', '--extract', dest='extract', action='store_true', default=False, help='Extract streams for processing')
-    group.add_option('-T', '--tag', dest='tag', action='store_true', default=False, help='Update file tags')
-    group.add_option('-O', '--optimize', dest='optimize', action='store_true', default=False, help='Optimize file layout')
-    group.add_option('-t', '--transcode', metavar='KIND', dest='transcode', type='choice', choices=configuration.action['transcode']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['transcode']['kind'])))
-    group.add_option('-c', '--transform', metavar='KIND', dest='transform', type='choice', choices=configuration.action['transform']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['transform']['kind'])))
-    group.add_option('-P', '--pack', metavar='KIND', dest='pack', type='choice', choices=configuration.action['pack']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['pack']['kind'])))
-    group.add_option('-u', '--update', metavar='KIND', dest='update', type='choice', choices=configuration.action['update']['kind'], help='KIND is one of [{0}]'.format(', '.join(configuration.action['update']['kind'])))
-    parser.add_option_group(group)
-        
-    group = OptionGroup(parser, 'Action modifiers')
-    group.add_option('-o', '--volume', dest='volume', type='choice', choices=configuration.volume.keys(), default=None)
-    group.add_option('-p', '--profile', dest='profile', type='choice', choices=configuration.available_profiles, default=None)
-    group.add_option('-q', '--quality', metavar='QUANTIZER', dest='quality', type='float')
-    group.add_option('-r', '--recursive', dest='recursive', action='store_true', default=False, help='Recursively process sub directories')
-    group.add_option('-w', '--overwrite', dest='overwrite', action='store_true', default=False, help='Overwrite existing files')
-    group.add_option('-W', '--width', metavar='WIDTH', type='int', dest='pixel_width', help='Override profile output pixel width')
-    group.add_option('-f', '--filter', metavar='REGEX', dest='file_filter', default=None, help='File name regex filter')
-    group.add_option('--crop', dest='crop', metavar='T:B:L:R', help='Set HandBrake cropping values [default: autocrop]')
-    parser.add_option_group(group)
+    parser.add_argument('path', metavar='PATH', nargs='+', help='file or directory paths to scan')
     
-    group = OptionGroup(parser, 'Subtitles')
-    group.add_option('--NTSC', dest='NTSC', action='store_true', default=False, help='Convert PAL to NTSC framerate')
-    group.add_option('--PAL', dest='PAL', action='store_true', default=False, help='Convert NTSC to PAL framerate')
-    group.add_option('--shift', metavar='TIME', dest='time_shift', type='int', default=None, help='Shift offset in millisec')
-    group.add_option('--input-rate', metavar='RATE', dest='input_rate', default=None, help='Subtitles decoding frame rate')
-    group.add_option('--output-rate', metavar='RATE', dest='output_rate', default=None, help='Subtitles encoding frame rate')
-    parser.add_option_group(group)
+    group = parser.add_argument_group('media file processing operations')
+    group.add_argument('-i', '--info',      dest='info',        action='store_true',    default=False, help='show info')
+    group.add_argument('-n', '--rename',    dest='rename',      action='store_true',    default=False, help='rename files to standard names')
+    group.add_argument('-C', '--copy',      dest='copy',        action='store_true',    default=False, help='copy into repository')
+    group.add_argument('-e', '--extract',   dest='extract',     action='store_true',    default=False, help='extract streams for processing')
+    group.add_argument('-T', '--tag',       dest='tag',         action='store_true',    default=False, help='update file tags')
+    group.add_argument('-O', '--optimize',  dest='optimize',    action='store_true',    default=False, help='optimize file layout')
+    group.add_argument('-t', '--transcode', dest='transcode',   metavar='KIND',         choices=configuration.action['transcode']['kind'], help='KIND is one of %(choices)s')
+    group.add_argument('-c', '--transform', dest='transform',   metavar='KIND',         choices=configuration.action['transform']['kind'], help='KIND is one of %(choices)s')
+    group.add_argument('-P', '--pack',      dest='pack',        metavar='KIND',         choices=configuration.action['pack']['kind'], help='KIND is one of %(choices)s')
+    group.add_argument('-u', '--update',    dest='update',      metavar='KIND',         choices=configuration.action['update']['kind'], help='KIND is one of %(choices)s')
     
-    group = OptionGroup(parser, 'Environment')
-    group.add_option('-L', '--location', dest='location', default='aeon', help='Name of local repository')
-    group.add_option('-R', '--repository', dest='repository', metavar='REPO', type='choice', choices=configuration.repository.keys(), default='aeon', help='REPO is one of [{0}]'.format(', '.join(configuration.repository.keys())))
+    group = parser.add_argument_group('media processing modifiers')
+    group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          choices=configuration.volume.keys())
+    group.add_argument('-p', '--profile',   dest='profile',     metavar='PROFILE',      choices=configuration.available_profiles)
+    group.add_argument('-S', '--sync',      dest='sync',        action='store_true',    default=False, help='sync encountered records with online service')
+    group.add_argument('-U', '--reindex',   dest='reindex',     action='store_true',    default=False, help='rebuild physical file index')
+    group.add_argument('-D', '--download',  dest='download',    action='store_true',    default=False, help='download if local is unavailable')
+    group.add_argument('-r', '--recursive', dest='recursive',   action='store_true',    default=False, help='recursively process sub directories')
+    group.add_argument('-w', '--overwrite', dest='overwrite',   action='store_true',    default=False, help='overwrite existing files')
+    group.add_argument('-f', '--filter',    dest='file_filter', metavar='REGEX',        help='file name regex filter')
+    group.add_argument('-l', '--language',  dest='language',    metavar='CODE',         default='eng', help='languge code to use when und [default: %(default)s]')
+    group.add_argument('-L', '--location',  dest='location',    metavar='LOC',          default='aeon', help='name of local repository')
+    group.add_argument('-R', '--repository',dest='repository',  metavar='REPO',         default='aeon', choices=configuration.repository.keys(), help='REPO is one of %(choices)s')
+    group.add_argument('-5', '--md5',       dest='md5',         action='store_true',    default=False, help='verify md5 checksum after copy')
     
-    group.add_option('-S', '--sync', dest='sync', action='store_true', default=False, help='Sync encountered records with online service')
-    group.add_option('-U', '--reindex', dest='reindex', action='store_true', default=False, help='Rebuild physical file index')
-    group.add_option('-D', '--download', dest='download', action='store_true', default=False, help='Download if local is unavailable')
-    group.add_option('-M', '--map-show', metavar="MAP", dest='map_show', help='Map show to tvdb id [tvdb id]:[show name]')
-    group.add_option('--choose-movie-poster', metavar='MAP', dest='choose_movie_poster', default=None, help='Choose tmdb movie poster [imdb]:[tmdb]')
-    group.add_option('-l', '--language', metavar='CODE', dest='language', default='eng', help='Languge code to use when und [default: %default]')
-    group.add_option('--initialize', dest='initialize', action='store_true', default=False, help='Run only once to initialize the system')
-    group.add_option('-5', '--md5', dest='md5', action='store_true', default=False, help='Verify md5 checksum after copy')
-    group.add_option('-d', '--debug', dest='debug', action='store_true', default=False, help='Only print commands without executing')
-    group.add_option('-v', '--verbosity', metavar='LEVEL', dest='verbosity', default='info', type='choice', choices=log_levels.keys(), help='Logging verbosity level [default: %default]')
-    parser.add_option_group(group)
+    group = parser.add_argument_group('video processing')
+    group.add_argument('-q', '--quality',   dest='quality',     metavar='QUANTIZER',    type=float)
+    group.add_argument('-W', '--width',     dest='pixel_width', metavar='WIDTH',        type=int, help='override profile output pixel width')
+    group.add_argument('--crop',            dest='crop',        metavar='T:B:L:R',      help='set HandBrake cropping values [default: autocrop]')
     
-    options, args = parser.parse_args()
-    configuration.load_options(options)
+    group = parser.add_argument_group('subtitle processing')
+    group.add_argument('--NTSC',            dest='NTSC',        action='store_true',    default=False, help='convert from PAL to NTSC framerate')
+    group.add_argument('--PAL',             dest='PAL',         action='store_true',    default=False, help='convert from NTSC to PAL framerate')
+    group.add_argument('--shift',           dest='time_shift',  metavar='TIME',         type=int, help='shift offset in milliseconds')
+    group.add_argument('--input-rate',      dest='input_rate',  metavar='RATE',         help='subtitles decoding frame rate')
+    group.add_argument('--output-rate',     dest='output_rate', metavar='RATE',         help='subtitles encoding frame rate')
     
-    return options, args
+    group = parser.add_argument_group('environment and repository')
+    group.add_argument('-M', '--map-show',  dest='map_show',    metavar="MAP",          help='map show to tvdb id [tvdb id]:[show name]')
+    group.add_argument('--poster',          dest='poster',      metavar='MAP',          help='choose tmdb movie poster [imdb]:[tmdb]')
+    group.add_argument('--initialize',      dest='initialize',  action='store_true',    default=False, help='run only once to initialize the system')
+    group.add_argument('-d', '--debug',     dest='debug',       action='store_true',    default=False, help='only print commands without executing')
+    group.add_argument('-v', '--verbosity', dest='verbosity',   metavar='LEVEL',        default='info', choices=log_levels.keys(), help='logging verbosity level [default: %(default)s]')
+    
+    args = parser.parse_args()
+    configuration.load_command_line_arguments(args)
 
 
 def main():
     logging.basicConfig()
     
-    # Setting the log level to be used before we read options
+    # Log level to be used before we read command line arguments
     logging.getLogger().setLevel(log_levels['warning'])
     
     # Initialize options and scan arguments
     configuration = Configuration()
-    options, args = load_options(configuration)
+    parse_command_line_arguments(configuration)
     
-    # Set the log level from options
-    logging.getLogger().setLevel(log_levels[options.verbosity])
-    logger = logging.getLogger('mpk')
+    # Override the default log level from the command line arguments
+    logging.getLogger().setLevel(log_levels[configuration.options.verbosity])
     
-    mpk_process = MPKProcess(configuration)
+    queue_processor = QueueProcessor(configuration)
     
-    if mpk_process.valid:
-        # Check for input path
-        input_path = None
-        if args:
-            input_path = unicode(args[0], 'utf-8')
-            if os.path.exists(input_path):
-                input_path = os.path.abspath(input_path)
-            else:
-                logger.error(u'Path %s does not exist', input_path)
-                input_path = None
-                
-        # Check for file filter
-        if input_path:
-            logger.info(u'Looking up files in %s', input_path)
-            mpk_process.load_files(input_path)
-            
-        # Preform operations on valid files, if any
-        valid_files, invalid_files = mpk_process.execute()
+    if queue_processor.valid:
+        # Preform operations
+        queue_processor.execute()
         
-        # Report valid files
-        if valid_files:
-            logger.info(u'%d valid files were found in %s', len(valid_files), input_path)
-            for path in valid_files:
-                logger.debug(u'Found valid %s', path.file_path)
-                
-        # Report invalid files
-        if invalid_files:
-            logger.warning(u'%d invalid files were found in %s', len(invalid_files), input_path)
-            for path in invalid_files:
-                logger.info(u'Found invalid %s', path)
-                    
-        # Report positional arguments
-        for idx, arg in enumerate(args):
-            logger.debug(u'Positional %d: %s', idx, arg)
-            
-        # Report options
-        for k,v in options.__dict__.iteritems():
-            logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, configuration.format['indent width'] - 2 - configuration.format['margin width']))
-            
-    else:
-        for k,v in configuration.command.iteritems():
-            logger.info(u'Command {0:-<{2}}: {1}'.format(k, v['path'], configuration.format['indent width'] - 2 - configuration.format['margin width']))
+        # Print the execution report
+        queue_processor.print_execution_report()
+    
+    configuration.print_option_report()
+    configuration.print_command_report()
 
 
 log_levels = {
@@ -300,8 +293,6 @@ log_levels = {
     'error': logging.ERROR,
     'critical': logging.CRITICAL
 }
-
-invisable_file_path = re.compile(ur'^\.', re.UNICODE)
 
 if __name__ == '__main__':
     main()

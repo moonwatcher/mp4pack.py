@@ -59,6 +59,9 @@ class Container(object):
         
         self.unindexed = []
         self.ghost = []
+        
+        # Processing time
+        self.processing = {'start':None, 'finish':None, 'duration':None, 'processed':False}
     
     
     def valid(self):
@@ -70,6 +73,10 @@ class Container(object):
     
     
     def load(self, refresh=False, download=False):
+        
+        # Start process tracking
+        self.processing['start'] = datetime.utcnow()
+        
         result = False
         result = Container.load_path_info(self)
         if result:
@@ -245,7 +252,10 @@ class Container(object):
         self.record = None
         self.info = None
         self.meta = None
-    
+        
+        # Finish process tracking
+        self.processing['finish'] = datetime.utcnow()
+        self.processing['duration'] = self.processing['finish'] - self.processing['start']
     
     
     def refresh_index(self, queue=None):
@@ -311,7 +321,6 @@ class Container(object):
             self.ghost.append(path)
     
     
-    
     def related(self):
         related = {}
         for k,v in self.record['entity']['physical'].iteritems():
@@ -320,11 +329,29 @@ class Container(object):
     
     
     
-    def info(self, options):
+    def mark_as_processed(self):
+        self.processing['processed'] = True
+    
+    
+    def processed(self):
+        return self.processing['processed']
+    
+    
+    def processing_duration(self):
+        result = None
+        if self.processing['duration']:
+            result = abs(self.processing['duration'])
+        return result
+    
+    
+    
+    def report_info(self, options):
+        self.mark_as_processed()
         return unicode(self)
     
     
     def copy(self, options):
+        self.mark_as_processed()
         result = None
         path_info = self.factory.util.copy_path_info(self.path_info, options)
         if self.factory.util.complete_path_info_default_values(path_info):
@@ -344,6 +371,7 @@ class Container(object):
     
     
     def delete(self):
+        self.mark_as_processed()
         if self.path_info:
             self.drop_from_index(self.file_path)
             self.logger.debug(u'Delete %s',self.file_path)
@@ -351,6 +379,7 @@ class Container(object):
     
     
     def rename(self, options):
+        self.mark_as_processed()
         dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_name())
         if os.path.exists(dest_path) and os.path.samefile(self.file_path, dest_path):
             self.logger.debug(u'No renaming needed for %s',dest_path)
@@ -369,31 +398,29 @@ class Container(object):
     
     
     def tag(self, options):
+        self.mark_as_processed()
         self.load_meta()
     
     
     def optimize(self, options):
-        pass
+        self.mark_as_processed()
     
     
     def extract(self, options):
+        self.mark_as_processed()
         return []
     
     
     def pack(self, options):
-        pass
+        self.mark_as_processed()
     
     
     def transcode(self, options):
-        pass
-    
-    
-    def transform(self, options):
-        pass
+        self.mark_as_processed()
     
     
     def update(self, options):
-        pass
+        self.mark_as_processed()
     
     
     
@@ -668,6 +695,7 @@ class AudioVideoContainer(Container):
         Container.pack(self, options)
         path_info = self.factory.util.copy_path_info(self.path_info, options)
         
+        # Packing into m4v with Subler
         if options.pack in ('m4v'):
             path_info['kind'] = 'm4v'
             if self.factory.util.complete_path_info_default_values(path_info):
@@ -683,7 +711,8 @@ class AudioVideoContainer(Container):
                             self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                             if self.factory.util.clean_if_not_exist(dest_path):
                                 self.queue_for_index(dest_path)
-                            
+                                
+        # Packing into Matroska with mkvmerge
         elif options.pack in ('mkv'):
             path_info['kind'] = 'mkv'
             if self.factory.util.complete_path_info_default_values(path_info):
@@ -804,8 +833,8 @@ class AudioVideoContainer(Container):
     def transcode(self, options):
         result = None
         Container.transcode(self, options)
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
         if options.transcode in ('mkv', 'm4v'):
+            path_info = self.factory.util.copy_path_info(self.path_info, options)
             path_info['kind'] = options.transcode
             if self.factory.util.complete_path_info_default_values(path_info):
                 dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
@@ -945,6 +974,7 @@ class Artwork(Container):
     
     def transcode(self, options):
         result = None
+        Container.transcode(self, options)
         path_info = self.factory.util.copy_path_info(self.path_info, options)
         path_info['kind'] = options.transcode
         if self.factory.util.complete_path_info_default_values(path_info):
@@ -1329,6 +1359,7 @@ class RawAudio(AudioVideoContainer):
     
     def transcode(self, options):
         result = None
+        Container.transcode(self, options)
         if options.transcode == 'ac3':
             path_info = self.factory.util.copy_path_info(self.path_info, options)
             path_info['kind'] = options.transcode
@@ -1502,6 +1533,7 @@ class Subtitle(Text):
     
     def transcode(self, options):
         result = None
+        Container.transcode(self, options)
         self.decode()
         path_info = self.factory.util.copy_path_info(self.path_info, options)
         path_info['kind'] = options.transcode

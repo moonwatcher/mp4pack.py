@@ -2546,6 +2546,11 @@ repository_config = {
         'threads':8,
         'sync delay':timedelta(days=14),
     },
+    'Display':{
+        'wrap':120, 
+        'indent':30, 
+        'margin':2,
+    },
     'Repository':{
         'aeon':{
             'local':{
@@ -2673,6 +2678,7 @@ repository_config = {
             
         },
     },
+    
     'Database':{
         'tmdb':{
             'apikey':tmdb_apikey,
@@ -2729,11 +2735,6 @@ repository_config = {
         'ffmpeg':{
             'binary':u'ffmpeg',
         }
-    },
-    'Display':{
-        'wrap':120, 
-        'indent':30, 
-        'margin':2,
     },
     'Action':{
         'info':{
@@ -3715,7 +3716,7 @@ class Configuration(object):
         self.load_default_config()
     
     
-    def load_options(self, options):
+    def load_command_line_arguments(self, options):
         self.options = options
         
         if self.options.location in self.repository:
@@ -3909,6 +3910,14 @@ class Configuration(object):
     def get_local_cache_path(self):
         return self.local_repository['local']['cache']['uri']
     
-
-
+    
+    def print_option_report(self):
+        for k,v in self.options.__dict__.iteritems():
+            self.logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, self.format['indent width'] - 2 - self.format['margin width']))
+    
+    
+    def print_command_report(self):
+        for k,v in self.command.iteritems():
+            self.logger.debug(u'Command {0:-<{2}}: {1}'.format(k, v['path'], self.format['indent width'] - 2 - self.format['margin width']))
+    
 
