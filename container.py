@@ -2437,7 +2437,7 @@ class FileUtil(object):
         result = None
         if command in self.factory.configuration.command:
             c = self.factory.configuration.command[command]
-            if 'path' in c:
+            if 'path' in c and c['path']:
                 result = [c['path'],]
             else:
                 logger.warning(u'Command %s could not be located. Is it installed?', c['binary'])

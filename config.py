@@ -3790,6 +3790,9 @@ class Configuration(object):
             if report[0]:
                 self.command[k]['path'] = report[0].splitlines()[0]
                 self.available_commands.append(k)
+            else:
+                self.command[k]['path'] = None
+                
         self.available_commands = set(self.available_commands)
     
     
