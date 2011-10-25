@@ -185,20 +185,21 @@ class QueueProcessor(object):
     
     
     def print_execution_report(self):
-        processed_media_files = [f for f in self.media_files if f.processed()]
-        unprocessed_media_files = [f for f in self.media_files if not f.processed()]
-        
-        # Report procsessed files
-        if processed_media_files:
-            self.logger.info(u'%d files processed', len(processed_media_files))
-            for f in processed_media_files:
-                self.logger.debug(u'Processing %s took %s', f.file_path, unicode(f.processing_duration()))
-                
-        # Report ignored files
-        if unprocessed_media_files:
-            self.logger.warning(u'%d files were not processed', len(unprocessed_media_files))
-            for f in unprocessed_media_files:
-                self.logger.info(u'Ignored %s', f.file_path)
+        if self.media_files:
+            processed_media_files = [f for f in self.media_files if f.processed()]
+            unprocessed_media_files = [f for f in self.media_files if not f.processed()]
+            
+            # Report procsessed files
+            if processed_media_files:
+                self.logger.info(u'%d files processed', len(processed_media_files))
+                for f in processed_media_files:
+                    self.logger.debug(u'Processing %s took %s', f.file_path, unicode(f.processing_duration()))
+            
+            # Report ignored files
+            if unprocessed_media_files:
+                self.logger.warning(u'%d files were not processed', len(unprocessed_media_files))
+                for f in unprocessed_media_files:
+                    self.logger.info(u'Ignored %s', f.file_path)
     
     
     invisable_file_path = re.compile(ur'^\.', re.UNICODE)

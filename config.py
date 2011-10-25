@@ -2633,10 +2633,10 @@ repository_config = {
                     'uri':u'mongodb://mp4pack:poohbear@diego.lan/mp4pack',
                 },
                 'cache':{
-                    'uri':u'/cache/',
+                    'uri':u'/net/diego/cache/',
                 },
                 'pool':{
-                    'uri':u'/pool',
+                    'uri':u'/net/diego/pool',
                 }
             },
             'remote':{
@@ -2645,12 +2645,12 @@ repository_config = {
                     'uri':u'mongodb://mp4pack:poohbear@localhost:27017/mp4pack',
                 },
                 'cache':{
-                    'uri':u'/net/diego/var/cache/mpk/',
+                    'uri':u'/net/diego/cache/',
                     'host':u'gilgalanti.no-ip.info',
                     'port':u'22040',
                 },
                 'pool':{
-                    'uri':u'/pool',
+                    'uri':u'/net/diego/pool',
                     'host':u'gilgalanti.no-ip.info',
                     'port':u'22040',
                 }

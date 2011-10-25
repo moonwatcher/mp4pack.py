@@ -39,9 +39,9 @@ class EntityManager(object):
         self.refresh_itmf_genres()
         self.refresh_tmdb_genres()
         
-        from config import base_config
-        for s in base_config['tvshow']:
-            self.map_show(s[1], s[0])
+        # from config import base_config
+        # for s in base_config['tvshow']:
+        #    self.map_show(s[1], s[0])
     
     
     def create_index(self):
