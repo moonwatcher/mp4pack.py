@@ -2203,6 +2203,7 @@ class FileUtil(object):
                                 related_path = self.canonic_path(related_path_info, entity)
                                 if os.path.exists(related_path):
                                     related.append(related_path)
+                                    self.logger.debug('Discovered %s', related_path)
                         else:
                             related_path_info = copy.deepcopy(path_info)
                             related_path_info['volume'] = v
@@ -2211,6 +2212,7 @@ class FileUtil(object):
                             related_path = self.canonic_path(related_path_info, entity)
                             if os.path.exists(related_path):
                                 related.append(related_path)
+                                self.logger.debug('Discovered %s', related_path)
         return related
     
     
