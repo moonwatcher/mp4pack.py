@@ -11,17 +11,17 @@ import xml.etree.cElementTree as ElementTree
 
 import pymongo
 from pymongo.objectid import ObjectId
-from pymongo import Connection
 
 class EntityManager(object):
     def __init__(self, configuration):
         self.logger = logging.getLogger('Entity Manager')
         self.configuration = configuration
         
-        mongo_config = self.configuration.get_active_mongodb_config()
-        self.connection = Connection(mongo_config['uri'])
-        self.db = self.connection[mongo_config['name']]
-        self.sync_delay = self.configuration.runtime['sync delay']
+        mongodb_conf = self.configuration.get_mongodb_config()
+        self.logger.debug('Connecting to %s', mongodb_conf['url'])
+        self.connection = pymongo.Connection(mongodb_conf['url'])
+        self.db = self.connection[mongodb_conf['database']]
+        self.sync_delay = self.configuration.user_config['horizon time delta']
         
         self.genres = self.db.genres
         self.departments = self.db.departments

@@ -164,23 +164,13 @@ class QueueProcessor(object):
         if os.path.isfile(path):
             dname, fname = os.path.split(path)
             if (self.file_filter == None or self.file_filter.search(fname) != None) and self.invisable_file_path.search(os.path.basename(path)) == None:
-                result.append(self.canonical_path(path))
+                result.append(self.configuration.canonic_path(path))
                 
         elif (recursive or depth > 0) and os.path.isdir(path) and self.invisable_file_path.search(os.path.basename(path)) == None:
             for p in os.listdir(path):
                 p = os.path.abspath(os.path.join(path,p))
                 rec_result = self.find_files_in_path(p, recursive, depth - 1)
                 result += rec_result
-        return result
-    
-    
-    def canonical_path(self, path):
-        result = path
-        realpath = os.path.realpath(os.path.abspath(path))
-        for k,v in self.configuration.property_map['volume'].iteritems():
-            if os.path.commonprefix([k, realpath]) == k:
-                result = realpath.replace(k, v['path'])
-                break
         return result
     
     
@@ -225,8 +215,8 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-u', '--update',    dest='update',      metavar='KIND',         choices=configuration.action['update']['kind'], help='KIND is one of %(choices)s')
     
     group = parser.add_argument_group('media processing modifiers')
-    group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          choices=configuration.volume.keys())
-    group.add_argument('-p', '--profile',   dest='profile',     metavar='PROFILE',      choices=configuration.available_profiles)
+    group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          choices=configuration.volume.keys(), help='VOL is one of %(choices)s')
+    group.add_argument('-p', '--profile',   dest='profile',     metavar='PROFILE',      choices=configuration.available_profiles, help='PROFILE is one of %(choices)s')
     group.add_argument('-S', '--sync',      dest='sync',        action='store_true',    default=False, help='sync encountered records with online service')
     group.add_argument('-U', '--reindex',   dest='reindex',     action='store_true',    default=False, help='rebuild physical file index')
     group.add_argument('-D', '--download',  dest='download',    action='store_true',    default=False, help='download if local is unavailable')
@@ -234,8 +224,8 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-w', '--overwrite', dest='overwrite',   action='store_true',    default=False, help='overwrite existing files')
     group.add_argument('-f', '--filter',    dest='file_filter', metavar='REGEX',        help='file name regex filter')
     group.add_argument('-l', '--language',  dest='language',    metavar='CODE',         default='eng', help='languge code to use when und [default: %(default)s]')
-    group.add_argument('-L', '--location',  dest='location',    metavar='LOC',          default='aeon', help='name of local repository')
-    group.add_argument('-R', '--repository',dest='repository',  metavar='REPO',         default='aeon', choices=configuration.repository.keys(), help='REPO is one of %(choices)s')
+    group.add_argument('-L', '--location',  dest='location',    metavar='LOC',          default=None, help='name of local repository')
+    group.add_argument('-R', '--repository',dest='repository',  metavar='REPO',         default=None, choices=configuration.repository.keys(), help='REPO is one of %(choices)s')
     group.add_argument('-5', '--md5',       dest='md5',         action='store_true',    default=False, help='verify md5 checksum after copy')
     
     group = parser.add_argument_group('video processing')
@@ -256,6 +246,7 @@ def parse_command_line_arguments(configuration):
     group.add_argument('--initialize',      dest='initialize',  action='store_true',    default=False, help='run only once to initialize the system')
     group.add_argument('-d', '--debug',     dest='debug',       action='store_true',    default=False, help='only print commands without executing')
     group.add_argument('-v', '--verbosity', dest='verbosity',   metavar='LEVEL',        default='info', choices=log_levels.keys(), help='logging verbosity level [default: %(default)s]')
+    group.add_argument('--conf',            dest='conf',        metavar='PATH',         help='path for external config file')
     
     args = parser.parse_args()
     configuration.load_command_line_arguments(args)
