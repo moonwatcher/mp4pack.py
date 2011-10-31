@@ -1722,7 +1722,7 @@ class ChapterMarker(object):
     
     
     def encode(self, line_buffer, index):
-        line_buffer.append(ChapterMarker.ogg_chapter_timestamp_format.format(str(index).zfill(2), unicode(self.factory.util.miliseconds_to_time(self.time, '.'), 'utf-8')))
+        line_buffer.append(ChapterMarker.ogg_chapter_timestamp_format.format(str(index).zfill(2), unicode(self.container.factory.util.miliseconds_to_time(self.time, '.'), 'utf-8')))
         name = self.name
         if name is None:
             name = ChapterMarker.default_chapter_name_format.format(index)
