@@ -46,6 +46,7 @@ class Configuration(object):
         self.load_default_config()
     
     
+    
     def load_default_config(self):
         # start from the base user conf
         self.user_config = copy.deepcopy(base_config)
@@ -63,7 +64,6 @@ class Configuration(object):
         self.load_command()
         self.load_action()
         self.load_kind()
-        self.load_repository()
         self.load_property_map()
         
         self.track_with_language = ('audio', 'subtitles', 'video')
@@ -180,6 +180,20 @@ class Configuration(object):
                         vol_v['alias'] = tuple(sorted(aliases))
                         vol_v['real path'] = os.path.realpath(vol_v['path'])
                         self.volume[vol_k] = vol_v
+                        
+        self.property_map['volume'] = {}
+        for vol_k,vol_v in self.volume.iteritems():
+            # mark location flags
+            if vol_v['repository'] == self.user_config['local repository']:
+                vol_v['local'] = True
+                vol_v['remote'] = False
+            else:
+                vol_v['local'] = False
+                vol_v['remote'] = True
+                
+            # map volume by alias
+            for a in vol_v['alias']:
+                self.property_map['volume'][a] = vol_v
     
     
     def load_property_map(self):
@@ -242,11 +256,6 @@ class Configuration(object):
         for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
             self.property_map['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
             
-        # Build volume map
-        self.property_map['volume'] = {}
-        for vol_k,vol_v in self.volume.iteritems():
-            for a in vol_v['alias']:
-                self.property_map['volume'][a] = vol_v
     
     
     def load_command_line_arguments(self, options):
@@ -255,14 +264,15 @@ class Configuration(object):
         # Load conf file from command line argument
         if self.options.conf:
             self.load_external_config(self.options.conf)
-        
+            
         if self.options.location:
             self.user_config['domain'] = self.options.location
-        if self.options.repository in self.repository:
+        if self.options.repository:
             self.user_config['local repository'] = self.options.repository
             
-        self.finalize_config()
-        self.infer_location()
+        self.load_repository()
+        self.user_config['horizon time delta'] = timedelta(**self.user_config['horizon'])
+        self.user_config['playback']['aspect ratio'] = float(float(self.user_config['playback']['width'])/float(self.user_config['playback']['height']))
     
     
     def load_external_config(self, path):
@@ -281,16 +291,6 @@ class Configuration(object):
                 self.user_config = dict(self.user_config.items() + external_config.items())
     
     
-    def infer_location(self):
-        # mark the volumes as remote or local
-        for v in self.volume.values():
-            if v['repository'] == self.user_config['local repository']:
-                v['local'] = True
-                v['remote'] = False
-            else:
-                v['local'] = False
-                v['remote'] = True
-    
     
     def build_mongodb_url(self, conf):
         if 'host' in conf and 'database' in conf:
@@ -300,12 +300,6 @@ class Configuration(object):
             if 'port' in conf:
                 '{0}:{1}'.format(url, conf['port'])
             conf['url'] = 'mongodb://{0}/{1}'.format(url, conf['database'])
-    
-    
-    def finalize_config(self):
-        self.user_config['horizon time delta'] = timedelta(**self.user_config['horizon'])
-        self.user_config['playback']['aspect ratio'] = float(float(self.user_config['playback']['width'])/float(self.user_config['playback']['height']))
-    
     
     
     def canonic_path(self, path):
@@ -339,6 +333,7 @@ class Configuration(object):
                 result = os.path.join(vol['uri prefix'], os.path.relpath(path, vol['path']))
                 break
         return result
+    
     
     
     def get_repository(self):
@@ -640,13 +635,13 @@ class Configuration(object):
 
 # Default base configuration
 base_config = {
-    'domain':'galanti.no-ip.info',
-    'local repository':'multivac',
+    'domain':'localhost',
+    'local repository':'local',
     'horizon':{ 'days':14, },
     'hd threshold':720,
     'playback':{ 'width':1920, 'height':1080, },
     'runtime':{
-        'threds':8,
+        'threds':2,
     },
     'shell':{
         'wrap':120, 
@@ -655,7 +650,7 @@ base_config = {
     },
     'repository':{
         'localhost':{
-            'domain':'lan',
+            'domain':'localhost',
             'base':{
                 'path':'/pool',
             },
@@ -668,199 +663,6 @@ base_config = {
             },
             'volume':{},
         },
-        'multivac':{
-            'domain':'galanti.no-ip.info',
-            'base':{
-                'path':'/net/multivac/pool',
-                'alias':[
-                    '/pool',
-                ],
-            },
-            'cache':{
-                'path':'/net/multivac/Volumes/alphaville/cache',
-            },
-            'mongodb':{
-                'database':'mp4pack',
-                'username':'mp4pack',
-                'password':'poohbear',
-                'host':'multivac'
-            },
-            'remote':{
-                'bulk ssh port':'22040',
-                'priority ssh port':'22020',
-                'mongodb':{
-                    'host':'localhost',
-                    'port':'28017',
-                },
-            },
-            'volume':{
-                'alpha':{
-                    'scan':True,
-                    'alias':[
-                        '/net/multivac/Volumes/alphaville/alpha',
-                        '/Volumes/alphaville/alpha',
-                    ]
-                },
-                'beta':{
-                    'alias':[
-                        '/net/multivac/Volumes/nyc/beta',
-                        '/Volumes/nyc/beta',
-                    ]
-                },
-                'gama':{
-                    'alias':[
-                        '/net/multivac/Volumes/cambridge/gama',
-                        '/Volumes/cambridge/gama',
-                    ]
-                },
-                'delta':{
-                    'alias':[
-                        '/net/vito/media/fairfield/delta',
-                        '/Volumes/fairfield/delta',
-                    ]
-                },
-                'eta':{
-                    'alias':[
-                        '/net/vito/media/tlv/eta',
-                        '/Volumes/tlv/eta',
-                    ]
-                },
-                'epsilon':{
-                    'alias':[
-                        '/net/vito/media/nagasaki/epsilon',
-                        '/Volumes/nagasaki/epsilon',
-                    ]
-                },
-            },
-            'rule':(
-                {
-                    'when':{'kind':'srt'},
-                    'default':{'volume':'alpha', 'profile':'clean'},
-                },
-                {
-                    'when':{'kind':'png'},
-                    'default':{'volume':'alpha', 'profile':'normal'},
-                },
-                {
-                    'when':{'kind':'txt'},
-                    'default':{'volume':'alpha', 'profile':'chapter'},
-                },
-                {
-                    'when':{'kind':'m4v'},
-                    'default':{'volume':'epsilon', 'profile':'A4'},
-                },
-                {
-                    'when':{'kind':'m4a'},
-                    'default':{'volume':'alpha', 'profile':'lossless'},
-                },
-                {
-                    'when':{'kind':'mkv'},
-                    'default':{'volume':'epsilon', 'profile':'720'},
-                },
-                {
-                    'when':{'kind':'avi'},
-                    'default':{'volume':'epsilon', 'profile':'sd'},
-                },
-                {
-                    'when':{'kind':'ac3'},
-                    'default':{'volume':'epsilon', 'profile':'normal'},
-                },
-                {
-                    'when':{'kind':'ass'},
-                    'default':{'volume':'epsilon', 'profile':'original'},
-                },
-                {
-                    'when':{'kind':'dts'},
-                    'default':{'volume':'epsilon', 'profile':'original'},
-                },
-            )
-        },
-        'gil':{
-            'domain':'gilgalanti.no-ip.info',
-            'base':{
-                'path':'/net/diego/pool',
-                'alias':(
-                    '/pool',
-                ),
-            },
-            'cache':{
-                'path':'/net/diego/cache',
-            },
-            'mongodb':{
-                'database':'mp4pack',
-                'username':'mp4pack',
-                'password':'poohbear',
-                'host':'diego',
-                'port':'27017',
-            },
-            'remote':{
-                'bulk ssh port':'22040',
-                'priority ssh port':'22020',
-                'mongodb':{
-                    'host':'localhost',
-                    'port':'28017',
-                },
-            },
-            'volume':{
-                'yellow':{
-                    'index':False,
-                },
-                'green':{
-                    'index':True,
-                },
-                'orange':{
-                    'base':{
-                        'path':'/Volumes',
-                        'alias':(
-                            '/net/diego/red',
-                        ),
-                    },
-                    'index':True,
-                }
-            },
-            'rules':(
-                {
-                    'when':{'kind':'srt'},
-                    'default':{'volume':'white', 'profile':'clean'},
-                },
-                {
-                    'when':{'kind':'png'},
-                    'default':{'volume':'white', 'profile':'normal'},
-                },
-                {
-                    'when':{'kind':'txt'},
-                    'default':{'volume':'white', 'profile':'chapter'},
-                },
-                {
-                    'when':{'kind':'m4v'},
-                    'default':{'volume':'green', 'profile':'A4'},
-                },
-                {
-                    'when':{'kind':'m4a'},
-                    'default':{'volume':'green', 'profile':'lossless'},
-                },
-                {
-                    'when':{'kind':'mkv'},
-                    'default':{'volume':'green', 'profile':'720'},
-                },
-                {
-                    'when':{'kind':'avi'},
-                    'default':{'volume':'green', 'profile':'sd'},
-                },
-                {
-                    'when':{'kind':'ac3'},
-                    'default':{'volume':'green', 'profile':'normal'},
-                },
-                {
-                    'when':{'kind':'ass'},
-                    'default':{'volume':'green', 'profile':'original'},
-                },
-                {
-                    'when':{'kind':'dts'},
-                    'default':{'volume':'green', 'profile':'original'},
-                },
-            )
-        }
     },
     'subtitles':{
         'filters':{

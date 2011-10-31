@@ -215,8 +215,8 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-u', '--update',    dest='update',      metavar='KIND',         choices=configuration.action['update']['kind'], help='KIND is one of %(choices)s')
     
     group = parser.add_argument_group('media processing modifiers')
-    group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          choices=configuration.volume.keys(), help='VOL is one of %(choices)s')
-    group.add_argument('-p', '--profile',   dest='profile',     metavar='PROFILE',      choices=configuration.available_profiles, help='PROFILE is one of %(choices)s')
+    group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          help='explicit volume to use')
+    group.add_argument('-p', '--profile',   dest='profile',     metavar='PROFILE',      help='explicit profile to use')
     group.add_argument('-S', '--sync',      dest='sync',        action='store_true',    default=False, help='sync encountered records with online service')
     group.add_argument('-U', '--reindex',   dest='reindex',     action='store_true',    default=False, help='rebuild physical file index')
     group.add_argument('-D', '--download',  dest='download',    action='store_true',    default=False, help='download if local is unavailable')
@@ -224,8 +224,8 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-w', '--overwrite', dest='overwrite',   action='store_true',    default=False, help='overwrite existing files')
     group.add_argument('-f', '--filter',    dest='file_filter', metavar='REGEX',        help='file name regex filter')
     group.add_argument('-l', '--language',  dest='language',    metavar='CODE',         default='eng', help='languge code to use when und [default: %(default)s]')
-    group.add_argument('-L', '--location',  dest='location',    metavar='LOC',          default=None, help='name of local repository')
-    group.add_argument('-R', '--repository',dest='repository',  metavar='REPO',         default=None, choices=configuration.repository.keys(), help='REPO is one of %(choices)s')
+    group.add_argument('-L', '--location',  dest='location',    metavar='LOC',          help='name of local repository')
+    group.add_argument('-R', '--repository',dest='repository',  metavar='REPO',         help='name of repository to use')
     group.add_argument('-5', '--md5',       dest='md5',         action='store_true',    default=False, help='verify md5 checksum after copy')
     
     group = parser.add_argument_group('video processing')
@@ -256,7 +256,7 @@ def main():
     logging.basicConfig()
     
     # Log level to be used before we read command line arguments
-    logging.getLogger().setLevel(log_levels['warning'])
+    logging.getLogger().setLevel(log_levels['info'])
     
     # Initialize options and scan arguments
     configuration = Configuration()
