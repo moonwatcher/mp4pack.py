@@ -241,12 +241,12 @@ def parse_command_line_arguments(configuration):
     group.add_argument('--output-rate',     dest='output_rate', metavar='RATE',         help='subtitles encoding frame rate')
     
     group = parser.add_argument_group('environment and repository')
-    group.add_argument('-M', '--map-show',  dest='map_show',    metavar="MAP",          help='map show to tvdb id [tvdb id]:[show name]')
+    group.add_argument('--show',            dest='map_show',    metavar="MAP",          help='map show to tvdb id [tvdb id]:[show name]')
     group.add_argument('--poster',          dest='poster',      metavar='MAP',          help='choose tmdb movie poster [imdb]:[tmdb]')
     group.add_argument('--initialize',      dest='initialize',  action='store_true',    default=False, help='run only once to initialize the system')
+    group.add_argument('--conf',            dest='conf',        metavar='PATH',         help='path for external config file')
     group.add_argument('-d', '--debug',     dest='debug',       action='store_true',    default=False, help='only print commands without executing')
     group.add_argument('-v', '--verbosity', dest='verbosity',   metavar='LEVEL',        default='info', choices=log_levels.keys(), help='logging verbosity level [default: %(default)s]')
-    group.add_argument('--conf',            dest='conf',        metavar='PATH',         help='path for external config file')
     
     args = parser.parse_args()
     configuration.load_command_line_arguments(args)
