@@ -7,7 +7,7 @@ import copy
 import logging
 from subprocess import Popen, PIPE
 from datetime import timedelta
-from urlparse import urlparse
+import urlparse
 
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = u'7B3B400B0146EA83'
@@ -78,7 +78,7 @@ class Configuration(object):
     
     def load_format(self):
         self.format = {}
-        self.format['schema'] = '{0}://{{0}}/{{1}}'.format(self.runtime_config['schema'])
+        self.format['scheme'] = '{0}://{{0}}/{{1}}'.format(self.runtime_config['scheme'])
         self.format['wrap width'] = self.user_config['shell']['wrap']
         self.format['indent width'] = self.user_config['shell']['indent']
         self.format['margin width'] = self.user_config['shell']['margin']
@@ -149,9 +149,14 @@ class Configuration(object):
                 for vol_k, vol_v in self.repository[repo_k]['volume'].iteritems():
                     vol_v['name'] = vol_k
                     vol_v['repository'] = self.repository[repo_k]['name']
-                    vol_v['uri prefix'] = self.format['schema'].format(vol_v['repository'], vol_v['name'])
+                    vol_v['uri prefix'] = self.format['scheme'].format(vol_v['repository'], vol_v['name'])
+                    
                     if 'alias' not in vol_v:
                         vol_v['alias'] = []
+                    if 'scan' not in vol_v:
+                        vol_v['scan'] = True
+                    if 'index' not in vol_v:
+                        vol_v['index'] = True
                     
                     if 'base' in self.repository[repo_k]:
                         if 'path' not in vol_v:
@@ -313,7 +318,21 @@ class Configuration(object):
         return result
     
     
-    def find_uri_by_canonice_path(self, path):
+    def canonice_path_from_uri(self, uri):
+        result = None
+        if uri:
+            parsed_uri = urlparse.urlparse(uri)
+            if parsed_uri.scheme == self.runtime_config['scheme']:
+                if parsed_uri.hostname in self.repository:
+                    frag = parsed_uri.path.split('/', 2)
+                    volume_name = frag[1]
+                    relative_path = frag[2]
+                    if volume_name in self.volume:
+                        result = os.path.join(self.volume[volume_name]['path'], relative_path)
+        return result
+    
+    
+    def uri_from_canonice_path(self, path):
         result = None
         for vol in self.volume.values():
             if os.path.commonprefix([vol['path'], path]) == vol['path']:
@@ -324,6 +343,10 @@ class Configuration(object):
     
     def get_repository(self):
         return self.repository[self.user_config['local repository']]
+    
+    
+    def local_volume(self, volume):
+        return volume in self.volume and self.volume[volume]['repository'] == self.user_config['local repository']
     
     
     def get_mongodb_config(self):
@@ -567,6 +590,38 @@ class Configuration(object):
         return result
     
     
+    def scan_repository_for_related(self, path, entity):
+        related = None
+        if path:
+            path_info = self.decode_path(path)
+            related = []
+            self.logger.debug(u'Scanning repository for file related to %s.', path)
+            for v, vol in self.volume.iteritems():
+                if vol['scan'] and self.local_volume(vol['name']):
+                    for k in self.kind:
+                        for p in self.kind[k]['profile']:
+                            if k in self.kind_with_language:
+                                for l in self.property_map['iso3t']['language']:
+                                    related_path_info = copy.deepcopy(path_info)
+                                    related_path_info['volume'] = v
+                                    related_path_info['kind'] = k
+                                    related_path_info['profile'] = p
+                                    related_path_info['language'] = l
+                                    related_path = self.encode_path(related_path_info, entity)
+                                    if os.path.exists(related_path):
+                                        related.append(related_path)
+                                        self.logger.debug('Discovered %s', related_path)
+                            else:
+                                related_path_info = copy.deepcopy(path_info)
+                                related_path_info['volume'] = v
+                                related_path_info['kind'] = k
+                                related_path_info['profile'] = p
+                                related_path = self.encode_path(related_path_info, entity)
+                                if os.path.exists(related_path):
+                                    related.append(related_path)
+                                    self.logger.debug('Discovered %s', related_path)
+        return related
+    
     
     
     def print_option_report(self):
@@ -611,11 +666,7 @@ base_config = {
                 'database':'mp4pack',
                 'host':'localhost'
             },
-            'volume':{
-                'alpha':{
-                    'indexed':True,
-                },
-            },
+            'volume':{},
         },
         'multivac':{
             'domain':'galanti.no-ip.info',
@@ -644,7 +695,7 @@ base_config = {
             },
             'volume':{
                 'alpha':{
-                    'indexed':True,
+                    'scan':True,
                     'alias':[
                         '/net/multivac/Volumes/alphaville/alpha',
                         '/Volumes/alphaville/alpha',
@@ -752,10 +803,10 @@ base_config = {
             },
             'volume':{
                 'yellow':{
-                    'indexed':False,
+                    'index':False,
                 },
                 'green':{
-                    'indexed':True,
+                    'index':True,
                 },
                 'orange':{
                     'base':{
@@ -764,7 +815,7 @@ base_config = {
                             '/net/diego/red',
                         ),
                     },
-                    'indexed':True,
+                    'index':True,
                 }
             },
             'rules':(
@@ -1139,8 +1190,8 @@ base_config = {
 
 # Runtime config
 runtime_config = {
-    'schema':'mp4pack',
-    'schema prefix':'mp4pack://',
+    'scheme':'mp4pack',
+    'scheme prefix':'mp4pack://',
     'service':{
         'tmdb':{
             'apikey':tmdb_apikey,

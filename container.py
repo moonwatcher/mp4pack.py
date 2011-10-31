@@ -45,7 +45,6 @@ class ContainerFactory(object):
     
 
 
-
 # Container super class
 class Container(object):
     def __init__(self, factory, file_path, autoload=True):
@@ -265,7 +264,7 @@ class Container(object):
                 self.record['entity']['physical'] = {}
             
             if queue is None:
-                queue = self.factory.util.scan_repository_for_related(self.file_path, self.record['entity'])
+                queue = self.factory.configuration.scan_repository_for_related(self.file_path, self.record['entity'])
             
             if queue:
                 discovered = 0
@@ -275,6 +274,9 @@ class Container(object):
                         if self.factory.util.check_if_in_repository(related_path_info):
                             self.logger.debug(u'Indexing %s.', path)
                             self.record['entity']['physical'][path] = {}
+                            uri = self.factory.configuration.uri_from_canonice_path(path)
+                            self.record['entity']['physical'][path]['uri'] = uri
+                            self.record['entity']['physical'][path]['canonic'] = self.factory.configuration.canonice_path_from_uri(uri)
                             self.record['entity']['physical'][path]['path info'] = related_path_info
                             self.record['entity']['physical'][path]['info'] = self.factory.util.decode_info(path)
                             discovered += 1
@@ -2130,39 +2132,6 @@ class FileUtil(object):
                     if 'long description' in info['tag']:
                         info['tag']['long description'] = info['tag']['long description'].replace('&quot;', '"')
         return info
-    
-    
-    
-    def scan_repository_for_related(self, path, entity):
-        related = None
-        if path:
-            path_info = self.factory.configuration.decode_path(path)
-            related = []
-            self.logger.debug(u'Scanning repository for file related to %s.', path)
-            for v in self.factory.configuration.volume:
-                for k in self.factory.configuration.kind:
-                    for p in self.factory.configuration.kind[k]['profile']:
-                        if k in self.factory.configuration.kind_with_language:
-                            for l in self.factory.configuration.property_map['iso3t']['language']:
-                                related_path_info = copy.deepcopy(path_info)
-                                related_path_info['volume'] = v
-                                related_path_info['kind'] = k
-                                related_path_info['profile'] = p
-                                related_path_info['language'] = l
-                                related_path = self.factory.configuration.encode_path(related_path_info, entity)
-                                if os.path.exists(related_path):
-                                    related.append(related_path)
-                                    self.logger.debug('Discovered %s', related_path)
-                        else:
-                            related_path_info = copy.deepcopy(path_info)
-                            related_path_info['volume'] = v
-                            related_path_info['kind'] = k
-                            related_path_info['profile'] = p
-                            related_path = self.factory.configuration.encode_path(related_path_info, entity)
-                            if os.path.exists(related_path):
-                                related.append(related_path)
-                                self.logger.debug('Discovered %s', related_path)
-        return related
     
     
     def check_if_in_repository(self, path_info):
