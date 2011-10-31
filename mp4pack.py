@@ -164,7 +164,7 @@ class QueueProcessor(object):
         if os.path.isfile(path):
             dname, fname = os.path.split(path)
             if (self.file_filter == None or self.file_filter.search(fname) != None) and self.invisable_file_path.search(os.path.basename(path)) == None:
-                result.append(self.canonical_path(path))
+                result.append(self.configuration.canonic_path(path))
                 
         elif (recursive or depth > 0) and os.path.isdir(path) and self.invisable_file_path.search(os.path.basename(path)) == None:
             for p in os.listdir(path):
@@ -174,31 +174,22 @@ class QueueProcessor(object):
         return result
     
     
-    def canonical_path(self, path):
-        result = path
-        realpath = os.path.realpath(os.path.abspath(path))
-        for k,v in self.configuration.property_map['volume'].iteritems():
-            if os.path.commonprefix([k, realpath]) == k:
-                result = realpath.replace(k, v['path'])
-                break
-        return result
-    
-    
     def print_execution_report(self):
-        processed_media_files = [f for f in self.media_files if f.processed()]
-        unprocessed_media_files = [f for f in self.media_files if not f.processed()]
-        
-        # Report procsessed files
-        if processed_media_files:
-            self.logger.info(u'%d files processed', len(processed_media_files))
-            for f in processed_media_files:
-                self.logger.debug(u'Processing %s took %s', f.file_path, unicode(f.processing_duration()))
-                
-        # Report ignored files
-        if unprocessed_media_files:
-            self.logger.warning(u'%d files were not processed', len(unprocessed_media_files))
-            for f in unprocessed_media_files:
-                self.logger.info(u'Ignored %s', f.file_path)
+        if self.media_files:
+            processed_media_files = [f for f in self.media_files if f.processed()]
+            unprocessed_media_files = [f for f in self.media_files if not f.processed()]
+            
+            # Report procsessed files
+            if processed_media_files:
+                self.logger.info(u'%d files processed', len(processed_media_files))
+                for f in processed_media_files:
+                    self.logger.debug(u'Processing %s took %s', f.file_path, unicode(f.processing_duration()))
+            
+            # Report ignored files
+            if unprocessed_media_files:
+                self.logger.warning(u'%d files were not processed', len(unprocessed_media_files))
+                for f in unprocessed_media_files:
+                    self.logger.info(u'Ignored %s', f.file_path)
     
     
     invisable_file_path = re.compile(ur'^\.', re.UNICODE)
@@ -224,8 +215,8 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-u', '--update',    dest='update',      metavar='KIND',         choices=configuration.action['update']['kind'], help='KIND is one of %(choices)s')
     
     group = parser.add_argument_group('media processing modifiers')
-    group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          choices=configuration.volume.keys())
-    group.add_argument('-p', '--profile',   dest='profile',     metavar='PROFILE',      choices=configuration.available_profiles)
+    group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          help='explicit volume to use')
+    group.add_argument('-p', '--profile',   dest='profile',     metavar='PROFILE',      help='explicit profile to use')
     group.add_argument('-S', '--sync',      dest='sync',        action='store_true',    default=False, help='sync encountered records with online service')
     group.add_argument('-U', '--reindex',   dest='reindex',     action='store_true',    default=False, help='rebuild physical file index')
     group.add_argument('-D', '--download',  dest='download',    action='store_true',    default=False, help='download if local is unavailable')
@@ -233,8 +224,8 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-w', '--overwrite', dest='overwrite',   action='store_true',    default=False, help='overwrite existing files')
     group.add_argument('-f', '--filter',    dest='file_filter', metavar='REGEX',        help='file name regex filter')
     group.add_argument('-l', '--language',  dest='language',    metavar='CODE',         default='eng', help='languge code to use when und [default: %(default)s]')
-    group.add_argument('-L', '--location',  dest='location',    metavar='LOC',          default='aeon', help='name of local repository')
-    group.add_argument('-R', '--repository',dest='repository',  metavar='REPO',         default='aeon', choices=configuration.repository.keys(), help='REPO is one of %(choices)s')
+    group.add_argument('-L', '--location',  dest='location',    metavar='LOC',          help='name of local repository')
+    group.add_argument('-R', '--repository',dest='repository',  metavar='REPO',         help='name of repository to use')
     group.add_argument('-5', '--md5',       dest='md5',         action='store_true',    default=False, help='verify md5 checksum after copy')
     
     group = parser.add_argument_group('video processing')
@@ -250,9 +241,10 @@ def parse_command_line_arguments(configuration):
     group.add_argument('--output-rate',     dest='output_rate', metavar='RATE',         help='subtitles encoding frame rate')
     
     group = parser.add_argument_group('environment and repository')
-    group.add_argument('-M', '--map-show',  dest='map_show',    metavar="MAP",          help='map show to tvdb id [tvdb id]:[show name]')
+    group.add_argument('--show',            dest='map_show',    metavar="MAP",          help='map show to tvdb id [tvdb id]:[show name]')
     group.add_argument('--poster',          dest='poster',      metavar='MAP',          help='choose tmdb movie poster [imdb]:[tmdb]')
     group.add_argument('--initialize',      dest='initialize',  action='store_true',    default=False, help='run only once to initialize the system')
+    group.add_argument('--conf',            dest='conf',        metavar='PATH',         help='path for external config file')
     group.add_argument('-d', '--debug',     dest='debug',       action='store_true',    default=False, help='only print commands without executing')
     group.add_argument('-v', '--verbosity', dest='verbosity',   metavar='LEVEL',        default='info', choices=log_levels.keys(), help='logging verbosity level [default: %(default)s]')
     
@@ -264,7 +256,7 @@ def main():
     logging.basicConfig()
     
     # Log level to be used before we read command line arguments
-    logging.getLogger().setLevel(log_levels['warning'])
+    logging.getLogger().setLevel(log_levels['info'])
     
     # Initialize options and scan arguments
     configuration = Configuration()

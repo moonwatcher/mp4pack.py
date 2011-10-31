@@ -45,7 +45,6 @@ class ContainerFactory(object):
     
 
 
-
 # Container super class
 class Container(object):
     def __init__(self, factory, file_path, autoload=True):
@@ -97,7 +96,7 @@ class Container(object):
     def load_path_info(self):
         self.path_info = None
         if self.file_path:
-            self.path_info = self.factory.util.decode_path(self.file_path)
+            self.path_info = self.factory.configuration.decode_path(self.file_path)
         return self.path_info is not None
     
     
@@ -265,16 +264,19 @@ class Container(object):
                 self.record['entity']['physical'] = {}
             
             if queue is None:
-                queue = self.factory.util.scan_repository_for_related(self.file_path, self.record['entity'])
+                queue = self.factory.configuration.scan_repository_for_related(self.file_path, self.record['entity'])
             
             if queue:
                 discovered = 0
                 for path in queue:
                     if path not in self.record['entity']['physical']:
-                        related_path_info = self.factory.util.decode_path(path)
+                        related_path_info = self.factory.configuration.decode_path(path)
                         if self.factory.util.check_if_in_repository(related_path_info):
                             self.logger.debug(u'Indexing %s.', path)
                             self.record['entity']['physical'][path] = {}
+                            uri = self.factory.configuration.uri_from_canonice_path(path)
+                            self.record['entity']['physical'][path]['uri'] = uri
+                            self.record['entity']['physical'][path]['canonic'] = self.factory.configuration.canonice_path_from_uri(uri)
                             self.record['entity']['physical'][path]['path info'] = related_path_info
                             self.record['entity']['physical'][path]['info'] = self.factory.util.decode_info(path)
                             discovered += 1
@@ -353,9 +355,9 @@ class Container(object):
     def copy(self, options):
         self.mark_as_processed()
         result = None
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
-        if self.factory.util.complete_path_info_default_values(path_info):
-            dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
+        path_info = self.factory.configuration.resolve_path_info(self.path_info, {'volume':options.volume, 'profile':options.profile})
+        if path_info:
+            dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
             if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                 command = self.factory.util.initialize_command('rsync', self.logger)
                 if command:
@@ -380,7 +382,7 @@ class Container(object):
     
     def rename(self, options):
         self.mark_as_processed()
-        dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_name())
+        dest_path = os.path.join(os.path.dirname(self.file_path), self.canonic_file_name())
         if os.path.exists(dest_path) and os.path.samefile(self.file_path, dest_path):
             self.logger.debug(u'No renaming needed for %s',dest_path)
         else:
@@ -474,9 +476,11 @@ class Container(object):
     
     def download_artwork(self, options):
         result = False
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
-        path_info['kind'] = 'png'
-        if self.factory.util.complete_path_info_default_values(path_info):
+        path_info = self.factory.configuration.resolve_path_info(
+            self.path_info, 
+            {'volume':options.volume, 'profile':options.profile, 'kind':'png'}
+        )
+        if path_info:
             selected = []
             lookup = {'kind':'png', 'profile':path_info['profile']}
             for (path, phy) in self.record['entity']['physical'].iteritems():
@@ -511,10 +515,10 @@ class Container(object):
             source_md5 = hashlib.md5(file(self.file_path).read()).hexdigest()
             dest_md5 = hashlib.md5(file(path).read()).hexdigest()
             if source_md5 == dest_md5:
-                self.logger.info(u'md5 match: %s %s',source_md5, self.canonic_name())
+                self.logger.info(u'md5 match: %s %s',source_md5, self.canonic_file_name())
                 result = True
             else:
-                self.logger.error(u'md5 mismatch: %s is not %s for %s', source_md5, dest_md5, self.canonic_name())
+                self.logger.error(u'md5 mismatch: %s is not %s for %s', source_md5, dest_md5, self.canonic_file_name())
         return result
     
     
@@ -536,16 +540,12 @@ class Container(object):
         )
     
     
-    def simple_name(self):
-        return self.factory.util.simple_name(self.path_info, self.record['entity'])
-    
-    
-    def canonic_name(self):
-        return self.factory.util.canonic_name(self.path_info, self.record['entity'])
+    def canonic_file_name(self):
+        return self.factory.configuration.encode_file_name(self.path_info, self.record['entity'])
     
     
     def canonic_path(self):
-        return self.factory.util.canonic_path(self.path_info, self.record['entity'])
+        return self.factory.configuration.encode_path(self.path_info, self.record['entity'])
     
     
     
@@ -651,15 +651,15 @@ class AudioVideoContainer(Container):
     
     
     def hd_video(self):
-        return self.video_width() > self.factory.configuration.runtime['hd video min width']
+        return self.video_width() > self.factory.configuration.user_config['hd threshold']
     
     
     def playback_height(self):
         result = 0
         v = self.main_video_track()
         if v:
-            if v['display aspect ratio'] >= self.factory.configuration.runtime['display aspect ratio']:
-                result = float(v['width']) / float(self.factory.configuration.runtime['display aspect ratio'])
+            if v['display aspect ratio'] >= self.factory.configuration.user_config['playback']['aspect ratio']:
+                result = float(v['width']) / float(self.factory.configuration.user_config['playback']['aspect ratio'])
             else:
                 result = float(v['height'])
         return result
@@ -672,10 +672,12 @@ class AudioVideoContainer(Container):
     def extract(self, options):
         result = Container.extract(self, options)
         if self.info['menu']:
-            path_info = self.factory.util.copy_path_info(self.path_info, options)
-            path_info['kind'] = 'txt'
-            if self.factory.util.complete_path_info_default_values(path_info):
-                dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
+            path_info = self.factory.configuration.resolve_path_info(
+                self.path_info, 
+                {'volume':options.volume, 'profile':options.profile, 'kind':'txt'}
+            )
+            if path_info:
+                dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
                 if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                     c = Chapter(self.factory, dest_path, False)
                     c.start()
@@ -693,16 +695,19 @@ class AudioVideoContainer(Container):
     
     def pack(self, options):
         Container.pack(self, options)
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
         
-        # Packing into m4v with Subler
-        if options.pack in ('m4v'):
-            path_info['kind'] = 'm4v'
-            if self.factory.util.complete_path_info_default_values(path_info):
-                dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-                if dest_path is not None:
-                    pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
-                    if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+        if options.pack in ('m4v', 'mkv'):
+            path_info = self.factory.configuration.resolve_path_info(
+                self.path_info, 
+                {'volume':options.volume, 'profile':options.profile, 'kind':options.pack}
+            )
+            if path_info:
+                dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
+                if dest_path and self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+                    pc = self.factory.configuration.kind[path_info['kind']]['profile'][path_info['profile']]
+                    
+                    # Packing into m4v with Subler
+                    if path_info['kind'] == 'm4v':
                         command = self.factory.util.initialize_command('subler', self.logger)
                         if command:
                             command.extend([u'-o', dest_path, u'-i', self.file_path])
@@ -712,179 +717,180 @@ class AudioVideoContainer(Container):
                             if self.factory.util.clean_if_not_exist(dest_path):
                                 self.queue_for_index(dest_path)
                                 
-        # Packing into Matroska with mkvmerge
-        elif options.pack in ('mkv'):
-            path_info['kind'] = 'mkv'
-            if self.factory.util.complete_path_info_default_values(path_info):
-                dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-                if dest_path is not None:
-                    pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
-                    selected = { 'related':{}, 'track':{} }
-                    
-                    if 'pack' in pc:
-                        # locate related files that need to be muxed in
-                        if 'related' in pc['pack']:
-                            for (path, phy) in self.record['entity']['physical'].iteritems():
-                                for c in pc['pack']['related']:
-                                    if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c.iteritems()):
-                                        if phy['path info']['kind'] not in selected['related']:
-                                            selected['related'][phy['path info']['kind']] = []
-                                        selected['related'][phy['path info']['kind']].append(path)
-                                        break
-                        #locate related tracks that need to be muxed in
-                        if 'tracks' in pc['pack']:
-                            for t in self.info['track']:
-                                for c in pc['pack']['tracks']:
-                                    if all((k in t and t[k] == v) for k,v in c.iteritems()):
-                                        if t['type'] not in selected['track']:
-                                            selected['track'][t['type']] = []
-                                        selected['track'][t['type']].append(t)
-                                        break
+                    # Packing into Matroska with mkvmerge
+                    elif path_info['kind'] == 'mkv':
+                        selected = { 'related':{}, 'track':{} }
+                        
+                        if 'pack' in pc:
+                            # locate related files that need to be muxed in
+                            if 'related' in pc['pack']:
+                                for (path, phy) in self.record['entity']['physical'].iteritems():
+                                    for c in pc['pack']['related']:
+                                        if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c.iteritems()):
+                                            if phy['path info']['kind'] not in selected['related']:
+                                                selected['related'][phy['path info']['kind']] = []
+                                            selected['related'][phy['path info']['kind']].append(path)
+                                            break
+                            #locate related tracks that need to be muxed in
+                            if 'tracks' in pc['pack']:
+                                for t in self.info['track']:
+                                    for c in pc['pack']['tracks']:
+                                        if all((k in t and t[k] == v) for k,v in c.iteritems()):
+                                            if t['type'] not in selected['track']:
+                                                selected['track'][t['type']] = []
+                                            selected['track'][t['type']].append(t)
+                                            break
+                                            
+                            command = self.factory.util.initialize_command('mkvmerge', self.logger)
+                            if command:
+                                command.extend([
+                                    u'--output', 
+                                    dest_path, 
+                                    u'--no-global-tags', 
+                                    u'--no-track-tags', 
+                                    u'--no-chapters', 
+                                    u'--no-attachments', 
+                                    u'--no-subtitles'
+                                ])
+                                
+                                full_name = None
+                                if 'name' in self.record['entity']:
+                                    full_name = self.factory.configuration.encode_full_name(self.path_info, self.record)
+                                    if full_name:
+                                        command.append(u'--title')
+                                        command.append(full_name)
+                                for t in selected['track']['video']:
+                                    if full_name:
+                                        command.append(u'--track-name')
+                                        command.append(u'{0}:{1}'.format(t['id'], full_name))
+                                    if 'language' in t:
+                                        command.append(u'--language')
+                                        command.append(u'{0}:{1}'.format(t['id'], self.factory.configuration.find_language(t['language'])['iso2']))
                                         
-                    self.logger.debug(selected)
-                    
-                    if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                        command = self.factory.util.initialize_command('mkvmerge', self.logger)
-                        if command:
-                            command.extend([u'--output', dest_path, u'--no-global-tags', u'--no-track-tags', u'--no-chapters', u'--no-attachments', u'--no-subtitles'])
-                            
-                            full_name = None
-                            if 'name' in self.record['entity']:
-                                full_name = self.factory.util.full_name(self.path_info, self.record)
-                                if full_name:
-                                    command.append(u'--title')
-                                    command.append(full_name)
-                            for t in selected['track']['video']:
-                                if full_name:
-                                    command.append(u'--track-name')
-                                    command.append(u'{0}:{1}'.format(t['id'], full_name))
-                                if 'language' in t:
-                                    command.append(u'--language')
-                                    command.append(u'{0}:{1}'.format(t['id'], self.factory.util.find_language(t['language'])['iso2']))
-                                
-                            for t in selected['track']['audio']:
-                                if 'channels' in t:
-                                    if t['channels'] < 2: tname = 'Mono'
-                                    elif t['channels'] > 2: tname = 'Surround'
-                                    else: tname = 'Stereo'
-                                    command.append(u'--track-name')
-                                    command.append(u'{0}:{1}'.format(t['id'], tname))
-                                if 'language' in t:
-                                    command.append(u'--language')
-                                    command.append(u'{0}:{1}'.format(t['id'], self.factory.util.find_language(t['language'])['iso2']))
-                                
-                            command.append(u'--audio-tracks')
-                            command.append(u','.join([ unicode(k['id']) for k in selected['track']['audio'] ]))
-                            command.append(u'--video-tracks')
-                            command.append(u','.join([ unicode(k['id']) for k in selected['track']['video'] ]))
-                            command.append(self.file_path)
-                            
-                            if 'ac3' in selected['related']:
-                                for r in selected['related']['ac3']:
-                                    # try to locate the DTS sound track from which the AC-3 track was transcoded
-                                    # if a match is found duplicate the delay
-                                    # checking exact duration ir sample cound migth be more accurate
-                                    ac3_record = self.record['entity']['physical'][r]
-                                    lookup = {'codec':'DTS', 'language':ac3_record['path info']['language']}
-                                    for t in self.info['track']:
-                                        if all((k in t and t[k] == v) for k,v in lookup.iteritems()):
-                                            if 'delay' in t and t['delay'] != 0:
-                                                self.logger.debug(u'Found a matching DTS track with non trivial delay of %d', t['delay'])
-                                                command.append(u'--sync')
-                                                command.append(u'0:{0}'.format(t['delay']))
-                                                break
-                                    if 'channels' in ac3_record['info']['track'][0]:
-                                        channels = ac3_record['info']['track'][0]['channels']
-                                        if channels < 2: tname = 'Mono'
-                                        elif channels > 2: tname = 'Surround'
+                                for t in selected['track']['audio']:
+                                    if 'channels' in t:
+                                        if t['channels'] < 2: tname = 'Mono'
+                                        elif t['channels'] > 2: tname = 'Surround'
                                         else: tname = 'Stereo'
                                         command.append(u'--track-name')
-                                        command.append(u'0:{0}'.format(tname))
-                                    command.append(u'--language')
-                                    command.append(u'0:{0}'.format(self.factory.util.find_language(ac3_record['path info']['language'])['iso2']))
-                                    command.append(r)
-                                    
-                            if 'srt' in selected['related']:
-                                for r in selected['related']['srt']:
-                                    path_info = self.record['entity']['physical'][r]['path info']
-                                    command.append(u'--sub-charset')
-                                    command.append(u'0:UTF-8')
-                                    command.append(u'--language')
-                                    command.append(u'0:{0}'.format(self.factory.util.find_language(path_info['language'])['iso2']))
-                                    command.append(r)
-                                    
-                            if 'txt' in selected['related']:
-                                for r in selected['related']['txt']:
-                                    path_info = self.record['entity']['physical'][r]['path info']
-                                    command.append(u'--chapter-language')
-                                    command.append(u'en')
-                                    command.append(u'--chapter-charset')
-                                    command.append(u'UTF-8')
-                                    command.append(u'--chapters')
-                                    command.append(r)
-                                    break
+                                        command.append(u'{0}:{1}'.format(t['id'], tname))
+                                    if 'language' in t:
+                                        command.append(u'--language')
+                                        command.append(u'{0}:{1}'.format(t['id'], self.factory.configuration.find_language(t['language'])['iso2']))
+                                        
+                                command.append(u'--audio-tracks')
+                                command.append(u','.join([ unicode(k['id']) for k in selected['track']['audio'] ]))
+                                command.append(u'--video-tracks')
+                                command.append(u','.join([ unicode(k['id']) for k in selected['track']['video'] ]))
+                                command.append(self.file_path)
                                 
-                            message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
-                            self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
-                            if self.factory.util.clean_if_not_exist(dest_path):
-                                self.queue_for_index(dest_path)
+                                if 'ac3' in selected['related']:
+                                    for r in selected['related']['ac3']:
+                                        # try to locate the DTS sound track from which the AC-3 track was transcoded
+                                        # if a match is found duplicate the delay
+                                        # checking exact duration ir sample cound migth be more accurate
+                                        ac3_record = self.record['entity']['physical'][r]
+                                        lookup = {'codec':'DTS', 'language':ac3_record['path info']['language']}
+                                        for t in self.info['track']:
+                                            if all((k in t and t[k] == v) for k,v in lookup.iteritems()):
+                                                if 'delay' in t and t['delay'] != 0:
+                                                    self.logger.debug(u'Found a matching DTS track with non trivial delay of %d', t['delay'])
+                                                    command.append(u'--sync')
+                                                    command.append(u'0:{0}'.format(t['delay']))
+                                                    break
+                                        if 'channels' in ac3_record['info']['track'][0]:
+                                            channels = ac3_record['info']['track'][0]['channels']
+                                            if channels < 2: tname = 'Mono'
+                                            elif channels > 2: tname = 'Surround'
+                                            else: tname = 'Stereo'
+                                            command.append(u'--track-name')
+                                            command.append(u'0:{0}'.format(tname))
+                                        command.append(u'--language')
+                                        command.append(u'0:{0}'.format(self.factory.configuration.find_language(ac3_record['path info']['language'])['iso2']))
+                                        command.append(r)
+                                        
+                                if 'srt' in selected['related']:
+                                    for r in selected['related']['srt']:
+                                        path_info = self.record['entity']['physical'][r]['path info']
+                                        command.append(u'--sub-charset')
+                                        command.append(u'0:UTF-8')
+                                        command.append(u'--language')
+                                        command.append(u'0:{0}'.format(self.factory.configuration.find_language(path_info['language'])['iso2']))
+                                        command.append(r)
+                                        
+                                if 'txt' in selected['related']:
+                                    for r in selected['related']['txt']:
+                                        path_info = self.record['entity']['physical'][r]['path info']
+                                        command.append(u'--chapter-language')
+                                        command.append(u'en')
+                                        command.append(u'--chapter-charset')
+                                        command.append(u'UTF-8')
+                                        command.append(u'--chapters')
+                                        command.append(r)
+                                        break
+                                        
+                                message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
+                                self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                                if self.factory.util.clean_if_not_exist(dest_path):
+                                    self.queue_for_index(dest_path)
     
     
     def transcode(self, options):
-        result = None
         Container.transcode(self, options)
-        if options.transcode in ('mkv', 'm4v'):
-            path_info = self.factory.util.copy_path_info(self.path_info, options)
-            path_info['kind'] = options.transcode
-            if self.factory.util.complete_path_info_default_values(path_info):
-                dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-                if dest_path is not None:
-                    command = None
-                    if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                        command = self.factory.util.initialize_command('handbrake', self.logger)
-                        if command:
-                            tc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]['transcode']
-                            
-                            if 'flags' in tc:
-                                for v in tc['flags']:
-                                    command.append(v)
-                                    
-                            if 'options' in tc:
-                                hb_config = copy.deepcopy(tc['options'])
-                                if options.pixel_width: hb_config['--maxWidth'] = options.pixel_width
-                                if options.quality: hb_config['--quality'] = options.quality
-                                if options.crop: hb_config['--crop'] = options.crop
+        
+        result = None
+        if options.transcode in ('m4v', 'mkv'):
+            path_info = self.factory.configuration.resolve_path_info(
+                self.path_info, 
+                {'volume':options.volume, 'profile':options.profile, 'kind':options.transcode}
+            )
+            if path_info:
+                dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
+                if dest_path and self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+                    command = self.factory.util.initialize_command('handbrake', self.logger)
+                    if command:
+                        tc = self.factory.configuration.kind[path_info['kind']]['profile'][path_info['profile']]['transcode']
+                        if 'flags' in tc:
+                            for v in tc['flags']:
+                                command.append(v)
                                 
-                                for (k,v) in hb_config.iteritems():
-                                    command.append(k)
-                                    command.append(unicode(v))
-                                    
-                            found_audio = False
-                            audio_options = {'--audio':[]}
-                            for s in tc['audio']:
-                                for idx, t in enumerate(self.audio_tracks()):
-                                    for c in s:
-                                        if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
-                                            found_audio = True
-                                            audio_options['--audio'].append(unicode(idx + 1))
-                                            for (k,v) in c['to'].iteritems():
-                                                if k not in audio_options: audio_options[k] = []
-                                                audio_options[k].append(unicode(v))
-                                        
-                                if found_audio:
-                                    break
-                                    
+                        if 'options' in tc:
+                            hb_config = copy.deepcopy(tc['options'])
+                            if options.pixel_width: hb_config['--maxWidth'] = options.pixel_width
+                            if options.quality: hb_config['--quality'] = options.quality
+                            if options.crop: hb_config['--crop'] = options.crop
+                            
+                            for (k,v) in hb_config.iteritems():
+                                command.append(k)
+                                command.append(unicode(v))
+                                
+                        found_audio = False
+                        audio_options = {'--audio':[]}
+                        for s in tc['audio']:
+                            for idx, t in enumerate(self.audio_tracks()):
+                                for c in s:
+                                    if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
+                                        found_audio = True
+                                        audio_options['--audio'].append(unicode(idx + 1))
+                                        for (k,v) in c['to'].iteritems():
+                                            if k not in audio_options: audio_options[k] = []
+                                            audio_options[k].append(unicode(v))
+                                            
                             if found_audio:
-                                for (k,v) in audio_options.iteritems():
-                                    if v:
-                                        command.append(k)
-                                        command.append(u','.join(v))
-                            command.extend([u'--input', self.file_path, u'--output', dest_path])
-                            message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
-                            self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
-                            if self.factory.util.clean_if_not_exist(dest_path):
-                                self.queue_for_index(dest_path)
-                                result = dest_path
+                                break
+                                
+                        if found_audio:
+                            for (k,v) in audio_options.iteritems():
+                                if v:
+                                    command.append(k)
+                                    command.append(u','.join(v))
+                        command.extend([u'--input', self.file_path, u'--output', dest_path])
+                        message = u'Transcode {0} --> {1}'.format(self.file_path, dest_path)
+                        self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
+                        if self.factory.util.clean_if_not_exist(dest_path):
+                            self.queue_for_index(dest_path)
+                            result = dest_path
+                            
         return result
     
     
@@ -949,11 +955,14 @@ class Text(Container):
         result = None
         Container.transcode(self, options)
         self.decode()
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
-        path_info['kind'] = options.transcode
-        if self.factory.util.complete_path_info_default_values(path_info):
-            dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-            if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+        
+        path_info = self.factory.configuration.resolve_path_info(
+            self.path_info, 
+            {'volume':options.volume, 'profile':options.profile, 'kind':options.transcode}
+        )
+        if path_info:
+            dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
+            if dest_path and self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                 self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
                 self.write(dest_path)
                 if self.factory.util.clean_if_not_exist(dest_path):
@@ -973,14 +982,17 @@ class Artwork(Container):
     
     
     def transcode(self, options):
-        result = None
         Container.transcode(self, options)
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
-        path_info['kind'] = options.transcode
-        if self.factory.util.complete_path_info_default_values(path_info):
-            dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-            if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                p = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
+        
+        result = None
+        path_info = self.factory.configuration.resolve_path_info(
+            self.path_info, 
+            {'volume':options.volume, 'profile':options.profile, 'kind':options.transcode}
+        )
+        if path_info:
+            dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
+            if dest_path and self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+                p = self.factory.configuration.kind[path_info['kind']]['profile'][path_info['profile']]
                 if 'transcode' in p:
                     if 'size' in p['transcode']:
                         from PIL import Image
@@ -1044,36 +1056,39 @@ class Matroska(AudioVideoContainer):
             'path':{ 'text':[], 'audio':[] },
             'extract':{ 'text':[], 'audio':[] }
         }
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
-        if 'volume' in path_info: del path_info['volume']
-        path_info['profile'] = 'dump'
-        for k in ('srt', 'ass', 'dts'):
-            if 'volume' in path_info: del path_info['volume']
-            path_info['kind'] = k
-            if self.factory.util.complete_path_info_default_values(path_info):
-                pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
-                if 'extract' in pc and 'tracks' in pc['extract']:
-                    for t in self.info['track']:
-                        for c in pc['extract']['tracks']:
-                            if all((k in t and t[k] == v) for k,v in c.iteritems()):
-                                t['kind'] = k
-                                selected['track'].append(t)
-                                break
-                                
+        
+        
+        path_info = self.factory.configuration.resolve_path_info(
+            self.path_info, 
+            {'volume':options.volume, 'profile':options.profile}
+        )
+        if path_info:
+            for k in ('srt', 'ass', 'dts'):
+                if self.factory.configuration.resolve_path_info(path_info, {'volume':options.volume, 'profile':'dump', 'kind':k}):
+                    pc = self.factory.configuration.kind[path_info['kind']]['profile'][path_info['profile']]
+                    if 'extract' in pc and 'tracks' in pc['extract']:
+                        for t in self.info['track']:
+                            for c in pc['extract']['tracks']:
+                                if all((k in t and t[k] == v) for k,v in c.iteritems()):
+                                    t['kind'] = k
+                                    selected['track'].append(t)
+                                    break
         if selected['track']:
             command = self.factory.util.initialize_command('mkvextract', self.logger)
             if command:
                 command.extend([u'tracks', self.file_path ])
                 for t in selected['track']:
-                    if 'volume' in path_info: del path_info['volume']
-                    path_info['kind'] = t['kind']
-                    path_info['language'] = t['language']
-                    if self.factory.util.complete_path_info_default_values(path_info):
-                        dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-                        if dest_path not in selected['path'][t['type']]:
-                            if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                                command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
-                                selected['path'][t['type']].append(dest_path)
+                    track_path_info = self.factory.configuration.resolve_path_info(path_info, {
+                        'volume':options.volume,
+                        'profile':'dump', 
+                        'kind':t['kind'], 
+                        'language':t['language']
+                    })
+                    if track_path_info:
+                        dest_path = self.factory.configuration.encode_path(track_path_info, self.record['entity'])
+                        if dest_path not in selected['path'][t['type']] and self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+                            command.append(u'{0}:{1}'.format(unicode(t['id']), dest_path))
+                            selected['path'][t['type']].append(dest_path)
                         else:
                             self.logger.warning('Skipping track %s of type %s because %s is taken', t['id'], t['type'], dest_path)
                             
@@ -1191,62 +1206,45 @@ class Mpeg4(AudioVideoContainer):
         
     
     
-    def _update_png(self, options):
+    def _update_artwork(self, options):
         AudioVideoContainer.tag(self, options)
-        if options.update == 'png':
-            path_info = self.factory.util.copy_path_info(self.path_info, options)
-            path_info['kind'] = 'png'
-            selected = []
-            if self.factory.util.complete_path_info_default_values(path_info):
+        if options.update in ('png', 'jpg'):
+            path_info = self.factory.configuration.resolve_path_info(self.path_info, {
+                'volume':options.volume, 
+                'profile':options.profile, 
+                'kind':options.update
+            })
+            if path_info:
                 if options.download:
                     self.download_artwork(options)
+                    
+                selected = []
                 lookup = {'kind':path_info['kind'], 'profile':path_info['profile']}
                 for (path, phy) in self.record['entity']['physical'].iteritems():
                     if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
                         selected.append(path)
                         break
-            if selected:
-                message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
-                command = self.factory.util.initialize_command('subler', self.logger)
-                if command:
-                    command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
-                    self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                    self.queue_for_index(self.file_path)
-            else:
-                self.logger.warning(u'No artwork available for %s', self.file_path)
-    
-    
-    def _update_jpg(self, options):
-        AudioVideoContainer.tag(self, options)
-        if options.update == 'jpg':
-            path_info = self.factory.util.copy_path_info(self.path_info, options)
-            path_info['kind'] = 'jpg'
-            selected = []
-            if self.factory.util.complete_path_info_default_values(path_info):
-                if options.download:
-                    self.download_artwork(options)
-                lookup = {'kind':path_info['kind'], 'profile':path_info['profile']}
-                for (path, phy) in self.record['entity']['physical'].iteritems():
-                    if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
-                        selected.append(path)
-                        break
-            if selected:
-                message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
-                command = self.factory.util.initialize_command('subler', self.logger)
-                if command:
-                    command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
-                    self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
-                    self.queue_for_index(self.file_path)
-            else:
-                self.logger.warning(u'No artwork available for %s', self.file_path)
+                        
+                if selected:
+                    message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
+                    command = self.factory.util.initialize_command('subler', self.logger)
+                    if command:
+                        command.extend([u'-o', self.file_path, u'-t', u'{{{0}:{1}}}'.format(u'Artwork', selected[0])])
+                        self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
+                        self.queue_for_index(self.file_path)
+                else:
+                    self.logger.warning(u'No artwork available for %s', self.file_path)
     
     
     def _update_srt(self, options):
-        if options.update == 'srt':
-            path_info = self.factory.util.copy_path_info(self.path_info, options)
-            path_info['kind'] = 'srt'
-            if self.factory.util.complete_path_info_default_values(path_info):
-                pc = self.factory.configuration.kind['srt']['Profile'][path_info['profile']]
+        if options.update in ('srt'):
+            path_info = self.factory.configuration.resolve_path_info(self.path_info, {
+                'volume':options.volume, 
+                'profile':options.profile, 
+                'kind':options.update
+            })
+            if path_info:
+                pc = self.factory.configuration.kind['srt']['profile'][path_info['profile']]
                 
                 has_changed = False
                 if 'profile' in path_info and 'update' in pc:
@@ -1266,7 +1264,7 @@ class Mpeg4(AudioVideoContainer):
                                     selected[path] = phy['path info']
                                     break
                                 
-                        for (p,i) in selected.iteritems():
+                        for p,i in selected.iteritems():
                             message = u'Update subtitles {0} --> {1}'.format(p, self.file_path)
                             command = self.factory.util.initialize_command('subler', self.logger)
                             if command:
@@ -1307,12 +1305,15 @@ class Mpeg4(AudioVideoContainer):
     
     def _update_txt(self, options):
         AudioVideoContainer.tag(self, options)
-        if options.update == 'txt':
-            path_info = self.factory.util.copy_path_info(self.path_info, options)
-            path_info['kind'] = 'txt'
-            selected = []
-            if self.factory.util.complete_path_info_default_values(path_info):
-                pc = self.factory.configuration.kind['txt']['Profile'][path_info['profile']]
+        if options.update in ('txt'):
+            path_info = self.factory.configuration.resolve_path_info(self.path_info, {
+                'volume':options.volume, 
+                'profile':options.profile, 
+                'kind':options.update
+            })
+            if path_info:
+                selected = []
+                pc = self.factory.configuration.kind['txt']['profile'][path_info['profile']]
                 if 'update' in pc:
                     if pc['update']['reset'] and self.info['menu']:
                         message = u'Drop existing chapters in {0}'.format(self.file_path)
@@ -1342,8 +1343,7 @@ class Mpeg4(AudioVideoContainer):
         AudioVideoContainer.update(self, options)
         self._update_srt(options)
         self._update_txt(options)
-        self._update_png(options)
-        self._update_jpg(options)
+        self._update_artwork(options)
     
     
 
@@ -1358,29 +1358,30 @@ class RawAudio(AudioVideoContainer):
     
     
     def transcode(self, options):
-        result = None
         Container.transcode(self, options)
-        if options.transcode == 'ac3':
-            path_info = self.factory.util.copy_path_info(self.path_info, options)
-            path_info['kind'] = options.transcode
-            path_info['language'] = self.path_info['language']
-            if self.factory.util.complete_path_info_default_values(path_info):
-                dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-                if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                    track = self.info['track'][0]
-                    option = None
-                    pc = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
-                    if 'transcode' in pc and 'audio' in pc['transcode']:
-                        for c in pc['transcode']['audio']:
-                            if all((k in track and track[k] == v) for k,v in c['from'].iteritems()):
-                                option = c
-                                break
-                    if option:
-                        message = u'Transcode audio {0} --> {1}'.format(self.file_path, dest_path)
-                        command = self.factory.util.initialize_command('ffmpeg', self.logger)
-                        if command:
+        result = None
+        if options.transcode in ('ac3'):
+            path_info = self.factory.configuration.resolve_path_info(
+                self.path_info, 
+                {'volume':options.volume, 'profile':options.profile, 'kind':options.transcode}
+            )
+            if path_info:
+                dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
+                if dest_path and self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+                    command = command = self.factory.util.initialize_command('ffmpeg', self.logger)
+                    if command:
+                        pc = self.factory.configuration.kind[path_info['kind']]['profile'][path_info['profile']]
+                        track = self.info['track'][0]
+                        option = None
+                        if 'transcode' in pc and 'audio' in pc['transcode']:
+                            for c in pc['transcode']['audio']:
+                                if all((k in track and track[k] == v) for k,v in c['from'].iteritems()):
+                                    option = c
+                                    break
+                        if option:
+                            message = u'Transcode audio {0} --> {1}'.format(self.file_path, dest_path)
                             command.extend([
-                                u'-threads',u'{0}'.format(self.factory.configuration.runtime['threads']),
+                                u'-threads',u'{0}'.format(self.factory.configuration.user_config['runtime']['threads']),
                                 u'-i', self.file_path,
                                 u'-acodec', u'ac3',
                                 u'-ac', u'{0}'.format(track['channels']),
@@ -1532,15 +1533,17 @@ class Subtitle(Text):
     
     
     def transcode(self, options):
-        result = None
         Container.transcode(self, options)
         self.decode()
-        path_info = self.factory.util.copy_path_info(self.path_info, options)
-        path_info['kind'] = options.transcode
-        if self.factory.util.complete_path_info_default_values(path_info):
-            dest_path = self.factory.util.canonic_path(path_info, self.record['entity'])
-            if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
-                p = self.factory.configuration.kind[path_info['kind']]['Profile'][path_info['profile']]
+        result = None
+        path_info = self.factory.configuration.resolve_path_info(
+            self.path_info, 
+            {'volume':options.volume, 'profile':options.profile, 'kind':options.transcode}
+        )
+        if path_info:
+            dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
+            if dest_path and self.factory.util.varify_if_path_available(dest_path, options.overwrite):
+                p = self.factory.configuration.kind[path_info['kind']]['profile'][path_info['profile']]
                 
                 # Check if profile dictates filtering
                 if 'transcode' in p and 'filter' in p['transcode']:
@@ -1651,7 +1654,7 @@ class Chapter(Text):
     
     def start(self):
         self.chapter_markers = []
-        self.path_info = self.factory.util.decode_path(self.file_path)
+        self.path_info = self.factory.configuration.decode_path(self.file_path)
     
     
     def decode(self):
@@ -1933,8 +1936,8 @@ class SubtitleFilter(object):
         result = None
         if name in self.sequence:
             result = self.sequence[name]
-        elif name in self.factory.configuration.subtitle:
-            config = self.factory.configuration.subtitle[name]
+        elif name in self.factory.configuration.user_config['subtitles']['filters']:
+            config = self.factory.configuration.user_config['subtitles']['filters'][name]
             self.logger.info(u'Loading %s filter sequence', name)
             if config['action'] == 'drop':
                 s = DropFilterSequence(config)
@@ -2131,141 +2134,9 @@ class FileUtil(object):
         return info
     
     
-    
-    def decode_path(self, path, extended=True):
-        # <Volume>/<Media Kind>/<Kind>/<Profile>/(<Show>/<Season>/(language/)?<Show> <Code> <Name>|(language/)?IMDb<IMDB ID> <Name>).<Extension>
-        path_info = {}
-        if path:
-            basename = os.path.basename(path)
-            for mk in self.factory.configuration.supported_media_kind:
-                match = mk['schema'].search(basename)
-                if match is not None:
-                    path_info = {'media kind':mk['code']}
-                    if mk['name'] == 'movie':
-                        path_info['imdb id'] = match.group(1)
-                        path_info['name'] = match.group(2)
-                        path_info['kind'] = match.group(3)
-                    elif mk['name'] == 'tvshow':
-                        path_info['tv show key'] = match.group(1)
-                        path_info['tv episode id'] = match.group(2)
-                        path_info['tv season'] = int(match.group(3))
-                        path_info['tv episode #'] = int(match.group(4))
-                        path_info['name'] = match.group(5)
-                        path_info['kind'] = match.group(6)
-                    prefix = os.path.dirname(path)
-                    if path_info['kind'] in self.factory.configuration.kind_with_language:
-                        prefix, iso = os.path.split(prefix)
-                        lang = self.find_language(iso)
-                        if lang: path_info['language'] = lang['iso3t']
-                    break
-                    
-            if 'media kind' in path_info and extended:
-                # media kind was detected and parsed
-                suffix = os.path.realpath(path)
-                for k,v in self.factory.configuration.volume.iteritems():
-                    if os.path.commonprefix([v['realpath'], suffix]) == v['realpath']:
-                        path_info['volume'] = k
-                        suffix = os.path.relpath(suffix, v['realpath'])
-                        break
-                
-                if 'volume' in path_info:
-                    # Path is in repository
-                    fragments = suffix.split('/')
-                    if (
-                        len(fragments) > 3 and
-                        fragments[0] in self.factory.configuration.property_map['name']['stik'] and path_info['media kind'] == self.factory.configuration.property_map['name']['stik'][fragments[0]]['code'] and
-                        fragments[1] in self.factory.configuration.kind and path_info['kind'] == fragments[1] and
-                        fragments[2] in self.factory.configuration.kind[path_info['kind']]['Profile']
-                    ): path_info['profile'] = fragments[2]
-                    
-        if 'name' in path_info and not path_info['name']:
-            del path_info['name']
-            
-        return path_info
-    
-    
-    def scan_repository_for_related(self, path, entity):
-        related = None
-        if path:
-            path_info = self.decode_path(path)
-            related = []
-            self.logger.debug(u'Scanning repository for file related to %s.', path)
-            for v in self.factory.configuration.volume:
-                for k in self.factory.configuration.kind:
-                    for p in self.factory.configuration.kind[k]['Profile']:
-                        if k in self.factory.configuration.kind_with_language:
-                            for l in self.factory.configuration.property_map['iso3t']['language']:
-                                related_path_info = copy.deepcopy(path_info)
-                                related_path_info['volume'] = v
-                                related_path_info['kind'] = k
-                                related_path_info['profile'] = p
-                                related_path_info['language'] = l
-                                related_path = self.canonic_path(related_path_info, entity)
-                                if os.path.exists(related_path):
-                                    related.append(related_path)
-                        else:
-                            related_path_info = copy.deepcopy(path_info)
-                            related_path_info['volume'] = v
-                            related_path_info['kind'] = k
-                            related_path_info['profile'] = p
-                            related_path = self.canonic_path(related_path_info, entity)
-                            if os.path.exists(related_path):
-                                related.append(related_path)
-        return related
-    
-    
-    
     def check_if_in_repository(self, path_info):
         return path_info and 'volume' in path_info and 'profile' in path_info
     
-    
-    def complete_path_info_default_values(self, path_info):
-        result = True
-        if 'kind' in path_info and path_info['kind'] in self.factory.configuration.kind.keys():
-            kc = self.factory.configuration.kind[path_info['kind']]
-            if 'profile' not in path_info:
-                if 'default' in kc and 'profile' in kc['default']:
-                    path_info['profile'] = kc['default']['profile']
-                else:
-                    result = False
-                    self.logger.warning(u'Could not assign default profile for %s', unicode(path_info))
-                    
-            if result and not self.profile_valid_for_kind(path_info['profile'], path_info['kind']):
-                result = False
-                self.logger.warning(u'Profile %s is invalid for kind %s', path_info['profile'], path_info['kind'])
-                
-            if result:
-                if 'volume' not in path_info:
-                    if path_info['profile'] in kc['Profile'] and 'default' in kc['Profile'][path_info['profile']]:
-                        dpc = kc['Profile'][path_info['profile']]['default']
-                        if path_info['media kind'] in dpc:
-                            if 'volume' in dpc[path_info['media kind']]:
-                                path_info['volume'] = dpc[path_info['media kind']]['volume']
-                if 'volume' not in path_info:
-                    result = False
-                    self.logger.warning(u'Could not assign default volume for %s', unicode(path_info))
-        else:
-            result = False
-            if 'kind' in path_info:
-                self.logger.warning(u'Invalid kind for %s', unicode(path_info))
-            else:
-                self.logger.warning(u'Unknow kind for %s', unicode(path_info))
-                
-        return result
-    
-    
-    def copy_path_info(self, path_info, options):
-        result = None
-        if path_info:
-            result = copy.deepcopy(path_info)
-            result['volume'] = options.volume
-            if result['volume'] is None:
-                del result['volume']
-                
-            result['profile'] = options.profile
-            if result['profile'] is None:
-                del result['profile']
-        return result
     
     
     
@@ -2277,100 +2148,6 @@ class FileUtil(object):
                 if not value:
                     value = None
         return value
-    
-    
-    def simple_name(self, path_info, entity=None):
-        result = None
-        if entity and 'simple_name' in entity:
-            result = entity['simple_name']
-        elif 'name' in path_info:
-            result = path_info['name']
-        if result:
-            result = self.characters_to_exclude_from_filename.sub(u'', result)
-        return result
-    
-    
-    def full_name(self, path_info, record):
-        result = None
-        if 'media kind' in path_info:
-            if path_info['media kind'] == 10: # TV Show
-                result = u''.join([record['tv show']['name'], u' s', u'{0:02d}'.format(record['entity']['tv_season']), u'e', u'{0:02d}'.format(record['entity']['tv_episode']), u' ',record['entity']['name']])
-            elif path_info['media kind'] == 9: # Movie
-                result = u''.join([u'IMDb', record['entity']['imdb_id'], u' ', record['entity']['name']])
-        return result
-    
-    
-    def canonic_name(self, path_info, entity=None):
-        result = None
-        valid = False
-        
-        if 'media kind' in path_info and 'kind' in path_info:
-            if path_info['media kind'] == 10: # TV Show
-                if 'tv show key' in path_info and 'tv episode id' in path_info:
-                    result = u''.join([path_info['tv show key'], u' ', path_info['tv episode id']])
-                    valid = True
-            elif path_info['media kind'] == 9: # Movie
-                if 'imdb id' in path_info:
-                    result = u''.join([u'IMDb', path_info['imdb id']])
-                    valid = True
-        if valid:
-            name = self.simple_name(path_info, entity)
-            if name is not None:
-                result = u''.join([result, u' ', name])
-            result = u''.join([result, u'.', path_info['kind']])
-        else:
-            result = None
-        
-        return result
-    
-    
-    def canonic_path(self, path_info, entity=None):
-        result = None
-        valid = True
-        if 'kind' in path_info and path_info['kind'] in self.factory.configuration.kind:
-            if 'volume' in path_info and path_info['volume'] in self.factory.configuration.volume:
-                if 'profile' in path_info:
-                    if self.profile_valid_for_kind(path_info['profile'], path_info['kind']):
-                        result = os.path.join(self.factory.configuration.volume[path_info['volume']]['path'], self.factory.configuration.property_map['code']['stik'][path_info['media kind']]['name'], path_info['kind'], path_info['profile'])
-                        if path_info['media kind'] == 10 and 'tv show key' in path_info and 'tv season' in path_info:
-                            result = os.path.join(result, path_info['tv show key'], str(path_info['tv season']))
-                        
-                        if path_info['kind'] in self.factory.configuration.kind_with_language:
-                            if 'language' in path_info:
-                                lang = self.find_language(path_info['language'])
-                                if lang:
-                                    result = os.path.join(result, lang['iso3t'])
-                                else:
-                                    valid = False
-                                    self.logger.warning(u'Unknown language for %s', unicode(path_info))
-                            else:
-                                valid = False
-                                self.logger.warning(u'Missing language for %s', unicode(path_info))
-                    else:
-                        valid = False
-                        self.logger.warning(u'Invalid profile for %s', unicode(path_info))
-                else:
-                    valid = False
-                    self.logger.warning(u'Unknow profile for %s', unicode(path_info))
-            else:
-                valid = False
-                if 'volume' in path_info:
-                    self.logger.warning(u'Invalid volume for %s', unicode(path_info))
-                else:
-                    self.logger.warning(u'Unknow volume for %s', unicode(path_info))
-        else:
-            valid = False
-            if 'kind' in path_info:
-                self.logger.warning(u'Invalid kind for %s', unicode(path_info))
-            else:
-                self.logger.warning(u'Unknow kind for %s', unicode(path_info))
-        
-        if valid:
-            result = os.path.join(result, self.canonic_name(path_info, entity))
-            result = os.path.abspath(result)
-        else:
-            result = None
-        return result
     
     
     def clean_if_not_exist(self, path):
@@ -2409,11 +2186,6 @@ class FileUtil(object):
         return result
     
     
-    def profile_valid_for_kind(self, profile, kind):
-        return profile and kind and kind in self.factory.configuration.kind.keys() and profile in self.factory.configuration.kind[kind]['Profile'].keys()
-        
-    
-    
     def check_if_path_available(self, path, overwrite=False):
         result = True
         if path is not None:
@@ -2437,7 +2209,7 @@ class FileUtil(object):
         result = None
         if command in self.factory.configuration.command:
             c = self.factory.configuration.command[command]
-            if 'path' in c:
+            if 'path' in c and c['path']:
                 result = [c['path'],]
             else:
                 logger.warning(u'Command %s could not be located. Is it installed?', c['binary'])
@@ -2480,18 +2252,6 @@ class FileUtil(object):
                 print encode_command(command)
         return report
     
-    
-    
-    def find_language(self, iso):
-        result = None
-        if len(iso) == 3:
-            if iso in self.factory.configuration.property_map['iso3t']['language']:
-                result = self.factory.configuration.property_map['iso3t']['language'][iso]
-            elif iso in self.factory.configuration.property_map['iso3b']['language']:
-                result = self.factory.configuration.property_map['iso3b']['language'][iso]
-        elif len(iso) == 2 and iso in self.factory.configuration.property_map['iso2']['language']:
-            result = self.factory.configuration.property_map['iso2']['language'][iso]
-        return result
     
     
     def timecode_to_miliseconds(self, timecode):
@@ -2579,7 +2339,6 @@ class FileUtil(object):
     
     
     
-    
     def frame_rate_to_float(self, frame_rate):
         frame_rate = str(frame_rate).split('/',1)
         if len(frame_rate) == 2 and str(frame_rate[0]).isdigit() and str(frame_rate[1]).isdigit():
@@ -2656,7 +2415,7 @@ class FileUtil(object):
                         pvalue = u', '.join(value)
                     else:
                         if key == 'language':
-                            lang = self.find_language(value)
+                            lang = self.factory.configuration.find_language(value)
                             pvalue = lang['print']
                         else:
                             pvalue = unicode(value)
@@ -2709,6 +2468,7 @@ class FileUtil(object):
     
     def format_value(self, value):
         return self.factory.configuration.format['value display'].format(value)
+    
     
     format_khz_display = u'{0}kHz'
     full_numeric_time_format = re.compile('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:\.|,)([0-9]+)')

@@ -7,13 +7,1560 @@ import copy
 import logging
 from subprocess import Popen, PIPE
 from datetime import timedelta
+import urlparse
 
 tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
 tvdb_apikey = u'7B3B400B0146EA83'
 
-# Default base configuration
+class Configuration(object):
+    def __init__(self):
+        self.logger = logging.getLogger('Configuration')
+        self.runtime_config = runtime_config
+        self.media_config = media_config
+        self.user_config = None
+        
+        self.repository = None
+        self.rules = None
+        self.volume = None
+        
+        self.kind = None
+        self.command = None
+        self.action = None
+        self.format = None
+        self.subtitle = None
+        
+        self.options = None
+        self.property_map = None
+        
+        self.track_with_language = None
+        self.kind_with_language = None
+        self.supported_media_kind = None
+        self.available_profiles = None
+        self.available_commands = None
+        
+        self.subtitle = None
+        self.tmdb = None
+        self.tvdb = None
+        self.genre = None
+        
+        self.load_default_config()
+    
+    
+    
+    def load_default_config(self):
+        # start from the base user conf
+        self.user_config = copy.deepcopy(base_config)
+        
+        # Load conf from environment variable
+        env_config_path = os.getenv('MP4PACK_CONFIG')
+        if env_config_path:
+            self.load_external_config(env_config_path)
+            
+        self.tmdb = self.runtime_config['service']['tmdb']
+        self.tvdb = self.runtime_config['service']['tvdb']
+        self.genre = self.media_config['gnre']
+        
+        self.load_format()
+        self.load_command()
+        self.load_action()
+        self.load_kind()
+        self.load_property_map()
+        
+        self.track_with_language = ('audio', 'subtitles', 'video')
+        self.kind_with_language = self.property_map['container']['subtitles']['kind'] + self.property_map['container']['raw audio']['kind']
+        self.supported_media_kind = [ mk for mk in self.media_config['stik'] if 'schema' in mk ]
+        
+        self.available_profiles = []
+        for v in self.kind.values():
+            self.available_profiles.extend(v['profile'].keys())
+        self.available_profiles = tuple(set(self.available_profiles))
+    
+    
+    def load_format(self):
+        self.format = {}
+        self.format['scheme'] = '{0}://{{0}}/{{1}}'.format(self.runtime_config['scheme'])
+        self.format['wrap width'] = self.user_config['shell']['wrap']
+        self.format['indent width'] = self.user_config['shell']['indent']
+        self.format['margin width'] = self.user_config['shell']['margin']
+        
+        self.format['indent'] = u'\n' + u' ' * self.format['indent width']
+        self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format(self.format['wrap width'] + self.format['indent width'], u' ' * self.format['margin width'])
+        self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format(self.format['indent width'] - self.format['margin width'] - 3, u' ' * self.format['margin width'])
+        self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format(self.format['indent width'] - self.format['margin width'] - 2, u' ' * self.format['margin width'])
+        self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
+    
+    
+    def load_command(self):
+        self.command = {}
+        self.available_commands = []
+        for k,v in self.runtime_config['command'].iteritems():
+            self.command[k] = copy.deepcopy(v)
+            
+            cmd = ['which', v['binary']]
+            proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            report = proc.communicate()
+            if report[0]:
+                self.command[k]['path'] = report[0].splitlines()[0]
+                self.available_commands.append(k)
+            else:
+                self.command[k]['path'] = None
+                
+        self.available_commands = set(self.available_commands)
+    
+    
+    def load_action(self):
+        self.action = {}
+        for k,v in self.runtime_config['action'].iteritems():
+            self.action[k] = copy.deepcopy(v)
+            self.action[k]['active'] = False
+            if 'depend' in v:
+                if set(v['depend']).issubset(self.available_commands):
+                    self.action[k]['active'] = True
+                    self.logger.debug(u'Action %s dependencies are satisfied', k)
+                else:
+                    self.logger.warning(u'Action %s has unsatisfied dependencies: %s', k, ', '.join(list(set(v['depend']) - self.available_commands)))
+    
+    
+    def load_kind(self):
+        self.kind = {}
+        for k,v in self.runtime_config['kind'].iteritems():
+            self.kind[k] = copy.deepcopy(v)
+    
+    
+    def load_repository(self):
+        self.repository = {}
+        self.volume = {}
+        self.rules = []
+        
+        for repo_k,repo_v in self.user_config['repository'].iteritems():
+            self.repository[repo_k] = copy.deepcopy(repo_v)
+            self.repository[repo_k]['name'] = repo_k
+            self.build_mongodb_url(self.repository[repo_k]['mongodb'])
+            if 'remote' in self.repository[repo_k] and 'mongodb' in self.repository[repo_k]['remote']:
+                self.build_mongodb_url(self.repository[repo_k]['remote']['mongodb'])
+                
+            if 'rule' in self.repository[repo_k]:
+                for r in self.repository[repo_k]['rule']:
+                    rule = copy.deepcopy(r)
+                    # rule['when']['repository'] = repo_k
+                    self.rules.append(rule)
+                    
+            if 'volume' in self.repository[repo_k]:
+                for vol_k, vol_v in self.repository[repo_k]['volume'].iteritems():
+                    vol_v['name'] = vol_k
+                    vol_v['repository'] = self.repository[repo_k]['name']
+                    vol_v['uri prefix'] = self.format['scheme'].format(vol_v['repository'], vol_v['name'])
+                    
+                    if 'alias' not in vol_v:
+                        vol_v['alias'] = []
+                    if 'scan' not in vol_v:
+                        vol_v['scan'] = True
+                    if 'index' not in vol_v:
+                        vol_v['index'] = True
+                    
+                    if 'base' in self.repository[repo_k]:
+                        if 'path' not in vol_v:
+                            # absolute path defined on a volume always takes precedence
+                            # if not present default to <base>/<volume name>
+                            vol_v['path'] = os.path.join(self.repository[repo_k]['base']['path'], vol_k)
+                            
+                        if 'alias' in self.repository[repo_k]['base']:
+                            for alt in self.repository[repo_k]['base']['alias']:
+                                vol_v['alias'].append(os.path.join(alt, vol_k))
+                    
+                    # need to add validity check
+                    if vol_v['path']:
+                        aliases = set()
+                        aliases.add(vol_v['path'])
+                        aliases.add(os.path.realpath(vol_v['path']))
+                        for a in vol_v['alias']:
+                            aliases.add(a)
+                            aliases.add(os.path.realpath(a))
+                            
+                        vol_v['alias'] = tuple(sorted(aliases))
+                        vol_v['real path'] = os.path.realpath(vol_v['path'])
+                        self.volume[vol_k] = vol_v
+                        
+        self.property_map['volume'] = {}
+        for vol_k,vol_v in self.volume.iteritems():
+            # mark location flags
+            if vol_v['repository'] == self.user_config['local repository']:
+                vol_v['local'] = True
+                vol_v['remote'] = False
+            else:
+                vol_v['local'] = False
+                vol_v['remote'] = True
+                
+            # map volume by alias
+            for a in vol_v['alias']:
+                self.property_map['volume'][a] = vol_v
+    
+    
+    def load_property_map(self):
+        self.property_map = {}
+        for key in ('name', 'mediainfo', 'mp4info'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            
+            # Build file and tag propery map
+            for block in ('file', 'tag'):
+                if block not in self.property_map[key]:
+                    self.property_map[key][block] = {}
+                    
+                for p in self.media_config[block]:
+                    if key in p and p[key] is not None:
+                        self.property_map[key][block][p[key]] = p
+            
+            # Build track property map
+            self.property_map[key]['track'] = {}
+            for block in ('audio', 'video', 'text', 'image'):
+                if block not in self.property_map[key]['track']:
+                    self.property_map[key]['track'][block] = {}
+                for p in self.media_config['track']['common']:
+                    if key in p and p[key] is not None:
+                        self.property_map[key]['track'][block][p[key]] = p
+                    
+                for p in self.media_config['track'][block]:
+                    if key in p and p[key] is not None:
+                        self.property_map[key]['track'][block][p[key]] = p
+        
+        # Build itunemovi plist properties map
+        for key in ('name', 'plist'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            self.property_map[key]['itunemovi'] = {}
+            for p in self.media_config['itunemovi']:
+                self.property_map[key]['itunemovi'][p[key]] = p
+        
+        # Build special iTunes atom map
+        for key in ('name', 'code'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
+                if block not in self.property_map[key]:
+                    self.property_map[key][block] = {}
+                for p in self.media_config[block]:
+                    self.property_map[key][block][p[key]] = p
+        
+        # Build language code map
+        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
+            if key not in self.property_map:
+                self.property_map[key] = {}
+            self.property_map[key]['language'] = {}
+            for p in self.media_config['language']:
+                if key in p:
+                    self.property_map[key]['language'][p[key]] = p
+        
+        # Build container kind map
+        self.property_map['container'] = {}
+        for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
+            self.property_map['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
+            
+    
+    
+    def load_command_line_arguments(self, options):
+        self.options = options
+        
+        # Load conf file from command line argument
+        if self.options.conf:
+            self.load_external_config(self.options.conf)
+            
+        if self.options.location:
+            self.user_config['domain'] = self.options.location
+        if self.options.repository:
+            self.user_config['local repository'] = self.options.repository
+            
+        self.load_repository()
+        self.user_config['horizon time delta'] = timedelta(**self.user_config['horizon'])
+        self.user_config['playback']['aspect ratio'] = float(float(self.user_config['playback']['width'])/float(self.user_config['playback']['height']))
+    
+    
+    def load_external_config(self, path):
+        if os.path.exists(path):
+            path = os.path.abspath(path)
+            external_config = None
+            
+            try:
+                external_config = eval(open(path).read())
+            except:
+                self.logger.warning('Failed to load config %s', path)
+                external_config = None
+                
+            if external_config:
+                self.logger.info('Load external config %s', path)
+                self.user_config = dict(self.user_config.items() + external_config.items())
+    
+    
+    
+    def build_mongodb_url(self, conf):
+        if 'host' in conf and 'database' in conf:
+            url = conf['host']
+            if 'username' in conf and 'password' in conf:
+                url = '{0}:{1}@{2}'.format(conf['username'], conf['password'], url)
+            if 'port' in conf:
+                '{0}:{1}'.format(url, conf['port'])
+            conf['url'] = 'mongodb://{0}/{1}'.format(url, conf['database'])
+    
+    
+    def canonic_path(self, path):
+        result = path
+        real_path = os.path.realpath(os.path.abspath(path))
+        for vol_path, vol in self.property_map['volume'].iteritems():
+            if os.path.commonprefix([vol_path, real_path]) == vol_path:
+                result = real_path.replace(vol_path, vol['path'])
+                break
+        return result
+    
+    
+    def canonice_path_from_uri(self, uri):
+        result = None
+        if uri:
+            parsed_uri = urlparse.urlparse(uri)
+            if parsed_uri.scheme == self.runtime_config['scheme']:
+                if parsed_uri.hostname in self.repository:
+                    frag = parsed_uri.path.split('/', 2)
+                    volume_name = frag[1]
+                    relative_path = frag[2]
+                    if volume_name in self.volume:
+                        result = os.path.join(self.volume[volume_name]['path'], relative_path)
+        return result
+    
+    
+    def uri_from_canonice_path(self, path):
+        result = None
+        for vol in self.volume.values():
+            if os.path.commonprefix([vol['path'], path]) == vol['path']:
+                result = os.path.join(vol['uri prefix'], os.path.relpath(path, vol['path']))
+                break
+        return result
+    
+    
+    
+    def get_repository(self):
+        return self.repository[self.user_config['local repository']]
+    
+    
+    def local_volume(self, volume):
+        return volume in self.volume and self.volume[volume]['repository'] == self.user_config['local repository']
+    
+    
+    def get_mongodb_config(self):
+        if self.user_config['domain'] == self.get_repository()['domain']:
+            # local
+            return self.get_repository()['mongodb']
+        else:
+            # remote
+            return self.get_repository()['remote']['mongodb']
+    
+    
+    def get_local_cache_path(self):
+        return self.get_repository()['cache']['path']
+    
+    
+    
+    def profile_valid_for_kind(self, profile, kind):
+        return profile and kind and kind in self.kind and profile in self.kind[kind]['profile']
+    
+    
+    def find_language(self, iso):
+        result = None
+        if len(iso) == 3:
+            if iso in self.property_map['iso3t']['language']:
+                result = self.property_map['iso3t']['language'][iso]
+            elif iso in self.property_map['iso3b']['language']:
+                result = self.property_map['iso3b']['language'][iso]
+        elif len(iso) == 2 and iso in self.property_map['iso2']['language']:
+            result = self.property_map['iso2']['language'][iso]
+        return result
+    
+    
+    def encode_full_name(self, path_info, record):
+        result = None
+        if 'media kind' in path_info:
+            if path_info['media kind'] == 10: # TV Show
+                result = u''.join([
+                    record['tv show']['name'],
+                    u' s', u'{0:02d}'.format(record['entity']['tv_season']),
+                    u'e', u'{0:02d}'.format(record['entity']['tv_episode']),
+                    u' ', record['entity']['name']
+                ])
+                
+            elif path_info['media kind'] == 9: # Movie
+                result = u''.join([
+                    u'IMDb',
+                    record['entity']['imdb_id'],
+                    u' ', record['entity']['name']
+                ])
+        return result
+    
+    
+    def encode_name(self, path_info, entity=None):
+        result = None
+        if entity and 'simple_name' in entity:
+            result = entity['simple_name']
+        elif 'name' in path_info:
+            result = path_info['name']
+            
+        if result:
+            result = self.characters_to_exclude_from_filename.sub(u'', result)
+            if not result:
+                result = None
+        return result
+    
+    
+    def encode_file_name(self, path_info, entity=None):
+        result = None
+        valid = False
+        
+        if 'media kind' in path_info and 'kind' in path_info:
+            if path_info['media kind'] == 10: # TV Show
+                if 'tv show key' in path_info and 'tv episode id' in path_info:
+                    result = u''.join([path_info['tv show key'], u' ', path_info['tv episode id']])
+                    valid = True
+            elif path_info['media kind'] == 9: # Movie
+                if 'imdb id' in path_info:
+                    result = u''.join([u'IMDb', path_info['imdb id']])
+                    valid = True
+        if valid:
+            name = self.encode_name(path_info, entity)
+            if name is not None:
+                result = u''.join([result, u' ', name])
+            result = u''.join([result, u'.', path_info['kind']])
+        else:
+            result = None
+        return result
+    
+    
+    def encode_path(self, path_info, entity=None):
+        result = None
+        valid = False
+        if 'kind' in path_info and path_info['kind'] in self.kind:
+            if 'volume' in path_info and path_info['volume'] in self.volume:
+                if 'profile' in path_info:
+                    if self.profile_valid_for_kind(path_info['profile'], path_info['kind']):
+                        valid = True
+                        
+                        # base of the path: volume, media kind, kind, profile
+                        result = os.path.join(
+                            self.volume[path_info['volume']]['path'], 
+                            self.property_map['code']['stik'][path_info['media kind']]['name'], 
+                            path_info['kind'],
+                            path_info['profile']
+                        )
+                        
+                        # for TV Show: TV Show Key, TV Show Season
+                        if path_info['media kind'] == 10 and 'tv show key' in path_info and 'tv season' in path_info:
+                            result = os.path.join(
+                                result, 
+                                path_info['tv show key'], 
+                                unicode(path_info['tv season'])
+                            )
+                            
+                        # for kinds that need a language sub division
+                        if path_info['kind'] in self.kind_with_language:
+                            if 'language' in path_info:
+                                lang = self.find_language(path_info['language'])
+                                if lang:
+                                    result = os.path.join(result, lang['iso3t'])
+                                else:
+                                    self.logger.warning(u'Unknown language for %s', unicode(path_info))
+                                    valid = False
+                            else:
+                                self.logger.warning(u'Missing language for %s', unicode(path_info))
+                                valid = False
+                    else:
+                        self.logger.warning(u'Invalid profile for %s', unicode(path_info))
+                else:
+                    self.logger.warning(u'Unknow profile for %s', unicode(path_info))
+            else:
+                if 'volume' in path_info:
+                    self.logger.warning(u'Invalid volume for %s', unicode(path_info))
+                else:
+                    self.logger.warning(u'Unknow volume for %s', unicode(path_info))
+        else:
+            if 'kind' in path_info:
+                self.logger.warning(u'Invalid kind for %s', unicode(path_info))
+            else:
+                self.logger.warning(u'Unknow kind for %s', unicode(path_info))
+                
+        if valid:
+            result = os.path.join(result, self.encode_file_name(path_info, entity))
+            result = os.path.abspath(result)
+        else:
+            result = None
+        return result
+    
+    
+    def decode_path(self, path):
+        # TV Show: <Volume>/<Media Kind>/<Kind>/<Profile>/<Show>/<Season>/(language/)?<Show> <Code> <Name>.<Extension>
+        # Movie: <Volume>/<Media Kind>/<Kind>/<Profile>/(language/)?IMDb<IMDB ID> <Name>.<Extension>
+        path_info = {}
+        if path:
+            basename = os.path.basename(path)
+            for mk in self.supported_media_kind:
+                match = mk['schema'].search(basename)
+                if match is not None:
+                    path_info = {'media kind':mk['code']}
+                    
+                    # handle each media kind with a different schema
+                    if mk['name'] == 'movie':
+                        path_info['imdb id'] = match.group(1)
+                        path_info['name'] = match.group(2)
+                        path_info['kind'] = match.group(3)
+                    elif mk['name'] == 'tvshow':
+                        path_info['tv show key'] = match.group(1)
+                        path_info['tv episode id'] = match.group(2)
+                        path_info['tv season'] = int(match.group(3))
+                        path_info['tv episode #'] = int(match.group(4))
+                        path_info['name'] = match.group(5)
+                        path_info['kind'] = match.group(6)
+                        
+                    prefix = os.path.dirname(path)
+                    if path_info['kind'] in self.kind_with_language:
+                        prefix, iso = os.path.split(prefix)
+                        lang = self.find_language(iso)
+                        if lang: 
+                            path_info['language'] = lang['iso3t']
+                    break
+                    
+            if 'media kind' in path_info:
+                # media kind was detected and parsed
+                relative_path = os.path.realpath(path)
+                for vol_k,vol_v in self.volume.iteritems():
+                    if os.path.commonprefix([vol_v['real path'], relative_path]) == vol_v['real path']:
+                        path_info['volume'] = vol_k
+                        relative_path = os.path.relpath(relative_path, vol_v['real path'])
+                        break
+                        
+                if 'volume' in path_info:
+                    # try to detect profile
+                    frag = relative_path.split('/')
+                    if (    len(frag) > 3 and
+                            frag[0] in self.property_map['name']['stik'] and 
+                            path_info['media kind'] == self.property_map['name']['stik'][frag[0]]['code'] and
+                            frag[1] in self.kind and path_info['kind'] == frag[1] and
+                            frag[2] in self.kind[path_info['kind']]['profile']
+                    ): path_info['profile'] = frag[2]
+                    
+        if 'name' in path_info and not path_info['name']:
+            del path_info['name']
+            
+        return path_info
+    
+    
+    def resolve_path_info(self, path_info, override=None):
+        result = copy.deepcopy(path_info)
+        
+        for k in result.keys():
+            # apply overrides
+            if override and k in override:
+                result[k] = override[k]
+            
+            # delete empty attributes
+            if result[k] is None:
+                del result[k]
+                
+        # apply rules
+        self.logger.debug('path to reolve: %s', unicode(result))
+        for rule in self.rules:
+            if all((k in result and result[k] == v) for k,v in rule['when'].iteritems()):
+                self.logger.debug('Apply rule: %s', unicode(rule))
+                # rule matches
+                for default_k, default_v in rule['default'].iteritems():
+                    if default_k not in result:
+                        result[default_k] = default_v
+                        
+        if 'kind' in result:
+            if 'profile' in result:
+                if not self.profile_valid_for_kind(result['profile'], result['kind']):
+                    self.logger.warning(u'Profile %s is not valid for kind %s', result['profile'], result['kind'])
+                    result = None
+            else:
+                self.logger.warning(u'Unknow profile for %s', unicode(result))
+                result = None
+        else:
+            self.logger.warning(u'Unknow kind for %s', unicode(result))
+            result = None
+            
+        return result
+    
+    
+    def scan_repository_for_related(self, path, entity):
+        related = None
+        if path:
+            path_info = self.decode_path(path)
+            related = []
+            self.logger.debug(u'Scanning repository for file related to %s.', path)
+            for v, vol in self.volume.iteritems():
+                if vol['scan'] and self.local_volume(vol['name']):
+                    for k in self.kind:
+                        for p in self.kind[k]['profile']:
+                            if k in self.kind_with_language:
+                                for l in self.property_map['iso3t']['language']:
+                                    related_path_info = copy.deepcopy(path_info)
+                                    related_path_info['volume'] = v
+                                    related_path_info['kind'] = k
+                                    related_path_info['profile'] = p
+                                    related_path_info['language'] = l
+                                    related_path = self.encode_path(related_path_info, entity)
+                                    if os.path.exists(related_path):
+                                        related.append(related_path)
+                                        self.logger.debug('Discovered %s', related_path)
+                            else:
+                                related_path_info = copy.deepcopy(path_info)
+                                related_path_info['volume'] = v
+                                related_path_info['kind'] = k
+                                related_path_info['profile'] = p
+                                related_path = self.encode_path(related_path_info, entity)
+                                if os.path.exists(related_path):
+                                    related.append(related_path)
+                                    self.logger.debug('Discovered %s', related_path)
+        return related
+    
+    
+    
+    def print_option_report(self):
+        for k,v in self.options.__dict__.iteritems():
+            self.logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, self.format['indent width'] - 2 - self.format['margin width']))
+    
+    
+    def print_command_report(self):
+        for k,v in self.command.iteritems():
+            self.logger.debug(u'Command {0:-<{2}}: {1}'.format(k, v['path'], self.format['indent width'] - 2 - self.format['margin width']))
+    
+    
+    characters_to_exclude_from_filename = re.compile(ur'[\\\/?<>:*|\'"^\.]')
+    
 
-media_property = {
+
+# Default base configuration
+base_config = {
+    'domain':'localhost',
+    'local repository':'local',
+    'horizon':{ 'days':14, },
+    'hd threshold':720,
+    'playback':{ 'width':1920, 'height':1080, },
+    'runtime':{
+        'threds':2,
+    },
+    'shell':{
+        'wrap':120, 
+        'indent':30, 
+        'margin':2, 
+    },
+    'repository':{
+        'localhost':{
+            'domain':'localhost',
+            'base':{
+                'path':'/pool',
+            },
+            'cache':{
+                'path':'/var/cache/mp4pack',
+            },
+            'mongodb':{
+                'database':'mp4pack',
+                'host':'localhost'
+            },
+            'volume':{},
+        },
+    },
+    'subtitles':{
+        'filters':{
+            'punctuation':{
+                'scope':'line',
+                'action':'replace',
+                'case':'sensitive',
+                'expression':(
+                    (r'^[-?\.,!:;"\'\s]+(.*)$', '\\1'),
+                    (r'^(.*)[-?\.,!:;"\'\s]+$', '\\1'),
+                ),
+            },
+            'leftover':{
+                'scope':'line',
+                'action':'drop',
+                'case':'insensitive',
+                'expression':(
+                    ur'^\([^\)]+\)$',
+                    ur'^[\[\]\(\)]*$',
+                    ur'^[-?\.,!:;"\'\s]*$',
+                ),
+            },
+            'hebrew noise':{
+                'scope':'block',
+                'action':'drop',
+                'case':'insensitive',
+                'expression':(
+                    ur':סנכרון',
+                    ur':תרגום',
+                    ur':שיפוץ',
+                    ur':לפרטים',
+                    ur'סונכרן',
+                    ur'תורגם על ידי',
+                    ur'תורגם חלקית',
+                    ur'סנכרן לגרסה זו',
+                    ur'תורגם ע"י',
+                    ur'שופץ ע"י',
+                    ur'תורגם משמיעה',
+                    ur'קריעה וסינכרון',
+                    ur'תוקן על ידי',
+                    ur'תורגם על-ידי',
+                    ur'תורגם ע"י',
+                    ur'תוקן ע"י',
+                    ur'הובא והוכן ע"י',
+                    ur'תורגם וסוכנרן',
+                    ur'תורגם וסונכרן',
+                    ur'תוקן קלות ע"י',
+                    ur'תרגום זה בוצע על ידי',
+                    ur'סונכרן לגירסא זו ע"י',
+                    ur'תרגום זה נעשה על ידי',
+                    ur'תורגם עם הרבה זיעה על ידי',
+                    ur'תורגם מספרדית ע"י אסף פארי',
+                    ur'כתוביות ע"י',
+                    ur'הגהה וסנכרון ע"י',
+                    ur'שנוכל להמשיך לתרגם',
+                    ur'הפרק מוקדש',
+                    ur'מצוות טורק',
+                    ur'shayx ע"י',
+                    ur'pusel :סנכרון',
+                    ur'תרגום: רותם ושמעון',
+                    ur'שיפוץ: השייח\' הסעודי',
+                    ur'שופץ ע"י השייח\' הסעודי',
+                    ur'תרגום: שמעון ורותם אברג\'יל',
+                    ur'כתובית זו הובאה',
+                    ur'שופצה, נערכה וסונכרנה לגרסה זו',
+                    ur'ברוכה הבאה אלוירה',
+                    ur'לצוות מתרגמי האוס',
+                    ur'אלוירה ברוכה הבאה',
+                    ur'עמוס נמני',
+                    ur'אינדיאנית שלי',
+                    ur'יומולדת שמח',
+                    ur'מוקדש לך',
+                    ur'מונחים רפואיים - ג\'ון דו',
+                    ur'מפורום תפוז',
+                    ur'מוקדש לפולי שלי',
+                    ur':כתוביות',
+                    ur'^בלעדית עבור$',
+                    ur'הורד מהאתר',
+                    ur'על ההגהה workbook',
+                    ur'מוקדש לכל אוהבי האוס אי שם',
+                    ur'theterminator נערך ותוקן בשיתוף עם',
+                    ur'התרגום נעשה על ידי המוריד',
+                    ur'תורגם וסונוכרן משמיעה ע"י',
+                    ur'\bצפייה מהנה\b',
+                    ur'\bצפיה מהנה\b',
+                    ur'נקרע ותוקן',
+                    ur'אבי דניאלי',
+                    ur'אוהבים את התרגומים שלנו',
+                    ur'נקלענו למאבק',
+                    ur'משפטי מתמשך',
+                    ur'לבילד המתקשה בהבנת קרדיטים',
+                    ur'אנא תרמו לנו כדי',
+                    ur'הגהה על-ידי',
+                    ur'^עריכה לשונית$',
+                    ur'^white fang-תרגום: עמית יקיר ו$',
+                    ur'ערן טלמור',
+                    ur'\bעדי-בלי-בצל\b',
+                    ur'\bבקרו אותנו בפורום\b',
+                    ur'הודה בוז',
+                    ur'\b-תודה מיוחדת ל\b',
+                    ur'^extreme מקבוצת$',
+                    ur'ialfan-ו mb0:עברית',
+                    ur'י ביצה קשה',
+                    ur'^ב$',
+                    ur'^בי$',
+                    ur'^ביצ$',
+                    ur'^ביצה$',
+                    ur'^ביצה ק$',
+                    ur'^ביצה קש$',
+                    ur'^ביצה קשה$',
+                    ur'ליונהארט',
+                    ur'\bמצוות פושל\b',
+                    ur'\bassem נקרע ע"י\b',
+                    ur'\bkawa: סנכרון\b',
+                    ur'אוהבת לנצח, שרון',
+                ),
+            },
+            'noise':{
+                'scope':'block',
+                'action':'drop',
+                'case':'insensitive',
+                'expression':(
+                    ur'www\.allsubs\.org',
+                    ur'\bswsub\b',
+                    ur'\bresync\b',
+                    ur'\b[a-za-z0-9\.]+@gmail.\s*com\b',
+                    ur'cync\sby\slanmao',
+                    ur'www\.1000fr\.com',
+                    ur'www\.tvsubtitles\.net',
+                    ur'ytet-vicky8800',
+                    ur'www\.ydy\.com',
+                    ur'sync:gagegao',
+                    ur'frm-lanma',
+                    ur'nowa\swizja',
+                    ur'ssmink',
+                    ur'\blinx\b',
+                    ur'torec',
+                    ur'\byanx26\b',
+                    ur'\bgreenscorpion\b',
+                    ur'\bneotrix\b',
+                    ur'\bglfinish\b',
+                    ur'\bshloogy\b',
+                    ur'\.co\.il',
+                    ur'\by0natan\b',
+                    ur'\belad\b',
+                    ur'sratim',
+                    ur'donkey cr3w',
+                    ur'r-subs',
+                    ur'\[d-s\]',
+                    ur'ponkoit',
+                    ur'\bsubbie\b',
+                    ur'\bxsesa\b',
+                    ur'napisy pobrane',
+                    ur'\bphaelox\b',
+                    ur'divxstation',
+                    ur'\bpetabit\b',
+                    ur'\bronkey\b',
+                    ur'chococat3@walla',
+                    ur'warez',
+                    ur'\bdrsub\b',
+                    ur'\beliavgold\b',
+                    ur'^elvira$',
+                    ur'\blob93\b',
+                    ur'\belvir\b',
+                    ur'\boofir\b',
+                    ur'\bkrok\b',
+                    ur'\bqsubd\b',
+                    ur'\bariel046\b',
+                    ur'\bzipc\b',
+                    ur'\btecnodrom\b',
+                    ur'visiontext subtitles',
+                    ur'english sdh',
+                    ur'srulikg',
+                    ur'lh translators team',
+                    ur'[-=\s]+sub-zero[-=\s]+',
+                    ur'lionetwork',
+                    ur'^eric$',
+                    ur'subz3ro',
+                    ur'^david-z$',
+                    ur'drziv@yahoo',
+                    ur'elran_o',
+                    ur'mcsnagel',
+                    ur'\boutwit\b',
+                    ur'^gimly$',
+                    ur'\btinyurl\b',
+                    ur'\bfoxriver\b',
+                    ur'\bextremesubs\b',
+                    ur'megalomania tree',
+                    ur'xmonwow',
+                    ur'\bciwan\b',
+                    ur'\bnata4ever\b',
+                    ur'\byosefff\b',
+                    ur'\bhentaiman\b',
+                    ur'\bfoxi9\b',
+                    ur'\bgamby\b',
+                    ur'\bbrassica nigra\b',
+                    ur'\bqsubs\b',
+                    ur'\bsharetw\b',
+                    ur'\bserethd\b',
+                    ur'hazy7868',
+                    ur'subscenter\.org'
+                    ur'\blakota\b',
+                    ur'\bnzigi\b'
+                    ur'\bqwer90\b',
+                    ur'roni_eliav',
+                    ur'subscenter',
+                    ur'\bkuniva\b',
+                    ur'hdbits.org',
+                    ur'addic7ed',
+                    ur'hdsubs',
+                ),
+            },
+            'typo':{
+                'scope':'line',
+                'action':'replace',
+                'case':'sensitive',
+                'expression':(
+                    (r'\b +(,|\.|\?|%|!)\b', '\\1 '),
+                    (r'\b(,|\.|\?|%|!) +\b', '\\1 '),
+                    (r'\.\s*\.\s*\.\.?', '...'),
+                    (r'</?[a-z]+/?>', ''),
+                    (r'\'{2}', '"'),
+                    (r'\s+\)', ')'),
+                    (r'\(\s+', '('),
+                    (r'\s+\]', ']'),
+                    (r'\[\s+', '['),
+                    (r'\[[^\]]+\]\s*', ''),
+                    (r'^[^\]]+\]', ''),
+                    (r'\[[^\]]+$', ''),
+                    (r'\([#a-zA-Z0-9l\s]+\)', ''),
+                    (r'\([#a-zA-Z0-9l\s]+$', ''),
+                    (r'^[#a-zA-Z0-9l\s]+\)', ''),
+                    (r'^[-\s]+', ''),
+                    (r'[-\s]+$', ''),
+                    (r'\b^[-A-Z\s]+[0-9]*:\s*', ''),
+                    (r'(?<=[a-zA-Z\'])I', 'l'),
+                    (r'^[-\s]*$', ''),
+                ),
+            },
+            'english typo':{
+                'scope':'line',
+                'action':'replace',
+                'case':'sensitive',
+                'expression':(
+                    (r'♪', ''),
+                    (r'¶', ''),
+                    (r'Theysaid', 'They said'),
+                    (r'\bIast\b', 'last'),
+                    (r'\bIook\b', 'look'),
+                    (r'\bIetting\b', 'letting'),
+                    (r'\bIet\b', 'let'),
+                    (r'\bIooking\b', 'looking'),
+                    (r'\bIife\b', 'life'),
+                    (r'\bIeft\b', 'left'),
+                    (r'\bIike\b', 'like'),
+                    (r'\bIittle\b', 'little'),
+                    (r'\bIadies\b', 'ladies'),
+                    (r'\bIearn\b', 'learn'),
+                    (r'\bIanded\b', 'landed'),
+                    (r'\bIocked\b', 'locked'),
+                    (r'\bIie\b', 'lie'),
+                    (r'\bIong\b', 'long'),
+                    (r'\bIine\b', 'line'),
+                    (r'\bIives\b', 'lives'),
+                    (r'\bIeave\b', 'leave'),
+                    (r'\bIawyer\b', 'lawyer'),
+                    (r'\bIogs\b', 'logs'),
+                    (r'\bIack\b', 'lack'),
+                    (r'\bIove\b', 'love'),
+                    (r'\bIot\b', 'lot'),
+                    (r'\bIanding\b', 'landing'),
+                    (r'\bIet\'s\b', 'let\'s'),
+                    (r'\bIand\b', 'land'),
+                    (r'\bIying\b', 'lying'),
+                    (r'\bIist\b', 'list'),
+                    (r'\bIoved\b', 'loved'),
+                    (r'\bIoss\b', 'loss'),
+                    (r'\bIied\b', 'lied'),
+                    (r'\bIaugh\b', 'laugh'),
+                    (r'\b(h|H)avert\b', '\\1aven\'t'),
+                    (r'\b(w|W)asrt\b', '\\1asn\'t'),
+                    (r'\b(d|D)oesrt\b', '\\1oesn\'t'),
+                    (r'\b(d|D)ort\b', '\\1on\'t'),
+                    (r'\b(d|D)idrt\b', '\\1idn\'t'),
+                    (r'\b(a|A)irt\b', '\\1in\'t'),
+                    (r'\b(i|I)srt\b', '\\1sn\'t'),
+                    (r'\b(w|W)ort\b', '\\1on\'t'),
+                    (r'\b(c|C|w|W|s|S)ouldrt\b', '\\1ouldn\'t'),
+                    (r'\barert\b', 'aren\'t'),
+                    (r'\bls\b', 'Is'),
+                    (r'\b(L|l)f\b', 'If'),
+                    (r'\blt\b', 'It'),
+                    (r'\blt\'s\b', 'It\'s'),
+                    (r'\bl\'m\b', 'I\'m'),
+                    (r'\bl\'ll\b', 'I\'ll'),
+                    (r'\bl\'ve\b', 'I\'ve'),
+                    (r'\bl\b', 'I'),
+                    (r'\bln\b', 'In'),
+                    (r'\blmpossible\b', 'Impossible'),
+                    (r'\bIight\b', 'light'),
+                    (r'\bIevitation\b', 'levitation'),
+                    (r'\bIeaving\b', 'leaving'),
+                    (r'\bIooked\b', 'looked'),
+                    (r'\bIucky\b', 'lucky'),
+                    (r'\bIuck\b', 'luck'),
+                    (r'\bIater\b', 'later'),
+                    (r'\bIift\b', 'lift'),
+                    (r'\bIip\b', 'lip'),
+                    (r'\bIooks\b', 'looks'),
+                    (r'\bIaid\b', 'laid'),
+                    (r'\bIikely\b', 'likely'),
+                    (r'\bIow\b', 'low'),
+                    (r'\bIeast\b', 'least'),
+                    (r'\bIeader\b', 'leader'),
+                    (r'\bIocate\b', 'locate'),
+                    (r'\bIaw\b', 'law'),
+                    (r'\bIately\b', 'lately'),
+                    (r'\bIiar\b', 'liar'),
+                    (r'\bIate\b', 'late'),
+                    (r'\bIonger\b', 'longer'),
+                    (r'\bIive\b', 'live'),
+                ),
+            },
+        }
+    },
+}
+
+# Runtime config
+runtime_config = {
+    'scheme':'mp4pack',
+    'scheme prefix':'mp4pack://',
+    'service':{
+        'tmdb':{
+            'apikey':tmdb_apikey,
+            'urls':{
+                'Movie.getInfo':u'http://api.themoviedb.org/2.1/Movie.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Movie.imdbLookup':u'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Person.getInfo':u'http://api.themoviedb.org/2.1/Person.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Person.search':u'http://api.themoviedb.org/2.1/Person.search/en/json/{0}/{{0}}'.format(tmdb_apikey),
+                'Genres.getList':u'http://api.themoviedb.org/2.1/Genres.getList/en/json/{0}'.format(tmdb_apikey),
+            },
+        },
+        'tvdb':{
+            'apikey':tvdb_apikey,
+            'fuzzy':{
+                'minimum_person_name_length':3,
+            },
+            'urls':{
+                'Show.getInfo':u'http://www.thetvdb.com/api/{0}/series/{{0}}/all/en.xml'.format(tvdb_apikey),
+                'Banner.getImage':u'http://www.thetvdb.com/banners/{0}'
+            },
+        },
+    },
+    'command':{
+        'rsync':{
+            'binary':u'rsync',
+        },
+        'mv':{
+            'binary':u'mv',
+        },
+        'handbrake':{
+            'binary':u'HandbrakeCLI',
+        },
+        'subler':{
+            'binary':u'SublerCLI',
+        },
+        'mkvmerge':{
+            'binary':u'mkvmerge',
+        },
+        'mkvextract':{
+            'binary':u'mkvextract',
+        },
+        'mp4info':{
+            'binary':u'mp4info',
+        },
+        'mp4file':{
+            'binary':u'mp4file',
+        },
+        'mp4art':{
+            'binary':u'mp4art',
+        },
+        'mediainfo':{
+            'binary':u'mediainfo',
+        },
+        'ffmpeg':{
+            'binary':u'ffmpeg',
+        }
+    },
+    'action':{
+        'info':{
+            'depend':('mediainfo', 'mp4info',),
+        },
+        'copy':{
+            'depend':('rsync',),
+        },
+        'rename':{
+            'depend':('mv',),
+        },
+        'extract':{
+            'depend':('mkvextract',),
+        },
+        'tag':{
+            'depend':('subler',),
+        },
+        'optimize':{
+            'depend':('mp4file',),
+        },
+        'pack':{
+            'depend':('mkvmerge',),
+            'kind':('mkv','m4v', ),
+        },
+        'transcode':{
+            'depend':('handbrake',),
+            'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'png', 'ac3'),
+        },
+        'transform':{
+            'depend':('handbrake',),
+            'kind':('m4v',),
+        },
+        'update':{
+            'depend':('subler',),
+            'kind':('srt', 'png', 'jpg', 'txt', 'm4v'),
+        },
+    },
+    'kind':{
+        'm4v':{
+            'container':'mp4',
+            'profile':{
+                'universal':{
+                    'description':'an SD profile that decodes on every cabac capable apple device',
+                    'transcode':{
+                        'options':{
+                            '--quality':18,
+                            '--encoder':'x264',
+                            '--encopts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1:b-pyramid=none',
+                            '--maxWidth':720,
+                        },
+                        'flags':('--large-file','--loose-anamorphic'),
+                        'audio':(
+                            (
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
+                                },
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
+                                }, 
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                        ),
+                    },
+                },
+                'A4':{
+                    'description':'All A4 based apple devices',
+                    'transcode':{
+                        'options':{
+                            '--quality':18,
+                            '--encoder':'x264',
+                            '--encopts':'mixed-refs=1:ref=3:bframes=3:me=umh:b-adapt=2:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
+                            '--maxWidth':1280,
+                        },
+                        'flags':('--large-file','--loose-anamorphic'),
+                        'audio':(
+                            (
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
+                                },
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                        ),
+                    },
+                },
+                'appletv':{
+                    'description':'Intel based AppleTV profile',
+                    'transcode':{
+                        'options':{
+                            '--quality':22,
+                            '--encoder':'x264',
+                            '--encopts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:8x8dct=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
+                            '--maxWidth':1280,
+                        },
+                        'flags':('--large-file','--loose-anamorphic'),
+                        'audio':(
+                            (
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
+                                },
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
+                                }, 
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                        ),
+                    },
+                },
+                'ipod':{
+                    'description':'All iPod touch models profile',
+                    'transcode':{
+                        'options':{
+                            '--quality':21,
+                            '--encoder':'x264',
+                            '--encopts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0:b-pyramid=none',
+                            '--maxWidth':480,
+                        },
+                        'flags':('--large-file','--loose-anamorphic'),
+                        'audio':(
+                            (
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                        ),
+                    },
+                },
+                'high':{
+                    'description':'High profile',
+                    'transcode':{
+                        'options':{
+                            '--quality':18,
+                            '--encoder':'x264',
+                            '--encopts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
+                            '--maxWidth':1280
+                        },
+                        'flags':('--large-file','--loose-anamorphic'),
+                        'audio':(
+                            (
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'},
+                                },
+                                {
+                                    'from': {'codec':'AC-3', 'type':'audio'},
+                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':2, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                                {
+                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio', 'channels':1, 'language':'heb'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                },
+                            ),
+                            (
+                                {
+                                    'from': {'codec':'AAC', 'type':'audio'},
+                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
+                                },
+                            ),
+                        ),
+                    },
+                },
+            },
+        },
+        'm4a':{
+            'container':'mp4',
+            'profile':{
+                'lossless':{},
+                'portable':{},
+            },
+        },
+        'mkv':{
+            'container':'matroska',
+            'profile':{
+                'sd':{
+                    'pack':{
+                        'related':(
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'},
+                            {'kind':'ac3'},
+                        ),
+                        'tracks':(
+                            {'type':'video'},
+                            {'type':'audio', 'codec':'AC-3'},
+                            {'type':'audio', 'codec':'MPEG Audio'},
+                            {'type':'audio', 'codec':'AAC'},
+                            {'type':'audio', 'codec':'DTS'},
+                        ),
+                    },
+                },
+                '720':{
+                    'pack':{
+                        'related':(
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'},
+                            {'kind':'ac3'},
+                        ),
+                        'tracks':(
+                            {'type':'video'},
+                            {'type':'audio', 'codec':'AC-3'},
+                            {'type':'audio', 'codec':'AAC'},
+                            {'type':'audio', 'codec':'DTS'},
+                            {'type':'audio', 'codec':'MPEG Audio'},
+                        ),
+                    },
+                },
+                '1080':{
+                    'pack':{
+                        'related':(
+                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
+                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'txt', 'profile':'chapter'},
+                            {'kind':'ac3'},
+                        ),
+                        'tracks':(
+                            {'type':'video'},
+                            {'type':'audio', 'codec':'AC-3'},
+                            {'type':'audio', 'codec':'AAC'},
+                            {'type':'audio', 'codec':'DTS'},
+                            {'type':'audio', 'codec':'MPEG Audio'},
+                        ),
+                    },
+                },
+            },
+        },
+        'avi':{
+            'container':'avi',
+            'profile':{
+                'sd':{
+                    'description':'a basic avi profile for SD content',
+                },
+            },
+        },
+        'srt':{
+            'container':'subtitles',
+            'profile':{
+                'dump':{
+                    'description':'Special profile used for extracting.',
+                    'extract':{
+                        'tracks':(
+                            {'type':'text', 'language':'heb', 'codec':'UTF-8'},
+                            {'type':'text', 'language':'eng', 'codec':'UTF-8'},
+                        ),
+                    },
+                },
+                'original':{
+                    'update':{
+                        'reset':True,
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
+                        'related':(
+                            {
+                                'from': {'language':'heb', 'kind':'srt', 'profile':'original'},
+                                'to': {'height':0.132, 'Name':'Normal', },
+                            },
+                            {
+                                'from': {'language':'eng', 'kind':'srt', 'profile':'original'},
+                                'to': {'height':0.132, 'Name':'Normal'},
+                            },
+                        ),
+                    },
+                },
+                'clean':{
+                    'transcode':{
+                        'filter':{
+                            'heb':('noise', 'hebrew noise', 'typo', 'punctuation', 'leftover'),
+                            'eng':('noise', 'typo', 'english typo', 'leftover'),
+                        },
+                    },
+                    'update':{
+                        'reset':True,
+                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
+                        'related':(
+                            {
+                                'from': {'language':'heb', 'kind':'srt', 'profile':'clean'},
+                                'to': {'height':0.132, 'Name':'Normal'},
+                            },
+                            {
+                                'from': {'language':'eng', 'kind':'srt', 'profile':'clean'},
+                                'to': {'height':0.132, 'Name':'Normal'},
+                            },
+                        ),
+                    },
+                },
+                'remove':{
+                    'update':{
+                        'reset':True,
+                    },
+                },
+            },
+        },
+        'ass':{
+            'container':'subtitles',
+            'profile':{
+                'dump':{
+                    'description':'Special profile used by extract command',
+                    'extract':{
+                        'tracks':(
+                            {'type':'text', 'language':'heb', 'codec':'ASS'},
+                            {'type':'text', 'language':'eng', 'codec':'ASS'},
+                        ),
+                    },
+                },
+            },
+        },
+        'txt':{
+            'container':'chapters',
+            'profile':{
+                'chapter':{
+                    'update':{
+                        'reset':True,
+                        'related':{'kind':'txt', 'profile':'chapter'}
+                    }
+                },
+                'remove':{
+                    'update':{
+                        'reset':True,
+                    }
+                },
+            },
+        },
+        'jpg':{
+            'container':'image',
+            'profile':{
+                'original':{
+                    'description':'Full size image. No resize.',
+                },
+            },
+        },
+        'png':{
+            'container':'image',
+            'profile':{
+                'original':{
+                    'description':'Full size image. No resize.',
+                },
+                'normal':{
+                    'transcode':{
+                        'aspect ratio':'preserve',
+                        'size':1024,
+                        'constraint':'max',
+                    },
+                },
+                'criterion':{
+                    'transcode':{
+                        'aspect ratio':'preserve',
+                        'size':1024,
+                        'constraint':'min'
+                    },
+                },
+            },
+        },
+        'ac3':{
+            'container':'raw audio',
+            'profile':{
+                'original':{
+                    'description':'Special profile for ac3 track from dts',
+                    'transcode':{
+                        'audio':(
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':6},
+                                'to': {'-ab':640},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':5},
+                                'to': {'-ab':640},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':4},
+                                'to': {'-ab':640},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':3},
+                                'to': {'-ab':448},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':2},
+                                'to': {'-ab':256},
+                            },
+                            {
+                                'from': {'codec':'DTS', 'type':'audio', 'channels':1},
+                                'to': {'-ab':192},
+                            },
+                        ),
+                    }
+                }
+            },
+        },
+        'dts':{
+            'container':'raw audio',
+            'profile':{
+                'dump':{
+                    'description':'Special profile for dts track exctracted from matroska',
+                    'extract':{
+                        'tracks':(
+                            {'type':'audio', 'codec':'DTS'},
+                        ),
+                    },
+                },
+            },
+        },
+    },
+}
+
+# Media properties and maps
+media_config = {
     'file':(
         {
             'name':'encoding',
@@ -2538,1386 +4085,3 @@ media_property = {
         {'name':'aol', 'print':'AOL', 'code':1},
     ),
 }
-
-repository_config = {
-    'Default':{
-        'hd video min width':720,
-        'display aspect ratio':float(float(16)/float(9)),
-        'threads':8,
-        'sync delay':timedelta(days=14),
-    },
-    'Display':{
-        'wrap':120, 
-        'indent':30, 
-        'margin':2,
-    },
-    'Repository':{
-        'aeon':{
-            'local':{
-                'mongodb':{
-                    'name':'mp4pack',
-                    'uri':u'mongodb://mp4pack:poohbear@multivac.lan/mp4pack',
-                },
-                'cache':{
-                    'uri':u'/net/multivac/Volumes/alphaville/cache/',
-                },
-                'pool':{
-                    'uri':u'/pool',
-                }
-            },
-            'remote':{
-                'mongodb':{
-                    'name':'mp4pack',
-                    'uri':u'mongodb://mp4pack:poohbear@localhost:27017/mp4pack',
-                },
-                'cache':{
-                    'uri':u'/net/multivac/Volumes/alphaville/cache/',
-                    'host':u'galanti.no-ip.info',
-                    'port':u'22040',
-                },
-                'pool':{
-                    'uri':u'/pool',
-                    'host':u'galanti.no-ip.info',
-                    'port':u'22040',
-                }
-            },
-            'volume':{
-                'alpha':{
-                    'path':'/pool/alpha',
-                    'alternative':(
-                        '/net/multivac/Volumes/alphaville/alpha',
-                        '/Volumes/alphaville/alpha',
-                    )
-                },
-                'beta':{
-                    'path':'/pool/beta',
-                    'alternative':(
-                        '/net/multivac/Volumes/nyc/beta',
-                        '/Volumes/nyc/beta',
-                    )
-                },
-                'gama':{
-                    'path':'/pool/gama',
-                    'alternative':(
-                        '/net/multivac/Volumes/cambridge/gama',
-                        '/Volumes/cambridge/gama',
-                    )
-                },
-                'delta':{
-                    'path':'/pool/delta',
-                    'alternative':(
-                        '/net/vito/media/fairfield/delta',
-                        '/Volumes/fairfield/delta',
-                    )
-                },
-                'eta':{
-                    'path':'/pool/eta',
-                    'alternative':(
-                        '/net/vito/media/tlv/eta',
-                        '/Volumes/tlv/eta',
-                    )
-                },
-                'epsilon':{
-                    'path':'/pool/epsilon',
-                    'alternative':(
-                        '/net/vito/media/nagasaki/epsilon',
-                        '/Volumes/nagasaki/epsilon',
-                    )
-                },
-            },
-        },
-        'flux':{
-            'local':{
-                'mongodb':{
-                    'name':'mp4pack',
-                    'uri':u'mongodb://mp4pack:poohbear@diego.lan/mp4pack',
-                },
-                'cache':{
-                    'uri':u'/cache/',
-                },
-                'pool':{
-                    'uri':u'/pool',
-                }
-            },
-            'remote':{
-                'mongodb':{
-                    'name':'mp4pack',
-                    'uri':u'mongodb://mp4pack:poohbear@localhost:27017/mp4pack',
-                },
-                'cache':{
-                    'uri':u'/net/diego/var/cache/mpk/',
-                    'host':u'gilgalanti.no-ip.info',
-                    'port':u'22040',
-                },
-                'pool':{
-                    'uri':u'/pool',
-                    'host':u'gilgalanti.no-ip.info',
-                    'port':u'22040',
-                }
-            },
-            'volume':{
-                'yellow':{
-                    'path':'/pool/yellow',
-                    'alternative':(
-                        '/net/diego/pool/yellow',
-                    )
-                },
-                'green':{
-                    'path':'/pool/green',
-                    'alternative':(
-                        '/net/diego/pool/green',
-                    )
-                },
-                'orange':{
-                    'path':'/pool/orange',
-                    'alternative':(
-                        '/net/diego/pool/orange',
-                    )
-                },
-            },
-            
-        },
-    },
-    
-    'Database':{
-        'tmdb':{
-            'apikey':tmdb_apikey,
-            'urls':{
-                'Movie.getInfo':u'http://api.themoviedb.org/2.1/Movie.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Movie.imdbLookup':u'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Person.getInfo':u'http://api.themoviedb.org/2.1/Person.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Person.search':u'http://api.themoviedb.org/2.1/Person.search/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Genres.getList':u'http://api.themoviedb.org/2.1/Genres.getList/en/json/{0}'.format(tmdb_apikey),
-            },
-        },
-        'tvdb':{
-            'apikey':tvdb_apikey,
-            'fuzzy':{
-                'minimum_person_name_length':3,
-            },
-            'urls':{
-                'Show.getInfo':u'http://www.thetvdb.com/api/{0}/series/{{0}}/all/en.xml'.format(tvdb_apikey),
-                'Banner.getImage':u'http://www.thetvdb.com/banners/{0}'
-            },
-        },
-    },
-    'Command':{
-        'rsync':{
-            'binary':u'rsync',
-        },
-        'mv':{
-            'binary':u'mv',
-        },
-        'handbrake':{
-            'binary':u'HandbrakeCLI',
-        },
-        'subler':{
-            'binary':u'SublerCLI',
-        },
-        'mkvmerge':{
-            'binary':u'mkvmerge',
-        },
-        'mkvextract':{
-            'binary':u'mkvextract',
-        },
-        'mp4info':{
-            'binary':u'mp4info',
-        },
-        'mp4file':{
-            'binary':u'mp4file',
-        },
-        'mp4art':{
-            'binary':u'mp4art',
-        },
-        'mediainfo':{
-            'binary':u'mediainfo',
-        },
-        'ffmpeg':{
-            'binary':u'ffmpeg',
-        }
-    },
-    'Action':{
-        'info':{
-            'depend':('mediainfo', 'mp4info',),
-        },
-        'copy':{
-            'depend':('rsync',),
-        },
-        'rename':{
-            'depend':('mv',),
-        },
-        'extract':{
-            'depend':('mkvextract',),
-        },
-        'tag':{
-            'depend':('subler',),
-        },
-        'optimize':{
-            'depend':('mp4file',),
-        },
-        'pack':{
-            'depend':('mkvmerge',),
-            'kind':('mkv','m4v', ),
-        },
-        'transcode':{
-            'depend':('handbrake',),
-            'kind':('m4v', 'mkv', 'srt', 'txt', 'jpg', 'png', 'ac3'),
-        },
-        'transform':{
-            'depend':('handbrake',),
-            'kind':('m4v',),
-        },
-        'update':{
-            'depend':('subler',),
-            'kind':('srt', 'png', 'jpg', 'txt', 'm4v'),
-        },
-    },
-    'Kind':{
-        'm4v':{
-            'container':'mp4',
-            'default':{'volume':'epsilon', 'profile':'appletv'},
-            'Profile':{
-                'universal':{
-                    'description':'an SD profile that decodes on every cabac capable apple device',
-                    'default':{
-                        10:{'volume':'beta'},
-                        9:{'volume':'gama'},
-                    },
-                    'transcode':{
-                        'options':{
-                            '--quality':18,
-                            '--encoder':'x264',
-                            '--encopts':'ref=2:me=umh:b-adapt=2:weightp=0:trellis=0:subme=9:cabac=1:b-pyramid=none',
-                            '--maxWidth':720,
-                        },
-                        'flags':('--large-file','--loose-anamorphic'),
-                        'audio':(
-                            (
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
-                                },
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
-                                }, 
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                            ),
-                        ),
-                    },
-                },
-                'A4':{
-                    'description':'All A4 based apple devices',
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'transcode':{
-                        'options':{
-                            '--quality':18,
-                            '--encoder':'x264',
-                            '--encopts':'mixed-refs=1:ref=3:bframes=3:me=umh:b-adapt=2:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
-                            '--maxWidth':1280,
-                        },
-                        'flags':('--large-file','--loose-anamorphic'),
-                        'audio':(
-                            (
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
-                                },
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
-                                },
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio', 'channels':2, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio', 'channels':1, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                            ),
-                        ),
-                    },
-                },
-                'appletv':{
-                    'description':'Intel based AppleTV profile',
-                    'default':{
-                        10:{'volume':'beta'},
-                        9:{'volume':'gama'},
-                    },
-                    'transcode':{
-                        'options':{
-                            '--quality':22,
-                            '--encoder':'x264',
-                            '--encopts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:8x8dct=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=5500:vbv-bufsize=5500:cabac=1',
-                            '--maxWidth':1280,
-                        },
-                        'flags':('--large-file','--loose-anamorphic'),
-                        'audio':(
-                            (
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'},
-                                },
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
-                                }, 
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                            ),
-                        ),
-                    },
-                },
-                'ipod':{
-                    'description':'All iPod touch models profile',
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'transcode':{
-                        'options':{
-                            '--quality':21,
-                            '--encoder':'x264',
-                            '--encopts':'ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6:weightp=0:cabac=0:b-pyramid=none',
-                            '--maxWidth':480,
-                        },
-                        'flags':('--large-file','--loose-anamorphic'),
-                        'audio':(
-                            (
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                            ),
-                        ),
-                    },
-                },
-                'high':{
-                    'description':'High profile',
-                    'default':{
-                        10:{'volume':'beta'},
-                        9:{'volume':'eta'},
-                    },
-                    'transcode':{
-                        'options':{
-                            '--quality':18,
-                            '--encoder':'x264',
-                            '--encopts':'ref=3:bframes=3:me=umh:b-adapt=2:weightp=0:weightb=1:trellis=0:b-pyramid=none:subme=9:vbv-maxrate=10000:vbv-bufsize=10000:cabac=1',
-                            '--maxWidth':1280
-                        },
-                        'flags':('--large-file','--loose-anamorphic'),
-                        'audio':(
-                            (
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':192, '--mixdown':'dpl2'},
-                                },
-                                {
-                                    'from': {'codec':'AC-3', 'type':'audio'},
-                                    'to': {'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'},
-                                },
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':2, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio', 'channels':2, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                                {
-                                    'from': {'codec':'MPEG Audio', 'type':'audio', 'channels':1, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio', 'channels':1, 'language':'heb'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
-                                },
-                            ),
-                            (
-                                {
-                                    'from': {'codec':'AAC', 'type':'audio'},
-                                    'to': {'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'},
-                                },
-                            ),
-                        ),
-                    },
-                },
-            },
-        },
-        'm4a':{
-            'container':'mp4',
-            'default':{'volume':'alpha'},
-            'Profile':{
-                'lossless':{},
-                'portable':{},
-            },
-        },
-        'mkv':{
-            'container':'matroska',
-            'default':{'volume':'epsilon'},
-            'Profile':{
-                'sd':{
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'pack':{
-                        'related':(
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'},
-                            {'kind':'ac3'},
-                        ),
-                        'tracks':(
-                            {'type':'video'},
-                            {'type':'audio', 'codec':'AC-3'},
-                            {'type':'audio', 'codec':'MPEG Audio'},
-                            {'type':'audio', 'codec':'AAC'},
-                            {'type':'audio', 'codec':'DTS'},
-                        ),
-                    },
-                },
-                '720':{
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'pack':{
-                        'related':(
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'},
-                            {'kind':'ac3'},
-                        ),
-                        'tracks':(
-                            {'type':'video'},
-                            {'type':'audio', 'codec':'AC-3'},
-                            {'type':'audio', 'codec':'AAC'},
-                            {'type':'audio', 'codec':'DTS'},
-                            {'type':'audio', 'codec':'MPEG Audio'},
-                        ),
-                    },
-                },
-                '1080':{
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'pack':{
-                        'related':(
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
-                            {'kind':'txt', 'profile':'chapter'},
-                            {'kind':'ac3'},
-                        ),
-                        'tracks':(
-                            {'type':'video'},
-                            {'type':'audio', 'codec':'AC-3'},
-                            {'type':'audio', 'codec':'AAC'},
-                            {'type':'audio', 'codec':'DTS'},
-                            {'type':'audio', 'codec':'MPEG Audio'},
-                        ),
-                    },
-                },
-            },
-        },
-        'avi':{
-            'container':'avi',
-            'default':{'volume':'epsilon', 'profile':'sd'},
-            'Profile':{
-                'sd':{
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                },
-            },
-        },
-        'srt':{
-            'container':'subtitles',
-            'default':{'profile':'clean'},
-            'Profile':{
-                'dump':{
-                    'description':'Special profile used for extracting.',
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'extract':{
-                        'tracks':(
-                            {'type':'text', 'language':'heb', 'codec':'UTF-8'},
-                            {'type':'text', 'language':'eng', 'codec':'UTF-8'},
-                        ),
-                    },
-                },
-                'original':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'update':{
-                        'reset':True,
-                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
-                        'related':(
-                            {
-                                'from': {'language':'heb', 'kind':'srt', 'profile':'original'},
-                                'to': {'height':0.132, 'Name':'Normal', },
-                            },
-                            {
-                                'from': {'language':'eng', 'kind':'srt', 'profile':'original'},
-                                'to': {'height':0.132, 'Name':'Normal'},
-                            },
-                        ),
-                    },
-                },
-                'clean':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'transcode':{
-                        'filter':{
-                            'heb':('noise', 'hebrew noise', 'typo', 'punctuation', 'leftover'),
-                            'eng':('noise', 'typo', 'english typo', 'leftover'),
-                        },
-                    },
-                    'update':{
-                        'reset':True,
-                        'smart':{'language':'swe', 'Name':'Default', 'order':('heb', 'eng'), 'height':0.148},
-                        'related':(
-                            {
-                                'from': {'language':'heb', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.132, 'Name':'Normal'},
-                            },
-                            {
-                                'from': {'language':'eng', 'kind':'srt', 'profile':'clean'},
-                                'to': {'height':0.132, 'Name':'Normal'},
-                            },
-                        ),
-                    },
-                },
-                'remove':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'update':{
-                        'reset':True,
-                    },
-                },
-            },
-        },
-        'ass':{
-            'container':'subtitles',
-            'default':{'profile':'dump'},
-            'Profile':{
-                'dump':{
-                    'description':'Special profile used by extract command',
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'extract':{
-                        'tracks':(
-                            {'type':'text', 'language':'heb', 'codec':'ASS'},
-                            {'type':'text', 'language':'eng', 'codec':'ASS'},
-                        ),
-                    },
-                },
-            },
-        },
-        'txt':{
-            'container':'chapters',
-            'default':{
-                'profile':'chapter',
-                'volume':'alpha'
-            },
-            'Profile':{
-                'chapter':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'update':{
-                        'reset':True,
-                        'related':{'kind':'txt', 'profile':'chapter'}
-                    }
-                },
-                'remove':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'update':{
-                        'reset':True,
-                    }
-                },
-            },
-        },
-        'jpg':{
-            'container':'image',
-            'default':{
-                'profile':'original',
-                'volume':'alpha'
-            },
-            'Profile':{
-                'original':{
-                    'description':'Full size image. No resize.',
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                },
-            },
-        },
-        'png':{
-            'container':'image',
-            'default':{
-                'profile':'normal',
-                'volume':'alpha'
-            },
-            'Profile':{
-                'original':{
-                    'description':'Full size image. No resize.',
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                },
-                'normal':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'transcode':{
-                        'aspect ratio':'preserve',
-                        'size':1024,
-                        'constraint':'max',
-                    },
-                },
-                'criterion':{
-                    'default':{
-                        10:{'volume':'alpha'},
-                        9:{'volume':'alpha'},
-                    },
-                    'transcode':{
-                        'aspect ratio':'preserve',
-                        'size':1024,
-                        'constraint':'min'
-                    },
-                },
-            },
-        },
-        'ac3':{
-            'container':'raw audio',
-            'default':{
-                'profile':'original',
-                'volume':'epsilon',
-            },
-            'Profile':{
-                'original':{
-                    'description':'Special profile for ac3 track from dts',
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'transcode':{
-                        'audio':(
-                            {
-                                'from': {'codec':'DTS', 'type':'audio', 'channels':6},
-                                'to': {'-ab':640},
-                            },
-                            {
-                                'from': {'codec':'DTS', 'type':'audio', 'channels':5},
-                                'to': {'-ab':640},
-                            },
-                            {
-                                'from': {'codec':'DTS', 'type':'audio', 'channels':4},
-                                'to': {'-ab':640},
-                            },
-                            {
-                                'from': {'codec':'DTS', 'type':'audio', 'channels':3},
-                                'to': {'-ab':448},
-                            },
-                            {
-                                'from': {'codec':'DTS', 'type':'audio', 'channels':2},
-                                'to': {'-ab':256},
-                            },
-                            {
-                                'from': {'codec':'DTS', 'type':'audio', 'channels':1},
-                                'to': {'-ab':192},
-                            },
-                        ),
-                    }
-                }
-            },
-        },
-        'dts':{
-            'container':'raw audio',
-            'default':{
-                'profile':'dump',
-                'volume':'epsilon',
-            },
-            'Profile':{
-                'dump':{
-                    'description':'Special profile for dts track exctracted from matroska',
-                    'default':{
-                        10:{'volume':'epsilon'},
-                        9:{'volume':'epsilon'},
-                    },
-                    'extract':{
-                        'tracks':(
-                            {'type':'audio', 'codec':'DTS'},
-                        ),
-                    },
-                },
-            },
-        },
-    },
-}
-
-subtitle_config = {
-    'punctuation':{
-        'scope':'line',
-        'action':'replace',
-        'case':'sensitive',
-        'expression':(
-            (r'^[-?\.,!:;"\'\s]+(.*)$', '\\1'),
-            (r'^(.*)[-?\.,!:;"\'\s]+$', '\\1'),
-        ),
-    },
-    'leftover':{
-        'scope':'line',
-        'action':'drop',
-        'case':'insensitive',
-        'expression':(
-            ur'^\([^\)]+\)$',
-            ur'^[\[\]\(\)]*$',
-            ur'^[-?\.,!:;"\'\s]*$',
-        ),
-    },
-    'hebrew noise':{
-        'scope':'block',
-        'action':'drop',
-        'case':'insensitive',
-        'expression':(
-            ur':סנכרון',
-            ur':תרגום',
-            ur':שיפוץ',
-            ur':לפרטים',
-            ur'סונכרן',
-            ur'תורגם על ידי',
-            ur'תורגם חלקית',
-            ur'סנכרן לגרסה זו',
-            ur'תורגם ע"י',
-            ur'שופץ ע"י',
-            ur'תורגם משמיעה',
-            ur'קריעה וסינכרון',
-            ur'תוקן על ידי',
-            ur'תורגם על-ידי',
-            ur'תורגם ע"י',
-            ur'תוקן ע"י',
-            ur'הובא והוכן ע"י',
-            ur'תורגם וסוכנרן',
-            ur'תורגם וסונכרן',
-            ur'תוקן קלות ע"י',
-            ur'תרגום זה בוצע על ידי',
-            ur'סונכרן לגירסא זו ע"י',
-            ur'תרגום זה נעשה על ידי',
-            ur'תורגם עם הרבה זיעה על ידי',
-            ur'תורגם מספרדית ע"י אסף פארי',
-            ur'כתוביות ע"י',
-            ur'הגהה וסנכרון ע"י',
-            ur'שנוכל להמשיך לתרגם',
-            ur'הפרק מוקדש',
-            ur'מצוות טורק',
-            ur'shayx ע"י',
-            ur'pusel :סנכרון',
-            ur'תרגום: רותם ושמעון',
-            ur'שיפוץ: השייח\' הסעודי',
-            ur'שופץ ע"י השייח\' הסעודי',
-            ur'תרגום: שמעון ורותם אברג\'יל',
-            ur'כתובית זו הובאה',
-            ur'שופצה, נערכה וסונכרנה לגרסה זו',
-            ur'ברוכה הבאה אלוירה',
-            ur'לצוות מתרגמי האוס',
-            ur'אלוירה ברוכה הבאה',
-            ur'עמוס נמני',
-            ur'אינדיאנית שלי',
-            ur'יומולדת שמח',
-            ur'מוקדש לך',
-            ur'מונחים רפואיים - ג\'ון דו',
-            ur'מפורום תפוז',
-            ur'מוקדש לפולי שלי',
-            ur':כתוביות',
-            ur'^בלעדית עבור$',
-            ur'הורד מהאתר',
-            ur'על ההגהה workbook',
-            ur'מוקדש לכל אוהבי האוס אי שם',
-            ur'theterminator נערך ותוקן בשיתוף עם',
-            ur'התרגום נעשה על ידי המוריד',
-            ur'תורגם וסונוכרן משמיעה ע"י',
-            ur'\bצפייה מהנה\b',
-            ur'\bצפיה מהנה\b',
-            ur'נקרע ותוקן',
-            ur'אבי דניאלי',
-            ur'אוהבים את התרגומים שלנו',
-            ur'נקלענו למאבק',
-            ur'משפטי מתמשך',
-            ur'לבילד המתקשה בהבנת קרדיטים',
-            ur'אנא תרמו לנו כדי',
-            ur'הגהה על-ידי',
-            ur'^עריכה לשונית$',
-            ur'^white fang-תרגום: עמית יקיר ו$',
-            ur'ערן טלמור',
-            ur'\bעדי-בלי-בצל\b',
-            ur'\bבקרו אותנו בפורום\b',
-            ur'הודה בוז',
-            ur'\b-תודה מיוחדת ל\b',
-            ur'^extreme מקבוצת$',
-            ur'ialfan-ו mb0:עברית',
-            ur'י ביצה קשה',
-            ur'^ב$',
-            ur'^בי$',
-            ur'^ביצ$',
-            ur'^ביצה$',
-            ur'^ביצה ק$',
-            ur'^ביצה קש$',
-            ur'^ביצה קשה$',
-            ur'ליונהארט',
-            ur'\bמצוות פושל\b',
-            ur'\bassem נקרע ע"י\b',
-            ur'\bkawa: סנכרון\b',
-            ur'אוהבת לנצח, שרון',
-        ),
-    },
-    'noise':{
-        'scope':'block',
-        'action':'drop',
-        'case':'insensitive',
-        'expression':(
-            ur'www\.allsubs\.org',
-            ur'\bswsub\b',
-            ur'\bresync\b',
-            ur'\b[a-za-z0-9\.]+@gmail.\s*com\b',
-            ur'cync\sby\slanmao',
-            ur'www\.1000fr\.com',
-            ur'www\.tvsubtitles\.net',
-            ur'ytet-vicky8800',
-            ur'www\.ydy\.com',
-            ur'sync:gagegao',
-            ur'frm-lanma',
-            ur'nowa\swizja',
-            ur'ssmink',
-            ur'\blinx\b',
-            ur'torec',
-            ur'\byanx26\b',
-            ur'\bgreenscorpion\b',
-            ur'\bneotrix\b',
-            ur'\bglfinish\b',
-            ur'\bshloogy\b',
-            ur'\.co\.il',
-            ur'\by0natan\b',
-            ur'\belad\b',
-            ur'sratim',
-            ur'donkey cr3w',
-            ur'r-subs',
-            ur'\[d-s\]',
-            ur'ponkoit',
-            ur'\bsubbie\b',
-            ur'\bxsesa\b',
-            ur'napisy pobrane',
-            ur'\bphaelox\b',
-            ur'divxstation',
-            ur'\bpetabit\b',
-            ur'\bronkey\b',
-            ur'chococat3@walla',
-            ur'warez',
-            ur'\bdrsub\b',
-            ur'\beliavgold\b',
-            ur'^elvira$',
-            ur'\blob93\b',
-            ur'\belvir\b',
-            ur'\boofir\b',
-            ur'\bkrok\b',
-            ur'\bqsubd\b',
-            ur'\bariel046\b',
-            ur'\bzipc\b',
-            ur'\btecnodrom\b',
-            ur'visiontext subtitles',
-            ur'english sdh',
-            ur'srulikg',
-            ur'lh translators team',
-            ur'[-=\s]+sub-zero[-=\s]+',
-            ur'lionetwork',
-            ur'^eric$',
-            ur'subz3ro',
-            ur'^david-z$',
-            ur'drziv@yahoo',
-            ur'elran_o',
-            ur'mcsnagel',
-            ur'\boutwit\b',
-            ur'^gimly$',
-            ur'\btinyurl\b',
-            ur'\bfoxriver\b',
-            ur'\bextremesubs\b',
-            ur'megalomania tree',
-            ur'xmonwow',
-            ur'\bciwan\b',
-            ur'\bnata4ever\b',
-            ur'\byosefff\b',
-            ur'\bhentaiman\b',
-            ur'\bfoxi9\b',
-            ur'\bgamby\b',
-            ur'\bbrassica nigra\b',
-            ur'\bqsubs\b',
-            ur'\bsharetw\b',
-            ur'\bserethd\b',
-            ur'hazy7868',
-            ur'subscenter\.org'
-            ur'\blakota\b',
-            ur'\bnzigi\b'
-            ur'\bqwer90\b',
-            ur'roni_eliav',
-            ur'subscenter',
-            ur'\bkuniva\b',
-            ur'hdbits.org',
-            ur'addic7ed',
-            ur'hdsubs',
-        ),
-    },
-    'typo':{
-        'scope':'line',
-        'action':'replace',
-        'case':'sensitive',
-        'expression':(
-            (r'\b +(,|\.|\?|%|!)\b', '\\1 '),
-            (r'\b(,|\.|\?|%|!) +\b', '\\1 '),
-            (r'\.\s*\.\s*\.\.?', '...'),
-            (r'</?[a-z]+/?>', ''),
-            (r'\'{2}', '"'),
-            (r'\s+\)', ')'),
-            (r'\(\s+', '('),
-            (r'\s+\]', ']'),
-            (r'\[\s+', '['),
-            (r'\[[^\]]+\]\s*', ''),
-            (r'^[^\]]+\]', ''),
-            (r'\[[^\]]+$', ''),
-            (r'\([#a-zA-Z0-9l\s]+\)', ''),
-            (r'\([#a-zA-Z0-9l\s]+$', ''),
-            (r'^[#a-zA-Z0-9l\s]+\)', ''),
-            (r'^[-\s]+', ''),
-            (r'[-\s]+$', ''),
-            (r'\b^[-A-Z\s]+[0-9]*:\s*', ''),
-            (r'(?<=[a-zA-Z\'])I', 'l'),
-            (r'^[-\s]*$', ''),
-        ),
-    },
-    'english typo':{
-        'scope':'line',
-        'action':'replace',
-        'case':'sensitive',
-        'expression':(
-            (r'♪', ''),
-            (r'¶', ''),
-            (r'Theysaid', 'They said'),
-            (r'\bIast\b', 'last'),
-            (r'\bIook\b', 'look'),
-            (r'\bIetting\b', 'letting'),
-            (r'\bIet\b', 'let'),
-            (r'\bIooking\b', 'looking'),
-            (r'\bIife\b', 'life'),
-            (r'\bIeft\b', 'left'),
-            (r'\bIike\b', 'like'),
-            (r'\bIittle\b', 'little'),
-            (r'\bIadies\b', 'ladies'),
-            (r'\bIearn\b', 'learn'),
-            (r'\bIanded\b', 'landed'),
-            (r'\bIocked\b', 'locked'),
-            (r'\bIie\b', 'lie'),
-            (r'\bIong\b', 'long'),
-            (r'\bIine\b', 'line'),
-            (r'\bIives\b', 'lives'),
-            (r'\bIeave\b', 'leave'),
-            (r'\bIawyer\b', 'lawyer'),
-            (r'\bIogs\b', 'logs'),
-            (r'\bIack\b', 'lack'),
-            (r'\bIove\b', 'love'),
-            (r'\bIot\b', 'lot'),
-            (r'\bIanding\b', 'landing'),
-            (r'\bIet\'s\b', 'let\'s'),
-            (r'\bIand\b', 'land'),
-            (r'\bIying\b', 'lying'),
-            (r'\bIist\b', 'list'),
-            (r'\bIoved\b', 'loved'),
-            (r'\bIoss\b', 'loss'),
-            (r'\bIied\b', 'lied'),
-            (r'\bIaugh\b', 'laugh'),
-            (r'\b(h|H)avert\b', '\\1aven\'t'),
-            (r'\b(w|W)asrt\b', '\\1asn\'t'),
-            (r'\b(d|D)oesrt\b', '\\1oesn\'t'),
-            (r'\b(d|D)ort\b', '\\1on\'t'),
-            (r'\b(d|D)idrt\b', '\\1idn\'t'),
-            (r'\b(a|A)irt\b', '\\1in\'t'),
-            (r'\b(i|I)srt\b', '\\1sn\'t'),
-            (r'\b(w|W)ort\b', '\\1on\'t'),
-            (r'\b(c|C|w|W|s|S)ouldrt\b', '\\1ouldn\'t'),
-            (r'\barert\b', 'aren\'t'),
-            (r'\bls\b', 'Is'),
-            (r'\b(L|l)f\b', 'If'),
-            (r'\blt\b', 'It'),
-            (r'\blt\'s\b', 'It\'s'),
-            (r'\bl\'m\b', 'I\'m'),
-            (r'\bl\'ll\b', 'I\'ll'),
-            (r'\bl\'ve\b', 'I\'ve'),
-            (r'\bl\b', 'I'),
-            (r'\bln\b', 'In'),
-            (r'\blmpossible\b', 'Impossible'),
-            (r'\bIight\b', 'light'),
-            (r'\bIevitation\b', 'levitation'),
-            (r'\bIeaving\b', 'leaving'),
-            (r'\bIooked\b', 'looked'),
-            (r'\bIucky\b', 'lucky'),
-            (r'\bIuck\b', 'luck'),
-            (r'\bIater\b', 'later'),
-            (r'\bIift\b', 'lift'),
-            (r'\bIip\b', 'lip'),
-            (r'\bIooks\b', 'looks'),
-            (r'\bIaid\b', 'laid'),
-            (r'\bIikely\b', 'likely'),
-            (r'\bIow\b', 'low'),
-            (r'\bIeast\b', 'least'),
-            (r'\bIeader\b', 'leader'),
-            (r'\bIocate\b', 'locate'),
-            (r'\bIaw\b', 'law'),
-            (r'\bIately\b', 'lately'),
-            (r'\bIiar\b', 'liar'),
-            (r'\bIate\b', 'late'),
-            (r'\bIonger\b', 'longer'),
-            (r'\bIive\b', 'live'),
-        ),
-    },
-}
-
-class Configuration(object):
-    def __init__(self):
-        self.logger = logging.getLogger('Configuration')
-        self.default_repository_config = repository_config
-        self.default_media_property_config = media_property
-        self.default_subtitle_config = subtitle_config
-        
-        self.kind = None
-        self.volume = None
-        self.command = None
-        self.action = None
-        self.format = None
-        self.runtime = None
-        self.subtitle = None
-        self.repository = None
-        
-        self.options = None
-        self.property_map = None
-        
-        self.local_repository = None
-        self.active_repository = None
-        
-        self.track_with_language = None
-        self.kind_with_language = None
-        self.supported_media_kind = None
-        self.available_profiles = None
-        self.available_commands = None
-        
-        self.subtitle = None
-        self.tmdb = None
-        self.tvdb = None
-        self.genre = None
-        
-        self.load_default_config()
-    
-    
-    def load_command_line_arguments(self, options):
-        self.options = options
-        
-        if self.options.location in self.repository:
-            self.local_repository = self.repository[self.options.location]
-        if self.options.repository in self.repository:
-            self.active_repository = self.repository[self.options.repository]
-        
-        # mark the volumes as remote or local
-        for v in self.volume.values():
-            if v['repository'] == self.local_repository['name']:
-                v['local'] = True
-                v['remote'] = False
-            else:
-                v['local'] = False
-                v['remote'] = True
-    
-    
-    def load_default_config(self):
-        self.subtitle = subtitle_config
-        self.tmdb = self.default_repository_config['Database']['tmdb']
-        self.tvdb = self.default_repository_config['Database']['tvdb']
-        self.genre = self.default_media_property_config['gnre']
-        
-        self.load_format()
-        self.load_runtime()
-        self.load_command()
-        self.load_action()
-        self.load_kind()
-        self.load_repository()
-        self.load_property_map()
-        
-        self.track_with_language = ('audio', 'subtitles', 'video')
-        self.kind_with_language = self.property_map['container']['subtitles']['kind'] + self.property_map['container']['raw audio']['kind']
-        self.supported_media_kind = [ mk for mk in self.default_media_property_config['stik'] if 'schema' in mk ]
-        
-        self.available_profiles = []
-        for v in self.kind.values():
-            self.available_profiles.extend(v['Profile'].keys())
-        self.available_profiles = tuple(set(self.available_profiles))
-        
-    
-    
-    def load_runtime(self):
-        self.runtime = {}
-        for k,v in self.default_repository_config['Default'].iteritems():
-            self.runtime[k] = v
-    
-    
-    def load_format(self):
-        self.format = {}
-        self.format['wrap width'] = self.default_repository_config['Display']['wrap']
-        self.format['indent width'] = self.default_repository_config['Display']['indent']
-        self.format['margin width'] = self.default_repository_config['Display']['margin']
-        
-        self.format['indent'] = u'\n' + u' ' * self.format['indent width']
-        self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format(self.format['wrap width'] + self.format['indent width'], u' ' * self.format['margin width'])
-        self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format(self.format['indent width'] - self.format['margin width'] - 3, u' ' * self.format['margin width'])
-        self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format(self.format['indent width'] - self.format['margin width'] - 2, u' ' * self.format['margin width'])
-        self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
-    
-    
-    def load_command(self):
-        self.command = {}
-        self.available_commands = []
-        for k,v in self.default_repository_config['Command'].iteritems():
-            self.command[k] = copy.deepcopy(v)
-            
-            cmd = ['which', v['binary']]
-            proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            report = proc.communicate()
-            if report[0]:
-                self.command[k]['path'] = report[0].splitlines()[0]
-                self.available_commands.append(k)
-        self.available_commands = set(self.available_commands)
-    
-    
-    def load_action(self):
-        self.action = {}
-        for k,v in self.default_repository_config['Action'].iteritems():
-            self.action[k] = copy.deepcopy(v)
-            self.action[k]['active'] = False
-            if 'depend' in v:
-                if set(v['depend']).issubset(self.available_commands):
-                    self.action[k]['active'] = True
-                    self.logger.debug(u'Action %s dependencies are satisfied', k)
-                else:
-                    self.logger.warning(u'Action %s has unsatisfied dependencies: %s', k, ', '.join(list(set(v['depend']) - self.available_commands)))
-    
-    
-    def load_kind(self):
-        self.kind = {}
-        for k,v in self.default_repository_config['Kind'].iteritems():
-            self.kind[k] = copy.deepcopy(v)
-    
-    
-    def load_repository(self):
-        self.repository = {}
-        self.volume = {}
-        for repo_k,repo_v in self.default_repository_config['Repository'].iteritems():
-            self.repository[repo_k] = copy.deepcopy(repo_v)
-            self.repository[repo_k]['name'] = repo_k
-            if 'volume' in self.repository[repo_k]:
-                for vol_k, vol_v in self.repository[repo_k]['volume'].iteritems():
-                    vol_v['repository'] = self.repository[repo_k]['name']
-                    self.volume[vol_k] = vol_v
-    
-    
-    def load_property_map(self):
-        self.property_map = {}
-        for key in ('name', 'mediainfo', 'mp4info'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            
-            # Build file and tag propery map
-            for block in ('file', 'tag'):
-                if block not in self.property_map[key]:
-                    self.property_map[key][block] = {}
-                    
-                for p in self.default_media_property_config[block]:
-                    if key in p and p[key] is not None:
-                        self.property_map[key][block][p[key]] = p
-            
-            # Build track property map
-            self.property_map[key]['track'] = {}
-            for block in ('audio', 'video', 'text', 'image'):
-                if block not in self.property_map[key]['track']:
-                    self.property_map[key]['track'][block] = {}
-                for p in self.default_media_property_config['track']['common']:
-                    if key in p and p[key] is not None:
-                        self.property_map[key]['track'][block][p[key]] = p
-                    
-                for p in self.default_media_property_config['track'][block]:
-                    if key in p and p[key] is not None:
-                        self.property_map[key]['track'][block][p[key]] = p
-        
-        # Build itunemovi plist properties map
-        for key in ('name', 'plist'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            self.property_map[key]['itunemovi'] = {}
-            for p in self.default_media_property_config['itunemovi']:
-                self.property_map[key]['itunemovi'][p[key]] = p
-        
-        # Build special iTunes atom map
-        for key in ('name', 'code'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
-                if block not in self.property_map[key]:
-                    self.property_map[key][block] = {}
-                for p in self.default_media_property_config[block]:
-                    self.property_map[key][block][p[key]] = p
-        
-        # Build language code map
-        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            self.property_map[key]['language'] = {}
-            for p in self.default_media_property_config['language']:
-                if key in p:
-                    self.property_map[key]['language'][p[key]] = p
-        
-        # Build container kind map
-        self.property_map['container'] = {}
-        for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
-            self.property_map['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
-            
-        # Build volume map
-        self.property_map['volume'] = {}
-        for k,v in self.volume.iteritems():
-            v['realpath'] = os.path.realpath(v['path'])
-            alt = []
-            alt.append(v['path'])
-            alt.append(v['realpath'])
-            alt.extend(v['alternative'])
-            alt = tuple(set(alt))
-            for p in alt:
-                self.property_map['volume'][p] = v
-    
-    
-    
-    def get_active_mongodb_config(self):
-        if self.local_repository['name'] == self.active_repository['name']:
-            self.logger.debug(u'Configuring local mongodb access to %s', self.active_repository['name'])
-            return self.active_repository['local']['mongodb']
-        else:
-            self.logger.debug(u'Configuring remote mongodb access to %s', self.active_repository['name'])
-            return self.active_repository['remote']['mongodb']
-    
-    
-    def get_local_cache_path(self):
-        return self.local_repository['local']['cache']['uri']
-    
-    
-    def print_option_report(self):
-        for k,v in self.options.__dict__.iteritems():
-            self.logger.debug(u'Option {0:-<{2}}: {1}'.format(k, v, self.format['indent width'] - 2 - self.format['margin width']))
-    
-    
-    def print_command_report(self):
-        for k,v in self.command.iteritems():
-            self.logger.debug(u'Command {0:-<{2}}: {1}'.format(k, v['path'], self.format['indent width'] - 2 - self.format['margin width']))
-    
-
