@@ -86,7 +86,7 @@ class EntityManager(object):
         if sync:
             delta = datetime.utcnow() - last_update
             if delta < self.sync_delay:
-                self.logger.info(u'Supressing online sync. Next update possible in %s', unicode(self.sync_delay - delta))
+                self.logger.debug(u'Supressing online sync. Next update possible in %s', unicode(self.sync_delay - delta))
                 sync = False
             else:
                 self.logger.info(u'Sync allowed. Fast forward %s', unicode(delta))
@@ -939,7 +939,7 @@ class TvdbXmlHandler(XmlHandler):
 
 class TvdbImageHandler(ImageHandler):
     def __init__(self, entity_manager, url):
-        ImageHandler.__init__(self, entity_manager, self.entity_manager.configuration.service['tvdb']['urls']['Banner.getImage'].format(url))
+        ImageHandler.__init__(self, entity_manager, entity_manager.configuration.service['tvdb']['urls']['Banner.getImage'].format(url))
         self.logger = logging.getLogger('Tvdb Image Handler')
     
     
