@@ -222,6 +222,7 @@ def parse_command_line_arguments(configuration):
     parser = ArgumentParser()
     
     parser.add_argument('path', metavar='PATH', nargs='*', help='file or directory paths to scan')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.4')
     
     group = parser.add_argument_group('media file processing operations')
     group.add_argument('-i', '--info',      dest='info',        action='store_true',    default=False, help='show info')
@@ -230,10 +231,10 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-e', '--extract',   dest='extract',     action='store_true',    default=False, help='extract streams for processing')
     group.add_argument('-T', '--tag',       dest='tag',         action='store_true',    default=False, help='update file tags')
     group.add_argument('-O', '--optimize',  dest='optimize',    action='store_true',    default=False, help='optimize file layout')
-    group.add_argument('-t', '--transcode', dest='transcode',   metavar='KIND',         choices=configuration.action['transcode']['kind'], help='KIND is one of %(choices)s')
-    group.add_argument('-c', '--transform', dest='transform',   metavar='KIND',         choices=configuration.action['transform']['kind'], help='KIND is one of %(choices)s')
-    group.add_argument('-P', '--pack',      dest='pack',        metavar='KIND',         choices=configuration.action['pack']['kind'], help='KIND is one of %(choices)s')
-    group.add_argument('-u', '--update',    dest='update',      metavar='KIND',         choices=configuration.action['update']['kind'], help='KIND is one of %(choices)s')
+    group.add_argument('-t', '--transcode', dest='transcode',   metavar='KIND',         nargs='?', const='m4v', choices=configuration.action['transcode']['kind'], help='one of: %(choices)s. defaults to %(const)s')
+    group.add_argument('-c', '--transform', dest='transform',   metavar='KIND',         nargs='?', const='m4v', choices=configuration.action['transform']['kind'], help='one of: %(choices)s. defaults to %(const)s')
+    group.add_argument('-P', '--pack',      dest='pack',        metavar='KIND',         nargs='?', const='mkv', choices=configuration.action['pack']['kind'], help='one of: %(choices)s. defaults to %(const)s')
+    group.add_argument('-u', '--update',    dest='update',      metavar='KIND',         nargs='?', const='srt', choices=configuration.action['update']['kind'], help='one of: %(choices)s. defaults to %(const)s')
     
     group = parser.add_argument_group('media processing modifiers')
     group.add_argument('-o', '--volume',    dest='volume',      metavar='VOL',          help='explicit volume to use')
@@ -243,7 +244,7 @@ def parse_command_line_arguments(configuration):
     group.add_argument('-D', '--download',  dest='download',    action='store_true',    default=False, help='download if local is unavailable')
     group.add_argument('-r', '--recursive', dest='recursive',   action='store_true',    default=False, help='recursively process sub directories')
     group.add_argument('-w', '--overwrite', dest='overwrite',   action='store_true',    default=False, help='overwrite existing files')
-    group.add_argument('-f', '--filter',    dest='file_filter', metavar='EXP',        help='file name regex filter')
+    group.add_argument('-f', '--filter',    dest='file_filter', metavar='EXP',          help='file name regex filter')
     group.add_argument('-l', '--lang',      dest='language',    metavar='CODE',         default='eng', help='languge code to use when und [default: %(default)s]')
     group.add_argument('-L', '--local',     dest='location',    metavar='LOC',          help='name of local repository')
     group.add_argument('-R', '--repo',      dest='repository',  metavar='REPO',         help='name of repository to use')

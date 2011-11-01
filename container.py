@@ -394,14 +394,6 @@ class Container(object):
                 self.drop_from_index(path)
     
     
-    def related(self):
-        related = {}
-        for k,v in self.record['entity']['physical'].iteritems():
-            related[k] = v['path info']
-        return related
-    
-    
-    
     def mark_as_processed(self):
         self.processing['processed'] = True
     
@@ -620,65 +612,87 @@ class Container(object):
     
     
     
-    def print_meta(self):
-        return self.factory.util.format_display_block(self.meta, self.factory.configuration.lookup['name']['tag'])
-    
-    
-    def print_related(self):
-        result = None
-        related = self.related()
-        if related:
-            result = (u'\n'.join([self.factory.util.format_value(key) for key in sorted(set(related))]))
-        return result
-    
-    
-    def print_path_info(self):
-        return self.factory.util.format_display_block(self.path_info, self.factory.configuration.lookup['name']['tag'])
-    
-    
-    def print_file_info(self):
-        return self.factory.util.format_display_block(self.info['file'], self.factory.configuration.lookup['name']['file'])
-    
-    
-    def print_tracks(self):
-        return (u'\n\n\n'.join([self.factory.util.format_display_block(track, self.factory.configuration.lookup['name']['track'][track['type']]) for track in self.info['track']]))
-    
-    
-    def print_tags(self):
-        return self.factory.util.format_display_block(self.info['tag'], self.factory.configuration.lookup['name']['tag'])
-    
-    
-    def print_chapter_markers(self):
-        return (u'\n'.join([self.factory.util.format_value(ChapterMarker(self, marker['time'], marker['name'])) for marker in self.info['menu']]))
-    
-    
     def __unicode__(self):
         result = None
-        result = self.factory.util.format_info_title(self.info['file']['name'])
+        lines = []
+        lines.append(self.factory.util.format_info_title(self.info['file']['name']))
         
-        related = self.related()
-        if related:
-            result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'related'), self.print_related()))
-        
+        profile = self.factory.configuration.options.profile
+        if profile not in self.factory.configuration.user_config['info']['profile']:
+            profile = 'normal'
+            
+        # Related physical
+        if self.record['entity']['physical']:
+            related = sorted(set(self.record['entity']['physical'].keys()))
+            lines.append(self.factory.util.format_info_subtitle(u'related'))
+            lines.extend(related)
+            
+        # File info
         if self.info['file']:
-            result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'file info'), self.print_file_info()))
+            buf = self.factory.util.format_information_block (
+                self.info['file'],
+                self.factory.configuration.lookup['name']['file'],
+                self.factory.configuration.user_config['info']['profile'][profile]['file'])
+            
+            if buf:
+                lines.append(self.factory.util.format_info_subtitle(u'file info'))
+                lines.extend(buf)
+                
+        # Path info
         if self.path_info:
-            result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'path info'), self.print_path_info()))
-        
+            buf = self.factory.util.format_information_block (
+                self.path_info,
+                self.factory.configuration.lookup['name']['tag'],
+                self.factory.configuration.user_config['info']['profile'][profile]['tag'])
+            
+            if buf:
+                lines.append(self.factory.util.format_info_subtitle(u'path info'))
+                lines.extend(buf)
+                
+        # Chapter info
         if self.info['menu']:
-            result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'menu'), self.print_chapter_markers()))
-        
+            lines.append(self.factory.util.format_info_subtitle(u'menu'))
+            for marker in self.info['menu']:
+                lines.append(self.factory.util.format_value(ChapterMarker(self, marker['time'], marker['name'])))
+                
+        # Tag info
         if self.info['tag']:
-            tag_block = self.print_tags()
-            if tag_block:
-                result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'tags'), tag_block))
-        
-        #self.load_meta()
+            buf = self.factory.util.format_information_block (
+                self.info['tag'],
+                self.factory.configuration.lookup['name']['tag'],
+                self.factory.configuration.user_config['info']['profile'][profile]['tag'])
+            
+            if buf:
+                lines.append(self.factory.util.format_info_subtitle(u'tag info'))
+                lines.extend(buf)
+                
+        # Meta data info from services
+        # self.load_meta()
         if self.meta:
-            result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'metadata'), self.print_meta()))
-        
+            buf = self.factory.util.format_information_block (
+                self.meta,
+                self.factory.configuration.lookup['name']['tag'],
+                self.factory.configuration.user_config['info']['profile'][profile]['tag'])
+            
+            if buf:
+                lines.append(self.factory.util.format_info_subtitle(u'meta data'))
+                lines.extend(buf)
+                
+        # Track info
         if self.info['track']:
-            result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'tracks'), self.print_tracks()))
+            if self.info['track']:
+                lines.append(self.factory.util.format_info_subtitle(u'tracks'))
+                for track in self.info['track']:
+                    buf = self.factory.util.format_information_block (
+                        track,
+                        self.factory.configuration.lookup['name']['track'][track['type']],
+                        self.factory.configuration.user_config['info']['profile'][profile]['track'][track['type']])
+                    
+                    if buf:
+                        lines.extend(buf)
+                        lines.append('')
+        if lines:
+            result = u'\n'.join(lines)
         return result
     
     
@@ -1781,14 +1795,17 @@ class Chapter(Text):
             self.chapter_markers.append(ChapterMarker(self, time, name))
     
     
-    def print_chapter_markers(self):
-        return (u'\n'.join([self.factory.util.format_value(chapter_marker) for chapter_marker in self.chapter_markers]))
-    
-    
     def __unicode__(self):
         result = Text.__unicode__(self)
-        if len(self.chapter_markers) > 0:
-            result = u'\n'.join((result, self.factory.util.format_info_subtitle(u'chapter markers'), self.print_chapter_markers()))
+        lines = []
+        # Chapter info
+        if self.chapter_markers:
+            lines.append(self.factory.util.format_info_subtitle(u'menu'))
+            for marker in self.chapter_markers:
+                lines.append(self.factory.util.format_value(marker))
+        if lines:
+            result += u'\n'
+            result += u'\n'.join(lines)
         return result
     
     
@@ -2153,14 +2170,17 @@ class FileUtil(object):
                                 if track:
                                     track['type'] = track_type
                                     if track_type == 'video':
-                                         if 'encoder settings' in track and 'encoder' in track and track['encoder'].count('x264'):
-                                             track['encoder settings'] = track['encoder settings'].split(' / ')
-                                
+                                        if 'encoder settings' in track and 'encoder' in track and track['encoder'].count('x264'):
+                                            encoder_literals = track['encoder settings'].split(' / ')
+                                            track['encoder settings'] = {}
+                                            for literal in encoder_literals:
+                                                split_literal = literal.split('=')
+                                                track['encoder settings'][split_literal[0]] = split_literal[1]
                                     # check to see if language is not set and set it to default
                                     if track['type'] in self.factory.configuration.track_with_language:
                                         if 'language' not in track or track['language'] == 'und':
                                             track['language'] = self.factory.configuration.options.language
-                                
+                                    
                                     info['track'].append(track)
                             elif track_type == 'menu':
                                 for t in tn:
@@ -2402,15 +2422,18 @@ class FileUtil(object):
             pkey = m['subler']
             if m['type'] == 'enum':
                 pvalue = self.factory.configuration.lookup['code'][m['atom']][value]['print']
-            elif m['type'] in ('string', 'list'):
+            elif m['type'] in ('string', 'list', 'dict'):
                 if m['type'] == 'list':
                     pvalue = u', '.join(value)
+                elif m['type'] == 'dict':
+                    pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
                 else:
                     if key == 'language':
                         pvalue = self.factory.configuration.lookup['iso3t']['language'][value]['print']
                     else:
                         pvalue = unicode(value)
                 pvalue = pvalue.replace(u'{',u'&#123;').replace(u'}',u'&#125;').replace(u':',u'&#58;')
+                
             elif m['type'] == 'bool':
                 if value: pvalue = u'yes'
                 else: pvalue = u'no'
@@ -2439,6 +2462,19 @@ class FileUtil(object):
     def frame_to_miliseconds(self, frame, frame_rate):
         return round(float(1000)/float(frame_rate) * float(frame))
     
+    
+    
+    def format_information_block(self, block, mapping, profile):
+        result = []
+        for p in profile:
+            if p in block:
+                v = self.format_key_value(p, block[p], mapping)
+                if v:
+                    result.append(v)
+        if not result:
+            result = None
+            
+        return result
     
     
     def format_display_block(self, block, mapping):
@@ -2492,13 +2528,14 @@ class FileUtil(object):
             m = mapping[key]
             if not ('display' in m and not m['display']):
                 pkey = m['print']
-                ptype = m['type']
-                if ptype == 'enum':
+                if m['type'] == 'enum':
                     pvalue = self.factory.configuration.lookup['code'][m['atom']][value]['print']
                     
-                elif ptype in ('string', 'list'):
-                    if ptype == 'list':
+                elif m['type'] in ('string', 'list', 'dict'):
+                    if m['type'] == 'list':
                         pvalue = u', '.join(value)
+                    elif m['type'] == 'dict':
+                        pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
                     else:
                         if key == 'language':
                             lang = self.factory.configuration.find_language(value)
@@ -2509,16 +2546,16 @@ class FileUtil(object):
                         lines = textwrap.wrap(pvalue, self.factory.configuration.format['wrap width'])
                         pvalue = self.factory.configuration.format['indent'].join(lines)
                         
-                elif ptype == 'float':
+                elif m['type'] == 'float':
                     pvalue = u'{0:.3f}'.format(value)
                     
-                elif ptype == 'bool':
+                elif m['type'] == 'bool':
                     if value:
                         pvalue = u'yes'
                     else:
                         pvalue = u'no'
                         
-                elif ptype == 'int':
+                elif m['type'] == 'int':
                     if 'format' in m:
                         pformat = m['format']
                         if pformat == 'bitrate':
@@ -2540,14 +2577,14 @@ class FileUtil(object):
                         
                 else:
                     pvalue = value
-                
+                    
             else:
                 pass
         else:
             pkey = key
             pvalue = value
             
-        if pvalue:
+        if pvalue and pkey:
             result = self.factory.configuration.format['key value display'].format(pkey, pvalue)
         return result
     
