@@ -23,26 +23,81 @@ class ContainerFactory(object):
         self.subtitle_filter = SubtitleFilter(self)
     
     
-    def create_media_file(self, file_path):
-        f = None
-        file_type = os.path.splitext(file_path)[1].strip('.')
-        if file_type in self.configuration.property_map['container']['mp4']['kind']:
-            f = Mpeg4(self, file_path, autoload=False)
-        elif file_type in self.configuration.property_map['container']['matroska']['kind']:
-            f = Matroska(self, file_path, autoload=False)
-        elif file_type in self.configuration.property_map['container']['subtitles']['kind']:
-            f = Subtitle(self, file_path, autoload=False)
-        elif file_type in self.configuration.property_map['container']['chapters']['kind']:
-            f = Chapter(self, file_path, autoload=False)
-        elif file_type in self.configuration.property_map['container']['image']['kind']:
-            f = Artwork(self, file_path, autoload=False)
-        elif file_type in self.configuration.property_map['container']['raw audio']['kind']:
-            f = RawAudio(self, file_path, autoload=False)
-        elif file_type in self.configuration.property_map['container']['avi']['kind']:
-            f = Avi(self, file_path, autoload=False)
+    def create_media_file(self, path):
+        mf= None
+        kind = os.path.splitext(path)[1].strip('.')
+        if kind in self.configuration.lookup['container']['mp4']['kind']:
+            mf = Mpeg4(self, path, autoload=False)
+        elif kind in self.configuration.lookup['container']['matroska']['kind']:
+            mf = Matroska(self, path, autoload=False)
+        elif kind in self.configuration.lookup['container']['subtitles']['kind']:
+            mf = Subtitle(self, path, autoload=False)
+        elif kind in self.configuration.lookup['container']['chapters']['kind']:
+            mf = Chapter(self, path, autoload=False)
+        elif kind in self.configuration.lookup['container']['image']['kind']:
+            mf = Artwork(self, path, autoload=False)
+        elif kind in self.configuration.lookup['container']['raw audio']['kind']:
+            mf = RawAudio(self, path, autoload=False)
+        elif kind in self.configuration.lookup['container']['avi']['kind']:
+            mf = Avi(self, path, autoload=False)
             
-        return f
+        return mf
     
+    
+    def clean(self, options):
+        total = 0
+        
+        # Cleanup orphan physical references in movies
+        saved_movie = 0
+        movie_ids = self.entity_manager.list_all_movie_imdbs()
+        for movie_id in movie_ids:
+            if 'imdb_id' in movie_id:
+                need_save = False
+                movie = self.entity_manager.find_movie_by_imdb_id(movie_id['imdb_id'])
+                if movie and 'physical' in movie:
+                    phy = copy.deepcopy(movie['physical'].keys())
+                    for uri in phy:
+                        path = self.configuration.canonic_path_from_uri(uri)
+                        if path is None or not os.path.exists(path):
+                            self.logger.debug(u'Dropping physical index for orphan %s', uri)
+                            del movie['physical'][uri]
+                            need_save = True
+                    if not movie['physical']:
+                        del movie['physical']
+                        need_save = True
+                    if need_save:
+                        self.entity_manager.save_movie(movie)
+                        saved_movie += 1
+        total += saved_movie
+        self.logger.info(u'Removed orphans from %d movies', saved_movie)
+        
+        # Cleanup orphan physical references in episodes
+        saved_episode = 0
+        episode_ids = self.entity_manager.list_all_tv_show_episode_ids()
+        for episode_id in episode_ids:
+            if '_id' in episode_id:
+                need_save = False
+                episode = self.entity_manager.find_episode_by_id(episode_id['_id'])
+                if episode and 'physical' in episode:
+                    phy = copy.deepcopy(episode['physical'].keys())
+                    for uri in phy:
+                        path = self.configuration.canonic_path_from_uri(uri)
+                        if path is None or not os.path.exists(path):
+                            self.logger.info(u'Dropping physical index for orphan %s', uri)
+                            del episode['physical'][uri]
+                            need_save = True
+                    if not episode['physical']:
+                        del episode['physical']
+                        need_save = True
+                    if need_save:
+                        self.entity_manager.save_tv_episode(episode)
+                        saved_episode += 1
+        total += saved_episode
+        self.logger.info(u'Removed orphans from %d tv episodes', saved_episode)
+        
+        self.logger.info(u'Removed orphans from a total of %d files', saved_episode)
+    
+
 
 
 # Container super class
@@ -51,6 +106,7 @@ class Container(object):
         self.logger = logging.getLogger('Container')
         self.factory = factory
         self.file_path = file_path
+        self.uri = self.factory.configuration.uri_from_canonic_path(file_path)
         self.path_info = None
         self.record = None
         self.info = None
@@ -132,16 +188,17 @@ class Container(object):
     def load_info(self, refresh=False):
         self.info = None
         if self.file_path and self.path_info:
-            if self.file_path in self.record['entity']['physical'] and not refresh:
-                self.info = self.record['entity']['physical'][self.file_path]['info']
+            if self.uri and self.uri in self.record['entity']['physical'] and not refresh:
+                self.info = self.record['entity']['physical'][self.uri]['info']
             else:
                 self.info = self.factory.util.decode_info(self.file_path)
-                if self.in_repository() and self.info:
-                    self.record['entity']['physical'][self.file_path] = {}
-                    self.record['entity']['physical'][self.file_path]['path info'] = self.path_info
-                    self.record['entity']['physical'][self.file_path]['info'] = self.info
+                if self.uri and self.info:
+                    self.record['entity']['physical'][self.uri] = {}
+                    self.record['entity']['physical'][self.uri]['path info'] = self.path_info
+                    self.record['entity']['physical'][self.uri]['info'] = self.info
                     self.save_record()
                     self.logger.info(u'Refreshed info about %s', self.file_path)
+                    
         return self.info is not None
     
     
@@ -258,7 +315,6 @@ class Container(object):
     
     
     def refresh_index(self, queue=None):
-        # <Volume>/<Media Kind>/<Kind>/<Profile>/(<Show>/<Season>/(language/)?<Show> <Code> <Name>|(language/)?IMDb<IMDB ID> <Name>).<Extension>
         if self.record:
             if 'physical' not in self.record['entity']:
                 self.record['entity']['physical'] = {}
@@ -272,14 +328,14 @@ class Container(object):
                     if path not in self.record['entity']['physical']:
                         related_path_info = self.factory.configuration.decode_path(path)
                         if self.factory.util.check_if_in_repository(related_path_info):
-                            self.logger.debug(u'Indexing %s.', path)
-                            self.record['entity']['physical'][path] = {}
-                            uri = self.factory.configuration.uri_from_canonice_path(path)
-                            self.record['entity']['physical'][path]['uri'] = uri
-                            self.record['entity']['physical'][path]['canonic'] = self.factory.configuration.canonice_path_from_uri(uri)
-                            self.record['entity']['physical'][path]['path info'] = related_path_info
-                            self.record['entity']['physical'][path]['info'] = self.factory.util.decode_info(path)
-                            discovered += 1
+                            uri = self.factory.configuration.uri_from_canonic_path(path)
+                            if uri:
+                                self.logger.debug(u'Indexing %s.', uri)
+                                self.record['entity']['physical'][uri] = {}
+                                self.record['entity']['physical'][uri]['uri'] = uri
+                                self.record['entity']['physical'][uri]['path info'] = related_path_info
+                                self.record['entity']['physical'][uri]['info'] = self.factory.util.decode_info(path)
+                                discovered += 1
                 if discovered:
                     self.save_record()
                     self.logger.debug(u'Indexed %s files related to %s in repository.', discovered, self.file_path)
@@ -289,16 +345,17 @@ class Container(object):
         if self.record and 'entity' in self.record and 'physical' in self.record['entity']:
             need_save = False
             if queue:
-                for p in queue:
-                    if p in self.record['entity']['physical']:
-                        self.logger.debug(u'Dropping physical index for %s', p)
-                        del self.record['entity']['physical'][p]
+                for path in queue:
+                    uri = self.factory.configuration.uri_from_canonic_path(path)
+                    if uri in self.record['entity']['physical']:
+                        self.logger.debug(u'Dropping physical index for %s', uri)
+                        del self.record['entity']['physical'][uri]
                         need_save = True
                 if not self.record['entity']['physical']:
                     del self.record['entity']['physical']
                     need_save = True
             else:
-                self.logger.debug(u'Dropping all physical index for %s', self.file_path)
+                self.logger.debug(u'Dropping all related physical index for %s', self.file_path)
                 del self.record['entity']['physical']
                 need_save = True
             if need_save: self.save_record()
@@ -321,6 +378,14 @@ class Container(object):
     def drop_from_index(self, path):
         if path not in self.ghost:
             self.ghost.append(path)
+    
+    
+    def clean(self, options):
+        for uri in self.record['entity']['physical'].keys():
+            path = self.factory.configuration.canonic_path_from_uri(uri)
+            if not os.path.exists(path):
+                self.logger.info(u'Found orphan %s', uri)
+                self.drop_from_index(path)
     
     
     def related(self):
@@ -441,7 +506,7 @@ class Container(object):
         if 'cast' in record:
             
             if initialize:
-                for i in self.factory.configuration.property_map['name']['itunemovi']:
+                for i in self.factory.configuration.lookup['name']['itunemovi']:
                     self.meta[i] = []
                     
             self.meta['directors'].extend([ 
@@ -466,7 +531,7 @@ class Container(object):
             ])
             
             if finalize:
-                for i in self.factory.configuration.property_map['name']['itunemovi']:
+                for i in self.factory.configuration.lookup['name']['itunemovi']:
                     if not self.meta[i]:
                         del self.meta[i]
         return
@@ -550,7 +615,7 @@ class Container(object):
     
     
     def print_meta(self):
-        return self.factory.util.format_display_block(self.meta, self.factory.configuration.property_map['name']['tag'])
+        return self.factory.util.format_display_block(self.meta, self.factory.configuration.lookup['name']['tag'])
     
     
     def print_related(self):
@@ -562,19 +627,19 @@ class Container(object):
     
     
     def print_path_info(self):
-        return self.factory.util.format_display_block(self.path_info, self.factory.configuration.property_map['name']['tag'])
+        return self.factory.util.format_display_block(self.path_info, self.factory.configuration.lookup['name']['tag'])
     
     
     def print_file_info(self):
-        return self.factory.util.format_display_block(self.info['file'], self.factory.configuration.property_map['name']['file'])
+        return self.factory.util.format_display_block(self.info['file'], self.factory.configuration.lookup['name']['file'])
     
     
     def print_tracks(self):
-        return (u'\n\n\n'.join([self.factory.util.format_display_block(track, self.factory.configuration.property_map['name']['track'][track['type']]) for track in self.info['track']]))
+        return (u'\n\n\n'.join([self.factory.util.format_display_block(track, self.factory.configuration.lookup['name']['track'][track['type']]) for track in self.info['track']]))
     
     
     def print_tags(self):
-        return self.factory.util.format_display_block(self.info['tag'], self.factory.configuration.property_map['name']['tag'])
+        return self.factory.util.format_display_block(self.info['tag'], self.factory.configuration.lookup['name']['tag'])
     
     
     def print_chapter_markers(self):
@@ -621,9 +686,11 @@ class AudioVideoContainer(Container):
     
     
     def valid(self):
-        if not self.info['track']:
+        result = Container.valid(self)
+        if result and not('track' in self.info and self.info['track']):
             self.logger.warning(u'Failed to decode track information for %s',self.file_path)
-        return Container.valid(self) and self.info['track']
+            result = False
+        return result
     
     
     def load_meta(self):
@@ -724,11 +791,12 @@ class AudioVideoContainer(Container):
                         if 'pack' in pc:
                             # locate related files that need to be muxed in
                             if 'related' in pc['pack']:
-                                for (path, phy) in self.record['entity']['physical'].iteritems():
+                                for phy in self.record['entity']['physical'].values():
                                     for c in pc['pack']['related']:
                                         if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c.iteritems()):
                                             if phy['path info']['kind'] not in selected['related']:
                                                 selected['related'][phy['path info']['kind']] = []
+                                            path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
                                             selected['related'][phy['path info']['kind']].append(path)
                                             break
                             #locate related tracks that need to be muxed in
@@ -786,49 +854,54 @@ class AudioVideoContainer(Container):
                                 
                                 if 'ac3' in selected['related']:
                                     for r in selected['related']['ac3']:
-                                        # try to locate the DTS sound track from which the AC-3 track was transcoded
-                                        # if a match is found duplicate the delay
-                                        # checking exact duration ir sample cound migth be more accurate
-                                        ac3_record = self.record['entity']['physical'][r]
-                                        lookup = {'codec':'DTS', 'language':ac3_record['path info']['language']}
-                                        for t in self.info['track']:
-                                            if all((k in t and t[k] == v) for k,v in lookup.iteritems()):
-                                                if 'delay' in t and t['delay'] != 0:
-                                                    self.logger.debug(u'Found a matching DTS track with non trivial delay of %d', t['delay'])
-                                                    command.append(u'--sync')
-                                                    command.append(u'0:{0}'.format(t['delay']))
-                                                    break
-                                        if 'channels' in ac3_record['info']['track'][0]:
-                                            channels = ac3_record['info']['track'][0]['channels']
-                                            if channels < 2: tname = 'Mono'
-                                            elif channels > 2: tname = 'Surround'
-                                            else: tname = 'Stereo'
-                                            command.append(u'--track-name')
-                                            command.append(u'0:{0}'.format(tname))
-                                        command.append(u'--language')
-                                        command.append(u'0:{0}'.format(self.factory.configuration.find_language(ac3_record['path info']['language'])['iso2']))
-                                        command.append(r)
+                                        ac3_path = self.factory.configuration.canonic_path_from_uri(r)
+                                        if ac3_path:
+                                            # try to locate the DTS sound track from which the AC-3 track was transcoded
+                                            # if a match is found duplicate the delay
+                                            # checking exact duration or sample cound migth be more accurate
+                                            ac3_record = self.record['entity']['physical'][r]
+                                            lookup = {'codec':'DTS', 'language':ac3_record['path info']['language']}
+                                            for t in self.info['track']:
+                                                if all((k in t and t[k] == v) for k,v in lookup.iteritems()):
+                                                    if 'delay' in t and t['delay'] != 0:
+                                                        self.logger.debug(u'Found a matching DTS track with non trivial delay of %d', t['delay'])
+                                                        command.append(u'--sync')
+                                                        command.append(u'0:{0}'.format(t['delay']))
+                                                        break
+                                            if 'channels' in ac3_record['info']['track'][0]:
+                                                channels = ac3_record['info']['track'][0]['channels']
+                                                if channels < 2: tname = 'Mono'
+                                                elif channels > 2: tname = 'Surround'
+                                                else: tname = 'Stereo'
+                                                command.append(u'--track-name')
+                                                command.append(u'0:{0}'.format(tname))
+                                            command.append(u'--language')
+                                            command.append(u'0:{0}'.format(self.factory.configuration.find_language(ac3_record['path info']['language'])['iso2']))
+                                            command.append(ac3_path)
                                         
                                 if 'srt' in selected['related']:
                                     for r in selected['related']['srt']:
-                                        path_info = self.record['entity']['physical'][r]['path info']
-                                        command.append(u'--sub-charset')
-                                        command.append(u'0:UTF-8')
-                                        command.append(u'--language')
-                                        command.append(u'0:{0}'.format(self.factory.configuration.find_language(path_info['language'])['iso2']))
-                                        command.append(r)
-                                        
+                                        srt_path = self.factory.configuration.canonic_path_from_uri(r)
+                                        if srt_path:
+                                            path_info = self.record['entity']['physical'][r]['path info']
+                                            command.append(u'--sub-charset')
+                                            command.append(u'0:UTF-8')
+                                            command.append(u'--language')
+                                            command.append(u'0:{0}'.format(self.factory.configuration.find_language(path_info['language'])['iso2']))
+                                            command.append(srt_path)
+                                            
                                 if 'txt' in selected['related']:
                                     for r in selected['related']['txt']:
-                                        path_info = self.record['entity']['physical'][r]['path info']
-                                        command.append(u'--chapter-language')
-                                        command.append(u'en')
-                                        command.append(u'--chapter-charset')
-                                        command.append(u'UTF-8')
-                                        command.append(u'--chapters')
-                                        command.append(r)
-                                        break
-                                        
+                                        txt_path = self.factory.configuration.canonic_path_from_uri(r)
+                                        if txt_path:
+                                            command.append(u'--chapter-language')
+                                            command.append(u'en')
+                                            command.append(u'--chapter-charset')
+                                            command.append(u'UTF-8')
+                                            command.append(u'--chapters')
+                                            command.append(txt_path)
+                                            break
+                                            
                                 message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
                                 self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                                 if self.factory.util.clean_if_not_exist(dest_path):
@@ -1154,7 +1227,7 @@ class Mpeg4(AudioVideoContainer):
         if self.meta:
             for k in [
                 k for k,v in self.meta.iteritems()
-                if self.factory.configuration.property_map['name']['tag'][k]['subler'] 
+                if self.factory.configuration.lookup['name']['tag'][k]['subler'] 
                 and (k not in self.info['tag'] or self.info['tag'][k] != v)
             ]: 
                 if k in self.info['tag']:
@@ -1184,7 +1257,7 @@ class Mpeg4(AudioVideoContainer):
                     update['name'] = self.path_info['name']
         if update:
             tc = u''.join([self.factory.util.format_key_value_for_subler(t, update[t]) for t in sorted(set(update))])
-            message = u'Update tags: {0} --> {1}'.format(u', '.join([self.factory.configuration.property_map['name']['tag'][t]['print'] for t in sorted(set(update.keys()))]), self.file_path)
+            message = u'Update tags: {0} --> {1}'.format(u', '.join([self.factory.configuration.lookup['name']['tag'][t]['print'] for t in sorted(set(update.keys()))]), self.file_path)
             command = self.factory.util.initialize_command('subler', self.logger)
             if command:
                 command.extend([u'-o', self.file_path, u'-t', tc])
@@ -1220,11 +1293,13 @@ class Mpeg4(AudioVideoContainer):
                     
                 selected = []
                 lookup = {'kind':path_info['kind'], 'profile':path_info['profile']}
-                for (path, phy) in self.record['entity']['physical'].iteritems():
+                for phy in self.record['entity']['physical'].values():
                     if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
-                        selected.append(path)
-                        break
-                        
+                        path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
+                        if path:
+                            selected.append(path)
+                            break
+                            
                 if selected:
                     message = u'Update artwork {0} --> {1}'.format(selected[0], self.file_path)
                     command = self.factory.util.initialize_command('subler', self.logger)
@@ -1258,9 +1333,10 @@ class Mpeg4(AudioVideoContainer):
                             
                     if 'related' in pc['update']:
                         selected = {}
-                        for (path, phy) in self.record['entity']['physical'].iteritems():
+                        for phy in self.record['entity']['physical'].values():
                             for c in pc['update']['related']:
                                 if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c['from'].iteritems()):
+                                    path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
                                     selected[path] = phy['path info']
                                     break
                                 
@@ -1271,7 +1347,7 @@ class Mpeg4(AudioVideoContainer):
                                 command.extend([
                                     u'-o', self.file_path,
                                     u'-i', p, 
-                                    u'-l', self.factory.configuration.property_map['iso3t']['language'][i['language']]['print'],
+                                    u'-l', self.factory.configuration.lookup['iso3t']['language'][i['language']]['print'],
                                     u'-n', c['to']['Name'], 
                                     u'-a', unicode(int(round(self.playback_height() * c['to']['height'])))
                                 ])
@@ -1285,13 +1361,13 @@ class Mpeg4(AudioVideoContainer):
                                 for (p,i) in selected.iteritems():
                                     if i['language'] == code:
                                         found = True
-                                        message = u'Update smart {0} subtitles {1} --> {2}'.format(self.factory.configuration.property_map['iso3t']['language'][code]['print'], p, self.file_path)
+                                        message = u'Update smart {0} subtitles {1} --> {2}'.format(self.factory.configuration.lookup['iso3t']['language'][code]['print'], p, self.file_path)
                                         command = self.factory.util.initialize_command('subler', self.logger)
                                         if command:
                                             command.extend([
                                                 u'-o', self.file_path, 
                                                 u'-i', p, 
-                                                u'-l', self.factory.configuration.property_map['iso3t']['language'][smart_section['language']]['print'],
+                                                u'-l', self.factory.configuration.lookup['iso3t']['language'][smart_section['language']]['print'],
                                                 u'-n', smart_section['Name'],
                                                 u'-a', unicode(int(round(self.playback_height() * smart_section['height'])))
                                             ])
@@ -1323,8 +1399,9 @@ class Mpeg4(AudioVideoContainer):
                             self.factory.util.execute(command, message, options.debug, pipeout=True, pipeerr=False, logger=self.logger)
                     if 'related' in pc['update']:
                         lookup = pc['update']['related']
-                        for (path, phy) in self.record['entity']['physical'].iteritems():
+                        for phy in self.record['entity']['physical'].values():
                             if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
+                                path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
                                 selected.append(path)
                                 break
                                 
@@ -1420,8 +1497,12 @@ class Subtitle(Text):
                         for (k,v) in block.statistics.iteritems():
                             statistics[k] += block.statistics[k]
                     self.info['statistics'] = statistics
-                    self.save_record()
+                    
+                    # update the record
                     self.logger.info(u'Refreshed statistics for %s', self.file_path)
+                    self.record['entity']['physical'][self.uri]['info']['statistics'] = statistics
+                    self.save_record()
+                    
                 else:
                     self.logger.warning('Could not parse subtitle file %s', self.file_path)
         else:
@@ -1976,7 +2057,7 @@ class SubtitleFilter(object):
 
 class FileUtil(object):
     def __init__(self, factory):
-        self.logger = logging.getLogger('File Utilities')
+        self.logger = logging.getLogger('Util')
         self.factory = factory
     
     
@@ -2026,8 +2107,8 @@ class FileUtil(object):
                 match = self.mp4info_tag.search(line)
                 if match is not None:
                     tag = match.groups()
-                    if tag[0] in self.factory.configuration.property_map['mp4info']['tag']:
-                        n = self.factory.configuration.property_map['mp4info']['tag'][tag[0]]
+                    if tag[0] in self.factory.configuration.lookup['mp4info']['tag']:
+                        n = self.factory.configuration.lookup['mp4info']['tag'][tag[0]]
                         info['tag'][n['name']] = tag[1]
     
     
@@ -2050,17 +2131,17 @@ class FileUtil(object):
                             track_type = tn.attrib['type'].lower()
                             if track_type == 'general':
                                 for t in tn:
-                                    if t.tag in self.factory.configuration.property_map['mediainfo']['tag']:
-                                        p = self.factory.configuration.property_map['mediainfo']['tag'][t.tag]
+                                    if t.tag in self.factory.configuration.lookup['mediainfo']['tag']:
+                                        p = self.factory.configuration.lookup['mediainfo']['tag'][t.tag]
                                         info['tag'][p['name']] = t.text
-                                    elif t.tag in self.factory.configuration.property_map['mediainfo']['file']:
-                                        p = self.factory.configuration.property_map['mediainfo']['file'][t.tag]
+                                    elif t.tag in self.factory.configuration.lookup['mediainfo']['file']:
+                                        p = self.factory.configuration.lookup['mediainfo']['file'][t.tag]
                                         info['file'][p['name']] = t.text
-                            elif track_type in self.factory.configuration.property_map['mediainfo']['track']:
+                            elif track_type in self.factory.configuration.lookup['mediainfo']['track']:
                                 track = {}
                                 for t in tn:
-                                    if t.tag in self.factory.configuration.property_map['mediainfo']['track'][track_type]:
-                                        p = self.factory.configuration.property_map['mediainfo']['track'][track_type][t.tag]
+                                    if t.tag in self.factory.configuration.lookup['mediainfo']['track'][track_type]:
+                                        p = self.factory.configuration.lookup['mediainfo']['track'][track_type][t.tag]
                                         value = self.convert_mediainfo_value(p['type'], t.text)
                                         track[p['name']] = value
                                 if track:
@@ -2094,7 +2175,7 @@ class FileUtil(object):
                         info['tag']['itunmovi'] = info['tag']['itunmovi'].replace('&quot;', '"')
                         info['tag']['itunmovi'] = self.clean_xml.sub(u'', info['tag']['itunmovi']).strip()
                         plist = plistlib.readPlistFromString(info['tag']['itunmovi'].encode('utf-8'))
-                        for k,v in self.factory.configuration.property_map['plist']['itunemovi'].iteritems():
+                        for k,v in self.factory.configuration.lookup['plist']['itunemovi'].iteritems():
                             if k in plist:
                                 l = [ unicode(n['name']) for n in plist[k]]
                                 if l: info['tag'][v['name']] = l
@@ -2115,15 +2196,15 @@ class FileUtil(object):
                     if 'genre type' in info['tag']:
                         info['tag']['genre type'] = int(info['tag']['genre type'].split(u',')[0])
                         if 'genre' not in info['tag']:
-                            info['tag']['genre'] = self.factory.configuration.property_map['code']['gnre'][info['tag']['genre type']]['print']
+                            info['tag']['genre'] = self.factory.configuration.lookup['code']['gnre'][info['tag']['genre type']]['print']
                     
                     
                     # Format info fields
                     for k,v in info['tag'].iteritems():
-                        value = self.convert_mediainfo_value(self.factory.configuration.property_map['name']['tag'][k]['type'], v)
+                        value = self.convert_mediainfo_value(self.factory.configuration.lookup['name']['tag'][k]['type'], v)
                         info['tag'][k] = value
                     for k,v in info['file'].iteritems():
-                        value = self.convert_mediainfo_value(self.factory.configuration.property_map['name']['file'][k]['type'], v)
+                        value = self.convert_mediainfo_value(self.factory.configuration.lookup['name']['file'][k]['type'], v)
                         info['file'][k] = value
                     
                     # Fix description and long description
@@ -2235,8 +2316,7 @@ class FileUtil(object):
                 logger.debug(u'Execute: %s', encode_command(command))
                 if message:
                     logger.info(message)
-                
-                from subprocess import Popen, PIPE
+                    
                 if pipeout and pipeerr:
                     proc = Popen(command, stdout=PIPE, stderr=PIPE)
                 elif pipeout and not pipeerr:
@@ -2311,17 +2391,17 @@ class FileUtil(object):
     
     
     def format_key_value_for_subler(self, key, value):
-        m = self.factory.configuration.property_map['name']['tag'][key]
+        m = self.factory.configuration.lookup['name']['tag'][key]
         if 'subler' in m:
             pkey = m['subler']
             if m['type'] == 'enum':
-                pvalue = self.factory.configuration.property_map['code'][m['atom']][value]['print']
+                pvalue = self.factory.configuration.lookup['code'][m['atom']][value]['print']
             elif m['type'] in ('string', 'list'):
                 if m['type'] == 'list':
                     pvalue = u', '.join(value)
                 else:
                     if key == 'language':
-                        pvalue = self.factory.configuration.property_map['iso3t']['language'][value]['print']
+                        pvalue = self.factory.configuration.lookup['iso3t']['language'][value]['print']
                     else:
                         pvalue = unicode(value)
                 pvalue = pvalue.replace(u'{',u'&#123;').replace(u'}',u'&#125;').replace(u':',u'&#58;')
@@ -2408,7 +2488,7 @@ class FileUtil(object):
                 pkey = m['print']
                 ptype = m['type']
                 if ptype == 'enum':
-                    pvalue = self.factory.configuration.property_map['code'][m['atom']][value]['print']
+                    pvalue = self.factory.configuration.lookup['code'][m['atom']][value]['print']
                     
                 elif ptype in ('string', 'list'):
                     if ptype == 'list':

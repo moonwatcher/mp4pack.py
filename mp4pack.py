@@ -12,7 +12,7 @@ from container import ContainerFactory
 from db import EntityManager
 from config import Configuration
 
-class QueueProcessor(object):
+class Queue(object):
     def __init__(self, configuration):
         self.logger = logging.getLogger('Queue')
         self.configuration = configuration
@@ -29,8 +29,17 @@ class QueueProcessor(object):
             self.container_factory = ContainerFactory(self.entity_manager)
             self.file_filter = self.load_file_filter()
             
+        self.load()
+    
+    
+    def sanity_check(self):
+        # Any tests we want to preform before executing the queue go here...
+        return True
+    
+    
+    def load(self):
         # Collect media files from all provided paths
-        files_paths = []
+        canonic_paths = []
         if self.configuration.options.path:
             for p in self.configuration.options.path:
                 input_path = unicode(p, 'utf-8')
@@ -41,18 +50,15 @@ class QueueProcessor(object):
                     input_path = None
                     
                 if input_path:
-                    self.logger.info(u'Scanning %s', input_path)
-                    files_paths.extend(self.find_files_in_path(input_path, self.configuration.options.recursive))
+                    p = self.find_files_in_path(input_path, self.configuration.options.recursive)
+                    self.logger.debug(u'Found %d files in %s', len(p), input_path)
+                    canonic_paths.extend(p)
                     
         # Sort paths and make sure they are unique
-        if files_paths:
-            files_paths = sorted(set(files_paths))
-            self.load_media_files(files_paths)
-    
-    
-    def sanity_check(self):
-        # Any tests we want to preform before executing the queue go here...
-        return True
+        if canonic_paths:
+            canonic_paths = sorted(set(canonic_paths))
+            self.logger.debug(u'Found %d files to process', len(canonic_paths))
+            self.load_queue(canonic_paths)
     
     
     def load_file_filter(self):
@@ -63,54 +69,21 @@ class QueueProcessor(object):
         return result
     
     
-    def load_media_files(self, file_paths):
+    def load_queue(self, canonic_paths):
         self.media_files = []
-        for p in file_paths:
-            media_file = self.container_factory.create_media_file(p)
+        for path in canonic_paths:
+            media_file = self.container_factory.create_media_file(path)
             if media_file:
                 self.media_files.append(media_file)
     
     
-    def transform_media_file(self, media_file):
-        result_path = None
-        o = copy.deepcopy(self.configuration.options)
-        o.transcode = o.transform
-        o.transform = None
-        result_path = media_file.transcode(o)
-        if result_path:
-            new_media_file = self.container_factory.create_media_file(result_path)
-            new_media_file.load()
-            if new_media_file and new_media_file.valid():
-                o.transcode = None
-                
-                # tag the new file
-                o.tag = True
-                new_media_file.tag(o)
-                o.tag = False
-                
-                # update clean subtitles in the new file
-                o.update = 'srt'
-                o.profile = 'clean'
-                new_media_file.update(o)
-                
-                # update chapters in the new file
-                o.update = 'txt'
-                o.profile = 'chapter'
-                new_media_file.update(o)
-                
-                # update artwork on the new file
-                o.volume = 'alpha'
-                o.update = 'png'
-                o.profile = 'normal'
-                o.download = True
-                new_media_file.update(o)
-        return result_path
-    
-    
-    def execute(self):
+    def process_queue(self):
         # Global operations not related to media files
         if self.configuration.options.initialize:
             self.entity_manager.base_init()
+            
+        if self.configuration.options.cleanup:
+            self.container_factory.clean(self.configuration.options)
             
         if self.configuration.options.map_show:
             self.entity_manager.map_show_with_pair(self.configuration.options.map_show)
@@ -162,16 +135,64 @@ class QueueProcessor(object):
     def find_files_in_path(self, path, recursive, depth=1):
         result = []
         if os.path.isfile(path):
+            # This is a file
+            # Ignore if it is invisable
+            # Ignore if a filter exists and matches
+            # Otherwise get a canonic path for the file and add it if its good
             dname, fname = os.path.split(path)
             if (self.file_filter == None or self.file_filter.search(fname) != None) and self.invisable_file_path.search(os.path.basename(path)) == None:
-                result.append(self.configuration.canonic_path(path))
-                
+                canonic_path = self.configuration.canonic_path(path)
+                if canonic_path:
+                    result.append(canonic_path)
+                    
         elif (recursive or depth > 0) and os.path.isdir(path) and self.invisable_file_path.search(os.path.basename(path)) == None:
+            # This is a non invisable directory
+            # and we need to recurse into it
             for p in os.listdir(path):
+                # recursively scan decendent paths
                 p = os.path.abspath(os.path.join(path,p))
                 rec_result = self.find_files_in_path(p, recursive, depth - 1)
+                
+                # accumulate the recurive results on the stack and return
                 result += rec_result
         return result
+    
+    
+    
+    def transform_media_file(self, media_file):
+        result_path = None
+        o = copy.deepcopy(self.configuration.options)
+        o.transcode = o.transform
+        o.transform = None
+        result_path = media_file.transcode(o)
+        if result_path:
+            new_media_file = self.container_factory.create_media_file(result_path)
+            new_media_file.load()
+            if new_media_file and new_media_file.valid():
+                o.transcode = None
+                
+                # tag the new file
+                o.tag = True
+                new_media_file.tag(o)
+                o.tag = False
+                
+                # update clean subtitles in the new file
+                o.update = 'srt'
+                o.profile = 'clean'
+                new_media_file.update(o)
+                
+                # update chapters in the new file
+                o.update = 'txt'
+                o.profile = 'chapter'
+                new_media_file.update(o)
+                
+                # update artwork on the new file
+                o.volume = 'alpha'
+                o.update = 'png'
+                o.profile = 'normal'
+                o.download = True
+                new_media_file.update(o)
+        return result_path
     
     
     def print_execution_report(self):
@@ -200,7 +221,7 @@ def parse_command_line_arguments(configuration):
     
     parser = ArgumentParser()
     
-    parser.add_argument('path', metavar='PATH', nargs='+', help='file or directory paths to scan')
+    parser.add_argument('path', metavar='PATH', nargs='*', help='file or directory paths to scan')
     
     group = parser.add_argument_group('media file processing operations')
     group.add_argument('-i', '--info',      dest='info',        action='store_true',    default=False, help='show info')
@@ -241,6 +262,7 @@ def parse_command_line_arguments(configuration):
     group.add_argument('--output-rate',     dest='output_rate', metavar='RATE',         help='subtitles encoding frame rate')
     
     group = parser.add_argument_group('environment and repository')
+    group.add_argument('--clean',           dest='cleanup',     action='store_true',    default=False, help='Remove orphan references')
     group.add_argument('--show',            dest='map_show',    metavar="MAP",          help='map show to tvdb id [tvdb id]:[show name]')
     group.add_argument('--poster',          dest='poster',      metavar='MAP',          help='choose tmdb movie poster [imdb]:[tmdb]')
     group.add_argument('--initialize',      dest='initialize',  action='store_true',    default=False, help='run only once to initialize the system')
@@ -265,15 +287,14 @@ def main():
     # Override the default log level from the command line arguments
     logging.getLogger().setLevel(log_levels[configuration.options.verbosity])
     
-    queue_processor = QueueProcessor(configuration)
-    
-    if queue_processor.valid:
+    q = Queue(configuration)
+    if q.valid:
         # Preform operations
-        queue_processor.execute()
+        q.process_queue()
         
         # Print the execution report
-        queue_processor.print_execution_report()
-    
+        q.print_execution_report()
+        
     configuration.print_option_report()
     configuration.print_command_report()
 

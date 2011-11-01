@@ -19,61 +19,51 @@ class Configuration(object):
         self.media_config = media_config
         self.user_config = None
         
+        # Repository configuration
         self.repository = None
-        self.rules = None
         self.volume = None
+        self.rules = None
         
+        # Media types configuration
         self.kind = None
+        self.subtitle = None
+        self.service = None
+        self.lookup = None
+        
+        # Runtime configuration
+        self.home = None
+        self.options = None
         self.command = None
         self.action = None
         self.format = None
-        self.subtitle = None
         
-        self.options = None
-        self.property_map = None
-        
-        self.track_with_language = None
-        self.kind_with_language = None
-        self.supported_media_kind = None
-        self.available_profiles = None
+        # Cached sets
         self.available_commands = None
-        
-        self.subtitle = None
-        self.tmdb = None
-        self.tvdb = None
-        self.genre = None
+        self.kind_with_language = set(self.runtime_config['kind with language'])
+        self.track_with_language = set(self.runtime_config['track with language'])
+        self.supported_media_kind = [ k for k in self.media_config['stik'] if 'schema' in k ]
         
         self.load_default_config()
     
     
     
+    # First stage loading
     def load_default_config(self):
         # start from the base user conf
         self.user_config = copy.deepcopy(base_config)
         
-        # Load conf from environment variable
-        env_config_path = os.getenv('MP4PACK_CONFIG')
-        if env_config_path:
-            self.load_external_config(env_config_path)
+        # Try to set the home folder from env
+        self.home = os.getenv('MPK_HOME')
+        if self.home:
+            self.load_external_config(os.path.join(self.home, 'mpk.conf'))
             
-        self.tmdb = self.runtime_config['service']['tmdb']
-        self.tvdb = self.runtime_config['service']['tvdb']
-        self.genre = self.media_config['gnre']
+        self.service = self.runtime_config['service']
         
         self.load_format()
         self.load_command()
         self.load_action()
         self.load_kind()
-        self.load_property_map()
-        
-        self.track_with_language = ('audio', 'subtitles', 'video')
-        self.kind_with_language = self.property_map['container']['subtitles']['kind'] + self.property_map['container']['raw audio']['kind']
-        self.supported_media_kind = [ mk for mk in self.media_config['stik'] if 'schema' in mk ]
-        
-        self.available_profiles = []
-        for v in self.kind.values():
-            self.available_profiles.extend(v['profile'].keys())
-        self.available_profiles = tuple(set(self.available_profiles))
+        self.load_lookup()
     
     
     def load_format(self):
@@ -92,20 +82,18 @@ class Configuration(object):
     
     def load_command(self):
         self.command = {}
-        self.available_commands = []
         for k,v in self.runtime_config['command'].iteritems():
-            self.command[k] = copy.deepcopy(v)
-            
-            cmd = ['which', v['binary']]
-            proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            report = proc.communicate()
-            if report[0]:
-                self.command[k]['path'] = report[0].splitlines()[0]
-                self.available_commands.append(k)
-            else:
-                self.command[k]['path'] = None
+            if v['binary']:
+                self.command[k] = copy.deepcopy(v)
+                cmd = ['which', v['binary']]
+                proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+                report = proc.communicate()
+                if report[0]:
+                    self.command[k]['path'] = report[0].splitlines()[0]
+                else:
+                    self.command[k]['path'] = None
                 
-        self.available_commands = set(self.available_commands)
+        self.available_commands = set([k for k,v in self.command.iteritems() if v['path'] is not None])
     
     
     def load_action(self):
@@ -127,137 +115,79 @@ class Configuration(object):
             self.kind[k] = copy.deepcopy(v)
     
     
-    def load_repository(self):
-        self.repository = {}
-        self.volume = {}
-        self.rules = []
+    def load_lookup(self):
+        self.lookup = {}
         
-        for repo_k,repo_v in self.user_config['repository'].iteritems():
-            self.repository[repo_k] = copy.deepcopy(repo_v)
-            self.repository[repo_k]['name'] = repo_k
-            self.build_mongodb_url(self.repository[repo_k]['mongodb'])
-            if 'remote' in self.repository[repo_k] and 'mongodb' in self.repository[repo_k]['remote']:
-                self.build_mongodb_url(self.repository[repo_k]['remote']['mongodb'])
-                
-            if 'rule' in self.repository[repo_k]:
-                for r in self.repository[repo_k]['rule']:
-                    rule = copy.deepcopy(r)
-                    # rule['when']['repository'] = repo_k
-                    self.rules.append(rule)
-                    
-            if 'volume' in self.repository[repo_k]:
-                for vol_k, vol_v in self.repository[repo_k]['volume'].iteritems():
-                    vol_v['name'] = vol_k
-                    vol_v['repository'] = self.repository[repo_k]['name']
-                    vol_v['uri prefix'] = self.format['scheme'].format(vol_v['repository'], vol_v['name'])
-                    
-                    if 'alias' not in vol_v:
-                        vol_v['alias'] = []
-                    if 'scan' not in vol_v:
-                        vol_v['scan'] = True
-                    if 'index' not in vol_v:
-                        vol_v['index'] = True
-                    
-                    if 'base' in self.repository[repo_k]:
-                        if 'path' not in vol_v:
-                            # absolute path defined on a volume always takes precedence
-                            # if not present default to <base>/<volume name>
-                            vol_v['path'] = os.path.join(self.repository[repo_k]['base']['path'], vol_k)
-                            
-                        if 'alias' in self.repository[repo_k]['base']:
-                            for alt in self.repository[repo_k]['base']['alias']:
-                                vol_v['alias'].append(os.path.join(alt, vol_k))
-                    
-                    # need to add validity check
-                    if vol_v['path']:
-                        aliases = set()
-                        aliases.add(vol_v['path'])
-                        aliases.add(os.path.realpath(vol_v['path']))
-                        for a in vol_v['alias']:
-                            aliases.add(a)
-                            aliases.add(os.path.realpath(a))
-                            
-                        vol_v['alias'] = tuple(sorted(aliases))
-                        vol_v['real path'] = os.path.realpath(vol_v['path'])
-                        self.volume[vol_k] = vol_v
-                        
-        self.property_map['volume'] = {}
-        for vol_k,vol_v in self.volume.iteritems():
-            # mark location flags
-            if vol_v['repository'] == self.user_config['local repository']:
-                vol_v['local'] = True
-                vol_v['remote'] = False
-            else:
-                vol_v['local'] = False
-                vol_v['remote'] = True
-                
-            # map volume by alias
-            for a in vol_v['alias']:
-                self.property_map['volume'][a] = vol_v
-    
-    
-    def load_property_map(self):
-        self.property_map = {}
+        # Mapping the names of properties in information extraction utilities
         for key in ('name', 'mediainfo', 'mp4info'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
+            # lazy dict initialize
+            if key not in self.lookup: self.lookup[key] = {}
             
-            # Build file and tag propery map
+            # File and Tag
             for block in ('file', 'tag'):
-                if block not in self.property_map[key]:
-                    self.property_map[key][block] = {}
-                    
+                # lazy dict initialize
+                if block not in self.lookup[key]: self.lookup[key][block] = {}
+                
                 for p in self.media_config[block]:
-                    if key in p and p[key] is not None:
-                        self.property_map[key][block][p[key]] = p
-            
-            # Build track property map
-            self.property_map[key]['track'] = {}
+                    if key in p and p[key] is not None and ('enable' not in p or p['enable']):
+                        self.lookup[key][block][p[key]] = p
+                        
+            # Track
+            self.lookup[key]['track'] = {}
             for block in ('audio', 'video', 'text', 'image'):
-                if block not in self.property_map[key]['track']:
-                    self.property_map[key]['track'][block] = {}
+                # lazy dict initialize
+                if block not in self.lookup[key]['track']: self.lookup[key]['track'][block] = {}
+                
                 for p in self.media_config['track']['common']:
-                    if key in p and p[key] is not None:
-                        self.property_map[key]['track'][block][p[key]] = p
-                    
+                    if key in p and p[key] is not None and ('enable' not in p or p['enable']):
+                        self.lookup[key]['track'][block][p[key]] = p
+                        
                 for p in self.media_config['track'][block]:
-                    if key in p and p[key] is not None:
-                        self.property_map[key]['track'][block][p[key]] = p
-        
-        # Build itunemovi plist properties map
+                    if key in p and p[key] is not None and ('enable' not in p or p['enable']):
+                        self.lookup[key]['track'][block][p[key]] = p
+                        
+                        
+        # itunemovi plist
         for key in ('name', 'plist'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            self.property_map[key]['itunemovi'] = {}
-            for p in self.media_config['itunemovi']:
-                self.property_map[key]['itunemovi'][p[key]] = p
-        
-        # Build special iTunes atom map
-        for key in ('name', 'code'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
-                if block not in self.property_map[key]:
-                    self.property_map[key][block] = {}
-                for p in self.media_config[block]:
-                    self.property_map[key][block][p[key]] = p
-        
-        # Build language code map
-        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
-            if key not in self.property_map:
-                self.property_map[key] = {}
-            self.property_map[key]['language'] = {}
-            for p in self.media_config['language']:
-                if key in p:
-                    self.property_map[key]['language'][p[key]] = p
-        
-        # Build container kind map
-        self.property_map['container'] = {}
-        for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
-            self.property_map['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
+            # lazy dict initialize
+            if key not in self.lookup: self.lookup[key] = {}
+            self.lookup[key]['itunemovi'] = {}
             
+            for p in self.media_config['itunemovi']:
+                if 'enable' not in p or p['enable']:
+                    self.lookup[key]['itunemovi'][p[key]] = p
+                    
+        # iTunes atom
+        for key in ('name', 'code'):
+            # lazy dict initialize
+            if key not in self.lookup: self.lookup[key] = {}
+            
+            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
+                # lazy dict initialize
+                if block not in self.lookup[key]: self.lookup[key][block] = {}
+                
+                for p in self.media_config[block]:
+                    if 'enable' not in p or p['enable']:
+                        self.lookup[key][block][p[key]] = p
+                        
+        # Language code
+        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
+            # lazy dict initialize
+            if key not in self.lookup: self.lookup[key] = {}
+            self.lookup[key]['language'] = {}
+            
+            for p in self.media_config['language']:
+                if key in p and ('enable' not in p or p['enable']):
+                    self.lookup[key]['language'][p[key]] = p
+                    
+        # Kind in Container
+        self.lookup['container'] = {}
+        for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
+            self.lookup['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
     
     
+    
+    # Second stage loading
     def load_command_line_arguments(self, options):
         self.options = options
         
@@ -291,6 +221,71 @@ class Configuration(object):
                 self.user_config = dict(self.user_config.items() + external_config.items())
     
     
+    def load_repository(self):
+        self.repository = {}
+        self.volume = {}
+        self.rules = []
+        
+        for repo_k,repo_v in self.user_config['repository'].iteritems():
+            self.repository[repo_k] = copy.deepcopy(repo_v)
+            self.repository[repo_k]['name'] = repo_k
+            self.build_mongodb_url(self.repository[repo_k]['mongodb'])
+            if 'remote' in self.repository[repo_k] and 'mongodb' in self.repository[repo_k]['remote']:
+                self.build_mongodb_url(self.repository[repo_k]['remote']['mongodb'])
+                
+            if 'rule' in self.repository[repo_k]:
+                for r in self.repository[repo_k]['rule']:
+                    rule = copy.deepcopy(r)
+                    # rule['when']['repository'] = repo_k
+                    self.rules.append(rule)
+                    
+            if 'volume' in self.repository[repo_k]:
+                for vol_k, vol_v in self.repository[repo_k]['volume'].iteritems():
+                    vol_v['name'] = vol_k
+                    vol_v['repository'] = self.repository[repo_k]['name']
+                    vol_v['uri prefix'] = self.format['scheme'].format(vol_v['repository'], vol_v['name'])
+                    
+                    if 'alias' not in vol_v: vol_v['alias'] = []
+                    if 'scan' not in vol_v: vol_v['scan'] = True
+                    if 'index' not in vol_v: vol_v['index'] = True
+                    
+                    if 'base' in self.repository[repo_k]:
+                        if 'path' not in vol_v:
+                            # absolute path defined on a volume always takes precedence
+                            # if not present default to <base>/<volume name>
+                            vol_v['path'] = os.path.join(self.repository[repo_k]['base']['path'], vol_k)
+                            
+                        if 'alias' in self.repository[repo_k]['base']:
+                            for alt in self.repository[repo_k]['base']['alias']:
+                                vol_v['alias'].append(os.path.join(alt, vol_k))
+                                
+                    # need to add validity check
+                    if vol_v['path']:
+                        aliases = set()
+                        aliases.add(vol_v['path'])
+                        aliases.add(os.path.realpath(vol_v['path']))
+                        for a in vol_v['alias']:
+                            aliases.add(a)
+                            aliases.add(os.path.realpath(a))
+                            
+                        vol_v['alias'] = tuple(sorted(aliases))
+                        vol_v['real path'] = os.path.realpath(vol_v['path'])
+                        self.volume[vol_k] = vol_v
+                        
+        self.lookup['volume'] = {}
+        for vol_k,vol_v in self.volume.iteritems():
+            # mark location flags
+            if vol_v['repository'] == self.user_config['local repository']:
+                vol_v['local'] = True
+                vol_v['remote'] = False
+            else:
+                vol_v['local'] = False
+                vol_v['remote'] = True
+                
+            # map volume by alias
+            for a in vol_v['alias']:
+                self.lookup['volume'][a] = vol_v
+    
     
     def build_mongodb_url(self, conf):
         if 'host' in conf and 'database' in conf:
@@ -302,17 +297,18 @@ class Configuration(object):
             conf['url'] = 'mongodb://{0}/{1}'.format(url, conf['database'])
     
     
+    
     def canonic_path(self, path):
         result = path
         real_path = os.path.realpath(os.path.abspath(path))
-        for vol_path, vol in self.property_map['volume'].iteritems():
+        for vol_path, vol in self.lookup['volume'].iteritems():
             if os.path.commonprefix([vol_path, real_path]) == vol_path:
                 result = real_path.replace(vol_path, vol['path'])
                 break
         return result
     
     
-    def canonice_path_from_uri(self, uri):
+    def canonic_path_from_uri(self, uri):
         result = None
         if uri:
             parsed_uri = urlparse.urlparse(uri)
@@ -326,13 +322,21 @@ class Configuration(object):
         return result
     
     
-    def uri_from_canonice_path(self, path):
+    def uri_from_canonic_path(self, path):
         result = None
         for vol in self.volume.values():
             if os.path.commonprefix([vol['path'], path]) == vol['path']:
                 result = os.path.join(vol['uri prefix'], os.path.relpath(path, vol['path']))
                 break
         return result
+    
+    
+    def uri_from_path(self, path):
+        uri = None
+        canonic_path = self.canonic_path(path)
+        if canonic_path:
+            uri = uri_from_canonic_path(canonic_path)
+        return uri
     
     
     
@@ -353,24 +357,23 @@ class Configuration(object):
             return self.get_repository()['remote']['mongodb']
     
     
-    def get_local_cache_path(self):
+    def get_cache_path(self):
         return self.get_repository()['cache']['path']
     
     
-    
-    def profile_valid_for_kind(self, profile, kind):
+    def valid_profile_for_kind(self, profile, kind):
         return profile and kind and kind in self.kind and profile in self.kind[kind]['profile']
     
     
     def find_language(self, iso):
         result = None
         if len(iso) == 3:
-            if iso in self.property_map['iso3t']['language']:
-                result = self.property_map['iso3t']['language'][iso]
-            elif iso in self.property_map['iso3b']['language']:
-                result = self.property_map['iso3b']['language'][iso]
-        elif len(iso) == 2 and iso in self.property_map['iso2']['language']:
-            result = self.property_map['iso2']['language'][iso]
+            if iso in self.lookup['iso3t']['language']:
+                result = self.lookup['iso3t']['language'][iso]
+            elif iso in self.lookup['iso3b']['language']:
+                result = self.lookup['iso3b']['language'][iso]
+        elif len(iso) == 2 and iso in self.lookup['iso2']['language']:
+            result = self.lookup['iso2']['language'][iso]
         return result
     
     
@@ -437,13 +440,13 @@ class Configuration(object):
         if 'kind' in path_info and path_info['kind'] in self.kind:
             if 'volume' in path_info and path_info['volume'] in self.volume:
                 if 'profile' in path_info:
-                    if self.profile_valid_for_kind(path_info['profile'], path_info['kind']):
+                    if self.valid_profile_for_kind(path_info['profile'], path_info['kind']):
                         valid = True
                         
                         # base of the path: volume, media kind, kind, profile
                         result = os.path.join(
                             self.volume[path_info['volume']]['path'], 
-                            self.property_map['code']['stik'][path_info['media kind']]['name'], 
+                            self.lookup['code']['stik'][path_info['media kind']]['name'], 
                             path_info['kind'],
                             path_info['profile']
                         )
@@ -536,8 +539,8 @@ class Configuration(object):
                     # try to detect profile
                     frag = relative_path.split('/')
                     if (    len(frag) > 3 and
-                            frag[0] in self.property_map['name']['stik'] and 
-                            path_info['media kind'] == self.property_map['name']['stik'][frag[0]]['code'] and
+                            frag[0] in self.lookup['name']['stik'] and 
+                            path_info['media kind'] == self.lookup['name']['stik'][frag[0]]['code'] and
                             frag[1] in self.kind and path_info['kind'] == frag[1] and
                             frag[2] in self.kind[path_info['kind']]['profile']
                     ): path_info['profile'] = frag[2]
@@ -572,7 +575,7 @@ class Configuration(object):
                         
         if 'kind' in result:
             if 'profile' in result:
-                if not self.profile_valid_for_kind(result['profile'], result['kind']):
+                if not self.valid_profile_for_kind(result['profile'], result['kind']):
                     self.logger.warning(u'Profile %s is not valid for kind %s', result['profile'], result['kind'])
                     result = None
             else:
@@ -590,13 +593,13 @@ class Configuration(object):
         if path:
             path_info = self.decode_path(path)
             related = []
-            self.logger.debug(u'Scanning repository for file related to %s.', path)
+            self.logger.debug(u'Scanning repository for file related to %s', path)
             for v, vol in self.volume.iteritems():
                 if vol['scan'] and self.local_volume(vol['name']):
                     for k in self.kind:
                         for p in self.kind[k]['profile']:
                             if k in self.kind_with_language:
-                                for l in self.property_map['iso3t']['language']:
+                                for l in self.lookup['iso3t']['language']:
                                     related_path_info = copy.deepcopy(path_info)
                                     related_path_info['volume'] = v
                                     related_path_info['kind'] = k
@@ -994,6 +997,8 @@ base_config = {
 runtime_config = {
     'scheme':'mp4pack',
     'scheme prefix':'mp4pack://',
+    'track with language':['audio', 'subtitles', 'video'],
+    'kind with language':['srt', 'ass', 'ac3', 'dts'],
     'service':{
         'tmdb':{
             'apikey':tmdb_apikey,
@@ -1573,6 +1578,7 @@ media_config = {
             'print':'Path',
             'mediainfo':'CompleteName',
             'type':'string',
+            'enable':False,
         },
         {
             'name':'directory',
@@ -1580,6 +1586,7 @@ media_config = {
             'mediainfo':'FolderName',
             'type':'string',
             'display':False,
+            'enable':False,
         },
         {
             'name':'name',

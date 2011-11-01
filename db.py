@@ -44,6 +44,14 @@ class EntityManager(object):
         #    self.map_show(s[1], s[0])
     
     
+    def list_all_movie_imdbs(self):
+        return self.movies.find({}, {'imdb_id':1, 'tmdb_id':1})
+    
+    
+    def list_all_tv_show_episode_ids(self):
+        return self.episodes.find({}, {'_id':1})
+    
+    
     def create_index(self):
         self.genres.create_index(u'small_name', unique=True)
         self.departments.create_index(u'small_name', unique=True)
@@ -86,7 +94,7 @@ class EntityManager(object):
     
     
     def refresh_tmdb_genres(self):
-        url = self.configuration.tmdb['urls']['Genres.getList']
+        url = self.configuration.service['tmdb']['urls']['Genres.getList']
         handler = TmdbJsonHandler(self, url)
         handler.refresh()
         element_list = handler.element()
@@ -104,7 +112,7 @@ class EntityManager(object):
     
     def refresh_itmf_genres(self):
         count = 0
-        for genre in self.configuration.genre:
+        for genre in self.configuration.media_config['gnre']:
             count += 1
             self.store_itmf_genre(genre['print'], genre['code'])
         self.logger.info(u'Refreshed %s iTMF genres', count)
@@ -291,6 +299,10 @@ class EntityManager(object):
         return show
     
     
+    def find_episode_by_id(self, id):
+        return self.episodes.find_one({'_id':id})
+    
+    
     def find_episode(self, tv_show_key, tv_season, tv_episode, refresh=False):
         show = self.find_show(tv_show_key, refresh)
         episode = None
@@ -365,7 +377,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         person = self.people.find_one({u'tmdb_id':tmdb_id})
-        url = self.configuration.tmdb['urls']['Person.getInfo'].format(tmdb_id)
+        url = self.configuration.service['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -392,7 +404,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         movie = self.movies.find_one({u'tmdb_id':tmdb_id})
-        url = self.configuration.tmdb['urls']['Movie.getInfo'].format(tmdb_id)
+        url = self.configuration.service['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -434,7 +446,7 @@ class EntityManager(object):
     
     def find_tmdb_movie_id_by_imdb_id(self, imdb_id):
         tmdb_id = None
-        url = self.configuration.tmdb['urls']['Movie.imdbLookup'].format(imdb_id)
+        url = self.configuration.service['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
         handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
@@ -483,7 +495,7 @@ class EntityManager(object):
     def find_tmdb_person_id_by_name(self, name):
         person = None
         clean = collapse_whitespace.sub(u' ', name).lower()
-        url = self.configuration.tmdb['urls']['Person.search'].format(format_tmdb_query(clean))
+        url = self.configuration.service['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
         handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
@@ -557,7 +569,7 @@ class EntityManager(object):
         tvdb_id = int(tvdb_id)
         show = self.shows.find_one({'tvdb_id':tvdb_id})
         if show is not None:
-            url = self.configuration.tvdb['urls']['Show.getInfo'].format(tvdb_id)
+            url = self.configuration.service['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
             handler = TvdbXmlHandler(self, url)
             if refresh: handler.refresh()
             element = handler.element()
@@ -762,7 +774,7 @@ class EntityManager(object):
         if value is not None:
             value = self.tvdb_person_name_junk.sub(u'', value)
             value = value.strip()
-            if len(value) < self.configuration.tvdb['fuzzy']['minimum_person_name_length']:
+            if len(value) < self.configuration.service['tvdb']['fuzzy']['minimum_person_name_length']:
                 value = None
         return value
     
@@ -781,7 +793,7 @@ class ResourceHandler(object):
     
     
     def local(self):
-        return url_to_cache.sub(self.entity_manager.configuration.get_local_cache_path(), self.remote_url)
+        return url_to_cache.sub(self.entity_manager.configuration.get_cache_path(), self.remote_url)
     
     
     def cache(self):
@@ -895,7 +907,7 @@ class TmdbJsonHandler(JsonHandler):
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.tmdb['apikey']), u'')
+        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.service['tmdb']['apikey']), u'')
         return result
     
     
@@ -918,7 +930,7 @@ class TvdbXmlHandler(XmlHandler):
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.tvdb['apikey']), u'')
+        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.service['tvdb']['apikey']), u'')
         result = result.replace(u'/all', u'')
         return result
     
@@ -927,7 +939,7 @@ class TvdbXmlHandler(XmlHandler):
 
 class TvdbImageHandler(ImageHandler):
     def __init__(self, entity_manager, url):
-        ImageHandler.__init__(self, entity_manager, self.entity_manager.configuration.tvdb['urls']['Banner.getImage'].format(url))
+        ImageHandler.__init__(self, entity_manager, self.entity_manager.configuration.service['tvdb']['urls']['Banner.getImage'].format(url))
         self.logger = logging.getLogger('Tvdb Image Handler')
     
     
