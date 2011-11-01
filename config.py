@@ -217,7 +217,7 @@ class Configuration(object):
                 external_config = None
                 
             if external_config:
-                self.logger.info('Load external config %s', path)
+                self.logger.debug('Load external config %s', path)
                 self.user_config = dict(self.user_config.items() + external_config.items())
     
     

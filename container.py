@@ -45,13 +45,16 @@ class ContainerFactory(object):
     
     
     def clean(self, options):
-        total = 0
+        total_effected = 0
+        total_scanned = 0
         
         # Cleanup orphan physical references in movies
         saved_movie = 0
+        scanned_movie = 0
         movie_ids = self.entity_manager.list_all_movie_imdbs()
         for movie_id in movie_ids:
             if 'imdb_id' in movie_id:
+                scanned_movie += 1
                 need_save = False
                 movie = self.entity_manager.find_movie_by_imdb_id(movie_id['imdb_id'])
                 if movie and 'physical' in movie:
@@ -68,14 +71,17 @@ class ContainerFactory(object):
                     if need_save:
                         self.entity_manager.save_movie(movie)
                         saved_movie += 1
-        total += saved_movie
-        self.logger.info(u'Removed orphans from %d movies', saved_movie)
+        total_effected += saved_movie
+        total_scanned += scanned_movie
+        self.logger.info(u'Scanned a total of %d movies, removed orphans from %d', scanned_movie, saved_movie)
         
         # Cleanup orphan physical references in episodes
         saved_episode = 0
+        scanned_episode = 0
         episode_ids = self.entity_manager.list_all_tv_show_episode_ids()
         for episode_id in episode_ids:
             if '_id' in episode_id:
+                scanned_episode += 1
                 need_save = False
                 episode = self.entity_manager.find_episode_by_id(episode_id['_id'])
                 if episode and 'physical' in episode:
@@ -92,10 +98,10 @@ class ContainerFactory(object):
                     if need_save:
                         self.entity_manager.save_tv_episode(episode)
                         saved_episode += 1
-        total += saved_episode
-        self.logger.info(u'Removed orphans from %d tv episodes', saved_episode)
-        
-        self.logger.info(u'Removed orphans from a total of %d files', saved_episode)
+        total_effected += saved_episode
+        total_scanned += scanned_episode
+        self.logger.info(u'Scanned a total of %d tv episodes, removed orphans from %d', scanned_episode, saved_episode)
+        self.logger.info(u'Scanned a total of %d records, removed orphans from %d', total_scanned, saved_episode)
     
 
 
