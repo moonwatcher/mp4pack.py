@@ -771,6 +771,7 @@ class AudioVideoContainer(Container):
                 dest_path = self.factory.configuration.encode_path(path_info, self.record['entity'])
                 if self.factory.util.varify_if_path_available(dest_path, options.overwrite):
                     c = Chapter(self.factory, dest_path, False)
+                    c.mark_processing_start()
                     c.start()
                     for marker in self.info['menu']:
                         c.add_chapter_marker(marker['time'], marker['name'])
