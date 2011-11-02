@@ -568,11 +568,12 @@ class Configuration(object):
     def resolve_path_info(self, path_info, override=None):
         result = copy.deepcopy(path_info)
         
-        for k in result.keys():
+        if override:
             # apply overrides
-            if override and k in override:
+            for k in override:
                 result[k] = override[k]
             
+        for k in result.keys():
             # delete empty attributes
             if result[k] is None:
                 del result[k]
@@ -658,7 +659,7 @@ base_config = {
     'hd threshold':720,
     'playback':{ 'width':1920, 'height':1080, },
     'runtime':{
-        'threds':2,
+        'threads':2,
     },
     'shell':{
         'wrap':120, 
@@ -1237,7 +1238,6 @@ base_config = {
                         'pixel aspect ratio',
                         'display aspect ratio',
                         'frame rate',
-                        'frame count',
                         'bpf',
                     ),
                     'text':(
@@ -1786,7 +1786,7 @@ runtime_config = {
         'ac3':{
             'container':'raw audio',
             'profile':{
-                'original':{
+                'normal':{
                     'description':'Special profile for ac3 track from dts',
                     'transcode':{
                         'audio':(

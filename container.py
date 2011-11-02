@@ -798,7 +798,6 @@ class AudioVideoContainer(Container):
                         command = self.factory.util.initialize_command('subler', self.logger)
                         if command:
                             command.extend([u'-o', dest_path, u'-i', self.file_path])
-                            
                             message = u'Pack {0} --> {1}'.format(self.file_path, dest_path)
                             self.factory.util.execute(command, message, options.debug, pipeout=False, pipeerr=False, logger=self.logger)
                             if self.factory.util.clean_if_not_exist(dest_path):
@@ -816,9 +815,9 @@ class AudioVideoContainer(Container):
                                         if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c.iteritems()):
                                             if phy['path info']['kind'] not in selected['related']:
                                                 selected['related'][phy['path info']['kind']] = []
-                                            path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
-                                            selected['related'][phy['path info']['kind']].append(path)
+                                            selected['related'][phy['path info']['kind']].append(phy['uri'])
                                             break
+                                            
                             #locate related tracks that need to be muxed in
                             if 'tracks' in pc['pack']:
                                 for t in self.info['track']:
@@ -1145,20 +1144,25 @@ class Matroska(AudioVideoContainer):
     def extract(self, options):
         result = AudioVideoContainer.extract(self, options)
         selected = {
-            'track':[], 
+            'track':[],
             'path':{ 'text':[], 'audio':[] },
             'extract':{ 'text':[], 'audio':[] }
         }
         
-        
+        # Select tracks fro extraction
         path_info = self.factory.configuration.resolve_path_info(
             self.path_info, 
             {'volume':options.volume, 'profile':options.profile}
         )
         if path_info:
             for k in ('srt', 'ass', 'dts'):
-                if self.factory.configuration.resolve_path_info(path_info, {'volume':options.volume, 'profile':'dump', 'kind':k}):
-                    pc = self.factory.configuration.kind[path_info['kind']]['profile'][path_info['profile']]
+                track_path_info = self.factory.configuration.resolve_path_info(path_info, {
+                    'volume':options.volume, 
+                    'profile':'dump', 
+                    'kind':k
+                })
+                if track_path_info:
+                    pc = self.factory.configuration.kind[track_path_info['kind']]['profile'][track_path_info['profile']]
                     if 'extract' in pc and 'tracks' in pc['extract']:
                         for t in self.info['track']:
                             for c in pc['extract']['tracks']:
@@ -1184,7 +1188,7 @@ class Matroska(AudioVideoContainer):
                             selected['path'][t['type']].append(dest_path)
                         else:
                             self.logger.warning('Skipping track %s of type %s because %s is taken', t['id'], t['type'], dest_path)
-                            
+                          
         if selected['path']['text'] or selected['path']['audio']:
             message = u'Extract {0} subtitle and {1} audio tracks from {2}'.format(
                 unicode(len(selected['path']['text'])), 
@@ -1519,9 +1523,10 @@ class Subtitle(Text):
                     self.info['statistics'] = statistics
                     
                     # update the record
-                    self.logger.info(u'Refreshed statistics for %s', self.file_path)
-                    self.record['entity']['physical'][self.uri]['info']['statistics'] = statistics
-                    self.save_record()
+                    if 'physical' in self.record['entity'] and self.uri in self.record['entity']['physical']:
+                        self.logger.info(u'Refreshed statistics for %s', self.file_path)
+                        self.record['entity']['physical'][self.uri]['info']['statistics'] = statistics
+                        self.save_record()
                     
                 else:
                     self.logger.warning('Could not parse subtitle file %s', self.file_path)
