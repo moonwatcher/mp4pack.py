@@ -134,11 +134,9 @@ class Container(object):
     
     
     def load(self, refresh=False, download=False):
-        
         # Start process tracking
-        self.processing['start'] = datetime.utcnow()
+        self.mark_processing_start()
         
-        result = False
         result = Container.load_path_info(self)
         if result:
             result = self.load_record(refresh, download)
@@ -394,6 +392,11 @@ class Container(object):
                 self.drop_from_index(path)
     
     
+    
+    def mark_processing_start(self):
+        self.processing['start'] = datetime.utcnow()
+    
+    
     def mark_as_processed(self):
         self.processing['processed'] = True
     
@@ -560,6 +563,7 @@ class Container(object):
                     path_info['kind'] = artwork['cache']['kind']
                     if 'volume' in path_info: del path_info['volume']
                     image = Artwork(self.factory, artwork['cache']['path'], False)
+                    image.mark_processing_start()
                     image.path_info = path_info
                     image.load_record()
                     o = copy.deepcopy(options)
@@ -1113,8 +1117,13 @@ class Artwork(Container):
                             image = image.resize(rsize, Image.ANTIALIAS)
                             
                         self.logger.info(u'Transcode %s --> %s', self.file_path, dest_path)
-                        image.save(dest_path)
-                        
+                        try:
+                            image.save(dest_path)
+                        except IOError as err:
+                            self.logger.error(u'Failed to transcode image %s', self.file_path)
+                            self.logger.debug(u'Exception raised: %s', err)
+                            self.factory.util.clean(dest_path)
+                            
                         if self.factory.util.clean_if_not_exist(dest_path):
                             self.queue_for_index(dest_path)
                             result = dest_path
