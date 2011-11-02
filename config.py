@@ -46,6 +46,21 @@ class Configuration(object):
         self.load_default_config()
     
     
+    def load_external_config(self, path):
+        if os.path.exists(path):
+            path = os.path.abspath(path)
+            external_config = None
+            
+            try:
+                external_config = eval(open(path).read())
+            except:
+                self.logger.warning('Failed to load config %s', path)
+                external_config = None
+                
+            if external_config:
+                self.logger.debug('Load external config %s', path)
+                self.user_config = dict(self.user_config.items() + external_config.items())
+    
     
     # First stage loading
     def load_default_config(self):
@@ -64,19 +79,6 @@ class Configuration(object):
         self.load_action()
         self.load_kind()
         self.load_lookup()
-    
-    
-    def load_info_config(self):
-        # Make a default info display, 
-        self.user_config['info']['profile']['default'] = {
-            'file':sorted(set([ v['name'] for v in self.media_config['file'] if 'name' in v and not ('display' in v and not v['display'])])),
-            'tag':sorted(set([ v['name'] for v in self.media_config['tag'] if 'name' in v and not ('display' in v and not v['display'])])),
-            'track':{},
-        }
-        common = [ v['name'] for v in self.media_config['track']['common'] if 'name' in v and not ('display' in v and not v['display'])]
-        for t in ('audio', 'video', 'text', 'image'):
-            prop = common + [ v['name'] for v in self.media_config['track'][t] if 'name' in v and not ('display' in v and not v['display'])]
-            self.user_config['info']['profile']['default']['track'][t] = sorted(set(prop))
     
     
     def load_format(self):
@@ -219,20 +221,17 @@ class Configuration(object):
         self.user_config['playback']['aspect ratio'] = float(float(self.user_config['playback']['width'])/float(self.user_config['playback']['height']))
     
     
-    def load_external_config(self, path):
-        if os.path.exists(path):
-            path = os.path.abspath(path)
-            external_config = None
-            
-            try:
-                external_config = eval(open(path).read())
-            except:
-                self.logger.warning('Failed to load config %s', path)
-                external_config = None
-                
-            if external_config:
-                self.logger.debug('Load external config %s', path)
-                self.user_config = dict(self.user_config.items() + external_config.items())
+    def load_info_config(self):
+        # Make a default info display, 
+        self.user_config['info']['profile']['default'] = {
+            'file':sorted(set([ v['name'] for v in self.media_config['file'] if 'name' in v and not ('display' in v and not v['display'])])),
+            'tag':sorted(set([ v['name'] for v in self.media_config['tag'] if 'name' in v and not ('display' in v and not v['display'])])),
+            'track':{},
+        }
+        common = [ v['name'] for v in self.media_config['track']['common'] if 'name' in v and not ('display' in v and not v['display'])]
+        for t in ('audio', 'video', 'text', 'image'):
+            prop = common + [ v['name'] for v in self.media_config['track'][t] if 'name' in v and not ('display' in v and not v['display'])]
+            self.user_config['info']['profile']['default']['track'][t] = sorted(set(prop))
     
     
     def load_repository(self):
@@ -587,7 +586,9 @@ class Configuration(object):
                 for default_k, default_v in rule['default'].iteritems():
                     if default_k not in result:
                         result[default_k] = default_v
-                        
+        self.logger.debug('Resolved path to: %s', unicode(result))
+        
+        # Check the result is valid
         if 'kind' in result:
             if 'profile' in result:
                 if not self.valid_profile_for_kind(result['profile'], result['kind']):
