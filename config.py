@@ -665,7 +665,7 @@ base_config = {
     'shell':{
         'wrap':120, 
         'indent':30, 
-        'margin':2, 
+        'margin':0, 
     },
     'repository':{
         'localhost':{

@@ -844,13 +844,16 @@ class AudioVideoContainer(Container):
                                     u'--no-attachments', 
                                     u'--no-subtitles'
                                 ])
-                                
                                 full_name = None
+                                
+                                # Set the name tag
                                 if 'name' in self.record['entity']:
                                     full_name = self.factory.configuration.encode_full_name(self.path_info, self.record)
                                     if full_name:
                                         command.append(u'--title')
                                         command.append(full_name)
+                                        
+                                # Set the name tag on each video track
                                 for t in selected['track']['video']:
                                     if full_name:
                                         command.append(u'--track-name')
@@ -859,6 +862,7 @@ class AudioVideoContainer(Container):
                                         command.append(u'--language')
                                         command.append(u'{0}:{1}'.format(t['id'], self.factory.configuration.find_language(t['language'])['iso2']))
                                         
+                                # set the name tag on each audio track
                                 for t in selected['track']['audio']:
                                     if 'channels' in t:
                                         if t['channels'] < 2: tname = 'Mono'
@@ -876,10 +880,11 @@ class AudioVideoContainer(Container):
                                 command.append(u','.join([ unicode(k['id']) for k in selected['track']['video'] ]))
                                 command.append(self.file_path)
                                 
+                                # Pick AC-3 sound tracks with the same delay as the matching DTS
                                 if 'ac3' in selected['related']:
                                     for r in selected['related']['ac3']:
                                         ac3_path = self.factory.configuration.canonic_path_from_uri(r)
-                                        if ac3_path:
+                                        if self.factory.util.check_if_path_exists(ac3_path):
                                             # try to locate the DTS sound track from which the AC-3 track was transcoded
                                             # if a match is found duplicate the delay
                                             # checking exact duration or sample cound migth be more accurate
@@ -902,11 +907,12 @@ class AudioVideoContainer(Container):
                                             command.append(u'--language')
                                             command.append(u'0:{0}'.format(self.factory.configuration.find_language(ac3_record['path info']['language'])['iso2']))
                                             command.append(ac3_path)
-                                        
+                                            
+                                # Add subtitle files
                                 if 'srt' in selected['related']:
                                     for r in selected['related']['srt']:
                                         srt_path = self.factory.configuration.canonic_path_from_uri(r)
-                                        if srt_path:
+                                        if self.factory.util.check_if_path_exists(srt_path):
                                             path_info = self.record['entity']['physical'][r]['path info']
                                             command.append(u'--sub-charset')
                                             command.append(u'0:UTF-8')
@@ -914,10 +920,11 @@ class AudioVideoContainer(Container):
                                             command.append(u'0:{0}'.format(self.factory.configuration.find_language(path_info['language'])['iso2']))
                                             command.append(srt_path)
                                             
+                                # Add the chapter file if one exists
                                 if 'txt' in selected['related']:
                                     for r in selected['related']['txt']:
                                         txt_path = self.factory.configuration.canonic_path_from_uri(r)
-                                        if txt_path:
+                                        if self.factory.util.check_if_path_exists(txt_path):
                                             command.append(u'--chapter-language')
                                             command.append(u'en')
                                             command.append(u'--chapter-charset')
@@ -1330,7 +1337,7 @@ class Mpeg4(AudioVideoContainer):
                 for phy in self.record['entity']['physical'].values():
                     if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
                         path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
-                        if path:
+                        if self.factory.util.check_if_path_exists(path):
                             selected.append(path)
                             break
                             
@@ -1371,8 +1378,9 @@ class Mpeg4(AudioVideoContainer):
                             for c in pc['update']['related']:
                                 if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in c['from'].iteritems()):
                                     path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
-                                    selected[path] = phy['path info']
-                                    break
+                                    if self.factory.util.check_if_path_exists(path):
+                                        selected[path] = phy['path info']
+                                        break
                                 
                         for p,i in selected.iteritems():
                             message = u'Update subtitles {0} --> {1}'.format(p, self.file_path)
@@ -1436,8 +1444,9 @@ class Mpeg4(AudioVideoContainer):
                         for phy in self.record['entity']['physical'].values():
                             if all((k in phy['path info'] and phy['path info'][k] == v) for k,v in lookup.iteritems()):
                                 path = self.factory.configuration.canonic_path_from_uri(phy['uri'])
-                                selected.append(path)
-                                break
+                                if self.factory.util.check_if_path_exists(path):
+                                    selected.append(path)
+                                    break
                                 
                         if selected:
                             message = u'Update chapters {0} --> {1}'.format(selected[0], self.file_path)
@@ -2302,16 +2311,16 @@ class FileUtil(object):
                 self.logger.debug(u'Creating directory %s', dirname)
                 os.makedirs(dirname)
                 result = True
-        except OSError as error:
-            self.logger.error(str(error))
+        except OSError as err:
+            self.logger.error(unicode(err))
             result = False
         return result
     
     
     def check_if_path_available(self, path, overwrite=False):
         result = True
-        if path is not None:
-            if os.path.exists(path) and not overwrite:
+        if path:
+            if self.check_if_path_exists(path) and not overwrite:
                 self.logger.warning(u'Refusing to overwrite %s', path)
                 result = False
         else:
@@ -2325,6 +2334,13 @@ class FileUtil(object):
         if result:
             self.varify_directory(path)
         return result
+    
+    
+    def check_if_path_exists(self, path):
+        if path is not None and os.path.exists(path):
+            return True
+        else:
+            return False
     
     
     def initialize_command(self, command, logger):
