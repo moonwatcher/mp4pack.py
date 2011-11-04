@@ -976,7 +976,7 @@ class AudioVideoContainer(Container):
                                     if all((k in t and t[k] == v) for k,v in c['from'].iteritems()):
                                         found_audio = True
                                         audio_options['--audio'].append(unicode(idx + 1))
-                                        for (k,v) in c['to'].iteritems():
+                                        for k,v in c['to'].iteritems():
                                             if k not in audio_options: audio_options[k] = []
                                             audio_options[k].append(unicode(v))
                                             
