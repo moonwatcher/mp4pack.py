@@ -2199,7 +2199,8 @@ class FileUtil(object):
                                             track['encoder settings'] = {}
                                             for literal in encoder_literals:
                                                 split_literal = literal.split('=')
-                                                track['encoder settings'][split_literal[0]] = split_literal[1]
+                                                if len(split_literal) == 2:
+                                                    track['encoder settings'][split_literal[0]] = split_literal[1]
                                     # check to see if language is not set and set it to default
                                     if track['type'] in self.factory.configuration.track_with_language:
                                         if 'language' not in track or track['language'] == 'und':
