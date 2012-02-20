@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import re
@@ -11,27 +10,93 @@ import xml.etree.cElementTree as ElementTree
 
 import pymongo
 from pymongo.objectid import ObjectId
+from datetime import timedelta
 
 class EntityManager(object):
-    def __init__(self, configuration):
-        self.logger = logging.getLogger('Entity Manager')
-        self.configuration = configuration
+    def __init__(self, env, ontology):
+        self.log = logging.getLogger('Entity Manager')
+        self.env = env
+        self.ontology = ontology
+        self.log.debug('Loading an entity manager for %s', self.ontology['host'])
+        self.log.debug('Using connection url %s', self.ontology['mongodb url'])
         
-        mongodb_conf = self.configuration.get_mongodb_config()
-        self.logger.debug('Connecting to %s', mongodb_conf['url'])
-        self.connection = pymongo.Connection(mongodb_conf['url'])
-        self.db = self.connection[mongodb_conf['database']]
-        self.sync_delay = self.configuration.user_config['horizon time delta']
-        
-        self.genres = self.db.genres
-        self.departments = self.db.departments
-        self.jobs = self.db.jobs
-        self.networks = self.db.networks
-        self.movies = self.db.movies
-        self.shows = self.db.shows
-        self.seasons = self.db.seasons
-        self.episodes = self.db.episodes
-        self.people = self.db.people
+        try:
+            self.connection = pymongo.Connection(self.ontology['mongodb url'])
+        except pymongo.errors.AutoReconnect as err:
+            self.connection = None
+            self.log.warning(u'Failed to open connection to %s', self.ontology['mongodb url'])
+            self.log.debug(u'Exception raised: %s', err)
+            
+        if self.valid:
+            self.db = self.connection[self.ontology['database']]
+            self.horizon = timedelta(**self.ontology['horizon'])
+    
+    
+    def find_asset_record(self, ontology, download):
+        result = None
+        if ontology:
+            if ontology['media kind'] == 'movie':
+                entity = self.find_movie_by_imdb_id(ontology['imdb id'], download)
+                if entity: result = {'entity':entity,}
+            elif self.ontology['media kind'] == 'tvshow':
+                show, episode = self.find_episode(ontology['tv show key'], ontology['tv season'], ontology['tv episode #'], download)
+                if show and episode: result = {'entity':episode, 'tv show':show,}
+        return result
+    
+    
+    @property
+    def host(self):
+        return self.ontology['host']
+    
+    
+    @property
+    def genres(self):
+        return self.db.genres
+    
+    
+    @property
+    def departments(self):
+        return self.db.departments
+    
+    
+    @property
+    def jobs(self):
+        return self.db.jobs
+    
+    
+    @property
+    def networks(self):
+        return self.db.networks
+    
+    
+    @property
+    def movies(self):
+        return self.db.movies
+    
+    
+    @property
+    def shows(self):
+        return self.db.shows
+    
+    
+    @property
+    def seasons(self):
+        return self.db.seasons
+    
+    
+    @property
+    def episodes(self):
+        return self.db.episodes
+    
+    
+    @property
+    def people(self):
+        return self.db.people
+    
+    
+    @property
+    def valid(self):
+        return self.connection is not None
     
     
     def base_init(self):
@@ -79,22 +144,22 @@ class EntityManager(object):
                 (u'tv_episode', pymongo.DESCENDING)
             ], unique=True
         )
-        self.logger.info(u'Created mongodb indexes')
+        self.log.info(u'Created mongodb indexes')
     
     
     def suppress_sync(self, sync, last_update):
         if sync:
             delta = datetime.utcnow() - last_update
-            if delta < self.sync_delay:
-                self.logger.debug(u'Supressing online sync. Next update possible in %s', unicode(self.sync_delay - delta))
+            if delta < self.horizon:
+                self.log.debug(u'Supressing online sync. Next update possible in %s', unicode(self.horizon - delta))
                 sync = False
             else:
-                self.logger.info(u'Sync allowed. Fast forward %s', unicode(delta))
+                self.log.info(u'Sync allowed. Fast forward %s', unicode(delta))
         return sync
     
     
     def refresh_tmdb_genres(self):
-        url = self.configuration.service['tmdb']['urls']['Genres.getList']
+        url = self.env.service['tmdb']['urls']['Genres.getList']
         handler = TmdbJsonHandler(self, url)
         handler.refresh()
         element_list = handler.element()
@@ -105,17 +170,17 @@ class EntityManager(object):
                     count += 1
                     self.store_tmdb_genre(element[u'name'], element[u'id'], element[u'url'])
             
-            self.logger.info(u'Refreshed %s genres from tmdb', count)
+            self.log.info(u'Refreshed %s genres from tmdb', count)
         else:
-            self.logger.warning(u'Could not get tmdb genres list', count)
+            self.log.warning(u'Could not get tmdb genres list', count)
     
     
     def refresh_itmf_genres(self):
         count = 0
-        for genre in self.configuration.media_config['gnre']:
+        for genre in self.env.dictionary['model']['gnre']:
             count += 1
             self.store_itmf_genre(genre['print'], genre['code'])
-        self.logger.info(u'Refreshed %s iTMF genres', count)
+        self.log.info(u'Refreshed %s iTMF genres', count)
     
     
     def map_show_with_pair(self, pair):
@@ -124,7 +189,7 @@ class EntityManager(object):
             if match is not None:
                 self.map_show(unicode(match.group(2)), int(match.group(1)))
             else:
-                self.logger.error(u'Could not parse %s', pair)
+                self.log.error(u'Could not parse %s', pair)
     
     
     def map_show(self, name, tvdb_id):
@@ -137,17 +202,17 @@ class EntityManager(object):
             # This is good, we can do the mapping
             show = {u'tv_show_key':tv_show_key, u'tvdb_id':tvdb_id, u'last_update':None}
             self.shows.save(show)
-            self.logger.info(u'TV Show %s is now mapped to tvdb %d', tv_show_key, tvdb_id)
+            self.log.info(u'TV Show %s is now mapped to tvdb %d', tv_show_key, tvdb_id)
         else: # This means at least one exists
             if show_by_key is not None and show_by_tvdb_id is not None and show_by_tvdb_id[u'_id'] == show_by_key[u'_id']:
                 # Both exist and are identical, so no mapping is needed
-                self.logger.debug(u'TV Show %s to tvdb %d mapping exists', tv_show_key, tvdb_id)
+                self.log.debug(u'TV Show %s to tvdb %d mapping exists', tv_show_key, tvdb_id)
             else:
                 # Mapping is impossible. Either one or both exist and mapped to somethign else
                 if show_by_key is not None:
-                    self.logger.error(u'Show %s is already mapped to tvdb %d', show_by_key[u'tv_show_key'], show_by_key[u'tvdb_id'])
+                    self.log.error(u'Show %s is already mapped to tvdb %d', show_by_key[u'tv_show_key'], show_by_key[u'tvdb_id'])
                 if show_by_tvdb_id is not None:
-                    self.logger.error(u'Show %s is already mapped to tvdb %d', show_by_tvdb_id[u'tv_show_key'], show_by_tvdb_id[u'tvdb_id'])
+                    self.log.error(u'Show %s is already mapped to tvdb %d', show_by_tvdb_id[u'tv_show_key'], show_by_tvdb_id[u'tvdb_id'])
     
     
     def store_network(self, name):
@@ -156,7 +221,7 @@ class EntityManager(object):
         if network is None:
             network = {u'small_name':small_name, u'name':name}
             self.networks.save(network)
-            self.logger.info(u'Created TV Network %s', name)
+            self.log.info(u'Created TV Network %s', name)
         return network
     
     
@@ -166,7 +231,7 @@ class EntityManager(object):
         if job is None:
             job = {u'small_name':small_name, u'name':name}
             self.jobs.save(job)
-            self.logger.info(u'Created Job %s', name)
+            self.log.info(u'Created Job %s', name)
         return job
     
     
@@ -176,7 +241,7 @@ class EntityManager(object):
         if department is None:
             department = {u'small_name':small_name, u'name':name}
             self.departments.save(department)
-            self.logger.info(u'Created Department %s', name)
+            self.log.info(u'Created Department %s', name)
         return department
     
     
@@ -190,20 +255,20 @@ class EntityManager(object):
                 # mapped genre does not exist
                 genre = {u'small_name':small_name, u'name':name, u'reference':small_reference_name}
                 self.genres.save(genre)
-                self.logger.info(u'Mapping new genre %s to %s', name, reference)
+                self.log.info(u'Mapping new genre %s to %s', name, reference)
             elif u'itmf' in genre:
                 # mapped genre is an itmf genre, refuse mapping
-                self.logger.error(u'Refusing to map itmf genre %s to %s', name, reference)
+                self.log.error(u'Refusing to map itmf genre %s to %s', name, reference)
             elif u'tmdb_id' in genre:
                 # mapped genre is tmdb genre, refuse mapping
-                self.logger.error(u'Refusing to map tmdb genre %s to %s', name, reference)
+                self.log.error(u'Refusing to map tmdb genre %s to %s', name, reference)
             else:
                 # mapped genre exists
                 genre[u'reference':small_reference_name]
                 self.genres.save(genre)
-                self.logger.info(u'Mapping existing genre %s to %s', name, reference)
+                self.log.info(u'Mapping existing genre %s to %s', name, reference)
         else:
-            self.logger.error(u'Can not map % to non existing genre %s', name, reference)
+            self.log.error(u'Can not map % to non existing genre %s', name, reference)
         return genre
     
     
@@ -212,11 +277,11 @@ class EntityManager(object):
         genre = self.genres.find_one({u'small_name':small_name})
         if genre is None:
             genre = {u'small_name':small_name, u'name':name, u'tmdb_id':tmdb_id, u'url':url}
-            self.logger.info(u'Created genre %s with tmdb %s', genre[u'name'], genre[u'tmdb_id'])
+            self.log.info(u'Created genre %s with tmdb %s', genre[u'name'], genre[u'tmdb_id'])
         elif u'tmdb_id' not in genre:
             genre[u'tmdb_id'] = tmdb_id
             genre[u'url'] = url
-            self.logger.info(u'Added tmdb id %s to genre %s', genre[u'tmdb_id'], genre[u'name'])
+            self.log.info(u'Added tmdb id %s to genre %s', genre[u'tmdb_id'], genre[u'name'])
         self.genres.save(genre)
         return genre
     
@@ -227,10 +292,10 @@ class EntityManager(object):
         if genre is None:
             genre = {u'small_name':small_name, u'name':name, u'itmf':itmf}
             self.genres.save(genre)
-            self.logger.info(u'Created genre %s with itmf %s', genre[u'name'], genre[u'itmf'])
+            self.log.info(u'Created genre %s with itmf %s', genre[u'name'], genre[u'itmf'])
         elif u'itmf' not in genre:
             genre[u'itmf'] = itmf
-            self.logger.info(u'Added itmf code %s to genre %s', genre[u'itmf'], genre[u'name'])
+            self.log.info(u'Added itmf code %s to genre %s', genre[u'itmf'], genre[u'name'])
         return genre
     
     
@@ -240,7 +305,7 @@ class EntityManager(object):
         if genre is None:
             genre = {u'small_name':small_name, u'name':name}
             self.genres.save(genre)
-            self.logger.info(u'Created genre %s', genre[u'name'])
+            self.log.info(u'Created genre %s', genre[u'name'])
         return genre
     
     
@@ -291,11 +356,11 @@ class EntityManager(object):
         show = self.shows.find_one({u'tv_show_key': tv_show_key})
         if show is not None and u'tvdb_id' in show:
             if show[u'last_update'] is None or self.suppress_sync(refresh, show['last_update']):
-                self.logger.info(u'Updating show %s', tv_show_key)
+                self.log.info(u'Updating show %s', tv_show_key)
                 show, episodes = self.store_tvdb_show(show[u'tvdb_id'], refresh)
-                self.logger.info(u'Done updating show %s', tv_show_key)
+                self.log.info(u'Done updating show %s', tv_show_key)
         else:
-            self.logger.error(u'Show %s does not exist', tv_show_key)
+            self.log.error(u'Show %s does not exist', tv_show_key)
         return show
     
     
@@ -309,9 +374,9 @@ class EntityManager(object):
         if show is not None:
             episode = self.episodes.find_one({u'tv_show_key':tv_show_key, u'tv_season':tv_season, u'tv_episode':tv_episode})
             #if episode is None:
-            #    self.logger.info(u'Could not find episode, updating show %s', tv_show_small_name)
+            #    self.log.info(u'Could not find episode, updating show %s', tv_show_small_name)
             #    self.store_tvdb_show(show[u'tvdb_id'], refresh)
-            #    self.logger.info(u'Done updating show %s', tv_show_small_name)
+            #    self.log.info(u'Done updating show %s', tv_show_small_name)
             #    episode = self.episodes.find_one({u'tv_show_small_name':tv_show_small_name, u'tv_season':tv_season, u'tv_episode':tv_episode})
         return show, episode
     
@@ -322,7 +387,7 @@ class EntityManager(object):
             if match is not None:
                 self.choose_tmdb_movie_poster(match.group(1), match.group(2), refresh)
             else:
-                self.logger.error(u'Could not parse %s', pair)
+                self.log.error(u'Could not parse %s', pair)
     
     
     def choose_tmdb_movie_poster(self, imdb_id, tmdb_poster_id, refresh=False):
@@ -339,11 +404,11 @@ class EntityManager(object):
                 if refresh:
                     handler = ImageHandler(self, poster['image']['url'])
                     handler.refresh()
-                self.logger.info(u'Poster %s selected for movie %s imdb:%s', movie['poster'], movie['name'], imdb_id)
+                self.log.info(u'Poster %s selected for movie %s imdb:%s', movie['poster'], movie['name'], imdb_id)
             else:
-                self.logger.error(u'No poster with id %s found for movie %s imdb:%s', tmdb_poster_id, movie['name'], imdb_id)
+                self.log.error(u'No poster with id %s found for movie %s imdb:%s', tmdb_poster_id, movie['name'], imdb_id)
         else:
-            self.logger.error(u'No movie with imdb id %s found', imdb_id)
+            self.log.error(u'No movie with imdb id %s found', imdb_id)
         return poster
     
     
@@ -377,7 +442,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         person = self.people.find_one({u'tmdb_id':tmdb_id})
-        url = self.configuration.service['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
+        url = self.env.service['tmdb']['urls']['Person.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -394,9 +459,9 @@ class EntityManager(object):
             self.people.save(person)
             
             if new_record:
-                self.logger.info(u'Created record for person %s with tmdb %s', person['tmdb_record']['name'], person['tmdb_id'])
+                self.log.info(u'Created record for person %s with tmdb %s', person['tmdb_record']['name'], person['tmdb_id'])
             else:
-                self.logger.info(u'Updated record for person %s with tmdb %s', person['tmdb_record']['name'], person['tmdb_id'])
+                self.log.info(u'Updated record for person %s with tmdb %s', person['tmdb_record']['name'], person['tmdb_id'])
         return person
     
     
@@ -404,7 +469,7 @@ class EntityManager(object):
         tmdb_id = int(tmdb_id)
         new_record = False
         movie = self.movies.find_one({u'tmdb_id':tmdb_id})
-        url = self.configuration.service['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
+        url = self.env.service['tmdb']['urls']['Movie.getInfo'].format(tmdb_id)
         handler = TmdbJsonHandler(self, url)
         if refresh: handler.refresh()
         element = handler.element()
@@ -428,7 +493,7 @@ class EntityManager(object):
                          movie['poster'] = posters[0]['image']['id']
                 else:
                     movie['poster'] = None
-                    self.logger.warning(u'No poster found for %s imdb:%s', movie['name'], movie['imdb_id'])
+                    self.log.warning(u'No poster found for %s imdb:%s', movie['name'], movie['imdb_id'])
             elif posters:
                 movie['poster'] = posters[0]['image']['id']
                 
@@ -438,15 +503,15 @@ class EntityManager(object):
                 for person in element['cast']:
                     self.find_person_by_tmdb_id(person['id'], refresh)
             if new_record:
-                self.logger.info(u'Created record for movie %s with tmdb:%s imdb:%s', movie['tmdb_record']['name'], movie['tmdb_id'], movie['imdb_id'])
+                self.log.info(u'Created record for movie %s with tmdb:%s imdb:%s', movie['tmdb_record']['name'], movie['tmdb_id'], movie['imdb_id'])
             else:
-                self.logger.info(u'Updated record for movie %s with tmdb:%s imdb:%s', movie['tmdb_record']['name'], movie['tmdb_id'], movie['imdb_id'])
+                self.log.info(u'Updated record for movie %s with tmdb:%s imdb:%s', movie['tmdb_record']['name'], movie['tmdb_id'], movie['imdb_id'])
         return movie
     
     
     def find_tmdb_movie_id_by_imdb_id(self, imdb_id):
         tmdb_id = None
-        url = self.configuration.service['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
+        url = self.env.service['tmdb']['urls']['Movie.imdbLookup'].format(imdb_id)
         handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
@@ -487,7 +552,7 @@ class EntityManager(object):
                     # Person was a stub, update tmdb id and refresh
                     person['tmdb_id'] = tmdb_id
                     self.people.save(person)
-                    self.logger.info('Updated existing stub person record for %s with new tmdb id %d', name, tmdb_id)
+                    self.log.info('Updated existing stub person record for %s with new tmdb id %d', name, tmdb_id)
                     person = self.find_person_by_tmdb_id(tmdb_id, True)
         return person
     
@@ -495,27 +560,27 @@ class EntityManager(object):
     def find_tmdb_person_id_by_name(self, name):
         person = None
         clean = collapse_whitespace.sub(u' ', name).lower()
-        url = self.configuration.service['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
+        url = self.env.service['tmdb']['urls']['Person.search'].format(format_tmdb_query(clean))
         handler = TmdbJsonHandler(self, url)
         element = handler.element()
         if element is not None:
             for potential in element:
                 if potential['name'].lower() == clean:
                     person = potential['id']
-                    self.logger.debug(u'Found a match: %s with tmdb %d for %s', potential['name'], potential['id'], name)
+                    self.log.debug(u'Found a match: %s with tmdb %d for %s', potential['name'], potential['id'], name)
                     break
                 else:
-                    self.logger.debug(u'Not a match: %s with tmdb %d for %s', potential['name'], potential['id'], name)
+                    self.log.debug(u'Not a match: %s with tmdb %d for %s', potential['name'], potential['id'], name)
             if person is None:
-                self.logger.debug(u'Trying to match %s without accents', name)
+                self.log.debug(u'Trying to match %s without accents', name)
                 simple_name = remove_accents(clean)
                 for potential in element:
                     if remove_accents(potential['name'].lower()) == simple_name:
                         person = potential['id']
-                        self.logger.debug(u'Found a match: %s with tmdb id %d for %s', potential['name'], potential['id'], name)
+                        self.log.debug(u'Found a match: %s with tmdb id %d for %s', potential['name'], potential['id'], name)
                         break
                     else:
-                        self.logger.debug(u'Not a match: %s with tmdb id %d for %s', potential['name'], potential['id'], name)
+                        self.log.debug(u'Not a match: %s with tmdb id %d for %s', potential['name'], potential['id'], name)
         return person
     
     
@@ -569,7 +634,7 @@ class EntityManager(object):
         tvdb_id = int(tvdb_id)
         show = self.shows.find_one({'tvdb_id':tvdb_id})
         if show is not None:
-            url = self.configuration.service['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
+            url = self.env.service['tvdb']['urls']['Show.getInfo'].format(tvdb_id)
             handler = TvdbXmlHandler(self, url)
             if refresh: handler.refresh()
             element = handler.element()
@@ -631,7 +696,7 @@ class EntityManager(object):
                 update_string_property(u'small_name', make_small_name(show['name']), show)
                 update_string_property(u'simple_name', remove_accents(show['small_name']), show)
                 self.shows.save(show)
-                self.logger.info(u'Updated record for TV show %s with tvdb %s', show[u'small_name'], show[u'tvdb_id'])
+                self.log.info(u'Updated record for TV show %s with tvdb %s', show[u'small_name'], show[u'tvdb_id'])
             
             # Now go through the episodes
             node = element.findall('Episode')
@@ -641,7 +706,7 @@ class EntityManager(object):
                     e = self.store_tvdb_episode(show, episode, refresh)
                     if e: episodes.append(e)
         else:
-            self.logger.error(u'Show %d does not exist', tvdb_id)
+            self.log.error(u'Show %d does not exist', tvdb_id)
         return show, episodes
     
     
@@ -734,21 +799,21 @@ class EntityManager(object):
                                             episode['tvdb_record']['cast'].append(reference)
                     episode['last_update'] = datetime.utcnow()
                     self.episodes.save(episode)
-                    self.logger.info(u'Updated record for TV Show %s season %d episode %d: %s', 
+                    self.log.info(u'Updated record for TV Show %s season %d episode %d: %s', 
                         show[u'name'],
                         episode[u'tv_season'],
                         episode[u'tv_episode'],
                         episode[u'name']
                     )
                 else:
-                    self.logger.warning(u'Ignoring bogus episode for TV Show %s season %d episode %d: %s', 
+                    self.log.warning(u'Ignoring bogus episode for TV Show %s season %d episode %d: %s', 
                         show[u'name'],
                         tv_season,
                         tv_episode,
                         tv_episode_name
                     )
             else:
-                self.logger.debug(u'Ignoring episode for TV Show %s with non positive season', show['tvdb_record']['name'])
+                self.log.debug(u'Ignoring episode for TV Show %s with non positive season', show['tvdb_record']['name'])
         return episode
     
     
@@ -765,7 +830,7 @@ class EntityManager(object):
                     if cp is not None:
                         result.append(cp)
                     else:
-                        self.logger.debug(u'Dropping bogus name %s', p)
+                        self.log.debug(u'Dropping bogus name %s', p)
         return result
     
     
@@ -774,7 +839,7 @@ class EntityManager(object):
         if value is not None:
             value = self.tvdb_person_name_junk.sub(u'', value)
             value = value.strip()
-            if len(value) < self.configuration.service['tvdb']['fuzzy']['minimum_person_name_length']:
+            if len(value) < self.env.service['tvdb']['fuzzy']['minimum_person_name_length']:
                 value = None
         return value
     
@@ -785,7 +850,7 @@ class EntityManager(object):
 
 class ResourceHandler(object):
     def __init__(self, entity_manager, url):
-        self.logger = logging.getLogger('Resource Handler')
+        self.log = logging.getLogger('Resource Handler')
         self.entity_manager = entity_manager
         self.remote_url = url
         self.local_path = self.local()
@@ -793,7 +858,7 @@ class ResourceHandler(object):
     
     
     def local(self):
-        return url_to_cache.sub(self.entity_manager.configuration.get_cache_path(), self.remote_url)
+        return url_to_cache.sub(self.entity_manager.env.get_cache_path(), self.remote_url)
     
     
     def cache(self):
@@ -803,12 +868,12 @@ class ResourceHandler(object):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
             try:
-                self.logger.debug(u'Retrieve %s', self.remote_url)
+                self.log.debug(u'Retrieve %s', self.remote_url)
                 filename, self.headers = urllib.urlretrieve(self.remote_url.encode('utf-8'), self.local_path)
             except IOError:
                 result = False
                 self.clean()
-                self.logger.warning(u'Failed to retrieve %s', self.remote_url)
+                self.log.warning(u'Failed to retrieve %s', self.remote_url)
         return result
     
     
@@ -820,7 +885,7 @@ class ResourceHandler(object):
                 value = urlhandle.read()
         except IOError:
             value = None
-            self.logger.warning(u'Failed to read %s', self.local_path)
+            self.log.warning(u'Failed to read %s', self.local_path)
         return value
     
     
@@ -843,7 +908,7 @@ class ResourceHandler(object):
 class JsonHandler(ResourceHandler):
     def __init__(self, entity_manager, url):
         ResourceHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('Json Handler')
+        self.log = logging.getLogger('Json Handler')
     
     
     def element(self):
@@ -858,7 +923,7 @@ class JsonHandler(ResourceHandler):
             except ValueError:
                 element = None
                 self.clean()
-                self.logger.error(u'Failed to load json document %s', self.local_path)
+                self.log.error(u'Failed to load json document %s', self.local_path)
         return element
     
 
@@ -866,7 +931,7 @@ class JsonHandler(ResourceHandler):
 class ImageHandler(ResourceHandler):
     def __init__(self, entity_manager, url):
         ResourceHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('Image Handler')
+        self.log = logging.getLogger('Image Handler')
     
     
     def cache(self):
@@ -882,7 +947,7 @@ class ImageHandler(ResourceHandler):
 class XmlHandler(ResourceHandler):
     def __init__(self, entity_manager, url):
         ResourceHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('Xml Handler')
+        self.log = logging.getLogger('Xml Handler')
     
     
     def element(self):
@@ -894,7 +959,7 @@ class XmlHandler(ResourceHandler):
             except SyntaxError:
                 element = None
                 self.clean()
-                self.logger.warning(u'Failed to load xml document %s', self.local_path)
+                self.log.warning(u'Failed to load xml document %s', self.local_path)
         return element
     
 
@@ -902,12 +967,12 @@ class XmlHandler(ResourceHandler):
 class TmdbJsonHandler(JsonHandler):
     def __init__(self, entity_manager, url):
         JsonHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('Tmdb Json Handler')
+        self.log = logging.getLogger('Tmdb Json Handler')
     
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.service['tmdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(self.entity_manager.env.service['tmdb']['apikey']), u'')
         return result
     
     
@@ -916,7 +981,7 @@ class TmdbJsonHandler(JsonHandler):
         if not element or element[0] == u'Nothing found.':
             element = None
             self.clean()
-            self.logger.debug(u'Nothing found in %s', self.remote_url)
+            self.log.debug(u'Nothing found in %s', self.remote_url)
         return element
     
     
@@ -925,12 +990,12 @@ class TmdbJsonHandler(JsonHandler):
 class TvdbXmlHandler(XmlHandler):
     def __init__(self, entity_manager, url):
         XmlHandler.__init__(self, entity_manager, url)
-        self.logger = logging.getLogger('Tvdb Xml Handler')
+        self.log = logging.getLogger('Tvdb Xml Handler')
     
     
     def local(self):
         result = ResourceHandler.local(self)
-        result = result.replace(u'/{0}'.format(self.entity_manager.configuration.service['tvdb']['apikey']), u'')
+        result = result.replace(u'/{0}'.format(self.entity_manager.env.service['tvdb']['apikey']), u'')
         result = result.replace(u'/all', u'')
         return result
     
@@ -939,8 +1004,8 @@ class TvdbXmlHandler(XmlHandler):
 
 class TvdbImageHandler(ImageHandler):
     def __init__(self, entity_manager, url):
-        ImageHandler.__init__(self, entity_manager, entity_manager.configuration.service['tvdb']['urls']['Banner.getImage'].format(url))
-        self.logger = logging.getLogger('Tvdb Image Handler')
+        ImageHandler.__init__(self, entity_manager, entity_manager.env.service['tvdb']['urls']['Banner.getImage'].format(url))
+        self.log = logging.getLogger('Tvdb Image Handler')
     
     
 

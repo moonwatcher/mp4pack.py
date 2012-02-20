@@ -1,0 +1,1110 @@
+# -*- coding: utf-8 -*-
+
+import os
+import re
+import logging
+import copy
+import unicodedata
+import urlparse
+from subprocess import Popen, PIPE
+from datetime import timedelta
+
+import config
+from ontology import Ontology
+from asset import AssetCache
+from db import EntityManager
+
+class Environment(object):
+    def __init__(self):
+        self.log = logging.getLogger('environment')
+        
+        from config.runtime import runtime as runtime_config
+        self.runtime = runtime_config
+        
+        self.configuration = None
+        self.ontology = None
+        self.em = None
+        self.caption_filter_cache = CaptionFilterCache(self)
+        self.universal_detector = None
+        
+        self.lookup = {
+            'info':{},
+            'model':{},
+            'volume':{},
+        }
+        self.state = {
+            'system':{},
+            'available':{},
+            'expression':{},
+            'command':{},
+            'action':{},
+            'profile':{},
+            'kind':{},
+            'report':{},
+            'format':{},
+            'repository':{},
+            'volume':{},
+        }
+        
+        self.load()
+    
+    
+    def __unicode__(self):
+        return unicode(u'{}:{}'.format(self.domain, self.host))
+    
+    
+    # Properties
+    @property
+    def verbosity(self):
+        return self.runtime['log level'][self.ontology['verbosity']]
+    
+    
+    @property
+    def system(self):
+        return self.state['system']
+    
+    
+    @property
+    def home(self):
+        return self.system['home']
+    
+    
+    @property
+    def host(self):
+        return self.system['host']
+    
+    
+    @property
+    def domain(self):
+        return self.system['domain']
+    
+    
+    @property
+    def language(self):
+        return self.system['language']
+    
+    
+    @property
+    def available(self):
+        return self.state['available']
+    
+    
+    @property
+    def command(self):
+        return self.state['command']
+    
+    
+    @property
+    def action(self):
+        return self.state['action']
+    
+    
+    @property
+    def report(self):
+        return self.state['report']
+    
+    
+    @property
+    def format(self):
+        return self.state['format']
+    
+    
+    @property
+    def repository(self):
+        return self.state['repository']
+    
+    
+    @property
+    def volume(self):
+        return self.state['volume']
+    
+    
+    @property
+    def expression(self):
+        return self.state['expression']
+    
+    
+    @property
+    def service(self):
+        return self.runtime['service']
+    
+    
+    @property
+    def profile(self):
+        return self.state['profile']
+    
+    
+    @property
+    def kind(self):
+        return self.state['kind']
+    
+    
+    @property
+    def kind_with_language(self):
+        return self.runtime['kind with language']
+    
+    
+    # Loading...
+    def load(self):
+        
+        # start from the base user conf
+        from config.base import base as base_config
+        self.configuration = copy.deepcopy(base_config)
+        self.load_system(self.configuration['system'])
+        
+        # Override the default home folder from env if specified
+        env_home = os.getenv('MPK_HOME')
+        if env_home and os.path.exists(env_home):
+            self.system['home'] = env_home
+            
+        if self.home:
+            self.load_external_config(os.path.join(self.home, 'mpk.conf'))
+            self.load_system(self.configuration['system'])
+            
+            
+        self.profile['default'] = self.runtime['default']['profile']
+        self.load_expressions(self.runtime['expression'])
+        self.load_commands(self.runtime['command'])
+        self.load_actions(self.runtime['action'])
+        
+        from config.model import model as model_config
+        self.load_model(model_config)
+        
+        from config.info import info as info_config
+        self.load_info(info_config)
+        
+        self.load_profiles(self.runtime['profile'])
+        self.load_kinds(self.runtime['kind'])
+        self.load_rules(self.runtime['rule'])
+    
+    
+    def load_interactive(self, arguments):
+        self.ontology = arguments
+        
+        # Load conf file from command line argument
+        if 'conf' in self.ontology:
+            self.load_external_config(self.ontology['conf'])
+            self.load_system(self.configuration['system'])
+        
+        # Override some value from command line
+        for p in ('domain', 'host', 'language'):
+            if p in self.ontology:
+                self.system[p] = self.ontology[p]
+                
+        self.load_format(self.configuration['display'])
+        self.load_reports(self.configuration['report'])
+        self.load_repositories(self.configuration['repository'])
+        self._load_default_host_rule()
+        self._load_default_language_rule()
+        self._load_volume_location_rule()
+        self._load_cache_location_rule()
+        self._load_container_rule()
+        self.configuration['playback']['aspect ratio'] = float(float(self.configuration['playback']['width'])/float(self.configuration['playback']['height']))
+        
+        o = Ontology(self, self.repository[self.host]['mongodb'])
+        self.em = EntityManager(self, o)
+    
+    
+    def load_external_config(self, path):
+        if path and os.path.exists(path):
+            path = os.path.abspath(path)
+            try:
+                external = eval(open(path).read())
+                self.log.debug('Load external config file %s', path)
+                self.configuration = dict(self.configuration.items() + external.items())
+            except IOError as ioerr:
+                self.log.warning('Failed to load config file %s', path)
+                self.log.debug(ioerr)
+    
+    
+    def load_system(self, config):
+        for k,v in config.iteritems():
+            self.system[k] = v
+    
+    
+    def load_expressions(self, config):
+        for expression in config:
+            if 'flags' in expression and expression['flags']:
+                self.expression[expression['name']] = re.compile(expression['definition'], expression['flags'])
+            else:
+                self.expression[expression['name']] = re.compile(expression['definition'])
+    
+    
+    def load_commands(self, config):
+        for command in config:
+            self.command[command['name']] = command
+            if command['binary']:
+                # check the command exists and get an absolute path for it
+                c = ['which', command['binary']]
+                proc = Popen(c, stdout=PIPE, stderr=PIPE)
+                report = proc.communicate()
+                if report[0]:
+                    command['path'] = report[0].splitlines()[0]
+        self.available['command'] = set([i['name'] for i in self.command.values() if 'path' in i])
+    
+    
+    def load_actions(self, config):
+        for action in config:
+            self.action[action['name']] = action
+            action['active'] = True
+            if 'depend' in action:
+                action['depend'] = set(action['depend'])
+                if not action['depend'].issubset(self.available['command']):
+                    action['active'] = False
+                    self.log.debug(u'Action %s has unsatisfied dependencies: %s', 
+                        action['name'], 
+                        u', '.join(list(action['depend'] - self.available['command']))
+                    )
+        self.available['action'] = set([i['name'] for i in self.action.values() if i['active']])
+    
+    
+    def load_model(self, config):
+        def verify(node, key):
+            if key not in node:
+                node[key] = {}
+        
+        
+        # itunemovi plist: lookup['model']['name'|'plist']['itunemovi'][subject]
+        for key in ('name', 'plist'):
+            verify(self.lookup['model'], key)
+            verify(self.lookup['model'][key], 'itunemovi')
+            for p in config['itunemovi']:
+                if key in p and p[key] is not None and ('enabled' not in p or p['enabled']):
+                    self.lookup['model'][key]['itunemovi'][p[key]] = p
+                    
+        # iTunes atom: lookup['model']['name' | 'code']['stik' | 'sfID' | 'rtng' | 'akID' | 'gnre'][subject]
+        for key in ('name', 'code'):
+            verify(self.lookup['model'], key)
+            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
+                verify(self.lookup['model'][key], block)
+                for p in config[block]:
+                    if key in p and p[key] is not None and ('enabled' not in p or p['enabled']):
+                        self.lookup['model'][key][block][p[key]] = p
+                        
+        # Language: lookup['model']['name' | 'iso3t' | 'iso3b' | 'iso2']['language'][subject]
+        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
+            verify(self.lookup['model'], key)
+            verify(self.lookup['model'][key], 'language')
+            for p in config['language']:
+                if key in p and p[key] is not None and ('enabled' not in p or p['enabled']):
+                    self.lookup['model'][key]['language'][p[key]] = p
+                    
+        # Kind in Container
+        verify(self.lookup['model'], 'container')
+        for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
+            self.lookup['model']['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
+    
+    
+    def load_info(self, config):
+        def verify(node, key):
+            if key not in node:
+                node[key] = {}
+        
+        
+        def load_info_model_defaults(node):
+            if 'auto cast' not in node: node['auto cast'] = True
+            if 'unescape xml' not in node: node['unescape xml'] = False
+            if 'enabled' not in node: node['enabled'] = True
+            if 'display' not in node: node['display'] = True
+            if 'mediainfo' not in node: node['mediainfo'] = None
+            if 'mp4info' not in node: node['mp4info'] = None
+            if 'subler' not in node: node['subler'] = None
+            if 'atom' not in node: node['atom'] = None
+            if 'plural' not in node: node['plural'] = None
+        
+        
+        # Load info model defaults
+        for i in config['file']: load_info_model_defaults(i)
+        for i in config['tag']: load_info_model_defaults(i)
+        for t in config['track'].values():
+            for i in t: load_info_model_defaults(i)
+        
+        # Mapping the names of properties in information extraction utilities
+        for key in ('name', 'mediainfo', 'mp4info', 'keyword'):
+            verify(self.lookup['info'], key)
+            # File and Tag: lookup['info']['name'|'mediainfo'|'mp4info'|'keyword']['file'|'tag'][subject]
+            for block in ('file', 'tag'):
+                verify(self.lookup['info'][key], block)
+                for p in config[block]:
+                    if key in p and p[key] is not None and p['enabled']:
+                        self.lookup['info'][key][block][p[key]] = p
+                        
+            # Track: lookup['info']['name'|'mediainfo'|'mp4info'|'keyword']['track']['audio'|'video'|'text'|'image'][subject]
+            verify(self.lookup['info'][key], 'track')
+            for block in ('audio', 'video', 'text', 'image'):
+                verify(self.lookup['info'][key]['track'], block)
+                for p in config['track']['common']:
+                    if key in p and p[key] is not None and p['enabled']:
+                        self.lookup['info'][key]['track'][block][p[key]] = p
+                        
+                for p in config['track'][block]:
+                    if key in p and p[key] is not None and p['enabled']:
+                        self.lookup['info'][key]['track'][block][p[key]] = p
+            
+            # Load a default report profile
+            report = {
+                'file':sorted(set([ v['name'] for v in config['file'] if 'name' in v and v['display']])),
+                'tag':sorted(set([ v['name'] for v in config['tag'] if 'name' in v and v['display']])),
+                'track':{},
+            }
+            common = [ v['name'] for v in config['track']['common'] if 'name' in v and v['display']]
+            for t in ('audio', 'video', 'text', 'image'):
+                prop = common + [ v['name'] for v in config['track'][t] if 'name' in v and v['display']]
+                report['track'][t] = sorted(set(prop))
+            self.report['default'] = report
+    
+    
+    def load_reports(self, config):
+        for k,v in config.iteritems():
+            self.report[k] = v
+    
+    
+    def load_profiles(self, config):
+        for name, profile in config.iteritems():
+            profile['name'] = name
+            for action in ('tag', 'rename', 'extract', 'pack', 'update', 'transcode'):
+                if action not in profile:
+                    profile[action] = self.profile['default'][action]
+            self.profile[name] = profile
+    
+    
+    def load_kinds(self, config):
+        for kind_name, kind in config.iteritems():
+            kind['name'] = kind_name
+            self.kind[kind_name] = kind
+    
+    
+    def load_rules(self, config):
+        for rule in config: self._load_rule(rule)
+    
+    
+    def load_repositories(self, config):
+        for name, repository in config.iteritems():
+            self.repository[name] = repository
+            repository['name'] = name
+            
+            if 'rule' in repository:
+                self.load_rules(repository['rule'])
+                
+            if 'volume' in repository:
+                for k, volume in repository['volume'].iteritems():
+                    volume['name'] = k
+                    volume['host'] = repository['name']
+                    volume['domain'] = repository['domain']
+                    volume['virtual path'] = u'/{0}'.format(volume['name'])
+                    self.volume[volume['name']] = volume
+                    
+                    if 'alias' not in volume: volume['alias'] = []
+                    if 'scan' not in volume: volume['scan'] = True
+                    if 'index' not in volume: volume['index'] = True
+                    
+                    # Absolute path defined on a volume always takes precedence
+                    # otherwise default to <base>/<volume name>
+                    if 'path' not in volume:
+                        volume['path'] = os.path.join(repository['base']['path'], volume['name'])
+                        
+                    # The real path is a singularity for comparing a path to the volume
+                    volume['real path'] = os.path.realpath(volume['path'])
+                    
+                    # Build the alias set for the volume
+                    aliases = set()
+                    if 'alias' in repository['base']:
+                        for alias in repository['base']['alias']:
+                            aliases.add(os.path.join(alias, volume['name']))
+                    aliases.add(volume['path'])
+                    aliases.add(os.path.realpath(volume['path']))
+                    for alias in volume['alias']:
+                        aliases.add(alias)
+                        aliases.add(os.path.realpath(alias))
+                    volume['alias'] = tuple(sorted(aliases))
+                    
+                    for alias in volume['alias']:
+                        if alias not in self.lookup['volume']:
+                            self.lookup['volume'][alias] = volume
+                        else:
+                            self.log.error('Alias %s for %s already mapped to volume %s', alias, volume['name'], self.lookup['volume'][alias]['name'])
+    
+    
+    def _load_rule(self, rule):
+        if 'rule' not in self.lookup:
+            self.lookup['rule'] = {'name':{}, 'provide':{}, }
+            
+        if rule['name'] not in self.lookup['rule']['name']:
+            self.lookup['rule']['name'][rule['name']] = rule
+            for branch in rule['branch']:
+                if 'match' in branch:
+                    flags = re.UNICODE
+                    if 'flags' in branch['match']: flags |= branch['match']['flags']
+                    branch['match']['pattern'] = re.compile(branch['match']['expression'], flags)
+                if 'decode' in branch:
+                    flags = re.UNICODE
+                    if 'flags' in branch['decode']: flags |= branch['decode']['flags']
+                    for d in branch['decode']: d['pattern'] = re.compile(d['expression'], flags)
+                    
+            for provide in rule['provides']:
+                if provide not in self.lookup['rule']['provide']:
+                    self.lookup['rule']['provide'][provide] = []
+                self.lookup['rule']['provide'][provide].append(rule)
+        else:
+            self.log.warning('Refusing to redefine rule %s.')
+    
+    
+    def _load_default_host_rule(self):
+        rule = {
+            'name':'default host',
+            'provides':set(('host',)),
+            'branch':[
+                {
+                    'apply':(
+                        {'property':'host', 'value':self.host},
+                    ),
+                },
+            ],
+        }
+        self._load_rule(rule)
+    
+    
+    def _load_volume_location_rule(self):
+        rule = {
+            'name':'volume location',
+            'provides':set(('volume path', 'domain')),
+            'branch':[],
+        }
+        
+        for volume in self.volume.values():
+            branch = {
+                'requires':set(('volume', 'host')),
+                'equal':{'volume':volume['name'], 'host':volume['host']},
+                'apply':(
+                    {'property':'domain', 'value':volume['domain']},
+                    {'property':'volume path', 'value':volume['path']},
+                ),
+            }
+            rule['branch'].append(branch)
+        self._load_rule(rule)
+    
+    
+    def _load_cache_location_rule(self):
+        rule = {
+            'name':'cache location',
+            'provides':set(('cache root',)),
+            'branch':[
+                {
+                    'apply':({'property':'cache root', 'value':self.repository[self.host]['cache']['path']},),
+                }
+            ],
+        }
+        self._load_rule(rule)
+        
+    
+    
+    def _load_container_rule(self):
+        rule = {
+            'name':'container for kind',
+            'provides':set(('container',)),
+            'branch':[],
+        }
+        
+        for kind in self.kind.values():
+            branch = {
+                'requires':set(('kind',)),
+                'equal':{'kind':kind['name'] },
+                'apply':(
+                    {'property':'container', 'value':kind['container']},
+                ),
+            }
+            rule['branch'].append(branch)
+        self._load_rule(rule)
+    
+    
+    def _load_default_language_rule(self):
+        rule = {
+            'name':'default language',
+            'provides':set(('language',)),
+            'branch':[
+                {
+                    'apply':(
+                        {'property':'language', 'value':self.language},
+                    ),
+                },
+            ],
+        }
+        self._load_rule(rule)
+        
+    
+    
+    def load_format(self, config):
+        self.format['wrap width'] = config['wrap']
+        self.format['indent width'] = config['indent']
+        self.format['margin width'] = config['margin']
+        
+        self.format['indent'] = u'\n' + u' ' * self.format['indent width']
+        self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format(
+            self.format['wrap width'] + self.format['indent width'],
+            u' ' * self.format['margin width']
+        )
+        self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format(
+            self.format['indent width'] - self.format['margin width'] - 3,
+            u' ' * self.format['margin width']
+        )
+        self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format(
+            self.format['indent width'] - self.format['margin width'] - 2,
+            u' ' * self.format['margin width']
+        )
+        self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
+    
+    
+    def parse(self, url):
+        result = None
+        if url:
+            result = Ontology(self)
+            result['url'] = url
+            
+            parsed = urlparse.urlparse(url)
+            if parsed.path:
+                result['path'] = parsed.path
+                
+                o = Ontology(self)
+                o['file name'] = os.path.basename(parsed.path)
+                if 'media kind' in o:
+                    result['scheme'] = parsed.scheme or u'file'
+                    result['host'] = parsed.hostname or self.host
+                    for k,v in o.iteritems():
+                        if k != 'file name': result[k] = v
+                            
+                    if result['host'] in self.repository:
+                        if result['scheme'] == 'file':
+                            for volume in self.repository[result['host']]['volume'].values():
+                                if os.path.commonprefix([volume['path'], parsed.path]) == volume['path']:
+                                    result['volume'] = volume['name']
+                                    break
+                                    
+                        elif result['scheme'] == self.runtime['resource scheme']:
+                            for volume in self.repository[result['host']]['volume'].values():
+                                if os.path.commonprefix([volume['virtual path'], parsed.path]) == volume['virtual path']:
+                                    result['volume'] = volume['name']
+                                    break
+                                    
+                    # Deep inference
+                    prefix = os.path.dirname(parsed.path)
+                    if result['kind'] in self.kind_with_language:
+                        prefix, iso = os.path.split(prefix)
+                        lang = self.find_language(iso)
+                        if lang:
+                            result['language'] = lang['iso3t']
+                             
+                    if prefix:
+                        if result['media kind'] == 'tvshow':
+                            prefix = os.path.dirname(prefix)
+                            if prefix: prefix = os.path.dirname(prefix)
+                            
+                    if prefix:
+                        profile = os.path.basename(prefix)
+                        if profile: result['profile'] = profile
+                        
+            return result
+    
+    
+    # Path manipulation
+    def varify_directory(self, path):
+        result = False
+        try:
+            dirname = os.path.dirname(path)
+            if not os.path.exists(dirname):
+                self.log.debug(u'Creating directory %s', dirname)
+                os.makedirs(dirname)
+                result = True
+        except OSError as err:
+            self.log.error(unicode(err))
+            result = False
+        return result
+    
+    
+    def scan_for_related(self, properties):
+        result = None
+        if properties:
+            result = []
+            self.log.debug(u'Scanning repository for file related to %s', properties)
+            for v in self.repository['volume'].values():
+                if v['scan']:
+                    for p in self.profile.values():
+                        for k in p['kind']:
+                            if k in self.kind_with_language:
+                                for l in self.lookup['model']['iso3t']['language']:
+                                    related = copy.deepcopy(properties)
+                                    related['volume'] = v['name']
+                                    related['kind'] = k
+                                    related['profile'] = p['name']
+                                    related['language'] = l
+                                    related_path = self.encode_canonic_path(related)
+                                    if os.path.exists(related_path):
+                                        result.append(related)
+                                        self.log.debug('Discovered %s', related_path)
+                            else:
+                                related = copy.deepcopy(properties)
+                                related['volume'] = v['name']
+                                related['kind'] = k
+                                related['profile'] = p['name']
+                                related_path = self.encode_canonic_path(related)
+                                if os.path.exists(related_path):
+                                    result.append(related)
+                                    self.log.debug('Discovered %s', related_path)
+        return result
+    
+    
+    def canonic_path_for(self, path):
+        result = path
+        real_path = os.path.realpath(os.path.abspath(path))
+        for vol_path, vol in self.lookup['volume'].iteritems():
+            if os.path.commonprefix([vol_path, real_path]) == vol_path:
+                result = real_path.replace(vol_path, vol['path'])
+                break
+        return result
+    
+    
+    def purge_path(self, path):
+        if path and os.path.isfile(path):
+            os.remove(path)
+            try:
+                os.removedirs(os.path.dirname(path))
+            except OSError:
+                pass
+    
+    
+    def is_path_available(self, path, overwrite=False):
+        result = True
+        if path:
+            if os.path.exists(path) and not overwrite:
+                self.log.warning(u'Refusing to overwrite %s', path)
+                result = False
+        else:
+            result = False
+        return result
+    
+    
+    def is_path_exists(self, path):
+        if path is not None and os.path.exists(path): return True
+        else: return False
+    
+    
+    def varify_path_is_available(self, path, overwrite=False):
+        result = self.is_path_available(path, overwrite)
+        if result: self.varify_directory(path)
+        return result
+    
+    
+    def purge_if_not_exist(self, path):
+        result = True
+        if path:
+            if not os.path.exists(path):
+                result = False
+                try:
+                    os.removedirs(os.path.dirname(path))
+                except OSError:
+                    pass
+        else:
+            result = False
+        return result
+    
+    
+    def find_language(self, iso):
+        result = None
+        if len(iso) == 3:
+            if iso in self.lookup['model']['iso3t']['language']:
+                result = self.lookup['model']['iso3t']['language'][iso]
+            elif iso in self.lookup['model']['iso3b']['language']:
+                result = self.lookup['model']['iso3b']['language'][iso]
+        elif len(iso) == 2 and iso in self.lookup['model']['iso2']['language']:
+            result = self.lookup['model']['iso2']['language'][iso]
+        return result
+    
+    
+    def detect_encoding(self, content):
+        if self.universal_detector is None:
+            from chardet.universaldetector import UniversalDetector
+            self.universal_detector = UniversalDetector()
+            
+        self.universal_detector.reset()
+        for line in content:
+            self.universal_detector.feed(line)
+            if self.universal_detector.done:
+                break
+        self.universal_detector.close()
+        return self.universal_detector.result
+    
+    
+    # Command execution
+    def initialize_command(self, command, log):
+        result = None
+        if command in self.available['command']:
+            c = self.command[command]
+            result = [ c['path'], ]
+        else:
+            log.warning(u'Command %s is unavailable', c['name'])
+        return result
+    
+    
+    def execute(self, command, message=None, debug=False, pipeout=True, pipeerr=True, log=None):
+        def encode_command(command):
+            c = []
+            for e in command:
+                if u' ' in e: c.append(u'"{0}"'.format(e))
+                else: c.append(e)
+            return u' '.join(c)
+        
+        
+        report = None
+        if command:
+            if not debug:
+                if log == None: log = self.log
+                log.debug(u'Execute: %s', encode_command(command))
+                if message: log.info(message)
+                
+                if pipeout and pipeerr:
+                    proc = Popen(command, stdout=PIPE, stderr=PIPE)
+                elif pipeout and not pipeerr:
+                    proc = Popen(command, stdout=PIPE)
+                elif not pipeout and pipeerr:
+                    proc = Popen(command, stderr=PIPE)
+                elif not pipeout and not pipeerr:
+                    proc = Popen(command)
+                    
+                report = proc.communicate()
+            else:
+                log.info(message)
+                print encode_command(command)
+        return report
+    
+    
+    # Format
+    def format_byte_as_iec_60027_2(self, value):
+        result = None
+        if value:
+            p = 0
+            v = float(value)
+            while v > 1024 and p < 4:
+                p += 1
+                v /= 1024.0
+            result = '{0:.2f} {1}'.format(v, self.runtime['binary iec 60027 2 prefix'][p])
+        return result
+    
+    
+    def format_bit_as_si(self, value):
+        result = None
+        if value:
+            p = 0
+            v = float(value)
+            while v > 1000 and p < 4:
+                p += 1
+                v /= 1000.0
+            result = '{0:.2f} {1}'.format(v, self.runtime['decimal si prefix'][p])
+        return result
+    
+    
+    def format_information_block(self, block, mapping, profile):
+        result = []
+        for p in profile:
+            if p in block:
+                v = self.format_key_value(p, block[p], mapping)
+                if v:
+                    result.append(v)
+        if not result:
+            result = None
+        return result
+    
+    
+    def format_info_title(self, text):
+        return self.format['info title display'].format(text)
+    
+    
+    def format_info_subtitle(self, text):
+        return self.format['info subtitle display'].format(text)
+    
+    
+    def format_value(self, value):
+        return self.format['value display'].format(value)
+    
+    
+    def format_key_value(self, key, value, mapping=None):
+        pkey = None
+        pvalue = None
+        result = None
+        if mapping:
+            m = mapping[key]
+            if not ('display' in m and not m['display']):
+                pkey = m['print']
+                if m['type'] == 'enum':
+                    pvalue = self.lookup['model']['code'][m['atom']][value]['print']
+                    
+                elif m['type'] in ('string', 'list', 'dict'):
+                    if m['type'] == 'list':
+                        pvalue = u', '.join(value)
+                    elif m['type'] == 'dict':
+                        pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
+                    else:
+                        if key == 'language':
+                            lang = self.find_language(value)
+                            pvalue = lang['print']
+                        else:
+                            pvalue = unicode(value)
+                    if len(pvalue) > self.format['wrap width']:
+                        lines = textwrap.wrap(pvalue, self.format['wrap width'])
+                        pvalue = self.format['indent'].join(lines)
+                        
+                elif m['type'] == 'float':
+                    pvalue = u'{0:.3f}'.format(value)
+                    
+                elif m['type'] == 'bool':
+                    if value:
+                        pvalue = u'yes'
+                    else:
+                        pvalue = u'no'
+                        
+                elif m['type'] == 'int':
+                    if 'format' in m:
+                        pformat = m['format']
+                        if pformat == 'bitrate':
+                            pvalue = '{0}/s'.format(self.format_bit_as_si(value))
+                        elif pformat == 'millisecond':
+                            pvalue = self.convert_millisecond_to_time(value)
+                        elif pformat == 'byte':
+                            pvalue = self.format_byte_as_iec_60027_2(value)
+                        elif pformat == 'bit':
+                            pvalue = '{0} bit'.format(value)
+                        elif pformat == 'frequency':
+                            pvalue = '{0} Hz'.format(value)
+                        elif pformat == 'pixel':
+                            pvalue = '{0} px'.format(value)
+                        else:
+                            pvalue = unicode(value)
+                    else:
+                        pvalue = unicode(value)
+                        
+                else:
+                    pvalue = value
+                    
+            else:
+                pass
+        else:
+            pkey = key
+            pvalue = value
+            
+        if pvalue and pkey:
+            result = self.format['key value display'].format(pkey, pvalue)
+        return result
+    
+    
+    # Field decoding
+    def remove_accents(self, value):
+        result = None
+        if value:
+            nkfd_form = unicodedata.normalize('NFKD', value)
+            result = self.runtime['empty string'].join([c for c in nkfd_form if not unicodedata.combining(c)])
+        return result
+    
+    
+    def simplify(self, value):
+        result = None
+        if value:
+            v = self.expression['whitespace'].sub(u' ', value).strip()
+            if v:
+                result = self.expression['characters to exclude from filename'].sub(self.runtime['empty string'], v)
+                if not result:
+                    result = v
+                    result = result.replace(u'?', u'question mark')
+                    result = result.replace(u'*', u'asterisk')
+                    result = result.replace(u'.', u'period')
+                    result = result.replace(u':', u'colon')
+                result = self.remove_accents(result)
+                result = result.lower()
+        return result
+    
+    
+    def encode_subler_key_value(self, key, value):
+        m = self.configuration.lookup['name']['tag'][key]
+        if 'subler' in m:
+            pkey = m['subler']
+            if m['type'] == 'enum':
+                pvalue = self.configuration.lookup['code'][m['atom']][value]['print']
+            elif m['type'] in ('string', 'list', 'dict'):
+                if m['type'] == 'list':
+                    pvalue = u', '.join(value)
+                elif m['type'] == 'dict':
+                    pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
+                else:
+                    if key == 'language':
+                        pvalue = self.configuration.lookup['iso3t']['language'][value]['print']
+                    else:
+                        pvalue = unicode(value)
+                pvalue = pvalue.replace(u'{',u'&#123;').replace(u'}',u'&#125;').replace(u':',u'&#58;')
+                
+            elif m['type'] == 'bool':
+                if value: pvalue = u'yes'
+                else: pvalue = u'no'
+            elif m['type'] == 'date':
+                pvalue = value.strftime('%Y-%m-%d %H:%M:%S')
+            elif m['type'] == 'int':
+                pvalue = unicode(value)
+            else:
+                pvalue = value
+                
+        return u'{{{0}:{1}}}'.format(pkey, pvalue)
+    
+    
+    def convert_millisecond_to_time(self, millisecond, millisecond_sep='.'):
+        hour = int(millisecond) / int(3600000)
+        hour_modulo = int(millisecond) % int(3600000)
+        minute = int(hour_modulo) / int(60000)
+        minute_modulo = int(hour_modulo) % int(60000)
+        second = int(minute_modulo) / int(1000)
+        second_modulo = int(minute_modulo) % int(1000)
+        millisecond = int(second_modulo)
+        return u'{0:02d}:{1:02d}:{2:02d}{3}{4:03d}'.format(hour, minute, second, millisecond_sep, millisecond)
+    
+    
+    def convert_framerate_to_float(self, frame_rate):
+        frame_rate = str(frame_rate).split('/',1)
+        if len(frame_rate) == 2 and str(frame_rate[0]).isdigit() and str(frame_rate[1]).isdigit():
+            frame_rate = float(frame_rate[0])/float(frame_rate[1])
+        elif str(frame_rate[0].replace('.', '',1)).isdigit():
+            frame_rate = float(frame_rate[0])
+        else:
+            frame_rate = None
+        return frame_rate
+    
+    
+
+
+class CaptionFilter(object):
+    def __init__(self, config):
+        self.log = logging.getLogger('Filter pipeline')
+        self.expression = []
+        self.action = config['action']
+        self.scope = config['scope']
+        self.ignorecase = config['ignore case']
+        
+        option = re.UNICODE
+        if self.ignorecase:
+            option = option|re.IGNORECASE
+        if self.scope == 'slide':
+            option = option|re.MULTILINE
+            
+        for e in config['expression']:
+            try:
+                if self.action == 'replace':
+                    self.expression.append((re.compile(e[0], option), e[1]))
+                elif self.action == 'drop':
+                    self.expression.append(re.compile(e,option))
+            except:
+                self.log.warning(u'Failed to load expression %s', e)
+    
+    
+    @property
+    def valid(self):
+        return len(self.expression) > 0
+    
+    
+    def filter(self, slide):
+        result = slide is not None and slide.valid
+        if result:
+            if self.action == 'replace':
+                if self.scope == 'line':
+                    for e in self.expression:
+                        original = slide.content
+                        slide.clear()
+                        for line in original:
+                            filtered = e[0].sub(e[1], line)
+                            slide.add(filtered)
+                            
+                            # This should be commented out in production
+                            if line != filtered:
+                                self.log.debug(u'Replaced "%s" --> "%s"', line, filtered)
+                                
+                        if not slide.valid:
+                            break
+                            
+                elif self.scope == 'slide':
+                    content = u'\n'.join(slide.lines)
+                    slide.clear()
+                    for e in self.expression:
+                        filtered = e[0].sub(e[1], content)
+                        
+                         # This should be commented out in production
+                        if content != filtered:
+                            self.log.debug(u'Replaced "%s" --> "%s"', content, filtered)
+                            
+                        content = filtered.strip()
+                        if not content:
+                            break
+                    if content:
+                        for line in content.split(u'\n'):
+                            slide.append(line)
+                            
+            elif self.action == 'drop':
+                if self.scope == 'line':
+                    original = slide.content
+                    slide.clear()
+                    for line in original:
+                        keep = True
+                        for e in self.expression:
+                            if e.search(line) is not None:
+                                self.log.debug(u'Drop %s', line)
+                                keep = False
+                                break
+                        if keep:
+                            slide.add(line)
+                            
+                elif self.scope == 'slide':
+                    keep = True
+                    for line in slide.content:
+                        for e in self.expression:
+                            if e.search(line) is not None:
+                                self.log.debug(u'Drop \n%s', u'\n'.join(slide.content))
+                                keep = False
+                                break
+                        if not keep:
+                            slide.clear()
+                            break
+            result = slide.valid
+        return result
+    
+
+
+class CaptionFilterCache(dict):
+    def __init__(self, env, *args, **kw):
+        dict.__init__(self, *args, **kw)
+        self.log = logging.getLogger('Subtitle Filter Cache')
+        self.env = env
+    
+    
+    def __contains__(self, key):
+        self.resolve(key)
+        return dict.__getitem__(self, key) is not None
+    
+    
+    def __delitem__(self, key):
+        if dict.__contains__(self, key):
+            dict.__delitem__(self, key)
+    
+    
+    def __missing__(self, key):
+        self.resolve(key)
+        return dict.__getitem__(self, key)
+    
+    
+    def resolve(self, key):
+        if not dict.__contains__(self, key):
+            if key in self.env.configuration['subtitles']['filters']:
+                o = CaptionFilter(self.env.configuration['subtitles']['filters'][key])
+                if o.valid:
+                    self.log.debug(u'Loaded %s filter pipeline', key)
+                    dict.__setitem__(self, key, o)
+                else:
+                    self.log.error(u'Failed to load %s filter pipeline', key)
+                    dict.__setitem__(self, key, None)
+            else:
+                self.log.error(u'%s subtitle filter is not defined', key)
+                dict.__setitem__(self, key, None)
+    
+    
+
