@@ -22,6 +22,7 @@ class EntityManager(object):
         
         try:
             self.connection = pymongo.Connection(self.ontology['mongodb url'])
+            
         except pymongo.errors.AutoReconnect as err:
             self.connection = None
             self.log.warning(u'Failed to open connection to %s', self.ontology['mongodb url'])
@@ -39,7 +40,7 @@ class EntityManager(object):
                 entity = self.find_movie_by_imdb_id(ontology['imdb id'], download)
                 if entity: result = {'entity':entity,}
             elif self.ontology['media kind'] == 'tvshow':
-                show, episode = self.find_episode(ontology['tv show key'], ontology['tv season'], ontology['tv episode #'], download)
+                show, episode = self.find_episode(ontology['tv show key'], ontology['tv season'], ontology['tv episode'], download)
                 if show and episode: result = {'entity':episode, 'tv show':show,}
         return result
     
@@ -103,10 +104,8 @@ class EntityManager(object):
         self.create_index()
         self.refresh_itmf_genres()
         self.refresh_tmdb_genres()
-        
-        # from config import base_config
-        # for s in base_config['tvshow']:
-        #    self.map_show(s[1], s[0])
+    
+    
     
     
     def list_all_movie_imdbs(self):
@@ -145,6 +144,7 @@ class EntityManager(object):
             ], unique=True
         )
         self.log.info(u'Created mongodb indexes')
+    
     
     
     def suppress_sync(self, sync, last_update):
@@ -193,7 +193,7 @@ class EntityManager(object):
     
     
     def map_show(self, name, tvdb_id):
-        tv_show_key = remove_accents(make_small_name(name))
+        tv_show_key = remove_accents(self.env.simplify(name))
         tvdb_id = int(tvdb_id)
         
         show_by_tvdb_id = self.shows.find_one({u'tvdb_id':tvdb_id})
@@ -216,7 +216,7 @@ class EntityManager(object):
     
     
     def store_network(self, name):
-        small_name = make_small_name(name)
+        small_name = self.env.simplify(name)
         network = self.networks.find_one({u'small_name': small_name})
         if network is None:
             network = {u'small_name':small_name, u'name':name}
@@ -226,7 +226,7 @@ class EntityManager(object):
     
     
     def store_job(self, name):
-        small_name = make_small_name(name)
+        small_name = self.env.simplify(name)
         job = self.jobs.find_one({u'small_name': small_name})
         if job is None:
             job = {u'small_name':small_name, u'name':name}
@@ -236,7 +236,7 @@ class EntityManager(object):
     
     
     def store_department(self, name):
-        small_name = make_small_name(name)
+        small_name = self.env.simplify(name)
         department = self.departments.find_one({u'small_name': small_name})
         if department is None:
             department = {u'small_name':small_name, u'name':name}
@@ -246,10 +246,10 @@ class EntityManager(object):
     
     
     def map_genre(self, name, reference):
-        small_reference_name = make_small_name(reference)
+        small_reference_name = self.env.simplify(reference)
         reference_genre = self.genres.find_one({u'small_name':small_reference_name})
         if reference_genre is not None:
-            small_name = make_small_name(name)
+            small_name = self.env.simplify(name)
             genre = self.genres.find_one({u'small_name':small_name})
             if genre is None:
                 # mapped genre does not exist
@@ -273,7 +273,7 @@ class EntityManager(object):
     
     
     def store_tmdb_genre(self, name, tmdb_id, url):
-        small_name = make_small_name(name)
+        small_name = self.env.simplify(name)
         genre = self.genres.find_one({u'small_name':small_name})
         if genre is None:
             genre = {u'small_name':small_name, u'name':name, u'tmdb_id':tmdb_id, u'url':url}
@@ -287,7 +287,7 @@ class EntityManager(object):
     
     
     def store_itmf_genre(self, name, itmf):
-        small_name = make_small_name(name)
+        small_name = self.env.simplify(name)
         genre = self.genres.find_one({u'small_name':small_name})
         if genre is None:
             genre = {u'small_name':small_name, u'name':name, u'itmf':itmf}
@@ -300,7 +300,7 @@ class EntityManager(object):
     
     
     def store_genre(self, name):
-        small_name = make_small_name(name)
+        small_name = self.env.simplify(name)
         genre = self.genres.find_one({u'small_name':small_name})
         if genre is None:
             genre = {u'small_name':small_name, u'name':name}
@@ -452,7 +452,7 @@ class EntityManager(object):
                 person = { 'tmdb_id':tmdb_id }
                 new_record = True
             person['name'] = element['name'].strip()
-            person['small_name'] = make_small_name(person['name'])
+            person['small_name'] = self.env.simplify(person['name'])
             person['simple_name'] = remove_accents(person['small_name'])
             person['last_update'] = datetime.utcnow()
             person['tmdb_record'] = element
@@ -480,7 +480,7 @@ class EntityManager(object):
                 new_record = True
             movie['imdb_id'] = element['imdb_id']
             movie['name'] = element['name']
-            movie['small_name'] = make_small_name(element['name'])
+            movie['small_name'] = self.env.simplify(element['name'])
             movie['simple_name'] = remove_accents(movie['small_name'])
             movie['last_update'] = datetime.utcnow()
             movie['tmdb_record'] = element
@@ -530,7 +530,7 @@ class EntityManager(object):
     def find_person_by_name(self, name, refresh=False):
         person = None
         name = collapse_whitespace.sub(u' ', name).strip()
-        small_name = make_small_name(name)
+        small_name = self.env.simplify(name)
         if small_name:
             person = self.people.find_one({'small_name':small_name})
             if person is None:
@@ -587,7 +587,7 @@ class EntityManager(object):
     def make_person_stub(self, name):
         person = {
             'name':name.strip(),
-            'small_name':make_small_name(name)
+            'small_name':self.env.simplify(name)
         }
         person['last_update'] = datetime.utcnow()
         self.people.save(person)
@@ -693,7 +693,7 @@ class EntityManager(object):
                                         show['tvdb_record']['cast'].append(reference)
                 show['last_update'] = datetime.utcnow()
                 update_string_property(u'name', show['tvdb_record']['name'], show)
-                update_string_property(u'small_name', make_small_name(show['name']), show)
+                update_string_property(u'small_name', self.env.simplify(show['name']), show)
                 update_string_property(u'simple_name', remove_accents(show['small_name']), show)
                 self.shows.save(show)
                 self.log.info(u'Updated record for TV show %s with tvdb %s', show[u'small_name'], show[u'tvdb_id'])
@@ -729,7 +729,7 @@ class EntityManager(object):
                             'tv_episode':tv_episode
                         }
                     update_string_property(u'name', tv_episode_name, episode)
-                    update_string_property(u'small_name', make_small_name(episode['name']), episode)
+                    update_string_property(u'small_name', self.env.simplify(episode['name']), episode)
                     update_string_property(u'simple_name', remove_accents(episode['small_name']), episode)
                     episode['tvdb_record'] = {'cast':[], 'posters':[]}
                     for item in node.getchildren():
@@ -1082,30 +1082,6 @@ def format_tmdb_query(value):
     return value
 
 
-def remove_accents(value):
-    value = value.strip()
-    nkfd_form = unicodedata.normalize('NFKD', value)
-    return u''.join([c for c in nkfd_form if not unicodedata.combining(c)])
-
-
-def make_small_name(name):
-    result = None
-    if name:
-        name = collapse_whitespace.sub(u' ', name).strip()
-        result = characters_to_exclude_from_filename.sub(u'', name)
-        if not result:
-            result = replace_invalid_characters(name)
-        result = result.lower()
-    return result
-
-
-def replace_invalid_characters(value):
-    if value:
-        value = value.replace(u'?', u'question mark')
-        value = value.replace(u'*', u'asterisk')
-        value = value.replace(u'.', u'period')
-        value = value.replace(u':', u'colon')
-    return value
 
 
 

@@ -3,8 +3,6 @@
 import re
 import logging
 
-tmdb_apikey = u'a8b9f96dde091408a03cb4c78477bd14'
-tvdb_apikey = u'7B3B400B0146EA83'
 resource_scheme = u'mp4pack'
 
 runtime = {
@@ -649,6 +647,128 @@ runtime = {
     ],
     'rule':[
         {
+            'name':'tmdb movie',
+            'provides':set(('tmdb movie',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id', 'language')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie',
+                            'format':u'mpk://{host}/c/tmdb/movie/{language}/{tmdb movie id}',
+                        },
+                    ),
+                },
+            ),
+        },
+        {
+            'name':'tmdb movie casts',
+            'provides':set(('tmdb movie casts',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie casts',
+                            'format':u'mpk://{host}/c/tmdb/movie/{tmdb movie id}/casts',
+                        },
+                    ),
+                },
+            ),
+        },
+        {
+            'name':'tmdb movie images',
+            'provides':set(('tmdb movie images',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie images',
+                            'format':u'mpk://{host}/c/tmdb/movie/{tmdb movie id}/images',
+                        },
+                    ),
+                },
+            ),
+        },
+        {
+            'name':'tmdb movie keywords',
+            'provides':set(('tmdb movie keywords',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie keywords',
+                            'format':u'mpk://{host}/c/tmdb/movie/{tmdb movie id}/keywords',
+                        },
+                    ),
+                },
+            ),
+        },
+        {
+            'name':'tmdb movie releases',
+            'provides':set(('tmdb movie releases',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie releases',
+                            'format':u'mpk://{host}/c/tmdb/movie/{tmdb movie id}/releases',
+                        },
+                    ),
+                },
+            ),
+        },
+        {
+            'name':'tmdb movie trailers',
+            'provides':set(('tmdb movie trailers',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie trailers',
+                            'format':u'mpk://{host}/c/tmdb/movie/{tmdb movie id}/trailers',
+                        },
+                    ),
+                },
+            ),
+        },
+        {
+            'name':'tmdb movie translations',
+            'provides':set(('tmdb movie translations',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id', 'language')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie translations',
+                            'format':u'mpk://{host}/c/tmdb/{language}/movie/{tmdb movie id}/translations',
+                        },
+                    ),
+                },
+            ),
+        },
+        {
+            'name':'tmdb movie alternative titles',
+            'provides':set(('tmdb movie alternative titles',)),
+            'branch':(
+                {
+                    'requires':set(('host', 'tmdb movie id')),
+                    'apply':(
+                        {
+                            'property':'tmdb movie alternative titles',
+                            'format':u'mpk://{host}/c/tmdb/movie/{tmdb movie id}/alternative_titles',
+                        },
+                    ),
+                },
+            ),
+        },
+        
+        
+        {
             'name':'enabled bit default',
             'provides':set(('enabled',)),
             'branch':(
@@ -669,7 +789,7 @@ runtime = {
                 'kind',
                 'tv show key',
                 'tv season',
-                'tv episode #',
+                'tv episode',
             )),
             'branch':(
                 {
@@ -831,7 +951,7 @@ runtime = {
             'provides':set(('tv episode id',)),
             'branch':(
                 {
-                    'requires':set(('media kind', 'tv season', 'tv episode #')),
+                    'requires':set(('media kind', 'tv season', 'tv episode')),
                     'equal':{'media kind':'tvshow', },
                     'apply':(
                         {
@@ -847,7 +967,7 @@ runtime = {
             'provides':set(('asset id',)),
             'branch':(
                 {
-                    'requires':set(('media kind', 'tv show key', 'tv season', 'tv episode #')),
+                    'requires':set(('media kind', 'tv show key', 'tv season', 'tv episode')),
                     'equal':{'media kind':'tvshow', },
                     'apply':(
                         {
@@ -1031,7 +1151,7 @@ runtime = {
             'provides':set(('track position', 'track #')),
             'branch':(
                 {
-                    'requires':set(('media kind', 'tv episode #', 'track total')),
+                    'requires':set(('media kind', 'tv episode', 'track total')),
                     'equal':{'media kind':'tvshow', },
                     'apply':(
                         {
@@ -1341,31 +1461,189 @@ runtime = {
         'appletv':{},
         'high':{},
     },
-    
-    # Should become a rule
     'service':{
         'tmdb':{
-            'apikey':tmdb_apikey,
-            'urls':{
-                'Movie.getInfo':u'http://api.themoviedb.org/2.1/Movie.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Movie.imdbLookup':u'http://api.themoviedb.org/2.1/Movie.imdbLookup/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Person.getInfo':u'http://api.themoviedb.org/2.1/Person.getInfo/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Person.search':u'http://api.themoviedb.org/2.1/Person.search/en/json/{0}/{{0}}'.format(tmdb_apikey),
-                'Genres.getList':u'http://api.themoviedb.org/2.1/Genres.getList/en/json/{0}'.format(tmdb_apikey),
+            'api key':u'a8b9f96dde091408a03cb4c78477bd14',
+            'match':ur'mpk://[^/]+/c/tmdb/.*',
+            'branch':{
+                'tmdb.configuration':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/configuration',
+                    'type':'json',
+                    'collection':'tmdb_configuration',
+                    'remote':ur'http://api.themoviedb.org/3/configuration?api_key={api key}',
+                },
+                'tmdb.movie':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<language>[a-z]{2})/(?P<tmdb_movie_id>[0-9]+)',
+                    'type':'json',
+                    'collection':'tmdb_movie',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}?language={language}&api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.movie.cast':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast',
+                    'type':'json',
+                    'collection':'tmdb_movie_cast',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/casts?api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.movie.poster':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/poster',
+                    'type':'json',
+                    'collection':'tmdb_movie_poster',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/images?api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.movie.keyword':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/keyword',
+                    'type':'json',
+                    'collection':'tmdb_movie_keyword',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/keywords?api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.movie.release':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/release',
+                    'type':'json',
+                    'collection':'tmdb_movie_release',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/releases?api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.movie.trailer':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/trailer',
+                    'type':'json',
+                    'collection':'tmdb_movie_trailer',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/trailers?api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.movie.translation':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/translation',
+                    'type':'json',
+                    'collection':'tmdb_movie_translation',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/translations?api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.movie.alternative':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/alternative',
+                    'type':'json',
+                    'collection':'tmdb_movie_alternative',
+                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/alternative_titles?api_key={api key}',
+                    'space':'tvdb.movie',
+                },
+                'tmdb.person':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)',
+                    'type':'json',
+                    'collection':'tmdb_person',
+                    'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}?api_key={api key}',
+                    'space':'tvdb.person',
+                },
+                'tmdb.person.poster':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/poster',
+                    'type':'json',
+                    'collection':'tmdb_person_poster',
+                    'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}/images?api_key={api key}',
+                    'space':'tvdb.person',
+                },
+                'tmdb.person.credit':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/credit',
+                    'type':'json',
+                    'collection':'tmdb_person_credit',
+                    'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}/credits?api_key={api key}',
+                    'space':'tvdb.person',
+                },
             },
+            'status codes':{
+                1:'Success.',
+                2:'Invalid service - This service does not exist.',
+                3:'Authentication failed - You do not have permissions to access the service.',
+                4:'Invalid format - This service doesn\'t exist in that format.',
+                5:'Invalid parameters - Your request parameters are incorrect.',
+                6:'Invalid id - The pre-requisite id is invalid or not found.',
+                7:'Invalid API key - You must be granted a valid key.',
+                8:'Duplicate entry - The data you tried to submit already exists.',
+                9:'Service offline - This service is temporarily offline. Try again later.',
+                10:'Suspended API key - Access to your account has been suspended, contact TMDb.',
+                11:'Internal error - Something went wrong. Contact TMDb.',
+                12:'The item/record was updated successfully.',
+                13:'The item/record was deleted successfully.',
+                14:'Authentication failed.',
+                15:'Failed.',
+                16:'Device denied.',
+                17:'Session denied.',
+            }
         },
         'tvdb':{
-            'apikey':tvdb_apikey,
-            'fuzzy':{
-                'minimum_person_name_length':3,
-            },
-            'urls':{
-                'Show.getInfo':u'http://www.thetvdb.com/api/{0}/series/{{0}}/all/en.xml'.format(tvdb_apikey),
-                'Banner.getImage':u'http://www.thetvdb.com/banners/{0}'
+            'api key':u'7B3B400B0146EA83',
+            'match':ur'mpk://[^/]+/c/tvdb/.*',
+            'branch':{
+                'tvdb.show':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/show/(?P<language>[a-z]{2})/(?P<tvdb_tv_show_id>[0-9]+)',
+                    'collection':'tvdb_tv_show',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/{language}.xml',
+                    'uri pattern':ur'mpk://{host}/c/tvdb/show/{language}/{tvdb tv show id}',
+                    'space':'tvdb.show',
+                    'type':'xml',
+                    'index':['tvdb tv show id'],
+                },
+                'tvdb.episode':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/episode/(?P<language>[a-z]{2})/(?P<tvdb_tv_episode_id>[0-9]+)',
+                    'collection':'tvdb_tv_episode',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/episodes/{tvdb tv episode id}/{language}.xml',
+                    'uri pattern':'mpk://{host}/c/tvdb/episode/{language}/{tvdb tv episode id}',
+                    'space':'tvdb.episode',
+                    'type':'xml',
+                    'index':['tvdb tv show id', 'tvdb tv episode id', 'tv season', 'tv episode'],
+                },
+                'tvdb.show.poster':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/poster',
+                    'collection':'tvdb_tv_show_poster',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/banners.xml',
+                    'uri pattern':ur'mpk://{host}/c/tvdb/show/{tvdb tv show id>}/poster',
+                    'space':'tvdb.show.poster',
+                    'type':'xml',
+                    'index':['tvdb tv show id'],
+                },
+                'tvdb.show.cast':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast',
+                    'collection':'tvdb_tv_show_cast',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/actors.xml',
+                    'uri pattern':ur'mpk://{host}/c/tvdb/show/{tvdb tv show id}/cast',
+                    'space':'tvdb.show.cast',
+                    'type':'xml',
+                    'index':['tvdb tv show id'],
+                },
+                'tvdb.show.complete':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/show/(?P<language>[a-z]{2})/(?P<tvdb>[0-9]+)/all',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb}/all/{language}.zip',
+                    'space':'tvdb.show',
+                    'type':'zip',
+                },
+                'tvdb.update.daily':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/update/day',
+                    'type':'zip',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_day.zip',
+                },
+                'tvdb.update.weekly':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/update/week',
+                    'type':'zip',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_week.zip',
+                },
+                'tvdb.update.monthly':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/update/month',
+                    'type':'zip',
+                    'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_month.zip',
+                },
+                'tvdb.update.episode':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/update/episode/(?P<time>[0-9]+)',
+                    'type':'xml',
+                    'remote':ur'http://www.thetvdb.com/api/Updates.php?type=episode&time={time}',
+                },
+                'tvdb.update.show':{
+                    'match':ur'mpk://(?P<host>[a-z]+)/c/tvdb/update/show/(?P<time>[0-9]+)',
+                    'type':'xml',
+                    'remote':ur'http://www.thetvdb.com/api/Updates.php?type=series&time={time}',
+                },
             },
         },
     },
-    
     'kind':{
         'm4v':{
             'container':'mp4',

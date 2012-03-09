@@ -151,7 +151,7 @@ class Asset(object):
                                     x.load()
                                     
                             else:
-                                for language in self.env.lookup['model']['iso3t']['language']:
+                                for language in self.env.model['language'].lookup['iso3t']:
                                     o['language'] = language
                                     if o['path'] and os.path.exists(o['path']):
                                         self.log.debug(u'Discovered %s', o['path'])
@@ -529,7 +529,7 @@ class AudioVideoContainer(Container):
                     if 'tv_season' in episode:
                         self._meta['tv season'] = episode['tv_season']
                     if 'tv_episode' in episode:
-                        self._meta['tv episode #'] = episode['tv_episode']
+                        self._meta['tv episode'] = episode['tv_episode']
                     if 'name' in episode:
                         self._meta['name'] = episode['name']
                     if 'certification' in show:
@@ -701,7 +701,7 @@ class AudioVideoContainer(Container):
     def _load_itunemovi_meta(self, record, initialize=True, finalize=True):
         if 'cast' in record:
             if initialize:
-                for i in self.env.lookup['name']['itunemovi']:
+                for i in self.env.model['itunemovi'].lookup['name']:
                     self._meta[i] = []
                     
             self._meta['directors'].extend([ 
@@ -726,7 +726,7 @@ class AudioVideoContainer(Container):
             ])
             
             if finalize:
-                for i in self.env.lookup['name']['itunemovi']:
+                for i in self.env.model['itunemovi'].lookup['name']:
                     if not self._meta[i]: del self._meta[i]
     
     
@@ -835,7 +835,7 @@ class MP4(AudioVideoContainer):
     def tag(self, task):
         AudioVideoContainer.tag(self, task)
         if self.meta:
-            supported = [ k for k in self.meta.keys() if self.env.lookup['name']['tag'][k]['subler'] ]
+            supported = [ k for k in self.meta.keys() if self.env.prototype['crawl']['tag'].find('subler', k) is not None ]
             missing = [ k for k in supported if k not in self.info ]
             outdated = [ k for k in supported if self.info[k] != self.meta[k] ]
             
@@ -864,7 +864,7 @@ class MP4(AudioVideoContainer):
             
         if update:
             q = u''.join([self.env.encode_subler_key_value(k, update[k]) for k in sorted(update)])
-            message = u'Update tags: {0} --> {1}'.format(u', '.join([self.env.lookup['name']['tag'][k]['print'] for k in sorted(update)]), unicode(self))
+            message = u'Update tags: {0} --> {1}'.format(u', '.join([self.env.prototype['crawl']['tag'].find('name', k).node['print'] for k in sorted(update)]), unicode(self))
             command = self.env.initialize_command('subler', self.log)
             if command:
                 command.extend([u'-o', self.path, u'-t', q])

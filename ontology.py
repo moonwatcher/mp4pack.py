@@ -91,20 +91,14 @@ class Ontology(dict):
     
     
     def _decode(self, keyword, value):
-        if keyword and value is not None and keyword in self.env.lookup['info']['keyword']['tag']:
-            prototype = self.env.lookup['info']['keyword']['tag'][keyword]
+        if keyword and value is not None:
+            prototype = self.env.prototype['crawl']['tag'].find('keyword', keyword)
             if prototype:
-                v = value
-                if prototype['type'] == int:
-                    try:
-                        v = int(value)
-                    except ValueError as error:
-                        self.log.error('Failed to decode integer prototype: %s', unicode({prototype['name']:value}))
-                        
-                elif prototype['type'] == unicode:
-                    v = self.env.simplify(value)
+                v = prototype.cast(value)
+                if prototype.node['type'] == unicode:
+                    v = self.env.simplify(v)
                     
-                if v: dict.__setitem__(self, prototype['name'], v)
+                if v: dict.__setitem__(self, prototype.name, v)
     
     
     def _resolve(self, key):

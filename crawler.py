@@ -22,7 +22,7 @@ class Crawler(object):
     
     
     def __unicode__(self):
-        return unicode(self.ontology)
+        return unicode(self.ontology['resource id'])
     
     
     @property
@@ -107,15 +107,14 @@ class Crawler(object):
                                     track_type = unicode(track_node.attrib['type'].lower())
                                     if track_type == 'general':
                                         for i in track_node:
-                                            self._set_file_concept(i.tag, i.text)
-                                            self._set_tag_concept(i.tag, i.text)
+                                            self._set_concept(self.ontology, self.env.prototype['crawl']['file'], 'mediainfo', i.tag, i.text)
+                                            self._set_concept(self.tag, self.env.prototype['crawl']['tag'], 'mediainfo', i.tag, i.text)
                                             
-                                    elif track_type in self.env.lookup['info']['mediainfo']['track']:
+                                    elif track_type in self.env.prototype['track']:
                                         track = Ontology(self.env)
                                         track['type'] = track_type
                                         for i in track_node:
-                                            self._set_track_concept(track, i.tag, i.text)
-                                            
+                                            self._set_concept(track, self.env.prototype['track'][track_type], 'mediainfo', i.tag, i.text)
                                         self._add_track(track)
                                         
                                     elif track_type == 'menu':
@@ -152,7 +151,7 @@ class Crawler(object):
                 match = self.env.expression['mp4info tag'].search(line)
                 if match is not None:
                     tag = match.groups()
-                    self._set_tag_concept(tag[0], tag[1])
+                    self._set_concept(self.tag, self.env.prototype['crawl']['tag'], 'mp4info', tag[0], tag[1])
     
     
     def _load_ogg_chapters(self):
@@ -298,99 +297,6 @@ class Crawler(object):
         return content
     
     
-    def _cast(self, prototype, value):
-        result = value
-        
-        # type: unicode, int, long, float, bool / 'date', 'enum', 'plist'
-        # plural: 'list', 'dict'
-        # plural format: 'mediainfo value list', 'mediainfo key value list'
-        
-        if prototype['auto cast']:
-            if not prototype['plural']:
-                if prototype['type']  == unicode:
-                    # For string, lets strip whitespace and convert empty strings to None
-                    if result: result = unicode(result.strip())
-                    if not result: result = None
-                    if result and prototype['unescape xml']:
-                        result = result.replace(u'&quot;', u'"')
-                # Primitive numeric types
-                elif prototype['type'] in (int, float):
-                    try:
-                        result = prototype['type'](value)
-                    except ValueError as error:
-                        self.log.error(u'Failed to decode: %s as %s', value, unicode(prototype['type']))
-                        result = None
-                        
-                # Datetime conversion, must have at least a Year, Month and Day. 
-                # If Year is present but Month and Day are missing they are set to 1
-                elif prototype['type'] == 'date':
-                    match = self.env.expression['full utc datetime'].search(value)
-                    if match:
-                        parsed = dict([(k, int(v)) for k,v in match.groupdict().iteritems() if k != u'tzinfo' and v is not None])
-                        if u'month' not in parsed: parsed[u'month'] = 1
-                        if u'day' not in parsed: parsed[u'day'] = 1
-                        try:
-                            result = datetime(**parsed)
-                        except TypeError, ValueError:
-                            self.log.debug(u'Failed to decode datetime %s', value)
-                            result = None
-                    else:
-                        self.log.debug(u'Failed to parse datetime %s', value)
-                        result = None
-                        
-                # Boolean type
-                elif prototype['type'] == bool:
-                    if self.env.expression['true value'].search(value) is not None:
-                        result = True
-                    else:
-                        result = False
-                        
-                # Clean and parse plist into a dictionary
-                elif prototype['type'] == 'plist':
-                    result = value.replace(u'&quot;', u'"')
-                    result = self.env.expression['clean xml'].sub(u'', result).strip()
-                    result = plistlib.readPlistFromString(result.encode('utf-8'))
-            else:
-                # Lists
-                if prototype['plural'] == 'list':
-                    if 'plural format' in prototype:
-                        if prototype['plural format'] == 'mediainfo value list':
-                            if self.env.expression['mediainfo value list'].match(value):
-                                result = value.split(u'/')
-                            else:
-                                self.log.error(u'Failed to parse mediainfo value list %s', value)
-                                result = None
-                                
-                    if result:
-                        if prototype['type'] == unicode:
-                            result = [ i.strip() for i in result ]
-                            result = [ i for i in result if i ]
-                            if result and prototype['unescape xml']:
-                                result = [ i.replace(u'&quot;', u'"') for i in result ]
-                                
-                        if prototype['type'] in (int, float):
-                            try:
-                                result = [prototype['type'](v) for v in result]
-                            except ValueError:
-                                self.log.error(u'Failed to decode list: %s as %s', value, unicode(prototype['type']))
-                                result = None
-                                
-                elif prototype['plural'] == 'dict':
-                    if 'plural format' in prototype:
-                        if prototype['plural format'] == 'mediainfo key value list':
-                            if self.env.expression['mediainfo value list'].match(value):
-                                literals = value.split(u'/')
-                                result = {}
-                                for literal in literals:
-                                    pair = literal.split(u'=')
-                                    if len(pair) == 2:
-                                        result[pair[0].strip()] = pair[1].strip()
-                            else:
-                                self.log.error(u'Failed to parse mediainfo key / value list %s', value)
-                                result = None
-        return result
-    
-    
     def _detect_encoding(self, content):
         if 'encoding' not in self.ontology:
             result = self.env.detect_encoding(content.splitlines())
@@ -398,45 +304,21 @@ class Crawler(object):
             self.ontology['encoding'] = result['encoding']
     
     
-    def _set_tag_concept(self, name, value):
-        result = False
-        if name in self.env.lookup['info']['mediainfo']['tag']:
-            prototype = self.env.lookup['info']['mediainfo']['tag'][name]
-            self.tag[prototype['name']] = self._cast(prototype, value)
-            result = True
-        return result
-    
-    
-    def _set_file_concept(self, name, value):
-        result = False
-        if name in self.env.lookup['info']['mediainfo']['file']:
-            prototype = self.env.lookup['info']['mediainfo']['file'][name]
-            self.ontology[prototype['name']] = self._cast(prototype, value)
-            result = True
-        return result
-    
-    
-    def _set_track_concept(self, track, name, value):
-        result = False
-        if 'type' in track and \
-        track['type'] in self.env.lookup['info']['mediainfo']['track'] and \
-        name in self.env.lookup['info']['mediainfo']['track'][track['type']]:
-            prototype = self.env.lookup['info']['mediainfo']['track'][track['type']][name]
-            track[prototype['name']] = self._cast(prototype, value)
-            result = True
-        return result
-    
+    def _set_concept(self, ontology, space, index, key, value):
+        prototype = space.find(index, key)
+        if prototype:
+            ontology[prototype.name] = prototype.cast(value)
     
     
     def _expand_itunmovi(self):
         if 'itunmovi' in self.tag:
             for k,v in self.tag['itunmovi'].iteritems():
-                if k in self.env.lookup['model']['plist']['itunemovi']:
-                    prototype = self.env.lookup['model']['plist']['itunemovi'][k]
+                element = self.env.model['itunemovi'].find('plist', k)
+                if element:
                     items = [ i['name'].strip() for i in v ]
                     items = [ unicode(i) for i in items if i ]
                     if items:
-                        self.tag[prototype['name']] = items
+                        self.tag[element.key] = items
     
     
     def _fix_genre(self):
@@ -446,7 +328,9 @@ class Crawler(object):
         if 'genre type' in self.tag:
             self.tag['genre type'] = int(self.tag['genre type'].split(u',')[0])
             if 'genre' not in self.tag:
-                self.tag['genre'] = self.env.lookup['model']['code']['gnre'][self.tag['genre type']]['print']
+                element = self.env.model['gnre'].find('name', self.tag['genre type'])
+                if element:
+                    self.tag['genre'] = element.node['print']
     
     
     def _fix_cover(self):

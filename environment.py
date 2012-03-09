@@ -28,12 +28,13 @@ class Environment(object):
         self.universal_detector = None
         
         self.lookup = {
-            'info':{},
             'model':{},
             'volume':{},
         }
         self.state = {
             'system':{},
+            'prototype':{},
+            'model':{},
             'available':{},
             'expression':{},
             'command':{},
@@ -62,6 +63,16 @@ class Environment(object):
     @property
     def system(self):
         return self.state['system']
+    
+    
+    @property
+    def prototype(self):
+        return self.state['prototype']
+    
+    
+    @property
+    def model(self):
+        return self.state['model']
     
     
     @property
@@ -166,12 +177,13 @@ class Environment(object):
         self.load_expressions(self.runtime['expression'])
         self.load_commands(self.runtime['command'])
         self.load_actions(self.runtime['action'])
+        self.load_service(self.runtime['service'])
         
         from config.model import model as model_config
         self.load_model(model_config)
         
-        from config.info import info as info_config
-        self.load_info(info_config)
+        from config.prototype import prototype as prototype_config
+        self.load_prototype(prototype_config)
         
         self.load_profiles(self.runtime['profile'])
         self.load_kinds(self.runtime['kind'])
@@ -258,100 +270,42 @@ class Environment(object):
         self.available['action'] = set([i['name'] for i in self.action.values() if i['active']])
     
     
-    def load_model(self, config):
-        def verify(node, key):
-            if key not in node:
-                node[key] = {}
-        
-        
-        # itunemovi plist: lookup['model']['name'|'plist']['itunemovi'][subject]
-        for key in ('name', 'plist'):
-            verify(self.lookup['model'], key)
-            verify(self.lookup['model'][key], 'itunemovi')
-            for p in config['itunemovi']:
-                if key in p and p[key] is not None and ('enabled' not in p or p['enabled']):
-                    self.lookup['model'][key]['itunemovi'][p[key]] = p
-                    
-        # iTunes atom: lookup['model']['name' | 'code']['stik' | 'sfID' | 'rtng' | 'akID' | 'gnre'][subject]
-        for key in ('name', 'code'):
-            verify(self.lookup['model'], key)
-            for block in ('stik', 'sfID', 'rtng', 'akID', 'gnre'):
-                verify(self.lookup['model'][key], block)
-                for p in config[block]:
-                    if key in p and p[key] is not None and ('enabled' not in p or p['enabled']):
-                        self.lookup['model'][key][block][p[key]] = p
-                        
-        # Language: lookup['model']['name' | 'iso3t' | 'iso3b' | 'iso2']['language'][subject]
-        for key in ('name', 'iso3t', 'iso3b', 'iso2'):
-            verify(self.lookup['model'], key)
-            verify(self.lookup['model'][key], 'language')
-            for p in config['language']:
-                if key in p and p[key] is not None and ('enabled' not in p or p['enabled']):
-                    self.lookup['model'][key]['language'][p[key]] = p
-                    
-        # Kind in Container
-        verify(self.lookup['model'], 'container')
-        for c in tuple(set([ v['container'] for k,v in self.kind.iteritems() ])):
-            self.lookup['model']['container'][c] = {'kind':[ k for (k,v) in self.kind.iteritems() if v['container'] == c ]}
-    
-    
     def load_info(self, config):
-        def verify(node, key):
-            if key not in node:
-                node[key] = {}
-        
-        
-        def load_info_model_defaults(node):
-            if 'auto cast' not in node: node['auto cast'] = True
-            if 'unescape xml' not in node: node['unescape xml'] = False
-            if 'enabled' not in node: node['enabled'] = True
-            if 'display' not in node: node['display'] = True
-            if 'mediainfo' not in node: node['mediainfo'] = None
-            if 'mp4info' not in node: node['mp4info'] = None
-            if 'subler' not in node: node['subler'] = None
-            if 'atom' not in node: node['atom'] = None
-            if 'plural' not in node: node['plural'] = None
-        
-        
-        # Load info model defaults
-        for i in config['file']: load_info_model_defaults(i)
-        for i in config['tag']: load_info_model_defaults(i)
-        for t in config['track'].values():
-            for i in t: load_info_model_defaults(i)
-        
-        # Mapping the names of properties in information extraction utilities
-        for key in ('name', 'mediainfo', 'mp4info', 'keyword'):
-            verify(self.lookup['info'], key)
-            # File and Tag: lookup['info']['name'|'mediainfo'|'mp4info'|'keyword']['file'|'tag'][subject]
-            for block in ('file', 'tag'):
-                verify(self.lookup['info'][key], block)
-                for p in config[block]:
-                    if key in p and p[key] is not None and p['enabled']:
-                        self.lookup['info'][key][block][p[key]] = p
-                        
-            # Track: lookup['info']['name'|'mediainfo'|'mp4info'|'keyword']['track']['audio'|'video'|'text'|'image'][subject]
-            verify(self.lookup['info'][key], 'track')
-            for block in ('audio', 'video', 'text', 'image'):
-                verify(self.lookup['info'][key]['track'], block)
-                for p in config['track']['common']:
-                    if key in p and p[key] is not None and p['enabled']:
-                        self.lookup['info'][key]['track'][block][p[key]] = p
-                        
-                for p in config['track'][block]:
-                    if key in p and p[key] is not None and p['enabled']:
-                        self.lookup['info'][key]['track'][block][p[key]] = p
-            
-            # Load a default report profile
-            report = {
-                'file':sorted(set([ v['name'] for v in config['file'] if 'name' in v and v['display']])),
-                'tag':sorted(set([ v['name'] for v in config['tag'] if 'name' in v and v['display']])),
-                'track':{},
-            }
-            common = [ v['name'] for v in config['track']['common'] if 'name' in v and v['display']]
-            for t in ('audio', 'video', 'text', 'image'):
-                prop = common + [ v['name'] for v in config['track'][t] if 'name' in v and v['display']]
-                report['track'][t] = sorted(set(prop))
-            self.report['default'] = report
+        # Load a default report profile
+        report = {
+            'file':sorted(set([ v['name'] for v in config['file'] if 'name' in v])),
+            'tag':sorted(set([ v['name'] for v in config['tag'] if 'name' in v])),
+            'track':{},
+        }
+        common = [ v['name'] for v in config['track']['common'] if 'name' in v]
+        for t in ('audio', 'video', 'text', 'image'):
+            prop = common + [ v['name'] for v in config['track'][t] if 'name' in v]
+            report['track'][t] = sorted(set(prop))
+        self.report['default'] = report
+    
+    
+    def load_model(self, config):
+        for node_name, node_value in config.iteritems():
+            node_value['name'] = node_name
+            space = Enumeration(self, node_value)
+            self.model[node_name] = space
+            space.load()
+    
+    
+    def load_service(self, config):
+        for k,v in config:
+            v['name'] = k
+            self.service[k] = v
+    
+    
+    def load_prototype(self, config):
+        for block_name, block_value in config.iteritems():
+            self.prototype[block_name] = {}
+            for node_name, node_value in block_value.iteritems():
+                node_value['name'] = node_name
+                space = PrototypeSpace(self, node_value)
+                self.prototype[block_name][node_name] = space
+                space.load()
     
     
     def load_reports(self, config):
@@ -630,7 +584,7 @@ class Environment(object):
                     for p in self.profile.values():
                         for k in p['kind']:
                             if k in self.kind_with_language:
-                                for l in self.lookup['model']['iso3t']['language']:
+                                for l in self.model['language'].lookup['iso2']:
                                     related = copy.deepcopy(properties)
                                     related['volume'] = v['name']
                                     related['kind'] = k
@@ -708,14 +662,9 @@ class Environment(object):
     
     
     def find_language(self, iso):
-        result = None
-        if len(iso) == 3:
-            if iso in self.lookup['model']['iso3t']['language']:
-                result = self.lookup['model']['iso3t']['language'][iso]
-            elif iso in self.lookup['model']['iso3b']['language']:
-                result = self.lookup['model']['iso3b']['language'][iso]
-        elif len(iso) == 2 and iso in self.lookup['model']['iso2']['language']:
-            result = self.lookup['model']['iso2']['language'][iso]
+        result = self.model['language'].find('iso2', iso)
+        if not result: result = self.model['language'].find('iso3t', iso)
+        if not result: result = self.model['language'].find('iso3b', iso)
         return result
     
     
@@ -831,60 +780,56 @@ class Environment(object):
         result = None
         if mapping:
             m = mapping[key]
-            if not ('display' in m and not m['display']):
-                pkey = m['print']
-                if m['type'] == 'enum':
-                    pvalue = self.lookup['model']['code'][m['atom']][value]['print']
-                    
-                elif m['type'] in ('string', 'list', 'dict'):
-                    if m['type'] == 'list':
-                        pvalue = u', '.join(value)
-                    elif m['type'] == 'dict':
-                        pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
-                    else:
-                        if key == 'language':
-                            lang = self.find_language(value)
-                            pvalue = lang['print']
-                        else:
-                            pvalue = unicode(value)
-                    if len(pvalue) > self.format['wrap width']:
-                        lines = textwrap.wrap(pvalue, self.format['wrap width'])
-                        pvalue = self.format['indent'].join(lines)
-                        
-                elif m['type'] == 'float':
-                    pvalue = u'{0:.3f}'.format(value)
-                    
-                elif m['type'] == 'bool':
-                    if value:
-                        pvalue = u'yes'
-                    else:
-                        pvalue = u'no'
-                        
-                elif m['type'] == 'int':
-                    if 'format' in m:
-                        pformat = m['format']
-                        if pformat == 'bitrate':
-                            pvalue = '{0}/s'.format(self.format_bit_as_si(value))
-                        elif pformat == 'millisecond':
-                            pvalue = self.convert_millisecond_to_time(value)
-                        elif pformat == 'byte':
-                            pvalue = self.format_byte_as_iec_60027_2(value)
-                        elif pformat == 'bit':
-                            pvalue = '{0} bit'.format(value)
-                        elif pformat == 'frequency':
-                            pvalue = '{0} Hz'.format(value)
-                        elif pformat == 'pixel':
-                            pvalue = '{0} px'.format(value)
-                        else:
-                            pvalue = unicode(value)
+            pkey = m['print']
+            if m['type'] == 'enum':
+                pvalue = self.model[m['atom']].find('code', value).node['print']
+                
+            elif m['type'] in ('string', 'list', 'dict'):
+                if m['type'] == 'list':
+                    pvalue = u', '.join(value)
+                elif m['type'] == 'dict':
+                    pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
+                else:
+                    if key == 'language':
+                        lang = self.find_language(value)
+                        pvalue = lang['print']
                     else:
                         pvalue = unicode(value)
-                        
+                if len(pvalue) > self.format['wrap width']:
+                    lines = textwrap.wrap(pvalue, self.format['wrap width'])
+                    pvalue = self.format['indent'].join(lines)
+                    
+            elif m['type'] == 'float':
+                pvalue = u'{0:.3f}'.format(value)
+                
+            elif m['type'] == 'bool':
+                if value:
+                    pvalue = u'yes'
                 else:
-                    pvalue = value
+                    pvalue = u'no'
+                    
+            elif m['type'] == 'int':
+                if 'format' in m:
+                    pformat = m['format']
+                    if pformat == 'bitrate':
+                        pvalue = '{0}/s'.format(self.format_bit_as_si(value))
+                    elif pformat == 'millisecond':
+                        pvalue = self.convert_millisecond_to_time(value)
+                    elif pformat == 'byte':
+                        pvalue = self.format_byte_as_iec_60027_2(value)
+                    elif pformat == 'bit':
+                        pvalue = '{0} bit'.format(value)
+                    elif pformat == 'frequency':
+                        pvalue = '{0} Hz'.format(value)
+                    elif pformat == 'pixel':
+                        pvalue = '{0} px'.format(value)
+                    else:
+                        pvalue = unicode(value)
+                else:
+                    pvalue = unicode(value)
                     
             else:
-                pass
+                pvalue = value
         else:
             pkey = key
             pvalue = value
@@ -975,6 +920,7 @@ class Environment(object):
     
 
 
+# Caption filter
 class CaptionFilter(object):
     def __init__(self, config):
         self.log = logging.getLogger('Filter pipeline')
@@ -1108,3 +1054,251 @@ class CaptionFilterCache(dict):
     
     
 
+
+# Generic Space / Element model
+class Space(object):
+    def __init__(self, env, node):
+        self.log = logging.getLogger('Space')
+        self.env = env
+        self.node = node
+        self.element = []
+        self._lookup = None
+    
+    
+    @property
+    def key(self):
+        return self.node['name']
+    
+    
+    @property
+    def lookup(self):
+        if self._lookup is None:
+            self._lookup = {}
+            for index in self.node['index']:
+                self._lookup[index] = {}
+                for e in self.element:
+                    if e.enabled and e.node[index] is not None:
+                        self._lookup[index][e.node[index]] = e
+        return self._lookup
+    
+    
+    def find(index, key):
+        result = None
+        if index and index in self.lookup and key and key in self.lookup[index]:
+            result = self.lookup[index][key]
+        return result
+    
+
+
+class Element(object):
+    def __init__(self, space, node):
+        self.log = logging.getLogger('Element')
+        self.space = space
+        self.node = node
+        
+        # Load defaults
+        for field in self.default:
+            if field not in self.node:
+                self.node[field] = self.default[field]
+    
+    
+    @property
+    def env(self):
+        return self.space.env
+    
+    
+    @property
+    def default(self):
+        return self.space.node['default']
+    
+    
+    @property
+    def enabled(self):
+        return self.node is not None and self.node['enabled']
+    
+    
+    @property
+    def key(self):
+        return self.node['name']
+    
+
+
+# Prototype model
+class PrototypeSpace(Space):
+    def __init__(self, env, node):
+        Space.__init__(self, env, node)
+    
+    
+    def load(self):
+        for node in self.node['element']:
+            self.element.append(Prototype(self, node))
+    
+
+
+class Prototype(Element):
+    def __init__(self, space, node):
+        Element.__init__(self, space, node)
+        
+        # Don't bother loading the cast function if not enabled
+        if self.enabled:
+            # Load a non trivial cast function only if auto cast is not False
+            if self.node['auto cast']:
+                if not self.node['plural']:
+                    
+                    if self.node['type']  == unicode:
+                        self.cast = self._cast_unicode
+                        
+                    elif self.node['type'] in (int, float):
+                        self.cast = self._cast_number
+                        
+                    elif self.node['type'] == 'date':
+                        self.cast = self._cast_date
+                        
+                    elif self.node['type'] == bool:
+                        self.cast = self._cast_boolean
+                        
+                    elif self.node['type'] == 'plist':
+                        self.cast = self._cast_plist
+                        
+                else:
+                    # Lists
+                    if self.node['plural'] == 'list':
+                        self.cast = self._cast_list
+                        
+                    elif self.node['plural'] == 'dict':
+                        self.cast = self._cast_dict
+            else:
+                self.cast = lambda x: x
+    
+    
+    def _cast_number(self, value):
+        result = None
+        try:
+            result = self.node['type'](value)
+        except ValueError as error:
+            self.log.error(u'Failed to decode: %s as %s', value, unicode(self.node['type']))
+            result = None
+            
+        return result
+    
+    
+    def _cast_unicode(self, value):
+        result = None
+        if value:
+            result = unicode(value.strip())
+            
+        if not result:
+            result = None
+            
+        if result and self.node['unescape xml']:
+            result = result.replace(u'&quot;', u'"')
+            
+        return result
+    
+    
+    def _cast_date(self, value):
+        # Datetime conversion, must have at least a Year, Month and Day. 
+        # If Year is present but Month and Day are missing they are set to 1
+        
+        result = None
+        match = self.env.expression['full utc datetime'].search(value)
+        if match:
+            parsed = dict([(k, int(v)) for k,v in match.groupdict().iteritems() if k != u'tzinfo' and v is not None])
+            if u'month' not in parsed:
+                parsed[u'month'] = 1
+            if u'day' not in parsed:
+                parsed[u'day'] = 1
+                
+            try:
+                result = datetime(**parsed)
+            except TypeError, ValueError:
+                self.log.debug(u'Failed to decode datetime %s', value)
+                result = None
+        else:
+            self.log.debug(u'Failed to parse datetime %s', value)
+            result = None
+            
+        return result
+    
+    
+    def _cast_boolean(self, value):
+        result = False
+        if self.env.expression['true value'].search(value) is not None:
+            result = True
+            
+        return result
+    
+    
+    def _cast_plist(self, value):
+        # Clean and parse plist into a dictionary
+        result = value.replace(u'&quot;', u'"')
+        result = self.env.expression['clean xml'].sub(u'', result).strip()
+        result = plistlib.readPlistFromString(result.encode('utf-8'))
+        return result
+    
+    
+    def _cast_list(self, value):
+        result = None
+        if 'plural format' in self.node:
+            if self.node['plural format'] == 'mediainfo value list':
+                if self.env.expression['mediainfo value list'].match(value):
+                    result = value.split(u'/')
+                else:
+                    self.log.error(u'Failed to parse mediainfo value list %s', value)
+                    result = None
+                    
+        if result:
+            if self.node['type'] == unicode:
+                result = [ self._cast_unicode(element) for element in result ]
+                
+            if self.node['type'] in (int, float):
+                result = [ self._cast_number(element) for element in result ]
+                
+        if result:
+            result = [ element for element in result if element is not None ]
+            
+        if not result:
+            result = None
+            
+        return result
+    
+    
+    def _cast_dict(self, value):
+        result = None
+        if 'plural format' in self.node:
+            if self.node['plural format'] == 'mediainfo key value list':
+                if self.env.expression['mediainfo value list'].match(value):
+                    literals = value.split(u'/')
+                    result = {}
+                    for literal in literals:
+                        pair = literal.split(u'=')
+                        if len(pair) == 2:
+                            result[pair[0].strip()] = pair[1].strip()
+                else:
+                    self.log.error(u'Failed to parse mediainfo key / value list %s', value)
+                    result = None
+        if not result:
+            result = None
+            
+        return result
+    
+
+
+# Enumeration model
+class Enumeration(Space):
+    def __init__(self, env, node):
+        Space.__init__(self, env, node)
+    
+    
+    def load(self):
+        for node in self.node['element']:
+            self.element.append(EnumeratedValue(self, node))
+    
+
+
+class EnumeratedValue(object):
+    def __init__(self, space, node):
+        Element.__init__(self, space, node)
+    
+
+        
