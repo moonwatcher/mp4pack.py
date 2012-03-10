@@ -1,6 +1,32 @@
 # -*- coding: utf-8 -*-
 
 model = {
+    'decimal si':{
+        'default':{
+            'enabled':True,
+        },
+        'index':['name', 'step'],
+        'element':[
+            {'name':'bit',  'print':'bit',  'base':10, 'exponent':0,   'step':0 },
+            {'name':'kbit', 'print':'kbit', 'base':10, 'exponent':3,   'step':1 },
+            {'name':'Mbit', 'print':'Mbit', 'base':10, 'exponent':6,   'step':2 },
+            {'name':'Gbit', 'print':'Gbit', 'base':10, 'exponent':9,   'step':3 },
+            {'name':'Tbit', 'print':'Tbit', 'base':10, 'exponent':12,  'step':4 },
+        ],
+    },
+    'binary iec 60027 2':{
+        'default':{
+            'enabled':True,
+        },
+        'index':['name', 'step'],
+        'element':[
+            {'name':'byte', 'print':'Byte', 'base':2, 'exponent':0,     'step':0 },
+            {'name':'kib',  'print':'KiB',  'base':2, 'exponent':10,    'step':1 },
+            {'name':'mib',  'print':'MiB',  'base':2, 'exponent':20,    'step':2 },
+            {'name':'gib',  'print':'GiB',  'base':2, 'exponent':30,    'step':3 },
+            {'name':'tib',  'print':'TiB',  'base':2, 'exponent':40,    'step':4 },
+        ],
+    },
     'itunemovi':{
         'default':{
             'enabled':True,
@@ -20,6 +46,7 @@ model = {
             'enabled':True,
         },
         'index':['name', 'iso2', 'iso3t', 'iso3b'],
+        'synonym':['iso2', 'iso3t', 'iso3b'],
         'element':[
             {'iso2':None,    'iso3t':'und',    'iso3b':'und',    'name':'unknown',              'print':'Unknown'},
             {'iso2':'aa',    'iso3t':'aar',    'iso3b':'aar',    'name':'afar',                 'print':'Afar'},
@@ -73,7 +100,7 @@ model = {
             {'iso2':'ff',    'iso3t':'ful',    'iso3b':'ful',    'name':'fulah',                'print':'Fulah'},
             {'iso2':'ka',    'iso3t':'kat',    'iso3b':'geo',    'name':'georgian',             'print':'Georgian'},
             {'iso2':'de',    'iso3t':'deu',    'iso3b':'ger',    'name':'german',               'print':'German'},
-            {'iso2':'gd',    'iso3t':'gla',    'iso3b':'gla',    'name':'gaelic (scots)',       'print':'Gaelic (Scots)'},
+            {'iso2':'gd',    'iso3t':'gla',    'iso3b':'gla',    'name':'gaelic',               'print':'Gaelic'},
             {'iso2':'ga',    'iso3t':'gle',    'iso3b':'gle',    'name':'irish',                'print':'Irish'},
             {'iso2':'gl',    'iso3t':'glg',    'iso3b':'glg',    'name':'galician',             'print':'Galician'},
             {'iso2':'gv',    'iso3t':'glv',    'iso3b':'glv',    'name':'manx',                 'print':'Manx'},

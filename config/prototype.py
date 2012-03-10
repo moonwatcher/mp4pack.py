@@ -1,6 +1,248 @@
 # -*- coding: utf-8 -*-
 
 prototype = {
+    'knowlege':{
+        'knowlege.movie':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'movie id',
+                    'keyword':'movie_id',
+                    'type':int,
+                },
+                {
+                    'name':'imdb movie id',
+                    'keyword':'imdb_movie_id',
+                    'type':unicode,
+                },
+            ],
+        },
+        'knowlege.tvshow.show':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'tv show id',
+                    'keyword':'tv_show_id',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.tvshow.season':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'tv show id',
+                    'keyword':'tv_show_id',
+                    'type':int,
+                },
+                {
+                    'name':'tv season',
+                    'keyword':'tv_season',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.tvshow.episode':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'tv show id',
+                    'keyword':'tv_show_id',
+                    'type':int,
+                },
+                {
+                    'name':'tv season',
+                    'keyword':'tv_season',
+                    'type':int,
+                },
+                {
+                    'name':'tv episode',
+                    'keyword':'tv_episode',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.person':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'person id',
+                    'keyword':'person_id',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.network':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'network id',
+                    'keyword':'network_id',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.studio':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'studio id',
+                    'keyword':'studio_id',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.job':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'job id',
+                    'keyword':'job_id',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.department':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'department id',
+                    'keyword':'department_id',
+                    'type':int,
+                },
+            ],
+        },
+        'knowlege.genre':{
+            'default':{
+                'enabled':True,
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'index':['name', 'keyword'],
+            'element':[
+                {
+                    'name':'host',
+                    'keyword':'host'
+                    'type':unicode,
+                },
+                {
+                    'name':'genre id',
+                    'keyword':'genre_id',
+                    'type':int,
+                },
+            ],
+        },
+    },
     'crawl':{
         'file':{
             'default':{
@@ -82,7 +324,7 @@ prototype = {
                     'name':'language',
                     'print':'Language',
                     'mediainfo':'Language_String3',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'profile',
@@ -101,6 +343,7 @@ prototype = {
                     'subler':'Media Kind',
                     'print':'Media Kind',
                     'type':'enum',
+                    'enumeration':'stik',
                 },
                 {
                     'name':'name',
@@ -378,6 +621,7 @@ prototype = {
                     'mp4info':'GenreType',
                     'print':'Genre Type',
                     'type':'enum',
+                    'enumeration':'gnre',
                 },
                 {
                     'name':'genre',
@@ -488,6 +732,7 @@ prototype = {
                     'mediainfo':'sfID',
                     'print':'iTunes country ID',
                     'type':'enum',
+                    'enumeration':'sfID',
                 },
                 {
                     'name':'itunes account type',
@@ -495,6 +740,7 @@ prototype = {
                     'mediainfo':'akID',
                     'print':'iTunes account type',
                     'type':'enum',
+                    'enumeration':'akID',
                 },
                 {
                     'name':'episode global id',
@@ -517,6 +763,7 @@ prototype = {
                     'subler':'Content Rating',
                     'print':'Content Rating',
                     'type':'enum',
+                    'enumeration':'rtng',
                 },
                 {
                     'name':'itunextc',
@@ -706,7 +953,7 @@ prototype = {
                     'name':'language',
                     'print':'Language',
                     'mediainfo':'Language_String3',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'track id',
@@ -853,7 +1100,7 @@ prototype = {
                     'name':'language',
                     'print':'Language',
                     'mediainfo':'Language_String3',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'track id',
@@ -1045,101 +1292,7 @@ prototype = {
                     'name':'language',
                     'print':'Language',
                     'mediainfo':'Language_String3',
-                    'type':unicode,
-                },
-                {
-                    'name':'track id',
-                    'print':'Track ID',
-                    'mediainfo':'ID',
-                    'type':int,
-                },
-                {
-                    'name':'type',
-                    'print':'Type',
-                    'type':unicode,
-                },
-                {
-                    'name':'delay',
-                    'print':'Delay',
-                    'mediainfo':'Delay',
-                    'type':int,
-                },
-                {
-                    'name':'position',
-                    'print':'Position',
-                    'mediainfo':'StreamKindID',
-                    'type':int,
-                },
-                {
-                    'name':'format',
-                    'print':'Format',
-                    'mediainfo':'Format',
-                    'type':unicode,
-                },
-                {
-                    'name':'codec profile',
-                    'print':'Codec Profile',
-                    'mediainfo':'Format_Profile',
-                    'type':unicode,
-                    'plural':'list',
-                    'plural format':'mediainfo value list',
-                },
-                {
-                    'name':'duration',
-                    'print':'Duration',
-                    'mediainfo':'Duration',
-                    'type':int,
-                    'format':'millisecond',
-                },
-                {
-                    'name':'bit rate',
-                    'print':'Bit Rate',
-                    'mediainfo':'BitRate',
-                    'type':int,
-                    'format':'bitrate',
-                },
-                {
-                    'name':'bit rate mode',
-                    'print':'Bit Rate Mode',
-                    'mediainfo':'BitRate_Mode',
-                    'type':unicode,
-                },
-                {
-                    'name':'bit depth',
-                    'print':'Bit Depth',
-                    'mediainfo':'BitDepth',
-                    'type':int,
-                    'format':'bit',
-                },
-                {
-                    'name':'stream size',
-                    'print':'Stream Size',
-                    'mediainfo':'StreamSize',
-                    'type':int,
-                    'format':'byte',
-                },
-                {
-                    'name':'encoded date',
-                    'print':'Encoded Date',
-                    'mediainfo':'Encoded_Date',
-                    'type':'date',
-                },
-                {
-                    'name':'enabled',
-                    'print':'Enabled',
-                    'type':bool,
-                },
-                {
-                    'name':'name',
-                    'print':'Name',
-                    'mediainfo':'Title',
-                    'type':unicode,
-                },
-                {
-                    'name':'language',
-                    'print':'Language',
-                    'mediainfo':'Language_String3',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'track id',
@@ -1238,7 +1391,7 @@ prototype = {
                     'name':'language',
                     'print':'Language',
                     'mediainfo':'Language_String3',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'track id',
@@ -1358,7 +1511,7 @@ prototype = {
                 {
                     'name':'language',
                     'tvdb':'Language',
-                    'type':unicode,
+                    'type':'enum',
                 },
             ],
         },
@@ -1473,7 +1626,7 @@ prototype = {
                 {
                     'name':'language',
                     'tvdb':'Language',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'url',
@@ -1578,7 +1731,7 @@ prototype = {
                 {
                     'name':'language',
                     'tvdb':'Language',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'overview',
@@ -1735,7 +1888,7 @@ prototype = {
                 {
                     'name':'language',
                     'tvdb':'Language',
-                    'type':unicode,
+                    'type':'enum',
                 },
                 {
                     'name':'release date',

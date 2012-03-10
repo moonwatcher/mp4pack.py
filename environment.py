@@ -14,6 +14,8 @@ from ontology import Ontology
 from asset import AssetCache
 from db import EntityManager
 
+from model import Timestamp
+
 class Environment(object):
     def __init__(self):
         self.log = logging.getLogger('environment')
@@ -508,7 +510,7 @@ class Environment(object):
         self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
     
     
-    def parse(self, url):
+    def parse_url(self, url):
         result = None
         if url:
             result = Ontology(self)
@@ -725,121 +727,6 @@ class Environment(object):
         return report
     
     
-    # Format
-    def format_byte_as_iec_60027_2(self, value):
-        result = None
-        if value:
-            p = 0
-            v = float(value)
-            while v > 1024 and p < 4:
-                p += 1
-                v /= 1024.0
-            result = '{0:.2f} {1}'.format(v, self.runtime['binary iec 60027 2 prefix'][p])
-        return result
-    
-    
-    def format_bit_as_si(self, value):
-        result = None
-        if value:
-            p = 0
-            v = float(value)
-            while v > 1000 and p < 4:
-                p += 1
-                v /= 1000.0
-            result = '{0:.2f} {1}'.format(v, self.runtime['decimal si prefix'][p])
-        return result
-    
-    
-    def format_information_block(self, block, mapping, profile):
-        result = []
-        for p in profile:
-            if p in block:
-                v = self.format_key_value(p, block[p], mapping)
-                if v:
-                    result.append(v)
-        if not result:
-            result = None
-        return result
-    
-    
-    def format_info_title(self, text):
-        return self.format['info title display'].format(text)
-    
-    
-    def format_info_subtitle(self, text):
-        return self.format['info subtitle display'].format(text)
-    
-    
-    def format_value(self, value):
-        return self.format['value display'].format(value)
-    
-    
-    def format_key_value(self, key, value, mapping=None):
-        pkey = None
-        pvalue = None
-        result = None
-        if mapping:
-            m = mapping[key]
-            pkey = m['print']
-            if m['type'] == 'enum':
-                pvalue = self.model[m['atom']].find('code', value).node['print']
-                
-            elif m['type'] in ('string', 'list', 'dict'):
-                if m['type'] == 'list':
-                    pvalue = u', '.join(value)
-                elif m['type'] == 'dict':
-                    pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
-                else:
-                    if key == 'language':
-                        lang = self.find_language(value)
-                        pvalue = lang['print']
-                    else:
-                        pvalue = unicode(value)
-                if len(pvalue) > self.format['wrap width']:
-                    lines = textwrap.wrap(pvalue, self.format['wrap width'])
-                    pvalue = self.format['indent'].join(lines)
-                    
-            elif m['type'] == 'float':
-                pvalue = u'{0:.3f}'.format(value)
-                
-            elif m['type'] == 'bool':
-                if value:
-                    pvalue = u'yes'
-                else:
-                    pvalue = u'no'
-                    
-            elif m['type'] == 'int':
-                if 'format' in m:
-                    pformat = m['format']
-                    if pformat == 'bitrate':
-                        pvalue = '{0}/s'.format(self.format_bit_as_si(value))
-                    elif pformat == 'millisecond':
-                        pvalue = self.convert_millisecond_to_time(value)
-                    elif pformat == 'byte':
-                        pvalue = self.format_byte_as_iec_60027_2(value)
-                    elif pformat == 'bit':
-                        pvalue = '{0} bit'.format(value)
-                    elif pformat == 'frequency':
-                        pvalue = '{0} Hz'.format(value)
-                    elif pformat == 'pixel':
-                        pvalue = '{0} px'.format(value)
-                    else:
-                        pvalue = unicode(value)
-                else:
-                    pvalue = unicode(value)
-                    
-            else:
-                pvalue = value
-        else:
-            pkey = key
-            pvalue = value
-            
-        if pvalue and pkey:
-            result = self.format['key value display'].format(pkey, pvalue)
-        return result
-    
-    
-    # Field decoding
     def remove_accents(self, value):
         result = None
         if value:
@@ -896,26 +783,7 @@ class Environment(object):
         return u'{{{0}:{1}}}'.format(pkey, pvalue)
     
     
-    def convert_millisecond_to_time(self, millisecond, millisecond_sep='.'):
-        hour = int(millisecond) / int(3600000)
-        hour_modulo = int(millisecond) % int(3600000)
-        minute = int(hour_modulo) / int(60000)
-        minute_modulo = int(hour_modulo) % int(60000)
-        second = int(minute_modulo) / int(1000)
-        second_modulo = int(minute_modulo) % int(1000)
-        millisecond = int(second_modulo)
-        return u'{0:02d}:{1:02d}:{2:02d}{3}{4:03d}'.format(hour, minute, second, millisecond_sep, millisecond)
     
-    
-    def convert_framerate_to_float(self, frame_rate):
-        frame_rate = str(frame_rate).split('/',1)
-        if len(frame_rate) == 2 and str(frame_rate[0]).isdigit() and str(frame_rate[1]).isdigit():
-            frame_rate = float(frame_rate[0])/float(frame_rate[1])
-        elif str(frame_rate[0].replace('.', '',1)).isdigit():
-            frame_rate = float(frame_rate[0])
-        else:
-            frame_rate = None
-        return frame_rate
     
     
 
@@ -1138,37 +1006,151 @@ class PrototypeSpace(Space):
 class Prototype(Element):
     def __init__(self, space, node):
         Element.__init__(self, space, node)
+        c = lambda x: x
+        f = lambda x: x
         
         # Don't bother loading the cast function if not enabled
         if self.enabled:
-            # Load a non trivial cast function only if auto cast is not False
-            if self.node['auto cast']:
-                if not self.node['plural']:
-                    
-                    if self.node['type']  == unicode:
-                        self.cast = self._cast_unicode
-                        
-                    elif self.node['type'] in (int, float):
-                        self.cast = self._cast_number
-                        
-                    elif self.node['type'] == 'date':
-                        self.cast = self._cast_date
-                        
-                    elif self.node['type'] == bool:
-                        self.cast = self._cast_boolean
-                        
-                    elif self.node['type'] == 'plist':
-                        self.cast = self._cast_plist
-                        
-                else:
-                    # Lists
-                    if self.node['plural'] == 'list':
-                        self.cast = self._cast_list
-                        
-                    elif self.node['plural'] == 'dict':
-                        self.cast = self._cast_dict
+            if self.node['type']  == unicode:
+                c = self._cast_unicode
+                f = self._format_unicode
+            elif self.node['type'] == int:
+                c = self._cast_number
+                f = self._format_int
+            elif self.node['type'] == float:
+                c = self._cast_number
+                f = self._format_float
+            elif self.node['type'] == 'date':
+                c = self._cast_date
+                f = self._format_date
+            elif self.node['type'] == bool:
+                c = self._cast_boolean
+                f = self._format_boolean
+            elif self.node['type'] == 'enum':
+                c = self._cast_enum
+                f = self._format_enum
+                
+            if not self.node['plural']:
+                self._cast = c
+                self._format = f
             else:
-                self.cast = lambda x: x
+                if self.node['plural'] == 'list':
+                    self._format = lambda x: self._format_list(x, f)
+                    self._cast = lambda x: self._cast_list(x, c)
+                elif self.node['plural'] == 'dict':
+                    self._format = lambda x: self._format_dict(x, f)
+                    self._cast = lambda x: self._cast_dict(x, c)
+                    
+            if not self.node['auto cast']:
+                self._cast = lambda x: x
+    
+    
+    def cast(self, value):
+        if value is not None:
+            return self._cast(value)
+        else:
+            return None
+    
+    
+    def format(self, value):
+        if value is not None:
+            return self._format(value)
+        else:
+            return None
+    
+    
+    def _wrap(self, value):
+        result = value
+        if len(value) > self.env.format['wrap width']:
+            lines = textwrap.wrap(value, self.env.format['wrap width'])
+            result = self.env.format['indent'].join(lines)
+        return result
+    
+    
+    def _format_byte_as_iec_60027_2(self, value):
+        p = 0
+        v = float(value)
+        while v > 1024.0 and p < 4:
+            p += 1
+            v /= 1024.0
+        return u'{0:.2f} {1}'.format(v, self.env.model['binary iec 60027 2'].find('step', p)['print'])
+    
+    
+    def _format_bit_as_si(self, value):
+        p = 0
+        v = float(value)
+        while v > 1000.0 and p < 4:
+            p += 1
+            v /= 1000.0
+        return u'{0:.2f} {1}'.format(v, self.env.model['decimal si'].find('step', p)['print'])
+    
+    
+    def _format_enum(self, value):
+        return self.env.model[self.node['enumeration']].find('code', value).node['print']
+    
+    
+    def _format_float(self, value):
+        return u'{0:.3f}'.format(value)
+    
+    
+    def _format_int(self, value):
+        result = unicode(value)
+        if 'format' in self.node:
+            if self.node['format'] == 'bitrate':
+                result = u'{0}/s'.format(self._format_bit_as_si(value))
+                
+            elif self.node['format'] == 'millisecond':
+                t = Timestamp(Timestamp.SRT)
+                t.millisecond = value
+                result =  t.timecode
+                
+            elif self.node['format'] == 'byte':
+                result = self._format_byte_as_iec_60027_2(value)
+                
+            elif self.node['format'] == 'bit':
+                result = u'{0} bit'.format(value)
+                
+            elif self.node['format'] == 'frequency':
+                result = u'{0} Hz'.format(value)
+                
+            elif self.node['format'] == 'pixel':
+                result = u'{0} px'.format(value)
+                
+        return result
+    
+    
+    def _format_boolean(self, value):
+        if value is True: return u'yes'
+        else: return u'no'
+    
+    
+    def _format_date(self, value):
+        return unicode(value)
+    
+    
+    def _format_list(self, value, formatter):
+        if value:
+            return u', '.join([ formatter(v) for v in value ])
+        else:
+            return None
+    
+    
+    def _format_dict(self, value, formatter):
+        if value:
+            return u', '.join([ u'{0}:{1}'.format(k,formatter(v)) for k,v in value.iteritems() ])
+        else:
+            return None
+    
+    
+    def _format_unicode(self, value):
+        return value
+    
+    
+    
+    def _cast_enum(self, value):
+        element = self.env.model[self.node['enumeration']].parse(value)
+        if element: return element.code
+        else: return None
     
     
     def _cast_number(self, value):
@@ -1177,22 +1159,15 @@ class Prototype(Element):
             result = self.node['type'](value)
         except ValueError as error:
             self.log.error(u'Failed to decode: %s as %s', value, unicode(self.node['type']))
-            result = None
-            
         return result
     
     
     def _cast_unicode(self, value):
-        result = None
-        if value:
-            result = unicode(value.strip())
-            
+        result = unicode(value.strip())
         if not result:
             result = None
-            
         if result and self.node['unescape xml']:
             result = result.replace(u'&quot;', u'"')
-            
         return result
     
     
@@ -1208,7 +1183,6 @@ class Prototype(Element):
                 parsed[u'month'] = 1
             if u'day' not in parsed:
                 parsed[u'day'] = 1
-                
             try:
                 result = datetime(**parsed)
             except TypeError, ValueError:
@@ -1217,7 +1191,6 @@ class Prototype(Element):
         else:
             self.log.debug(u'Failed to parse datetime %s', value)
             result = None
-            
         return result
     
     
@@ -1225,7 +1198,6 @@ class Prototype(Element):
         result = False
         if self.env.expression['true value'].search(value) is not None:
             result = True
-            
         return result
     
     
@@ -1237,33 +1209,25 @@ class Prototype(Element):
         return result
     
     
-    def _cast_list(self, value):
+    def _cast_list(self, value, caster):
         result = None
         if 'plural format' in self.node:
+            literals = None
             if self.node['plural format'] == 'mediainfo value list':
                 if self.env.expression['mediainfo value list'].match(value):
-                    result = value.split(u'/')
+                    literals = value.split(u'/')
                 else:
-                    self.log.error(u'Failed to parse mediainfo value list %s', value)
-                    result = None
-                    
+                    self.log.error(u'Could not parse list %s', value)
+            if literals:
+                result = [ caster(l) for l in literals ]
         if result:
-            if self.node['type'] == unicode:
-                result = [ self._cast_unicode(element) for element in result ]
-                
-            if self.node['type'] in (int, float):
-                result = [ self._cast_number(element) for element in result ]
-                
-        if result:
-            result = [ element for element in result if element is not None ]
-            
+            result = [ v for v in result if v is not None ]
         if not result:
             result = None
-            
         return result
     
     
-    def _cast_dict(self, value):
+    def _cast_dict(self, value, caster):
         result = None
         if 'plural format' in self.node:
             if self.node['plural format'] == 'mediainfo key value list':
@@ -1273,13 +1237,12 @@ class Prototype(Element):
                     for literal in literals:
                         pair = literal.split(u'=')
                         if len(pair) == 2:
-                            result[pair[0].strip()] = pair[1].strip()
+                            result[pair[0].strip()] = caster(pair[1])
                 else:
-                    self.log.error(u'Failed to parse mediainfo key / value list %s', value)
+                    self.log.error(u'Could not parse dictionary %s', value)
                     result = None
         if not result:
             result = None
-            
         return result
     
 
@@ -1288,17 +1251,43 @@ class Prototype(Element):
 class Enumeration(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
+        self.synonym = None
+    
+    
+    @property
+    def synonym(self):
+        if self._synonym is None:
+            self._synonym = {}
+            for synonym in self.node['synonym']:
+                for e in self.element:
+                    if e.enabled and synonym in e.node and \
+                    e.node[synonym] is not None and \
+                    e.node[synonym] not in self._synonym:
+                        self._synonym[e[synonym]] = e
+        return self._synonym
     
     
     def load(self):
         for node in self.node['element']:
             self.element.append(EnumeratedValue(self, node))
     
+    
+    def parse(self, value):
+        element = None
+        if value is not None and value in self.synonym:
+            element = self.synonym[value]
+        return element
+    
 
 
 class EnumeratedValue(object):
     def __init__(self, space, node):
         Element.__init__(self, space, node)
+    
+    
+    @property
+    def code(self):
+        return self.node['code']
     
 
         

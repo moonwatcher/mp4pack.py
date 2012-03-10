@@ -5,9 +5,9 @@ from StringIO import StringIO
 from xml.etree import  cElementTree as ElementTree
 from urllib2 import Request, urlopen, URLError, HTTPError
 
-class TvdbResourceHandler(ResourceHandler):
-    def __init__(self, config):
-        ResourceHandler.__init__(self, config)
+class TVDbHandler(ResourceHandler):
+    def __init__(self, node):
+        ResourceHandler.__init__(self, node)
     
     
     def fetch(self, query):
@@ -25,20 +25,22 @@ class TvdbResourceHandler(ResourceHandler):
                 try:
                     query['stream'].append(StringIO(response.read()))
                 except Error:
-                    self.log.warning(u'Failed to load xml document from %s', query['remote url'])
+                    self.log.warning(u'Failed to load document %s', query['remote url'])
+                    
             elif query['type'] == 'zip':
                 try:
                     bytes = BytesIO(response.read())
                     archive = zipfile.ZipFile(bytes)
+                except Error:
+                    self.log.warning(u'Failed to decode zip archive %s', query['remote url'])
+                else:
                     for filename in archive.namelist():
                         try:
                             query['stream'].append(StringIO(archive.open(filename, 'rU')))
                         except Error:
-                            self.log.warning(u'Failed to load xml document %s from archive %s', filename, query['remote url'])
+                            self.log.warning(u'Failed to load document %s from archive %s', filename, query['remote url'])
                     archive.close()
                     bytes.close()
-                except Error:
-                    self.log.warning(u'Failed to decode zip archive %s', query['remote url'])
     
     
     def parse(self, query):
@@ -46,12 +48,13 @@ class TvdbResourceHandler(ResourceHandler):
             try:
                 element = ElementTree.parse(stream)
             except SyntaxError:
-                self.log.warning(u'Failed to parse xml document %s', query['remote url'])
+                self.log.warning(u'Failed to decode xml document %s', query['remote url'])
             else:
-                for namespace, space in self.prototype_spaces.iteritems():
+                for namespace, space in self.spaces.iteritems():
                     branch = self.branch[namespace]
                     if space.node['coalesce']:
                         entry = {
+                            u'host':query['parameter']['host'],
                             u'namespace':namespace,
                             u'uri':branch['uri pattern'].format(**query['parameter']),
                             u'document':[],

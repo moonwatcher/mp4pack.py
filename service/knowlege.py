@@ -4,23 +4,13 @@ import json
 from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 
-class TMDbHandler(ResourceHandler):
+class KnowlegeBaseHandler(ResourceHandler):
     def __init__(self, node):
         ResourceHandler.__init__(self, node)
     
     
     def fetch(self, query):
-        self.log.debug(u'Retrieve %s', query['remote url'])
-        request = Request(query['remote url'])
-        
-        try:
-            response = urlopen(request)
-        except HTTPError, e:
-            self.log.warning(u'Server returned an error when requesting %s: %s', query['remote url'], e.code)
-        except URLError, e:
-            self.log.warning(u'Could not reach server when requesting %s: %s', query['remote url'], e.reason)
-        else:
-            query['stream'].append(StringIO(response.read()))
+        pass
     
     
     def parse(self, query):
@@ -28,11 +18,11 @@ class TMDbHandler(ResourceHandler):
             try:
                 document = json.load(stream)
             except ValueError, e:
-                self.log.warning(u'Failed to decode JSON document %s: %s', query['remote url'], e)
+                self.log.warning(u'Could not decode JSON from %s: %s', remote, e)
             else:
                 # Check if we got a TMDB error document
                 if 'status_code' in document and document['status_code'] != 1:
-                    self.log.warning(u'Error fetching %s: %s', query['remote url'], document['status_message'])
+                    self.log.warning(u'Failed to fetch %s %s', remote, document['status_message'])
                 else:
                     branch = self.branch[query['namespace']]
                     entry = {

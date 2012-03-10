@@ -94,7 +94,7 @@ class Job(object):
     
     def add_url(self, url):
         if url:
-            ontology = self.env.parse(url)
+            ontology = self.env.parse_url(url)
             if ontology:
                 self.target.append(ontology)
     
