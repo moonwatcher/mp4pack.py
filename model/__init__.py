@@ -178,9 +178,8 @@ class Chapter(object):
                     frag = match.groupdict()
                     o.name = frag['name'].replace('&quot;', '"')
                     #if 'lang' in frag and frag['lang']:
-                    #    lang = self.env.find_language(frag['lang'])
-                    #    if lang:
-                    #        self.language = lang['iso3t']
+                    #    lang = self.env.model['language'].parse(frag['lang'])
+                    #    if lang: self.language = lang
             else:
                 o.name = name
         return o

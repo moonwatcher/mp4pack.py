@@ -92,13 +92,13 @@ class Ontology(dict):
     
     def _decode(self, keyword, value):
         if keyword and value is not None:
-            prototype = self.env.prototype['crawl']['tag'].find('keyword', keyword)
+            prototype = self.env.prototype['crawl']['tag'].search(keyword)
             if prototype:
                 v = prototype.cast(value)
                 if prototype.node['type'] == unicode:
                     v = self.env.simplify(v)
                     
-                if v: dict.__setitem__(self, prototype.name, v)
+                if v: dict.__setitem__(self, prototype.key, v)
     
     
     def _resolve(self, key):

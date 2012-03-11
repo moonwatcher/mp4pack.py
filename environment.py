@@ -545,9 +545,8 @@ class Environment(object):
                     prefix = os.path.dirname(parsed.path)
                     if result['kind'] in self.kind_with_language:
                         prefix, iso = os.path.split(prefix)
-                        lang = self.find_language(iso)
-                        if lang:
-                            result['language'] = lang['iso3t']
+                        if self.env.model['language'].find(iso):
+                            result['language'] = iso
                              
                     if prefix:
                         if result['media kind'] == 'tvshow':
@@ -586,7 +585,7 @@ class Environment(object):
                     for p in self.profile.values():
                         for k in p['kind']:
                             if k in self.kind_with_language:
-                                for l in self.model['language'].lookup['iso2']:
+                                for l in self.model['language'].element.keys():
                                     related = copy.deepcopy(properties)
                                     related['volume'] = v['name']
                                     related['kind'] = k
@@ -660,13 +659,6 @@ class Environment(object):
                     pass
         else:
             result = False
-        return result
-    
-    
-    def find_language(self, iso):
-        result = self.model['language'].find('iso2', iso)
-        if not result: result = self.model['language'].find('iso3t', iso)
-        if not result: result = self.model['language'].find('iso3b', iso)
         return result
     
     
@@ -929,8 +921,14 @@ class Space(object):
         self.log = logging.getLogger('Space')
         self.env = env
         self.node = node
-        self.element = []
-        self._lookup = None
+        self.element = None
+        self._synonym = None
+        
+        if 'default' not in self.node:
+            self.node['default'] = {}
+            
+        if 'enabled' not in self.default:
+            self.default['enabled'] = True
     
     
     @property
@@ -939,22 +937,45 @@ class Space(object):
     
     
     @property
-    def lookup(self):
-        if self._lookup is None:
-            self._lookup = {}
-            for index in self.node['index']:
-                self._lookup[index] = {}
-                for e in self.element:
-                    if e.enabled and e.node[index] is not None:
-                        self._lookup[index][e.node[index]] = e
-        return self._lookup
+    def synonym(self):
+        if self._synonym is None:
+            self._synonym = {}
+            for synonym in self.node['synonym']:
+                for e in self.element.values():
+                    if e.node[synonym] is not None and \
+                    e.node[synonym] not in self._synonym:
+                        self._synonym[e[synonym]] = e
+        return self._synonym
     
     
-    def find(index, key):
-        result = None
-        if index and index in self.lookup and key and key in self.lookup[index]:
-            result = self.lookup[index][key]
-        return result
+    @property
+    def default(self):
+        return self.node['default']
+    
+    
+    def find(self, key):
+        if key is not None and key in self.element:
+            return self.element[key]
+        else: return None
+    
+    
+    def get(self, key):
+        element = self.search(key)
+        if element is not None: return element.name
+        else: return None
+    
+    
+    def search(self, value):
+        if value is not None and value in self.synonym:
+            return self.synonym[value]
+        else: return None
+    
+    
+    def parse(self, value):
+        element = self.search(value)
+        if element is not None: return element.key
+        else: return None
+    
     
 
 
@@ -964,10 +985,13 @@ class Element(object):
         self.space = space
         self.node = node
         
-        # Load defaults
-        for field in self.default:
-            if field not in self.node:
-                self.node[field] = self.default[field]
+        if self.node is not None and \
+        'key' in self.node and \
+        'name' in self.node:
+            # Load defaults
+            for field in self.default:
+                if field not in self.node:
+                    self.node[field] = self.default[field]
     
     
     @property
@@ -977,7 +1001,7 @@ class Element(object):
     
     @property
     def default(self):
-        return self.space.node['default']
+        return self.space.default
     
     
     @property
@@ -987,6 +1011,11 @@ class Element(object):
     
     @property
     def key(self):
+        return self.node['key']
+    
+    
+    @property
+    def name(self):
         return self.node['name']
     
 
@@ -998,8 +1027,10 @@ class PrototypeSpace(Space):
     
     
     def load(self):
-        for node in self.node['element']:
-            self.element.append(Prototype(self, node))
+        for e in self.node['element']:
+            prototype = Prototype(self, e)
+            if prototype.enabled:
+                self.element[prototype.key] = prototype
     
 
 
@@ -1059,6 +1090,7 @@ class Prototype(Element):
             return None
     
     
+    
     def _wrap(self, value):
         result = value
         if len(value) > self.env.format['wrap width']:
@@ -1073,7 +1105,7 @@ class Prototype(Element):
         while v > 1024.0 and p < 4:
             p += 1
             v /= 1024.0
-        return u'{0:.2f} {1}'.format(v, self.env.model['binary iec 60027 2'].find('step', p)['print'])
+        return u'{0:.2f} {1}'.format(v, self.env.model['binary iec 60027 2'].get(p))
     
     
     def _format_bit_as_si(self, value):
@@ -1082,11 +1114,17 @@ class Prototype(Element):
         while v > 1000.0 and p < 4:
             p += 1
             v /= 1000.0
-        return u'{0:.2f} {1}'.format(v, self.env.model['decimal si'].find('step', p)['print'])
+        return u'{0:.2f} {1}'.format(v, self.env.model['decimal si'].get(p))
     
     
-    def _format_enum(self, value):
-        return self.env.model[self.node['enumeration']].find('code', value).node['print']
+    def _format_timecode(self, value):
+        t = Timestamp(Timestamp.SRT)
+        t.millisecond = value
+        return t.timecode
+    
+    
+    def _format_enum(self, key):
+        return self.env.model[self.node['enumeration']].get(key)
     
     
     def _format_float(self, value):
@@ -1100,9 +1138,7 @@ class Prototype(Element):
                 result = u'{0}/s'.format(self._format_bit_as_si(value))
                 
             elif self.node['format'] == 'millisecond':
-                t = Timestamp(Timestamp.SRT)
-                t.millisecond = value
-                result =  t.timecode
+                result =  self._format_timecode(value)
                 
             elif self.node['format'] == 'byte':
                 result = self._format_byte_as_iec_60027_2(value)
@@ -1146,11 +1182,8 @@ class Prototype(Element):
         return value
     
     
-    
     def _cast_enum(self, value):
-        element = self.env.model[self.node['enumeration']].parse(value)
-        if element: return element.code
-        else: return None
+        return self.env.model[self.node['enumeration']].parse(value)
     
     
     def _cast_number(self, value):
@@ -1251,43 +1284,12 @@ class Prototype(Element):
 class Enumeration(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
-        self.synonym = None
-    
-    
-    @property
-    def synonym(self):
-        if self._synonym is None:
-            self._synonym = {}
-            for synonym in self.node['synonym']:
-                for e in self.element:
-                    if e.enabled and synonym in e.node and \
-                    e.node[synonym] is not None and \
-                    e.node[synonym] not in self._synonym:
-                        self._synonym[e[synonym]] = e
-        return self._synonym
     
     
     def load(self):
-        for node in self.node['element']:
-            self.element.append(EnumeratedValue(self, node))
-    
-    
-    def parse(self, value):
-        element = None
-        if value is not None and value in self.synonym:
-            element = self.synonym[value]
-        return element
+        for e in self.node['element']:
+            element = Element(self, e)
+            if element.enabled:
+                self.element[element.key] = element
     
 
-
-class EnumeratedValue(object):
-    def __init__(self, space, node):
-        Element.__init__(self, space, node)
-    
-    
-    @property
-    def code(self):
-        return self.node['code']
-    
-
-        

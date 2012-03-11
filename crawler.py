@@ -107,14 +107,14 @@ class Crawler(object):
                                     track_type = unicode(track_node.attrib['type'].lower())
                                     if track_type == 'general':
                                         for i in track_node:
-                                            self._set_concept(self.ontology, self.env.prototype['crawl']['file'], 'mediainfo', i.tag, i.text)
-                                            self._set_concept(self.tag, self.env.prototype['crawl']['tag'], 'mediainfo', i.tag, i.text)
+                                            self._set_concept(self.ontology, self.env.prototype['crawl']['file'], i.tag, i.text)
+                                            self._set_concept(self.tag, self.env.prototype['crawl']['tag'], i.tag, i.text)
                                             
                                     elif track_type in self.env.prototype['track']:
                                         track = Ontology(self.env)
                                         track['type'] = track_type
                                         for i in track_node:
-                                            self._set_concept(track, self.env.prototype['track'][track_type], 'mediainfo', i.tag, i.text)
+                                            self._set_concept(track, self.env.prototype['track'][track_type], i.tag, i.text)
                                         self._add_track(track)
                                         
                                     elif track_type == 'menu':
@@ -151,7 +151,7 @@ class Crawler(object):
                 match = self.env.expression['mp4info tag'].search(line)
                 if match is not None:
                     tag = match.groups()
-                    self._set_concept(self.tag, self.env.prototype['crawl']['tag'], 'mp4info', tag[0], tag[1])
+                    self._set_concept(self.tag, self.env.prototype['crawl']['tag'], tag[0], tag[1])
     
     
     def _load_ogg_chapters(self):
@@ -304,21 +304,21 @@ class Crawler(object):
             self.ontology['encoding'] = result['encoding']
     
     
-    def _set_concept(self, ontology, space, index, key, value):
-        prototype = space.find(index, key)
+    def _set_concept(self, ontology, space, key, value):
+        prototype = space.search(key)
         if prototype:
-            ontology[prototype.name] = prototype.cast(value)
+            ontology[prototype.key] = prototype.cast(value)
     
     
     def _expand_itunmovi(self):
         if 'itunmovi' in self.tag:
             for k,v in self.tag['itunmovi'].iteritems():
-                element = self.env.model['itunemovi'].find('plist', k)
-                if element:
+                key = self.env.model['itunmovi'].parse(k)
+                if key:
                     items = [ i['name'].strip() for i in v ]
                     items = [ unicode(i) for i in items if i ]
                     if items:
-                        self.tag[element.key] = items
+                        self.tag[key] = items
     
     
     def _fix_genre(self):
@@ -328,9 +328,7 @@ class Crawler(object):
         if 'genre type' in self.tag:
             self.tag['genre type'] = int(self.tag['genre type'].split(u',')[0])
             if 'genre' not in self.tag:
-                element = self.env.model['gnre'].find('name', self.tag['genre type'])
-                if element:
-                    self.tag['genre'] = element.node['print']
+                self.tag['genre'] = self.env.model['genre'].get(self.tag['genre type'])
     
     
     def _fix_cover(self):

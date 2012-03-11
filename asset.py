@@ -151,7 +151,7 @@ class Asset(object):
                                     x.load()
                                     
                             else:
-                                for language in self.env.model['language'].lookup['iso3t']:
+                                for language in self.env.model['language'].element.keys():
                                     o['language'] = language
                                     if o['path'] and os.path.exists(o['path']):
                                         self.log.debug(u'Discovered %s', o['path'])
@@ -651,7 +651,7 @@ class AudioVideoContainer(Container):
                     if track['codec'] != 'chpl':
                         if 'language' in track:
                             command.append(u'--language')
-                            command.append(u'{0}:{1}'.format(track['track id'], self.env.find_language(track['language'])['iso2']))
+                            command.append(u'{0}:{1}'.format(track['track id'], self.env.model['language'].find(track['language']).node['ISO 639-1']))
                             
                         if 'name' in track:
                             command.append(u'--track-name')
@@ -667,7 +667,7 @@ class AudioVideoContainer(Container):
                             
                     else:
                         command.append(u'--chapter-language')
-                        command.append(self.env.find_language(track['language'])['iso2'])
+                        command.append(self.env.model['language'].find(track['language']).node['ISO 639-1'])
                         command.append(u'--chapter-charset')
                         command.append(u'UTF-8')
                         command.append(u'--chapters')
@@ -701,7 +701,7 @@ class AudioVideoContainer(Container):
     def _load_itunemovi_meta(self, record, initialize=True, finalize=True):
         if 'cast' in record:
             if initialize:
-                for i in self.env.model['itunemovi'].lookup['name']:
+                for i in self.env.model['itunmovi'].element.keys():
                     self._meta[i] = []
                     
             self._meta['directors'].extend([ 
@@ -726,7 +726,7 @@ class AudioVideoContainer(Container):
             ])
             
             if finalize:
-                for i in self.env.model['itunemovi'].lookup['name']:
+                for i in self.env.model['itunmovi'].element.keys():
                     if not self._meta[i]: del self._meta[i]
     
     
@@ -919,7 +919,7 @@ class MP4(AudioVideoContainer):
                     command.extend([
                         u'-o', self.path,
                         u'-i', pivot.resource.path,
-                        u'-l', self.env.find_language(track['language'])['print'],
+                        u'-l', self.env.model['language'].find(track['language']).name,
                         u'-n', track['name'],
                         u'-a', unicode(int(round(self.info['height'] * track['height'])))
                     ])

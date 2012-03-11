@@ -68,7 +68,7 @@ class TVDbHandler(ResourceHandler):
                         for node in element.findall(space.node['tag']):
                             o = Ontology(self.env)
                             for item in node.getchildren():
-                                prototype = space.find('tvdb', item.tag)
+                                prototype = space.search(item.tag)
                                 if prototype:
                                     o[prototype.key] = prototype.cast(item.txt)
                             entry[u'document'].append(o.node)
@@ -78,7 +78,7 @@ class TVDbHandler(ResourceHandler):
                         for node in element.findall(space.node['tag']):
                             o = Ontology(self.env)
                             for item in node.getchildren():
-                                prototype = space.find('tvdb', item.tag)
+                                prototype = space.search(item.tag)
                                 if prototype:
                                     o[prototype.key] = prototype.cast(item.txt)
                             entry = {

@@ -140,7 +140,7 @@ class ResourceHandler(object):
                     if 'space' in branch and branch['space'] in self.spaces:
                         space = self.spaces[branch['space']]
                         for k,v in match.groupdict().iteritems():
-                            prototype = space.find('keyword', k)
+                            prototype = space.search(k)
                             query['parameter'][prototype.key] = prototype.cast(v)
                             
                     if 'remote' in branch:
