@@ -128,8 +128,6 @@ def decode_cli(env):
     c['optimize'].add_argument('-U', '--crawl',     dest='crawl',       action='store_true', default=False, help='rebuild physical file index')
     
     c['clean'] = s.add_parser('clean', help='clean repository indexes')
-    c['show'] = s.add_parser('show', help='map a tv show to a TVDB id')
-    c['poster'] = s.add_parser('poster', help='manage prefered poster')
     c['initialize'] = s.add_parser('initialize', help='initialize the repository')
     
     o = Ontology(env, vars(p.parse_args()))

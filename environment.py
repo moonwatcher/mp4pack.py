@@ -27,9 +27,7 @@ class Environment(object):
         self.ontology = None
         self.caption_filter_cache = CaptionFilterCache(self)
         self.universal_detector = None
-        
         self.lookup = {
-            'model':{},
             'volume':{},
         }
         self.state = {
@@ -46,6 +44,7 @@ class Environment(object):
             'format':{},
             'repository':{},
             'volume':{},
+            'rule':{},
         }
         
         self.load()
@@ -53,17 +52,6 @@ class Environment(object):
     
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
-    
-    
-    # Properties
-    @property
-    def verbosity(self):
-        return self.runtime['log level'][self.ontology['verbosity']]
-    
-    
-    @property
-    def system(self):
-        return self.state['system']
     
     
     @property
@@ -74,26 +62,6 @@ class Environment(object):
     @property
     def model(self):
         return self.state['model']
-    
-    
-    @property
-    def home(self):
-        return self.system['home']
-    
-    
-    @property
-    def host(self):
-        return self.system['host']
-    
-    
-    @property
-    def domain(self):
-        return self.system['domain']
-    
-    
-    @property
-    def language(self):
-        return self.system['language']
     
     
     @property
@@ -117,11 +85,6 @@ class Environment(object):
     
     
     @property
-    def format(self):
-        return self.state['format']
-    
-    
-    @property
     def repository(self):
         return self.state['repository']
     
@@ -129,16 +92,6 @@ class Environment(object):
     @property
     def volume(self):
         return self.state['volume']
-    
-    
-    @property
-    def expression(self):
-        return self.state['expression']
-    
-    
-    @property
-    def service(self):
-        return self.runtime['service']
     
     
     @property
@@ -152,11 +105,64 @@ class Environment(object):
     
     
     @property
+    def rule(self):
+        return self.state['rule']
+    
+    
+    @property
+    def service(self):
+        return self.runtime['service']
+    
+    
+    @property
+    def expression(self):
+        return self.state['expression']
+    
+    
+    
+    
+    @property
+    def verbosity(self):
+        return self.runtime['log level'][self.ontology['verbosity']]
+    
+    
+    @property
+    def system(self):
+        return self.state['system']
+    
+    
+    @property
+    def home(self):
+        return self.system['home']
+    
+    
+    @property
+    def host(self):
+        return self.system['host']
+    
+    
+    @property
+    def domain(self):
+        return self.system['domain']
+    
+    
+    @property
+    def language(self):
+        return self.system['language']
+    
+    
+    @property
+    def format(self):
+        return self.state['format']
+    
+    
+    @property
     def kind_with_language(self):
         return self.runtime['kind with language']
     
     
-    # Loading...
+    
+    
     def load(self):
         
         # start from the base user conf
@@ -380,27 +386,20 @@ class Environment(object):
     
     
     def _load_rule(self, rule):
-        if 'rule' not in self.lookup:
-            self.lookup['rule'] = {'name':{}, 'provide':{}, }
-            
-        if rule['name'] not in self.lookup['rule']['name']:
-            self.lookup['rule']['name'][rule['name']] = rule
-            for branch in rule['branch']:
-                if 'match' in branch:
-                    flags = re.UNICODE
-                    if 'flags' in branch['match']: flags |= branch['match']['flags']
-                    branch['match']['pattern'] = re.compile(branch['match']['expression'], flags)
-                if 'decode' in branch:
-                    flags = re.UNICODE
-                    if 'flags' in branch['decode']: flags |= branch['decode']['flags']
-                    for d in branch['decode']: d['pattern'] = re.compile(d['expression'], flags)
-                    
-            for provide in rule['provides']:
-                if provide not in self.lookup['rule']['provide']:
-                    self.lookup['rule']['provide'][provide] = []
-                self.lookup['rule']['provide'][provide].append(rule)
-        else:
-            self.log.warning('Refusing to redefine rule %s.')
+        for branch in rule['branch']:
+            if 'match' in branch:
+                flags = re.UNICODE
+                if 'flags' in branch['match']: flags |= branch['match']['flags']
+                branch['match']['pattern'] = re.compile(branch['match']['expression'], flags)
+            if 'decode' in branch:
+                flags = re.UNICODE
+                if 'flags' in branch['decode']: flags |= branch['decode']['flags']
+                for d in branch['decode']: d['pattern'] = re.compile(d['expression'], flags)
+                
+        for provide in rule['provides']:
+            if provide not in self.rule:
+                self.rule[provide] = []
+            self.rule[provide].append(rule)
     
     
     def _load_default_host_rule(self):
@@ -508,6 +507,9 @@ class Environment(object):
         self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
     
     
+    
+    
+    # Path manipulation
     def parse_url(self, url):
         result = None
         if url:
@@ -558,7 +560,16 @@ class Environment(object):
             return result
     
     
-    # Path manipulation
+    def canonic_path_for(self, path):
+        result = path
+        real_path = os.path.realpath(os.path.abspath(path))
+        for vol_path, vol in self.lookup['volume'].iteritems():
+            if os.path.commonprefix([vol_path, real_path]) == vol_path:
+                result = real_path.replace(vol_path, vol['path'])
+                break
+        return result
+    
+    
     def varify_directory(self, path):
         result = False
         try:
@@ -570,48 +581,6 @@ class Environment(object):
         except OSError as err:
             self.log.error(unicode(err))
             result = False
-        return result
-    
-    
-    def scan_for_related(self, properties):
-        result = None
-        if properties:
-            result = []
-            self.log.debug(u'Scanning repository for file related to %s', properties)
-            for v in self.repository['volume'].values():
-                if v['scan']:
-                    for p in self.profile.values():
-                        for k in p['kind']:
-                            if k in self.kind_with_language:
-                                for l in self.model['language'].element.keys():
-                                    related = copy.deepcopy(properties)
-                                    related['volume'] = v['name']
-                                    related['kind'] = k
-                                    related['profile'] = p['name']
-                                    related['language'] = l
-                                    related_path = self.encode_canonic_path(related)
-                                    if os.path.exists(related_path):
-                                        result.append(related)
-                                        self.log.debug('Discovered %s', related_path)
-                            else:
-                                related = copy.deepcopy(properties)
-                                related['volume'] = v['name']
-                                related['kind'] = k
-                                related['profile'] = p['name']
-                                related_path = self.encode_canonic_path(related)
-                                if os.path.exists(related_path):
-                                    result.append(related)
-                                    self.log.debug('Discovered %s', related_path)
-        return result
-    
-    
-    def canonic_path_for(self, path):
-        result = path
-        real_path = os.path.realpath(os.path.abspath(path))
-        for vol_path, vol in self.lookup['volume'].iteritems():
-            if os.path.commonprefix([vol_path, real_path]) == vol_path:
-                result = real_path.replace(vol_path, vol['path'])
-                break
         return result
     
     
@@ -633,11 +602,6 @@ class Environment(object):
         else:
             result = False
         return result
-    
-    
-    def is_path_exists(self, path):
-        if path is not None and os.path.exists(path): return True
-        else: return False
     
     
     def varify_path_is_available(self, path, overwrite=False):
@@ -672,6 +636,8 @@ class Environment(object):
                 break
         self.universal_detector.close()
         return self.universal_detector.result
+    
+    
     
     
     # Command execution
@@ -740,41 +706,6 @@ class Environment(object):
                 result = self.remove_accents(result)
                 result = result.lower()
         return result
-    
-    
-    def encode_subler_key_value(self, key, value):
-        m = self.configuration.lookup['name']['tag'][key]
-        if 'subler' in m:
-            pkey = m['subler']
-            if m['type'] == 'enum':
-                pvalue = self.configuration.lookup['code'][m['atom']][value]['print']
-            elif m['type'] in ('string', 'list', 'dict'):
-                if m['type'] == 'list':
-                    pvalue = u', '.join(value)
-                elif m['type'] == 'dict':
-                    pvalue = u', '.join(['{0}:{1}'.format(k,v) for k,v in value.iteritems()])
-                else:
-                    if key == 'language':
-                        pvalue = self.configuration.lookup['iso3t']['language'][value]['print']
-                    else:
-                        pvalue = unicode(value)
-                pvalue = pvalue.replace(u'{',u'&#123;').replace(u'}',u'&#125;').replace(u':',u'&#58;')
-                
-            elif m['type'] == 'bool':
-                if value: pvalue = u'yes'
-                else: pvalue = u'no'
-            elif m['type'] == 'date':
-                pvalue = value.strftime('%Y-%m-%d %H:%M:%S')
-            elif m['type'] == 'int':
-                pvalue = unicode(value)
-            else:
-                pvalue = value
-                
-        return u'{{{0}:{1}}}'.format(pkey, pvalue)
-    
-    
-    
-    
     
 
 

@@ -365,6 +365,21 @@ model = {
             { 'key':'ringtone',     'name':u'Ringtone',     'stik':14 },
         ],
     },
+    'content rating':{
+        'synonym':['rtng'],
+        'element':[
+            { 'key':'none',     'name':u'None',      'rtng':0 },
+            { 'key':'clean',    'name':u'Clean',     'rtng':2 },
+            { 'key':'explicit', 'name':u'Explicit',  'rtng':4 },
+        ],
+    },
+    'itunes account type':{
+        'synonym':['akID'],
+        'element':[
+            { 'key':'itunes',   'name':u'iTunes',    'akID':0 },
+            { 'key':'aol',      'name':u'AOL',       'akID':1 },
+        ],
+    },
     'country':{
         'synonym':['ISO 3166-1 alpha-2', 'ISO 3166-1 alpha-3'],
         'element':[
@@ -616,21 +631,6 @@ model = {
             { 'key':'ye',   'ISO 3166-1 alpha-2':'YE',  'ISO 3166-1 alpha-3':'YEM', 'ISO 3166-1 numeric':'887',                 'name':u'Yemen', },
             { 'key':'zm',   'ISO 3166-1 alpha-2':'ZM',  'ISO 3166-1 alpha-3':'ZMB', 'ISO 3166-1 numeric':'894',                 'name':u'Zambia', },
             { 'key':'zw',   'ISO 3166-1 alpha-2':'ZW',  'ISO 3166-1 alpha-3':'ZWE', 'ISO 3166-1 numeric':'716',                 'name':u'Zimbabwe', },
-        ],
-    },
-    'content rating':{
-        'synonym':['rtng'],
-        'element':[
-            { 'key':'none',     'name':u'None',      'rtng':0 },
-            { 'key':'clean',    'name':u'Clean',     'rtng':2 },
-            { 'key':'explicit', 'name':u'Explicit',  'rtng':4 },
-        ],
-    },
-    'itunes account type':{
-        'synonym':['akID'],
-        'element':[
-            { 'key':'itunes',   'name':u'iTunes',    'akID':0 },
-            { 'key':'aol',      'name':u'AOL',       'akID':1 },
         ],
     },
 }

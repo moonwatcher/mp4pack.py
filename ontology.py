@@ -85,11 +85,6 @@ class Ontology(dict):
         dict.clear(self)
     
     
-    def complete(self):
-        for key in self.env.lookup['rule']['provide']:
-            self[key]
-    
-    
     def _decode(self, keyword, value):
         if keyword and value is not None:
             prototype = self.env.prototype['crawl']['tag'].search(keyword)
@@ -103,8 +98,8 @@ class Ontology(dict):
     
     def _resolve(self, key):
         if not dict.__contains__(self, key):
-            if key in self.env.lookup['rule']['provide']:
-                for rule in self.env.lookup['rule']['provide'][key]:
+            if key in self.env.rule:
+                for rule in self.env.rule[key]:
                     for branch in rule['branch']:
                         taken = True
                         if 'requires' in branch:
