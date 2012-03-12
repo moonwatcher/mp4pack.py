@@ -226,6 +226,16 @@ class Task(object):
         return self._resource
     
     
+    @property
+    def profile(self):
+        result = None
+        if 'profile' in self.job.ontology:
+            result = self.env.profile[self.job.ontology['profile']]
+        elif 'profile' in self.resource.ontology:
+            result = self.env.profile[self.resource.ontology['profile']]
+        return result
+    
+    
     def open(self):
         self.log.debug('Open task %s', unicode(self))
         self.node = {
@@ -268,15 +278,15 @@ class Task(object):
     
     def extract(self):
         self.query.add(self.resource)
-        self.query.resolve(self.job.profile['extract'])
-        self.transform.resolve(self.query.result, self.job.profile['extract'])
+        self.query.resolve(self.profile['extract'])
+        self.transform.resolve(self.query.result, self.profile['extract'])
         self.resource.extract(self)
     
     
     def pack(self):
         self.query.add(self.resource)
-        self.query.resolve(self.job.profile['pack'])
-        self.transform.resolve(self.query.result, self.job.profile['pack'])
+        self.query.resolve(self.profile['pack'])
+        self.transform.resolve(self.query.result, self.profile['pack'])
         
         o = Ontology.clone(self.resource.ontology)
         del o['path']
@@ -292,8 +302,8 @@ class Task(object):
     
     def transcode(self):
         self.query.add(self.resource)
-        self.query.resolve(self.job.profile['transcode'])
-        self.transform.resolve(self.query.result, self.job.profile['transcode'])
+        self.query.resolve(self.profile['transcode'])
+        self.transform.resolve(self.query.result, self.profile['transcode'])
         
         o = Ontology.clone(self.resource.ontology)
         del o['path']
@@ -308,8 +318,8 @@ class Task(object):
     
     
     def update(self):
-        self.query.resolve(self.job.profile['update'])
-        self.transform.resolve(self.query.result, self.job.profile['update'])
+        self.query.resolve(self.profile['update'])
+        self.transform.resolve(self.query.result, self.profile['update'])
         self.resource.update(self)
     
     

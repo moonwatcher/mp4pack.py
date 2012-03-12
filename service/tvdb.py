@@ -5,9 +5,11 @@ from StringIO import StringIO
 from xml.etree import  cElementTree as ElementTree
 from urllib2 import Request, urlopen, URLError, HTTPError
 
+from service import ResourceHandler
+
 class TVDbHandler(ResourceHandler):
-    def __init__(self, node):
-        ResourceHandler.__init__(self, node)
+    def __init__(self, resolver, node):
+        ResourceHandler.__init__(self, resolver, node)
     
     
     def fetch(self, query):
@@ -97,5 +99,4 @@ class TVDbHandler(ResourceHandler):
         for entry in query['result']:
             self.store(entry)
     
-
 

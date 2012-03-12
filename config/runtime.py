@@ -3,7 +3,7 @@
 import re
 import logging
 
-resource_scheme = u'mp4pack'
+resource_scheme = u'mpk'
 
 runtime = {
     'default':{
@@ -645,7 +645,7 @@ runtime = {
             'flags':re.UNICODE,
         },
     ],
-    'rule':[
+    'rule':[ 
         {
             'name':'tmdb movie',
             'provides':set(('tmdb movie',)),
@@ -767,7 +767,6 @@ runtime = {
             ),
         },
         
-        
         {
             'name':'enabled bit default',
             'provides':set(('enabled',)),
@@ -779,7 +778,6 @@ runtime = {
                 },
             ),
         },
-        
         {
             'name':'decode path',
             'provides':set((
@@ -814,7 +812,6 @@ runtime = {
                 },
             ),
         },
-        
         {
             'name':'implicit path',
             'provides':set(('path',)),
@@ -830,7 +827,6 @@ runtime = {
                 },
             ),
         },
-        
         {
             'name':'global environment',
             'provides':set(('resource uri scheme',)),
@@ -956,7 +952,7 @@ runtime = {
                     'apply':(
                         {
                             'property':'tv episode id',
-                            'format':u's{tv season:02d}e{tv episode #:02d}',
+                            'format':u's{tv season:02d}e{tv episode:02d}',
                         },
                     ),
                 },
@@ -972,7 +968,7 @@ runtime = {
                     'apply':(
                         {
                             'property':'asset id',
-                            'format':u'{media kind}/{tv show key}/{tv season}/{tv episode #}',
+                            'format':u'{media kind}/{tv show key}/{tv season}/{tv episode}',
                         },
                     ),
                 },
@@ -1156,11 +1152,11 @@ runtime = {
                     'apply':(
                         {
                             'property':'track position',
-                            'format':u'{tv episode #}',
+                            'format':u'{tv episode}',
                         },
                         {
                             'property':'track #',
-                            'format':u'{tv episode #} / {track total}',
+                            'format':u'{tv episode} / {track total}',
                         },
                     ),
                 },

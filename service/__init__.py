@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import re
+import logging
+
 from ontology import Ontology
 
 class Resolver(object):
     def __init__(self, env):
         self.log = logging.getLogger('Resolver')
         self.env = env
-        self.handlers = []
+        self.handlers = {}
         self.pool = {}
         
         from tmdb import TMDbHandler
@@ -17,40 +20,22 @@ class Resolver(object):
     
     
     def open(self):
-        pass
+        self.log.debug(u'Starting resolver')
     
     
     def close(self):
-        for host, handle in self.pool.iteritems():
-            handle['connection'].close()
+        for handle in self.pool.values():
+            handle.close()
     
     
     def find_database_handle(self, host):
         result = None
         if host in self.pool:
             result = self.pool[host]
-        elif host in self.env.repository:
-            repository = self.env.repository[host]
-            o = Ontology(repository['mongodb'])
-            handle = {
-                'ontology':o,
-                'connection':None,
-                'database':None,
-                'created':datetime.utcnow(),
-            }
-            
-            if 'mongodb url' in o:
-                try:
-                    self.log.debug(u'Connecting to %s', o['mongodb url'])
-                    handle['connection'] = pymongo.Connection(o['mongodb url'])
-                except pymongo.errors.AutoReconnect as err:
-                    self.log.warning(u'Failed to connect to %s', o['mongodb url'])
-                    self.log.debug(u'Exception raised: %s', err)
-                else:
-                    self.log.debug(u'Connection established with %s', o['host'])
-                    handle['database'] = handle['connection'][o['database']]
-                    self.pool[host] = handle
-                    result = handle
+        else:
+            result = MongoConnection(self.env, host)
+            self.pool[host] = result
+            result.open()
         return result
     
     
@@ -69,6 +54,38 @@ class Resolver(object):
                 break
                 
         return result
+    
+
+
+class MongoConnection(object):
+    def __init__(self, env, host):
+        self.log = logging.getLogger('mongodb')
+        self.env = env
+        self.ontology = None
+        self.connection = None
+        self.database = None
+        
+        if host in self.env.repository and \
+        'mongodb' in self.env.repository[host]:
+            self.ontology = Ontology(self.env.repository[host]['mongodb'])
+    
+    
+    def open(self):
+        if self.ontology and 'mongodb url' in self.ontology:
+            try:
+                self.log.debug(u'Connecting to %s', self.ontology['mongodb url'])
+                self.connection = pymongo.Connection(self.ontology['mongodb url'])
+            except pymongo.errors.AutoReconnect as err:
+                self.log.warning(u'Failed to connect to %s', self.ontology['mongodb url'])
+                self.log.debug(u'Exception raised: %s', err)
+            else:
+                self.log.debug(u'Connection established with %s', self.ontology['host'])
+                self.database = self.connection[self.ontology['database']]
+    
+    
+    def close(self):
+        self.log.debug(u'Closing mongodb connection to %s', self.ontology['host'])
+        self.connection.close()
     
 
 
@@ -110,7 +127,7 @@ class ResourceHandler(object):
                 if 'host' in param:
                     handle = self.resolver.find_database_handle(param['host'])
                     if handle:
-                        collection = handle['database'][branch['collection']]
+                        collection = handle.database[branch['collection']]
                         result = collection.find_one({u'uri':uri})
                         if result is None:
                             self.cache(uri)
@@ -159,19 +176,19 @@ class ResourceHandler(object):
                 if 'host' in param:
                     handle = self.resolver.find_database_handle(param['host'])
                     if handle:
-                        collection = handle['database'][branch['collection']]
+                        collection = handle.database[branch['collection']]
                         collection.remove({u'uri':uri})
                 break
     
     
     def store(self, entry):
-        if entry and 'uri' in entry and 'host' in entry \
+        if entry and 'uri' in entry and 'host' in entry and \
         'namespace' in entry and entry['namespace'] in self.branch:
             branch = self.branch[entry['namespace']]
             if 'collection' in branch:
                 handle = self.resolver.find_database_handle(entry['host'])
                 if handle:
-                    collection = handle['database'][branch['collection']]
+                    collection = handle.database[branch['collection']]
                     current = collection.find_one({u'uri':entry[u'uri']})
                     now = datetime.utcnow()
                     if current is None:
@@ -197,27 +214,3 @@ class ResourceHandler(object):
     
     
 
-
-# media kind 'Movie'
-# mpk://multivac/kb/movie
-# mpk://multivac/kb/movie/imdb/<imdb id>
-# mpk://multivac/kb/movie/tmdb/<tmdb id>
-#
-# media kind 'TV Show'
-# mpk://multivac/kb/tvshow
-# mpk://multivac/kb/tvshow/show/<show>
-# mpk://multivac/kb/tvshow/season/<show>/<season>
-# mpk://multivac/kb/tvshow/episode/<show>/<season>/<episode>
-#
-# media kind 'Music'
-# mpk://multivac/kb/music
-# mpk://multivac/kb/music/album/<album>
-# mpk://multivac/kb/music/disc/<album>/<disc>
-# mpk://multivac/kb/music/track/<album>/<disc>/<track>
-
-# mpk://multivac/kb/person
-# mpk://multivac/kb/network
-# mpk://multivac/kb/studio
-# mpk://multivac/kb/job
-# mpk://multivac/kb/department
-# mpk://multivac/kb/genre

@@ -4,9 +4,11 @@ import json
 from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 
+from service import ResourceHandler
+
 class TMDbHandler(ResourceHandler):
-    def __init__(self, node):
-        ResourceHandler.__init__(self, node)
+    def __init__(self, resolver, node):
+        ResourceHandler.__init__(self, resolver, node)
     
     
     def fetch(self, query):

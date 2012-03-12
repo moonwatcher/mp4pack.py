@@ -13,16 +13,19 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'movie id',
+                    'name':'Movie ID',
                     'keyword':'movie_id',
                     'type':int,
                 },
                 {
                     'key':'imdb movie id',
+                    'name':'IMDB Movie ID',
                     'keyword':'imdb_movie_id',
                     'type':unicode,
                 },
@@ -39,11 +42,13 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tv show id',
+                    'name':'TV Show ID',
                     'keyword':'tv_show_id',
                     'type':int,
                 },
@@ -60,16 +65,19 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tv show id',
+                    'name':'TV Show ID',
                     'keyword':'tv_show_id',
                     'type':int,
                 },
                 {
                     'key':'tv season',
+                    'name':'TV Season',
                     'keyword':'tv_season',
                     'type':int,
                 },
@@ -86,21 +94,25 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tv show id',
+                    'name':'TV Show ID',
                     'keyword':'tv_show_id',
                     'type':int,
                 },
                 {
                     'key':'tv season',
+                    'name':'TV Season',
                     'keyword':'tv_season',
                     'type':int,
                 },
                 {
                     'key':'tv episode',
+                    'name':'TV Episode',
                     'keyword':'tv_episode',
                     'type':int,
                 },
@@ -117,11 +129,13 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'person id',
+                    'name':'Person ID',
                     'keyword':'person_id',
                     'type':int,
                 },
@@ -138,11 +152,13 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'network id',
+                    'name':'Network ID',
                     'keyword':'network_id',
                     'type':int,
                 },
@@ -159,11 +175,13 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'studio id',
+                    'name':'Studio ID',
                     'keyword':'studio_id',
                     'type':int,
                 },
@@ -180,11 +198,13 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'job id',
+                    'name':'Job ID',
                     'keyword':'job_id',
                     'type':int,
                 },
@@ -201,11 +221,13 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'department id',
+                    'name':'Department ID',
                     'keyword':'department_id',
                     'type':int,
                 },
@@ -222,11 +244,13 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'genre id',
+                    'name':'Genre ID',
                     'keyword':'genre_id',
                     'type':int,
                 },
@@ -308,6 +332,7 @@ prototype = {
                     'name':'Language',
                     'mediainfo':'Language_String3',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'profile',
@@ -326,7 +351,7 @@ prototype = {
                     'subler':'Media Kind',
                     'name':'Media Kind',
                     'type':'enum',
-                    'enumeration':'stik',
+                    'enumeration':'media kind',
                 },
                 {
                     'key':'name',
@@ -604,7 +629,7 @@ prototype = {
                     'mp4info':'GenreType',
                     'name':'Genre Type',
                     'type':'enum',
-                    'enumeration':'gnre',
+                    'enumeration':'genre',
                 },
                 {
                     'key':'genre',
@@ -715,7 +740,7 @@ prototype = {
                     'mediainfo':'sfID',
                     'name':'iTunes country ID',
                     'type':'enum',
-                    'enumeration':'sfID',
+                    'enumeration':'country',
                 },
                 {
                     'key':'itunes account type',
@@ -723,7 +748,7 @@ prototype = {
                     'mediainfo':'akID',
                     'name':'iTunes account type',
                     'type':'enum',
-                    'enumeration':'akID',
+                    'enumeration':'itunes account type',
                 },
                 {
                     'key':'episode global id',
@@ -746,7 +771,7 @@ prototype = {
                     'subler':'Content Rating',
                     'name':'Content Rating',
                     'type':'enum',
-                    'enumeration':'rtng',
+                    'enumeration':'content rating',
                 },
                 {
                     'key':'itunextc',
@@ -931,6 +956,7 @@ prototype = {
                     'name':'Language',
                     'mediainfo':'Language_String3',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'track id',
@@ -1072,6 +1098,7 @@ prototype = {
                     'name':'Language',
                     'mediainfo':'Language_String3',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'track id',
@@ -1258,6 +1285,7 @@ prototype = {
                     'name':'Language',
                     'mediainfo':'Language_String3',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'track id',
@@ -1339,6 +1367,13 @@ prototype = {
             ],
         },
         'image':{
+            'default':{
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'mediainfo':None,
+                'atom':None,
+            },
             'synonym':['mediainfo'],
             'element':[
                 {
@@ -1352,6 +1387,7 @@ prototype = {
                     'name':'Language',
                     'mediainfo':'Language_String3',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'track id',
@@ -1459,18 +1495,22 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tmdb movie id',
-                    'keyword':'tmdb_movie_id'
+                    'name':'TMDB movie ID',
+                    'keyword':'tmdb_movie_id',
                     'type':int,
                 },
                 {
                     'key':'language',
+                    'name':'Language',
                     'keyword':'language',
                     'type':'enum',
+                    'enumeration':'language',
                 },
             ],
         },
@@ -1485,12 +1525,14 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tmdb person id',
-                    'keyword':'tmdb_person_id'
+                    'name':'TMDB person ID',
+                    'keyword':'tmdb_person_id',
                     'type':int,
                 },
             ],
@@ -1511,37 +1553,44 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tvdb tv show id',
-                    'keyword':'tvdb_tv_show_id'
+                    'name':'TVDB TV Show ID',
+                    'keyword':'tvdb_tv_show_id',
                     'type':int,
                 },
                 {
                     'key':'tvdb person id',
+                    'name':'TVDB Person ID',
                     'keyword':'tvdb_person_id',
                     'tvdb':'id',
                     'type':int,
                 },
                 {
                     'key':'image url',
+                    'name':'Image URL',
                     'tvdb':'Image',
                     'type':unicode,
                 },
                 {
                     'key':'name',
+                    'name':'Name',
                     'tvdb':'Name',
                     'type':unicode,
                 },
                 {
                     'key':'character',
+                    'name':'Character',
                     'tvdb':'Role',
                     'type':unicode,
                 },
                 {
                     'key':'sort order',
+                    'name':'Sort Order',
                     'tvdb':'SortOrder',
                     'type':int,
                 },
@@ -1560,38 +1609,45 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tvdb tv show id',
-                    'keyword':'tvdb_tv_show_id'
+                    'name':'TVDB TV Show ID',
+                    'keyword':'tvdb_tv_show_id',
                     'type':int,
                 },
                 {
                     'key':'tvdb image id',
-                    'key':'tvdb_image_id',
+                    'name':'TVDB Image ID',
                     'tvdb':'id',
                     'type':int,
                 },
                 {
                     'key':'tv season',
+                    'name':'TV Season',
                     'tvdb':'Season',
                     'type':int,
                 },
                 {
                     'key':'language',
+                    'name':'Language',
                     'tvdb':'Language',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'url',
+                    'name':'URL',
                     'tvdb':'BannerPath',
                     'type':unicode,
                 },
                 {
                     # fanart, poster, season, series
                     'key':'tvdb image context',
+                    'name':'TVDB Image Context',
                     'tvdb':'BannerType',
                     'type':unicode,
                 },
@@ -1599,21 +1655,25 @@ prototype = {
                     # season, seasonwide, text, graphical, blank,
                     # 1920x1080, 1280x720, 680x1000
                     'key':'tvdb image layout',
+                    'name':'TVDB Image Layout',
                     'tvdb':'BannerType2',
                     'type':unicode,
                 },
                 {
                     'key':'user rating',
+                    'name':'User Rating',
                     'tvdb':'Rating',
                     'type':float,
                 },
                 {
                     'key':'user rating count',
+                    'name':'User Rating Count',
                     'tvdb':'RatingCount',
                     'type':int,
                 },
                 {
                     'key':'tv show name text',
+                    'name':'TV Show Name Text',
                     'tvdb':'SeriesName',
                     'type':bool,
                 },
@@ -1644,82 +1704,99 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tvdb tv show id',
-                    'keyword':'tvdb_tv_show_id'
+                    'name':'TVDB TV Show ID',
+                    'keyword':'tvdb_tv_show_id',
                     'tvdb':'id',
                     'type':int,
                 },
                 {
                     'key':'imdb id',
+                    'name':'IMDB ID',
                     'tvdb':'IMDB_ID',
                     'type':unicode,
                 },
                 {
                     'key':'zap2it id',
+                    'name':'Zap2It ID',
                     'tvdb':'zap2it_id',
                     'type':unicode,
                 },
                 {
                     'key':'name',
+                    'name':'Name',
                     'tvdb':'SeriesName',
                     'type':unicode,
                 },
                 {
                     'key':'modified',
+                    'name':'Modified',
                     'tvdb':'lastupdated',
                     'type':'date',
                 },
                 {
                     'key':'release date',
+                    'name':'Release Date',
                     'tvdb':'FirstAired',
                     'type':'date',
                 },
                 {
                     'key':'rating',
+                    'name':'Rating',
                     'tvdb':'ContentRating',
                     'type':unicode,
                 },
                 {
                     'key':'language',
+                    'name':'Language',
                     'tvdb':'Language',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'overview',
+                    'name':'Overview',
                     'tvdb':'Overview',
                     'type':unicode,
                 },
                 {
-                    'tvdb':'Rating',
                     'key':'user rating',
+                    'name':'User Rating',
+                    'tvdb':'Rating',
                     'type':float,
                 },
                 {
                     'key':'user rating count',
+                    'name':'User Rating Count',
                     'tvdb':'RatingCount',
                     'type':int,
                 },
                 {
                     'key':'runtime',
+                    'name':'Runtime',
                     'tvdb':'Runtime',
                     'type':int,
                 },
                 {
                     'key':'status',
+                    'name':'Status',
                     'tvdb':'Status',
                     'type':unicode,
                 },
                 {
                     'key':'tv network',
+                    'name':'TV Network',
                     'tvdb':'Network',
                     'type':unicode,
                 },
                 {
                     'key':'genre',
+                    'name':'Genre',
                     'tvdb':'Genre',
                     'type':unicode,
                     'plural':'list',
@@ -1727,6 +1804,7 @@ prototype = {
                 },
                 {
                     'key':'actor',
+                    'name':'Actor',
                     'tvdb':'Actors',
                     'type':unicode,
                     'plural':'list',
@@ -1734,16 +1812,19 @@ prototype = {
                 },
                 {
                     'key':'poster url',
+                    'name':'Poster URL',
                     'tvdb':'poster',
                     'type':unicode,
                 },
                 {
                     'key':'banner url',
+                    'name':'Banner URL',
                     'tvdb':'banner',
                     'type':unicode,
                 },
                 {
                     'key':'fan art url',
+                    'name':'Fan Art URL',
                     'tvdb':'fanart',
                     'type':unicode,
                 },
@@ -1789,93 +1870,112 @@ prototype = {
             'element':[
                 {
                     'key':'host',
-                    'keyword':'host'
+                    'name':'Host',
+                    'keyword':'host',
                     'type':unicode,
                 },
                 {
                     'key':'tvdb tv show id',
+                    'name':'TVDB TV Show ID',
                     'keyword':'tvdb_tv_show_id',
                     'tvdb':'seriesid',
                     'type':int,
                 },
                 {
                     'key':'tvdb tv season id',
+                    'name':'TVDB TV Season ID',
                     'tvdb':'seasonid',
                     'type':int,
                 },
                 {
                     'key':'tvdb tv episode id',
+                    'name':'TVDB TV Episode ID',
                     'keyword':'tvdb_tv_episode_id',
                     'tvdb':'id',
                     'type':int,
                 },
                 {
                     'key':'tv season',
+                    'name':'TV Season',
                     'tvdb':'SeasonNumber',
                     'type':int,
                 },
                 {
                     'key':'tv episode',
+                    'name':'TV Episode',
                     'tvdb':'EpisodeNumber',
                     'type':int,
                 },
                 {
                     'key':'name',
+                    'name':'Name',
                     'tvdb':'EpisodeName',
                     'type':unicode,
                 },
                 {
                     'key':'absolute tv episode',
+                    'name':'Absolute TV Episode',
                     'tvdb':'absolute_number',
                     'type':int,
                 },
                 {
                     'key':'imdb id',
+                    'name':'IMDB ID',
                     'tvdb':'IMDB_ID',
                     'type':unicode,
                 },
                 {
                     'key':'modified',
+                    'name':'Modified',
                     'tvdb':'lastupdated',
                     'type':'date',
                 },
                 {
                     'key':'language',
+                    'name':'Language',
                     'tvdb':'Language',
                     'type':'enum',
+                    'enumeration':'language',
                 },
                 {
                     'key':'release date',
+                    'name':'Release Date',
                     'tvdb':'FirstAired',
                     'type':'date',
                 },
                 {
                     'key':'overview',
+                    'name':'Overview',
                     'tvdb':'Overview',
                     'type':unicode
                 },
                 {
                     'key':'production code',
+                    'name':'Production Code',
                     'tvdb':'ProductionCode',
                     'type':unicode,
                 },
                 {
                     'key':'user rating',
+                    'name':'User Rating',
                     'tvdb':'Rating',
                     'type':float,
                 },
                 {
                     'key':'user rating count',
+                    'name':'User Rating Count',
                     'tvdb':'RatingCount',
                     'type':int,
                 },
                 {
                     'key':'poster url',
+                    'name':'Poster URL',
                     'tvdb':'filename',
                     'type':unicode,
                 },
                 {
                     'key':'actor',
+                    'name':'Actor',
                     'tvdb':'GuestStars',
                     'type':unicode,
                     'plural':'list',
@@ -1883,6 +1983,7 @@ prototype = {
                 },
                 {
                     'key':'director',
+                    'name':'Director',
                     'tvdb':'Director',
                     'type':unicode,
                     'plural':'list',
@@ -1890,6 +1991,7 @@ prototype = {
                 },
                 {
                     'key':'screenwriter',
+                    'name':'Screenwriter',
                     'tvdb':'Writer',
                     'type':unicode,
                     'plural':'list',

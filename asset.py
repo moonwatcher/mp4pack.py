@@ -279,12 +279,13 @@ class Resource(object):
     
     @property
     def path(self):
-        result = None
-        if self.local:
-            result = self.ontology['path']
-        else:
-            result = self.ontology['path in cache']
-        return result
+        return self.ontology['path']
+        #result = None
+        #if self.local:
+        #    result = self.ontology['path']
+        #else:
+        #    result = self.ontology['path in cache']
+        #return result
     
     
     @property

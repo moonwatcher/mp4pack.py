@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import plistlib
 import logging
 from ontology import Ontology
 from subprocess import Popen, PIPE

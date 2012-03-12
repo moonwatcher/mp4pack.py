@@ -6,15 +6,15 @@ import logging
 import copy
 import unicodedata
 import urlparse
+import plistlib
 from subprocess import Popen, PIPE
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import config
 from ontology import Ontology
 from asset import AssetCache
-from db import EntityManager
-
 from model import Timestamp
+from service import Resolver
 
 class Environment(object):
     def __init__(self):
@@ -25,7 +25,6 @@ class Environment(object):
         
         self.configuration = None
         self.ontology = None
-        self.em = None
         self.caption_filter_cache = CaptionFilterCache(self)
         self.universal_detector = None
         
@@ -171,7 +170,7 @@ class Environment(object):
             self.system['home'] = env_home
             
         if self.home:
-            self.load_external_config(os.path.join(self.home, 'mpk.conf'))
+            self.load_external_config(os.path.join(self.home, 'dev.conf'))
             self.load_system(self.configuration['system'])
             
             
@@ -215,8 +214,7 @@ class Environment(object):
         self._load_container_rule()
         self.configuration['playback']['aspect ratio'] = float(float(self.configuration['playback']['width'])/float(self.configuration['playback']['height']))
         
-        o = Ontology(self, self.repository[self.host]['mongodb'])
-        self.em = EntityManager(self, o)
+        self.resolver = Resolver(self)
     
     
     def load_external_config(self, path):
@@ -295,7 +293,7 @@ class Environment(object):
     
     
     def load_service(self, config):
-        for k,v in config:
+        for k,v in config.iteritems():
             v['name'] = k
             self.service[k] = v
     
@@ -683,7 +681,7 @@ class Environment(object):
             c = self.command[command]
             result = [ c['path'], ]
         else:
-            log.warning(u'Command %s is unavailable', c['name'])
+            log.warning(u'Command %s is unavailable', command)
         return result
     
     
@@ -944,7 +942,7 @@ class Space(object):
                 for e in self.element.values():
                     if e.node[synonym] is not None and \
                     e.node[synonym] not in self._synonym:
-                        self._synonym[e[synonym]] = e
+                        self._synonym[e.node[synonym]] = e
         return self._synonym
     
     
@@ -1027,6 +1025,7 @@ class PrototypeSpace(Space):
     
     
     def load(self):
+        self.element = {}
         for e in self.node['element']:
             prototype = Prototype(self, e)
             if prototype.enabled:
@@ -1060,6 +1059,9 @@ class Prototype(Element):
             elif self.node['type'] == 'enum':
                 c = self._cast_enum
                 f = self._format_enum
+            elif self.node['type'] == 'plist':
+                c = self._cast_plist
+                f = lambda x: unicode(x)
                 
             if not self.node['plural']:
                 self._cast = c
@@ -1287,6 +1289,7 @@ class Enumeration(Space):
     
     
     def load(self):
+        self.element = {}
         for e in self.node['element']:
             element = Element(self, e)
             if element.enabled:
