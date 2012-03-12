@@ -62,7 +62,7 @@ def decode_cli(env):
     c['pack'].add_argument('-S', '--sync',          dest='sync',        action='store_true', default=False, help='sync encountered records with online service')
     c['pack'].add_argument('-U', '--crawl',         dest='crawl',       action='store_true', default=False, help='rebuild physical file index')
     c['pack'].add_argument('-w', '--overwrite',     dest='overwrite',   action='store_true', default=False, help='overwrite existing files')
-    c['pack'].add_argument('-l', '--lang',          dest='language',    metavar='CODE', default='eng', help='languge code to use when und [default: %(default)s]')
+    c['pack'].add_argument('-l', '--lang',          dest='language',    metavar='CODE', default='en', help='languge code to use when und [default: %(default)s]')
     
     c['update'] = s.add_parser('update', help='update streams in container')
     c['update'].add_argument('scan',                                    metavar='PATH', nargs='*', help='file or directory paths to scan')

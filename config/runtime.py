@@ -26,15 +26,15 @@ runtime = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'heb', 'codec':'srt'},
-                                    {'type':'text', 'language':'heb', 'codec':'ass'},
+                                    {'type':'text', 'language':'he', 'codec':'srt'},
+                                    {'type':'text', 'language':'he', 'codec':'ass'},
                                 ],
                             },
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'eng', 'codec':'srt'},
-                                    {'type':'text', 'language':'eng', 'codec':'ass'},
+                                    {'type':'text', 'language':'en', 'codec':'srt'},
+                                    {'type':'text', 'language':'en', 'codec':'ass'},
                                 ],
                             },
                             {
@@ -84,14 +84,14 @@ runtime = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'heb'},
+                                    {'type':'text', 'language':'he'},
                                 ],
                                 'override':{'name':'Normal'},
                             },
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'eng'},
+                                    {'type':'text', 'language':'en'},
                                 ],
                                 'override':{'name':'Normal'},
                             },
@@ -101,8 +101,8 @@ runtime = {
                         'description':'First of hebrew or english subtitles as swedish',
                         'mode':'choose',
                         'branch':[
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'srt', 'profile':'clean', 'language':'he'},
+                            {'kind':'srt', 'profile':'clean', 'language':'en'},
                         ],
                         'track':[
                             {
@@ -118,8 +118,8 @@ runtime = {
                         'description':'First of hebrew or english or other chapter track',
                         'mode':'choose',
                         'branch':[
-                            {'kind':'chpl', 'language':'heb'},
-                            {'kind':'chpl', 'language':'eng'},
+                            {'kind':'chpl', 'language':'he'},
+                            {'kind':'chpl', 'language':'en'},
                             {'kind':'chpl'},
                         ],
                         'track':[
@@ -196,14 +196,14 @@ runtime = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'heb'},
+                                    {'type':'text', 'language':'he'},
                                 ],
                                 'override':{'name':'Normal', 'height':0.132},
                             },
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'eng'},
+                                    {'type':'text', 'language':'en'},
                                 ],
                                 'override':{'name':'Normal', 'height':0.132},
                             },
@@ -213,8 +213,8 @@ runtime = {
                         'description':'First of hebrew or english subtitles as swedish',
                         'mode':'choose',
                         'branch':[
-                            {'kind':'srt', 'profile':'clean', 'language':'heb'},
-                            {'kind':'srt', 'profile':'clean', 'language':'eng'},
+                            {'kind':'srt', 'profile':'clean', 'language':'he'},
+                            {'kind':'srt', 'profile':'clean', 'language':'en'},
                         ],
                         'track':[
                             {
@@ -230,8 +230,8 @@ runtime = {
                         'description':'First of hebrew or english artwork',
                         'mode':'choose',
                         'branch':[
-                            {'kind':'png', 'profile':'normal', 'language':'heb'},
-                            {'kind':'png', 'profile':'normal', 'language':'eng'},
+                            {'kind':'png', 'profile':'normal', 'language':'he'},
+                            {'kind':'png', 'profile':'normal', 'language':'en'},
                         ],
                         'track':[
                             {
@@ -246,8 +246,8 @@ runtime = {
                         'description':'First of hebrew or english chapter track',
                         'mode':'choose',
                         'branch':[
-                            {'kind':'chpl', 'language':'heb'},
-                            {'kind':'chpl', 'language':'eng'},
+                            {'kind':'chpl', 'language':'he'},
+                            {'kind':'chpl', 'language':'en'},
                         ],
                         'track':[
                             {
@@ -446,7 +446,7 @@ runtime = {
                                 'description':'Hebrew subtitles',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'heb'},
+                                    {'type':'text', 'language':'he'},
                                 ],
                                 'override':{
                                     'subtitle filters':['noise', 'hebrew noise', 'typo', 'punctuation', 'leftover']
@@ -456,7 +456,7 @@ runtime = {
                                 'description':'English subtitles',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'eng'},
+                                    {'type':'text', 'language':'en'},
                                 ],
                                 'override':{
                                     'subtitle filters':['noise', 'typo', 'english typo', 'leftover']

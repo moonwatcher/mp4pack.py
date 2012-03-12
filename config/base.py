@@ -6,7 +6,7 @@ base = {
         'domain':None,
         'host':None,
         'threads':2,
-        'language':'eng',
+        'language':'en',
     },
     'display':{
         'wrap':120, 

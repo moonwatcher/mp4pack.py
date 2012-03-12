@@ -477,7 +477,7 @@ class Container(Resource):
         pass
     
     
-    def transcode(self, job):
+    def transcode(self, task):
         pass
     
     
