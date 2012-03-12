@@ -19,17 +19,11 @@ from service import Resolver
 class Environment(object):
     def __init__(self):
         self.log = logging.getLogger('environment')
-        
-        from config.runtime import runtime as runtime_config
-        self.runtime = runtime_config
-        
+        self.runtime = None
         self.configuration = None
         self.ontology = None
-        self.caption_filter_cache = CaptionFilterCache(self)
+        self.caption_filter_cache = None
         self.universal_detector = None
-        self.lookup = {
-            'volume':{},
-        }
         self.state = {
             'system':{},
             'prototype':{},
@@ -46,7 +40,9 @@ class Environment(object):
             'volume':{},
             'rule':{},
         }
-        
+        self.lookup = {
+            'volume':{},
+        }
         self.load()
     
     
@@ -164,6 +160,10 @@ class Environment(object):
     
     
     def load(self):
+        self.caption_filter_cache = CaptionFilterCache(self)
+        
+        from config.runtime import runtime as runtime_config
+        self.runtime = runtime_config
         
         # start from the base user conf
         from config.base import base as base_config
@@ -235,21 +235,21 @@ class Environment(object):
                 self.log.debug(ioerr)
     
     
-    def load_system(self, config):
-        for k,v in config.iteritems():
+    def load_system(self, node):
+        for k,v in node.iteritems():
             self.system[k] = v
     
     
-    def load_expressions(self, config):
-        for expression in config:
+    def load_expressions(self, node):
+        for expression in node:
             if 'flags' in expression and expression['flags']:
                 self.expression[expression['name']] = re.compile(expression['definition'], expression['flags'])
             else:
                 self.expression[expression['name']] = re.compile(expression['definition'])
     
     
-    def load_commands(self, config):
-        for command in config:
+    def load_commands(self, node):
+        for command in node:
             self.command[command['name']] = command
             if command['binary']:
                 # check the command exists and get an absolute path for it
@@ -261,8 +261,8 @@ class Environment(object):
         self.available['command'] = set([i['name'] for i in self.command.values() if 'path' in i])
     
     
-    def load_actions(self, config):
-        for action in config:
+    def load_actions(self, node):
+        for action in node:
             self.action[action['name']] = action
             action['active'] = True
             if 'depend' in action:
@@ -276,36 +276,36 @@ class Environment(object):
         self.available['action'] = set([i['name'] for i in self.action.values() if i['active']])
     
     
-    def load_info(self, config):
+    def load_info(self, node):
         # Load a default report profile
         report = {
-            'file':sorted(set([ v['name'] for v in config['file'] if 'name' in v])),
-            'tag':sorted(set([ v['name'] for v in config['tag'] if 'name' in v])),
+            'file':sorted(set([ v['name'] for v in node['file'] if 'name' in v])),
+            'tag':sorted(set([ v['name'] for v in node['tag'] if 'name' in v])),
             'track':{},
         }
-        common = [ v['name'] for v in config['track']['common'] if 'name' in v]
+        common = [ v['name'] for v in node['track']['common'] if 'name' in v]
         for t in ('audio', 'video', 'text', 'image'):
-            prop = common + [ v['name'] for v in config['track'][t] if 'name' in v]
+            prop = common + [ v['name'] for v in node['track'][t] if 'name' in v]
             report['track'][t] = sorted(set(prop))
         self.report['default'] = report
     
     
-    def load_model(self, config):
-        for node_name, node_value in config.iteritems():
+    def load_model(self, node):
+        for node_name, node_value in node.iteritems():
             node_value['name'] = node_name
             space = Enumeration(self, node_value)
             self.model[node_name] = space
             space.load()
     
     
-    def load_service(self, config):
-        for k,v in config.iteritems():
+    def load_service(self, node):
+        for k,v in node.iteritems():
             v['name'] = k
             self.service[k] = v
     
     
-    def load_prototype(self, config):
-        for block_name, block_value in config.iteritems():
+    def load_prototype(self, node):
+        for block_name, block_value in node.iteritems():
             self.prototype[block_name] = {}
             for node_name, node_value in block_value.iteritems():
                 node_value['name'] = node_name
@@ -314,13 +314,13 @@ class Environment(object):
                 space.load()
     
     
-    def load_reports(self, config):
-        for k,v in config.iteritems():
+    def load_reports(self, node):
+        for k,v in node.iteritems():
             self.report[k] = v
     
     
-    def load_profiles(self, config):
-        for name, profile in config.iteritems():
+    def load_profiles(self, node):
+        for name, profile in node.iteritems():
             profile['name'] = name
             for action in ('tag', 'rename', 'extract', 'pack', 'update', 'transcode'):
                 if action not in profile:
@@ -328,18 +328,18 @@ class Environment(object):
             self.profile[name] = profile
     
     
-    def load_kinds(self, config):
-        for kind_name, kind in config.iteritems():
+    def load_kinds(self, node):
+        for kind_name, kind in node.iteritems():
             kind['name'] = kind_name
             self.kind[kind_name] = kind
     
     
-    def load_rules(self, config):
-        for rule in config: self._load_rule(rule)
+    def load_rules(self, node):
+        for rule in node: self._load_rule(rule)
     
     
-    def load_repositories(self, config):
-        for name, repository in config.iteritems():
+    def load_repositories(self, node):
+        for name, repository in node.iteritems():
             self.repository[name] = repository
             repository['name'] = name
             
@@ -486,10 +486,10 @@ class Environment(object):
         
     
     
-    def load_format(self, config):
-        self.format['wrap width'] = config['wrap']
-        self.format['indent width'] = config['indent']
-        self.format['margin width'] = config['margin']
+    def load_format(self, node):
+        self.format['wrap width'] = node['wrap']
+        self.format['indent width'] = node['indent']
+        self.format['margin width'] = node['margin']
         
         self.format['indent'] = u'\n' + u' ' * self.format['indent width']
         self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format(
@@ -545,7 +545,7 @@ class Environment(object):
                     prefix = os.path.dirname(parsed.path)
                     if result['kind'] in self.kind_with_language:
                         prefix, iso = os.path.split(prefix)
-                        if self.env.model['language'].find(iso):
+                        if self.model['language'].find(iso):
                             result['language'] = iso
                              
                     if prefix:
@@ -711,12 +711,12 @@ class Environment(object):
 
 # Caption filter
 class CaptionFilter(object):
-    def __init__(self, config):
+    def __init__(self, node):
         self.log = logging.getLogger('Filter pipeline')
         self.expression = []
-        self.action = config['action']
-        self.scope = config['scope']
-        self.ignorecase = config['ignore case']
+        self.action = node['action']
+        self.scope = node['scope']
+        self.ignorecase = node['ignore case']
         
         option = re.UNICODE
         if self.ignorecase:
@@ -724,7 +724,7 @@ class CaptionFilter(object):
         if self.scope == 'slide':
             option = option|re.MULTILINE
             
-        for e in config['expression']:
+        for e in node['expression']:
             try:
                 if self.action == 'replace':
                     self.expression.append((re.compile(e[0], option), e[1]))
