@@ -1745,17 +1745,16 @@ runtime = {
             'container':'raw audio',
         },
     },
-    'log level':{
-        'debug': logging.DEBUG,
-        'info': logging.INFO,
-        'warning': logging.WARNING,
-        'error': logging.ERROR,
-        'critical': logging.CRITICAL
-    },
     
-    'track with language':set(('audio', 'text', 'video')),
-    'kind with language':set(('srt', 'ass', 'ac3', 'dts')),
-    'escaped subler tag characters':set((u'{', u'}', u':')),
+    'track with language':set(
+        ('audio', 'text', 'video')
+    ),
+    'kind with language':set(
+        ('srt', 'ass', 'ac3', 'dts')
+    ),
+    'escaped subler tag characters':set(
+        (u'{', u'}', u':')
+    ),
     'empty string':u'',
     'resource scheme':resource_scheme,
     'PAL framerate':25.0,

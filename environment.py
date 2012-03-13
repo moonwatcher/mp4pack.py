@@ -11,9 +11,10 @@ from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
 
 import config
+
 from ontology import Ontology
-from asset import AssetCache
-from model import Timestamp
+from model import Timestamp, Enumeration, PrototypeSpace
+from model.caption import CaptionFilterCache
 from service import Resolver
 
 class Environment(object):
@@ -48,6 +49,31 @@ class Environment(object):
     
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
+    
+    
+    @property
+    def system(self):
+        return self.state['system']
+    
+    
+    @property
+    def home(self):
+        return self.system['home']
+    
+    
+    @property
+    def host(self):
+        return self.system['host']
+    
+    
+    @property
+    def domain(self):
+        return self.system['domain']
+    
+    
+    @property
+    def language(self):
+        return self.system['language']
     
     
     @property
@@ -116,56 +142,15 @@ class Environment(object):
     
     
     
-    
-    @property
-    def verbosity(self):
-        return self.runtime['log level'][self.ontology['verbosity']]
-    
-    
-    @property
-    def system(self):
-        return self.state['system']
-    
-    
-    @property
-    def home(self):
-        return self.system['home']
-    
-    
-    @property
-    def host(self):
-        return self.system['host']
-    
-    
-    @property
-    def domain(self):
-        return self.system['domain']
-    
-    
-    @property
-    def language(self):
-        return self.system['language']
-    
-    
-    @property
-    def format(self):
-        return self.state['format']
-    
-    
-    @property
-    def kind_with_language(self):
-        return self.runtime['kind with language']
-    
-    
-    
-    
+    # Load environment
     def load(self):
         self.caption_filter_cache = CaptionFilterCache(self)
         
+        # Runtime config
         from config.runtime import runtime as runtime_config
         self.runtime = runtime_config
         
-        # start from the base user conf
+        # Base user conf
         from config.base import base as base_config
         self.configuration = copy.deepcopy(base_config)
         self.load_system(self.configuration['system'])
@@ -179,7 +164,6 @@ class Environment(object):
             self.load_external_config(os.path.join(self.home, 'dev.conf'))
             self.load_system(self.configuration['system'])
             
-            
         self.profile['default'] = self.runtime['default']['profile']
         self.load_expressions(self.runtime['expression'])
         self.load_commands(self.runtime['command'])
@@ -191,7 +175,6 @@ class Environment(object):
         
         from config.prototype import prototype as prototype_config
         self.load_prototype(prototype_config)
-        
         self.load_profiles(self.runtime['profile'])
         self.load_kinds(self.runtime['kind'])
         self.load_rules(self.runtime['rule'])
@@ -213,13 +196,11 @@ class Environment(object):
         self.load_format(self.configuration['display'])
         self.load_reports(self.configuration['report'])
         self.load_repositories(self.configuration['repository'])
-        self._load_default_host_rule()
-        self._load_default_language_rule()
-        self._load_volume_location_rule()
-        self._load_cache_location_rule()
-        self._load_container_rule()
-        self.configuration['playback']['aspect ratio'] = float(float(self.configuration['playback']['width'])/float(self.configuration['playback']['height']))
-        
+        self._load_dynamic_rules()
+        self.configuration['playback']['aspect ratio'] = float (
+            float(self.configuration['playback']['width']) / 
+            float(self.configuration['playback']['height'])
+        )
         self.resolver = Resolver(self)
     
     
@@ -228,10 +209,10 @@ class Environment(object):
             path = os.path.abspath(path)
             try:
                 external = eval(open(path).read())
-                self.log.debug('Load external config file %s', path)
+                self.log.debug(u'Load external config file %s', path)
                 self.configuration = dict(self.configuration.items() + external.items())
             except IOError as ioerr:
-                self.log.warning('Failed to load config file %s', path)
+                self.log.warning(u'Failed to load config file %s', path)
                 self.log.debug(ioerr)
     
     
@@ -269,8 +250,7 @@ class Environment(object):
                 action['depend'] = set(action['depend'])
                 if not action['depend'].issubset(self.available['command']):
                     action['active'] = False
-                    self.log.debug(u'Action %s has unsatisfied dependencies: %s', 
-                        action['name'], 
+                    self.log.debug(u'Action %s has unsatisfied dependencies: %s', action['name'], 
                         u', '.join(list(action['depend'] - self.available['command']))
                     )
         self.available['action'] = set([i['name'] for i in self.action.values() if i['active']])
@@ -402,7 +382,8 @@ class Environment(object):
             self.rule[provide].append(rule)
     
     
-    def _load_default_host_rule(self):
+    def _load_dynamic_rules(self):
+        # default host
         rule = {
             'name':'default host',
             'provides':set(('host',)),
@@ -415,62 +396,8 @@ class Environment(object):
             ],
         }
         self._load_rule(rule)
-    
-    
-    def _load_volume_location_rule(self):
-        rule = {
-            'name':'volume location',
-            'provides':set(('volume path', 'domain')),
-            'branch':[],
-        }
         
-        for volume in self.volume.values():
-            branch = {
-                'requires':set(('volume', 'host')),
-                'equal':{'volume':volume['name'], 'host':volume['host']},
-                'apply':(
-                    {'property':'domain', 'value':volume['domain']},
-                    {'property':'volume path', 'value':volume['path']},
-                ),
-            }
-            rule['branch'].append(branch)
-        self._load_rule(rule)
-    
-    
-    def _load_cache_location_rule(self):
-        rule = {
-            'name':'cache location',
-            'provides':set(('cache root',)),
-            'branch':[
-                {
-                    'apply':({'property':'cache root', 'value':self.repository[self.host]['cache']['path']},),
-                }
-            ],
-        }
-        self._load_rule(rule)
-        
-    
-    
-    def _load_container_rule(self):
-        rule = {
-            'name':'container for kind',
-            'provides':set(('container',)),
-            'branch':[],
-        }
-        
-        for kind in self.kind.values():
-            branch = {
-                'requires':set(('kind',)),
-                'equal':{'kind':kind['name'] },
-                'apply':(
-                    {'property':'container', 'value':kind['container']},
-                ),
-            }
-            rule['branch'].append(branch)
-        self._load_rule(rule)
-    
-    
-    def _load_default_language_rule(self):
+        # default language
         rule = {
             'name':'default language',
             'provides':set(('language',)),
@@ -484,28 +411,52 @@ class Environment(object):
         }
         self._load_rule(rule)
         
-    
-    
-    def load_format(self, node):
-        self.format['wrap width'] = node['wrap']
-        self.format['indent width'] = node['indent']
-        self.format['margin width'] = node['margin']
+        # volume location
+        rule = {
+            'name':'volume location',
+            'provides':set(('volume path', 'domain')),
+            'branch':[],
+        }
+        for volume in self.volume.values():
+            branch = {
+                'requires':set(('volume', 'host')),
+                'equal':{'volume':volume['name'], 'host':volume['host']},
+                'apply':(
+                    {'property':'domain', 'value':volume['domain']},
+                    {'property':'volume path', 'value':volume['path']},
+                ),
+            }
+            rule['branch'].append(branch)
+        self._load_rule(rule)
         
-        self.format['indent'] = u'\n' + u' ' * self.format['indent width']
-        self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format(
-            self.format['wrap width'] + self.format['indent width'],
-            u' ' * self.format['margin width']
-        )
-        self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format(
-            self.format['indent width'] - self.format['margin width'] - 3,
-            u' ' * self.format['margin width']
-        )
-        self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format(
-            self.format['indent width'] - self.format['margin width'] - 2,
-            u' ' * self.format['margin width']
-        )
-        self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
-    
+        # cache
+        rule = {
+            'name':'cache location',
+            'provides':set(('cache root',)),
+            'branch':[
+                {
+                    'apply':({'property':'cache root', 'value':self.repository[self.host]['cache']['path']},),
+                }
+            ],
+        }
+        self._load_rule(rule)
+        
+        rule = {
+            'name':'container for kind',
+            'provides':set(('container',)),
+            'branch':[],
+        }
+        for kind in self.kind.values():
+            branch = {
+                'requires':set(('kind',)),
+                'equal':{'kind':kind['name'] },
+                'apply':(
+                    {'property':'container', 'value':kind['container']},
+                ),
+            }
+            rule['branch'].append(branch)
+        self._load_rule(rule)
+        
     
     
     
@@ -624,21 +575,6 @@ class Environment(object):
         return result
     
     
-    def detect_encoding(self, content):
-        if self.universal_detector is None:
-            from chardet.universaldetector import UniversalDetector
-            self.universal_detector = UniversalDetector()
-            
-        self.universal_detector.reset()
-        for line in content:
-            self.universal_detector.feed(line)
-            if self.universal_detector.done:
-                break
-        self.universal_detector.close()
-        return self.universal_detector.result
-    
-    
-    
     
     # Command execution
     def initialize_command(self, command, log):
@@ -683,12 +619,27 @@ class Environment(object):
         return report
     
     
+    
+    # Text processing
     def remove_accents(self, value):
         result = None
         if value:
             nkfd_form = unicodedata.normalize('NFKD', value)
             result = self.runtime['empty string'].join([c for c in nkfd_form if not unicodedata.combining(c)])
         return result
+    
+    
+    def detect_encoding(self, content):
+        if self.universal_detector is None:
+            from chardet.universaldetector import UniversalDetector
+            self.universal_detector = UniversalDetector()
+        self.universal_detector.reset()
+        for line in content:
+            self.universal_detector.feed(line)
+            if self.universal_detector.done:
+                break
+        self.universal_detector.close()
+        return self.universal_detector.result
     
     
     def simplify(self, value):
@@ -707,523 +658,36 @@ class Environment(object):
                 result = result.lower()
         return result
     
-
-
-# Caption filter
-class CaptionFilter(object):
-    def __init__(self, node):
-        self.log = logging.getLogger('Filter pipeline')
-        self.expression = []
-        self.action = node['action']
-        self.scope = node['scope']
-        self.ignorecase = node['ignore case']
+    
+    
+    @property
+    def format(self):
+        return self.state['format']
+    
+    
+    @property
+    def kind_with_language(self):
+        return self.runtime['kind with language']
+    
+    
+    def load_format(self, node):
+        self.format['wrap width'] = node['wrap']
+        self.format['indent width'] = node['indent']
+        self.format['margin width'] = node['margin']
         
-        option = re.UNICODE
-        if self.ignorecase:
-            option = option|re.IGNORECASE
-        if self.scope == 'slide':
-            option = option|re.MULTILINE
-            
-        for e in node['expression']:
-            try:
-                if self.action == 'replace':
-                    self.expression.append((re.compile(e[0], option), e[1]))
-                elif self.action == 'drop':
-                    self.expression.append(re.compile(e,option))
-            except:
-                self.log.warning(u'Failed to load expression %s', e)
-    
-    
-    @property
-    def valid(self):
-        return len(self.expression) > 0
-    
-    
-    def filter(self, slide):
-        result = slide is not None and slide.valid
-        if result:
-            if self.action == 'replace':
-                if self.scope == 'line':
-                    for e in self.expression:
-                        original = slide.content
-                        slide.clear()
-                        for line in original:
-                            filtered = e[0].sub(e[1], line)
-                            slide.add(filtered)
-                            
-                            # This should be commented out in production
-                            if line != filtered:
-                                self.log.debug(u'Replaced "%s" --> "%s"', line, filtered)
-                                
-                        if not slide.valid:
-                            break
-                            
-                elif self.scope == 'slide':
-                    content = u'\n'.join(slide.lines)
-                    slide.clear()
-                    for e in self.expression:
-                        filtered = e[0].sub(e[1], content)
-                        
-                         # This should be commented out in production
-                        if content != filtered:
-                            self.log.debug(u'Replaced "%s" --> "%s"', content, filtered)
-                            
-                        content = filtered.strip()
-                        if not content:
-                            break
-                    if content:
-                        for line in content.split(u'\n'):
-                            slide.append(line)
-                            
-            elif self.action == 'drop':
-                if self.scope == 'line':
-                    original = slide.content
-                    slide.clear()
-                    for line in original:
-                        keep = True
-                        for e in self.expression:
-                            if e.search(line) is not None:
-                                self.log.debug(u'Drop %s', line)
-                                keep = False
-                                break
-                        if keep:
-                            slide.add(line)
-                            
-                elif self.scope == 'slide':
-                    keep = True
-                    for line in slide.content:
-                        for e in self.expression:
-                            if e.search(line) is not None:
-                                self.log.debug(u'Drop \n%s', u'\n'.join(slide.content))
-                                keep = False
-                                break
-                        if not keep:
-                            slide.clear()
-                            break
-            result = slide.valid
-        return result
-    
-
-
-class CaptionFilterCache(dict):
-    def __init__(self, env, *args, **kw):
-        dict.__init__(self, *args, **kw)
-        self.log = logging.getLogger('Subtitle Filter Cache')
-        self.env = env
-    
-    
-    def __contains__(self, key):
-        self.resolve(key)
-        return dict.__getitem__(self, key) is not None
-    
-    
-    def __delitem__(self, key):
-        if dict.__contains__(self, key):
-            dict.__delitem__(self, key)
-    
-    
-    def __missing__(self, key):
-        self.resolve(key)
-        return dict.__getitem__(self, key)
-    
-    
-    def resolve(self, key):
-        if not dict.__contains__(self, key):
-            if key in self.env.configuration['subtitles']['filters']:
-                o = CaptionFilter(self.env.configuration['subtitles']['filters'][key])
-                if o.valid:
-                    self.log.debug(u'Loaded %s filter pipeline', key)
-                    dict.__setitem__(self, key, o)
-                else:
-                    self.log.error(u'Failed to load %s filter pipeline', key)
-                    dict.__setitem__(self, key, None)
-            else:
-                self.log.error(u'%s subtitle filter is not defined', key)
-                dict.__setitem__(self, key, None)
-    
-    
-
-
-# Generic Space / Element model
-class Space(object):
-    def __init__(self, env, node):
-        self.log = logging.getLogger('Space')
-        self.env = env
-        self.node = node
-        self.element = None
-        self._synonym = None
-        
-        if 'default' not in self.node:
-            self.node['default'] = {}
-            
-        if 'enabled' not in self.default:
-            self.default['enabled'] = True
-    
-    
-    @property
-    def key(self):
-        return self.node['name']
-    
-    
-    @property
-    def synonym(self):
-        if self._synonym is None:
-            self._synonym = {}
-            for synonym in self.node['synonym']:
-                for e in self.element.values():
-                    if e.node[synonym] is not None and \
-                    e.node[synonym] not in self._synonym:
-                        self._synonym[e.node[synonym]] = e
-        return self._synonym
-    
-    
-    @property
-    def default(self):
-        return self.node['default']
-    
-    
-    def find(self, key):
-        if key is not None and key in self.element:
-            return self.element[key]
-        else: return None
-    
-    
-    def get(self, key):
-        element = self.search(key)
-        if element is not None: return element.name
-        else: return None
-    
-    
-    def search(self, value):
-        if value is not None and value in self.synonym:
-            return self.synonym[value]
-        else: return None
-    
-    
-    def parse(self, value):
-        element = self.search(value)
-        if element is not None: return element.key
-        else: return None
-    
-    
-
-
-class Element(object):
-    def __init__(self, space, node):
-        self.log = logging.getLogger('Element')
-        self.space = space
-        self.node = node
-        
-        if self.node is not None and \
-        'key' in self.node and \
-        'name' in self.node:
-            # Load defaults
-            for field in self.default:
-                if field not in self.node:
-                    self.node[field] = self.default[field]
-    
-    
-    @property
-    def env(self):
-        return self.space.env
-    
-    
-    @property
-    def default(self):
-        return self.space.default
-    
-    
-    @property
-    def enabled(self):
-        return self.node is not None and self.node['enabled']
-    
-    
-    @property
-    def key(self):
-        return self.node['key']
-    
-    
-    @property
-    def name(self):
-        return self.node['name']
-    
-
-
-# Prototype model
-class PrototypeSpace(Space):
-    def __init__(self, env, node):
-        Space.__init__(self, env, node)
-    
-    
-    def load(self):
-        self.element = {}
-        for e in self.node['element']:
-            prototype = Prototype(self, e)
-            if prototype.enabled:
-                self.element[prototype.key] = prototype
-    
-
-
-class Prototype(Element):
-    def __init__(self, space, node):
-        Element.__init__(self, space, node)
-        c = lambda x: x
-        f = lambda x: x
-        
-        # Don't bother loading the cast function if not enabled
-        if self.enabled:
-            if self.node['type']  == unicode:
-                c = self._cast_unicode
-                f = self._format_unicode
-            elif self.node['type'] == int:
-                c = self._cast_number
-                f = self._format_int
-            elif self.node['type'] == float:
-                c = self._cast_number
-                f = self._format_float
-            elif self.node['type'] == 'date':
-                c = self._cast_date
-                f = self._format_date
-            elif self.node['type'] == bool:
-                c = self._cast_boolean
-                f = self._format_boolean
-            elif self.node['type'] == 'enum':
-                c = self._cast_enum
-                f = self._format_enum
-            elif self.node['type'] == 'plist':
-                c = self._cast_plist
-                f = lambda x: unicode(x)
-                
-            if not self.node['plural']:
-                self._cast = c
-                self._format = f
-            else:
-                if self.node['plural'] == 'list':
-                    self._format = lambda x: self._format_list(x, f)
-                    self._cast = lambda x: self._cast_list(x, c)
-                elif self.node['plural'] == 'dict':
-                    self._format = lambda x: self._format_dict(x, f)
-                    self._cast = lambda x: self._cast_dict(x, c)
-                    
-            if not self.node['auto cast']:
-                self._cast = lambda x: x
-    
-    
-    def cast(self, value):
-        if value is not None:
-            return self._cast(value)
-        else:
-            return None
-    
-    
-    def format(self, value):
-        if value is not None:
-            return self._format(value)
-        else:
-            return None
-    
-    
-    
-    def _wrap(self, value):
-        result = value
-        if len(value) > self.env.format['wrap width']:
-            lines = textwrap.wrap(value, self.env.format['wrap width'])
-            result = self.env.format['indent'].join(lines)
-        return result
-    
-    
-    def _format_byte_as_iec_60027_2(self, value):
-        p = 0
-        v = float(value)
-        while v > 1024.0 and p < 4:
-            p += 1
-            v /= 1024.0
-        return u'{0:.2f} {1}'.format(v, self.env.model['binary iec 60027 2'].get(p))
-    
-    
-    def _format_bit_as_si(self, value):
-        p = 0
-        v = float(value)
-        while v > 1000.0 and p < 4:
-            p += 1
-            v /= 1000.0
-        return u'{0:.2f} {1}'.format(v, self.env.model['decimal si'].get(p))
-    
-    
-    def _format_timecode(self, value):
-        t = Timestamp(Timestamp.SRT)
-        t.millisecond = value
-        return t.timecode
-    
-    
-    def _format_enum(self, key):
-        return self.env.model[self.node['enumeration']].get(key)
-    
-    
-    def _format_float(self, value):
-        return u'{0:.3f}'.format(value)
-    
-    
-    def _format_int(self, value):
-        result = unicode(value)
-        if 'format' in self.node:
-            if self.node['format'] == 'bitrate':
-                result = u'{0}/s'.format(self._format_bit_as_si(value))
-                
-            elif self.node['format'] == 'millisecond':
-                result =  self._format_timecode(value)
-                
-            elif self.node['format'] == 'byte':
-                result = self._format_byte_as_iec_60027_2(value)
-                
-            elif self.node['format'] == 'bit':
-                result = u'{0} bit'.format(value)
-                
-            elif self.node['format'] == 'frequency':
-                result = u'{0} Hz'.format(value)
-                
-            elif self.node['format'] == 'pixel':
-                result = u'{0} px'.format(value)
-                
-        return result
-    
-    
-    def _format_boolean(self, value):
-        if value is True: return u'yes'
-        else: return u'no'
-    
-    
-    def _format_date(self, value):
-        return unicode(value)
-    
-    
-    def _format_list(self, value, formatter):
-        if value:
-            return u', '.join([ formatter(v) for v in value ])
-        else:
-            return None
-    
-    
-    def _format_dict(self, value, formatter):
-        if value:
-            return u', '.join([ u'{0}:{1}'.format(k,formatter(v)) for k,v in value.iteritems() ])
-        else:
-            return None
-    
-    
-    def _format_unicode(self, value):
-        return value
-    
-    
-    def _cast_enum(self, value):
-        return self.env.model[self.node['enumeration']].parse(value)
-    
-    
-    def _cast_number(self, value):
-        result = None
-        try:
-            result = self.node['type'](value)
-        except ValueError as error:
-            self.log.error(u'Failed to decode: %s as %s', value, unicode(self.node['type']))
-        return result
-    
-    
-    def _cast_unicode(self, value):
-        result = unicode(value.strip())
-        if not result:
-            result = None
-        if result and self.node['unescape xml']:
-            result = result.replace(u'&quot;', u'"')
-        return result
-    
-    
-    def _cast_date(self, value):
-        # Datetime conversion, must have at least a Year, Month and Day. 
-        # If Year is present but Month and Day are missing they are set to 1
-        
-        result = None
-        match = self.env.expression['full utc datetime'].search(value)
-        if match:
-            parsed = dict([(k, int(v)) for k,v in match.groupdict().iteritems() if k != u'tzinfo' and v is not None])
-            if u'month' not in parsed:
-                parsed[u'month'] = 1
-            if u'day' not in parsed:
-                parsed[u'day'] = 1
-            try:
-                result = datetime(**parsed)
-            except TypeError, ValueError:
-                self.log.debug(u'Failed to decode datetime %s', value)
-                result = None
-        else:
-            self.log.debug(u'Failed to parse datetime %s', value)
-            result = None
-        return result
-    
-    
-    def _cast_boolean(self, value):
-        result = False
-        if self.env.expression['true value'].search(value) is not None:
-            result = True
-        return result
-    
-    
-    def _cast_plist(self, value):
-        # Clean and parse plist into a dictionary
-        result = value.replace(u'&quot;', u'"')
-        result = self.env.expression['clean xml'].sub(u'', result).strip()
-        result = plistlib.readPlistFromString(result.encode('utf-8'))
-        return result
-    
-    
-    def _cast_list(self, value, caster):
-        result = None
-        if 'plural format' in self.node:
-            literals = None
-            if self.node['plural format'] == 'mediainfo value list':
-                if self.env.expression['mediainfo value list'].match(value):
-                    literals = value.split(u'/')
-                else:
-                    self.log.error(u'Could not parse list %s', value)
-            if literals:
-                result = [ caster(l) for l in literals ]
-        if result:
-            result = [ v for v in result if v is not None ]
-        if not result:
-            result = None
-        return result
-    
-    
-    def _cast_dict(self, value, caster):
-        result = None
-        if 'plural format' in self.node:
-            if self.node['plural format'] == 'mediainfo key value list':
-                if self.env.expression['mediainfo value list'].match(value):
-                    literals = value.split(u'/')
-                    result = {}
-                    for literal in literals:
-                        pair = literal.split(u'=')
-                        if len(pair) == 2:
-                            result[pair[0].strip()] = caster(pair[1])
-                else:
-                    self.log.error(u'Could not parse dictionary %s', value)
-                    result = None
-        if not result:
-            result = None
-        return result
-    
-
-
-# Enumeration model
-class Enumeration(Space):
-    def __init__(self, env, node):
-        Space.__init__(self, env, node)
-    
-    
-    def load(self):
-        self.element = {}
-        for e in self.node['element']:
-            element = Element(self, e)
-            if element.enabled:
-                self.element[element.key] = element
+        self.format['indent'] = u'\n' + u' ' * self.format['indent width']
+        self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format (
+            self.format['wrap width'] + self.format['indent width'],
+            u' ' * self.format['margin width']
+        )
+        self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format (
+            self.format['indent width'] - self.format['margin width'] - 3,
+            u' ' * self.format['margin width']
+        )
+        self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format (
+            self.format['indent width'] - self.format['margin width'] - 2,
+            u' ' * self.format['margin width']
+        )
+        self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
     
 

@@ -3,12 +3,13 @@
 
 import os
 import logging
-from ontology import Ontology
+from datetime import datetime
 from subprocess import Popen, PIPE
 import xml.etree.cElementTree as ElementTree
-from datetime import datetime
 
-from model import Timestamp, Chapter, Slide, Caption, Menu
+from ontology import Ontology
+from model import Chapter, Menu
+from model.caption import Caption, Slide
 
 class Crawler(object):
     def __init__(self, ontology):

@@ -6,7 +6,8 @@ import hashlib
 import re
 
 from ontology import Ontology
-from model import Timestamp, Chapter, Slide, Caption, Menu, Transform, Query
+from model import Chapter, Menu
+from model.caption import Caption
 from crawler import Crawler
 
 class AssetCache(object):

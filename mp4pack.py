@@ -149,7 +149,7 @@ def main():
     env.load_interactive(arguments)
     
     # Override the initial log level
-    logging.getLogger().setLevel(env.verbosity)
+    logging.getLogger().setLevel(log_levels[env.ontology['verbosity']])
     
     # Initialize a processing queue
     queue = Queue(env)
