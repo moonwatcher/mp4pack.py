@@ -1484,6 +1484,16 @@ prototype = {
         }
     },
     'tmdb':{
+        #'tmdb.movie.cast':{},
+        #'tmdb.movie.poster':{},
+        #'tmdb.movie.keyword':{},
+        #'tmdb.movie.release':{},
+        #'tmdb.movie.trailer':{},
+        #'tmdb.movie.translation':{},
+        #'tmdb.movie.alternative':{},
+        #'tmdb.person.poster':{},
+        #'tmdb.person.credit':{},
+        
         'tmdb.movie':{
             'default':{
                 'auto cast':True,
@@ -1601,6 +1611,7 @@ prototype = {
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
+                'tvdb':None,
                 'keyword':None,
             },
             'tag':'Banner',
@@ -1696,6 +1707,7 @@ prototype = {
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
+                'tvdb':None,
                 'keyword':None,
             },
             'tag':'Series',
@@ -1737,7 +1749,7 @@ prototype = {
                     'key':'modified',
                     'name':'Modified',
                     'tvdb':'lastupdated',
-                    'type':'date',
+                    'type':int,
                 },
                 {
                     'key':'release date',
@@ -1754,6 +1766,7 @@ prototype = {
                 {
                     'key':'language',
                     'name':'Language',
+                    'keyword':'language',
                     'tvdb':'Language',
                     'type':'enum',
                     'enumeration':'language',
@@ -1862,6 +1875,7 @@ prototype = {
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
+                'tvdb':None,
                 'keyword':None,
             },
             'tag':'Episode',
@@ -1928,7 +1942,7 @@ prototype = {
                     'key':'modified',
                     'name':'Modified',
                     'tvdb':'lastupdated',
-                    'type':'date',
+                    'type':int,
                 },
                 {
                     'key':'language',

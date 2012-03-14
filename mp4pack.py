@@ -154,6 +154,22 @@ def main():
     # Initialize a processing queue
     queue = Queue(env)
     
+    #r = env.resolver.cache(u'mpk://yoshi/c/tvdb/show/en/73255/all')
+    #r = env.resolver.resolve(u'mpk://yoshi/c/tvdb/show/73255/poster')
+    #o = []
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/1891'))
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/cast'))
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/poster'))
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/keyword'))
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/release'))
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/trailer'))
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/translation'))
+    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/alternative'))
+    
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/credit')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
+    
     job = Job(queue, arguments)
     job.open()
     job.run()

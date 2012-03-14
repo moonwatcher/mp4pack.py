@@ -151,7 +151,7 @@ class Caption(object):
 
 class CaptionFilter(object):
     def __init__(self, node):
-        self.log = logging.getLogger('Filter pipeline')
+        self.log = logging.getLogger('Caption filter')
         self.expression = []
         self.action = node['action']
         self.scope = node['scope']

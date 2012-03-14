@@ -9,6 +9,7 @@ import urlparse
 import plistlib
 from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
+from chardet.universaldetector import UniversalDetector
 
 import config
 
@@ -23,8 +24,6 @@ class Environment(object):
         self.runtime = None
         self.configuration = None
         self.ontology = None
-        self.caption_filter_cache = None
-        self.universal_detector = None
         self.state = {
             'system':{},
             'prototype':{},
@@ -44,6 +43,11 @@ class Environment(object):
         self.lookup = {
             'volume':{},
         }
+        
+        self._caption_filter_cache = None
+        self._universal_detector = None
+        self._resolver = None
+        
         self.load()
     
     
@@ -51,6 +55,30 @@ class Environment(object):
         return unicode(u'{}:{}'.format(self.domain, self.host))
     
     
+    # Lazy loading processors
+    @property
+    def resolver(self):
+        if self._resolver is None:
+            self._resolver = Resolver(self)
+            self._resolver.open()
+        return self._resolver
+    
+    
+    @property
+    def universal_detector(self):
+        if self._universal_detector is None:
+            self._universal_detector = UniversalDetector()
+        return self._universal_detector
+    
+    
+    @property
+    def caption_filter_cache(self):
+        if  self._caption_filter_cache is None:
+            self._caption_filter_cache = CaptionFilterCache(self)
+        return self._caption_filter_cache
+    
+    
+    # Properties
     @property
     def system(self):
         return self.state['system']
@@ -144,8 +172,6 @@ class Environment(object):
     
     # Load environment
     def load(self):
-        self.caption_filter_cache = CaptionFilterCache(self)
-        
         # Runtime config
         from config.runtime import runtime as runtime_config
         self.runtime = runtime_config
@@ -201,7 +227,6 @@ class Environment(object):
             float(self.configuration['playback']['width']) / 
             float(self.configuration['playback']['height'])
         )
-        self.resolver = Resolver(self)
     
     
     def load_external_config(self, path):
@@ -630,9 +655,7 @@ class Environment(object):
     
     
     def detect_encoding(self, content):
-        if self.universal_detector is None:
-            from chardet.universaldetector import UniversalDetector
-            self.universal_detector = UniversalDetector()
+        # This will not survive a multi threaded environment
         self.universal_detector.reset()
         for line in content:
             self.universal_detector.feed(line)

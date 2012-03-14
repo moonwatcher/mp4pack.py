@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE
 import xml.etree.cElementTree as ElementTree
 
 from ontology import Ontology
-from model import Chapter, Menu
+from model.menu import Chapter, Menu
 from model.caption import Caption, Slide
 
 class Crawler(object):
