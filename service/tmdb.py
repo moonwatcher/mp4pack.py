@@ -11,7 +11,7 @@ class TMDbHandler(ResourceHandler):
         ResourceHandler.__init__(self, resolver, node)
     
     
-    def fetch(self, query, handle):
+    def fetch(self, query):
         self.log.debug(u'Retrieve %s', query['remote url'])
         request = Request(query['remote url'], None, {'Accept': 'application/json'})
         
@@ -25,7 +25,7 @@ class TMDbHandler(ResourceHandler):
             query['stream'].append(StringIO(response.read()))
     
     
-    def parse(self, query, handle):
+    def parse(self, query):
         for stream in query['stream']:
             try:
                 document = json.load(stream)

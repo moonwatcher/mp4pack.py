@@ -20,7 +20,7 @@ class TVDbHandler(ResourceHandler):
                     branch['reference'].append(self.branch[ref])
     
     
-    def fetch(self, query, handle):
+    def fetch(self, query):
         self.log.debug(u'Retrieve %s', query['remote url'])
         request = Request(query['remote url'])
         
@@ -54,7 +54,7 @@ class TVDbHandler(ResourceHandler):
                     bytes.close()
     
     
-    def parse(self, query, handle):
+    def parse(self, query):
         for stream in query['stream']:
             try:
                 element = ElementTree.parse(stream)

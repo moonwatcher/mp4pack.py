@@ -12,7 +12,7 @@ class Resolver(object):
         self.log = logging.getLogger('Resolver')
         self.env = env
         self.handlers = {}
-        self.pool = {}
+        self.databases = {}
     
     
     def open(self):
@@ -26,18 +26,18 @@ class Resolver(object):
     
     
     def close(self):
-        for handle in self.pool.values():
-            handle.close()
+        for database in self.databases.values():
+            database.close()
     
     
-    def find_database_handle(self, host):
+    def find_database(self, host):
         result = None
-        if host in self.pool:
-            result = self.pool[host]
+        if host in self.databases:
+            result = self.databases[host]
         else:
-            result = MongoConnection(self.env, host)
+            result = Database(self.env, host)
             result.open()
-            self.pool[host] = result
+            self.databases[host] = result
         return result
     
     
@@ -46,8 +46,8 @@ class Resolver(object):
             match = handler.match(uri)
             if match is not None:
                 parsed = match.groupdict()
-                handle = self.find_database_handle(parsed['host'])
-                handler.remove(parsed['relative'], handle)
+                db = self.find_database(parsed['host'])
+                handler.remove(parsed['relative'], db)
                 break
     
     
@@ -57,8 +57,8 @@ class Resolver(object):
             match = handler.match(uri)
             if match is not None:
                 parsed = match.groupdict()
-                handle = self.find_database_handle(parsed['host'])
-                result = handler.resolve(parsed['relative'], handle)
+                db = self.find_database(parsed['host'])
+                result = handler.resolve(parsed['relative'], db)
                 break
         return result
     
@@ -68,13 +68,13 @@ class Resolver(object):
             match = handler.match(uri)
             if match is not None:
                 parsed = match.groupdict()
-                handle = self.find_database_handle(parsed['host'])
-                handler.cache(parsed['relative'], handle)
+                db = self.find_database(parsed['host'])
+                handler.cache(parsed['relative'], db)
                 break
     
 
 
-class MongoConnection(object):
+class Database(object):
     def __init__(self, env, host):
         self.log = logging.getLogger('mongodb')
         self.env = env
@@ -139,40 +139,41 @@ class ResourceHandler(object):
         return self.pattern.search(uri)
     
     
-    def resolve(self, uri, handle):
+    def resolve(self, uri, db):
         result = None
         for branch in self.branch.values():
             match = branch['pattern'].search(uri)
             if match is not None:
                 # Only branches with a collection definition are resolvable
                 if 'collection' in branch:
-                    collection = handle.database[branch['collection']]
+                    collection = db.database[branch['collection']]
                     result = collection.find_one({u'uri':uri})
                     
                     # If no record exists proceed to caching it
                     if result is None:
-                        self.cache(uri, handle)
+                        self.cache(uri, db)
                         result = collection.find_one({u'uri':uri})
                 break
         return result
     
     
-    def remove(self, uri, handle):
+    def remove(self, uri, db):
         for branch in self.branch.values():
             match = branch['pattern'].search(uri)
             if match is not None:
                 # Only branches with a collection definition are resolvable
                 if 'collection' in branch:
-                    collection = handle.database[branch['collection']]
+                    collection = db.database[branch['collection']]
                     result = collection.remove({u'uri':uri})
                 break
     
     
-    def cache(self, uri, handle):
+    def cache(self, uri, db):
         for branch in self.branch.values():
             match = branch['pattern'].search(uri)
             if match is not None:
                 query = {
+                    'database':db,
                     'branch':branch,
                     'uri':uri,
                     'parameter':{},
@@ -194,16 +195,25 @@ class ResourceHandler(object):
                         query['parameter']['api key'] = self.node['api key']
                     query['remote url'] = branch['remote'].format(**query['parameter'])
                     
-                self.fetch(query, handle)
-                self.parse(query, handle)
-                self.store(query, handle)
+                self.fetch(query)
+                self.parse(query)
+                self.store(query)
                 break
     
     
     
-    def store(self, query, handle):
+    
+    def fetch(self, query):
+        pass
+    
+    
+    def parse(self, query):
+        pass
+    
+    
+    def store(self, query):
         for entry in query['result']:
-            collection = handle.database[entry['collection']]
+            collection = query['database'].database[entry['collection']]
             record = collection.find_one({u'uri':entry[u'uri']})
             now = datetime.utcnow()
             if record is None:
@@ -225,14 +235,5 @@ class ResourceHandler(object):
             
             # save the entry to db
             collection.save(record)
-    
-    
-    def fetch(self, query, handle):
-        pass
-    
-    
-    def parse(self, query, handle):
-        pass
-    
     
 
