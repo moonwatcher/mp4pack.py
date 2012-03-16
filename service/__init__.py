@@ -116,7 +116,8 @@ class ResourceHandler(object):
         
         for name, branch in self.node['branch'].iteritems():
             branch['name'] = name
-            branch['pattern'] = re.compile(branch['match'])
+            for match in branch['match']:
+                match['pattern'] = re.compile(match['filter'])
             self.branch[name] = branch
     
     
@@ -141,64 +142,74 @@ class ResourceHandler(object):
     
     def resolve(self, uri, db):
         result = None
+        taken = False
         for branch in self.branch.values():
-            match = branch['pattern'].search(uri)
-            if match is not None:
-                # Only branches with a collection definition are resolvable
-                if 'collection' in branch:
-                    collection = db.database[branch['collection']]
-                    result = collection.find_one({u'uri':uri})
-                    
-                    # If no record exists proceed to caching it
-                    if result is None:
-                        self.cache(uri, db)
-                        result = collection.find_one({u'uri':uri})
-                break
+            for match in branch['match']:
+                m = match['pattern'].search(uri)
+                if m is not None:
+                    taken = True
+                    # Only branches with a collection definition are resolvable
+                    if 'collection' in branch:
+                        collection = db.database[branch['collection']]
+                        result = collection.find_one({u'head.uri':uri})
+                        
+                        # If record does not exists proceed to caching it
+                        if result is None:
+                            self.cache(uri, db)
+                            result = collection.find_one({u'head.uri':uri})
+                    break
+            if taken: break
         return result
     
     
     def remove(self, uri, db):
+        taken = False
         for branch in self.branch.values():
-            match = branch['pattern'].search(uri)
-            if match is not None:
-                # Only branches with a collection definition are resolvable
-                if 'collection' in branch:
-                    collection = db.database[branch['collection']]
-                    result = collection.remove({u'uri':uri})
-                break
+            for match in branch['match']:
+                m = match['pattern'].search(uri)
+                if m is not None:
+                    taken = True
+                    # Only branches with a collection definition are resolvable
+                    if 'collection' in branch:
+                        self.log.debug(u'Dropping %s', uri)
+                        collection = db.database[branch['collection']]
+                        result = collection.remove({u'head.uri':uri})
+                    break
+            if taken: break
     
     
     def cache(self, uri, db):
+        taken = False
         for branch in self.branch.values():
-            match = branch['pattern'].search(uri)
-            if match is not None:
-                query = {
-                    'database':db,
-                    'branch':branch,
-                    'uri':uri,
-                    'parameter':{},
-                    'stream':[],
-                    'result':[],
-                }
-                
-                # extract and cast parameters
-                if 'namespace' in branch:
-                    ns = self.namespaces[branch['namespace']]
-                    for k,v in match.groupdict().iteritems():
-                        prototype = ns.search(k)
-                        if prototype is not None:
-                            query['parameter'][prototype.key] = prototype.cast(v)
-                            
-                # calculate the remote url
-                if 'remote' in branch:
+            for match in branch['match']:
+                m = match['pattern'].search(uri)
+                if m is not None:
+                    query = {
+                        'database':db,
+                        'branch':branch,
+                        'uri':uri,
+                        'parameter':{},
+                        'stream':[],
+                        'result':[],
+                    }
+                    
+                    # extract and cast parameters
+                    if 'namespace' in branch:
+                        ns = self.namespaces[branch['namespace']]
+                        for k,v in m.groupdict().iteritems():
+                            prototype = ns.search(k)
+                            if prototype is not None:
+                                query['parameter'][prototype.key] = prototype.cast(v)
+                                
+                    # calculate the remote url
                     if 'api key' in self.node:
                         query['parameter']['api key'] = self.node['api key']
-                    query['remote url'] = branch['remote'].format(**query['parameter'])
+                    query['remote url'] = match['remote'].format(**query['parameter'])
                     
-                self.fetch(query)
-                self.parse(query)
-                self.store(query)
-                break
+                    self.fetch(query)
+                    self.parse(query)
+                    self.store(query)
+                    break
     
     
     
@@ -213,27 +224,31 @@ class ResourceHandler(object):
     
     def store(self, query):
         for entry in query['result']:
-            collection = query['database'].database[entry['collection']]
-            record = collection.find_one({u'uri':entry[u'uri']})
-            now = datetime.utcnow()
-            if record is None:
-                record = {
-                    u'uri':entry[u'uri'],
-                    u'document':entry[u'document'],
-                    u'created':now,
-                }
-            else:
-                record[u'document'] = entry[u'document']
-                
-            # update index
-            if 'index' in entry:
-                for k,v in entry['index'].iteritems():
-                    record[k] = v
+            entry[u'uri'] = []
+            # build all the resolvable URIs
+            for r in entry['branch']['resolvable']:
+                try:
+                    entry['uri'].append(r['format'].format(**entry['parameter']))
+                except KeyError, e:
+                    self.log.debug(u'Could not create uri for %s because %s was missing', r['name'], e)
                     
-            # update the modified field
-            record[u'modified'] = now
+            collection = query['database'].database[entry['branch']['collection']]
+            
+            record = None
+            now = datetime.utcnow()
+            for uri in entry[u'uri']:
+                record = collection.find_one({u'head.uri':uri})
+                break
+                
+            if record is None: record = { u'head':{ u'created':now, }, }
+            record[u'head'][u'uri'] = entry[u'uri']
+            record[u'body'] = entry[u'body']
+            
+            # always update the modified field
+            record[u'head'][u'modified'] = now
             
             # save the entry to db
+            self.log.debug(u'Storing %s', uri)
             collection.save(record)
     
 

@@ -154,21 +154,36 @@ def main():
     # Initialize a processing queue
     queue = Queue(env)
     
-    #r = env.resolver.cache(u'mpk://yoshi/c/tvdb/show/en/73255/all')
-    #r = env.resolver.resolve(u'mpk://yoshi/c/tvdb/show/73255/poster')
-    #o = []
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/1891'))
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/cast'))
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/poster'))
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/keyword'))
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/release'))
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/trailer'))
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/translation'))
-    #o.append(env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/alternative'))
+    env.resolver.cache(u'mpk://yoshi/c/tvdb/show/en/73255/complete')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tvdb/episode/en/73255/4/7')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tvdb/show/73255/poster')
     
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/credit')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/configuration')
+    
+    #env.resolver.remove(u'mpk://yoshi/c/tmdb/movie/1891/cast')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/1891')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/cast')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/poster')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/keyword')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/release')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/trailer')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/translation')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/alternative')
+    
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/tt0080684')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/cast')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/poster')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/keyword')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/release')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/trailer')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/translation')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/alternative')
+    
+    
+    
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/credit')
+    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
     
     job = Job(queue, arguments)
     job.open()

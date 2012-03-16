@@ -5,6 +5,8 @@ from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 
 from service import ResourceHandler
+from ontology import Ontology
+
 
 class TMDbHandler(ResourceHandler):
     def __init__(self, resolver, node):
@@ -12,7 +14,7 @@ class TMDbHandler(ResourceHandler):
     
     
     def fetch(self, query):
-        self.log.debug(u'Retrieve %s', query['remote url'])
+        self.log.debug(u'Fetching %s', query['remote url'])
         request = Request(query['remote url'], None, {'Accept': 'application/json'})
         
         try:
@@ -34,17 +36,19 @@ class TMDbHandler(ResourceHandler):
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
                 entry = {
-                    u'collection':query['branch']['collection'],
-                    u'uri':query['uri'],
-                    u'document':[document],
+                    u'branch':query['branch'],
+                    u'parameter':Ontology(self.env, query['parameter']),
+                    u'body':document,
                 }
                 
                 # update index
+                ns = self.namespaces[query['branch']['namespace']]
                 if 'index' in query['branch']:
-                    entry[u'index'] = {}
                     for index in query['branch']['index']:
-                        if index in query['parameter']:
-                            entry[u'index'][index] = query['parameter'][index]
+                        prototype = ns.find(index)
+                        if prototype and prototype.node['tmdb'] in document:
+                            entry[u'parameter'][index] = prototype.cast(document[prototype.node['tmdb']])
+                            
                 query['result'].append(entry)
     
 

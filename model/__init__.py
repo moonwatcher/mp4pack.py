@@ -595,6 +595,14 @@ class Prototype(Element):
                     literals = value.split(u'/')
                 else:
                     self.log.error(u'Could not parse list %s', value)
+                    
+            elif self.node['plural format'] == 'tvdb list':
+                value = self.env.expression['tvdb list separators'].sub(u'|', value)
+                value = self.env.expression['space around tvdb list item'].sub(u'|', value)
+                value = value.strip().strip(u'|')
+                if value:
+                    literals = value.split(u'|')
+                    
             if literals:
                 result = [ caster(l) for l in literals ]
         if result:

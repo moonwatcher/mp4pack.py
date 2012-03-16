@@ -602,6 +602,16 @@ runtime = {
             'flags':re.UNICODE,
         },
         {
+            'name':'tvdb list separators',
+            'definition':ur'\||,',
+            'flags':re.UNICODE,
+        },
+        {
+            'name':'space around tvdb list item',
+            'definition':ur'\s*\|\s*',
+            'flags':re.UNICODE,
+        },
+        {
             'name':'clean xml',
             'definition':ur'\s+/\s+(?:\t)*',
             'flags':re.UNICODE,
@@ -1459,7 +1469,7 @@ runtime = {
     },
     'service':{
         'knowlege':{
-            'match':ur'mpk://[^/]+/k/.*',
+            'match':ur'^mpk://(?P<host>[^/]+)(?P<relative>/k/.*)$',
             'branch':{
                 'knowlege.configuration':{
                     'match':ur'/k/configuration',
@@ -1533,98 +1543,281 @@ runtime = {
             'match':ur'^mpk://(?P<host>[^/]+)(?P<relative>/c/tmdb/.*)$',
             'branch':{
                 'tmdb.configuration':{
-                    'match':ur'^/c/tmdb/configuration$',
-                    'remote':ur'http://api.themoviedb.org/3/configuration?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/configuration$',
+                            'remote':ur'http://api.themoviedb.org/3/configuration?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb configuration',
+                            'format':ur'/c/tmdb/configuration',
+                        },
+                    ],
                     'collection':'tmdb_configuration',
+                    'namespace':'tmdb.movie',
                     'type':'json',
                 },
                 'tmdb.movie':{
-                    'match':ur'^/c/tmdb/movie/(?P<language>[a-z]{2})/(?P<tmdb_movie_id>[0-9]+)$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}?language={language}&api_key={api key}',
+                    # http://api.themoviedb.org/3/movie/1891?language=en&api_key=a8b9f96dde091408a03cb4c78477bd14
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<language>[a-z]{2})/(?P<tmdb_movie_id>[0-9]+)$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}?language={language}&api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<language>[a-z]{2})/(?P<imdb_movie_id>tt[0-9]+)$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}?language={language}&api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie by tmdb id',
+                            'format':ur'/c/tmdb/movie/{language}/{tmdb movie id}',
+                        },
+                        {
+                            'name':u'tmdb movie by imdb id',
+                            'format':ur'/c/tmdb/movie/{language}/{imdb movie id}',
+                        }
+                    ],
                     'collection':'tmdb_movie',
                     'namespace':'tmdb.movie',
                     'type':'json',
-                    'index':['tmdb movie id', 'language'],
+                    'index':['tmdb movie id', 'language', 'imdb movie id'],
                 },
                 'tmdb.movie.cast':{
-                    'match':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/casts?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/casts?api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/cast$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/casts?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie cast by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/cast',
+                        },
+                        {
+                            'name':u'tmdb movie cast by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/cast',
+                        },
+                    ],
                     'collection':'tmdb_movie_cast',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
                 'tmdb.movie.poster':{
-                    'match':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/poster$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/images?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/poster$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/images?api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/poster$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/images?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie poster by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/poster',
+                        },
+                        {
+                            'name':u'tmdb movie poster by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/poster',
+                        },
+                    ],
                     'collection':'tmdb_movie_poster',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
                 'tmdb.movie.keyword':{
-                    'match':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/keyword$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/keywords?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/keyword$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/keywords?api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/keyword$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/keywords?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie keyword by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/keyword',
+                        },
+                        {
+                            'name':u'tmdb movie keyword by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/keyword',
+                        },
+                    ],
                     'collection':'tmdb_movie_keyword',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
                 'tmdb.movie.release':{
-                    'match':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/release$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/releases?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/release$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/releases?api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/release$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/releases?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie release by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/release',
+                        },
+                        {
+                            'name':u'tmdb movie release by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/release',
+                        },
+                    ],
                     'collection':'tmdb_movie_release',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
                 'tmdb.movie.trailer':{
-                    'match':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/trailer$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/trailers?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/trailer$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/trailers?api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/trailer$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/trailers?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie trailer by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/trailer',
+                        },
+                        {
+                            'name':u'tmdb movie trailer by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/trailer',
+                        },
+                    ],
                     'collection':'tmdb_movie_trailer',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
                 'tmdb.movie.translation':{
-                    'match':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/translation$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/translations?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/translation$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/translations?api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/translation$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/translations?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie translation by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/translation',
+                        },
+                        {
+                            'name':u'tmdb movie translation by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/translation',
+                        },
+                    ],
                     'collection':'tmdb_movie_translation',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
                 'tmdb.movie.alternative':{
-                    'match':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/alternative$',
-                    'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/alternative_titles?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/alternative$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/alternative_titles?api_key={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/alternative$',
+                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/alternative_titles?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb movie alternative by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/alternative',
+                        },
+                        {
+                            'name':u'tmdb movie alternative by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/alternative',
+                        },
+                    ],
                     'collection':'tmdb_movie_alternative',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
                 'tmdb.person':{
-                    'match':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)$',
-                    'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)$',
+                            'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb person by tmdb id',
+                            'format':ur'/c/tmdb/person/{tmdb person id}',
+                        },
+                    ],
                     'collection':'tmdb_person',
                     'namespace':'tmdb.person',
                     'type':'json',
-                    'index':['tmdb movie id'],
                 },
                 'tmdb.person.poster':{
-                    'match':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/poster$',
-                    'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}/images?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/poster$',
+                            'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb person poster by tmdb id',
+                            'format':ur'/c/tmdb/person/{tmdb person id}/poster',
+                        },
+                    ],
                     'collection':'tmdb_person_poster',
                     'namespace':'tmdb.person',
                     'type':'json',
-                    'index':['tmdb movie id'],
                 },
                 'tmdb.person.credit':{
-                    'match':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/credit$',
-                    'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}/credits?api_key={api key}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/credit$',
+                            'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}/credits?api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb person credit by tmdb id',
+                            'format':ur'/c/tmdb/person/{tmdb person id}/credit',
+                        },
+                    ],
                     'collection':'tmdb_person_credit',
                     'namespace':'tmdb.person',
                     'type':'json',
-                    'index':['tmdb movie id'],
                 },
             },
             'status codes':{
@@ -1652,19 +1845,45 @@ runtime = {
             'match':ur'^mpk://(?P<host>[^/]+)(?P<relative>/c/tvdb/.*)$',
             'branch':{
                 'tvdb.show':{
-                    'match':ur'^/c/tvdb/show/(?P<language>[a-z]{2})/(?P<tvdb_tv_show_id>[0-9]+)$',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/{language}.xml',
-                    'uri pattern':ur'/c/tvdb/show/{language}/{tvdb tv show id}',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/show/(?P<language>[a-z]{2})/(?P<tvdb_tv_show_id>[0-9]+)$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/{language}.xml',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb show by tvdb show id',
+                            'format':ur'/c/tvdb/show/{language}/{tvdb tv show id}',
+                        },
+                    ],
                     'collection':'tvdb_tv_show',
                     'namespace':'tvdb.show',
                     'type':'xml',
                     'produce':['tvdb.show'],
-                    'index':['tvdb tv show id', 'language'],
                 },
                 'tvdb.episode':{
-                    'match':ur'^/c/tvdb/episode/(?P<language>[a-z]{2})/(?P<tvdb_tv_episode_id>[0-9]+)$',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/episodes/{tvdb tv episode id}/{language}.xml',
-                    'uri pattern':'/c/tvdb/episode/{language}/{tvdb tv episode id}',
+                    # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/default/7/1/en.xml
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/episode/(?P<language>[a-z]{2})/(?P<tvdb_tv_episode_id>[0-9]+)$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/episodes/{tvdb tv episode id}/{language}.xml',
+                        },
+                        {
+                            'filter':ur'^/c/tvdb/episode/(?P<language>[a-z]{2})/(?P<tvdb_tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)/(?P<tv_episode>[0-9]+)$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/default/{tv season}/{tv episode}/{language}.xml',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb episode by tvdb episode id',
+                            'format':ur'/c/tvdb/episode/{language}/{tvdb tv episode id}',
+                        },
+                        {
+                            'name':u'tvdb episode by tvdb show id',
+                            'format':ur'/c/tvdb/episode/{language}/{tvdb tv show id}/{tv season}/{tv episode}',
+                        },
+                    ],
                     'collection':'tvdb_tv_episode',
                     'namespace':'tvdb.episode',
                     'type':'xml',
@@ -1672,55 +1891,131 @@ runtime = {
                     'index':['tvdb tv show id', 'tvdb tv episode id', 'tv season', 'tv episode'],
                 },
                 'tvdb.show.poster':{
-                    'match':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/poster$',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/banners.xml',
-                    'uri pattern':ur'/c/tvdb/show/{tvdb tv show id}/poster',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/poster$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/banners.xml',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb show poster by tvdb show id',
+                            'format':ur'/c/tvdb/show/{tvdb tv show id}/poster',
+                        },
+                    ],
                     'collection':'tvdb_tv_show_poster',
                     'namespace':'tvdb.show.poster',
                     'type':'xml',
                     'produce':['tvdb.show.poster'],
-                    'index':['tvdb tv show id'],
                 },
                 'tvdb.show.cast':{
-                    'match':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/actors.xml',
-                    'uri pattern':ur'/c/tvdb/show/{tvdb tv show id}/cast',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/actors.xml',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb show cast by tvdb show id',
+                            'format':ur'/c/tvdb/show/{tvdb tv show id}/cast',
+                        },
+                    ],
                     'collection':'tvdb_tv_show_cast',
                     'namespace':'tvdb.show.cast',
                     'type':'xml',
                     'produce':['tvdb.show.cast'],
-                    'index':['tvdb tv show id'],
                 },
                 'tvdb.show.complete':{
-                    'match':ur'^/c/tvdb/show/(?P<language>[a-z]{2})/(?P<tvdb_tv_show_id>[0-9]+)/all$',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/all/{language}.zip',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/show/(?P<language>[a-z]{2})/(?P<tvdb_tv_show_id>[0-9]+)/complete$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/all/{language}.zip',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'complete tvdb show by tvdb show id',
+                            'format':ur'/c/tvdb/show/{language}/{tvdb tv show id}/complete',
+                        },
+                    ],
                     'namespace':'tvdb.show',
                     'type':'zip',
                     'produce':['tvdb.show', 'tvdb.episode', 'tvdb.show.poster', 'tvdb.show.cast'],
                 },
                 'tvdb.update.daily':{
-                    'match':ur'^/c/tvdb/update/day',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_day.zip',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/update/day$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_day.zip',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb daily update',
+                            'format':ur'/c/tvdb/update/day',
+                        },
+                    ],
                     'type':'zip',
                 },
                 'tvdb.update.weekly':{
-                    'match':ur'/c/tvdb/update/week',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_week.zip',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/update/week$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_week.zip',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb weekly update',
+                            'format':ur'/c/tvdb/update/week',
+                        },
+                    ],
                     'type':'zip',
                 },
                 'tvdb.update.monthly':{
-                    'match':ur'/c/tvdb/update/month',
-                    'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_month.zip',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/update/month$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_month.zip',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb monthly update',
+                            'format':ur'/c/tvdb/update/month',
+                        },
+                    ],
                     'type':'zip',
                 },
                 'tvdb.update.episode':{
-                    'match':ur'/c/tvdb/update/episode/(?P<time>[0-9]+)',
-                    'remote':ur'http://www.thetvdb.com/api/Updates.php?type=episode&time={time}',
+                    'match':[
+                        {
+                            'filter':ur'/c/tvdb/update/episode/(?P<time>[0-9]+)',
+                            'remote':ur'http://www.thetvdb.com/api/Updates.php?type=episode&time={time}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb episode update since',
+                            'format':ur'/c/tvdb/update/episode/{time}',
+                        },
+                    ],
                     'type':'xml',
                 },
                 'tvdb.update.show':{
-                    'match':ur'/c/tvdb/update/show/(?P<time>[0-9]+)',
-                    'remote':ur'http://www.thetvdb.com/api/Updates.php?type=series&time={time}',
+                    'match':[
+                        {
+                            'filter':ur'/c/tvdb/update/show/(?P<time>[0-9]+)',
+                            'remote':ur'http://www.thetvdb.com/api/Updates.php?type=series&time={time}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb show update since',
+                            'format':ur'/c/tvdb/update/show/{time}',
+                        },
+                    ],
                     'type':'xml',
                 },
             },

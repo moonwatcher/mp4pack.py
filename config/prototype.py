@@ -1493,27 +1493,29 @@ prototype = {
         #'tmdb.movie.alternative':{},
         #'tmdb.person.poster':{},
         #'tmdb.person.credit':{},
-        
         'tmdb.movie':{
             'default':{
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
                 'keyword':None,
+                'tmdb':None,
             },
             'synonym':['keyword'],
             'element':[
                 {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
-                {
                     'key':'tmdb movie id',
                     'name':'TMDB movie ID',
                     'keyword':'tmdb_movie_id',
+                    'tmdb':'id',
                     'type':int,
+                },
+                {
+                    'key':'imdb movie id',
+                    'name':'IMDB movie ID',
+                    'keyword':'imdb_movie_id',
+                    'tmdb':'imdb_id',
+                    'type':unicode,
                 },
                 {
                     'key':'language',
@@ -1533,12 +1535,6 @@ prototype = {
             },
             'synonym':['keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'tmdb person id',
                     'name':'TMDB person ID',
@@ -1561,12 +1557,6 @@ prototype = {
             'coalesce':True,
             'synonym':['tvdb', 'keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'tvdb tv show id',
                     'name':'TVDB TV Show ID',
@@ -1618,12 +1608,6 @@ prototype = {
             'coalesce':True,
             'synonym':['tvdb', 'keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'tvdb tv show id',
                     'name':'TVDB TV Show ID',
@@ -1714,12 +1698,6 @@ prototype = {
             'coalesce':False,
             'synonym':['tvdb', 'keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'tvdb tv show id',
                     'name':'TVDB TV Show ID',
@@ -1883,12 +1861,6 @@ prototype = {
             'synonym':['tvdb', 'keyword'],
             'element':[
                 {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
-                {
                     'key':'tvdb tv show id',
                     'name':'TVDB TV Show ID',
                     'keyword':'tvdb_tv_show_id',
@@ -1911,12 +1883,14 @@ prototype = {
                 {
                     'key':'tv season',
                     'name':'TV Season',
+                    'keyword':'tv_season',
                     'tvdb':'SeasonNumber',
                     'type':int,
                 },
                 {
                     'key':'tv episode',
                     'name':'TV Episode',
+                    'keyword':'tv_episode',
                     'tvdb':'EpisodeNumber',
                     'type':int,
                 },
@@ -1947,6 +1921,7 @@ prototype = {
                 {
                     'key':'language',
                     'name':'Language',
+                    'keyword':'language',
                     'tvdb':'Language',
                     'type':'enum',
                     'enumeration':'language',

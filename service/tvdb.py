@@ -21,7 +21,7 @@ class TVDbHandler(ResourceHandler):
     
     
     def fetch(self, query):
-        self.log.debug(u'Retrieve %s', query['remote url'])
+        self.log.debug(u'Fetching %s', query['remote url'])
         request = Request(query['remote url'])
         
         try:
@@ -40,18 +40,24 @@ class TVDbHandler(ResourceHandler):
             elif query['branch']['type'] == 'zip':
                 try:
                     bytes = BytesIO(response.read())
-                    archive = ZipFile(bytes)
-                except BadZipfile, e:
-                    self.log.warning(u'Failed to decode zip archive %s', query['remote url'])
+                except IOError, e:
+                    self.log.warning(u'Failed to read stream from archive %s', query['remote url'])
                     self.log.debug(u'Exception raised %s', unicode(e))
                 else:
-                    for filename in archive.namelist():
-                        try:
-                            query['stream'].append(StringIO(archive.open(filename, 'rU').read()))
-                        except Exception:
-                            self.log.warning(u'Failed to load document %s from archive %s', filename, query['remote url'])
-                    archive.close()
-                    bytes.close()
+                    try:
+                        archive = ZipFile(bytes)
+                    except BadZipfile, e:
+                        self.log.warning(u'Failed to decode zip archive %s', query['remote url'])
+                        self.log.debug(u'Exception raised %s', unicode(e))
+                        bytes.close()
+                    else:
+                        for filename in archive.namelist():
+                            try:
+                                query['stream'].append(StringIO(archive.open(filename, 'rU').read()))
+                            except Exception:
+                                self.log.warning(u'Failed to load document %s from archive %s', filename, query['remote url'])
+                        archive.close()
+                        bytes.close()
     
     
     def parse(self, query):
@@ -64,30 +70,23 @@ class TVDbHandler(ResourceHandler):
             else:
                 for branch in query['branch']['reference']:
                     ns = self.namespaces[branch['namespace']]
+                    
+                    # Collect all elements of this type into a list
                     if ns.node['coalesce']:
-                        entry = {
-                            u'collection':branch['collection'],
-                            u'uri':branch['uri pattern'].format(**query['parameter']),
-                            u'document':[],
-                        }
-                        
-                        # update index
-                        if 'index' in branch:
-                            entry[u'index'] = {}
-                            for index in branch['index']:
-                                if index in query['parameter']:
-                                    entry[u'index'][index] = query['parameter'][index]
-                                    
+                        entry = {u'branch':branch, u'body':[],}
                         for node in element.findall(ns.node['tag']):
                             o = Ontology(self.env)
                             for item in node.getchildren():
                                 prototype = ns.search(item.tag)
                                 if prototype:
                                     o[prototype.key] = prototype.cast(item.text)
-                            entry[u'document'].append(o.node)
+                            entry[u'body'].append(o.node)
                             
-                        if entry[u'document']:
-                            query['result'].append(entry)
+                        if entry[u'body']:
+                            entry[u'parameter'] = Ontology(self.env, query['parameter'])
+                            query[u'result'].append(entry)
+                            
+                    # Treat every element as an individual record
                     else:
                         for node in element.findall(ns.node['tag']):
                             o = Ontology(self.env)
@@ -97,18 +96,16 @@ class TVDbHandler(ResourceHandler):
                                     o[prototype.key] = prototype.cast(item.text)
                                     
                             entry = {
-                                u'collection':branch['collection'],
-                                u'uri':branch['uri pattern'].format(**o.node),
-                                u'document':o.node,
+                                u'branch':branch,
+                                u'parameter':Ontology(self.env, query['parameter']),
+                                u'body':o.node,
                             }
                             
                             # update index
                             if 'index' in branch:
-                                entry[u'index'] = {}
                                 for index in branch['index']:
-                                    if index in o:
-                                        entry[u'index'][index] = o[index]
-                                        
+                                    if index in o: entry[u'parameter'][index] = o[index]
+                                    
                             query['result'].append(entry)
     
 
