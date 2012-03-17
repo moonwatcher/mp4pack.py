@@ -134,26 +134,7 @@ def decode_cli(env):
     return o
 
 
-def main():
-    # Initialize logging and set the initial log level
-    logging.basicConfig()
-    logging.getLogger().setLevel(logging.DEBUG)
-    
-    # Initialize the environment
-    env = Environment()
-    
-    # Decode command line arguments
-    arguments = decode_cli(env)
-    
-    # Load the interactive arguments into the environment
-    env.load_interactive(arguments)
-    
-    # Override the initial log level
-    logging.getLogger().setLevel(log_levels[env.ontology['verbosity']])
-    
-    # Initialize a processing queue
-    queue = Queue(env)
-    
+def test(env):
     env.resolver.cache(u'mpk://yoshi/c/tvdb/show/en/73255/complete')
     #print env.resolver.resolve(u'mpk://yoshi/c/tvdb/episode/en/73255/4/7')
     #print env.resolver.resolve(u'mpk://yoshi/c/tvdb/show/73255/poster')
@@ -184,6 +165,27 @@ def main():
     #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891')
     #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/credit')
     #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
+
+
+def main():
+    # Initialize logging and set the initial log level
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    
+    # Initialize the environment
+    env = Environment()
+    
+    # Decode command line arguments
+    arguments = decode_cli(env)
+    
+    # Load the interactive arguments into the environment
+    env.load_interactive(arguments)
+    
+    # Override the initial log level
+    logging.getLogger().setLevel(log_levels[env.ontology['verbosity']])
+    
+    # Initialize a processing queue
+    queue = Queue(env)
     
     job = Job(queue, arguments)
     job.open()

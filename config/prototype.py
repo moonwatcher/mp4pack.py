@@ -12,12 +12,6 @@ prototype = {
             'synonym':['keyword'],
             'element':[
                 {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
-                {
                     'key':'movie id',
                     'name':'Movie ID',
                     'keyword':'movie_id',
@@ -28,6 +22,12 @@ prototype = {
                     'name':'IMDB Movie ID',
                     'keyword':'imdb_movie_id',
                     'type':unicode,
+                },
+                {
+                    'key':'tmdb movie id',
+                    'name':'TMDB movie ID',
+                    'keyword':'tmdb_movie_id',
+                    'type':int,
                 },
             ],
         },
@@ -40,12 +40,6 @@ prototype = {
             },
             'synonym':['keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'tv show id',
                     'name':'TV Show ID',
@@ -63,12 +57,6 @@ prototype = {
             },
             'synonym':['keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'tv show id',
                     'name':'TV Show ID',
@@ -92,12 +80,6 @@ prototype = {
             },
             'synonym':['keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'tv show id',
                     'name':'TV Show ID',
@@ -128,12 +110,6 @@ prototype = {
             'synonym':['keyword'],
             'element':[
                 {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
-                {
                     'key':'person id',
                     'name':'Person ID',
                     'keyword':'person_id',
@@ -150,12 +126,6 @@ prototype = {
             },
             'synonym':['keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'network id',
                     'name':'Network ID',
@@ -174,12 +144,6 @@ prototype = {
             'synonym':['keyword'],
             'element':[
                 {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
-                {
                     'key':'studio id',
                     'name':'Studio ID',
                     'keyword':'studio_id',
@@ -196,12 +160,6 @@ prototype = {
             },
             'synonym':['keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'job id',
                     'name':'Job ID',
@@ -220,12 +178,6 @@ prototype = {
             'synonym':['keyword'],
             'element':[
                 {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
-                {
                     'key':'department id',
                     'name':'Department ID',
                     'keyword':'department_id',
@@ -242,12 +194,6 @@ prototype = {
             },
             'synonym':['keyword'],
             'element':[
-                {
-                    'key':'host',
-                    'name':'Host',
-                    'keyword':'host',
-                    'type':unicode,
-                },
                 {
                     'key':'genre id',
                     'name':'Genre ID',

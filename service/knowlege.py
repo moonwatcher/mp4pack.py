@@ -18,27 +18,23 @@ class KnowlegeBaseHandler(ResourceHandler):
             try:
                 document = json.load(stream)
             except ValueError, e:
-                self.log.warning(u'Could not decode JSON from %s: %s', remote, e)
+                self.log.warning(u'Failed to decode JSON document %s', query['remote url'])
+                self.log.debug(u'Exception raised %s', unicode(e))
             else:
-                # Check if we got a TMDB error document
-                if 'status_code' in document and document['status_code'] != 1:
-                    self.log.warning(u'Failed to fetch %s %s', remote, document['status_message'])
-                else:
-                    branch = self.branch[query['namespace']]
-                    entry = {
-                        u'host':query['parameter']['host'],
-                        u'namespace':query['namespace'],
-                        u'uri':query['uri'],
-                        u'document':[],
-                    }
-                    
-                    if 'index' in branch:
-                        for index in branch['index']:
-                            if index in query['parameter']:
-                                entry[index] = query['parameter'][index]
-                                
-                    query['result'].append(document)
-        for entry in query['result']:
-            self.store(entry)
+                entry = {
+                    u'branch':query['branch'],
+                    u'parameter':Ontology(self.env, query['parameter']),
+                    u'body':document,
+                }
+                
+                # update index
+                ns = self.namespaces[query['branch']['namespace']]
+                if 'index' in query['branch']:
+                    for index in query['branch']['index']:
+                        prototype = ns.find(index)
+                        if prototype and prototype.node['tmdb'] in document:
+                            entry[u'parameter'][index] = prototype.cast(document[prototype.node['tmdb']])
+                            
+                query['result'].append(entry)
     
 
