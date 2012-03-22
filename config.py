@@ -502,6 +502,11 @@ configuration = {
             'keyword':u'host',
             'type':'unicode',
         },
+        'port':{
+            'name':u'Port',
+            'keyword':u'port',
+            'type':'int',
+        },
         'directory':{
             'name':u'Directory',
             'keyword':u'directory',
@@ -1936,21 +1941,13 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'host':{
-                    'name':u'Host',
-                    'keyword':u'host',
-                    'type':'unicode',
-                },
+                'host':None,
                 'database':{
                     'name':u'Database',
                     'keyword':u'database',
                     'type':'unicode',
                 },
-                'port':{
-                    'name':u'Port',
-                    'keyword':u'port',
-                    'type':'int',
-                },
+                'port':None,
                 'username':{
                     'name':u'Username',
                     'keyword':u'username',
@@ -1971,7 +1968,16 @@ configuration = {
                 'rule.mongodb.url',
             ],
         },
-        'resource.hint':{},
+        'resource.hint':{
+            'default':{
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+            },
+            'synonym':['keyword'],
+            'element':{
+            }
+        },
         'resource.file.url':{
             'default':{
                 'auto cast':True,
@@ -2014,14 +2020,9 @@ configuration = {
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
-                'mediainfo':None,
                 'atom':None,
             },
             'synonym':['keyword'],
-            'rule':[
-                'rule.parse.path',
-                'rule.parse.filename',
-            ],
             'element':{
                 'path':None,
                 'directory':None,
@@ -2039,6 +2040,10 @@ configuration = {
                 'track position':None,
                 'name':None,
             },
+            'rule':[
+                'rule.parse.path',
+                'rule.parse.filename',
+            ],
         },
         'knowlege.movie':{
             'default':{
@@ -2247,7 +2252,6 @@ configuration = {
                     'mediainfo':'Format',
                 },
             },
-            'match':{ 'expression':ur'^General$', 'flags':re.UNICODE },
         },
         'crawl.tag':{
             'default':{
@@ -2528,7 +2532,6 @@ configuration = {
                 'imdb tv episode id':None,
                 'tmdb movie id':None,
             },
-            'match':{ 'expression':ur'^General$', 'flags':re.UNICODE },
         },
         'crawl.stream.audio':{
             'default':{
@@ -2604,7 +2607,6 @@ configuration = {
                     'mediainfo':'dialnorm',
                 },
             },
-            'match':{ 'expression':ur'^Audio$', 'flags':re.UNICODE },
         },
         'crawl.stream.video':{
             'default':{
@@ -2704,7 +2706,6 @@ configuration = {
                     'plural format':'mediainfo key value list',
                 },
             },
-            'match':{ 'expression':ur'^Video$', 'flags':re.UNICODE },
         },
         'crawl.stream.text':{
             'default':{
@@ -2761,7 +2762,6 @@ configuration = {
                     'mediainfo':'Encoded_Date',
                 },
             },
-            'match':{ 'expression':ur'^Text$', 'flags':re.UNICODE },
         },
         'crawl.stream.image':{
             'default':{
@@ -2826,7 +2826,6 @@ configuration = {
                     'format':'pixel',
                 },
             },
-            'match':{ 'expression':ur'^Image$', 'flags':re.UNICODE },
         },
         'tmdb.movie':{
             'default':{

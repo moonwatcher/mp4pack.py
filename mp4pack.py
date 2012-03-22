@@ -186,7 +186,7 @@ def main():
     # Initialize a processing queue
     queue = Queue(env)
     
-    test(env)
+    #test(env)
     
     job = Job(queue, env.ontology)
     job.open()
