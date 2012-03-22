@@ -79,11 +79,6 @@ class ResourceHandler(object):
         return self.node['name']
     
     
-    @property
-    def namespaces(self):
-        return self.env.prototype[self.name]
-    
-    
     def match(self, uri):
         return self.pattern.search(uri)
     
