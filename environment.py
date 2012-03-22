@@ -41,7 +41,6 @@ class Environment(object):
             'subtitle filter':{},
         }
         
-        self._deduction = None
         self._resolver = None
         self._caption_filter = None
         self._universal_detector = None
@@ -81,14 +80,6 @@ class Environment(object):
     
     
     # Lazy loaders for processors
-    
-    @property
-    def deduction(self):
-        if self._deduction is None:
-            self._deduction = Deduction(self)
-        return self._deduction
-    
-    
     @property
     def resolver(self):
         if self._resolver is None:
