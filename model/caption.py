@@ -123,8 +123,8 @@ class Caption(object):
     
     
     def filter(self, name):
-        if name in self.env.caption_filter_cache:
-            f = self.env.caption_filter_cache[name]
+        if name in self.env.caption_filter:
+            f = self.env.caption_filter[name]
             for slide in self.slides:
                 f.filter(slide)
     
@@ -268,8 +268,8 @@ class CaptionFilterCache(dict):
     
     def resolve(self, key):
         if not dict.__contains__(self, key):
-            if key in self.env.configuration['subtitles']['filters']:
-                o = CaptionFilter(self.env.configuration['subtitles']['filters'][key])
+            if key in self.env.subtitle_filter:
+                o = CaptionFilter(self.env.subtitle_filter[key])
                 if o.valid:
                     self.log.debug(u'Loaded %s filter pipeline', key)
                     dict.__setitem__(self, key, o)

@@ -130,41 +130,40 @@ def decode_cli(env):
     c['clean'] = s.add_parser('clean', help='clean repository indexes')
     c['initialize'] = s.add_parser('initialize', help='initialize the repository')
     
-    o = Ontology(env, vars(p.parse_args()))
-    return o
+    return vars(p.parse_args())
 
 
 def test(env):
     env.resolver.cache(u'mpk://yoshi/c/tvdb/show/en/73255/complete')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tvdb/episode/en/73255/4/7')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tvdb/show/73255/poster')
+    print env.resolver.resolve(u'mpk://yoshi/c/tvdb/episode/en/73255/4/7')
+    print env.resolver.resolve(u'mpk://yoshi/c/tvdb/show/73255/poster')
     
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/configuration')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/configuration')
     
-    #env.resolver.remove(u'mpk://yoshi/c/tmdb/movie/1891/cast')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/1891')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/cast')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/poster')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/keyword')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/release')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/trailer')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/translation')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/alternative')
+    env.resolver.remove(u'mpk://yoshi/c/tmdb/movie/1891/cast')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/1891')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/cast')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/poster')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/keyword')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/release')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/trailer')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/translation')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/alternative')
     
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/tt0080684')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/cast')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/poster')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/keyword')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/release')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/trailer')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/translation')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/alternative')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/tt0080684')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/cast')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/poster')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/keyword')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/release')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/trailer')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/translation')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/alternative')
     
     
     
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/credit')
-    #print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/credit')
+    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
 
 
 def main():
@@ -187,7 +186,9 @@ def main():
     # Initialize a processing queue
     queue = Queue(env)
     
-    job = Job(queue, arguments)
+    test(env)
+    
+    job = Job(queue, env.ontology)
     job.open()
     job.run()
     job.close()

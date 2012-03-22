@@ -11,13 +11,19 @@ from ontology import Ontology
 from model.menu import Chapter, Menu
 from model.caption import Caption, Slide
 
+track_type_namespace = {
+    'audio':'crawl.stream.audio',
+    'video':'crawl.stream.video',
+    'text':'crawl.stream.text',
+    'image':'crawl.stream.image',
+}
+
 class Crawler(object):
     def __init__(self, ontology):
         self.log = logging.getLogger('crawler')
         self.ontology = ontology
-        self.tag = Ontology.clone(ontology)
+        self.tag = Ontology.project('crawl.tag', ontology)
         self.track = []
-        
         self.load()
     
     
@@ -107,14 +113,14 @@ class Crawler(object):
                                     track_type = unicode(track_node.attrib['type'].lower())
                                     if track_type == 'general':
                                         for i in track_node:
-                                            self._set_concept(self.ontology, self.env.prototype['crawl']['file'], i.tag, i.text)
-                                            self._set_concept(self.tag, self.env.prototype['crawl']['tag'], i.tag, i.text)
+                                            self.ontology.decode(i.tag, i.text)
+                                            self.tag.decode(i.tag, i.text)
                                             
-                                    elif track_type in self.env.prototype['track']:
-                                        track = Ontology(self.env)
+                                    elif track_type in track_type_namespace:
+                                        track = Ontology(self.env, track_type_namespace[track_type])
                                         track['type'] = track_type
                                         for i in track_node:
-                                            self._set_concept(track, self.env.prototype['track'][track_type], i.tag, i.text)
+                                            track.decode(i.tag, i.text)
                                         self._add_track(track)
                                         
                                     elif track_type == 'menu':
@@ -127,7 +133,7 @@ class Crawler(object):
                         if menu_track:
                             menu_track = menu_track[0]
                         else:
-                            menu_track = Ontology(self.env)
+                            menu_track = Ontology(self.env, track_type_namespace['text'])
                             menu_track['type'] = u'text'
                             menu_track['codec'] = u'chpl'
                             self._add_track(menu_track)
@@ -151,7 +157,7 @@ class Crawler(object):
                 match = self.env.expression['mp4info tag'].search(line)
                 if match is not None:
                     tag = match.groups()
-                    self._set_concept(self.tag, self.env.prototype['crawl']['tag'], tag[0], tag[1])
+                    self.tag.decode(tag[0], tag[1])
     
     
     def _load_ogg_chapters(self):
@@ -164,11 +170,11 @@ class Crawler(object):
                 
             menu.normalize()
             if menu.valid:
-                track = Ontology(self.env)
-                track['content'] = menu.node
+                track = Ontology(self.env, track_type_namespace['text'])
                 track['type'] = 'text'
                 track['codec'] = 'chpl'
                 track['language'] = self.ontology['language']
+                track['content'] = menu.node
                 self._add_track(track)
     
     
@@ -211,13 +217,13 @@ class Crawler(object):
                     
             caption.normalize()
             if caption.valid:
-                track = Ontology(self.env)
-                track['content'] = caption.node
-                track['track id'] = 0
-                track['position'] = 0
+                track = Ontology(self.env, track_type_namespace['text'])
                 track['type'] = 'text'
                 track['codec'] = 'srt'
+                track['track id'] = 0
+                track['position'] = 0
                 track['language'] = self.ontology['language']
+                track['content'] = caption.node
                 self._add_track(track)
     
     
@@ -258,13 +264,13 @@ class Crawler(object):
                         
             caption.normalize()
             if caption.valid:
-                track = Ontology(self.env)
-                track['content'] = caption.node
-                track['track id'] = 0
-                track['position'] = 0
+                track = Ontology(self.env, track_type_namespace['text'])
                 track['type'] = 'text'
                 track['codec'] = 'ass'
+                track['track id'] = 0
+                track['position'] = 0
                 track['language'] = self.ontology['language']
+                track['content'] = caption.node
                 self._add_track(track)
     
     
@@ -304,16 +310,10 @@ class Crawler(object):
             self.ontology['encoding'] = result['encoding']
     
     
-    def _set_concept(self, ontology, space, key, value):
-        prototype = space.search(key)
-        if prototype:
-            ontology[prototype.key] = prototype.cast(value)
-    
-    
     def _expand_itunmovi(self):
         if 'itunmovi' in self.tag:
             for k,v in self.tag['itunmovi'].iteritems():
-                key = self.env.model['itunmovi'].parse(k)
+                key = self.env.enumeration['itunmovi'].parse(k)
                 if key:
                     items = [ i['name'].strip() for i in v ]
                     items = [ unicode(i) for i in items if i ]
@@ -328,7 +328,7 @@ class Crawler(object):
         if 'genre type' in self.tag:
             self.tag['genre type'] = int(self.tag['genre type'].split(u',')[0])
             if 'genre' not in self.tag:
-                self.tag['genre'] = self.env.model['genre'].get(self.tag['genre type'])
+                self.tag['genre'] = self.env.enumeration['genre'].get(self.tag['genre type'])
     
     
     def _fix_cover(self):
@@ -406,8 +406,8 @@ class Crawler(object):
                 main = t
         if main:
             self.tag['width'] = float(main['width'])
-            if main['display aspect ratio'] >= self.env.configuration['playback']['aspect ratio']:
-                self.tag['height'] = self.tag['width'] / self.env.configuration['playback']['aspect ratio']
+            if main['display aspect ratio'] >= self.env.constant['playback aspect ration']:
+                self.tag['height'] = self.tag['width'] / self.env.constant['playback aspect ration']
             else:
                 self.tag['height'] = float(main['height'])
     

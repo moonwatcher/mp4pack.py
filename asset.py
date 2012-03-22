@@ -152,7 +152,7 @@ class Asset(object):
                                     x.load()
                                     
                             else:
-                                for language in self.env.model['language'].element.keys():
+                                for language in self.env.enumeration['language'].element.keys():
                                     o['language'] = language
                                     if o['path'] and os.path.exists(o['path']):
                                         self.log.debug(u'Discovered %s', o['path'])
@@ -208,7 +208,7 @@ class Asset(object):
     def touch(self):
         if not self.touched and self.managed:
             for node in self.node['entity']['resource'].values():
-                ontology = Ontology(self.env, node['ontology'])
+                ontology = Ontology(self.env, 'crawl.file', node['ontology'])
                 self.find(ontology)
             self.touched = True
     
@@ -300,9 +300,9 @@ class Resource(object):
         if self._info is None:
             if self.valid:
                 if self.node and 'tag' in self.node:
-                    self._info = Ontology(self.env, self.node['tag'])
+                    self._info = Ontology(self.env, 'crawl.tag', self.node['tag'])
                 else:
-                    self._info = Ontology(self.env)
+                    self._info = Ontology(self.env, 'crawl.file')
         return self._info
     
     
@@ -322,9 +322,9 @@ class Resource(object):
         if self._hint is None:
             if self.valid:
                 if self.node and 'hint' in self.node:
-                    self._hint = Ontology.from_node(self.env, self.node['hint'])
+                    self._hint = Ontology(self.env, 'resource.hint', self.node['hint'])
                 else:
-                    self._hint = Ontology(self.env)
+                    self._hint = Ontology(self.env, 'resource.hint')
         return self._hint
     
     
@@ -554,7 +554,7 @@ class AudioVideoContainer(Container):
     
     @property
     def hd(self):
-        return self.info['width'] >= self.env.configuration['hd threshold']
+        return self.info['width'] >= self.env.constant['hd threshold']
     
     
     
@@ -653,7 +653,7 @@ class AudioVideoContainer(Container):
                     if track['codec'] != 'chpl':
                         if 'language' in track:
                             command.append(u'--language')
-                            command.append(u'{0}:{1}'.format(track['track id'], self.env.model['language'].find(track['language']).node['ISO 639-1']))
+                            command.append(u'{0}:{1}'.format(track['track id'], self.env.enumeration['language'].find(track['language']).node['ISO 639-1']))
                             
                         if 'name' in track:
                             command.append(u'--track-name')
@@ -669,7 +669,7 @@ class AudioVideoContainer(Container):
                             
                     else:
                         command.append(u'--chapter-language')
-                        command.append(self.env.model['language'].find(track['language']).node['ISO 639-1'])
+                        command.append(self.env.enumeration['language'].find(track['language']).node['ISO 639-1'])
                         command.append(u'--chapter-charset')
                         command.append(u'UTF-8')
                         command.append(u'--chapters')
@@ -703,7 +703,7 @@ class AudioVideoContainer(Container):
     def _load_itunemovi_meta(self, record, initialize=True, finalize=True):
         if 'cast' in record:
             if initialize:
-                for i in self.env.model['itunmovi'].element.keys():
+                for i in self.env.enumeration['itunmovi'].element.keys():
                     self._meta[i] = []
                     
             self._meta['directors'].extend([ 
@@ -728,7 +728,7 @@ class AudioVideoContainer(Container):
             ])
             
             if finalize:
-                for i in self.env.model['itunmovi'].element.keys():
+                for i in self.env.enumeration['itunmovi'].element.keys():
                     if not self._meta[i]: del self._meta[i]
     
     
@@ -921,7 +921,7 @@ class MP4(AudioVideoContainer):
                     command.extend([
                         u'-o', self.path,
                         u'-i', pivot.resource.path,
-                        u'-l', self.env.model['language'].find(track['language']).name,
+                        u'-l', self.env.enumeration['language'].find(track['language']).name,
                         u'-n', track['name'],
                         u'-a', unicode(int(round(self.info['height'] * track['height'])))
                     ])

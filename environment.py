@@ -11,42 +11,41 @@ from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
 from chardet.universaldetector import UniversalDetector
 
-import config
-
-from ontology import Ontology
-from model import Timestamp, Enumeration, PrototypeSpace
+from ontology import Ontology, Enumeration, PrototypeSpace, Rule
+from model import Timestamp
 from model.caption import CaptionFilterCache
 from service import Resolver
 
 class Environment(object):
     def __init__(self):
         self.log = logging.getLogger('environment')
-        self.runtime = None
-        self.configuration = None
+        
+        from config import configuration
+        self.node = configuration
+        
         self.ontology = None
         self.state = {
+            'default':{},
             'system':{},
-            'prototype':{},
-            'model':{},
-            'available':{},
+            'archetype':{},
+            'enumeration':{},
+            'namespace':{},
+            'rule':{},
+            'service':{},
             'expression':{},
+            'constant':{},
             'command':{},
             'action':{},
-            'profile':{},
             'kind':{},
-            'report':{},
-            'format':{},
+            'profile':{},
             'repository':{},
-            'volume':{},
-            'rule':{},
-        }
-        self.lookup = {
-            'volume':{},
+            'subtitle filter':{},
         }
         
-        self._caption_filter_cache = None
-        self._universal_detector = None
+        self._deduction = None
         self._resolver = None
+        self._caption_filter = None
+        self._universal_detector = None
         
         self.load()
     
@@ -55,30 +54,7 @@ class Environment(object):
         return unicode(u'{}:{}'.format(self.domain, self.host))
     
     
-    # Lazy loading processors
-    @property
-    def resolver(self):
-        if self._resolver is None:
-            self._resolver = Resolver(self)
-            self._resolver.open()
-        return self._resolver
-    
-    
-    @property
-    def universal_detector(self):
-        if self._universal_detector is None:
-            self._universal_detector = UniversalDetector()
-        return self._universal_detector
-    
-    
-    @property
-    def caption_filter_cache(self):
-        if  self._caption_filter_cache is None:
-            self._caption_filter_cache = CaptionFilterCache(self)
-        return self._caption_filter_cache
-    
-    
-    # Properties
+    # Runtime properties
     @property
     def system(self):
         return self.state['system']
@@ -104,19 +80,75 @@ class Environment(object):
         return self.system['language']
     
     
-    @property
-    def prototype(self):
-        return self.state['prototype']
     
+    # Lazy loaders for processors
     
     @property
-    def model(self):
-        return self.state['model']
+    def deduction(self):
+        if self._deduction is None:
+            self._deduction = Deduction(self)
+        return self._deduction
     
     
     @property
-    def available(self):
-        return self.state['available']
+    def resolver(self):
+        if self._resolver is None:
+            self._resolver = Resolver(self)
+        return self._resolver
+    
+    
+    @property
+    def caption_filter(self):
+        if  self._caption_filter is None:
+            self._caption_filter = CaptionFilterCache(self)
+        return self._caption_filter
+    
+    
+    @property
+    def universal_detector(self):
+        if self._universal_detector is None:
+            self._universal_detector = UniversalDetector()
+        return self._universal_detector
+    
+    
+    @property
+    def default(self):
+        return self.state['default']
+    
+    
+    @property
+    def archetype(self):
+        return self.state['archetype']
+    
+    
+    @property
+    def enumeration(self):
+        return self.state['enumeration']
+    
+    
+    @property
+    def namespace(self):
+        return self.state['namespace']
+    
+    
+    @property
+    def rule(self):
+        return self.state['rule']
+    
+    
+    @property
+    def service(self):
+        return self.state['service']
+    
+    
+    @property
+    def expression(self):
+        return self.state['expression']
+    
+    
+    @property
+    def constant(self):
+        return self.state['constant']
     
     
     @property
@@ -130,18 +162,8 @@ class Environment(object):
     
     
     @property
-    def report(self):
-        return self.state['report']
-    
-    
-    @property
-    def repository(self):
-        return self.state['repository']
-    
-    
-    @property
-    def volume(self):
-        return self.state['volume']
+    def kind(self):
+        return self.state['kind']
     
     
     @property
@@ -150,261 +172,135 @@ class Environment(object):
     
     
     @property
-    def kind(self):
-        return self.state['kind']
+    def repository(self):
+        return self.state['repository']
     
     
     @property
-    def rule(self):
-        return self.state['rule']
+    def subtitle_filter(self):
+        return self.state['subtitle filter']
     
     
-    @property
-    def service(self):
-        return self.runtime['service']
-    
-    
-    @property
-    def expression(self):
-        return self.state['expression']
-    
+    def load_node(self, node):
+        if 'default' in node:
+            for k,e in node['default'].iteritems():
+                self.default[k] = e
+                
+        if 'system' in node:
+            for k,e in node['system'].iteritems():
+                self.system[k] = e
+                
+        if 'archetype' in node:
+            for k,e in node['archetype'].iteritems():
+                e['key'] = k
+                self.archetype[k] = e
+                
+        if 'enumeration' in node:
+            for k,e in node['enumeration'].iteritems():
+                e['key'] = k
+                self.enumeration[k] = Enumeration(self, e)
+                
+        if 'namespace' in node:
+            for k,e in node['namespace'].iteritems():
+                e['key'] = k
+                self.namespace[k] = PrototypeSpace(self, e)
+                
+        if 'rule' in node:
+            for k,e in node['rule'].iteritems():
+                e['key'] = k
+                self.rule[k] = Rule(self, e)
+                
+        if 'service' in node:
+            for k,e in node['service'].iteritems():
+                e['name'] = k
+                self.service[k] = e
+                
+        if 'expression' in node:
+            for e in node['expression']:
+                if 'flags' not in e: e['flags'] = 0
+                self.expression[e['name']] = re.compile(e['definition'], e['flags'])
+                
+        if 'constant' in node:
+            for k,v in node['constant'].iteritems():
+                self.constant[k] = v
+                
+        if 'command' in node:
+            for e in node['command']:
+                self.command[e['name']] = e
+                self.which(e)
+                
+        if 'action' in node:
+            for e in node['action']:
+                self.action[e['name']] = e
+                
+        if 'kind' in node:
+            for k,e in node['kind'].iteritems():
+                e['name'] = k
+                self.kind[k] = e
+                
+        if 'profile' in node:
+            for k,e in node['profile'].iteritems():
+                e['name'] = k
+                self.profile[k] = e
+                for action in self.default['profile']:
+                    if action not in e:
+                        e[action] = self.default['profile'][action]
+                        
+        if 'repository' in node:
+            for k,e in node['repository'].iteritems():
+                e['host'] = k
+                self.repository[k] = Repository(self, e)
+                
+        if 'subtitle filter' in node:
+            for k,e in node['subtitle filter'].iteritems():
+                e['name'] = k
+                self.subtitle_filter[k] = e
+                
+        # if 'available' in node:
+        # if 'report' in node:
+        # if 'format' in node:
     
     
     # Load environment
+    
     def load(self):
-        # Runtime config
-        from config.runtime import runtime as runtime_config
-        self.runtime = runtime_config
-        
-        # Base user conf
-        from config.base import base as base_config
-        self.configuration = copy.deepcopy(base_config)
-        self.load_system(self.configuration['system'])
+        self.load_node(self.node)
         
         # Override the default home folder from env if specified
-        env_home = os.getenv('MPK_HOME')
-        if env_home and os.path.exists(env_home):
-            self.system['home'] = env_home
-            
-        if self.home:
-            self.load_external_config(os.path.join(self.home, 'dev.conf'))
-            self.load_system(self.configuration['system'])
-            
-        self.profile['default'] = self.runtime['default']['profile']
-        self.load_expressions(self.runtime['expression'])
-        self.load_commands(self.runtime['command'])
-        self.load_actions(self.runtime['action'])
-        self.load_service(self.runtime['service'])
-        
-        from config.model import model as model_config
-        self.load_model(model_config)
-        
-        from config.prototype import prototype as prototype_config
-        self.load_prototype(prototype_config)
-        self.load_profiles(self.runtime['profile'])
-        self.load_kinds(self.runtime['kind'])
-        self.load_rules(self.runtime['rule'])
+        home = os.getenv('MPK_HOME')
+        if home:
+            home = os.path.realpath(os.path.expanduser(os.path.expandvars(home)))
+            if os.path.isdir(home):
+                self.system['home'] = home
+                
+        self.system['conf'] = os.path.join(self.home, u'mpk.conf')
+        self.load_external(self.system['conf'])
     
     
     def load_interactive(self, arguments):
-        self.ontology = arguments
+        self.ontology = Ontology(self, 'system.job', arguments)
         
         # Load conf file from command line argument
         if 'conf' in self.ontology:
-            self.load_external_config(self.ontology['conf'])
-            self.load_system(self.configuration['system'])
-        
+            self.ontology['conf'] = os.path.realpath(os.path.expanduser(os.path.expandvars(self.ontology['conf'])))
+            self.load_external(self.ontology['conf'])
+            
         # Override some value from command line
-        for p in ('domain', 'host', 'language'):
-            if p in self.ontology:
-                self.system[p] = self.ontology[p]
-                
-        self.load_format(self.configuration['display'])
-        self.load_reports(self.configuration['report'])
-        self.load_repositories(self.configuration['repository'])
-        self._load_dynamic_rules()
-        self.configuration['playback']['aspect ratio'] = float (
-            float(self.configuration['playback']['width']) / 
-            float(self.configuration['playback']['height'])
-        )
+        for e in ('domain', 'host', 'language'):
+            if e in self.ontology:
+                self.system[e] = self.ontology[e]
+        # self._load_dynamic_rules()
     
     
-    def load_external_config(self, path):
-        if path and os.path.exists(path):
-            path = os.path.abspath(path)
+    def load_external(self, path):
+        if path and os.path.isfile(path):
             try:
                 external = eval(open(path).read())
                 self.log.debug(u'Load external config file %s', path)
-                self.configuration = dict(self.configuration.items() + external.items())
-            except IOError as ioerr:
+                self.load_node(external)
+            except IOError, e:
                 self.log.warning(u'Failed to load config file %s', path)
-                self.log.debug(ioerr)
-    
-    
-    def load_system(self, node):
-        for k,v in node.iteritems():
-            self.system[k] = v
-    
-    
-    def load_expressions(self, node):
-        for expression in node:
-            if 'flags' in expression and expression['flags']:
-                self.expression[expression['name']] = re.compile(expression['definition'], expression['flags'])
-            else:
-                self.expression[expression['name']] = re.compile(expression['definition'])
-    
-    
-    def load_commands(self, node):
-        for command in node:
-            self.command[command['name']] = command
-            if command['binary']:
-                # check the command exists and get an absolute path for it
-                c = ['which', command['binary']]
-                proc = Popen(c, stdout=PIPE, stderr=PIPE)
-                report = proc.communicate()
-                if report[0]:
-                    command['path'] = report[0].splitlines()[0]
-        self.available['command'] = set([i['name'] for i in self.command.values() if 'path' in i])
-    
-    
-    def load_actions(self, node):
-        for action in node:
-            self.action[action['name']] = action
-            action['active'] = True
-            if 'depend' in action:
-                action['depend'] = set(action['depend'])
-                if not action['depend'].issubset(self.available['command']):
-                    action['active'] = False
-                    self.log.debug(u'Action %s has unsatisfied dependencies: %s', action['name'], 
-                        u', '.join(list(action['depend'] - self.available['command']))
-                    )
-        self.available['action'] = set([i['name'] for i in self.action.values() if i['active']])
-    
-    
-    def load_info(self, node):
-        # Load a default report profile
-        report = {
-            'file':sorted(set([ v['name'] for v in node['file'] if 'name' in v])),
-            'tag':sorted(set([ v['name'] for v in node['tag'] if 'name' in v])),
-            'track':{},
-        }
-        common = [ v['name'] for v in node['track']['common'] if 'name' in v]
-        for t in ('audio', 'video', 'text', 'image'):
-            prop = common + [ v['name'] for v in node['track'][t] if 'name' in v]
-            report['track'][t] = sorted(set(prop))
-        self.report['default'] = report
-    
-    
-    def load_model(self, node):
-        for node_name, node_value in node.iteritems():
-            node_value['name'] = node_name
-            space = Enumeration(self, node_value)
-            self.model[node_name] = space
-            space.load()
-    
-    
-    def load_service(self, node):
-        for k,v in node.iteritems():
-            v['name'] = k
-            self.service[k] = v
-    
-    
-    def load_prototype(self, node):
-        for block_name, block_value in node.iteritems():
-            self.prototype[block_name] = {}
-            for node_name, node_value in block_value.iteritems():
-                node_value['name'] = node_name
-                space = PrototypeSpace(self, node_value)
-                self.prototype[block_name][node_name] = space
-                space.load()
-    
-    
-    def load_reports(self, node):
-        for k,v in node.iteritems():
-            self.report[k] = v
-    
-    
-    def load_profiles(self, node):
-        for name, profile in node.iteritems():
-            profile['name'] = name
-            for action in ('tag', 'rename', 'extract', 'pack', 'update', 'transcode'):
-                if action not in profile:
-                    profile[action] = self.profile['default'][action]
-            self.profile[name] = profile
-    
-    
-    def load_kinds(self, node):
-        for kind_name, kind in node.iteritems():
-            kind['name'] = kind_name
-            self.kind[kind_name] = kind
-    
-    
-    def load_rules(self, node):
-        for rule in node: self._load_rule(rule)
-    
-    
-    def load_repositories(self, node):
-        for name, repository in node.iteritems():
-            self.repository[name] = repository
-            repository['name'] = name
-            
-            if 'rule' in repository:
-                self.load_rules(repository['rule'])
-                
-            if 'volume' in repository:
-                for k, volume in repository['volume'].iteritems():
-                    volume['name'] = k
-                    volume['host'] = repository['name']
-                    volume['domain'] = repository['domain']
-                    volume['virtual path'] = u'/{0}'.format(volume['name'])
-                    self.volume[volume['name']] = volume
-                    
-                    if 'alias' not in volume: volume['alias'] = []
-                    if 'scan' not in volume: volume['scan'] = True
-                    if 'index' not in volume: volume['index'] = True
-                    
-                    # Absolute path defined on a volume always takes precedence
-                    # otherwise default to <base>/<volume name>
-                    if 'path' not in volume:
-                        volume['path'] = os.path.join(repository['base']['path'], volume['name'])
-                        
-                    # The real path is a singularity for comparing a path to the volume
-                    volume['real path'] = os.path.realpath(volume['path'])
-                    
-                    # Build the alias set for the volume
-                    aliases = set()
-                    if 'alias' in repository['base']:
-                        for alias in repository['base']['alias']:
-                            aliases.add(os.path.join(alias, volume['name']))
-                    aliases.add(volume['path'])
-                    aliases.add(os.path.realpath(volume['path']))
-                    for alias in volume['alias']:
-                        aliases.add(alias)
-                        aliases.add(os.path.realpath(alias))
-                    volume['alias'] = tuple(sorted(aliases))
-                    
-                    for alias in volume['alias']:
-                        if alias not in self.lookup['volume']:
-                            self.lookup['volume'][alias] = volume
-                        else:
-                            self.log.error('Alias %s for %s already mapped to volume %s', alias, volume['name'], self.lookup['volume'][alias]['name'])
-    
-    
-    def _load_rule(self, rule):
-        for branch in rule['branch']:
-            if 'match' in branch:
-                flags = re.UNICODE
-                if 'flags' in branch['match']: flags |= branch['match']['flags']
-                branch['match']['pattern'] = re.compile(branch['match']['expression'], flags)
-            if 'decode' in branch:
-                flags = re.UNICODE
-                if 'flags' in branch['decode']: flags |= branch['decode']['flags']
-                for d in branch['decode']: d['pattern'] = re.compile(d['expression'], flags)
-                
-        for provide in rule['provides']:
-            if provide not in self.rule:
-                self.rule[provide] = []
-            self.rule[provide].append(rule)
+                self.log.debug(u'Exception raised: %s', unicode(e))
     
     
     def _load_dynamic_rules(self):
@@ -484,55 +380,24 @@ class Environment(object):
         
     
     
-    
     # Path manipulation
     def parse_url(self, url):
         result = None
         if url:
-            result = Ontology(self)
-            result['url'] = url
-            
             parsed = urlparse.urlparse(url)
             if parsed.path:
-                result['path'] = parsed.path
-                
-                o = Ontology(self)
-                o['file name'] = os.path.basename(parsed.path)
-                if 'media kind' in o:
+                decoded = Ontology(self, 'resource.decode.url')
+                decoded['path'] = parsed.path
+                if 'file name' in decoded and 'directory' in decoded:
+                    decodec['media type']
+                    result = Ontology(self, 'crawl.file')
+                    result['url'] = url
                     result['scheme'] = parsed.scheme or u'file'
                     result['host'] = parsed.hostname or self.host
-                    for k,v in o.iteritems():
-                        if k != 'file name': result[k] = v
-                            
-                    if result['host'] in self.repository:
-                        if result['scheme'] == 'file':
-                            for volume in self.repository[result['host']]['volume'].values():
-                                if os.path.commonprefix([volume['path'], parsed.path]) == volume['path']:
-                                    result['volume'] = volume['name']
-                                    break
-                                    
-                        elif result['scheme'] == self.runtime['resource scheme']:
-                            for volume in self.repository[result['host']]['volume'].values():
-                                if os.path.commonprefix([volume['virtual path'], parsed.path]) == volume['virtual path']:
-                                    result['volume'] = volume['name']
-                                    break
-                                    
-                    # Deep inference
-                    prefix = os.path.dirname(parsed.path)
-                    if result['kind'] in self.kind_with_language:
-                        prefix, iso = os.path.split(prefix)
-                        if self.model['language'].find(iso):
-                            result['language'] = iso
-                             
-                    if prefix:
-                        if result['media kind'] == 'tvshow':
-                            prefix = os.path.dirname(prefix)
-                            if prefix: prefix = os.path.dirname(prefix)
-                            
-                    if prefix:
-                        profile = os.path.basename(prefix)
-                        if profile: result['profile'] = profile
-                        
+                    for k,v in decoded: result[k] = v
+                    if result['host'] in self.repository and 'volume path' in result:
+                        result['volume'] = self.repository[result['host']].volume.parse(result['volume path'])
+                        del result['volume path']
             return result
     
     
@@ -603,13 +468,11 @@ class Environment(object):
     
     # Command execution
     def initialize_command(self, command, log):
-        result = None
-        if command in self.available['command']:
-            c = self.command[command]
-            result = [ c['path'], ]
+        if command in self.command and self.command[command]['path']:
+            return [ self.command[command]['path'] ]
         else:
-            log.warning(u'Command %s is unavailable', command)
-        return result
+            log.debug(u'Command %s is unavailable', command)
+            return None
     
     
     def execute(self, command, message=None, debug=False, pipeout=True, pipeerr=True, log=None):
@@ -643,6 +506,22 @@ class Environment(object):
                 print encode_command(command)
         return report
     
+    
+    def which(self, command):
+        def is_executable(fpath):
+            return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+        
+        
+        command['path'] = None
+        fpath, fname = os.path.split(command['binary'])
+        if fpath:
+            if is_executable(command['binary']):
+                command['path'] = command['binary']
+        else:
+            for path in os.environ["PATH"].split(os.pathsep):
+                bpath = os.path.join(path, command['binary'])
+                if is_executable(bpath):
+                    command['path'] = bpath
     
     
     # Text processing
@@ -681,36 +560,97 @@ class Environment(object):
                 result = result.lower()
         return result
     
+
+
+class Repository(object):
+    def __init__(self, env, node):
+        self.log = logging.getLogger('repository')
+        self.env = env
+        self.node = node
+        self.mongodb = Ontology(self.env, 'system.mongodb', self.node['mongodb'])
+        self._volume = None
+        self._connection = None
+        if 'routing' not in self.node:
+            self.node['routing'] = []
     
     
     @property
-    def format(self):
-        return self.state['format']
+    def valid(self):
+        return True
     
     
     @property
-    def kind_with_language(self):
-        return self.runtime['kind with language']
+    def host(self):
+        return self.node['host']
     
     
-    def load_format(self, node):
-        self.format['wrap width'] = node['wrap']
-        self.format['indent width'] = node['indent']
-        self.format['margin width'] = node['margin']
+    @property
+    def domain(self):
+        return self.node['domain']
+    
+    
+    @property
+    def volume(self):
+        if self._volume is None:
+            self.reload()
+        return self._volume
+    
+    
+    @property
+    def connection(self):
+        if self._connection is None and 'mongodb url' in self.mongodb:
+            try:
+                import pymongo
+                self.log.debug(u'Connecting to %s', self.mongodb['mongodb url'])
+                self._connection = pymongo.Connection(self.mongodb['mongodb url'])
+            except pymongo.errors.AutoReconnect, e:
+                self.log.warning(u'Failed to connect to %s', self.mongodb['mongodb url'])
+                self.log.debug(u'Exception raised: %s', e)
+            else:
+                self.log.debug(u'Connection established with %s', self.host)
+        return self._connection
+    
+    
+    @property
+    def database(self):
+        if self.connection is not None:
+            return self.connection[self.mongodb['database']]
+        else:
+            return None
+    
+    
+    def close(self):
+        if self._connection is not None:
+            self.log.debug(u'Closing mongodb connection to %s', self.host)
+            self._connection.disconnect()
+    
+    
+    def reload(self):
+        # reload the volume enumeration
+        for key, volume in self.node['volume'].iteritems():
+            volume['host'] = self.host
+            volume['domain'] = self.domain
+            volume['virtual'] = u'/{0}'.format(key)
+            volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
+            
+            volume['alternative'] = set()
+            volume['alternative'].add(volume['real'])
+            volume['alternative'].add(volume['virtual'])
+            for alias in volume['alias']:
+                volume['alternative'].add(os.path.realpath(os.path.expanduser(os.path.expandvars(alias))))
+                
+        self._volume = Enumeration(self.env, self.node['volume'])
         
-        self.format['indent'] = u'\n' + u' ' * self.format['indent width']
-        self.format['info title display'] = u'\n\n\n{1}[{{0:-^{0}}}]'.format (
-            self.format['wrap width'] + self.format['indent width'],
-            u' ' * self.format['margin width']
-        )
-        self.format['info subtitle display'] = u'\n{1}[{{0:^{0}}}]\n'.format (
-            self.format['indent width'] - self.format['margin width'] - 3,
-            u' ' * self.format['margin width']
-        )
-        self.format['key value display'] = u'{1}{{0:-<{0}}}: {{1}}'.format (
-            self.format['indent width'] - self.format['margin width'] - 2,
-            u' ' * self.format['margin width']
-        )
-        self.format['value display'] = u'{0}{{0}}'.format(u' ' * self.format['margin width'])
+        for key, volume in self.node['volume'].iteritems():
+            for alt in volume['alternative']:
+                if self._volume.search(alt) is None:
+                    self._volume.map(key, alt)
+                else:
+                    self.log.error('Alias %s for %s on %s already mapped to volume %s', alt, key, self.host, self._volume.search(alt)['key'])
+                    
+        # reload routing rules
+        routing = self.env.deduction.find('rule.system.default.routing')
+        for branch in self.node['routing']:
+            routing.add_branch(branch)
     
 

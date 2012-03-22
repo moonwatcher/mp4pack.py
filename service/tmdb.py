@@ -37,12 +37,12 @@ class TMDbHandler(ResourceHandler):
             else:
                 entry = {
                     u'branch':query['branch'],
-                    u'parameter':Ontology(self.env, query['parameter']),
+                    u'parameter':Ontology.clone(query['parameter']),
                     u'body':document,
                 }
                 
                 # update index
-                ns = self.namespaces[query['branch']['namespace']]
+                ns = self.env.namespace[entry['branch']['namespace']]
                 if 'index' in query['branch']:
                     for index in query['branch']['index']:
                         prototype = ns.find(index)
