@@ -480,7 +480,7 @@ configuration = {
         },
     },
     'system':{
-        'home':'/usr/local/etc/mpk',
+        'home':u'/usr/local/etc/mpk',
         'domain':None,
         'host':None,
         'threads':2,
@@ -3240,20 +3240,20 @@ configuration = {
             'provides':set(('volume', 'profile',)),
         },
         'rule.system.default.enabled':{
-            'name':'enabled bit default',
+            'name':'Default enabled bit',
             'provides':set(('enabled',)),
-            'branch':(
+            'branch':[
                 {
                     'apply':(
                         {'property':'enabled', 'value':True,},
                     ),
                 },
-            ),
+            ],
         },
         'rule.mongodb.url':{
             'name':'mongodb url',
             'provides':set(('mongodb url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'database', 'port', 'username', 'password')),
                     'apply':(
@@ -3290,7 +3290,7 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.parse.path':{
             'name':'Split directory and file name',
@@ -3301,7 +3301,7 @@ configuration = {
                 'profile',
                 'language',
             )),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('path',)),
                     'match':{'property':'path', 'expression':ur'^/.+/tvshow/[a-z0-9]{3,4}/[^/]+/[a-z]+/[0-9]+(?:/[a-z]{2})?/[^/]+$', },
@@ -3352,7 +3352,7 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.parse.filename':{
             'name':'Parse file name',
@@ -3367,7 +3367,7 @@ configuration = {
                 'simple album',
                 'name',
             )),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('file name',)),
                     'match':{'property':'file name', 'expression':ur'^.+ s[0-9]+e[0-9]+(?: .*)?\.[^\.]+$', },
@@ -3408,12 +3408,12 @@ configuration = {
                         {'property':'media kind', 'value':u'movie',},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.default.track.total':{
             'name':'Default track total',
             'provides':set(('track total',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind',)),
                     'equal':{'media kind':'tvshow', },
@@ -3428,12 +3428,12 @@ configuration = {
                         {'property':'track total', 'value':0},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.default.disk.total':{
             'name':'Default disk total',
             'provides':set(('disk total',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind',)),
                     'equal':{'media kind':'tvshow', },
@@ -3448,12 +3448,12 @@ configuration = {
                         {'property':'disk total', 'value':0},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.default.episode':{
             'name':'Default TV episode number',
             'provides':set(('tv episode', 'tv season')),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'track position', 'disk position')),
                     'equal':{'media kind':'tvshow', },
@@ -3462,12 +3462,12 @@ configuration = {
                         { 'property':'tv season', 'reference':'disk position', },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.asset.id':{
             'name':'asset id',
             'provides':set(('asset id',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'simple tv show', 'tv season', 'tv episode')),
                     'equal':{'media kind':'tvshow', },
@@ -3488,12 +3488,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.resource.id':{
             'name':'resource id',
             'provides':set(('resource id',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('path', 'host')),
                     'apply':(
@@ -3503,12 +3503,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.resource.uri':{
             'name':'uri',
             'provides':set(('uri',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'volume', 'volume relative path')),
                     'apply':(
@@ -3518,12 +3518,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.asset.name':{
             'name':'full name',
             'provides':set(('full name',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'tv show', 'tv episode id', 'name')),
                     'equal':{'media kind':'tvshow', },
@@ -3564,12 +3564,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.track.number':{
             'name':'Compute the composite track number',
             'provides':set(('track number',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'track position', 'track total')),
                     'equal':{'media kind':'tvshow', },
@@ -3584,12 +3584,12 @@ configuration = {
                         { 'property':'track number', 'format':u'{track position} / {track total}', },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.disk.number':{
             'name':'Compute the composite disk number',
             'provides':set(('disk number',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('disk position', 'disk total')),
                     'equal':{'media kind':'tvshow', },
@@ -3604,12 +3604,12 @@ configuration = {
                         { 'property':'disk number', 'format':u'{disk position} / {disk total}', },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.artist.info':{
             'name':'artist information',
             'provides':set(('artist', 'album artist')),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'tv show')),
                     'equal':{'media kind':'tvshow', },
@@ -3694,84 +3694,84 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.sort.name':{
             'name':'sort name',
             'provides':set(('sort name',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('name',)),
                     'decode':(
                         {'property':'name', 'expression':ur'^(the |a )?(?P<sort_name>.+)$', 'flags':re.IGNORECASE},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.sort.artist':{
             'name':'sort artist',
             'provides':set(('sort artist',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('artist',)),
                     'decode':(
                         {'property':'artist', 'expression':ur'^(the |a )?(?P<sort_artist>.+)$', 'flags':re.IGNORECASE},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.sort.albumartist':{
             'name':'sort album artist',
             'provides':set(('sort album artist',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('album artist',)),
                     'decode':(
                         {'property':'album artist', 'expression':ur'^(the |a )?(?P<sort_album_artist>.+)$', 'flags':re.IGNORECASE},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.sort.album':{
             'name':'sort album',
             'provides':set(('sort album',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('album',)),
                     'decode':(
                         {'property':'album', 'expression':ur'^(the |a )?(?P<sort_album>.+)$', 'flags':re.IGNORECASE},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.sort.show':{
             'name':'sort tv show',
             'provides':set(('sort tv show',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('tv show',)),
                     'decode':(
                         {'property':'tv show', 'expression':ur'^(the |a )?(?P<sort_tv_show>.+)$', 'flags':re.IGNORECASE},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.sort.composer':{
             'name':'sort composer',
             'provides':set(('sort composer',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('composer',)),
                     'decode':(
                         {'property':'composer', 'expression':ur'^(the |a )?(?P<sort_composer>.+)$', 'flags':re.IGNORECASE},
                     ),
                 },
-            ),
+            ],
         },
         'rule.knowlege.episode.id':{
             'name':'tv episode id',
             'provides':set(('tv episode id',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'tv season', 'tv episode')),
                     'equal':{'media kind':'tvshow', },
@@ -3782,12 +3782,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.stream.audio.name':{
             'name':'audio track name',
             'provides':set(('name',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('type', 'channels')),
                     'equal':{'type':'audio', 'channels':1 },
@@ -3844,12 +3844,12 @@ configuration = {
                         { 'property':'name', 'value':'Surround' },
                     ),
                 },
-            ),
+            ],
         },
         'rule.path.filename.canonic':{
             'name':'canonic file name',
             'provides':set(('canonic file name',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'simple tv show', 'tv episode id', 'simple name', 'kind')),
                     'equal':{'media kind':'tvshow', },
@@ -3890,12 +3890,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.path.relative.volume':{
             'name':'volume relative path',
             'provides':set(('volume relative path',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'kind', 'profile', 'simple tv show', 'tv season', 'language', 'canonic file name')),
                     'equal':{'media kind':'tvshow', },
@@ -3936,12 +3936,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.path.canonic':{
             'name':'canonic path',
             'provides':set(('canonic path',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('volume path', 'volume relative path')),
                     'apply':(
@@ -3951,12 +3951,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.path.implicit':{
             'name':'implicit path',
             'provides':set(('path',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('canonic path',)),
                     'apply':(
@@ -3966,12 +3966,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.path.cache':{
             'name':'Path in cache',
             'provides':set(('path in cache',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('cache root', 'host', 'volume', 'volume relative path')),
                     'apply':(
@@ -3990,7 +3990,7 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.itunes.itunextc.parse':{
             'name':'Parse itunextc atom',
@@ -4000,19 +4000,19 @@ configuration = {
                 'rating score',
                 'rating annotation',
             )),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('itunextc',)),
                     'decode':(
                         {'property':'itunextc', 'expression':ur'(?P<rating_standard>[^|]+)\|(?P<rating>[^|]+)\|(?P<rating_score>[^|]+)\|(?P<rating_annotation>[^|]+)?',},
                     ),
                 },
-            ),
+            ],
         },
         'rule.itunes.album.name':{
             'name':'Album name for iTunes',
             'provides':set(('album',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('media kind', 'tv show', 'tv season')),
                     'equal':{'media kind':'tvshow', },
@@ -4023,12 +4023,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie':{
             'name':'tmdb movie url',
             'provides':set(('tmdb movie url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id', 'language')),
                     'apply':(
@@ -4038,12 +4038,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie.cast':{
             'name':'tmdb movie cast url',
             'provides':set(('tmdb movie cast url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id')),
                     'apply':(
@@ -4053,12 +4053,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie.poster':{
             'name':'tmdb movie poster url',
             'provides':set(('tmdb movie poster url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id')),
                     'apply':(
@@ -4068,12 +4068,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie.keyword':{
             'name':'tmdb movie keyword url',
             'provides':set(('tmdb movie keyword url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id')),
                     'apply':(
@@ -4083,12 +4083,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie.release':{
             'name':'tmdb movie release url',
             'provides':set(('tmdb movie release url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id')),
                     'apply':(
@@ -4098,12 +4098,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie.trailer':{
             'name':'tmdb movie trailer url',
             'provides':set(('tmdb movie trailer url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id')),
                     'apply':(
@@ -4113,12 +4113,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie.translation':{
             'name':'tmdb movie translation url',
             'provides':set(('tmdb movie translation url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id', 'language')),
                     'apply':(
@@ -4128,12 +4128,12 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
         'rule.url.tmdb.movie.alternative url':{
             'name':'tmdb movie alternative url',
             'provides':set(('tmdb movie alternative url',)),
-            'branch':(
+            'branch':[
                 {
                     'requires':set(('host', 'tmdb movie id')),
                     'apply':(
@@ -4143,7 +4143,7 @@ configuration = {
                         },
                     ),
                 },
-            ),
+            ],
         },
     },
     'service':{
@@ -4781,6 +4781,7 @@ configuration = {
         'empty string':u'',
         'hd threshold':720,
         'playback aspect ration':1920.0/1080.0,
+        'space':u' ',
     },
     'command':[
         {'name':'rsync',        'binary':u'rsync', },
@@ -4900,26 +4901,26 @@ configuration = {
             'scope':'line',
             'action':'replace',
             'ignore case':False,
-            'expression':(
+            'expression':[
                 (ur'^[-?\.,!:;"\'\s]+(.*)$', '\\1'),
                 (ur'^(.*)[-?\.,!:;"\'\s]+$', '\\1'),
-            ),
+            ],
         },
         'leftover':{
             'scope':'line',
             'action':'drop',
             'ignore case':True,
-            'expression':(
+            'expression':[
                 ur'^\([^\)]+\)$',
                 ur'^[\[\]\(\)]*$',
                 ur'^[-?\.,!:;"\'\s]*$',
-            ),
+            ],
         },
         'hebrew noise':{
             'scope':'slide',
             'action':'drop',
             'ignore case':True,
-            'expression':(
+            'expression':[
                 ur':סנכרון',
                 ur':תרגום',
                 ur':שיפוץ',
@@ -5008,13 +5009,13 @@ configuration = {
                 ur'\bassem נקרע ע"י\b',
                 ur'\bkawa: סנכרון\b',
                 ur'אוהבת לנצח, שרון',
-            ),
+            ],
         },
         'noise':{
             'scope':'slide',
             'action':'drop',
             'ignore case':True,
-            'expression':(
+            'expression':[
                 ur'www\.allsubs\.org',
                 ur'\bswsub\b',
                 ur'\bresync\b',
@@ -5104,13 +5105,13 @@ configuration = {
                 ur'addic7ed',
                 ur'hdsubs',
                 ur'corrected by elderman',
-            ),
+            ],
         },
         'typo':{
             'scope':'line',
             'action':'replace',
             'ignore case':False,
-            'expression':(
+            'expression':[
                 (ur'♪', ''),
                 (ur'¶', ''),
                 (ur'\b +(,|\.|\?|%|!)\b', '\\1 '),
@@ -5133,13 +5134,13 @@ configuration = {
                 (ur'\b^[-A-Z\s]+[0-9]*:\s*', ''),
                 (ur'(?<=[a-zA-Z\'])I', 'l'),
                 (ur'^[-\s]*$', ''),
-            ),
+            ],
         },
         'english typo':{
             'scope':'line',
             'action':'replace',
             'ignore case':False,
-            'expression':(
+            'expression':[
                 (ur'Theysaid', u'They said'),
                 (ur'\bIast\b', u'last'),
                 (ur'\bIook\b', u'look'),
@@ -5215,7 +5216,7 @@ configuration = {
                 (ur'\bIate\b', u'late'),
                 (ur'\bIonger\b', u'longer'),
                 (ur'\bIive\b', u'live'),
-            ),
+            ],
         },
     },
 }

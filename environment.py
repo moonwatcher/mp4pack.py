@@ -4,7 +4,6 @@ import os
 import re
 import logging
 import copy
-import unicodedata
 import urlparse
 import plistlib
 from subprocess import Popen, PIPE
@@ -465,7 +464,6 @@ class Environment(object):
         return result
     
     
-    
     # Command execution
     def initialize_command(self, command, log):
         if command in self.command and self.command[command]['path']:
@@ -524,15 +522,6 @@ class Environment(object):
                     command['path'] = bpath
     
     
-    # Text processing
-    def remove_accents(self, value):
-        result = None
-        if value:
-            nkfd_form = unicodedata.normalize('NFKD', value)
-            result = self.runtime['empty string'].join([c for c in nkfd_form if not unicodedata.combining(c)])
-        return result
-    
-    
     def detect_encoding(self, content):
         # This will not survive a multi threaded environment
         self.universal_detector.reset()
@@ -542,23 +531,6 @@ class Environment(object):
                 break
         self.universal_detector.close()
         return self.universal_detector.result
-    
-    
-    def simplify(self, value):
-        result = None
-        if value:
-            v = self.expression['whitespace'].sub(u' ', value).strip()
-            if v:
-                result = self.expression['characters to exclude from filename'].sub(self.runtime['empty string'], v)
-                if not result:
-                    result = v
-                    result = result.replace(u'?', u'question mark')
-                    result = result.replace(u'*', u'asterisk')
-                    result = result.replace(u'.', u'period')
-                    result = result.replace(u':', u'colon')
-                result = self.remove_accents(result)
-                result = result.lower()
-        return result
     
 
 

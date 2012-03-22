@@ -3,6 +3,7 @@
 import logging
 import copy
 import re
+import unicodedata
 
 from datetime import datetime
 
@@ -307,6 +308,9 @@ class Element(object):
 class PrototypeSpace(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
+        
+        if 'simplify' not in self.default:
+            self.default['simplify'] = False
     
     
     def _load_element(self):
@@ -509,6 +513,8 @@ class Prototype(Element):
             result = None
         if result and self.node['unescape xml']:
             result = result.replace(u'&quot;', u'"')
+        if self.node['simplify']:
+            result = self._simplify(result)
         return result
     
     
@@ -594,7 +600,31 @@ class Prototype(Element):
             result = None
         return result
     
-
+    
+    def _remove_accents(self, value):
+        result = None
+        if value:
+            nkfd = unicodedata.normalize('NFKD', value)
+            result = self.env.constant['empty string'].join([c for c in nkfd if not unicodedata.combining(c)])
+        return result
+    
+    
+    def _simplify(self, value):
+        result = None
+        if value:
+            v = self.expression['whitespace'].sub(self.env.constant['space'], value).strip()
+            if v:
+                result = self.expression['characters to exclude from filename'].sub(self.env.constant['empty string'], v)
+                if not result:
+                    result = v
+                    result = result.replace(u'?', u'question mark')
+                    result = result.replace(u'*', u'asterisk')
+                    result = result.replace(u'.', u'period')
+                    result = result.replace(u':', u'colon')
+                result = self._remove_accents(result)
+                result = result.lower()
+        return result
+    
 
 class Enumeration(Space):
     def __init__(self, env, node):
