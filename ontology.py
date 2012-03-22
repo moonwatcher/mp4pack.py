@@ -156,6 +156,7 @@ class Ontology(dict):
     
 
 
+# Generic Space and Element
 class Space(object):
     def __init__(self, env, node):
         self.log = logging.getLogger('Space')
@@ -305,6 +306,7 @@ class Element(object):
     
 
 
+# Prototype Space and Prototype
 class PrototypeSpace(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
@@ -626,6 +628,8 @@ class Prototype(Element):
         return result
     
 
+
+# Enumeration and Enumerator
 class Enumeration(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
@@ -653,6 +657,7 @@ class Enumerator(Element):
     
 
 
+# Deduction and Rule
 class Deduction(object):
     def __init__(self, env, node):
         self.log = logging.getLogger('deduction')
