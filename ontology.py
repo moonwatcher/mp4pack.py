@@ -726,7 +726,7 @@ class Rule(object):
     
     @property
     def provide(self):
-        return self.node['provides']
+        return self.node['provide']
     
     
     @property

@@ -12,17 +12,17 @@ from model.menu import Chapter, Menu
 from model.caption import Caption, Slide
 
 track_type_namespace = {
-    'audio':'crawl.stream.audio',
-    'video':'crawl.stream.video',
-    'text':'crawl.stream.text',
-    'image':'crawl.stream.image',
+    'audio':'resource.crawl.stream.audio',
+    'video':'resource.crawl.stream.video',
+    'text':'resource.crawl.stream.text',
+    'image':'resource.crawl.stream.image',
 }
 
 class Crawler(object):
     def __init__(self, ontology):
         self.log = logging.getLogger('crawler')
         self.ontology = ontology
-        self.tag = Ontology.project('crawl.tag', ontology)
+        self.tag = Ontology.project('resource.crawl.meta', ontology)
         self.track = []
         self.load()
     

@@ -208,7 +208,7 @@ class Asset(object):
     def touch(self):
         if not self.touched and self.managed:
             for node in self.node['entity']['resource'].values():
-                ontology = Ontology(self.env, 'crawl.file', node['ontology'])
+                ontology = Ontology(self.env, 'resource.file.url', node['ontology'])
                 self.find(ontology)
             self.touched = True
     
@@ -300,9 +300,9 @@ class Resource(object):
         if self._info is None:
             if self.valid:
                 if self.node and 'tag' in self.node:
-                    self._info = Ontology(self.env, 'crawl.tag', self.node['tag'])
+                    self._info = Ontology(self.env, 'resource.crawl.meta', self.node['tag'])
                 else:
-                    self._info = Ontology(self.env, 'crawl.file')
+                    self._info = Ontology(self.env, 'resource.file.url')
         return self._info
     
     
@@ -390,7 +390,7 @@ class Resource(object):
                     command.append(u'--partial')
                     command.append(u'--rsh')
                     command.append(u'ssh -p {0}'.format(self.env.repository[self.ontology['host']]['remote']['download port']))
-                    command.append(u'{0}:{1}'.format(self.ontology['domain'], self.ontology['file path'].replace(u' ', ur'\ ')))
+                    command.append(u'{0}:{1}'.format(self.ontology['domain'], self.ontology['path'].replace(u' ', ur'\ ')))
                     command.append(self.ontology['path in cache'])
                     
                     message = u'Fetch \'{0}\' from {1}'.format(self.ontology['volume relative path'], self.ontology['domain'])
@@ -422,32 +422,32 @@ class Resource(object):
                 command = self.env.initialize_command('rsync', self.log)
                 if command:
                     command.extend([self.path, ontology['path']])
-                    message = u'Copy ' + self.path + u' --> ' + ontology['file path']
+                    message = u'Copy ' + self.path + u' --> ' + ontology['path']
                     self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
-                    if self.env.purge_if_not_exist(ontology['file path']):
+                    if self.env.purge_if_not_exist(ontology['path']):
                         self.asset.find(ontology)
     
     
     def move(self, job):
-        if 'file path' in ontology:
-            if os.path.exists(ontology['file path']) and os.path.samefile(self.path, ontology['file path']):
+        if 'path' in ontology:
+            if os.path.exists(ontology['path']) and os.path.samefile(self.path, ontology['path']):
                 self.log.debug(u'No move needed for %s', unicode(self))
             else:
-                if self.env.varify_path_is_available(ontology['file path'], False):
+                if self.env.varify_path_is_available(ontology['path'], False):
                     command = self.env.initialize_command('mv', self.log)
                     if command:
-                        command.extend([self.path, ontology['file path']])
-                        message = u'Rename {0} --> {1}'.format(self.path, ontology['file path'])
+                        command.extend([self.path, ontology['path']])
+                        message = u'Rename {0} --> {1}'.format(self.path, ontology['path'])
                         self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
                 else:
-                    self.log.warning(u'Not renaming %s, destination exists: %s', self.path, ontology['file path'])
+                    self.log.warning(u'Not renaming %s, destination exists: %s', self.path, ontology['path'])
     
     
     def compare(self, job):
         result = False
-        if os.path.exists(self.path) and os.path.exists(ontology['file path']):
+        if os.path.exists(self.path) and os.path.exists(ontology['path']):
             source_md5 = hashlib.md5(file(self.path).read()).hexdigest()
-            dest_md5 = hashlib.md5(file(ontology['file path']).read()).hexdigest()
+            dest_md5 = hashlib.md5(file(ontology['path']).read()).hexdigest()
             if source_md5 == dest_md5:
                 self.log.info(u'md5 match: %s %s',source_md5, unicode(self))
                 result = True

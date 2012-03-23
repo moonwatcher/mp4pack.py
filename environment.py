@@ -297,7 +297,7 @@ class Environment(object):
         # default host
         rule = {
             'name':'default host',
-            'provides':set(('host',)),
+            'provide':set(('host',)),
             'branch':[
                 {
                     'apply':(
@@ -311,7 +311,7 @@ class Environment(object):
         # default language
         rule = {
             'name':'default language',
-            'provides':set(('language',)),
+            'provide':set(('language',)),
             'branch':[
                 {
                     'apply':(
@@ -325,7 +325,7 @@ class Environment(object):
         # volume location
         rule = {
             'name':'volume location',
-            'provides':set(('volume path', 'domain')),
+            'provide':set(('volume path', 'domain')),
             'branch':[],
         }
         for volume in self.volume.values():
@@ -343,7 +343,7 @@ class Environment(object):
         # cache
         rule = {
             'name':'cache location',
-            'provides':set(('cache root',)),
+            'provide':set(('cache root',)),
             'branch':[
                 {
                     'apply':({'property':'cache root', 'value':self.repository[self.host]['cache']['path']},),
@@ -354,7 +354,7 @@ class Environment(object):
         
         rule = {
             'name':'container for kind',
-            'provides':set(('container',)),
+            'provide':set(('container',)),
             'branch':[],
         }
         for kind in self.kind.values():
@@ -377,18 +377,19 @@ class Environment(object):
             parsed = urlparse.urlparse(url)
             if parsed.path:
                 decoded = Ontology(self, 'resource.decode.url')
-                decoded['path'] = parsed.path
+                decoded['directory'], decoded['file name'] = os.path.split(parsed.path)
                 if 'file name' in decoded and 'directory' in decoded:
                     decodec['media type']
-                    result = Ontology(self, 'crawl.file')
+                    result = Ontology(self, 'resource.file.url')
                     result['url'] = url
+                    result['path'] = parsed.path
                     result['scheme'] = parsed.scheme or u'file'
                     result['host'] = parsed.hostname or self.host
                     for k,v in decoded: result[k] = v
                     if result['host'] in self.repository and 'volume path' in result:
                         result['volume'] = self.repository[result['host']].volume.parse(result['volume path'])
                         del result['volume path']
-            return result
+        return result
     
     
     def canonic_path_for(self, path):
