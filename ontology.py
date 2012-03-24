@@ -175,7 +175,7 @@ class Space(object):
             
         if 'enabled' not in self.default:
             self.default['enabled'] = True
-        
+            
         if 'match' in self.node:
             self.node['pattern'] = re.compile(self.node['match']['expression'], self.node['match']['flags'])
         else:

@@ -560,7 +560,7 @@ class AudioVideoContainer(Container):
     
     def extract(self, task): 
         for track in task.transform.single_result.track:
-            if track['enabled'] and track['type'] == 'text' and track['codec'] == 'chpl':
+            if track['enabled'] and track['stream kind'] == 'menu':
                 o = Ontology.clone(self.ontology)
                 del o['path']
                 del o['url']
@@ -568,7 +568,7 @@ class AudioVideoContainer(Container):
                 o['volume'] = task.job.ontology['volume']
                 o['profile'] = task.job.ontology['profile']
                 o['language'] = track['language']
-                o['kind'] = track['codec']
+                o['kind'] = track['kind']
                 product = self.asset.find(o)
                 self.env.varify_directory(product.path)
                 product.menu = Menu.from_node(self.env, track['content'])
@@ -591,7 +591,7 @@ class AudioVideoContainer(Container):
             audio_options = {'--audio':[]}
             
             for track in task.transform.single_result.track:
-                if track['type'] == 'video':
+                if track['stream kind'] == 'video':
                     for flag in track['handbrake flags']:
                         command.append(flag)
                         
@@ -606,7 +606,7 @@ class AudioVideoContainer(Container):
                     command.append(u'--encopts')
                     command.append(x264_config)
                     
-                elif track['type'] == 'audio':
+                elif track['stream kind'] == 'audio':
                     audio_options['--audio'].append(unicode(track['stream position']))
                     for k,v in track['encoder settings'].iteritems():
                         if k not in audio_options:
@@ -644,13 +644,13 @@ class AudioVideoContainer(Container):
                     #command.append(self.asset.meta['full name'])
                     
                     command.append(u'--audio-tracks')
-                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['type'] == 'audio']))
+                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['stream kind'] == 'audio']))
                     command.append(u'--video-tracks')
-                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['type'] == 'video']))
+                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['stream kind'] == 'video']))
                     
                 # Iterate the tracks
                 for track in pivot.track:
-                    if track['codec'] != 'chpl':
+                    if track['kind'] != 'menu':
                         if 'language' in track:
                             command.append(u'--language')
                             command.append(u'{0}:{1}'.format(track['stream id'], self.env.enumeration['language'].find(track['language']).node['ISO 639-1']))
@@ -663,7 +663,7 @@ class AudioVideoContainer(Container):
                             command.append(u'--sync')
                             command.append(u'{0}:{1}'.format(track['stream id'], pivot.resource.hint['delay']))
                             
-                        if track['codec'] == 'srt':
+                        if track['kind'] == 'srt':
                             command.append(u'--sub-charset')
                             command.append(u'{0}:{1}'.format(track['stream id'], u'UTF-8'))
                             
@@ -763,7 +763,7 @@ class Artwork(Container):
     def transcode(self, task):
         from PIL import Image
         product = task.product[0]
-        track = [ t for t in transform.single_result.track if t['type'] == 'image' ]
+        track = [ t for t in transform.single_result.track if t['stream kind'] == 'image' ]
         if track: track = track[0]
         else: track = None
         if track:
@@ -809,8 +809,7 @@ class Matroska(AudioVideoContainer):
                     o['volume'] = task.job.ontology['volume']
                     o['profile'] = task.job.ontology['profile']
                     o['language'] = track['language']
-                    o['type'] = track['type']
-                    o['kind'] = track['codec']
+                    o['kind'] = track['kind']
                     product = self.asset.find(o)
                     self.env.varify_directory(product.path)
                     
@@ -959,7 +958,7 @@ class RawAudio(Container):
     
     def transcode(self, task):
         product = task.product[0]
-        track = [ t for t in task.transform.single_result.track if t['type'] == 'audio' ]
+        track = [ t for t in task.transform.single_result.track if t['stream kind'] == 'audio' ]
         if track: track = track[0]
         else: track = None
         if track:
@@ -996,7 +995,7 @@ class Subtitles(Text):
     def caption(self):
         if self._caption is None:
             for track in self.track:
-                if track['type'] == 'text' and 'content' in track:
+                if track['stream kind'] == 'caption' and 'content' in track:
                     self._caption_track = track
                     self._caption = Caption.from_node(self.env, track['content'])
                     
@@ -1023,7 +1022,7 @@ class Subtitles(Text):
     def transcode(self, task):
         product = task.product[0]
         product.caption = self.caption
-        track = [ t for t in task.transform.single_result.track if t['type'] == 'text' ]
+        track = [ t for t in task.transform.single_result.track if t['stream kind'] == 'caption' ]
         if track: track = track[0]
         else: track = None
         if track:
@@ -1054,7 +1053,7 @@ class TableOfContent(Text):
     def menu(self):
         if self._menu is None:
             for track in self.track:
-                if track['type'] == 'text' and 'content' in track:
+                if track['stream kind'] == 'menu' and 'content' in track:
                     self._menu_track = track
                     self._menu = Menu.from_node(self.env, track['content'])
                     
@@ -1081,7 +1080,7 @@ class TableOfContent(Text):
     def transcode(self, task):
         product = task.product[0]
         product.menu = self.menu
-        track = [ t for t in transform.single_result.track if t['type'] == 'text' ]
+        track = [ t for t in transform.single_result.track if t['stream kind'] == 'menu' ]
         if track: track = track[0]
         else: track = None
         if track:

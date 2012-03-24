@@ -77,7 +77,6 @@ class Environment(object):
         return self.system['language']
     
     
-    
     # Lazy loaders for processors
     @property
     def resolver(self):

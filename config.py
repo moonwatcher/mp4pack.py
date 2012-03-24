@@ -21,27 +21,25 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'he', 'codec':'srt'},
-                                    {'type':'text', 'language':'he', 'codec':'ass'},
+                                    {'stream kind':'caption', 'language':'he'},
                                 ],
                             },
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'en', 'codec':'srt'},
-                                    {'type':'text', 'language':'en', 'codec':'ass'},
+                                    {'stream kind':'caption', 'language':'en'},
                                 ],
                             },
                             {
                                 'mode':'select',
                                 'branch':(
-                                    {'type':'audio', 'codec':'dts'},
+                                    {'stream kind':'audio', 'kind':'dts'},
                                 ),
                             },
                             {
                                 'mode':'choose',
                                 'branch':(
-                                    {'type':'text', 'codec':'chpl'},
+                                    {'stream kind':'menu'},
                                 ),
                             },
                         ],
@@ -55,7 +53,7 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'codec':'chpl'},
+                                    {'stream kind':'menu'},
                                 ],
                             },
                         ],
@@ -79,14 +77,14 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'he'},
+                                    {'stream kind':'caption', 'language':'he'},
                                 ],
                                 'override':{'name':'Normal'},
                             },
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'en'},
+                                    {'stream kind':'caption', 'language':'en'},
                                 ],
                                 'override':{'name':'Normal'},
                             },
@@ -103,7 +101,7 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text'},
+                                    {'stream kind':'caption'},
                                 ],
                                 'override':{'name':'Smart', 'language':'swe'},
                             },
@@ -121,7 +119,7 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text'},
+                                    {'stream kind':'caption'},
                                 ],
                             },
                         ],
@@ -136,7 +134,7 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'audio', 'codec':'ac3'},
+                                    {'stream kind':'audio', 'kind':'ac3'},
                                 ],
                                 'override':{'name':'Normal'},
                             },
@@ -163,11 +161,11 @@ configuration = {
                             {
                                 'mode':'select',
                                 'branch':[
-                                    {'type':'video'},
-                                    {'type':'audio', 'codec':'ac3'},
-                                    {'type':'audio', 'codec':'aac'},
-                                    {'type':'audio', 'codec':'dts'},
-                                    {'type':'audio', 'codec':'mp3'},
+                                    {'stream kind':'video'},
+                                    {'stream kind':'audio', 'kind':'ac3'},
+                                    {'stream kind':'audio', 'kind':'aac'},
+                                    {'stream kind':'audio', 'kind':'dts'},
+                                    {'stream kind':'audio', 'kind':'mp3'},
                                 ],
                             },
                         ]
@@ -191,14 +189,14 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'he'},
+                                    {'stream kind':'caption', 'language':'he'},
                                 ],
                                 'override':{'name':'Normal', 'height':0.132},
                             },
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'en'},
+                                    {'stream kind':'caption', 'language':'en'},
                                 ],
                                 'override':{'name':'Normal', 'height':0.132},
                             },
@@ -215,7 +213,7 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text'},
+                                    {'stream kind':'caption'},
                                 ],
                                 'override':{'name':'Smart', 'height':0.148, 'language':'swe'},
                             },
@@ -232,7 +230,7 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'image'},
+                                    {'stream kind':'image'},
                                 ],
                             },
                         ],
@@ -248,7 +246,7 @@ configuration = {
                             {
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text'},
+                                    {'stream kind':'menu'},
                                 ],
                             },
                         ],
@@ -269,7 +267,7 @@ configuration = {
                                 'description':'Transcode the main video track to H.264',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'video'},
+                                    {'stream kind':'video'},
                                 ],
                                 'override':{
                                     'handbrake flags':[
@@ -300,7 +298,7 @@ configuration = {
                                 'description':'Copy all ac3 audio tracks',
                                 'mode':'select',
                                 'branch':[
-                                    {'type':'audio', 'codec':'ac3'},
+                                    {'stream kind':'audio', 'kind':'ac3'},
                                 ],
                                 'override':{
                                     'encoder settings':{'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'}
@@ -310,7 +308,7 @@ configuration = {
                                 'description':'Transcode all ac3 audio tracks to Dolby Pro Logic II aac',
                                 'mode':'select',
                                 'branch':[
-                                    {'type':'audio', 'codec':'ac3'},
+                                    {'stream kind':'audio', 'kind':'ac3'},
                                 ],
                                 'override':{
                                     'encoder settings':{'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
@@ -320,8 +318,8 @@ configuration = {
                                 'description':'Transcode all Stereo aac or mp3 tracks to Stereo aac',
                                 'mode':'select',
                                 'branch':[
-                                    {'type':'audio', 'codec':'mp3', 'channels':2},
-                                    {'type':'audio', 'codec':'aac', 'channels':2},
+                                    {'stream kind':'audio', 'kind':'mp3', 'channels':2},
+                                    {'stream kind':'audio', 'kind':'aac', 'channels':2},
                                 ],
                                 'override':{
                                     'encoder settings':{'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
@@ -331,8 +329,8 @@ configuration = {
                                 'description':'Transcode all Mono aac or mp3 tracks to Mono aac',
                                 'mode':'select',
                                 'branch':[
-                                    {'type':'audio', 'codec':'mp3', 'channels':1},
-                                    {'type':'audio', 'codec':'aac', 'channels':1},
+                                    {'stream kind':'audio', 'kind':'mp3', 'channels':1},
+                                    {'stream kind':'audio', 'kind':'aac', 'channels':1},
                                 ],
                                 'override':{
                                     'encoder settings':{'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
@@ -352,7 +350,7 @@ configuration = {
                                 'description':'Transcode image to png',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'image'},
+                                    {'stream kind':'image'},
                                 ],
                                 'override':{
                                     'max length':1024,
@@ -371,7 +369,7 @@ configuration = {
                                 'description':'Transcode 6 channels dts to ac3',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'audio', 'codec':'dts', 'channels':6},
+                                    {'stream kind':'audio', 'kind':'dts', 'channels':6},
                                 ],
                                 'override':{
                                     'ffmpeg parameters':{'-ab':u'640k', '-acodec':u'ac3', '-ac':6 },
@@ -381,7 +379,7 @@ configuration = {
                                 'description':'Transcode 5 channels dts to ac3',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'audio', 'codec':'dts', 'channels':5},
+                                    {'stream kind':'audio', 'kind':'dts', 'channels':5},
                                 ],
                                 'override':{
                                     'ffmpeg parameters':{'-ab':u'640k', '-acodec':u'ac3', '-ac':5 },
@@ -391,7 +389,7 @@ configuration = {
                                 'description':'Transcode 4 channels dts to ac3',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'audio', 'codec':'dts', 'channels':4},
+                                    {'stream kind':'audio', 'kind':'dts', 'channels':4},
                                 ],
                                 'override':{
                                     'ffmpeg parameters':{'-ab':u'448k', '-acodec':u'ac3', '-ac':4 },
@@ -401,7 +399,7 @@ configuration = {
                                 'description':'Transcode 3 channels dts to ac3',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'audio', 'codec':'dts', 'channels':3},
+                                    {'stream kind':'audio', 'kind':'dts', 'channels':3},
                                 ],
                                 'override':{
                                     'ffmpeg parameters':{'-ab':u'448k', '-acodec':u'ac3', '-ac':3 },
@@ -411,7 +409,7 @@ configuration = {
                                 'description':'Transcode stereo dts to ac3',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'audio', 'codec':'dts', 'channels':2},
+                                    {'stream kind':'audio', 'kind':'dts', 'channels':2},
                                 ],
                                 'override':{
                                     'ffmpeg parameters':{'-ab':u'256k', '-acodec':u'ac3', '-ac':2 },
@@ -421,7 +419,7 @@ configuration = {
                                 'description':'Transcode mono dts to ac3',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'audio', 'codec':'dts', 'channels':1},
+                                    {'stream kind':'audio', 'kind':'dts', 'channels':1},
                                 ],
                                 'override':{
                                     'ffmpeg parameters':{'-ab':u'192k', '-acodec':u'ac3', '-ac':1 },
@@ -441,7 +439,7 @@ configuration = {
                                 'description':'Hebrew subtitles',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'he'},
+                                    {'stream kind':'caption', 'language':'he'},
                                 ],
                                 'override':{
                                     'subtitle filters':['noise', 'hebrew noise', 'typo', 'punctuation', 'leftover']
@@ -451,7 +449,7 @@ configuration = {
                                 'description':'English subtitles',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text', 'language':'en'},
+                                    {'stream kind':'caption', 'language':'en'},
                                 ],
                                 'override':{
                                     'subtitle filters':['noise', 'typo', 'english typo', 'leftover']
@@ -470,7 +468,7 @@ configuration = {
                                 'description':'menu',
                                 'mode':'choose',
                                 'branch':[
-                                    {'type':'text'},
+                                    {'stream kind':'menu'},
                                 ],
                             },
                         ]
@@ -4139,57 +4137,57 @@ configuration = {
             'provide':set(('name',)),
             'branch':[
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':1 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':1 },
                     'apply':[
                         { 'property':'name', 'value':'Mono' },
                     ],
                 },
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':2 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':2 },
                     'apply':[
                         { 'property':'name', 'value':'Stereo' },
                     ],
                 },
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':3 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':3 },
                     'apply':[
                         { 'property':'name', 'value':'Stereo' },
                     ],
                 },
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':4 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':4 },
                     'apply':[
                         { 'property':'name', 'value':'Quadraphonic' },
                     ],
                 },
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':5 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':5 },
                     'apply':[
                         { 'property':'name', 'value':'Surround' },
                     ],
                 },
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':6 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':6 },
                     'apply':[
                         { 'property':'name', 'value':'Surround' },
                     ],
                 },
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':7 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':7 },
                     'apply':[
                         { 'property':'name', 'value':'Surround' },
                     ],
                 },
                 {
-                    'requires':set(('type', 'channels')),
-                    'equal':{'type':'audio', 'channels':8 },
+                    'requires':set(('stream kind', 'channels')),
+                    'equal':{'stream kind':'audio', 'channels':8 },
                     'apply':[
                         { 'property':'name', 'value':'Surround' },
                     ],

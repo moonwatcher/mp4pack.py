@@ -183,7 +183,7 @@ def test2(env):
         c = Crawler(o)
         n = c.node
         
-        #print json.dumps(n, sort_keys=True, indent=4,  default=dthandler)
+        print json.dumps(n, sort_keys=True, indent=4,  default=dthandler)
 
 
 def main():
