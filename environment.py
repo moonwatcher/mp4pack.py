@@ -379,6 +379,7 @@ class Environment(object):
                 decoded['directory'], decoded['file name'] = os.path.split(parsed.path)
                 if 'file name' in decoded and 'directory' in decoded:
                     decoded['media kind']
+                    decoded['volume path']
                     result = Ontology(self, 'resource.file.url')
                     result['url'] = url
                     result['path'] = parsed.path
@@ -590,7 +591,7 @@ class Repository(object):
     
     def reload(self):
         # reload the volume enumeration
-        for key, volume in self.node['volume'].iteritems():
+        for key, volume in self.node['volume']['element'].iteritems():
             volume['host'] = self.host
             volume['domain'] = self.domain
             volume['virtual'] = u'/{0}'.format(key)
@@ -604,15 +605,15 @@ class Repository(object):
                 
         self._volume = Enumeration(self.env, self.node['volume'])
         
-        for key, volume in self.node['volume'].iteritems():
+        for key, volume in self.node['volume']['element'].iteritems():
             for alt in volume['alternative']:
-                if self._volume.search(alt) is None:
-                    self._volume.map(key, alt)
-                else:
-                    self.log.error('Alias %s for %s on %s already mapped to volume %s', alt, key, self.host, self._volume.search(alt)['key'])
+                e = self._volume.search(alt)
+                if e is None: self._volume.map(key, alt)
+                elif e.key != key:
+                    self.log.error('Alias %s for %s on %s already mapped to volume %s', alt, key, self.host, e.key)
                     
         # reload routing rules
-        routing = self.env.deduction.find('rule.system.default.routing')
+        routing = self.env.rule['rule.system.default.routing']
         for branch in self.node['routing']:
             routing.add_branch(branch)
     

@@ -66,6 +66,7 @@ class Crawler(object):
                 
             elif self.ontology['kind'] == 'ass':
                 self._load_ass()
+            self.normalize()
     
     
     def normalize(self):
@@ -138,6 +139,9 @@ class Crawler(object):
                 for o in v:
                     o['stream kind'] = k
                     self.stream.append(o)
+                    
+            self._stream = None
+            self._menu = None
     
     
     def _load_mediainfo(self):
