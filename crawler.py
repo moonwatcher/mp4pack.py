@@ -11,19 +11,15 @@ from ontology import Ontology
 from model.menu import Chapter, Menu
 from model.caption import Caption, Slide
 
-track_type_namespace = {
-    'audio':'resource.crawl.stream.audio',
-    'video':'resource.crawl.stream.video',
-    'text':'resource.crawl.stream.text',
-    'image':'resource.crawl.stream.image',
-}
-
 class Crawler(object):
     def __init__(self, ontology):
         self.log = logging.getLogger('crawler')
         self.ontology = ontology
-        self.tag = Ontology.project('resource.crawl.meta', ontology)
-        self.track = []
+        self.info = None
+        self.stream = None
+        
+        self._stream = None
+        self._menu = None
         self.load()
     
     
@@ -45,137 +41,149 @@ class Crawler(object):
     
     @property
     def node(self):
-        node = {
+        self.normalize()
+        return {
             'ontology':self.ontology.node,
-            'tag':self.tag.node,
-            'track':[],
+            'info':self.info.node,
+            'stream':[ o.node for o in self.stream ],
         }
-        
-        for track in self.track:
-            node['track'].append(track.node)
-            
-        return node
     
     
-    # Loading...
     def load(self):
-        self._load_mediainfo()
-        
-        self._fix_cover()
-        
-        # Find the main video stream and add playback dimensions accordingly
-        self._exapnd_playback_dimensions()
-        
-        if self.ontology['format'] == u'AC-3' or self.ontology['format'] == u'DTS':
-            for index,track in enumerate(self.track):
-                track['track id'] = index
+        if self.valid:
+            self.info = None
+            self.stream = None
+            self._stream = []
+            self._menu = []
+            
+            self._load_mediainfo()
+            
+            if self.ontology['kind'] == 'chpl':
+                self._load_ogg_chapters()
                 
-        if self.ontology['format'] == u'MPEG-4':
+            elif self.ontology['kind'] == 'srt':
+                self._load_srt()
+                
+            elif self.ontology['kind'] == 'ass':
+                self._load_ass()
+    
+    
+    def normalize(self):
+        if self.info is None:
+            self.stream = []
+            normal = {
+                'info':None,
+                'image':None,
+                'audio':[],
+                'video':[],
+                'caption':[],
+                'menu':[],
+                'preview':[],
+            }
+            normal['info'] = [ o for o in self._stream if o['stream type'] == u'general' ]
+            normal['image'] = [ o for o in self._stream if o['stream type'] == u'image' ]
             
-            # Add tag info from mp4info for MPEG-4
-            self._load_mp4info()
+            # There should always be exactly one info stream
+            if normal['info']:
+                self.info = normal['info'][0]
+                self._fix(self.info)
+            else:
+                self.info = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('general').node['namespace'])
+            del normal['info']
             
-            # Expand lists from the itunmovi plist atom
-            self._expand_itunmovi()
+            # Choose the minimum channel count for every audio stream
+            for o in [ o for o in self._stream if o['stream type'] == u'audio' ]:
+                normal['audio'].append(o)
+                if 'channel count' in o:
+                    o['channels'] = min(o['channel count'])
+                    
+            # if the text stream format is 'Apple text' it is a chapter track in mp4
+            # otherwise its a caption stream
+            for o in [ o for o in self._stream if o['stream type'] == u'text' ]:
+                if o['format'] == u'Apple text':
+                    normal['menu'].append(o)
+                else:
+                    normal['caption'].append(o)
+                    
+            # break the video streams into normal video and chapter preview images
+            # by relative portion of the stream and locate the primary
+            primary = None
+            for o in [ o for o in self._stream if o['stream type'] == u'video' ]:
+                if o['format'] == u'JPEG' and o['stream portion'] < 0.01:
+                    normal['preview'].append(o)
+                else:
+                    normal['video'].append(o)
+                    if primary is None or o['stream portion'] > primary['stream portion']:
+                        primary = o
+            if primary:
+                # If we have a primary video stream, set the dimensions on the info node
+                primary['primary'] = True
+                self.info['width'] = float(primary['width'])
+                if primary['display aspect ratio'] >= self.env.constant['playback aspect ration']:
+                    self.info['height'] = self.info['width'] / self.env.constant['playback aspect ration']
+                else:
+                    self.info['height'] = float(primary['height'])
+                    
+            # There should only be one menu stream with one menu in it or none at all
+            if self._menu:
+                if normal['menu']: o = normal['menu'][0]
+                else:
+                    o = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('text').node['namespace'])
+                    o['stream type'] = u'text'
+                o['content'] = self._menu[0].node
+                normal['menu'] = [o]
+            else: normal['menu'] = []
             
-            # If gnre is present and ©gen isn't 
-            # set ©gen to the print value of the enumerated gnre
-            # Confusing isn't it?
-            self._fix_genre()
-            
-        if self.ontology['kind'] == 'chpl':
-            self._load_ogg_chapters()
-            
-        elif self.ontology['kind'] == 'srt':
-            self._load_srt()
-            
-        elif self.ontology['kind'] == 'ass':
-            self._load_ass()
+            for k,v in normal.iteritems():
+                for o in v:
+                    o['stream kind'] = k
+                    self.stream.append(o)
     
     
     def _load_mediainfo(self):
-        if self.valid:
-            command = self.env.initialize_command('mediainfo', self.log)
-            if command:
-                command.extend([u'--Language=raw', u'--Output=XML', u'-f', self.ontology['path']])
-                proc_mediainfo = Popen(command, stdout=PIPE, stderr=PIPE)
-                proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
-                report = proc_grep.communicate()
-                element = ElementTree.fromstring(report[0])
-                if element is not None:
-                    menu = None
-                    file_nodes = element.findall(u'File')
-                    if file_nodes:
-                        track_nodes = file_nodes[0].findall(u'track')
-                        if track_nodes:
-                            for track_node in track_nodes:
-                                if 'type' in track_node.attrib:
-                                    track_type = unicode(track_node.attrib['type'].lower())
-                                    if track_type == 'general':
-                                        for i in track_node:
-                                            self.ontology.decode(i.tag, i.text)
-                                            self.tag.decode(i.tag, i.text)
-                                            
-                                    elif track_type in track_type_namespace:
-                                        track = Ontology(self.env, track_type_namespace[track_type])
-                                        track['type'] = track_type
-                                        for i in track_node:
-                                            track.decode(i.tag, i.text)
-                                        self._add_track(track)
-                                        
-                                    elif track_type == 'menu':
-                                        menu = Menu(self.env)
-                                        for i in track_node:
-                                            menu.add(Chapter.from_raw(i.tag, i.text, Chapter.MEDIAINFO))
-                                            
-                    if menu is not None:
-                        menu_track = [ t for t in self.track if t['format'] == u'Apple text' ]
-                        if menu_track:
-                            menu_track = menu_track[0]
-                        else:
-                            menu_track = Ontology(self.env, track_type_namespace['text'])
-                            menu_track['type'] = u'text'
-                            menu_track['codec'] = u'chpl'
-                            self._add_track(menu_track)
-                            
-                        menu.normalize()
-                        if menu.valid:
-                            menu_track['content'] = menu.node
-                            
-                # Release resources held by the element, we no longer need it
-                element.clear()
-    
-    
-    def _load_mp4info(self):
-        command = self.env.initialize_command('mp4info', self.log)
+        command = self.env.initialize_command('mediainfo', self.log)
         if command:
-            command.append(self.ontology['path'])
-            proc = Popen(command, stdout=PIPE, stderr=PIPE)
-            report = proc.communicate()
-            mp4info_report = unicode(report[0], 'utf-8').splitlines()
-            for line in mp4info_report:
-                match = self.env.expression['mp4info tag'].search(line)
-                if match is not None:
-                    tag = match.groups()
-                    self.tag.decode(tag[0], tag[1])
+            command.extend([u'--Language=raw', u'--Output=XML', u'-f', self.ontology['path']])
+            proc_mediainfo = Popen(command, stdout=PIPE, stderr=PIPE)
+            proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
+            report = proc_grep.communicate()
+            element = ElementTree.fromstring(report[0])
+            if element is not None:
+                menu = None
+                for node in element.findall(u'File/track'):
+                    if 'type' in node.attrib:
+                        mtype = self.env.enumeration['mediainfo stream type'].search(node.attrib['type'])
+                        if mtype is not None:
+                            if mtype.node['namespace']:
+                                o = Ontology(self.env, mtype.node['namespace'])
+                                for item in list(node):
+                                    o.decode(item.tag, item.text)
+                                self._stream.append(o)
+                            elif mtype.key == 'menu':
+                                m = Menu(self.env)
+                                for item in list(node):
+                                    m.add(Chapter.from_raw(item.tag, item.text, Chapter.MEDIAINFO))
+                                self._add_menu(m)
+                                
+            # Release resources held by the element, we no longer need it
+            element.clear()
+    
+    
+    def _add_menu(self, menu):
+        if menu is not None:
+            menu.normalize()
+            if menu.valid:
+                self._menu.append(menu)
     
     
     def _load_ogg_chapters(self):
         content = self._read()
         if content:
             content = content.splitlines()
-            menu = Menu(self.env)
+            m = Menu(self.env)
             for index in range(len(content) - 1):
-                menu.add(Chapter.from_raw(content[index], content[index + 1], Chapter.OGG))
-                
-            menu.normalize()
-            if menu.valid:
-                track = Ontology(self.env, track_type_namespace['text'])
-                track['type'] = 'text'
-                track['codec'] = 'chpl'
-                track['language'] = self.ontology['language']
-                track['content'] = menu.node
-                self._add_track(track)
+                m.add(Chapter.from_raw(content[index], content[index + 1], Chapter.OGG))
+            self._add_menu(m)
     
     
     def _load_srt(self):
@@ -217,14 +225,13 @@ class Crawler(object):
                     
             caption.normalize()
             if caption.valid:
-                track = Ontology(self.env, track_type_namespace['text'])
-                track['type'] = 'text'
-                track['codec'] = 'srt'
-                track['track id'] = 0
-                track['position'] = 0
-                track['language'] = self.ontology['language']
-                track['content'] = caption.node
-                self._add_track(track)
+                mtype = self.env.enumeration['mediainfo stream type'].find('text')
+                o = Ontology(self.env, mtype.node['namespace'])
+                o['stream type'] = u'text'
+                o['format'] = u'UTF-8'
+                o['language'] = self.ontology['language']
+                o['content'] = caption.node
+                self._stream.append(o)
     
     
     def _load_ass(self, lines):
@@ -264,26 +271,13 @@ class Crawler(object):
                         
             caption.normalize()
             if caption.valid:
-                track = Ontology(self.env, track_type_namespace['text'])
-                track['type'] = 'text'
-                track['codec'] = 'ass'
-                track['track id'] = 0
-                track['position'] = 0
-                track['language'] = self.ontology['language']
-                track['content'] = caption.node
-                self._add_track(track)
-    
-    
-    def _add_track(self, track):
-        result = True
-        
-        result = result and self._expand_track_codec(track)
-        #result = result and track['format'] != u'Apple text'
-        result = result and self._expand_channel_configuration(track)
-        result = result and self._reset_undefined_language(track)
-        
-        if result:
-            self.track.append(track)
+                mtype = self.env.enumeration['mediainfo stream type'].find('text')
+                o = Ontology(self.env, mtype.node['namespace'])
+                o['stream type'] = u'text'
+                o['format'] = u'ASS'
+                o['language'] = self.ontology['language']
+                o['content'] = caption.node
+                self._stream.append(o)
     
     
     def _read(self):
@@ -310,105 +304,28 @@ class Crawler(object):
             self.ontology['encoding'] = result['encoding']
     
     
-    def _expand_itunmovi(self):
-        if 'itunmovi' in self.tag:
-            for k,v in self.tag['itunmovi'].iteritems():
-                key = self.env.enumeration['itunmovi'].parse(k)
-                if key:
-                    items = [ i['name'].strip() for i in v ]
-                    items = [ unicode(i) for i in items if i ]
-                    if items:
-                        self.tag[key] = items
-    
-    
-    def _fix_genre(self):
-        # If gnre is present and ©gen isn't 
-        # set ©gen to the print value of the enumerated gnre
-        # Confusing isn't it?
-        if 'genre type' in self.tag:
-            self.tag['genre type'] = int(self.tag['genre type'].split(u',')[0])
-            if 'genre' not in self.tag:
-                self.tag['genre'] = self.env.enumeration['genre'].get(self.tag['genre type'])
-    
-    
-    def _fix_cover(self):
-        if 'cover' in self.tag:
-            self.tag['cover'] = self.tag['cover'].count('Yes')
-    
-    
-    def _reset_undefined_language(self, track):
-        if track['language'] == 'und':
-            del track['language']
-        return True
-    
-    
-    def _expand_channel_configuration(self, track):
-        # Set the channels count as the minimum of all configurations
-        if 'channel configuration' in track:
-            track['channels'] = min(track['channel configuration'])
-        return True
-    
-    
-    def _expand_track_codec(self, track):
-        if 'format' in track:
-            if track['type'] == 'text':
-                if track['format'] == 'Timed text':
-                    track['codec'] = u'tx3g'
-                elif track['format'] == 'Apple text':
-                    track['codec'] = u'chpl'
-                elif track['format'] == 'UTF-8':
-                    track['codec'] = u'srt'
-                elif track['format'] == 'ASS':
-                    track['codec'] = u'ass'
-                elif track['format'] == 'PGS':
-                    track['codec'] = u'pgs'
-                elif track['format'] == 'RLE':
-                    track['codec'] = u'rle'
+    def _fix(self, ontology):
+        if ontology:
+            
+            # try to decode the genre as an enumerated genre type
+            if 'genre' in ontology:
+                element = self.env.enumeration['genre'].search(ontology['genre'])
+                if element:
+                    ontology['genre'] = element.name
+                    ontology['genre type'] = element.key
                     
-            elif track['type'] == 'audio':
-                if track['format'] == 'AC-3':
-                    track['codec'] = u'ac3'
-                elif track['format'] == 'MPEG Audio':
-                    track['codec'] = u'mp3'
-                elif track['format'] == 'DTS':
-                    track['codec'] = u'dts'
-                elif track['format'] == 'AAC':
-                    track['codec'] = u'aac'
-                elif track['format'] == 'PCM':
-                    track['codec'] = u'pcm'
-                    
-            elif track['type'] == 'video':
-                if track['format'] == 'AVC':
-                    track['codec'] = u'h.264'
-                elif track['format'] == 'MPEG-4 Visual':
-                    track['codec'] = u'h.263'
-                elif track['format'] == 'H.263':
-                    track['codec'] = u'h.263'
-                elif track['format'] == 'MPEG Video':
-                    track['codec'] = u'h.262'
-                elif track['format'] == 'JPEG':
-                    track['codec'] = u'jpeg'
-                    
-            elif track['type'] == 'image':
-                if track['format'] == 'LZ77':
-                    track['codec'] = u'png'
-                elif track['format'] == 'JPEG':
-                    track['codec'] = u'jpg'
-                    
-        return True
-    
-    
-    def _exapnd_playback_dimensions(self):
-        # Find the main video stream and add playback dimensions accordingly
-        main = None
-        for t in self.track:
-            if t['type'] == 'video' and (main is None or t['stream size'] > main['stream size']):
-                main = t
-        if main:
-            self.tag['width'] = float(main['width'])
-            if main['display aspect ratio'] >= self.env.constant['playback aspect ration']:
-                self.tag['height'] = self.tag['width'] / self.env.constant['playback aspect ration']
-            else:
-                self.tag['height'] = float(main['height'])
+            # count cover pieces
+            if 'cover' in ontology:
+                ontology['cover'] = ontology['cover'].count('Yes')
+                
+            # expand the itunmovi plist
+            if 'itunmovi' in ontology:
+                for k,v in ontology['itunmovi'].iteritems():
+                    key = self.env.enumeration['itunmovi'].parse(k)
+                    if key:
+                        items = [ i['name'].strip() for i in v ]
+                        items = [ unicode(i) for i in items if i ]
+                        if items:
+                            ontology[key] = items
     
 

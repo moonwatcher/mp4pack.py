@@ -607,7 +607,7 @@ class AudioVideoContainer(Container):
                     command.append(x264_config)
                     
                 elif track['type'] == 'audio':
-                    audio_options['--audio'].append(unicode(track['position'] + 1))
+                    audio_options['--audio'].append(unicode(track['stream position']))
                     for k,v in track['encoder settings'].iteritems():
                         if k not in audio_options:
                             audio_options[k] = []
@@ -644,28 +644,28 @@ class AudioVideoContainer(Container):
                     #command.append(self.asset.meta['full name'])
                     
                     command.append(u'--audio-tracks')
-                    command.append(u','.join([ unicode(track['track id']) for track in pivot.track if track['type'] == 'audio']))
+                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['type'] == 'audio']))
                     command.append(u'--video-tracks')
-                    command.append(u','.join([ unicode(track['track id']) for track in pivot.track if track['type'] == 'video']))
+                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['type'] == 'video']))
                     
                 # Iterate the tracks
                 for track in pivot.track:
                     if track['codec'] != 'chpl':
                         if 'language' in track:
                             command.append(u'--language')
-                            command.append(u'{0}:{1}'.format(track['track id'], self.env.enumeration['language'].find(track['language']).node['ISO 639-1']))
+                            command.append(u'{0}:{1}'.format(track['stream id'], self.env.enumeration['language'].find(track['language']).node['ISO 639-1']))
                             
                         if 'name' in track:
                             command.append(u'--track-name')
-                            command.append(u'{0}:{1}'.format(track['track id'], track['name']))
+                            command.append(u'{0}:{1}'.format(track['stream id'], track['name']))
                             
                         if 'delay' in pivot.resource.hint:
                             command.append(u'--sync')
-                            command.append(u'{0}:{1}'.format(track['track id'], pivot.resource.hint['delay']))
+                            command.append(u'{0}:{1}'.format(track['stream id'], pivot.resource.hint['delay']))
                             
                         if track['codec'] == 'srt':
                             command.append(u'--sub-charset')
-                            command.append(u'{0}:{1}'.format(track['track id'], u'UTF-8'))
+                            command.append(u'{0}:{1}'.format(track['stream id'], u'UTF-8'))
                             
                     else:
                         command.append(u'--chapter-language')
@@ -818,7 +818,7 @@ class Matroska(AudioVideoContainer):
                     if 'delay' in track:
                         product.hint['delay'] = track['delay']
                         
-                    command.append(u'{0}:{1}'.format(unicode(track['track id']), product.path))
+                    command.append(u'{0}:{1}'.format(unicode(track['stream id']), product.path))
                     task.product.append(product)
                     track['enabled'] = False
                     taken = True

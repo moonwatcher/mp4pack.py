@@ -166,6 +166,27 @@ def test(env):
     print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
 
 
+def test2(env):
+    from crawler import Crawler
+    paths = [
+        #'file://yoshi/Users/lg/Downloads/samurai jack s01e07 jack and the three blind archers.m4v',
+        #'file://multivac/net/multivac/pool/eta/movie/mkv/1080/IMDbtt0076759 star wars episode iv - a new hope.mkv',
+        #'file://multivac/net/multivac/Volumes/alphaville/alpha/tvshow/srt/clean/3rd rock from the sun/1/eng/3rd rock from the sun s01e02 post nasal dick.srt',
+        'file://yoshi/Users/lg/Downloads/mpk/pool/epsilon/tvshow/dts/original/weeds/7/en/weeds s07e01 bags.dts',
+    ]
+    import json
+    import datetime
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
+    
+    for path in paths:
+        o = env.parse_url(path)
+        c = Crawler(o)
+        n = c.node
+        
+        print json.dumps(n, sort_keys=True, indent=4,  default=dthandler)
+    
+
+
 def main():
     # Initialize logging and set the initial log level
     logging.basicConfig()
@@ -187,12 +208,13 @@ def main():
     queue = Queue(env)
     
     #test(env)
+    test2(env)
     
     job = Job(queue, env.ontology)
     job.open()
     job.run()
     job.close()
-    print job.node
+    #print job.node
 
 
 log_levels = {

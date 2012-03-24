@@ -183,7 +183,7 @@ class Chapter(object):
         },
         2:{
             'timecode encode':None,
-            'timecode decode':re.compile(ur'_(?P<hour>[0-9]{,2})_(?P<minute>[0-9]{,2})_(?P<second>[0-9]{,2})\.(?P<millisecond>[0-9]+)', re.UNICODE),
+            'timecode decode':re.compile(ur'_(?P<hour>[0-9]{,2})_(?P<minute>[0-9]{,2})_(?P<second>[0-9]{2})(?P<millisecond>[0-9]{3})', re.UNICODE),
             'name encode':None,
             'name decode':re.compile(ur'(?:(?P<lang>[a-z]{2}):)?(?P<name>.*)', re.UNICODE),
         }

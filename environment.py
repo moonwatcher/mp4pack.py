@@ -5,7 +5,6 @@ import re
 import logging
 import copy
 import urlparse
-import plistlib
 from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
 from chardet.universaldetector import UniversalDetector
@@ -379,13 +378,13 @@ class Environment(object):
                 decoded = Ontology(self, 'resource.decode.url')
                 decoded['directory'], decoded['file name'] = os.path.split(parsed.path)
                 if 'file name' in decoded and 'directory' in decoded:
-                    decodec['media type']
+                    decoded['media kind']
                     result = Ontology(self, 'resource.file.url')
                     result['url'] = url
                     result['path'] = parsed.path
                     result['scheme'] = parsed.scheme or u'file'
                     result['host'] = parsed.hostname or self.host
-                    for k,v in decoded: result[k] = v
+                    for k,v in decoded.iteritems(): result[k] = v
                     if result['host'] in self.repository and 'volume path' in result:
                         result['volume'] = self.repository[result['host']].volume.parse(result['volume path'])
                         del result['volume path']

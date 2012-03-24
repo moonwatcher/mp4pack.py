@@ -4,6 +4,7 @@ import logging
 import copy
 import re
 import unicodedata
+import plistlib
 
 from datetime import datetime
 
@@ -614,9 +615,9 @@ class Prototype(Element):
     def _simplify(self, value):
         result = None
         if value:
-            v = self.expression['whitespace'].sub(self.env.constant['space'], value).strip()
+            v = self.env.expression['whitespace'].sub(self.env.constant['space'], value).strip()
             if v:
-                result = self.expression['characters to exclude from filename'].sub(self.env.constant['empty string'], v)
+                result = self.env.expression['characters to exclude from filename'].sub(self.env.constant['empty string'], v)
                 if not result:
                     result = v
                     result = result.replace(u'?', u'question mark')

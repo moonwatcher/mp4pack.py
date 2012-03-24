@@ -1117,7 +1117,14 @@ configuration = {
         'stream type':{
             'name':u'Stream Type',
             'keyword':u'stream_type',
-            'type':'unicode',
+            'type':'enum',
+            'enumeration':'mediainfo stream type',
+        },
+        'stream kind':{
+            'name':u'Stream Kind',
+            'keyword':u'stream_kind',
+            'type':'enum',
+            'enumeration':'stream kind',
         },
         'format':{
             'name':u'Format',
@@ -1129,9 +1136,9 @@ configuration = {
             'type':'unicode',
             'plural':'list',
         },
-        'channel configuration':{
-            'name':u'Channel configuration',
-            'keyword':u'channel_configuration',
+        'channel count':{
+            'name':u'Channel count',
+            'keyword':u'channel_count',
             'type':'int',
             'plural':'list',
         },
@@ -1156,6 +1163,21 @@ configuration = {
             'keyword':u'stream_size',
             'type':'int',
             'format':'byte',
+        },
+        'stream portion':{
+            'name':u'Stream portion',
+            'keyword':u'stream_portion',
+            'type':'float',
+        },
+        'default':{
+            'name':u'Default',
+            'keyword':u'default',
+            'type':'bool',
+        },
+        'primary':{
+            'name':u'Primary',
+            'keyword':u'primary',
+            'type':'bool',
         },
         'delay':{
             'name':u'Delay',
@@ -1519,134 +1541,134 @@ configuration = {
             },
         },
         'genre':{
-            'synonym':['name','gnre', 'key'],
+            'synonym':['name','mediainfo'],
             'element':{
-                'blues':{               'gnre':1,   'name':u'Blues' },
-                'classic rock':{        'gnre':2,   'name':u'Classic Rock' },
-                'country':{             'gnre':3,   'name':u'Country' },
-                'dance':{               'gnre':4,   'name':u'Dance' },
-                'disco':{               'gnre':5,   'name':u'Disco' },
-                'funk':{                'gnre':6,   'name':u'Funk' },
-                'grunge':{              'gnre':7,   'name':u'Grunge' },
-                'hip hop':{             'gnre':8,   'name':u'Hip Hop' },
-                'jazz':{                'gnre':9,   'name':u'Jazz' },
-                'metal':{               'gnre':10,  'name':u'Metal' },
-                'new age':{             'gnre':11,  'name':u'New Age' },
-                'oldies':{              'gnre':12,  'name':u'Oldies' },
-                'other':{               'gnre':13,  'name':u'Other' },
-                'pop':{                 'gnre':14,  'name':u'Pop' },
-                'r&b':{                 'gnre':15,  'name':u'R&B' },
-                'rap':{                 'gnre':16,  'name':u'Rap' },
-                'reggae':{              'gnre':17,  'name':u'Reggae' },
-                'rock':{                'gnre':18,  'name':u'Rock' },
-                'techno':{              'gnre':19,  'name':u'Techno' },
-                'industrial':{          'gnre':20,  'name':u'Industrial' },
-                'alternative':{         'gnre':21,  'name':u'Alternative' },
-                'ska':{                 'gnre':22,  'name':u'Ska' },
-                'death metal':{         'gnre':23,  'name':u'Death Metal' },
-                'pranks':{              'gnre':24,  'name':u'Pranks' },
-                'soundtrack':{          'gnre':25,  'name':u'Soundtrack' },
-                'euro techno':{         'gnre':26,  'name':u'Euro Techno' },
-                'ambient':{             'gnre':27,  'name':u'Ambient' },
-                'trip hop':{            'gnre':28,  'name':u'Trip Hop' },
-                'vocal':{               'gnre':29,  'name':u'Vocal' },
-                'jazz funk':{           'gnre':30,  'name':u'Jazz Funk' },
-                'fusion':{              'gnre':31,  'name':u'Fusion' },
-                'trance':{              'gnre':32,  'name':u'Trance' },
-                'classical':{           'gnre':33,  'name':u'Classical' },
-                'instrumental':{        'gnre':34,  'name':u'Instrumental' },
-                'acid':{                'gnre':35,  'name':u'Acid' },
-                'house':{               'gnre':36,  'name':u'House' },
-                'game':{                'gnre':37,  'name':u'Game' },
-                'sound clip':{          'gnre':38,  'name':u'Sound Clip' },
-                'gospel':{              'gnre':39,  'name':u'Gospel' },
-                'noise':{               'gnre':40,  'name':u'Noise' },
-                'alternrock':{          'gnre':41,  'name':u'Alternrock' },
-                'bass':{                'gnre':42,  'name':u'Bass' },
-                'soul':{                'gnre':43,  'name':u'Soul' },
-                'punk':{                'gnre':44,  'name':u'Punk' },
-                'space':{               'gnre':45,  'name':u'Space' },
-                'meditative':{          'gnre':46,  'name':u'Meditative' },
-                'instrumental pop':{    'gnre':47,  'name':u'Instrumental Pop' },
-                'instrumental rock':{   'gnre':48,  'name':u'Instrumental Rock' },
-                'ethnic':{              'gnre':49,  'name':u'Ethnic' },
-                'gothic':{              'gnre':50,  'name':u'Gothic' },
-                'darkwave':{            'gnre':51,  'name':u'Darkwave' },
-                'techno industrial':{   'gnre':52,  'name':u'Techno Industrial' },
-                'electronic':{          'gnre':53,  'name':u'Electronic' },
-                'pop folk':{            'gnre':54,  'name':u'Pop Folk' },
-                'eurodance':{           'gnre':55,  'name':u'Eurodance' },
-                'dream':{               'gnre':56,  'name':u'Dream' },
-                'southern rock':{       'gnre':57,  'name':u'Southern Rock' },
-                'comedy':{              'gnre':58,  'name':u'Comedy' },
-                'cult':{                'gnre':59,  'name':u'Cult' },
-                'gangsta':{             'gnre':60,  'name':u'Gangsta' },
-                'top 40':{              'gnre':61,  'name':u'Top 40' },
-                'christian rap':{       'gnre':62,  'name':u'Christian Rap' },
-                'pop funk':{            'gnre':63,  'name':u'Pop Funk' },
-                'jungle':{              'gnre':64,  'name':u'Jungle' },
-                'native American':{     'gnre':65,  'name':u'Native American' },
-                'cabaret':{             'gnre':66,  'name':u'Cabaret' },
-                'new wave':{            'gnre':67,  'name':u'New Wave' },
-                'psychedelic':{         'gnre':68,  'name':u'Psychedelic' },
-                'rave':{                'gnre':69,  'name':u'Rave' },
-                'showtunes':{           'gnre':70,  'name':u'Showtunes' },
-                'trailer':{             'gnre':71,  'name':u'Trailer' },
-                'lo fi':{               'gnre':72,  'name':u'Lo Fi' },
-                'tribal':{              'gnre':73,  'name':u'Tribal' },
-                'acid punk':{           'gnre':74,  'name':u'Acid Punk' },
-                'acid jazz':{           'gnre':75,  'name':u'Acid Jazz' },
-                'polka':{               'gnre':76,  'name':u'Polka' },
-                'retro':{               'gnre':77,  'name':u'Retro' },
-                'musical':{             'gnre':78,  'name':u'Musical' },
-                'rock and roll':{       'gnre':79,  'name':u'Rock and Roll' },
-                'hard rock':{           'gnre':80,  'name':u'Hard Rock' },
-                'folk':{                'gnre':81,  'name':u'Folk' },
-                'folk rock':{           'gnre':82,  'name':u'Folk-Rock' },
-                'national folk':{       'gnre':83,  'name':u'National Folk' },
-                'swing':{               'gnre':84,  'name':u'Swing' },
-                'fast fusion':{         'gnre':85,  'name':u'Fast Fusion' },
-                'bebob':{               'gnre':86,  'name':u'Bebob' },
-                'latin':{               'gnre':87,  'name':u'Latin' },
-                'revival':{             'gnre':88,  'name':u'Revival' },
-                'celtic':{              'gnre':89,  'name':u'Celtic' },
-                'bluegrass':{           'gnre':90,  'name':u'Bluegrass' },
-                'avantgarde':{          'gnre':91,  'name':u'Avantgarde' },
-                'gothic rock':{         'gnre':92,  'name':u'Gothic Rock' },
-                'progressive rock':{    'gnre':93,  'name':u'Progresive Rock' },
-                'psychedelic rock':{    'gnre':94,  'name':u'Psychedelic Rock' },
-                'symphonic rock':{      'gnre':95,  'name':u'Symphonic Rock' },
-                'slow rock':{           'gnre':96,  'name':u'Slow Rock' },
-                'big band':{            'gnre':97,  'name':u'Big Band' },
-                'chorus':{              'gnre':98,  'name':u'Chorus' },
-                'easy listening':{      'gnre':99,  'name':u'Easy Listening' },
-                'acoustic':{            'gnre':100, 'name':u'Acoustic' },
-                'humour':{              'gnre':101, 'name':u'Humor' },
-                'speech':{              'gnre':102, 'name':u'Speech' },
-                'chanson':{             'gnre':103, 'name':u'Chason' },
-                'opera':{               'gnre':104, 'name':u'Opera' },
-                'chamber music':{       'gnre':105, 'name':u'Chamber Music' },
-                'sonata':{              'gnre':106, 'name':u'Sonata' },
-                'symphony':{            'gnre':107, 'name':u'Symphony' },
-                'booty bass':{          'gnre':108, 'name':u'Booty Bass' },
-                'primus':{              'gnre':109, 'name':u'Primus' },
-                'porn groove':{         'gnre':110, 'name':u'Porn Groove' },
-                'satire':{              'gnre':111, 'name':u'Satire' },
-                'slow jam':{            'gnre':112, 'name':u'Slow Jam' },
-                'club':{                'gnre':113, 'name':u'Club' },
-                'tango':{               'gnre':114, 'name':u'Tango' },
-                'samba':{               'gnre':115, 'name':u'Samba' },
-                'folklore':{            'gnre':116, 'name':u'Folklore' },
-                'ballad':{              'gnre':117, 'name':u'Ballad' },
-                'power ballad':{        'gnre':118, 'name':u'Power Ballad' },
-                'rhythmic soul':{       'gnre':119, 'name':u'Rhythmic Soul' },
-                'freestyle':{           'gnre':120, 'name':u'Freestyle' },
-                'duet':{                'gnre':121, 'name':u'Duet' },
-                'punk rock':{           'gnre':122, 'name':u'Punk Rock' },
-                'drum solo':{           'gnre':123, 'name':u'Drum Solo' },
-                'a capella':{           'gnre':124, 'name':u'A capella' },
-                'euro house':{          'gnre':125, 'name':u'Euro-House' },
-                'dance hall':{          'gnre':126, 'name':u'Dance Hall' },
+                1:{     'gnre':1,       'ID3':0,    'mediainfo':u'Genre_000',   'name':u'Blues' },
+                2:{     'gnre':2,       'ID3':1,    'mediainfo':u'Genre_001',   'name':u'Classic Rock' },
+                3:{     'gnre':3,       'ID3':2,    'mediainfo':u'Genre_002',   'name':u'Country' },
+                4:{     'gnre':4,       'ID3':3,    'mediainfo':u'Genre_003',   'name':u'Dance' },
+                5:{     'gnre':5,       'ID3':4,    'mediainfo':u'Genre_004',   'name':u'Disco' },
+                6:{     'gnre':6,       'ID3':5,    'mediainfo':u'Genre_005',   'name':u'Funk' },
+                7:{     'gnre':7,       'ID3':6,    'mediainfo':u'Genre_006',   'name':u'Grunge' },
+                8:{     'gnre':8,       'ID3':7,    'mediainfo':u'Genre_007',   'name':u'Hip Hop' },
+                9:{     'gnre':9,       'ID3':8,    'mediainfo':u'Genre_008',   'name':u'Jazz' },
+                10:{    'gnre':10,      'ID3':9,    'mediainfo':u'Genre_009',   'name':u'Metal' },
+                11:{    'gnre':11,      'ID3':10,   'mediainfo':u'Genre_010',   'name':u'New Age' },
+                12:{    'gnre':12,      'ID3':11,   'mediainfo':u'Genre_011',   'name':u'Oldies' },
+                13:{    'gnre':13,      'ID3':12,   'mediainfo':u'Genre_012',   'name':u'Other' },
+                14:{    'gnre':14,      'ID3':13,   'mediainfo':u'Genre_013',   'name':u'Pop' },
+                15:{    'gnre':15,      'ID3':14,   'mediainfo':u'Genre_014',   'name':u'R&B' },
+                16:{    'gnre':16,      'ID3':15,   'mediainfo':u'Genre_015',   'name':u'Rap' },
+                17:{    'gnre':17,      'ID3':16,   'mediainfo':u'Genre_016',   'name':u'Reggae' },
+                18:{    'gnre':18,      'ID3':17,   'mediainfo':u'Genre_017',   'name':u'Rock' },
+                19:{    'gnre':19,      'ID3':18,   'mediainfo':u'Genre_018',   'name':u'Techno' },
+                20:{    'gnre':20,      'ID3':19,   'mediainfo':u'Genre_019',   'name':u'Industrial' },
+                21:{    'gnre':21,      'ID3':20,   'mediainfo':u'Genre_020',   'name':u'Alternative' },
+                22:{    'gnre':22,      'ID3':21,   'mediainfo':u'Genre_021',   'name':u'Ska' },
+                23:{    'gnre':23,      'ID3':22,   'mediainfo':u'Genre_022',   'name':u'Death Metal' },
+                24:{    'gnre':24,      'ID3':23,   'mediainfo':u'Genre_023',   'name':u'Pranks' },
+                25:{    'gnre':25,      'ID3':24,   'mediainfo':u'Genre_024',   'name':u'Soundtrack' },
+                26:{    'gnre':26,      'ID3':25,   'mediainfo':u'Genre_025',   'name':u'Euro Techno' },
+                27:{    'gnre':27,      'ID3':26,   'mediainfo':u'Genre_026',   'name':u'Ambient' },
+                28:{    'gnre':28,      'ID3':27,   'mediainfo':u'Genre_027',   'name':u'Trip Hop' },
+                29:{    'gnre':29,      'ID3':28,   'mediainfo':u'Genre_028',   'name':u'Vocal' },
+                30:{    'gnre':30,      'ID3':29,   'mediainfo':u'Genre_029',   'name':u'Jazz Funk' },
+                31:{    'gnre':31,      'ID3':30,   'mediainfo':u'Genre_030',   'name':u'Fusion' },
+                32:{    'gnre':32,      'ID3':31,   'mediainfo':u'Genre_031',   'name':u'Trance' },
+                33:{    'gnre':33,      'ID3':32,   'mediainfo':u'Genre_032',   'name':u'Classical' },
+                34:{    'gnre':34,      'ID3':33,   'mediainfo':u'Genre_033',   'name':u'Instrumental' },
+                35:{    'gnre':35,      'ID3':34,   'mediainfo':u'Genre_034',   'name':u'Acid' },
+                36:{    'gnre':36,      'ID3':35,   'mediainfo':u'Genre_035',   'name':u'House' },
+                37:{    'gnre':37,      'ID3':36,   'mediainfo':u'Genre_036',   'name':u'Game' },
+                38:{    'gnre':38,      'ID3':37,   'mediainfo':u'Genre_037',   'name':u'Sound Clip' },
+                39:{    'gnre':39,      'ID3':38,   'mediainfo':u'Genre_038',   'name':u'Gospel' },
+                40:{    'gnre':40,      'ID3':39,   'mediainfo':u'Genre_039',   'name':u'Noise' },
+                41:{    'gnre':41,      'ID3':40,   'mediainfo':u'Genre_040',   'name':u'Alternrock' },
+                42:{    'gnre':42,      'ID3':41,   'mediainfo':u'Genre_041',   'name':u'Bass' },
+                43:{    'gnre':43,      'ID3':42,   'mediainfo':u'Genre_042',   'name':u'Soul' },
+                44:{    'gnre':44,      'ID3':43,   'mediainfo':u'Genre_043',   'name':u'Punk' },
+                45:{    'gnre':45,      'ID3':44,   'mediainfo':u'Genre_044',   'name':u'Space' },
+                46:{    'gnre':46,      'ID3':45,   'mediainfo':u'Genre_045',   'name':u'Meditative' },
+                47:{    'gnre':47,      'ID3':46,   'mediainfo':u'Genre_046',   'name':u'Instrumental Pop' },
+                48:{    'gnre':48,      'ID3':47,   'mediainfo':u'Genre_047',   'name':u'Instrumental Rock' },
+                49:{    'gnre':49,      'ID3':48,   'mediainfo':u'Genre_048',   'name':u'Ethnic' },
+                50:{    'gnre':50,      'ID3':49,   'mediainfo':u'Genre_049',   'name':u'Gothic' },
+                51:{    'gnre':51,      'ID3':50,   'mediainfo':u'Genre_050',   'name':u'Darkwave' },
+                52:{    'gnre':52,      'ID3':51,   'mediainfo':u'Genre_051',   'name':u'Techno Industrial' },
+                53:{    'gnre':53,      'ID3':52,   'mediainfo':u'Genre_052',   'name':u'Electronic' },
+                54:{    'gnre':54,      'ID3':53,   'mediainfo':u'Genre_053',   'name':u'Pop Folk' },
+                55:{    'gnre':55,      'ID3':54,   'mediainfo':u'Genre_054',   'name':u'Eurodance' },
+                56:{    'gnre':56,      'ID3':55,   'mediainfo':u'Genre_055',   'name':u'Dream' },
+                57:{    'gnre':57,      'ID3':56,   'mediainfo':u'Genre_056',   'name':u'Southern Rock' },
+                58:{    'gnre':58,      'ID3':57,   'mediainfo':u'Genre_057',   'name':u'Comedy' },
+                59:{    'gnre':59,      'ID3':58,   'mediainfo':u'Genre_058',   'name':u'Cult' },
+                60:{    'gnre':60,      'ID3':59,   'mediainfo':u'Genre_059',   'name':u'Gangsta' },
+                61:{    'gnre':61,      'ID3':60,   'mediainfo':u'Genre_060',   'name':u'Top 40' },
+                62:{    'gnre':62,      'ID3':61,   'mediainfo':u'Genre_061',   'name':u'Christian Rap' },
+                63:{    'gnre':63,      'ID3':62,   'mediainfo':u'Genre_062',   'name':u'Pop Funk' },
+                64:{    'gnre':64,      'ID3':63,   'mediainfo':u'Genre_063',   'name':u'Jungle' },
+                65:{    'gnre':65,      'ID3':64,   'mediainfo':u'Genre_064',   'name':u'Native American' },
+                66:{    'gnre':66,      'ID3':65,   'mediainfo':u'Genre_065',   'name':u'Cabaret' },
+                67:{    'gnre':67,      'ID3':66,   'mediainfo':u'Genre_066',   'name':u'New Wave' },
+                68:{    'gnre':68,      'ID3':67,   'mediainfo':u'Genre_067',   'name':u'Psychedelic' },
+                69:{    'gnre':69,      'ID3':68,   'mediainfo':u'Genre_068',   'name':u'Rave' },
+                70:{    'gnre':70,      'ID3':69,   'mediainfo':u'Genre_069',   'name':u'Showtunes' },
+                71:{    'gnre':71,      'ID3':70,   'mediainfo':u'Genre_070',   'name':u'Trailer' },
+                72:{    'gnre':72,      'ID3':71,   'mediainfo':u'Genre_071',   'name':u'Lo Fi' },
+                73:{    'gnre':73,      'ID3':72,   'mediainfo':u'Genre_072',   'name':u'Tribal' },
+                74:{    'gnre':74,      'ID3':73,   'mediainfo':u'Genre_073',   'name':u'Acid Punk' },
+                75:{    'gnre':75,      'ID3':74,   'mediainfo':u'Genre_074',   'name':u'Acid Jazz' },
+                76:{    'gnre':76,      'ID3':75,   'mediainfo':u'Genre_075',   'name':u'Polka' },
+                77:{    'gnre':77,      'ID3':76,   'mediainfo':u'Genre_076',   'name':u'Retro' },
+                78:{    'gnre':78,      'ID3':77,   'mediainfo':u'Genre_077',   'name':u'Musical' },
+                79:{    'gnre':79,      'ID3':78,   'mediainfo':u'Genre_078',   'name':u'Rock and Roll' },
+                80:{    'gnre':80,      'ID3':79,   'mediainfo':u'Genre_079',   'name':u'Hard Rock' },
+                81:{    'gnre':81,      'ID3':80,   'mediainfo':u'Genre_080',   'name':u'Folk' },
+                82:{    'gnre':82,      'ID3':81,   'mediainfo':u'Genre_081',   'name':u'Folk-Rock' },
+                83:{    'gnre':83,      'ID3':82,   'mediainfo':u'Genre_082',   'name':u'National Folk' },
+                84:{    'gnre':84,      'ID3':83,   'mediainfo':u'Genre_083',   'name':u'Swing' },
+                85:{    'gnre':85,      'ID3':84,   'mediainfo':u'Genre_084',   'name':u'Fast Fusion' },
+                86:{    'gnre':86,      'ID3':85,   'mediainfo':u'Genre_085',   'name':u'Bebob' },
+                87:{    'gnre':87,      'ID3':86,   'mediainfo':u'Genre_086',   'name':u'Latin' },
+                88:{    'gnre':88,      'ID3':87,   'mediainfo':u'Genre_087',   'name':u'Revival' },
+                89:{    'gnre':89,      'ID3':88,   'mediainfo':u'Genre_088',   'name':u'Celtic' },
+                90:{    'gnre':90,      'ID3':89,   'mediainfo':u'Genre_089',   'name':u'Bluegrass' },
+                91:{    'gnre':91,      'ID3':90,   'mediainfo':u'Genre_090',   'name':u'Avantgarde' },
+                92:{    'gnre':92,      'ID3':91,   'mediainfo':u'Genre_091',   'name':u'Gothic Rock' },
+                93:{    'gnre':93,      'ID3':92,   'mediainfo':u'Genre_092',   'name':u'Progresive Rock' },
+                94:{    'gnre':94,      'ID3':93,   'mediainfo':u'Genre_093',   'name':u'Psychedelic Rock' },
+                95:{    'gnre':95,      'ID3':94,   'mediainfo':u'Genre_094',   'name':u'Symphonic Rock' },
+                96:{    'gnre':96,      'ID3':95,   'mediainfo':u'Genre_095',   'name':u'Slow Rock' },
+                97:{    'gnre':97,      'ID3':96,   'mediainfo':u'Genre_096',   'name':u'Big Band' },
+                98:{    'gnre':98,      'ID3':97,   'mediainfo':u'Genre_097',   'name':u'Chorus' },
+                99:{    'gnre':99,      'ID3':98,   'mediainfo':u'Genre_098',   'name':u'Easy Listening' },
+                100:{   'gnre':100,     'ID3':99,   'mediainfo':u'Genre_099',   'name':u'Acoustic' },
+                101:{   'gnre':101,     'ID3':100,  'mediainfo':u'Genre_100',   'name':u'Humor' },
+                102:{   'gnre':102,     'ID3':101,  'mediainfo':u'Genre_101',   'name':u'Speech' },
+                103:{   'gnre':103,     'ID3':102,  'mediainfo':u'Genre_102',   'name':u'Chason' },
+                104:{   'gnre':104,     'ID3':103,  'mediainfo':u'Genre_103',   'name':u'Opera' },
+                105:{   'gnre':105,     'ID3':104,  'mediainfo':u'Genre_104',   'name':u'Chamber Music' },
+                106:{   'gnre':106,     'ID3':105,  'mediainfo':u'Genre_105',   'name':u'Sonata' },
+                107:{   'gnre':107,     'ID3':106,  'mediainfo':u'Genre_106',   'name':u'Symphony' },
+                108:{   'gnre':108,     'ID3':107,  'mediainfo':u'Genre_107',   'name':u'Booty Bass' },
+                109:{   'gnre':109,     'ID3':108,  'mediainfo':u'Genre_108',   'name':u'Primus' },
+                110:{   'gnre':110,     'ID3':109,  'mediainfo':u'Genre_109',   'name':u'Porn Groove' },
+                111:{   'gnre':111,     'ID3':110,  'mediainfo':u'Genre_110',   'name':u'Satire' },
+                112:{   'gnre':112,     'ID3':111,  'mediainfo':u'Genre_111',   'name':u'Slow Jam' },
+                113:{   'gnre':113,     'ID3':112,  'mediainfo':u'Genre_112',   'name':u'Club' },
+                114:{   'gnre':114,     'ID3':113,  'mediainfo':u'Genre_113',   'name':u'Tango' },
+                115:{   'gnre':115,     'ID3':114,  'mediainfo':u'Genre_114',   'name':u'Samba' },
+                116:{   'gnre':116,     'ID3':115,  'mediainfo':u'Genre_115',   'name':u'Folklore' },
+                117:{   'gnre':117,     'ID3':116,  'mediainfo':u'Genre_116',   'name':u'Ballad' },
+                118:{   'gnre':118,     'ID3':117,  'mediainfo':u'Genre_117',   'name':u'Power Ballad' },
+                119:{   'gnre':119,     'ID3':118,  'mediainfo':u'Genre_118',   'name':u'Rhythmic Soul' },
+                120:{   'gnre':120,     'ID3':119,  'mediainfo':u'Genre_119',   'name':u'Freestyle' },
+                121:{   'gnre':121,     'ID3':120,  'mediainfo':u'Genre_120',   'name':u'Duet' },
+                122:{   'gnre':122,     'ID3':121,  'mediainfo':u'Genre_121',   'name':u'Punk Rock' },
+                123:{   'gnre':123,     'ID3':122,  'mediainfo':u'Genre_122',   'name':u'Drum Solo' },
+                124:{   'gnre':124,     'ID3':123,  'mediainfo':u'Genre_123',   'name':u'A capella' },
+                125:{   'gnre':125,     'ID3':124,  'mediainfo':u'Genre_124',   'name':u'Euro-House' },
+                126:{   'gnre':126,     'ID3':125,  'mediainfo':u'Genre_125',   'name':u'Dance Hall' },
             },
         },
         'media kind':{
@@ -1660,6 +1682,28 @@ configuration = {
                 'tvshow':{      'name':u'TV Show',      'stik':10 },
                 'booklet':{     'name':u'Booklet',      'stik':11 },
                 'ringtone':{    'name':u'Ringtone',     'stik':14 },
+            },
+        },
+        'stream kind':{
+            'synonym':['key'],
+            'element':{
+                'video':{   'name':u'Video'     },
+                'audio':{   'name':u'Audio'     },
+                'image':{   'name':u'Image'     },
+                'caption':{ 'name':u'Caption'   },
+                'menu':{    'name':u'Menu'      },
+                'preview':{ 'name':u'Preview'   },
+            },
+        },
+        'mediainfo stream type':{
+            'synonym':['mediainfo'],
+            'element':{
+                'video':{   'name':u'Video',    'namespace':'resource.crawl.stream.video',  'mediainfo':u'Video'     },
+                'audio':{   'name':u'Audio',    'namespace':'resource.crawl.stream.audio',  'mediainfo':u'Audio'     },
+                'image':{   'name':u'Image',    'namespace':'resource.crawl.stream.image',  'mediainfo':u'Image'     },
+                'text':{    'name':u'Text',     'namespace':'resource.crawl.stream.text',   'mediainfo':u'Text'   },
+                'menu':{    'name':u'Menu',     'namespace':None,                           'mediainfo':u'Menu'      },
+                'general':{ 'name':u'General',  'namespace':'resource.crawl.meta',          'mediainfo':u'General'   },
             },
         },
         'kind':{
@@ -2082,12 +2126,11 @@ configuration = {
                 'plural':None,
                 'unescape xml':False,
                 'mediainfo':None,
-                'mp4info':None,
                 'subler':None,
                 'atom':None,
                 'keyword':None,
             },
-            'synonym':['mediainfo', 'mp4info', 'keyword'],
+            'synonym':['mediainfo', 'keyword'],
             'element':{
                 'kind':None,
                 'profile':None,
@@ -2096,6 +2139,9 @@ configuration = {
                 'simple name':None,
                 'imdb movie id':None,
                 'tmdb movie id':None,
+                'stream type':{
+                    'mediainfo':'StreamKind',
+                },
                 'file size':{
                     'mediainfo':'FileSize',
                 },
@@ -2227,7 +2273,7 @@ configuration = {
                     'unescape xml':True,
                 },
                 'lyrics':{
-                    'mp4info':'Lyrics',
+                    'mediainfo':'lyr',
                     'subler':'Lyrics',
                     'unescape xml':True,
                 },
@@ -2237,12 +2283,10 @@ configuration = {
                 },
                 'encoding tool':{
                     # mediainfo seems to mix @enc and @too into Encoded_Application
-                    'mp4info':'Encoded with',
                     'subler':'Encoding Tool',
                 },
                 'encoded by':{
                     # mediainfo seems to mix @enc and @too into Encoded_Application
-                    'mp4info':'Encoded by',
                     'subler':'Encoded by',
                 },
                 'compilation':{
@@ -2252,11 +2296,9 @@ configuration = {
                     'mediainfo':'BPM',
                     'subler':'Tempo',
                 },
-                'genre type':{
-                    'mp4info':'GenreType',
-                },
+                'genre type':None,
                 'genre':{
-                    'mp4info':'Genre',
+                    'mediainfo':'Genre',
                     'subler':'Genre',
                 },
                 'hd video':{
@@ -2264,7 +2306,6 @@ configuration = {
                     'subler':'HD Video',
                 },
                 'gapless':{
-                    'mp4info':'Part of Gapless Album',
                     'subler':'Gapless',
                 },
                 'podcast':{
@@ -2359,7 +2400,7 @@ configuration = {
             },
             'rule':[
                 'rule.knowlege.disk.number',
-                'rule.knowlege.track.number'
+                'rule.knowlege.track.number',
                 'rule.knowlege.default.track.total',
                 'rule.knowlege.default.disk.total',
                 'rule.knowlege.default.episode',
@@ -2385,10 +2426,25 @@ configuration = {
             },
             'synonym':['mediainfo'],
             'element':{
+                'stream id':{
+                    'mediainfo':'ID',
+                },
+                'stream position':{
+                    'mediainfo':'StreamKindPos',
+                },
+                'stream type':{
+                    'mediainfo':'StreamKind',
+                },
+                'stream kind':None,
                 'stream name':{
                     'mediainfo':'Title',
                 },
-                'stream type':None,
+                'language':{
+                    'mediainfo':'Language_String3',
+                },
+                'default':{
+                    'mediainfo':'Default',
+                },
                 'format':{
                     'mediainfo':'Format',
                 },
@@ -2396,22 +2452,14 @@ configuration = {
                     'mediainfo':'Format_Profile',
                     'plural format':'mediainfo value list',
                 },
-                'channel configuration':{
+                'channels':None,
+                'channel count':{
                     'mediainfo':'Channel_s_',
                     'plural format':'mediainfo value list',
                 },
                 'channel position':{
                     'mediainfo':'ChannelPositions',
                     'plural format':'mediainfo value list',
-                },
-                'language':{
-                    'mediainfo':'Language_String3',
-                },
-                'stream id':{
-                    'mediainfo':'ID',
-                },
-                'stream position':{
-                    'mediainfo':'StreamKindID',
                 },
                 'delay':{
                     'mediainfo':'Delay',
@@ -2434,10 +2482,9 @@ configuration = {
                     'mediainfo':'StreamSize',
                     'format':'byte',
                 },
-                'encoded date':{
-                    'mediainfo':'Encoded_Date',
+                'stream portion':{
+                    'mediainfo':'StreamSize_Proportion',
                 },
-                'channels':None,
                 'sample rate':{
                     'mediainfo':'SamplingRate',
                     'format':'frequency',
@@ -2448,7 +2495,15 @@ configuration = {
                 'dialnorm':{
                     'mediainfo':'dialnorm',
                 },
+                'encoded date':{
+                    'mediainfo':'Encoded_Date',
+                },
             },
+            'rule':[
+                'rule.stream.default.position',
+                'rule.stream.default.id',
+                'rule.stream.audio.kind',
+            ],
         },
         'resource.crawl.stream.video':{
             'default':{
@@ -2460,25 +2515,31 @@ configuration = {
             },
             'synonym':['mediainfo'],
             'element':{
+                'stream id':{
+                    'mediainfo':'ID',
+                },
+                'stream position':{
+                    'mediainfo':'StreamKindPos',
+                },
+                'stream type':{
+                    'mediainfo':'StreamKind',
+                },
+                'stream kind':None,
                 'stream name':{
                     'mediainfo':'Title',
                 },
-                'stream type':None,
+                'language':{
+                    'mediainfo':'Language_String3',
+                },
+                'default':{
+                    'mediainfo':'Default',
+                },
                 'format':{
                     'mediainfo':'Format',
                 },
                 'format profile':{
                     'mediainfo':'Format_Profile',
                     'plural format':'mediainfo value list',
-                },
-                'language':{
-                    'mediainfo':'Language_String3',
-                },
-                'stream id':{
-                    'mediainfo':'ID',
-                },
-                'stream position':{
-                    'mediainfo':'StreamKindID',
                 },
                 'delay':{
                     'mediainfo':'Delay',
@@ -2501,8 +2562,8 @@ configuration = {
                     'mediainfo':'StreamSize',
                     'format':'byte',
                 },
-                'encoded date':{
-                    'mediainfo':'Encoded_Date',
+                'stream portion':{
+                    'mediainfo':'StreamSize_Proportion',
                 },
                 'width':{
                     'mediainfo':'Width',
@@ -2547,7 +2608,16 @@ configuration = {
                     'plural':'dict',
                     'plural format':'mediainfo key value list',
                 },
+                'encoded date':{
+                    'mediainfo':'Encoded_Date',
+                },
+                'primary':None,
             },
+            'rule':[
+                'rule.stream.default.position',
+                'rule.stream.default.id',
+                'rule.stream.video.kind',
+            ],
         },
         'resource.crawl.stream.text':{
             'default':{
@@ -2559,10 +2629,25 @@ configuration = {
             },
             'synonym':['mediainfo'],
             'element':{
+                'stream id':{
+                    'mediainfo':'ID',
+                },
+                'stream position':{
+                    'mediainfo':'StreamKindPos',
+                },
+                'stream type':{
+                    'mediainfo':'StreamKind',
+                },
+                'stream kind':None,
                 'stream name':{
                     'mediainfo':'Title',
                 },
-                'stream type':None,
+                'language':{
+                    'mediainfo':'Language_String3',
+                },
+                'default':{
+                    'mediainfo':'Default',
+                },
                 'format':{
                     'mediainfo':'Format',
                 },
@@ -2570,17 +2655,8 @@ configuration = {
                     'mediainfo':'Format_Profile',
                     'plural format':'mediainfo value list',
                 },
-                'language':{
-                    'mediainfo':'Language_String3',
-                },
-                'stream id':{
-                    'mediainfo':'ID',
-                },
                 'delay':{
                     'mediainfo':'Delay',
-                },
-                'stream position':{
-                    'mediainfo':'StreamKindID',
                 },
                 'duration':{
                     'mediainfo':'Duration',
@@ -2600,10 +2676,18 @@ configuration = {
                     'mediainfo':'StreamSize',
                     'format':'byte',
                 },
+                'stream portion':{
+                    'mediainfo':'StreamSize_Proportion',
+                },
                 'encoded date':{
                     'mediainfo':'Encoded_Date',
                 },
             },
+            'rule':[
+                'rule.stream.default.position',
+                'rule.stream.default.id',
+                'rule.stream.text.kind',
+            ],
         },
         'resource.crawl.stream.image':{
             'default':{
@@ -2615,10 +2699,22 @@ configuration = {
             },
             'synonym':['mediainfo'],
             'element':{
+                'stream id':{
+                    'mediainfo':'ID',
+                },
+                'stream position':{
+                    'mediainfo':'StreamKindPos',
+                },
+                'stream type':{
+                    'mediainfo':'StreamKind',
+                },
+                'stream kind':None,
                 'stream name':{
                     'mediainfo':'Title',
                 },
-                'stream type':None,
+                'language':{
+                    'mediainfo':'Language_String3',
+                },
                 'format':{
                     'mediainfo':'Format',
                 },
@@ -2626,17 +2722,8 @@ configuration = {
                     'mediainfo':'Format_Profile',
                     'plural format':'mediainfo value list',
                 },
-                'language':{
-                    'mediainfo':'Language_String3',
-                },
-                'stream id':{
-                    'mediainfo':'ID',
-                },
                 'delay':{
                     'mediainfo':'Delay',
-                },
-                'stream position':{
-                    'mediainfo':'StreamKindID',
                 },
                 'duration':{
                     'mediainfo':'Duration',
@@ -2656,8 +2743,8 @@ configuration = {
                     'mediainfo':'StreamSize',
                     'format':'byte',
                 },
-                'encoded date':{
-                    'mediainfo':'Encoded_Date',
+                'stream portion':{
+                    'mediainfo':'StreamSize_Proportion',
                 },
                 'width':{
                     'mediainfo':'Width',
@@ -2667,7 +2754,15 @@ configuration = {
                     'mediainfo':'Height',
                     'format':'pixel',
                 },
+                'encoded date':{
+                    'mediainfo':'Encoded_Date',
+                },
             },
+            'rule':[
+                'rule.stream.default.position',
+                'rule.stream.default.id',
+                'rule.stream.image.kind',
+            ],
         },
         
         'knowlege.movie':{
@@ -4101,6 +4196,157 @@ configuration = {
                 },
             ],
         },
+        'rule.stream.default.position':{
+            'name':'Default stream position',
+            'provide':set(('stream position',)),
+            'branch':[
+                {
+                    'apply':[
+                        {'property':'stream position', 'value':1,},
+                    ],
+                },
+            ],
+        },
+        'rule.stream.default.id':{
+            'name':'Default stream id',
+            'provide':set(('stream id',)),
+            'branch':[
+                {
+                    'apply':[
+                        {'property':'stream id', 'value':0,},
+                    ],
+                },
+            ],
+        },
+        'rule.stream.audio.kind':{
+            'name':'Kind for audio stream',
+            'provide':set(('kind',)),
+            'branch':[
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'AC-3'},
+                    'apply':[
+                        { 'property':'kind', 'value':'ac3' },
+                    ],
+                },
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'DTS'},
+                    'apply':[
+                        { 'property':'kind', 'value':'dts' },
+                    ],
+                },
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'MPEG Audio'},
+                    'apply':[
+                        { 'property':'kind', 'value':'mp3' },
+                    ],
+                },
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'AAC'},
+                    'apply':[
+                        { 'property':'kind', 'value':'aac' },
+                    ],
+                },
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'PCM'},
+                    'apply':[
+                        { 'property':'kind', 'value':'pcm' },
+                    ],
+                },
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'FLAC'},
+                    'apply':[
+                        { 'property':'kind', 'value':'flac' },
+                    ],
+                },
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'Vorbis'},
+                    'apply':[
+                        { 'property':'kind', 'value':'ogg' },
+                    ],
+                },
+            ],
+        },
+        'rule.stream.video.kind':{
+            'name':'Kind for video stream',
+            'provide':set(('kind',)),
+            'branch':[
+                {
+                    'requires':set(('stream kind', 'format')),
+                    'equal':{'stream kind':'video', 'format':'AVC'},
+                    'apply':[
+                        { 'property':'kind', 'value':'h264' },
+                    ],
+                },
+                {
+                    'requires':set(('stream kind', 'format')),
+                    'equal':{'stream kind':'video', 'format':'MPEG-4 Visual'},
+                    'apply':[
+                        { 'property':'kind', 'value':'h263' },
+                    ],
+                },
+            ],
+        },
+        'rule.stream.image.kind':{
+            'name':'Kind for image stream',
+            'provide':set(('kind',)),
+            'branch':[
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'LZ77'},
+                    'apply':[
+                        { 'property':'kind', 'value':'png' },
+                    ],
+                },
+                {
+                    'requires':set(('format')),
+                    'equal':{'format':'JPEG'},
+                    'apply':[
+                        { 'property':'kind', 'value':'jpg' },
+                    ],
+                },
+            ],
+        },
+        'rule.stream.text.kind':{
+            'name':'Kind for text stream',
+            'provide':set(('kind')),
+            'branch':[
+                {
+                    'requires':set(('stream kind', 'format')),
+                    'equal':{'stream kind':'caption', 'format':'Timed text'},
+                    'apply':[
+                        { 'property':'kind', 'value':'tx3g' },
+                    ],
+                },
+                {
+                    'requires':set(('stream kind', 'format')),
+                    'equal':{'stream kind':'caption', 'format':'UTF-8'},
+                    'apply':[
+                        { 'property':'kind', 'value':'srt' },
+                    ],
+                },
+                {
+                    'requires':set(('stream kind', 'format')),
+                    'equal':{'stream kind':'caption', 'format':'ASS'},
+                    'apply':[
+                        { 'property':'kind', 'value':'ass' },
+                    ],
+                },
+                {
+                    'requires':set(('stream kind')),
+                    'equal':{'stream kind':'menu'},
+                    'apply':[
+                        { 'property':'kind', 'value':'chpl' },
+                    ],
+                },
+            ],
+        },
         
         'rule.url.tmdb.movie':{
             'name':'tmdb movie url',
@@ -4848,11 +5094,6 @@ configuration = {
             'definition':ur'(?:(?P<tzinfo>[A-Za-z/]+) )?(?P<year>[0-9]{4})(?:-(?P<month>[0-9]{2})(?:-(?P<day>[0-9]{2})(?: (?P<hour>[0-9]{2}):(?P<minute>[0-9]{2}):(?P<second>[0-9]{2}))?)?)?',
             'flags':re.UNICODE,
         },
-        {
-            'name':'mp4info tag',
-            'definition':u' ([^:]+): (.*)$',
-            'flags':re.UNICODE,
-        },
     ],
     'constant':{
         'empty string':u'',
@@ -4867,7 +5108,6 @@ configuration = {
         {'name':'subler',       'binary':u'SublerCLI', },
         {'name':'mkvmerge',     'binary':u'mkvmerge', },
         {'name':'mkvextract',   'binary':u'mkvextract', },
-        {'name':'mp4info',      'binary':u'mp4info', },
         {'name':'mp4file',      'binary':u'mp4file', },
         {'name':'mp4art',       'binary':u'mp4art', },
         {'name':'mediainfo',    'binary':u'mediainfo', },
@@ -4876,7 +5116,7 @@ configuration = {
     'action':[
         {
             'name':'info',
-            'depend':('mediainfo', 'mp4info',),
+            'depend':('mediainfo',),
         },
         {
             'name':'copy',
