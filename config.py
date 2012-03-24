@@ -1307,6 +1307,81 @@ configuration = {
             'keyword':u'poster_url',
             'type':'unicode',
         },
+        'database':{
+            'name':u'Database',
+            'keyword':u'database',
+            'type':'unicode',
+        },
+        'username':{
+            'name':u'Username',
+            'keyword':u'username',
+            'type':'unicode',
+        },
+        'password':{
+            'name':u'Password',
+            'keyword':u'password',
+            'type':'unicode',
+        },
+        'mongodb url':{
+            'name':u'MongoDB URL',
+            'keyword':u'mongodb_url',
+            'type':'unicode',
+        },
+        'movie id':{
+            'name':u'Movie ID',
+            'keyword':u'movie_id',
+            'type':'int',
+        },
+        'tv show id':{
+            'name':u'TV Show ID',
+            'keyword':u'tv_show_id',
+            'type':'int',
+        },
+        'person id':{
+            'name':u'Person ID',
+            'keyword':u'person_id',
+            'type':'int',
+        },
+        'network id':{
+            'name':u'Network ID',
+            'keyword':u'network_id',
+            'type':'int',
+        },
+        'studio id':{
+            'name':u'Studio ID',
+            'keyword':u'studio_id',
+            'type':'int',
+        },
+        'job id':{
+            'name':u'Job ID',
+            'keyword':u'job_id',
+            'type':'int',
+        },
+        'department id':{
+            'name':u'Department ID',
+            'keyword':u'department_id',
+            'type':'int',
+        },
+        'genre id':{
+            'name':u'Genre ID',
+            'keyword':u'genre_id',
+            'type':'int',
+        },
+        'sort order':{
+            'name':u'Sort Order',
+            'keyword':u'sort_order',
+            'type':'int',
+        },
+        'tv show air day':{
+            'name':u'TV Show Air Day',
+            'keyword':u'tv_show_air_day',
+            'type':'unicode',
+        },
+        'tv show air time':{
+            'name':u'TV Show Air Time',
+            'keyword':u'tv_show_air_time',
+            'type':'time',
+        },
     },
     'enumeration':{
         'frame rate':{
@@ -2012,27 +2087,11 @@ configuration = {
             'synonym':['keyword'],
             'element':{
                 'host':None,
-                'database':{
-                    'name':u'Database',
-                    'keyword':u'database',
-                    'type':'unicode',
-                },
+                'database':None,
                 'port':None,
-                'username':{
-                    'name':u'Username',
-                    'keyword':u'username',
-                    'type':'unicode',
-                },
-                'password':{
-                    'name':u'Password',
-                    'keyword':u'password',
-                    'type':'unicode',
-                },
-                'mongodb url':{
-                    'name':u'MongoDB URL',
-                    'keyword':u'mongodb_url',
-                    'type':'unicode',
-                },
+                'username':None,
+                'password':None,
+                'mongodb url':None,
             },
             'rule':[
                 'rule.mongodb.url',
@@ -2496,6 +2555,7 @@ configuration = {
                 'encoded date':{
                     'mediainfo':'Encoded_Date',
                 },
+                'primary':None,
             },
             'rule':[
                 'rule.stream.default.position',
@@ -2615,6 +2675,7 @@ configuration = {
                 'rule.stream.default.position',
                 'rule.stream.default.id',
                 'rule.stream.video.kind',
+                'rule.stream.default.primary',
             ],
         },
         'resource.crawl.stream.text':{
@@ -2680,11 +2741,13 @@ configuration = {
                 'encoded date':{
                     'mediainfo':'Encoded_Date',
                 },
+                'primary':None,
             },
             'rule':[
                 'rule.stream.default.position',
                 'rule.stream.default.id',
                 'rule.stream.text.kind',
+                'rule.stream.default.primary',
             ],
         },
         'resource.crawl.stream.image':{
@@ -2755,11 +2818,13 @@ configuration = {
                 'encoded date':{
                     'mediainfo':'Encoded_Date',
                 },
+                'primary':None,
             },
             'rule':[
                 'rule.stream.default.position',
                 'rule.stream.default.id',
                 'rule.stream.image.kind',
+                'rule.stream.default.primary',
             ],
         },
         
@@ -2772,21 +2837,9 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'movie id':{
-                    'name':u'Movie ID',
-                    'keyword':u'movie_id',
-                    'type':'int',
-                },
-                'imdb movie id':{
-                    'name':u'IMDb Movie ID',
-                    'keyword':u'imdb_movie_id',
-                    'type':'unicode',
-                },
-                'tmdb movie id':{
-                    'name':u'TMDb Movie ID',
-                    'keyword':u'tmdb_movie_id',
-                    'type':'int',
-                },
+                'movie id':None,
+                'imdb movie id':None,
+                'tmdb movie id':None,
             },
         },
         'knowlege.tvshow.show':{
@@ -2798,11 +2851,7 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'tv show id':{
-                    'name':u'TV Show ID',
-                    'keyword':u'tv_show_id',
-                    'type':'int',
-                },
+                'tv show id':None,
             },
         },
         'knowlege.tvshow.season':{
@@ -2814,16 +2863,8 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'tv show id':{
-                    'name':u'TV Show ID',
-                    'keyword':u'tv_show_id',
-                    'type':'int',
-                },
-                'tv season':{
-                    'name':u'TV Season',
-                    'keyword':u'tv_season',
-                    'type':'int',
-                },
+                'tv show id':None,
+                'tv season':None,
             },
         },
         'knowlege.tvshow.episode':{
@@ -2835,21 +2876,9 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'tv show id':{
-                    'name':u'TV Show ID',
-                    'keyword':u'tv_show_id',
-                    'type':'int',
-                },
-                'tv season':{
-                    'name':u'TV Season',
-                    'keyword':u'tv_season',
-                    'type':'int',
-                },
-                'tv episode':{
-                    'name':u'TV Episode',
-                    'keyword':u'tv_episode',
-                    'type':'int',
-                },
+                'tv show id':None,
+                'tv season':None,
+                'tv episode':None,
             },
         },
         'knowlege.person':{
@@ -2861,11 +2890,7 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'person id':{
-                    'name':u'Person ID',
-                    'keyword':u'person_id',
-                    'type':'int',
-                },
+                'person id':None,
             },
         },
         'knowlege.network':{
@@ -2877,11 +2902,7 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'network id':{
-                    'name':u'Network ID',
-                    'keyword':u'network_id',
-                    'type':'int',
-                },
+                'network id':None,
             },
         },
         'knowlege.studio':{
@@ -2893,11 +2914,7 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'studio id':{
-                    'name':u'Studio ID',
-                    'keyword':u'studio_id',
-                    'type':'int',
-                },
+                'studio id':None,
             },
         },
         'knowlege.job':{
@@ -2909,11 +2926,7 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'job id':{
-                    'name':u'Job ID',
-                    'keyword':u'job_id',
-                    'type':'int',
-                },
+                'job id':None,
             },
         },
         'knowlege.department':{
@@ -2925,11 +2938,7 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'department id':{
-                    'name':u'Department ID',
-                    'keyword':u'department_id',
-                    'type':'int',
-                },
+                'department id':None,
             },
         },
         'knowlege.genre':{
@@ -2941,11 +2950,7 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'genre id':{
-                    'name':u'Genre ID',
-                    'keyword':u'genre_id',
-                    'type':'int',
-                },
+                'genre id':None,
             },
         },
         'tmdb.movie':{
@@ -3105,9 +3110,6 @@ configuration = {
                     'tvdb':'Role',
                 },
                 'sort order':{
-                    'name':u'Sort Order',
-                    'keyword':u'sort_order',
-                    'type':'int',
                     'tvdb':'SortOrder',
                 },
             },
@@ -3253,16 +3255,10 @@ configuration = {
                     'tvdb':'fanart',
                 },
                 'tv show air day':{
-                    'name':u'TV Show Air Day',
-                    'keyword':u'tv_show_air_day',
-                    'type':'unicode',
                     'tvdb':'Airs_DayOfWeek',
                     'enabled':False,
                 },
                 'tv show air time':{
-                    'name':u'TV Show Air Time',
-                    'keyword':u'tv_show_air_time',
-                    'type':'time',
                     'tvdb':'Airs_Time',
                     'enabled':False,
                 },
@@ -4201,6 +4197,17 @@ configuration = {
                 {
                     'apply':[
                         {'property':'stream position', 'value':1,},
+                    ],
+                },
+            ],
+        },
+        'rule.stream.default.primary':{
+            'name':'Default stream position',
+            'provide':set(('primary',)),
+            'branch':[
+                {
+                    'apply':[
+                        {'property':'primary', 'value':False },
                     ],
                 },
             ],

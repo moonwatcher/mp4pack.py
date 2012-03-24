@@ -207,7 +207,7 @@ def main():
     queue = Queue(env)
     
     #test(env)
-    test2(env)
+    #test2(env)
     
     job = Job(queue, env.ontology)
     job.open()
