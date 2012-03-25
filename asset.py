@@ -12,26 +12,21 @@ from crawler import Crawler
 
 class AssetCache(object):
     def __init__(self, env):
-        self.log = logging.getLogger('Cache')
+        self.log = logging.getLogger('cache')
         self.env = env
         self.assets = {}
     
     
-    @property
-    def em(self):
-        return self.env.em
-    
-    
     def find_asset(self, ontology):
         result = None
-        if ontology and 'asset id' in ontology:
-            if ontology['asset id'] in self.assets:
-                result = self.assets[ontology['asset id']]
+        if ontology and 'asset uri' in ontology:
+            if ontology['asset uri'] in self.assets:
+                result = self.assets[ontology['asset uri']]
             else:
                 result = Asset(self, ontology)
                 if result.valid:
                     result.load()
-                    self.assets[ontology['asset id']] = result
+                    self.assets[ontology['asset uri']] = result
                 else:
                     result.unload()
                     result = None
@@ -63,7 +58,7 @@ class Asset(object):
     
     
     def __unicode__(self):
-        return unicode(self.ontology['asset id'])
+        return unicode(self.ontology['asset uri'])
     
     
     @property
@@ -72,13 +67,8 @@ class Asset(object):
     
     
     @property
-    def em(self):
-        return self.cahce.em
-    
-    
-    @property
     def valid(self):
-        return self.ontology is not None and 'asset id' in self.ontology
+        return self.ontology is not None and 'asset uri' in self.ontology
     
     
     @property
@@ -137,7 +127,7 @@ class Asset(object):
             del o['url']
             result = []
             self.log.debug(u'Scanning %s for resources related to %s', self.env.host, unicode(self))
-            for volume in self.env.repository[self.env.host]['volume'].values():
+            for volume in self.env.repository[self.env.host].volume.element.values():
                 if volume['scan']:
                     o['volume'] = volume['name']
                     for kind in self.env.kind.values():
@@ -169,9 +159,9 @@ class Asset(object):
     
     def find(self, ontology):
         result = None
-        if 'resource id' in ontology:
-            if ontology['resource id'] in self.resource:
-                result = self.resource[ontology['resource id']]
+        if 'resource uri' in ontology:
+            if ontology['resource uri'] in self.resource:
+                result = self.resource[ontology['resource uri']]
             else:
                 if 'container' in ontology:
                     if ontology['container'] == 'mp4':
@@ -190,7 +180,7 @@ class Asset(object):
                         result = Avi(self, ontology)
                         
                     if result:
-                        self.resource[ontology['resource id']] = result
+                        self.resource[ontology['resource uri']] = result
                 else:
                     result = None
         return result
@@ -237,7 +227,7 @@ class Resource(object):
     
     
     def __unicode__(self):
-        return unicode(self.ontology['resource id'])
+        return unicode(self.ontology['resource uri'])
     
     
     
@@ -259,7 +249,7 @@ class Resource(object):
     
     @property
     def valid(self):
-        return self.ontology is not None and 'resource id' in self.ontology
+        return self.ontology is not None and 'resource uri' in self.ontology
     
     
     @property
@@ -299,8 +289,8 @@ class Resource(object):
     def info(self):
         if self._info is None:
             if self.valid:
-                if self.node and 'tag' in self.node:
-                    self._info = Ontology(self.env, 'resource.crawl.meta', self.node['tag'])
+                if self.node and 'info' in self.node:
+                    self._info = Ontology(self.env, 'resource.crawl.meta', self.node['info'])
                 else:
                     self._info = Ontology(self.env, 'resource.file.url')
         return self._info
@@ -311,8 +301,8 @@ class Resource(object):
         if self._track is None:
             if self.valid:
                 self._track = []
-                if self.node and 'track' in self.node:
-                    for track in self.node['track']:
+                if self.node and 'stream' in self.node:
+                    for track in self.node['stream']:
                         self._track.append(Ontology(self.env, track))
         return self._track
     
@@ -355,14 +345,14 @@ class Resource(object):
     def flush(self):
         if self.volatile:
             if self._info is not None:
-                self.node['tag'] = self._info.node
+                self.node['info'] = self._info.node
                 self._info = None
                 
             if self._track is not None:
                 tracks = []
                 for track in self._track:
                     tracks.append(track.node)
-                self.node['track'] = tracks
+                self.node['stream'] = tracks
                 self._track = None
                 
             if self._hint is not None:
@@ -836,7 +826,7 @@ class MP4(AudioVideoContainer):
     def tag(self, task):
         AudioVideoContainer.tag(self, task)
         if self.meta:
-            supported = [ k for k in self.meta.keys() if self.env.prototype['crawl']['tag'].find('subler', k) is not None ]
+            supported = [ k for k in self.meta.keys() if self.env.prototype['crawl']['info'].find('subler', k) is not None ]
             missing = [ k for k in supported if k not in self.info ]
             outdated = [ k for k in supported if self.info[k] != self.meta[k] ]
             
@@ -865,7 +855,7 @@ class MP4(AudioVideoContainer):
             
         if update:
             q = u''.join([self.env.encode_subler_key_value(k, update[k]) for k in sorted(update)])
-            message = u'Update tags: {0} --> {1}'.format(u', '.join([self.env.prototype['crawl']['tag'].find('name', k).node['print'] for k in sorted(update)]), unicode(self))
+            message = u'Update tags: {0} --> {1}'.format(u', '.join([self.env.prototype['crawl']['info'].find('name', k).node['print'] for k in sorted(update)]), unicode(self))
             command = self.env.initialize_command('subler', self.log)
             if command:
                 command.extend([u'-o', self.path, u'-t', q])

@@ -16,7 +16,7 @@ from model import Transform, Query
 
 class Queue(object):
     def __init__(self, env):
-        self.log = logging.getLogger('Queue')
+        self.log = logging.getLogger('queue')
         self.env = env
         self.cache = AssetCache(env)
         self.job = []
@@ -24,8 +24,8 @@ class Queue(object):
     
     
     @property
-    def em(self):
-        return self.env.em
+    def length(self):
+        return len(self.job)
     
     
     def load(self):
@@ -35,11 +35,6 @@ class Queue(object):
     def submit(self, job):
         if job and job.valid:
             self.job.append(job)
-    
-    
-    @property
-    def length(self):
-        return len(self.job)
     
     
     def next(self):
@@ -59,7 +54,6 @@ class Job(object):
         self.ontology = ontology
         self.uuid = uuid.uuid4()
         self._include_filter = None
-        self.target = []
         self.task = []
         self.node = {
             'command':self.ontology.node,
@@ -82,11 +76,6 @@ class Job(object):
         return self.queue.cache
     
     
-    @property
-    def profile(self):
-        return self.env.profile[self.ontology['profile']]
-    
-    
     def load(self):
         if self.valid:
             self._load_filter()
@@ -96,21 +85,20 @@ class Job(object):
         if url:
             ontology = self.env.parse_url(url)
             if ontology:
-                self.target.append(ontology)
+                self.task.append(Task(self, ontology))
     
     
     def scan(self):
         result = []
         if self.ontology['scan']:
-            for p in self.ontology['scan']:
-                if os.path.exists(p):
-                    p = os.path.abspath(p)
-                    paths = self._scan_path(p, self.ontology['recursive'])
-                    self.log.debug(u'Found %d files in %s', len(paths), p)
-                    result.extend(paths)
+            for path in self.ontology['scan']:
+                if os.path.exists(path):
+                    path = os.path.realpath(os.path.abspath(os.path.expanduser(os.path.expandvars(path))))
+                    files = self._scan_path(path, self.ontology['recursive'])
+                    self.log.debug(u'Found %d files in %s', len(files), path)
+                    result.extend(files)
                 else:
-                    self.log.error(u'Path %s does not exist', p)
-                    
+                    self.log.error(u'Path %s does not exist', path)
         if result:
             result = sorted(set(result))
             self.log.debug(u'Found %d files to process', len(result))
@@ -121,10 +109,8 @@ class Job(object):
     def run(self):
         start = datetime.now()
         self.node['start'] = unicode(start)
-        
         self.scan()
-        for o in self.target:
-            task = Task(self, o)
+        for task in self.task:
             if task.valid:
                 task.open()
                 task.run()
@@ -154,31 +140,23 @@ class Job(object):
     
     
     def _filter(self, path):
-        return path and \
-        os.path.basename(path)[0] != u'.' and ( \
-        self._include_filter is None or \
-        self._include_filter.search(path) != None )
+        return path and os.path.basename(path)[0] != self.env.constant['dot'] and \
+        ( self._include_filter is None or self._include_filter.search(path) != None )
     
     
     def _scan_path(self, path, recursive, depth=1):
         result = []
         if os.path.isfile(path):
-            dir_name, file_name = os.path.split(path)
-            if self._filter(file_name):
-                # Converting the path to a canonic form
-                # 1. The canonic form will always be absolute
-                # 2. If the path is in one of the defined volumes
-                # the path to the volume is replaced with the canonic volume path
-                # So either a canonic path has prefix that matches some volume
-                # or its outside the repository altogether
-                canonic = self.env.canonic_path_for(path)
-                if canonic: result.append(canonic)
+            dname, fname = os.path.split(path)
+            if self._filter(fname):
+                result.append(os.path.realpath(path))
                 
         # Recursively scan decendent paths and aggregate the results
-        elif (recursive or depth > 0) and os.path.isdir(path) and os.path.basename(path)[0] != u'.':
-            for p in os.listdir(path):
-                p = os.path.abspath(os.path.join(path,p))
-                result.extend(self._scan_path(p, recursive, depth - 1))
+        elif (recursive or depth > 0) and os.path.isdir(path) and \
+        os.path.basename(path)[0] != self.env.constant['dot']:
+            for dnext in os.listdir(path):
+                dnext = os.path.abspath(os.path.join(path,dnext))
+                result.extend(self._scan_path(dnext, recursive, depth - 1))
         return result
     
     
@@ -190,9 +168,9 @@ class Job(object):
 class Task(object):
     def __init__(self, job, ontology):
         self.log = logging.getLogger('task')
-        self.node = None
         self.job = job
         self.ontology = ontology
+        self.node = None
         self.uuid = uuid.uuid4()
         self._resource = None
         self.product = None

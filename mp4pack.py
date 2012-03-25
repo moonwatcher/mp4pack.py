@@ -169,10 +169,10 @@ def test(env):
 def test2(env):
     from crawler import Crawler
     paths = [
-        #'file://yoshi/Users/lg/Downloads/samurai jack s01e07 jack and the three blind archers.m4v',
+        'file://yoshi/Users/lg/Downloads/samurai jack s01e07 jack and the three blind archers.m4v',
         'file://multivac/net/vito/media/tlv/eta/movie/mkv/1080/IMDbtt0076759 star wars episode iv - a new hope.mkv',
-        #'file://multivac/net/multivac/Volumes/alphaville/alpha/tvshow/srt/clean/3rd rock from the sun/1/eng/3rd rock from the sun s01e02 post nasal dick.srt',
-        #'file://yoshi/Users/lg/Downloads/mpk/pool/epsilon/tvshow/dts/original/weeds/7/en/weeds s07e01 bags.dts',
+        'file://multivac/net/multivac/Volumes/alphaville/alpha/tvshow/srt/clean/3rd rock from the sun/1/eng/3rd rock from the sun s01e02 post nasal dick.srt',
+        'file://yoshi/Users/lg/Downloads/mpk/pool/epsilon/tvshow/dts/original/weeds/7/en/weeds s07e01 bags.dts',
     ]
     import json
     import datetime
@@ -182,8 +182,9 @@ def test2(env):
         o = env.parse_url(path)
         c = Crawler(o)
         n = c.node
-        
-        print json.dumps(n, sort_keys=True, indent=4,  default=dthandler)
+        print o['resource uri']
+        print o['asset uri']
+        #print json.dumps(n, sort_keys=True, indent=4,  default=dthandler)
 
 
 def main():
