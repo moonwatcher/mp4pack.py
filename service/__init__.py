@@ -64,6 +64,7 @@ class ResourceHandler(object):
         
         for name, branch in self.node['branch'].iteritems():
             branch['name'] = name
+            # branch['persistant'] = 'collection' in branch
             for match in branch['match']:
                 match['pattern'] = re.compile(match['filter'])
             self.branch[name] = branch
@@ -164,8 +165,9 @@ class ResourceHandler(object):
     
     def store(self, query):
         for entry in query['result']:
+            
+            # Build all the resolvable URIs
             entry[u'uri'] = []
-            # build all the resolvable URIs
             for r in entry['branch']['resolvable']:
                 try:
                     entry['uri'].append(r['format'].format(**entry['parameter']))
@@ -190,5 +192,57 @@ class ResourceHandler(object):
             # save the entry to db
             self.log.debug(u'Storing %s', uri)
             collection.save(record)
+    
+    
+    
+    
+    
+    def locate(self, uris, repository):
+        result = None
+        taken = False
+        for branch in self.branch.values():
+            for uri in uris:
+                for match in branch['match']:
+                    m = match['pattern'].search(uri)
+                    if m is not None:
+                        taken = True
+                        if 'collection' in branch:
+                            collection = repository.database[branch['collection']]
+                            result = collection.find_one({u'head.uri':uri})
+                            if result is not None: break
+                if result is not None: break
+            if taken: break
+        return result
+    
+    
+    def save(self, node, repository):
+        result = None
+        taken = False
+        for uri in node['head']['uri']:
+            for branch in self.branch.values():
+                for match in branch['match']:
+                    m = match['pattern'].search(uri)
+                    if m is not None:
+                        taken = True
+                        # Only branches with a collection definition are resolvable
+                        if 'collection' in branch:
+                            now = datetime.utcnow()
+                            collection = repository.database[branch['collection']]
+                            current = collection.find_one({u'head.uri':uri})
+                            
+                            if current is None:
+                                current = { u'head':{ u'created':now, }, }
+                            current[u'body'] = current[u'body']
+                            
+                            # always update the modified field
+                            current[u'head'][u'modified'] = now
+                            
+                            # save the entry to db
+                            self.log.debug(u'Saving %s', uri)
+                            collection.save(current)
+                        break
+                if taken: break
+        return result
+        
     
 

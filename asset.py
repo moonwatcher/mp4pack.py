@@ -85,7 +85,7 @@ class Asset(object):
     def load(self):
         if self.valid:
             self.scan()
-            # self.node = self.em.find_asset(self.ontology)
+            self.node = self.env.resolver.resolve(self.ontology['asset uri'])
     
     
     def unload(self):
@@ -102,14 +102,14 @@ class Asset(object):
         if self.managed:
             for resource in self.resource.values():
                 if resource.orphan:
-                    if resource.ontology['uri'] in self.node['entity']['resource']:
-                        del self.node['entity']['resource'][resource.ontology['uri']]
+                    if resource.ontology['resource uri'] in self.node['body']['resource']:
+                        del self.node['body']['resource'][resource.ontology['resource uri']]
                         self.log.debug(u'Dropped record for %s', unicode(resource))
                         self.volatile = True
                         
                 elif resource.volatile and resource.indexed:
                     resource.flush()
-                    self.node['entity']['resource'][resource.ontology['uri']] = resource.node
+                    self.node['body']['resource'][resource.ontology['resource uri']] = resource.node
                     self.log.debug(u'Flushed record for %s', unicode(resource))
                     self.volatile = True
     

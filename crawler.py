@@ -73,16 +73,14 @@ class Crawler(object):
         if self.info is None:
             self.stream = []
             normal = {
-                'info':None,
-                'image':None,
+                'info':[ o for o in self._stream if o['stream type'] == u'general' ],
+                'image':[ o for o in self._stream if o['stream type'] == u'image' ],
                 'audio':[],
                 'video':[],
                 'caption':[],
                 'menu':[],
                 'preview':[],
             }
-            normal['info'] = [ o for o in self._stream if o['stream type'] == u'general' ]
-            normal['image'] = [ o for o in self._stream if o['stream type'] == u'image' ]
             
             # There should always be exactly one info stream
             if normal['info']:
@@ -98,7 +96,7 @@ class Crawler(object):
                 if 'channel count' in o:
                     o['channels'] = min(o['channel count'])
                     
-            # if the text stream format is 'Apple text' it is a chapter track in mp4
+            # If the text stream format is 'Apple text' it is a chapter track in mp4,
             # otherwise its a caption stream
             for o in [ o for o in self._stream if o['stream type'] == u'text' ]:
                 if o['format'] == u'Apple text':
@@ -106,7 +104,7 @@ class Crawler(object):
                 else:
                     normal['caption'].append(o)
                     
-            # break the video streams into normal video and chapter preview images
+            # Break the video streams into normal video and chapter preview images
             # by relative portion of the stream and locate the primary
             primary = None
             for o in [ o for o in self._stream if o['stream type'] == u'video' ]:
@@ -116,8 +114,9 @@ class Crawler(object):
                     normal['video'].append(o)
                     if primary is None or o['stream portion'] > primary['stream portion']:
                         primary = o
+                        
+            # If a primary video stream is found set the dimensions on the info node
             if primary:
-                # If we have a primary video stream, set the dimensions on the info node
                 primary['primary'] = True
                 self.info['width'] = float(primary['width'])
                 if primary['display aspect ratio'] >= self.env.constant['playback aspect ration']:
@@ -135,11 +134,13 @@ class Crawler(object):
                 normal['menu'] = [o]
             else: normal['menu'] = []
             
+            # Finally, assign the stream kind by the aggregation
             for k,v in normal.iteritems():
                 for o in v:
                     o['stream kind'] = k
                     self.stream.append(o)
                     
+            # Clean up
             self._stream = None
             self._menu = None
     
@@ -176,8 +177,7 @@ class Crawler(object):
     def _add_menu(self, menu):
         if menu is not None:
             menu.normalize()
-            if menu.valid:
-                self._menu.append(menu)
+            if menu.valid: self._menu.append(menu)
     
     
     def _load_ogg_chapters(self):

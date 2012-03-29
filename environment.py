@@ -33,11 +33,11 @@ class Environment(object):
             'expression':{},
             'constant':{},
             'command':{},
-            'action':{},
             'kind':{},
             'profile':{},
             'repository':{},
             'subtitle filter':{},
+            'interface':{},
         }
         
         self._resolver = None
@@ -145,8 +145,8 @@ class Environment(object):
     
     
     @property
-    def action(self):
-        return self.state['action']
+    def interface(self):
+        return self.state['interface']
     
     
     @property
@@ -217,10 +217,6 @@ class Environment(object):
                 self.command[e['name']] = e
                 self.which(e)
                 
-        if 'action' in node:
-            for e in node['action']:
-                self.action[e['name']] = e
-                
         if 'kind' in node:
             for k,e in node['kind'].iteritems():
                 e['name'] = k
@@ -244,6 +240,11 @@ class Environment(object):
                 e['name'] = k
                 self.subtitle_filter[k] = e
                 
+        if 'interface' in node:
+            for k,e in node['interface'].iteritems():
+                e['key'] = k
+                self.interface[k] = e
+        
         # if 'available' in node:
         # if 'report' in node:
         # if 'format' in node:
@@ -265,13 +266,13 @@ class Environment(object):
         self.load_external(self.system['conf'])
     
     
-    def load_interactive(self, arguments):
-        self.ontology = Ontology(self, 'system.job', arguments)
+    def load_interactive(self, ontology):
+        self.ontology = ontology
         
         # Load conf file from command line argument
-        if 'conf' in self.ontology:
-            self.ontology['conf'] = os.path.realpath(os.path.expanduser(os.path.expandvars(self.ontology['conf'])))
-            self.load_external(self.ontology['conf'])
+        if 'configuration path' in self.ontology:
+            self.ontology['configuration path'] = os.path.realpath(os.path.expanduser(os.path.expandvars(self.ontology['configuration path'])))
+            self.load_external(self.ontology['configuration path'])
             
         # Override some value from command line
         for e in ('domain', 'host', 'language'):
@@ -369,6 +370,7 @@ class Environment(object):
     
     
     # Path manipulation
+    
     def parse_url(self, url):
         result = None
         if url:
@@ -456,6 +458,7 @@ class Environment(object):
     
     
     # Command execution
+    
     def initialize_command(self, command, log):
         if command in self.command and self.command[command]['path']:
             return [ self.command[command]['path'] ]
