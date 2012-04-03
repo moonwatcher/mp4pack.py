@@ -27,6 +27,7 @@ class CommandLineParser(object):
             parser.add_argument(*node['flag'], **node['parameter'])
         
         
+        # Add the enumeration constrains
         for argument in self.node['prototype'].values():
             if 'dest' in argument['parameter']:
                 archetype = self.env.archetype[argument['parameter']['dest']]
@@ -34,15 +35,18 @@ class CommandLineParser(object):
                     enumeration = self.env.enumeration[archetype['enumeration']]
                     argument['parameter']['choices'] = enumeration.synonym.keys()
                     
+        # Add global arguments
         for argument in self.node['global']['argument']:
             add_argument(self.parser, argument)
             
+        # Add individual command sections
         s = self.parser.add_subparsers(dest='action')
         for action in self.node['action']:
             action_parser = s.add_parser(**action['instruction'])
             for argument in action['argument']:
                 add_argument(action_parser, argument)
                 
+            # Add groups of arguments, if any.
             if 'group' in action:
                 for group in action['group']:
                     group_parser = action_parser.add_argument_group(**group['instruction'])
@@ -64,14 +68,17 @@ def main():
     logging.basicConfig()
     logging.getLogger().setLevel(logging.DEBUG)
     
-    # Initialize the environment
+    # Initialize an environment
     env = Environment()
     
-    # Decode command line arguments
+    # Parser for the command line
     cli = CommandLineParser(env, env.interface['default'])
     
     # Load the interactive arguments into the environment
     env.load_interactive(cli.parse())
+    
+    # Discard the parser
+    cli = None
     
     # Override the initial log level
     logging.getLogger().setLevel(env.ontology['verbosity'])
@@ -86,7 +93,11 @@ def main():
     job.open()
     job.run()
     job.close()
-    print job.node
+    
+    import json
+    import datetime
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
+    print json.dumps(job.node, sort_keys=True, indent=4,  default=dthandler)
 
 
 def test(env):

@@ -49,7 +49,7 @@ class AssetCache(object):
 class Asset(object):
     def __init__(self, cache, ontology):
         self.log = logging.getLogger('asset')
-        self.cahce = cache
+        self.cache = cache
         self.ontology = ontology
         self.node = None
         self.volatile = False
@@ -63,7 +63,7 @@ class Asset(object):
     
     @property
     def env(self):
-        return self.cahce.env
+        return self.cache.env
     
     
     @property
@@ -243,7 +243,7 @@ class Resource(object):
     
     @property
     def cache(self):
-        return self.asset.cahce
+        return self.asset.cache
     
     
     
@@ -445,6 +445,7 @@ class Resource(object):
                 self.log.error(u'md5 mismatch: %s is not %s for %s', source_md5, dest_md5, unicode(self))
         return result
     
+
 
 
 class Container(Resource):

@@ -63,11 +63,12 @@ class ResourceHandler(object):
         self.branch = {}
         
         for name, branch in self.node['branch'].iteritems():
-            branch['name'] = name
-            # branch['persistant'] = 'collection' in branch
-            for match in branch['match']:
-                match['pattern'] = re.compile(match['filter'])
-            self.branch[name] = branch
+            if 'namespace' in branch:
+                branch['name'] = name
+                branch['persistant'] = 'collection' in branch
+                for match in branch['match']:
+                    match['pattern'] = re.compile(match['filter'])
+                self.branch[name] = branch
     
     
     @property
@@ -92,8 +93,7 @@ class ResourceHandler(object):
                 m = match['pattern'].search(uri)
                 if m is not None:
                     taken = True
-                    # Only branches with a collection definition are resolvable
-                    if 'collection' in branch:
+                    if branch['persistant']:
                         collection = repository.database[branch['collection']]
                         result = collection.find_one({u'head.uri':uri})
                         
@@ -113,13 +113,42 @@ class ResourceHandler(object):
                 m = match['pattern'].search(uri)
                 if m is not None:
                     taken = True
-                    # Only branches with a collection definition are resolvable
-                    if 'collection' in branch:
+                    if branch['persistant']:
                         self.log.debug(u'Dropping %s', uri)
                         collection = repository.database[branch['collection']]
                         result = collection.remove({u'head.uri':uri})
                     break
             if taken: break
+    
+    
+    def save(self, node, repository):
+        result = None
+        taken = False
+        for branch in self.branch.values():
+            for uri in node['head']['uri']:
+                for match in branch['match']:
+                    m = match['pattern'].search(uri)
+                    if m is not None:
+                        taken = True
+                        if branch['persistant']:
+                            collection = repository.database[branch['collection']]
+                            result = collection.find_one({u'head.uri':uri})
+                            if result is not None: break
+                if result is not None: break
+                
+            if taken:
+                now = datetime.utcnow()
+                if result is None:
+                    result = { u'head':{ u'created':now, }, }
+                result[u'body'] = node[u'body']
+                
+                # always update the modified field
+                result[u'head'][u'modified'] = now
+                
+                # save the entry to db
+                collection.save(result)
+                break
+        return result
     
     
     def cache(self, uri, repository):
@@ -137,18 +166,17 @@ class ResourceHandler(object):
                         'result':[],
                     }
                     
-                    # extract and cast parameters
-                    if 'namespace' in branch:
-                        query['parameter'] = Ontology(self.env, branch['namespace'])
-                        for k,v in m.groupdict().iteritems():
-                            query['parameter'].decode(k,v)
-                            
-                        if 'api key' in self.node:
-                            query['parameter']['api key'] = self.node['api key']
-                            
-                        # calculate the remote url
-                        query['remote url'] = match['remote'].format(**query['parameter'])
+                    # populate the parameters
+                    query['parameter'] = Ontology(self.env, branch['namespace'])
+                    for k,v in m.groupdict().iteritems():
+                        query['parameter'].decode(k,v)
                         
+                    if 'api key' in self.node:
+                        query['parameter']['api key'] = self.node['api key']
+                        
+                    # calculate the remote url
+                    query['remote url'] = match['remote'].format(**query['parameter'])
+                    
                     self.fetch(query)
                     self.parse(query)
                     self.store(query)
@@ -192,57 +220,5 @@ class ResourceHandler(object):
             # save the entry to db
             self.log.debug(u'Storing %s', uri)
             collection.save(record)
-    
-    
-    
-    
-    
-    def locate(self, uris, repository):
-        result = None
-        taken = False
-        for branch in self.branch.values():
-            for uri in uris:
-                for match in branch['match']:
-                    m = match['pattern'].search(uri)
-                    if m is not None:
-                        taken = True
-                        if 'collection' in branch:
-                            collection = repository.database[branch['collection']]
-                            result = collection.find_one({u'head.uri':uri})
-                            if result is not None: break
-                if result is not None: break
-            if taken: break
-        return result
-    
-    
-    def save(self, node, repository):
-        result = None
-        taken = False
-        for uri in node['head']['uri']:
-            for branch in self.branch.values():
-                for match in branch['match']:
-                    m = match['pattern'].search(uri)
-                    if m is not None:
-                        taken = True
-                        # Only branches with a collection definition are resolvable
-                        if 'collection' in branch:
-                            now = datetime.utcnow()
-                            collection = repository.database[branch['collection']]
-                            current = collection.find_one({u'head.uri':uri})
-                            
-                            if current is None:
-                                current = { u'head':{ u'created':now, }, }
-                            current[u'body'] = current[u'body']
-                            
-                            # always update the modified field
-                            current[u'head'][u'modified'] = now
-                            
-                            # save the entry to db
-                            self.log.debug(u'Saving %s', uri)
-                            collection.save(current)
-                        break
-                if taken: break
-        return result
-        
     
 
