@@ -81,7 +81,7 @@ class TVDbHandler(ResourceHandler):
                             entry[u'body'].append(o.node)
                             
                         if entry[u'body']:
-                            entry[u'parameter'] = Ontology.project(branch['namespace'], query['parameter'])
+                            entry[u'parameter'] = query['parameter'].project(branch['namespace'])
                             query[u'result'].append(entry)
                             
                     # Treat every element as an individual record
@@ -93,7 +93,7 @@ class TVDbHandler(ResourceHandler):
                                 
                             entry = {
                                 u'branch':branch,
-                                u'parameter':Ontology.project(branch['namespace'], query['parameter']),
+                                u'parameter':query['parameter'].project(branch['namespace']),
                                 u'body':o.node,
                             }
                             

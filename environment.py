@@ -526,6 +526,13 @@ class Environment(object):
         self.universal_detector.close()
         return self.universal_detector.result
     
+    
+    def default_json_handler(self, o):
+        result = None
+        if isinstance(o, datetime):
+            result = o.isoformat()
+        return result
+    
 
 
 class Repository(object):

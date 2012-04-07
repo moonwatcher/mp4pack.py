@@ -605,9 +605,9 @@ configuration = {
             'keyword':u'tvdb_person_id',
             'type':'int',
         },
-        'tvdb poster id':{
-            'name':u'TVDb poster ID',
-            'keyword':u'tvdb_poster_id',
+        'tvdb image id':{
+            'name':u'TVDb image ID',
+            'keyword':u'tvdb_image_id',
             'type':'int',
         },
         'imdb tv show id':{
@@ -643,6 +643,16 @@ configuration = {
         'tmdb company id':{
             'name':u'TMDb company ID',
             'keyword':u'tmdb_company_id',
+            'type':'int',
+        },
+        'tmdb genre id':{
+            'name':u'TMDb genre ID',
+            'keyword':u'tmdb_genre_id',
+            'type':'int',
+        },
+        'tmdb keyword id':{
+            'name':u'TMDb keyword ID',
+            'keyword':u'tmdb_keyword_id',
             'type':'int',
         },
         'zap2it tv show id':{
@@ -1319,9 +1329,9 @@ configuration = {
             'keyword':u'character',
             'type':'unicode',
         },
-        'poster url':{
-            'name':u'Poster URL',
-            'keyword':u'poster_url',
+        'image url':{
+            'name':u'Image URL',
+            'keyword':u'image_url',
             'type':'unicode',
         },
         'database':{
@@ -1510,7 +1520,7 @@ configuration = {
             'atom':'©pub',
             'enable':False,
         },
-        'Sound Engineer':{
+        'sound engineer':{
             'name':u'Sound engineer',
             'description':u'The name of the person doing soundengineering',
             'keyword':'sound_engineer',
@@ -1629,6 +1639,12 @@ configuration = {
         'scan path':{
             'name':u'Scan path',
             'keyword':u'scan_path',
+            'type':'unicode',
+            'plural':'list',
+        },
+        'uris':{
+            'name':u'URIs',
+            'keyword':u'uris',
             'type':'unicode',
             'plural':'list',
         },
@@ -2397,6 +2413,9 @@ configuration = {
                 'scan path':{
                     'auto cast':False,
                 },
+                'uris':{
+                    'auto cast':False,
+                },
                 'quantizer':None,
                 'width':None,
                 'crop':None,
@@ -2419,8 +2438,83 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
+                'domain':None,
                 'host':None,
+                'volume':None,
+                'profile':None,
+                'recursive':{
+                    'auto cast':False,
+                },
+                'sync':{
+                    'auto cast':False,
+                },
+                'crawl':{
+                    'auto cast':False,
+                },
+                'download':{
+                    'auto cast':False,
+                },
+                'overwrite':{
+                    'auto cast':False,
+                },
+                'kind':None,
+                'inclusion':None,
+                'exclusion':None,
                 'language':None,
+                'scan path':{
+                    'auto cast':False,
+                },
+                'uris':{
+                    'auto cast':False,
+                },
+                'quantizer':None,
+                'width':None,
+                'crop':None,
+                'time shift':None,
+                'source frame rate':None,
+                'target frame rate':None,
+                'debug':{
+                    'auto cast':False,
+                },
+                'action':None,
+            },
+        },
+        'system.task':{
+            'default':{
+                'keyword':None,
+                'plural':None,
+                'auto cast':True,
+            },
+            'synonym':['keyword'],
+            'element':{
+                'domain':None,
+                'host':None,
+                'volume':None,
+                'profile':None,
+                'sync':{
+                    'auto cast':False,
+                },
+                'crawl':{
+                    'auto cast':False,
+                },
+                'download':{
+                    'auto cast':False,
+                },
+                'overwrite':{
+                    'auto cast':False,
+                },
+                'kind':None,
+                'language':None,
+                'quantizer':None,
+                'width':None,
+                'crop':None,
+                'time shift':None,
+                'source frame rate':None,
+                'target frame rate':None,
+                'debug':{
+                    'auto cast':False,
+                },
+                'action':None,
             },
         },
         'system.mongodb':{
@@ -2524,7 +2618,7 @@ configuration = {
                 'rule.resource.filename.parse',
             ],
         },
-        'resource.crawl.meta':{
+        'resource.tag.meta':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -2820,6 +2914,290 @@ configuration = {
             ],
         },
         
+        'resource.crawl.meta':{
+            'default':{
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'mediainfo':None,
+                'subler':None,
+                'atom':None,
+                'keyword':None,
+            },
+            'synonym':['mediainfo', 'keyword'],
+            'element':{
+                'kind':None,
+                'profile':None,
+                'volume':None,
+                'language':None,
+                'simple name':None,
+                'imdb movie id':None,
+                'tmdb movie id':None,
+                'stream type':{
+                    'mediainfo':'StreamKind',
+                },
+                'file size':{
+                    'mediainfo':'FileSize',
+                },
+                'format':{
+                    'mediainfo':'Format',
+                },
+                'modified date':{
+                    'mediainfo':'File_Modified_Date',
+                },
+                'tag date':{
+                    'mediainfo':'Tagged_Date',
+                },
+                'bit rate':{
+                    'mediainfo':'OverallBitRate',
+                },
+                'duration':{
+                    'mediainfo':'Duration',
+                },
+                'width':{
+                    'mediainfo':'Width',
+                    'format':'pixel',
+                },
+                'height':{
+                    'mediainfo':'Height',
+                    'format':'pixel',
+                },
+                'media kind':{
+                    'mediainfo':'stik',
+                    'subler':'Media Kind',
+                },
+                'track position':{
+                    'mediainfo':'Track_Position',
+                },
+                'track total':{
+                    'mediainfo':'Track_Position_Total',
+                },
+                'disk position':{
+                    'mediainfo':'Part_Position',
+                },
+                'disk total':{
+                    'mediainfo':'Part_Position_Total',
+                },
+                'track number':{
+                    'subler':'Track #',
+                },
+                'disk number':{
+                    'subler':'Disk #',
+                },
+                'tv season':{
+                    'mediainfo':'tvsn',
+                    'subler':'TV Season',
+                },
+                'tv episode':{
+                    'mediainfo':'tves',
+                    'subler':'TV Episode #',
+                },
+                'sort name':{
+                    'mediainfo':'sonm',
+                    'subler':'Sort Name',
+                },
+                'sort artist':{
+                    'mediainfo':'soar',
+                    'subler':'Sort Artist',
+                },
+                'sort album artist':{
+                    'mediainfo':'soaa',
+                    'subler':'Sort Album Artist',
+                },
+                'sort album':{
+                    'mediainfo':'soal',
+                    'subler':'Sort Album',
+                },
+                'sort composer':{
+                    'mediainfo':'soco',
+                    'subler':'Sort Composer',
+                },
+                'sort tv show':{
+                    'mediainfo':'sosn',
+                    'subler':'Sort TV Show',
+                },
+                'name':{
+                    'mediainfo':'Title',
+                    'subler':'Name',
+                },
+                'artist':{
+                    'mediainfo':'Performer',
+                    'subler':'Artist',
+                },
+                'album artist':{
+                    'mediainfo':'Album_Performer',
+                    'subler':'Album Artist',
+                },
+                'album':{
+                    'mediainfo':'Album',
+                    'subler':'Album',
+                },
+                'tv show':{
+                    'mediainfo':'tvsh',
+                    'subler':'TV Show',
+                },
+                'tv episode id':{
+                    'mediainfo':'tven',
+                    'subler':'TV Episode ID',
+                },
+                'tv network':{
+                    'mediainfo':'tvnn',
+                    'subler':'TV Network',
+                },
+                'grouping':{
+                    'mediainfo':'Grouping',
+                    'subler':'Grouping',
+                },
+                'composer':{
+                    'mediainfo':'ScreenplayBy',
+                    'subler':'Composer',
+                },
+                'comment':{
+                    'mediainfo':'Comment',
+                    'subler':'Comments',
+                },
+                'description':{
+                    'mediainfo':'desc',
+                    'subler':'Description',
+                    'unescape xml':True,
+                },
+                'long description':{
+                    'mediainfo':'ldes',
+                    'subler':'Long Description',
+                    'unescape xml':True,
+                },
+                'lyrics':{
+                    'mediainfo':'lyr',
+                    'subler':'Lyrics',
+                    'unescape xml':True,
+                },
+                'copyright':{
+                    'mediainfo':'Copyright',
+                    'subler':'Copyright',
+                },
+                'encoding tool':{
+                    # mediainfo seems to mix @enc and @too into Encoded_Application
+                    'subler':'Encoding Tool',
+                },
+                'encoded by':{
+                    # mediainfo seems to mix @enc and @too into Encoded_Application
+                    'subler':'Encoded by',
+                },
+                'compilation':{
+                    'mediainfo':'Compilation',
+                },
+                'tempo':{
+                    'mediainfo':'BPM',
+                    'subler':'Tempo',
+                },
+                'genre type':None,
+                'genre':{
+                    'mediainfo':'Genre',
+                    'subler':'Genre',
+                },
+                'hd video':{
+                    'mediainfo':'hdvd',
+                    'subler':'HD Video',
+                },
+                'gapless':{
+                    'subler':'Gapless',
+                },
+                'podcast':{
+                    'mediainfo':'pcst',
+                },
+                'podcast url':None,
+                'itunes keywords':{
+                    'mediainfo':'keyw',
+                },
+                'itunes category':{
+                    'mediainfo':'catg',
+                },
+                'xid':{
+                    'mediainfo':'xid',
+                    'subler':'XID',
+                },
+                'itunes content id':{
+                    'mediainfo':'cnID',
+                    'subler':'contentID',
+                },
+                'itunes account':{
+                    'mediainfo':'apID',
+                    'subler':'iTunes Account',
+                },
+                'itunes artist id':{
+                    'mediainfo':'atID',
+                },
+                'itunes composer id':{
+                    'mediainfo':'cmID',
+                },
+                'itunes playlist id':{
+                    'mediainfo':'plID',
+                },
+                'itunes genre id':{
+                    'mediainfo':'geID',
+                },
+                'itunes country id':{
+                    'mediainfo':'sfID',
+                },
+                'itunes account type':{
+                    'mediainfo':'akID',
+                },
+                'itunes episode global id':None,
+                'purchase date':{
+                    'mediainfo':'purd',
+                    'subler':'Purchase Date',
+                },
+                'release date':{
+                    'mediainfo':'Recorded_Date',
+                    'subler':'Release Date',
+                },
+                'content rating':{
+                    'mediainfo':'rtng',
+                    'subler':'Content Rating',
+                },
+                'itunextc':{
+                    'mediainfo':'iTunEXTC',
+                },
+                'rating standard':None,
+                'rating':{
+                    'subler':'Rating',
+                },
+                'rating score':None,
+                'rating annotation':{
+                    'subler':'Rating Annotation',
+                },
+                'itunmovi':{
+                    'mediainfo':'iTunMOVI',
+                },
+                'cast':{
+                    'subler':'Cast',
+                },
+                'directors':{
+                    'subler':'Director',
+                },
+                'codirectors':{
+                    'subler':'Codirectors',
+                },
+                'producers':{
+                    'subler':'Producers',
+                },
+                'screenwriters':{
+                    'subler':'Screenwriters',
+                },
+                'studio':{
+                    'subler':'Studio',
+                },
+                'cover':{
+                    'mediainfo':'Cover',
+                    'auto cast':False,
+                },
+            },
+            'rule':[
+                'rule.knowlege.disk.number',
+                'rule.knowlege.track.number',
+                'rule.itunes.itunextc.parse',
+            ],
+        },
         'resource.crawl.stream.audio':{
             'default':{
                 'auto cast':True,
@@ -3344,7 +3722,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.movie.poster':{
+        'tmdb.movie.image':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3441,7 +3819,7 @@ configuration = {
                 },
             },
         },
-        'tmdb.person.poster':{
+        'tmdb.person.image':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3516,7 +3894,7 @@ configuration = {
                 'tvdb person id':{
                     'tvdb':'id',
                 },
-                'poster url':{
+                'image url':{
                     'tvdb':'Image',
                 },
                 'name':{
@@ -3532,7 +3910,7 @@ configuration = {
             'tag':u'Actor',
             'coalesce':True,
         },
-        'tvdb.show.poster':{
+        'tvdb.show.image':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3543,7 +3921,7 @@ configuration = {
             'synonym':['tvdb', 'keyword'],
             'element':{
                 'tvdb tv show id':None,
-                'tvdb poster id':{
+                'tvdb image id':{
                     'tvdb':'id',
                 },
                 'tv season':{
@@ -3552,21 +3930,21 @@ configuration = {
                 'language':{
                     'tvdb':'Language',
                 },
-                'poster url':{
+                'image url':{
                     'tvdb':'BannerPath',
                 },
                 'tvdb image context':{
                     # fanart, poster, season, series
-                    'name':u'TVDb Poster Context',
-                    'keyword':u'tvdb_poster_context',
+                    'name':u'TVDb image Context',
+                    'keyword':u'tvdb_image_context',
                     'type':'unicode',
                     'tvdb':'BannerType',
                 },
-                'tvdb_poster_layout':{
+                'tvdb image layout':{
                     # season, seasonwide, text, graphical, blank,
                     # 1920x1080, 1280x720, 680x1000
-                    'name':u'TVDb Poster Layout',
-                    'keyword':u'tvdb_poster_layout',
+                    'name':u'TVDb image Layout',
+                    'keyword':u'tvdb_image_layout',
                     'type':'unicode',
                     'tvdb':'BannerType2',
                 },
@@ -3655,7 +4033,7 @@ configuration = {
                     'tvdb':'Actors',
                     'plural format':'tvdb list',
                 },
-                'poster url':{
+                'image url':{
                     'tvdb':'poster',
                 },
                 'banner url':{
@@ -3739,7 +4117,7 @@ configuration = {
                 'user rating count':{
                     'tvdb':'RatingCount',
                 },
-                'poster url':{
+                'image url':{
                     'tvdb':'filename',
                 },
                 'cast':{
@@ -3754,9 +4132,9 @@ configuration = {
                     'tvdb':'Screenwriter',
                     'plural format':'tvdb list',
                 },
-                'tvdb poster flag':{
-                    'name':u'TVDb Poster Flag',
-                    'keyword':u'tvdb_poster_flag',
+                'tvdb image flag':{
+                    'name':u'TVDb image flag',
+                    'keyword':u'tvdb_image_flag',
                     'type':'int',
                     'tvdb':'EpImgFlag',
                     'enabled':False,
@@ -4951,16 +5329,16 @@ configuration = {
                 },
             ],
         },
-        'rule.uri.tmdb.movie.poster':{
-            'name':'tmdb movie poster uri',
-            'provide':set(('tmdb movie poster uri',)),
+        'rule.uri.tmdb.movie.image':{
+            'name':'tmdb movie image uri',
+            'provide':set(('tmdb movie image uri',)),
             'branch':[
                 {
                     'requires':set(('tmdb movie id',)),
                     'apply':[
                         {
-                            'property':'tmdb movie poster uri',
-                            'format':u'/c/tmdb/movie/{tmdb movie id}/poster',
+                            'property':'tmdb movie image uri',
+                            'format':u'/c/tmdb/movie/{tmdb movie id}/image',
                         },
                     ],
                 },
@@ -4968,8 +5346,8 @@ configuration = {
                     'requires':set(('imdb movie id',)),
                     'apply':[
                         {
-                            'property':'imdb movie poster uri',
-                            'format':u'/c/tmdb/movie/{imdb movie id}/poster',
+                            'property':'imdb movie image uri',
+                            'format':u'/c/tmdb/movie/{imdb movie id}/image',
                         },
                     ],
                 },
@@ -5125,16 +5503,16 @@ configuration = {
                 },
             ],
         },
-        'rule.uri.tmdb.person.poster':{
-            'name':'tmdb person poster uri',
-            'provide':set(('tmdb person poster uri',)),
+        'rule.uri.tmdb.person.image':{
+            'name':'tmdb person image uri',
+            'provide':set(('tmdb person image uri',)),
             'branch':[
                 {
                     'requires':set(('tmdb person id',)),
                     'apply':[
                         {
-                            'property':'tmdb person poster uri',
-                            'format':u'/c/tmdb/person/{tmdb person id}/poster',
+                            'property':'tmdb person image uri',
+                            'format':u'/c/tmdb/person/{tmdb person id}/image',
                         },
                     ],
                 },
@@ -5188,6 +5566,29 @@ configuration = {
         
     },
     'service':{
+        'tag':{
+            'match':ur'^resource://(?P<host>[^/]+)(?P<relative>/t/.*)$',
+            'branch':{
+                'tag.movie':{
+                    'match':ur'/t/movie/(?P<language>[a-z]{2})/(?P<movie_id>[0-9]+)',
+                    'type':'json',
+                    'collection':'tag_movie',
+                    'namespace':'tag.movie',
+                },
+                'tag.music.track':{
+                    'match':ur'/t/music/(?P<language>[a-z]{2})/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                    'type':'json',
+                    'collection':'tag_music_track',
+                    'namespace':'tag.music.track',
+                },
+                'tag.tvshow.episode':{
+                    'match':ur'/t/tvshow/(?P<language>[a-z]{2})/episode/(?P<tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)/(?P<tv_episode>[0-9]+)',
+                    'type':'json',
+                    'collection':'tag_tvshow_episode',
+                    'namespace':'tag.tvshow.episode',
+                },
+            }
+        },
         'knowlege':{
             'match':ur'^resource://(?P<host>[^/]+)(?P<relative>/k/.*)$',
             'branch':{
@@ -5196,17 +5597,105 @@ configuration = {
                     'type':'json',
                     'collection':'knowlege_configuration',
                 },
-                'knowlege.movie':{ 
+                
+                'knowlege.collection':{
+                    'match':ur'/k/collection/(?P<language>[a-z]{2})/(?P<collection_id>[0-9]+)',
+                    'type':'json',
+                    'collection':'knowlege_collection',
+                    'namespace':'knowlege.collection',
+                },
+                
+                'knowlege.movie':{
                     'match':ur'/k/movie/(?P<language>[a-z]{2})/(?P<movie_id>[0-9]+)',
                     'type':'json',
                     'collection':'knowlege_movie',
                     'namespace':'knowlege.movie',
                 },
+                'knowlege.movie.cast':{
+                    'match':ur'/k/movie/(?P<movie_id>[0-9]+)/cast',
+                    'type':'json',
+                    'collection':'knowlege_movie_cast',
+                    'namespace':'knowlege.movie.cast',
+                },
+                'knowlege.movie.image':{
+                    'match':ur'/k/movie/(?P<movie_id>[0-9]+)/image',
+                    'type':'json',
+                    'collection':'knowlege_movie_image',
+                    'namespace':'knowlege.movie.image',
+                },
+                'knowlege.movie.keyword':{
+                    'match':ur'/k/movie/(?P<movie_id>[0-9]+)/keyword',
+                    'type':'json',
+                    'collection':'knowlege_movie_keyword',
+                    'namespace':'knowlege.movie.keyword',
+                },
+                'knowlege.movie.release':{
+                    'match':ur'/k/movie/(?P<movie_id>[0-9]+)/release',
+                    'type':'json',
+                    'collection':'knowlege_movie_release',
+                    'namespace':'knowlege.movie.release',
+                },
+                'knowlege.movie.clip':{
+                    'match':ur'/k/movie/(?P<movie_id>[0-9]+)/clip',
+                    'type':'json',
+                    'collection':'knowlege_movie_clip',
+                    'namespace':'knowlege.movie.clip',
+                },
+                'knowlege.movie.translation':{
+                    'match':ur'/k/movie/(?P<movie_id>[0-9]+)/translation',
+                    'type':'json',
+                    'collection':'knowlege_movie_translation',
+                    'namespace':'knowlege.movie.translation',
+                },
+                'knowlege.movie.alternative':{
+                    'match':ur'/k/movie/(?P<movie_id>[0-9]+)/alternative',
+                    'type':'json',
+                    'collection':'knowlege_movie_alternative',
+                    'namespace':'knowlege.movie.alternative',
+                },
+                
+                'knowlege.music.album':{
+                    'match':ur'/k/music/(?P<language>[a-z]{2})/album/(?P<album_id>[0-9]+)',
+                    'type':'json',
+                    'collection':'knowlege_music_album',
+                    'namespace':'knowlege.music.album',
+                },
+                'knowlege.music.album.image':{
+                    'match':ur'/k/music/(?P<language>[a-z]{2})/album/(?P<album_id>[0-9]+)/image',
+                    'type':'json',
+                    'collection':'knowlege_music_album_image',
+                    'namespace':'knowlege.music.album.image',
+                },
+                'knowlege.music.disk':{
+                    'match':ur'/k/music/(?P<language>[a-z]{2})/disk/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                    'type':'json',
+                    'collection':'knowlege_music_disk',
+                    'namespace':'knowlege.music.disk',
+                },
+                'knowlege.music.track':{
+                    'match':ur'/k/music/(?P<language>[a-z]{2})/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                    'type':'json',
+                    'collection':'knowlege_music_track',
+                    'namespace':'knowlege.music.track',
+                },
+                
                 'knowlege.tvshow.show':{
                     'match':ur'/k/tvshow/(?P<language>[a-z]{2})/show/(?P<tv_show_id>[0-9]+)',
                     'type':'json',
                     'collection':'knowlege_tvshow_show',
                     'namespace':'knowlege.tvshow.show',
+                },
+                'knowlege.tvshow.show.image':{
+                    'match':ur'/k/tvshow/(?P<language>[a-z]{2})/show/(?P<tv_show_id>[0-9]+)/image',
+                    'type':'json',
+                    'collection':'knowlege_tvshow_show_image',
+                    'namespace':'knowlege.tvshow.show.image',
+                },
+                'knowlege.tvshow.show.credit':{
+                    'match':ur'/k/tvshow/(?P<language>[a-z]{2})/show/(?P<tv_show_id>[0-9]+)/credit',
+                    'type':'json',
+                    'collection':'knowlege_tvshow_show_credit',
+                    'namespace':'knowlege.tvshow.show.credit',
                 },
                 'knowlege.tvshow.season':{
                     'match':ur'/k/tvshow/(?P<language>[a-z]{2})/season/(?P<tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)',
@@ -5214,30 +5703,75 @@ configuration = {
                     'collection':'knowlege_tvshow_season',
                     'namespace':'knowlege.tvshow.season',
                 },
+                'knowlege.tvshow.season.image':{
+                    'match':ur'/k/tvshow/(?P<language>[a-z]{2})/season/(?P<tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)/image',
+                    'type':'json',
+                    'collection':'knowlege_tvshow_season_image',
+                    'namespace':'knowlege.tvshow.season.image',
+                },
+                'knowlege.tvshow.season.credit':{
+                    'match':ur'/k/tvshow/(?P<language>[a-z]{2})/season/(?P<tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)/credit',
+                    'type':'json',
+                    'collection':'knowlege_tvshow_season_credit',
+                    'namespace':'knowlege.tvshow.season.credit',
+                },
                 'knowlege.tvshow.episode':{
                     'match':ur'/k/tvshow/(?P<language>[a-z]{2})/episode/(?P<tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)/(?P<tv_episode>[0-9]+)',
                     'type':'json',
                     'collection':'knowlege_tvshow_episode',
                     'namespace':'knowlege.tvshow.episode',
                 },
+                'knowlege.tvshow.episode.image':{
+                    'match':ur'/k/tvshow/(?P<language>[a-z]{2})/episode/(?P<tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)/(?P<tv_episode>[0-9]+)/image',
+                    'type':'json',
+                    'collection':'knowlege_tvshow_episode_image',
+                    'namespace':'knowlege.tvshow.episode.image',
+                },
+                'knowlege.tvshow.episode.credit':{
+                    'match':ur'/k/tvshow/(?P<language>[a-z]{2})/episode/(?P<tv_show_id>[0-9]+)/(?P<tv_season>[0-9]+)/(?P<tv_episode>[0-9]+)/credit',
+                    'type':'json',
+                    'collection':'knowlege_tvshow_episode_credit',
+                    'namespace':'knowlege.tvshow.episode.credit',
+                },
+                
                 'knowlege.person':{
                     'match':ur'/k/person/(?P<person_id>[0-9]+)',
                     'type':'json',
                     'collection':'knowlege_person',
                     'namespace':'knowlege.person',
                 },
-                'knowlege.network':{
-                    'match':ur'/k/network/(?P<network_id>[0-9]+)',
+                'knowlege.person.image':{
+                    'match':ur'/k/person/(?P<person_id>[0-9]+)/image',
                     'type':'json',
-                    'collection':'knowlege_network',
-                    'namespace':'knowlege.network',
+                    'collection':'knowlege_person_image',
+                    'namespace':'knowlege.person.image',
                 },
-                'knowlege.studio':{
-                    'match':ur'/k/studio/(?P<studio_id>[0-9]+)',
+                'knowlege.person.credit':{
+                    'match':ur'/k/person/(?P<person_id>[0-9]+)/credit',
                     'type':'json',
-                    'collection':'knowlege_studio',
-                    'namespace':'knowlege.studio',
+                    'collection':'knowlege_person_credit',
+                    'namespace':'knowlege.person.credit',
                 },
+                
+                'knowlege.company':{
+                    'match':ur'/k/company/(?P<company_id>[0-9]+)',
+                    'type':'json',
+                    'collection':'knowlege_company',
+                    'namespace':'knowlege.company',
+                },
+                'knowlege.company.image':{
+                    'match':ur'/k/company/(?P<company_id>[0-9]+)/image',
+                    'type':'json',
+                    'collection':'knowlege_company_image',
+                    'namespace':'knowlege.company.image',
+                },
+                'knowlege.company.credit':{
+                    'match':ur'/k/company/(?P<company_id>[0-9]+)/credit',
+                    'type':'json',
+                    'collection':'knowlege_company_credit',
+                    'namespace':'knowlege.company.credit',
+                },
+                
                 'knowlege.job':{
                     'match':ur'/k/job/(?P<job_id>[0-9]+)',
                     'type':'json',
@@ -5332,28 +5866,28 @@ configuration = {
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.poster':{
+                'tmdb.movie.image':{
                     'match':[
                         {
-                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/poster$',
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/image$',
                             'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/images?api_key={api key}',
                         },
                         {
-                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/poster$',
+                            'filter':ur'^/c/tmdb/movie/(?P<imdb_movie_id>tt[0-9]+)/image$',
                             'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}/images?api_key={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tmdb movie poster by tmdb id',
-                            'format':ur'/c/tmdb/movie/{tmdb movie id}/poster',
+                            'name':u'tmdb movie image by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/image',
                         },
                         {
-                            'name':u'tmdb movie poster by imdb id',
-                            'format':ur'/c/tmdb/movie/{imdb movie id}/poster',
+                            'name':u'tmdb movie image by imdb id',
+                            'format':ur'/c/tmdb/movie/{imdb movie id}/image',
                         },
                     ],
-                    'collection':'tmdb_movie_poster',
+                    'collection':'tmdb_movie_image',
                     'namespace':'tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
@@ -5524,21 +6058,21 @@ configuration = {
                     'namespace':'tmdb.person',
                     'type':'json',
                 },
-                'tmdb.person.poster':{
+                'tmdb.person.image':{
                     'match':[
                         {
-                            'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/poster$',
+                            'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/image$',
                             'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}?api_key={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tmdb person poster by tmdb id',
-                            'format':ur'/c/tmdb/person/{tmdb person id}/poster',
+                            'name':u'tmdb person image by tmdb id',
+                            'format':ur'/c/tmdb/person/{tmdb person id}/image',
                         },
                     ],
-                    'collection':'tmdb_person_poster',
-                    'namespace':'tmdb.person.poster',
+                    'collection':'tmdb_person_image',
+                    'namespace':'tmdb.person.image',
                     'type':'json',
                 },
                 'tmdb.person.credit':{
@@ -5663,23 +6197,23 @@ configuration = {
                     'produce':['tvdb.episode'],
                     'index':['tvdb tv show id', 'tvdb tv episode id', 'tv season', 'tv episode'],
                 },
-                'tvdb.show.poster':{
+                'tvdb.show.image':{
                     'match':[
                         {
-                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/poster$',
+                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
                             'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/banners.xml',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tvdb show poster by tvdb show id',
-                            'format':ur'/c/tvdb/show/{tvdb tv show id}/poster',
+                            'name':u'tvdb show image by tvdb show id',
+                            'format':ur'/c/tvdb/show/{tvdb tv show id}/image',
                         },
                     ],
-                    'collection':'tvdb_tv_show_poster',
-                    'namespace':'tvdb.show.poster',
+                    'collection':'tvdb_tv_show_image',
+                    'namespace':'tvdb.show.image',
                     'type':'xml',
-                    'produce':['tvdb.show.poster'],
+                    'produce':['tvdb.show.image'],
                 },
                 'tvdb.show.cast':{
                     'match':[
@@ -5714,7 +6248,7 @@ configuration = {
                     ],
                     'namespace':'tvdb.show',
                     'type':'zip',
-                    'produce':['tvdb.show', 'tvdb.episode', 'tvdb.show.poster', 'tvdb.show.cast'],
+                    'produce':['tvdb.show', 'tvdb.episode', 'tvdb.show.image', 'tvdb.show.cast'],
                 },
                 'tvdb.update.daily':{
                     'match':[
@@ -5905,6 +6439,7 @@ configuration = {
                         'help':'Get a JSON formated document by URI',
                     },
                     'argument':[
+                        'uris',
                         'sync',
                         'download',
                     ]
@@ -6201,6 +6736,14 @@ configuration = {
                         'help':'File or directory paths to scan',
                         'nargs':'*',
                         'metavar':'PATH',
+                    },
+                },
+                'uris':{
+                    'flag':['uris'],
+                    'parameter':{
+                        'help':'List of URIs',
+                        'nargs':'*',
+                        'metavar':'URI',
                     },
                 },
                 'quantizer':{

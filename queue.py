@@ -7,12 +7,12 @@ import logging
 import urlparse
 import urllib
 import uuid
+import json
 
 from ontology import Ontology
 from asset import AssetCache
 from datetime import datetime
 from model import Transform, Query
-
 
 class Queue(object):
     def __init__(self, env):
@@ -40,25 +40,20 @@ class Queue(object):
     def next(self):
         if self.length > 0:
             job = self.job.pop()
-            job.open()
-            job.load()
             job.run()
-            job.close()
     
 
 
 class Job(object):
     def __init__(self, queue, ontology):
-        self.log = logging.getLogger('job')
+        self.log = logging.getLogger('Job')
         self.queue = queue
         self.ontology = ontology
         self.uuid = uuid.uuid4()
-        self._include_filter = None
-        self.task = []
-        self.node = {
-            'command':self.ontology.node,
-            'task':[],
-        }
+        self.node = None
+        self.task = None
+        self._inclusion = None
+        self._exclusion = None
     
     
     @property
@@ -76,88 +71,61 @@ class Job(object):
         return self.queue.cache
     
     
+    @property
+    def document(self):
+        return json.dumps(self.node, sort_keys=True, indent=4,  default=self.env.default_json_handler)
+    
+    
     def load(self):
-        if self.valid:
-            self._load_filter()
+        if 'inclusion' in self.ontology:
+            try:
+                self._inclusion = re.compile(self.ontology['inclusion'], re.UNICODE)
+                self.log.info(u'Inclusion filter set to \'%s\'', self.ontology['inclusion'])
+            except re.error as err:
+                self.log.info(u'Failed to compile inclusion filter \'%s\' because of %s', self.ontology['inclusion'], err)
+                
+        if 'exclusion' in self.ontology:
+            try:
+                self._exclusion = re.compile(self.ontology['exclusion'], re.UNICODE)
+                self.log.info(u'Exclusion filter set to \'%s\'', self.ontology['exclusion'])
+            except re.error as err:
+                self.log.info(u'Failed to compile exclusion filter \'%s\' because of %s', self.ontology['exclusion'], err)
     
     
-    def add_url(self, url):
-        if url:
-            ontology = self.env.parse_url(url)
-            if ontology:
-                self.task.append(Task(self, ontology))
-    
-    
-    def scan(self):
-        result = []
-        if self.ontology['scan']:
-            for path in self.ontology['scan']:
-                if os.path.exists(path):
-                    path = os.path.realpath(os.path.abspath(os.path.expanduser(os.path.expandvars(path))))
-                    files = self._scan_path(path, self.ontology['recursive'])
-                    self.log.debug(u'Found %d files in %s', len(files), path)
-                    result.extend(files)
-                else:
-                    self.log.error(u'Path %s does not exist', path)
-        if result:
-            result = sorted(set(result))
-            self.log.debug(u'Found %d files to process', len(result))
-            for path in result:
-                self.add_url(u'file://{}'.format(path))
+    def enqueue(self, task):
+        if task and task.valid:
+            self.task.append(task)
     
     
     def run(self):
-        start = datetime.now()
-        self.node['start'] = unicode(start)
-        self.scan()
+        self.open()
+        self.load()
         for task in self.task:
-            if task.valid:
-                task.open()
-                task.run()
-                task.close()
-                self.node['task'].append(task.node)
-                
-        end = datetime.now()
-        self.node['end'] = unicode(end)
-        self.node['duration'] = unicode(end - start)
+            task.run()
+            self.node['task'].append(task.node)
+        self.close()
     
     
     def open(self):
         self.log.debug('Open job %s', unicode(self))
+        self.task = []
+        self.node = {
+            'uuid':unicode(self.uuid),
+            'start':datetime.now(),
+            'command':self.ontology.node,
+            'task':[],
+        }
     
     
     def close(self):
+        self.node['end'] = datetime.now()
+        self.node['duration'] = unicode(self.node['end'] - self.node['start'])
         self.log.debug('Close job %s', unicode(self))
     
     
-    def _load_filter(self):
-        if 'filter' in self.ontology:
-            try:
-                self._include_filter = re.compile(self.ontology['filter'], re.UNICODE)
-                self.log.info(u'File filter set to \'%s\'', self.ontology['filter'])
-            except re.error as err:
-                self.log.info(u'Failed to compile filter \'%s\' because of %s', self.ontology['filter'], err)
-    
-    
-    def _filter(self, path):
-        return path and os.path.basename(path)[0] != self.env.constant['dot'] and \
-        ( self._include_filter is None or self._include_filter.search(path) != None )
-    
-    
-    def _scan_path(self, path, recursive, depth=1):
-        result = []
-        if os.path.isfile(path):
-            dname, fname = os.path.split(path)
-            if self._filter(fname):
-                result.append(os.path.realpath(path))
-                
-        # Recursively scan decendent paths and aggregate the results
-        elif (recursive or depth > 0) and os.path.isdir(path) and \
-        os.path.basename(path)[0] != self.env.constant['dot']:
-            for dnext in os.listdir(path):
-                dnext = os.path.abspath(os.path.join(path,dnext))
-                result.extend(self._scan_path(dnext, recursive, depth - 1))
-        return result
+    def filter(self, path):
+        return path and ( self._inclusion is None or self._inclusion.search(path) is not None ) and \
+        ( self._exclusion is None or self._exclusion.search(path) is None )
     
     
     def __unicode__(self):
@@ -170,12 +138,8 @@ class Task(object):
         self.log = logging.getLogger('task')
         self.job = job
         self.ontology = ontology
-        self.node = None
         self.uuid = uuid.uuid4()
-        self._resource = None
-        self.product = None
-        self.query = None
-        self.transform = None
+        self.node = None
     
     
     def __unicode__(self):
@@ -189,7 +153,7 @@ class Task(object):
     
     @property
     def valid(self):
-        return self.ontology is not None and self.resource is not None
+        return self.ontology is not None
     
     
     @property
@@ -197,53 +161,126 @@ class Task(object):
         return self.job.cache
     
     
-    @property
-    def resource(self):
-        if self._resource is None:
-            self._resource = self.cache.find(self.ontology)
-        return self._resource
-    
-    
-    @property
-    def profile(self):
-        result = None
-        if 'profile' in self.job.ontology:
-            result = self.env.profile[self.job.ontology['profile']]
-        elif 'profile' in self.resource.ontology:
-            result = self.env.profile[self.resource.ontology['profile']]
-        return result
+    def load(self):
+        pass
     
     
     def open(self):
-        self.log.debug('Open task %s', unicode(self))
+        self.log.debug('Opening task %s', unicode(self))
         self.node = {
             'uuid':unicode(self.uuid),
-            'resource':unicode(self.resource),
+            'start':datetime.now(),
+            'command':self.ontology.node,
         }
     
     
     def close(self):
-        self.log.debug('Close task %s', unicode(self))
+        self.node['end'] = datetime.now()
+        self.node['duration'] = unicode(self.node['end'] - self.node['start'])
+        self.log.debug('Closing task %s', unicode(self))
     
     
     def run(self):
-        if self.valid:
-            start = datetime.now()
-            self.node['start'] = unicode(start)
-            
+        pass
+    
+
+
+class ResourceJob(Job):
+    def __init__(self, queue, ontology):
+        Job.__init__(self, queue, ontology)
+        self._profile = None
+    
+    
+    @property
+    def profile(self):
+        if self._profile is None and 'profile' in self.job.ontology:
+            self._profile = self.env.profile[self.ontology['profile']]
+        return self._profile
+    
+    
+    def load(self):
+        Job.load(self)
+        
+        targets = []
+        if self.ontology['scan path']:
+            for path in self.ontology['scan path']:
+                if os.path.exists(path):
+                    path = os.path.realpath(os.path.abspath(os.path.expanduser(os.path.expandvars(path))))
+                    files = self._scan_path(path, self.ontology['recursive'])
+                    self.log.debug(u'Found %d files in %s', len(files), path)
+                    targets.extend(files)
+                else:
+                    self.log.error(u'Path %s does not exist', path)
+        if targets:
+            targets = sorted(set(targets))
+            self.log.debug(u'Found %d files to process', len(targets))
+            for path in targets:
+                self.enqueue(ResourceTask(self, self.ontology.project('system.task'), u'file://{}'.format(path)))
+    
+    
+    def filter(self, path):
+        return path and os.path.basename(path)[0] != self.env.constant['dot'] and Job.filter(self, path)
+    
+    
+    def _scan_path(self, path, recursive, depth=1):
+        result = []
+        if os.path.isfile(path):
+            dname, fname = os.path.split(path)
+            if self.filter(fname):
+                result.append(os.path.realpath(path))
+                
+        # Recursively scan decendent paths and aggregate the results
+        elif (recursive or depth > 0) and os.path.isdir(path) and \
+        os.path.basename(path)[0] != self.env.constant['dot']:
+            for dnext in os.listdir(path):
+                dnext = os.path.abspath(os.path.join(path,dnext))
+                result.extend(self._scan_path(dnext, recursive, depth - 1))
+        return result
+    
+    
+
+
+class ResourceTask(Task):
+    def __init__(self, job, ontology, url):
+        Task.__init__(self, job, ontology)
+        self.location = self.env.parse_url(url)
+        self.resource = None
+        self.query = None
+        self.transform = None
+        self.product = None
+        self._profile = None
+    
+    
+    @property
+    def valid(self):
+        return Task.valid.fget(self) and self.location is not None
+    
+    
+    @property
+    def profile(self):
+        if self._profile is None:
+            if self._profile is None and 'profile' in self.ontology:
+                self._profile = self.env.profile[self.ontology['profile']]
+        return self._profile
+    
+    
+    def load(self):
+        Task.load(self)
+        self.resource = self.cache.find(self.location)
+    
+    
+    def run(self):
+        self.open()
+        self.load()
+        if self.resource:
             self.product = []
             self.query = Query(self.resource.asset.resources)
             self.transform = Transform()
-            self.resource.load()
-            if self.resource.valid:
-                action = getattr(self, self.job.ontology['action'], None)
-                if action: action()
-            else:
-                self.log.debug(u'Ignoring invalid resource %s', unicode(self.resource))
-                
-            end = datetime.now()
-            self.node['end'] = unicode(end)
-            self.node['duration'] = unicode(end - start)
+            action = getattr(self, self.ontology['action'], None)
+            if action: action()
+        else:
+            self.debug(u'Resource invalid, aborting task %s', unicode(self))
+        self.close()
     
     
     def tag(self):
@@ -266,7 +303,7 @@ class Task(object):
         self.query.resolve(self.profile['pack'])
         self.transform.resolve(self.query.result, self.profile['pack'])
         
-        o = Ontology.clone(self.resource.ontology)
+        o = Ontology.clone(self.location)
         del o['path']
         del o['url']
         o['host'] = self.env.host
@@ -283,7 +320,7 @@ class Task(object):
         self.query.resolve(self.profile['transcode'])
         self.transform.resolve(self.query.result, self.profile['transcode'])
         
-        o = Ontology.clone(self.resource.ontology)
+        o = Ontology.clone(self.location)
         del o['path']
         del o['url']
         o['host'] = self.env.host
@@ -303,5 +340,56 @@ class Task(object):
     
     def report(self):
         print self.resource.node
+    
+
+
+class ServiceJob(Job):
+    def __init__(self, queue, ontology):
+        Job.__init__(self, queue, ontology)
+    
+    
+    def load(self):
+        Job.load(self)
+        
+        if self.ontology['uris']:
+            for uri in self.ontology['uris']:
+                self.enqueue(ServiceTask(self, self.ontology.project('system.task'), uri))
+    
+
+
+class ServiceTask(Task):
+    def __init__(self, job, ontology, uri):
+        Task.__init__(self, job, ontology)
+        self.uri = uri
+        self.document = None
+    
+    
+    @property
+    def valid(self):
+        return Task.valid.fget(self) and self.uri is not None
+    
+    
+    def load(self):
+        Task.load(self)
+        self.document = self.env.resolver.resolve(self.uri)
+    
+    
+    def run(self):
+        self.open()
+        self.load()
+        
+        if self.document is not None:
+            action = getattr(self, self.ontology['action'], None)
+            if action: action()
+        else:
+            self.log.debug(u'Could not resolve document %s, aborting task %s', self.uri, unicode(self))
+            
+        self.close()
+    
+    
+    def get(self):
+        from pymongo import json_util
+        print json.dumps(self.document, sort_keys=True, indent=4,  default=json_util.default)
+        # print json.dumps(self.document, sort_keys=True, indent=4,  default=self.env.default_json_handler)
     
 

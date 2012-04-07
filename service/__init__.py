@@ -3,8 +3,10 @@
 import re
 import logging
 import copy
+import json
 from datetime import datetime
 from ontology import Ontology
+from pymongo import json_util
 
 class Resolver(object):
     def __init__(self, env):
@@ -51,6 +53,14 @@ class Resolver(object):
                 if parsed['host'] in self.env.repository:
                     handler.cache(parsed['relative'], self.env.repository[parsed['host']])
                 break
+    
+    
+    def json(self, uri):
+        result = None
+        node = self.resolve(uri)
+        if node:
+            result = json.dumps(node, sort_keys=True, indent=4,  default=json_util.default)
+        return result
     
 
 

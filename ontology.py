@@ -29,12 +29,6 @@ class Ontology(dict):
     
     
     @classmethod
-    def project(cls, namespace ,other):
-        o = cls(other.env, namespace, other.kernel)
-        return o
-    
-    
-    @classmethod
     def clone(cls, other):
         o = cls(other.env, other.namespace.key, other.kernel)
         return o
@@ -47,6 +41,14 @@ class Ontology(dict):
     
     def match(self, fact):
         return all((k in self and self[k] == v) for k,v in fact.iteritems())
+    
+    
+    def project(self, namespace):
+        o = Ontology(self.env, namespace)
+        for k,v in self.kernel.iteritems():
+            if o.namespace.contains(k):
+                o[k] = v
+        return o
     
     
     def __setitem__(self, key, value):
@@ -220,6 +222,10 @@ class Space(object):
     
     def match(self, key):
         return not self.pattern or self.pattern.search(key) is not None
+    
+    
+    def contains(self, key):
+        return key is not None and key in self.element
     
     
     def find(self, key):

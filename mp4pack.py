@@ -8,7 +8,7 @@ import getopt
 import logging
 import copy
 
-from queue import Queue, Job
+from queue import Queue, ResourceJob, ServiceJob
 from environment import Environment
 from ontology import Ontology
 from argparse import ArgumentParser
@@ -88,49 +88,36 @@ def main():
     
     #test(env)
     #test2(env)
-    
-    job = Job(queue, env.ontology)
-    job.open()
+    if 'uris' in env.ontology:
+        job = ServiceJob(queue, env.ontology.project('system.job'))
+    else:
+        job = ResourceJob(queue, env.ontology.project('system.job'))
     job.run()
-    job.close()
     
-    import json
-    import datetime
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
-    print json.dumps(job.node, sort_keys=True, indent=4,  default=dthandler)
+    sys.stderr.write(job.document)
 
 
 def test(env):
-    env.resolver.cache(u'mpk://yoshi/c/tvdb/show/en/73255/complete')
-    print env.resolver.resolve(u'mpk://yoshi/c/tvdb/episode/en/73255/4/7')
-    print env.resolver.resolve(u'mpk://yoshi/c/tvdb/show/73255/poster')
+    #env.resolver.cache(u'resource://yoshi/c/tvdb/show/en/73255/complete')
+    print env.resolver.json(u'resource://yoshi/c/tvdb/episode/en/73255/4/7')
+    print env.resolver.json(u'resource://yoshi/c/tvdb/show/73255/poster')
     
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/configuration')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/configuration')
     
-    env.resolver.remove(u'mpk://yoshi/c/tmdb/movie/1891/cast')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/1891')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/cast')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/poster')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/keyword')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/release')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/trailer')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/translation')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/1891/alternative')
-    
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/en/tt0080684')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/cast')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/poster')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/keyword')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/release')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/trailer')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/translation')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/movie/tt0080684/alternative')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/en/tt0080684')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/cast')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/image')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/keyword')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/release')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/trailer')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/translation')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/alternative')
     
     
     
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/credit')
-    print env.resolver.resolve(u'mpk://yoshi/c/tmdb/person/1891/poster')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/person/1891')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/person/1891/credit')
+    #print env.resolver.json(u'resource://yoshi/c/tmdb/person/1891/poster')
 
 
 def test2(env):

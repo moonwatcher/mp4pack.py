@@ -54,6 +54,7 @@ class Asset(object):
         self.node = None
         self.volatile = False
         self.touched = False
+        self._resource_node = {}
         self.resource = {}
     
     
@@ -163,26 +164,34 @@ class Asset(object):
             if ontology['resource uri'] in self.resource:
                 result = self.resource[ontology['resource uri']]
             else:
-                if 'container' in ontology:
-                    if ontology['container'] == 'mp4':
-                        result = MP4(self, ontology)
-                    elif ontology['container'] == 'matroska':
-                        result = Matroska(self, ontology)
-                    elif ontology['container'] == 'subtitles':
-                        result = Subtitles(self, ontology)
-                    elif ontology['container'] == 'chapters':
-                        result = TableOfContent(self, ontology)
-                    elif ontology['container'] == 'image':
-                        result = Artwork(self, ontology)
-                    elif ontology['container'] == 'raw audio':
-                        result = RawAudio(self, ontology)
-                    elif ontology['container'] == 'avi':
-                        result = Avi(self, ontology)
+                volatile = False
+                node = self.env.resolver.resolve(ontology['resource uri'])
+                if node is None:
+                    volatile = True
+                    crawler = Crawler(ontology)
+                    if crawler.valid:
+                        node = crawler.node
                         
-                    if result:
-                        self.resource[ontology['resource uri']] = result
-                else:
-                    result = None
+                if node is not None:
+                    if 'container' in ontology:
+                        if ontology['container'] == 'mp4':
+                            result = MP4(self, ontology, node)
+                        elif ontology['container'] == 'matroska':
+                            result = Matroska(self, ontology, node)
+                        elif ontology['container'] == 'subtitles':
+                            result = Subtitles(self, ontology, node)
+                        elif ontology['container'] == 'chapters':
+                            result = TableOfContent(self, ontology, node)
+                        elif ontology['container'] == 'image':
+                            result = Artwork(self, ontology, node)
+                        elif ontology['container'] == 'raw audio':
+                            result = RawAudio(self, ontology, node)
+                        elif ontology['container'] == 'avi':
+                            result = Avi(self, ontology, node)
+                            
+                        if result:
+                            result.volatile = volatile
+                            self.resource[ontology['resource uri']] = result
         return result
     
     
@@ -202,22 +211,14 @@ class Asset(object):
                 self.find(ontology)
             self.touched = True
     
-    
-    def _lookup_resource_node(self, ontology):
-        result = None
-        if self.managed and ontology is not None \
-        and 'uri' in ontology and ontology['uri'] in self.node['entity']['resource']:
-            result = self.node['entity']['resource'][ontology['uri']]
-        return result
-    
 
 
 class Resource(object):
-    def __init__(self, asset, ontology):
+    def __init__(self, asset, ontology, node):
         self.log = logging.getLogger('resource')
         self.asset = asset
         self.ontology = ontology
-        self.node = None
+        self.node = node
         self.volatile = False
         self.orphan = False
         
@@ -230,21 +231,14 @@ class Resource(object):
         return unicode(self.ontology['resource uri'])
     
     
-    
     @property
     def env(self):
         return self.asset.env
     
     
     @property
-    def em(self):
-        return self.asset.em
-    
-    
-    @property
     def cache(self):
         return self.asset.cache
-    
     
     
     @property
@@ -254,7 +248,8 @@ class Resource(object):
     
     @property
     def indexed(self):
-        return 'uri' in self.ontology and \
+        self.ontology['host'] in self.env.repository and \
+        self.ontology['volume'] in self.env.repository[self.ontology['host']]['volume'] and \
         self.env.repository[self.ontology['host']]['volume'][self.ontology['volume']]['index']
     
     
@@ -271,12 +266,6 @@ class Resource(object):
     @property
     def path(self):
         return self.ontology['path']
-        #result = None
-        #if self.local:
-        #    result = self.ontology['path']
-        #else:
-        #    result = self.ontology['path in cache']
-        #return result
     
     
     @property
@@ -299,22 +288,20 @@ class Resource(object):
     @property
     def track(self):
         if self._track is None:
-            if self.valid:
-                self._track = []
-                if self.node and 'stream' in self.node:
-                    for track in self.node['stream']:
-                        self._track.append(Ontology(self.env, track))
+            self._track = []
+            if self.node and 'stream' in self.node:
+                for track in self.node['stream']:
+                    self._track.append(Ontology(self.env, track))
         return self._track
     
     
     @property
     def hint(self):
         if self._hint is None:
-            if self.valid:
-                if self.node and 'hint' in self.node:
-                    self._hint = Ontology(self.env, 'resource.hint', self.node['hint'])
-                else:
-                    self._hint = Ontology(self.env, 'resource.hint')
+            if self.node and 'hint' in self.node:
+                self._hint = Ontology(self.env, 'resource.hint', self.node['hint'])
+            else:
+                self._hint = Ontology(self.env, 'resource.hint')
         return self._hint
     
     
@@ -322,16 +309,6 @@ class Resource(object):
     def hint(self, value):
         self._hint = value
         self.volatile = True
-    
-    
-    
-    def load(self):
-        if self.valid:
-            if self.node is None:
-                self.node = self.asset._lookup_resource_node(self.ontology)
-                
-            if self.node is None:
-                self.crawl()
     
     
     def crawl(self):
