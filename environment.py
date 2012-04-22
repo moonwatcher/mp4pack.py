@@ -376,12 +376,12 @@ class Environment(object):
         if url:
             parsed = urlparse.urlparse(url)
             if parsed.path:
-                decoded = Ontology(self, 'resource.decode.url')
+                decoded = Ontology(self, 'ns.medium.resource.url.decode')
                 decoded['directory'], decoded['file name'] = os.path.split(parsed.path)
                 if 'file name' in decoded and 'directory' in decoded:
                     decoded['media kind']
                     decoded['volume path']
-                    result = Ontology(self, 'resource.file.url')
+                    result = Ontology(self, 'ns.medium.resource.location')
                     result['url'] = url
                     result['path'] = parsed.path
                     result['scheme'] = parsed.scheme or u'file'
@@ -529,8 +529,12 @@ class Environment(object):
     
     def default_json_handler(self, o):
         result = None
+        from bson.objectid import ObjectId
         if isinstance(o, datetime):
             result = o.isoformat()
+        if isinstance(o, ObjectId):
+            result = str(o)
+            
         return result
     
 
@@ -540,7 +544,7 @@ class Repository(object):
         self.log = logging.getLogger('repository')
         self.env = env
         self.node = node
-        self.mongodb = Ontology(self.env, 'system.mongodb', self.node['mongodb'])
+        self.mongodb = Ontology(self.env, 'ns.system.mongodb', self.node['mongodb'])
         self._volume = None
         self._connection = None
         if 'routing' not in self.node:

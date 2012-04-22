@@ -14,30 +14,29 @@ class AssetCache(object):
     def __init__(self, env):
         self.log = logging.getLogger('cache')
         self.env = env
-        self.assets = {}
+        self.asset = {}
     
     
     def find_asset(self, ontology):
         result = None
         if ontology and 'asset uri' in ontology:
-            if ontology['asset uri'] in self.assets:
-                result = self.assets[ontology['asset uri']]
+            if ontology['asset uri'] in self.asset:
+                result = self.asset[ontology['asset uri']]
             else:
                 result = Asset(self, ontology)
                 if result.valid:
-                    result.load()
                     self.assets[ontology['asset uri']] = result
                 else:
-                    result.unload()
                     result = None
         return result
     
     
     def find(self, ontology):
         result = None
-        asset = self.find_asset(ontology)
-        if asset:
-            result = asset.find(ontology)
+        if ontology:
+            asset = self.find_asset(ontology.project('ns.medium.asset.location'))
+            if asset:
+                result = asset.find(ontology)
         return result
     
     
@@ -51,11 +50,10 @@ class Asset(object):
         self.log = logging.getLogger('asset')
         self.cache = cache
         self.ontology = ontology
-        self.node = None
+        self.resource = {}
         self.volatile = False
         self.touched = False
-        self._resource_node = {}
-        self.resource = {}
+        self._node = None
     
     
     def __unicode__(self):
@@ -73,46 +71,13 @@ class Asset(object):
     
     
     @property
-    def managed(self):
-        return self.valid and self.node is not None
-    
-    
-    @property
-    def resources(self):
-        self.touch()
-        return self.resource.values()
-    
-    
-    def load(self):
-        if self.valid:
-            self.scan()
-            self.node = self.env.resolver.resolve(self.ontology['asset uri'])
-    
-    
-    def unload(self):
-        self.save()
-        self.resource.clear()
-        self.node = None
-        self.volatile = False
-    
-    
-    def flush(self):
-        # Reload the node to make sure we have a fresh copy
-        self.load()
-        
-        if self.managed:
-            for resource in self.resource.values():
-                if resource.orphan:
-                    if resource.ontology['resource uri'] in self.node['body']['resource']:
-                        del self.node['body']['resource'][resource.ontology['resource uri']]
-                        self.log.debug(u'Dropped record for %s', unicode(resource))
-                        self.volatile = True
-                        
-                elif resource.volatile and resource.indexed:
-                    resource.flush()
-                    self.node['body']['resource'][resource.ontology['resource uri']] = resource.node
-                    self.log.debug(u'Flushed record for %s', unicode(resource))
-                    self.volatile = True
+    def node(self):
+        if self._node is None:
+            if self.managed:
+                self._node = self.env.resolver.resolve(self.ontology['asset uri'])
+            if self._node is None:
+                self.crawl()
+        return self._node
     
     
     def clean(self):
@@ -120,7 +85,14 @@ class Asset(object):
         pass
     
     
-    def scan(self):
+    def crawl(self):
+        self._node = {
+            'head':{},
+            'body':{
+                'resource':{},
+            },
+        }
+        
         result = None
         if self.valid:
             o = Ontology.clone(self.ontology)
@@ -139,96 +111,105 @@ class Asset(object):
                                 if o['path'] and os.path.exists(o['path']):
                                     self.log.debug(u'Discovered %s', o['path'])
                                     x = self.find(Ontology.clone(o))
-                                    # DEBUG
-                                    x.load()
-                                    
                             else:
                                 for language in self.env.enumeration['language'].element.keys():
                                     o['language'] = language
                                     if o['path'] and os.path.exists(o['path']):
                                         self.log.debug(u'Discovered %s', o['path'])
                                         x = self.find(Ontology.clone(o))
-                                        # DEBUG
-                                        x.load()
                                         
                                     del o['language']
                             del o['profile']
                         del o['kind']
                     del o['volume']
+        self.volatile = True
         return result
     
     
     def find(self, ontology):
         result = None
-        if 'resource uri' in ontology:
+        if ontology and 'resource uri' in ontology:
             if ontology['resource uri'] in self.resource:
                 result = self.resource[ontology['resource uri']]
             else:
-                volatile = False
-                node = self.env.resolver.resolve(ontology['resource uri'])
-                if node is None:
-                    volatile = True
-                    crawler = Crawler(ontology)
-                    if crawler.valid:
-                        node = crawler.node
-                        
-                if node is not None:
-                    if 'container' in ontology:
-                        if ontology['container'] == 'mp4':
-                            result = MP4(self, ontology, node)
-                        elif ontology['container'] == 'matroska':
-                            result = Matroska(self, ontology, node)
-                        elif ontology['container'] == 'subtitles':
-                            result = Subtitles(self, ontology, node)
-                        elif ontology['container'] == 'chapters':
-                            result = TableOfContent(self, ontology, node)
-                        elif ontology['container'] == 'image':
-                            result = Artwork(self, ontology, node)
-                        elif ontology['container'] == 'raw audio':
-                            result = RawAudio(self, ontology, node)
-                        elif ontology['container'] == 'avi':
-                            result = Avi(self, ontology, node)
-                            
-                        if result:
-                            result.volatile = volatile
-                            self.resource[ontology['resource uri']] = result
+                result = Resource.create(self, ontology)
+                if result and result.valid:
+                    self.resource[ontology['resource uri']] = result
+                else: result = None
         return result
     
     
-    def save(self):
-        self.flush()
+    def commit(self):
+        self._node = None
+        for resource in self.resource.values():
+            if resource.managed:
+                if resource.available and resource.volatile and resource.indexed:
+                    resource.commit()
+                    self.node['body']['resource'][resource.ontology['resource uri']] = resource.ontology.node
+                    self.volatile = True
+                    
+                elif (not resource.available or not resource.indexed) and resource.ontology['resource uri'] in self.node['body']['resource']:
+                    del self.node['body']['resource'][resource.ontology['resource uri']]
+                    self.volatile = True
+                del self.resource[resource.ontology['resource uri']]
+            else:
+                resource.commit()
+                
         if self.volatile:
-            # self.em.save_asset(self.node)
+            self.env.resolver.save(self.node)
+            self.log.debug(u'Saved asset document %s', unicode(self))
+            self._node = None
             self.volatile = False
-            self.log.debug(u'Saved record for %s', unicode(self))
-        
+            self.touched = False
     
     
     def touch(self):
-        if not self.touched and self.managed:
-            for node in self.node['entity']['resource'].values():
-                ontology = Ontology(self.env, 'resource.file.url', node['ontology'])
-                self.find(ontology)
-            self.touched = True
+        if not self.touched:
+            for ref in self.node['body']['resource'].values():
+                self.find(Ontology(self.env, 'ns.medium.resource.location', ref['location']))
+        self.touched = True
     
 
 
 class Resource(object):
-    def __init__(self, asset, ontology, node):
+    def __init__(self, asset, ontology):
         self.log = logging.getLogger('resource')
         self.asset = asset
         self.ontology = ontology
-        self.node = node
         self.volatile = False
-        self.orphan = False
         
-        self._info = None
-        self._track = None
+        self._node = None
+        self._meta = None
+        self._stream = None
         self._hint = None
     
     
     def __unicode__(self):
         return unicode(self.ontology['resource uri'])
+    
+    
+    @classmethod
+    def create(cls, asset, ontology):
+        result = None
+        if ontology:
+            if'container' in ontology:
+                if ontology['container'] == 'mp4':
+                    result = MP4(asset, ontology)
+                elif ontology['container'] == 'matroska':
+                    result = Matroska(asset, ontology)
+                elif ontology['container'] == 'subtitles':
+                    result = Subtitles(asset, ontology)
+                elif ontology['container'] == 'chapters':
+                    result = TableOfContent(asset, ontology)
+                elif ontology['container'] == 'image':
+                    result = Artwork(asset, ontology)
+                elif ontology['container'] == 'raw audio':
+                    result = RawAudio(asset, ontology)
+                elif ontology['container'] == 'avi':
+                    result = Avi(asset, ontology)
+            else:
+                result = cls(asset, ontology)
+        return result
     
     
     @property
@@ -244,6 +225,11 @@ class Resource(object):
     @property
     def valid(self):
         return self.ontology is not None and 'resource uri' in self.ontology
+    
+    
+    @property
+    def managed(self):
+        return self.ontology['managed']
     
     
     @property
@@ -273,35 +259,41 @@ class Resource(object):
         return self.path and os.path.exists(self.path)
     
     
-    
     @property
-    def info(self):
-        if self._info is None:
-            if self.valid:
-                if self.node and 'info' in self.node:
-                    self._info = Ontology(self.env, 'resource.crawl.meta', self.node['info'])
-                else:
-                    self._info = Ontology(self.env, 'resource.file.url')
-        return self._info
+    def node(self):
+        if self._node is None:
+            self._node = self.env.resolver.resolve(self.ontology['resource uri'])
+            if self._node is None:
+                self.crawl()
+        return self._node
     
     
     @property
-    def track(self):
-        if self._track is None:
-            self._track = []
-            if self.node and 'stream' in self.node:
-                for track in self.node['stream']:
-                    self._track.append(Ontology(self.env, track))
-        return self._track
+    def meta(self):
+        if self._meta is None:
+            if self.node:
+                self._meta = Ontology(self.env, 'ns.medium.resource.crawl.meta', self.node['body']['meta'])
+        return self._meta
+    
+    
+    @property
+    def stream(self):
+        if self._stream is None:
+            if self.node and 'stream' in self.node['body']:
+                self._stream = []
+                for stream in self.node['body']['stream']:
+                    mtype = self.env.enumeration['stream kind'].find(stream['stream kind'])
+                    self._stream.append(Ontology(self.env, mtype.node['namepsace'], stream))
+        return self._stream
     
     
     @property
     def hint(self):
         if self._hint is None:
             if self.node and 'hint' in self.node:
-                self._hint = Ontology(self.env, 'resource.hint', self.node['hint'])
+                self._hint = Ontology(self.env, 'ns.medium.resource.hint', self.node['body']['hint'])
             else:
-                self._hint = Ontology(self.env, 'resource.hint')
+                self._hint = Ontology(self.env, 'ns.medium.resource.hint')
         return self._hint
     
     
@@ -320,21 +312,36 @@ class Resource(object):
     
     
     def flush(self):
-        if self.volatile:
-            if self._info is not None:
-                self.node['info'] = self._info.node
-                self._info = None
-                
-            if self._track is not None:
-                tracks = []
-                for track in self._track:
-                    tracks.append(track.node)
-                self.node['stream'] = tracks
-                self._track = None
-                
-            if self._hint is not None:
-                self.node['hint'] = self._hint.node
-                self._hint = None
+        # Flush meta to node
+        if self._meta is not None:
+            self.node['body']['meta'] = self._meta.node
+            self._meta = None
+            
+        # Flush streams to node
+        if self._stream is not None:
+            self.node['body']['stream'] = []
+            for stream in self._stream:
+                self.node['body']['stream'].append(stream.node)
+            self._stream = None
+            
+        # Flush hint to node
+        if self._hint is not None:
+            self.node['body']['hint'] = self._hint.node
+            self._hint = None
+    
+    
+    def commit(self):
+        self.flush()
+        if self.managed:
+            if self.available:
+                if self.volatile:
+                    self.env.resolver.save(self.node)
+                    self.log.debug(u'Saved resource document %s', unicode(self))
+                    self._node = None
+                    self.volatile = False
+            else:
+                self.env.resolver.remove(self.ontology['resource uri'])
+                self.log.debug(u'Dropped orphan resource document %s', unicode(self))
     
     
     def read(self):
@@ -380,7 +387,6 @@ class Resource(object):
     def delete(self, job):
         if self.path:
             self.env.purge_path(self.path)
-        self.orphan = True
     
     
     def copy(self, job):
@@ -462,67 +468,11 @@ class Container(Resource):
 class AudioVideoContainer(Container):
     def __init__(self, asset, ontology):
         Container.__init__(self, asset, ontology)
-        self._meta = None
-    
-    
-    @property
-    def meta(self):
-        if self._meta is None:
-            self._meta = Ontology.clone(self.ontology)
-            if self._meta['media kind'] == 'movie':
-                if 'tmdb_record' in self.node['entity']:
-                    movie = self.node['entity']['tmdb_record']
-                    
-                    if 'name' in movie:
-                        self._meta['name'] = movie['name']
-                    if 'overview' in movie and movie['overview'] != u'No overview found.':
-                        self._meta['long description'] = self.env.expression['whitespace'].sub(u' ', movie['overview']).strip()
-                    if 'certification' in movie:
-                        self._meta['rating'] = movie['certification']
-                    if 'released' in movie and movie['released']:
-                        self._meta['release date'] = datetime.strptime(movie['released'], u'%Y-%m-%d')
-                    if 'tagline' in movie and movie['tagline']:
-                        self._meta['description'] = self.env.expression['whitespace'].sub(u' ', movie['tagline']).strip()
-                    elif 'overview' in movie and movie['overview'] != u'No overview found.':
-                        s = self.env.expression['sentence end'].split(self.env.expression['whitespace'].sub(u' ', movie['overview']).strip(u'\'".,'))
-                        if s: self.meta_['description'] = s[0].strip(u'"\' ').strip() + u'.'
-                    self._load_itunemovi_meta(movie)
-                    self._load_genre_meta(movie)
-                    result = True
-                    
-            elif self._meta['media kind'] == 'tvshow':
-                if show and 'tvdb_record' in show and episode and 'tvdb_record' in episode:
-                    show = self.node['tv show']['tvdb_record']
-                    episode = self.node['entity']['tvdb_record']
-                    if 'name' in show:
-                        self._meta['tv show'] = show['name']
-                    if 'tv_season' in episode:
-                        self._meta['tv season'] = episode['tv_season']
-                    if 'tv_episode' in episode:
-                        self._meta['tv episode'] = episode['tv_episode']
-                    if 'name' in episode:
-                        self._meta['name'] = episode['name']
-                    if 'certification' in show:
-                        self._meta['rating'] = show['certification']
-                    if 'tv_network' in show:
-                        self._meta['tv network'] = show['tv_network']
-                    if 'released' in episode:
-                        self._meta['release date'] = episode['released']
-                    if 'overview' in episode:
-                        overview = self.env.expression['whitespace'].sub(u' ', episode['overview']).strip()
-                        self._meta['long description'] = overview
-                        s = self.env.expression['sentence end'].split(overview.strip(u'\'".,'))
-                        if s: self._meta['description'] = s[0].strip(u'"\' ').strip() + u'.'
-                        
-                    self._load_genre_meta(show)
-                    self._load_itunemovi_meta(show, True, False)
-                    self._load_itunemovi_meta(episode, False, True)
-        return self._meta
     
     
     @property
     def hd(self):
-        return self.info['width'] >= self.env.constant['hd threshold']
+        return self.meta['width'] >= self.env.constant['hd threshold']
     
     
     
@@ -591,7 +541,6 @@ class AudioVideoContainer(Container):
             self.env.execute(command, message, task.job.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
-    
     def _pack_mkv(self, task):
         command = self.env.initialize_command('mkvmerge', self.log)
         if command:
@@ -657,47 +606,6 @@ class AudioVideoContainer(Container):
             message = u'Pack {0} --> {1}'.format(unicode(self), unicode(product))
             self.env.execute(command, message, options.debug, pipeout=False, pipeerr=False, log=self.log)
     
-    
-    def _load_genre_meta(self, record):
-        if 'genres' in record and record['genres']:
-            genres = [ r for r in record['genres'] if r['type'] == 'genre' ]
-            if genres:
-                genre = genres[0]
-                self._meta['genre'] = genre['name']
-                if 'itmf' in genre:
-                    self._meta['genre type'] = genre['itmf']
-    
-    
-    def _load_itunemovi_meta(self, record, initialize=True, finalize=True):
-        if 'cast' in record:
-            if initialize:
-                for i in self.env.enumeration['itunmovi'].element.keys():
-                    self._meta[i] = []
-                    
-            self._meta['directors'].extend([ 
-                r['name'] for r in record['cast'] 
-                if r['department'] == 'Directing' and r['job'] == 'Director'
-            ])
-            self._meta['codirectors'].extend([
-                r['name'] for r in record['cast'] 
-                if r['department'] == 'Directing' and  r['job'] != 'Director'
-            ])
-            self._meta['producers'].extend([
-                r['name'] for r in record['cast'] 
-                if r['department'] == 'Production'
-            ])
-            self._meta['screenwriters'].extend([
-                r['name'] for r in record['cast'] 
-                if r['department'] == 'Writing'
-            ])
-            self._meta['cast'].extend([
-                r['name'] for r in record['cast'] 
-                if r['department'] == 'Actors'
-            ])
-            
-            if finalize:
-                for i in self.env.enumeration['itunmovi'].element.keys():
-                    if not self._meta[i]: del self._meta[i]
     
     
 
@@ -802,44 +710,7 @@ class MP4(AudioVideoContainer):
     
     
     def tag(self, task):
-        AudioVideoContainer.tag(self, task)
-        if self.meta:
-            supported = [ k for k in self.meta.keys() if self.env.prototype['crawl']['info'].find('subler', k) is not None ]
-            missing = [ k for k in supported if k not in self.info ]
-            outdated = [ k for k in supported if self.info[k] != self.meta[k] ]
-            
-            if self.hd:
-                if 'hd video' not in self.info:
-                    missing['hd video'] = True
-                elif not self.info['hd video']:
-                    outdated['hd video'] = True
-            else:
-                if 'hd video' not in self.info:
-                    missing['hd video'] = False
-                elif self.info['hd video']:
-                    outdated['hd video'] = False
-                    
-            for k in outdated:
-                self.log.debug('Update tag %s from %s to %s', k, self.info[k], self.meta[k])
-                
-            for k in missing:
-                self.log.debug('Set tag %s to %s', k, self.meta[k])
-                
-        update = {}
-        for k in missing:
-            update[k] = self.meta[k]
-        for k in outdated:
-            update[k] = self.meta[k]
-            
-        if update:
-            q = u''.join([self.env.encode_subler_key_value(k, update[k]) for k in sorted(update)])
-            message = u'Update tags: {0} --> {1}'.format(u', '.join([self.env.prototype['crawl']['info'].find('name', k).node['print'] for k in sorted(update)]), unicode(self))
-            command = self.env.initialize_command('subler', self.log)
-            if command:
-                command.extend([u'-o', self.path, u'-t', q])
-                self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-        else:
-            self.log.info(u'No tags need update in %s', unicode(self))
+        pass
     
     
     def optimize(self, task):
@@ -890,7 +761,7 @@ class MP4(AudioVideoContainer):
                         u'-i', pivot.resource.path,
                         u'-l', self.env.enumeration['language'].find(track['language']).name,
                         u'-n', track['name'],
-                        u'-a', unicode(int(round(self.info['height'] * track['height'])))
+                        u'-a', unicode(int(round(self.meta['height'] * track['height'])))
                     ])
                     self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                     

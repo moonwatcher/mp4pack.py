@@ -87,40 +87,16 @@ def main():
     queue = Queue(env)
     
     #test(env)
-    #test2(env)
     if 'uris' in env.ontology:
-        job = ServiceJob(queue, env.ontology.project('system.job'))
+        job = ServiceJob(queue, env.ontology.project('ns.system.job'))
     else:
-        job = ResourceJob(queue, env.ontology.project('system.job'))
+        job = ResourceJob(queue, env.ontology.project('ns.system.job'))
     job.run()
     
     sys.stderr.write(job.document)
 
 
 def test(env):
-    #env.resolver.cache(u'resource://yoshi/c/tvdb/show/en/73255/complete')
-    print env.resolver.json(u'resource://yoshi/c/tvdb/episode/en/73255/4/7')
-    print env.resolver.json(u'resource://yoshi/c/tvdb/show/73255/poster')
-    
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/configuration')
-    
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/en/tt0080684')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/cast')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/image')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/keyword')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/release')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/trailer')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/translation')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/movie/1891/alternative')
-    
-    
-    
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/person/1891')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/person/1891/credit')
-    #print env.resolver.json(u'resource://yoshi/c/tmdb/person/1891/poster')
-
-
-def test2(env):
     from crawler import Crawler
     paths = [
         'file://yoshi/Users/lg/Downloads/samurai jack s01e07 jack and the three blind archers.m4v',

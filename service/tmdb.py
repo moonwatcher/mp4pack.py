@@ -38,6 +38,7 @@ class TMDbHandler(ResourceHandler):
                 entry = {
                     u'branch':query['branch'],
                     u'parameter':Ontology.clone(query['parameter']),
+                    u'head':{},
                     u'body':document,
                 }
                 

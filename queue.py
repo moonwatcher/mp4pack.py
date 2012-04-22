@@ -215,7 +215,7 @@ class ResourceJob(Job):
             targets = sorted(set(targets))
             self.log.debug(u'Found %d files to process', len(targets))
             for path in targets:
-                self.enqueue(ResourceTask(self, self.ontology.project('system.task'), u'file://{}'.format(path)))
+                self.enqueue(ResourceTask(self, self.ontology.project('ns.system.task'), u'file://{}'.format(path)))
     
     
     def filter(self, path):
@@ -274,7 +274,8 @@ class ResourceTask(Task):
         self.load()
         if self.resource:
             self.product = []
-            self.query = Query(self.resource.asset.resources)
+            self.resource.asset.touch()
+            self.query = Query(self.resource.asset.resource.values())
             self.transform = Transform()
             action = getattr(self, self.ontology['action'], None)
             if action: action()
@@ -353,7 +354,7 @@ class ServiceJob(Job):
         
         if self.ontology['uris']:
             for uri in self.ontology['uris']:
-                self.enqueue(ServiceTask(self, self.ontology.project('system.task'), uri))
+                self.enqueue(ServiceTask(self, self.ontology.project('ns.system.task'), uri))
     
 
 
@@ -389,7 +390,7 @@ class ServiceTask(Task):
     
     def get(self):
         from pymongo import json_util
-        print json.dumps(self.document, sort_keys=True, indent=4,  default=json_util.default)
-        # print json.dumps(self.document, sort_keys=True, indent=4,  default=self.env.default_json_handler)
+        #print json.dumps(self.document, sort_keys=True, indent=4,  default=json_util.default)
+        print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
 

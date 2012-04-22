@@ -528,25 +528,28 @@ class Prototype(Element):
     
     
     def _cast_date(self, value):
-        # Datetime conversion, must have at least a Year, Month and Day. 
-        # If Year is present but Month and Day are missing they are set to 1
-        
         result = None
-        match = self.env.expression['full utc datetime'].search(value)
-        if match:
-            parsed = dict([(k, int(v)) for k,v in match.groupdict().iteritems() if k != u'tzinfo' and v is not None])
-            if u'month' not in parsed:
-                parsed[u'month'] = 1
-            if u'day' not in parsed:
-                parsed[u'day'] = 1
-            try:
-                result = datetime(**parsed)
-            except TypeError, ValueError:
-                self.log.debug(u'Failed to decode datetime %s', value)
-                result = None
+        if 'format' in self.node and self.node['format'] == 'unix time':
+            result = self._cast_int(value)
+            if result is not None:
+                result = datetime.utcfromtimestamp(result)
         else:
-            self.log.debug(u'Failed to parse datetime %s', value)
-            result = None
+            # Datetime conversion, must have at least a Year, Month and Day. 
+            # If Year is present but Month and Day are missing they are set to 1
+            
+            match = self.env.expression['full utc datetime'].search(value)
+            if match:
+                parsed = dict([(k, int(v)) for k,v in match.groupdict().iteritems() if k != u'tzinfo' and v is not None])
+                if u'month' not in parsed:
+                    parsed[u'month'] = 1
+                if u'day' not in parsed:
+                    parsed[u'day'] = 1
+                try:
+                    result = datetime(**parsed)
+                except TypeError, ValueError:
+                    self.log.debug(u'Failed to decode datetime %s', value)
+            else:
+                self.log.debug(u'Failed to parse datetime %s', value)
         return result
     
     

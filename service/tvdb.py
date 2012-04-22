@@ -73,7 +73,7 @@ class TVDbHandler(ResourceHandler):
                     
                     # Collect all elements of this type into a list
                     if ns.node['coalesce']:
-                        entry = {u'branch':branch, u'body':[],}
+                        entry = {u'branch':branch, u'head':{}, u'body':[],}
                         for node in element.findall(ns.node['tag']):
                             o = Ontology(self.env, branch['namespace'])
                             for item in node.getchildren():
@@ -94,6 +94,7 @@ class TVDbHandler(ResourceHandler):
                             entry = {
                                 u'branch':branch,
                                 u'parameter':query['parameter'].project(branch['namespace']),
+                                u'head':{},
                                 u'body':o.node,
                             }
                             

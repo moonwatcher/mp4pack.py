@@ -41,7 +41,6 @@ class Crawler(object):
     
     @property
     def node(self):
-        self.normalize()
         return {
             'location':self.ontology.node,
             'meta':self.meta.node,

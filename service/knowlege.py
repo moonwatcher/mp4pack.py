@@ -10,10 +10,12 @@ class KnowlegeBaseHandler(ResourceHandler):
     
     
     def fetch(self, query):
+        # create an empty record
         pass
     
     
     def parse(self, query):
+        # update the indexs
         pass
     
 
