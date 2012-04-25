@@ -131,6 +131,7 @@ class ResourceHandler(object):
                         'repository':repository,
                         'location':location,
                         'branch':branch,
+                        'match':match,
                         'uri':uri,
                         'parameter':None,
                         'stream':[],
@@ -145,10 +146,6 @@ class ResourceHandler(object):
                     # add an api key if one is specified for the handler
                     if 'api key' in self.node:
                         query['parameter']['api key'] = self.node['api key']
-                        
-                    # calculate a remote url if the match specifies one
-                    if 'remote' in match:
-                        query['remote url'] = match['remote'].format(**query['parameter'])
                         
                     self.fetch(query)
                     self.parse(query)
@@ -253,6 +250,5 @@ class ResourceHandler(object):
     
     def parse(self, query):
         pass
-    
     
 

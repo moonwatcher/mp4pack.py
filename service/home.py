@@ -10,12 +10,29 @@ class HomeHandler(ResourceHandler):
     
     
     def fetch(self, query):
-        # create an empty record
-        pass
+        if 'depend' in query['match']:
+            document = self.resolver.resolve(query['match']['depend'].format(**query['parameter']))
+            if document is not None:
+                query['stream'].append(document)
     
     
     def parse(self, query):
-        # update the indexs
-        pass
+        for stream in query['stream']:
+                 entry = {
+                     u'branch':query['branch'],
+                     u'parameter':query['parameter'],
+                     u'head':{},
+                     u'body':document,
+                 }
+                 
+                 # update index
+                 ns = self.env.namespace[entry['branch']['namespace']]
+                 if 'index' in query['branch']:
+                     for index in query['branch']['index']:
+                         prototype = ns.find(index)
+                         if prototype and prototype.node['tmdb'] in document:
+                             entry[u'parameter'][index] = prototype.cast(document[prototype.node['tmdb']])
+                             
+                 query['result'].append(entry)
     
 

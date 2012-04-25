@@ -5615,15 +5615,11 @@ configuration = {
                         },
                         {
                             'filter':ur'/h/movie/tmdb/(?P<tmdb_movie_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tmdb/movie/{tmdb movie id}',
-                            ]
+                            'depend':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
                         },
                         {
                             'filter':ur'/h/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
-                            ]
+                            'depend':ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
                         },
                     ],
                     'resolvable':[
@@ -5660,9 +5656,7 @@ configuration = {
                         },
                         {
                             'filter':ur'/h/tvshow/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/show/{tvdb tv show id}',
-                            ],
+                            'depend':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
                         },
                     ],
                     'resolvable':[
@@ -5698,9 +5692,7 @@ configuration = {
                         },
                         {
                             'filter':ur'/h/tvshow/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
-                            ]
+                            'depend':ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
                         },
                     ],
                     'resolvable':[
@@ -5743,9 +5735,7 @@ configuration = {
                         },
                         {
                             'filter':ur'/h/tvshow/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}'
-                            ],
+                            'depend':ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}'
                         },
                     ],
                     'resolvable':[
@@ -5876,9 +5866,7 @@ configuration = {
                         },
                         {
                             'filter':ur'/h/person/tmdb/(?P<tmdb_person_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/person/{tmdb person id}'
-                            ],
+                            'depend':ur'/c/tmdb/person/{tmdb person id}'
                         },
                     ],
                     'resolvable':[
@@ -5904,9 +5892,7 @@ configuration = {
                         },
                         {
                             'filter':ur'/h/company/tmdb/(?P<tmdb_company_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/company/{tmdb company id}'
-                            ],
+                            'depend':ur'/c/tmdb/company/{tmdb company id}'
                         },
                     ],
                     'resolvable':[
@@ -5932,9 +5918,7 @@ configuration = {
                         },
                         {
                             'filter':ur'/h/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/genre/{tmdb genre id}'
-                            ],
+                            'depend':ur'/c/tmdb/genre/{tmdb genre id}'
                         },
                     ],
                     'resolvable':[

@@ -14,6 +14,10 @@ class TMDbHandler(ResourceHandler):
     
     
     def fetch(self, query):
+        # calculate a remote url if the match specifies one
+        if 'remote' in query['match']:
+            query['remote url'] = query['match']['remote'].format(**query['parameter'])
+            
         self.log.debug(u'Fetching %s', query['remote url'])
         request = Request(query['remote url'], None, {'Accept': 'application/json'})
         
