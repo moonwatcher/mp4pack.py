@@ -4,6 +4,13 @@ import re
 import logging
 
 configuration = {
+    'system':{
+        'home':u'/usr/local/etc/mpk',
+        'domain':None,
+        'host':None,
+        'threads':2,
+        'language':'en',
+    },
     'default':{
         'profile':{
             'name':'default',
@@ -477,13 +484,6 @@ configuration = {
                 ],
             }
         },
-    },
-    'system':{
-        'home':u'/usr/local/etc/mpk',
-        'domain':None,
-        'host':None,
-        'threads':2,
-        'language':'en',
     },
     'archetype':{
         'character encoding':{
@@ -5602,157 +5602,391 @@ configuration = {
         
     },
     'service':{
-        'medium':{
-            'match':ur'^resource://(?P<host>[^/]+)(?P<relative>/m/.*)$',
+        'home':{
+            'match':ur'^resource://(?P<host>[^/]+)(?P<relative>/h/.*)$',
             'branch':{
-                'medium.asset.movie':{
+                'home.movie':{
                     'match':[
                         {
-                            'filter':ur'/m/asset/movie/(?P<movie_id>[0-9]+)',
+                            'filter':ur'/h/movie/(?P<movie_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/movie/~/(?P<movie_handle>[^/]+)',
+                        },
+                        {
+                            'filter':ur'/h/movie/tmdb/(?P<tmdb_movie_id>[0-9]+)',
+                            'depend':[
+                                ur'/c/{language}/tmdb/movie/{tmdb movie id}',
+                            ]
+                        },
+                        {
+                            'filter':ur'/h/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)',
+                            'depend':[
+                                ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
+                            ]
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'movie asset',
-                            'format':ur'/m/asset/movie/{movie id}',
+                            'name':u'movie knowledge by id',
+                            'format':ur'/h/movie/{movie id}',
+                        },
+                        {
+                            'name':u'movie knowledge by id',
+                            'format':ur'/h/movie/~/{movie handle}',
+                        },
+                        {
+                            'name':u'movie knowledge by tmdb id',
+                            'format':ur'/h/movie/tmdb/{tmdb movie id}',
+                        },
+                        {
+                            'name':u'movie knowledge by imdb id',
+                            'format':ur'/h/movie/imdb/{imdb movie id}',
                         },
                     ],
-                    'type':'reference',
-                    'collection':'medium_asset_movie',
-                    'collection reference':'medium_resource_movie',
-                    'namespace':'medium.asset.movie',
+                    'type':'json',
+                    'collection':'knowledge_movie_home',
+                    'namespace':'home.movie',
+                    'key generator':'knowledge',
+                    'index':['movie id', 'tmdb movie id', 'imdb movie id', 'movie handle'],
                 },
-                'medium.asset.music.track':{
+                'home.tvshow.show':{
                     'match':[
                         {
-                            'filter':ur'/m/asset/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'/h/tvshow/show/(?P<tv_show_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/show/~/(?P<tv_show_handle>[^/]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)',
+                            'depend':[
+                                ur'/c/{language}/tvdb/show/{tvdb tv show id}',
+                            ],
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'music asset',
-                            'format':ur'/m/asset/music/track/{album id}/{disk position}/{track position}',
+                            'name':u'show knowledge by tv show id',
+                            'format':ur'/h/tvshow/show/{tv show id}',
+                        },
+                        {
+                            'name':u'show knowledge by tv show handle',
+                            'format':ur'/h/tvshow/show/~/{tv show handle}',
+                        },
+                        {
+                            'name':u'show knowledge by tvdb tv show id',
+                            'format':ur'/h/tvshow/show/tvdb/{tvdb tv show id}',
                         },
                     ],
-                    'type':'reference',
-                    'collection':'medium_asset_music_track',
-                    'collection reference':'medium_resource_music',
-                    'namespace':'medium.asset.music.track',
+                    'type':'json',
+                    'collection':'knowledge_tvshow_show_home',
+                    'namespace':'home.tvshow.show',
+                    'key generator':'knowledge',
+                    'index':['tv show id', 'tv show handle', 'tvdb tv show id'],
                 },
-                'medium.asset.tvshow.episode':{
+                'home.tvshow.season':{
                     'match':[
                         {
-                            'filter':ur'/m/asset/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'/h/tvshow/season/(?P<disk_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/season/~/(?P<tv_show_handle>[0-9]+)/(?P<disk_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                            'depend':[
+                                ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
+                            ]
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tv show asset',
-                            'format':ur'/m/asset/tvshow/episode/{tv show id}/{disk position}/{track position}',
+                            'name':u'season knowledge by disk id',
+                            'format':ur'/h/tvshow/season/{disk id}',
+                        },
+                        {
+                            'name':u'season knowledge by tv show id and position',
+                            'format':ur'/h/tvshow/season/{tv show id}/{disk position}',
+                        },
+                        {
+                            'name':u'season knowledge by tv show handle and position',
+                            'format':ur'/h/tvshow/season/~/{tv show handle}/{disk position}',
+                        },
+                        {
+                            'name':u'season knowledge by tvdb tv show id and position',
+                            'format':ur'/h/tvshow/season/tvdb/{tvdb tv show id}/{disk position}',
                         },
                     ],
-                    'type':'reference',
-                    'collection':'medium_asset_tvshow_episode',
-                    'collection reference':'medium_resource_tvshow',
-                    'namespace':'medium.asset.tvshow.episode',
+                    'type':'json',
+                    'collection':'knowledge_tvshow_season_home',
+                    'namespace':'home.tvshow.season',
+                    'key generator':'knowledge',
+                    'index':['tv show id', 'tv show handle', 'tvdb tv show id', 'disk id', 'disk position'],
                 },
-                'medium.resource.movie.language':{
+                'home.tvshow.episode':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<movie_id>[0-9]+)$',
+                            'filter':ur'/h/tvshow/episode/(?P<track_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/episode/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/episode/~/(?P<tv_show_handle>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/tvshow/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'depend':[
+                                ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}'
+                            ],
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'movie resource with language',
-                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{language}/{movie id}',
+                            'name':u'episode knowledge by track id',
+                            'format':ur'/h/tvshow/episode/{track id}',
+                        },
+                        {
+                            'name':u'episode knowledge by disk id',
+                            'format':ur'/h/tvshow/episode/{disk id}/{track position}',
+                        },
+                        {
+                            'name':u'episode knowledge by tv show id',
+                            'format':ur'/h/tvshow/episode/{tv show id}/{disk position}/{track position}',
+                        },
+                        {
+                            'name':u'episode knowledge by tv show handle',
+                            'format':ur'/h/tvshow/episode/~/{tv show handle}/{disk position}/{track position}',
+                        },
+                        {
+                            'name':u'episode knowledge by tvdb tv show id',
+                            'format':ur'/h/tvshow/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_movie',
-                    'namespace':'medium.resource.movie',
+                    'type':'json',
+                    'collection':'knowledge_tvshow_episode_home',
+                    'namespace':'home.tvshow.episode',
+                    'key generator':'knowledge',
+                    'index':['tv show id', 'tv show handle', 'tvdb tv show id', 'disk id', 'track id', 'disk position', 'track position'],
                 },
-                'medium.resource.movie':{
+                'home.music.album':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<movie_id>[0-9]+)$',
+                            'filter':ur'/h/music/album/(?P<album_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/music/album/~/(?P<album_handle>[^/]+)',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'movie resource',
-                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{movie id}',
+                            'name':u'music album',
+                            'format':ur'/h/music/album/{album id}',
+                        },
+                        {
+                            'name':u'music album',
+                            'format':ur'/h/music/album/~/{album handle}',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_movie',
-                    'namespace':'medium.resource.movie',
+                    'type':'json',
+                    'collection':'knowledge_music_album_home',
+                    'namespace':'home.music.album',
+                    'index':['album id', 'album handle'],
                 },
-                'medium.resource.tvshow.language':{
+                'home.music.disk':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'/h/music/disk/(?P<disk_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/music/disk/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/music/disk/~/(?P<album_handle>[^/]+)/(?P<disk_position>[0-9]+)',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tv show episode resource with language',
-                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{language}/{tv show id}/{disk position}/{track position}',
+                            'name':u'music disk by disk id',
+                            'format':ur'/h/music/disk/{disk id}',
+                        },
+                        {
+                            'name':u'music disk by album id',
+                            'format':ur'/h/music/disk/{album id}/{disk position}',
+                        },
+                        {
+                            'name':u'music disk by album id',
+                            'format':ur'/h/music/disk/~/{album handle}/{disk position}',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_tvshow',
-                    'namespace':'medium.resource.tvshow',
+                    'type':'json',
+                    'collection':'knowledge_music_disk_home',
+                    'namespace':'home.music.disk',
+                    'index':['album id', 'disk id', 'disk position', 'album handle'],
                 },
-                'medium.resource.tvshow':{
+                'home.music.track':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'/h/music/track/(?P<track_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/music/track/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/music/track/~/(?P<album_handle>[^/]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tv show episode resource',
-                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{tv show id}/{disk position}/{track position}',
+                            'name':u'music track by track id',
+                            'format':ur'/h/music/track/{track id}',
+                        },
+                        {
+                            'name':u'music track by disk id',
+                            'format':ur'/h/music/track/{disk id}/{track position}',
+                        },
+                        {
+                            'name':u'music track by album id',
+                            'format':ur'/h/music/track/{album id}/{disk position}/{track position}',
+                        },
+                        {
+                            'name':u'music track by album id',
+                            'format':ur'/h/music/track/~/{album handle}/{disk position}/{track position}',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_tvshow',
-                    'namespace':'medium.resource.tvshow',
+                    'type':'json',
+                    'collection':'knowledge_music_track_home',
+                    'namespace':'home.music.track',
+                    'index':['album id', 'disk id', 'track id', 'disk position', 'track position', 'album handle'],
                 },
-                'medium.resource.music.language':{
+                'home.person':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'/h/person/(?P<person_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/person/tmdb/(?P<tmdb_person_id>[0-9]+)',
+                            'depend':[
+                                ur'/c/tmdb/person/{tmdb person id}'
+                            ],
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'music track resource with language',
-                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{language}/{album id}/{disk position}/{track position}',
+                            'name':u'person by knowledge id',
+                            'format':ur'/h/person/{person id}',
+                        },
+                        {
+                            'name':u'person by tmdb id',
+                            'format':ur'/h/person/tmdb/{tmdb person id}',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_music',
-                    'namespace':'medium.resource.music',
+                    'type':'json',
+                    'collection':'knowledge_person_home',
+                    'namespace':'home.person',
+                    'key generator':'knowledge',
+                    'index':['person id', 'tmdb person id'],
                 },
-                'medium.resource.music':{
+                'home.company':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'/h/company/(?P<company_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/company/tmdb/(?P<tmdb_company_id>[0-9]+)',
+                            'depend':[
+                                ur'/c/tmdb/company/{tmdb company id}'
+                            ],
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'music track resource',
-                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{album id}/{disk position}/{track position}',
+                            'name':u'company by knowledge id',
+                            'format':ur'/h/company/{company id}',
+                        },
+                        {
+                            'name':u'company by tmdb id',
+                            'format':ur'/h/company/tmdb/{tmdb company id}',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_music',
-                    'namespace':'medium.resource.music',
+                    'type':'json',
+                    'collection':'knowledge_company_home',
+                    'namespace':'home.company',
+                    'key generator':'knowledge',
+                    'index':['company id', 'tmdb company id'],
                 },
-            }
+                'home.genre':{
+                    'match':[
+                        {
+                            'filter':ur'/h/genre/(?P<genre_id>[0-9]+)',
+                        },
+                        {
+                            'filter':ur'/h/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)',
+                            'depend':[
+                                ur'/c/tmdb/genre/{tmdb genre id}'
+                            ],
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'genre',
+                            'format':ur'/h/genre/{genre id}',
+                        },
+                        {
+                            'name':u'genre by tmdb id',
+                            'format':ur'/h/genre/tmdb/{tmdb genre id}',
+                        },
+                    ],
+                    'type':'json',
+                    'collection':'knowledge_genre_home',
+                    'namespace':'home.genre',
+                    'key generator':'knowledge',
+                },
+                'home.job':{
+                    'match':[
+                        {
+                            'filter':ur'/h/job/(?P<job_id>[0-9]+)',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'job',
+                            'format':ur'/h/job/{job id}',
+                        },
+                    ],
+                    'type':'json',
+                    'collection':'knowledge_job_home',
+                    'namespace':'home.job',
+                    'key generator':'knowledge',
+                },
+                'home.department':{
+                    'match':[
+                        {
+                            'filter':ur'/h/department/(?P<department_id>[0-9]+)',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'department',
+                            'format':ur'/h/department/{department id}',
+                        },
+                    ],
+                    'type':'json',
+                    'collection':'knowledge_department_home',
+                    'namespace':'home.department',
+                    'key generator':'knowledge',
+                },
+            },
         },
         'knowledge':{
             'match':ur'^resource://(?P<host>[^/]+)(?P<relative>/k/.*)$',
@@ -5771,370 +6005,6 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_configuration',
-                },
-                
-                'knowledge.movie.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/movie/~/(?P<movie_handle>[^/]+)',
-                        },
-                        {
-                            'filter':ur'/k/movie/tmdb/(?P<tmdb_movie_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tmdb/movie/{tmdb movie id}',
-                            ]
-                        },
-                        {
-                            'filter':ur'/k/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
-                            ]
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'movie knowledge by id',
-                            'format':ur'/k/movie/{movie id}',
-                        },
-                        {
-                            'name':u'movie knowledge by id',
-                            'format':ur'/k/movie/~/{movie handle}',
-                        },
-                        {
-                            'name':u'movie knowledge by tmdb id',
-                            'format':ur'/k/movie/tmdb/{tmdb movie id}',
-                        },
-                        {
-                            'name':u'movie knowledge by imdb id',
-                            'format':ur'/k/movie/imdb/{imdb movie id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_movie_home',
-                    'namespace':'knowledge.movie',
-                    'key generator':'knowledge',
-                    'index':['movie id', 'tmdb movie id', 'imdb movie id', 'movie handle'],
-                },
-                'knowledge.tvshow.show.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/tvshow/show/(?P<tv_show_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/show/~/(?P<tv_show_handle>[^/]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/show/{tvdb tv show id}',
-                            ],
-                        },
-                        {
-                            'filter':ur'/k/tvshow/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/show/{tvdb tv show id}',
-                            ],
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'show knowledge by tv show id',
-                            'format':ur'/k/tvshow/show/{tv show id}',
-                        },
-                        {
-                            'name':u'show knowledge by tv show handle',
-                            'format':ur'/k/tvshow/show/~/{tv show handle}',
-                        },
-                        {
-                            'name':u'show knowledge by tvdb tv show id',
-                            'format':ur'/k/tvshow/show/tvdb/{tvdb tv show id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_tvshow_show_home',
-                    'namespace':'knowledge.tvshow.show',
-                    'key generator':'knowledge',
-                    'index':['tv show id', 'tv show handle', 'tvdb tv show id'],
-                },
-                'knowledge.tvshow.season.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/tvshow/season/(?P<disk_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/season/~/(?P<tv_show_handle>[0-9]+)/(?P<disk_position>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
-                            ]
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'season knowledge by disk id',
-                            'format':ur'/k/tvshow/season/{disk id}',
-                        },
-                        {
-                            'name':u'season knowledge by tv show id and position',
-                            'format':ur'/k/tvshow/season/{tv show id}/{disk position}',
-                        },
-                        {
-                            'name':u'season knowledge by tv show handle and position',
-                            'format':ur'/k/tvshow/season/~/{tv show handle}/{disk position}',
-                        },
-                        {
-                            'name':u'season knowledge by tvdb tv show id and position',
-                            'format':ur'/k/tvshow/season/tvdb/{tvdb tv show id}/{disk position}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_tvshow_season_home',
-                    'namespace':'knowledge.tvshow.season',
-                    'key generator':'knowledge',
-                    'index':['tv show id', 'tv show handle', 'tvdb tv show id', 'disk id', 'disk position'],
-                },
-                'knowledge.tvshow.episode.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/tvshow/episode/(?P<track_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/episode/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/episode/~/(?P<tv_show_handle>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/tvshow/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}'
-                            ],
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'episode knowledge by track id',
-                            'format':ur'/k/tvshow/episode/{track id}',
-                        },
-                        {
-                            'name':u'episode knowledge by disk id',
-                            'format':ur'/k/tvshow/episode/{disk id}/{track position}',
-                        },
-                        {
-                            'name':u'episode knowledge by tv show id',
-                            'format':ur'/k/tvshow/episode/{tv show id}/{disk position}/{track position}',
-                        },
-                        {
-                            'name':u'episode knowledge by tv show handle',
-                            'format':ur'/k/tvshow/episode/~/{tv show handle}/{disk position}/{track position}',
-                        },
-                        {
-                            'name':u'episode knowledge by tvdb tv show id',
-                            'format':ur'/k/tvshow/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_tvshow_episode_home',
-                    'namespace':'knowledge.tvshow.episode',
-                    'key generator':'knowledge',
-                    'index':['tv show id', 'tv show handle', 'tvdb tv show id', 'disk id', 'track id', 'disk position', 'track position'],
-                },
-                'knowledge.music.album.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/music/album/(?P<album_id>[0-9]+)',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'music album',
-                            'format':ur'/k/music/album/{album id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_music_album_home',
-                    'namespace':'knowledge.music.album',
-                    'index':['album id'],
-                },
-                'knowledge.music.disk.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/music/disk/(?P<disk_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/music/disk/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'music disk by disk id',
-                            'format':ur'/k/music/disk/{disk id}',
-                        },
-                        {
-                            'name':u'music disk by album id',
-                            'format':ur'/k/music/disk/{album id}/{disk position}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_music_disk_home',
-                    'namespace':'knowledge.music.disk',
-                    'index':['album id', 'disk id', 'disk position'],
-                },
-                'knowledge.music.track.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/music/track/(?P<track_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/music/track/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'music track by track id',
-                            'format':ur'/k/music/track/{track id}',
-                        },
-                        {
-                            'name':u'music track by disk id',
-                            'format':ur'/k/music/track/{disk id}/{track position}',
-                        },
-                        {
-                            'name':u'music track by album id',
-                            'format':ur'/k/music/track/{album id}/{disk position}/{track position}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_music_track_home',
-                    'namespace':'knowledge.music.track',
-                    'index':['album id', 'disk id', 'track id', 'disk position', 'track position'],
-                },
-                'knowledge.person.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/person/(?P<person_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/person/tmdb/(?P<tmdb_person_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/person/{tmdb person id}'
-                            ],
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'person by knowledge id',
-                            'format':ur'/k/person/{person id}',
-                        },
-                        {
-                            'name':u'person by tmdb id',
-                            'format':ur'/k/person/tmdb/{tmdb person id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_person_home',
-                    'namespace':'knowledge.person',
-                    'key generator':'knowledge',
-                    'index':['person id', 'tmdb person id'],
-                },
-                'knowledge.company.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/company/(?P<company_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/company/tmdb/(?P<tmdb_company_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/company/{tmdb company id}'
-                            ],
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'company by knowledge id',
-                            'format':ur'/k/company/{company id}',
-                        },
-                        {
-                            'name':u'company by tmdb id',
-                            'format':ur'/k/company/tmdb/{tmdb company id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_company_home',
-                    'namespace':'knowledge.company',
-                    'key generator':'knowledge',
-                    'index':['company id', 'tmdb company id'],
-                },
-                'knowledge.genre.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/genre/(?P<genre_id>[0-9]+)',
-                        },
-                        {
-                            'filter':ur'/k/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/genre/{tmdb genre id}'
-                            ],
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'genre',
-                            'format':ur'/k/genre/{genre id}',
-                        },
-                        {
-                            'name':u'genre by tmdb id',
-                            'format':ur'/k/genre/tmdb/{tmdb genre id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_genre_home',
-                    'namespace':'knowledge.genre',
-                    'key generator':'knowledge',
-                },
-                'knowledge.job.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/job/(?P<job_id>[0-9]+)',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'job',
-                            'format':ur'/k/job/{job id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_job_home',
-                    'namespace':'knowledge.job',
-                    'key generator':'knowledge',
-                },
-                'knowledge.department.home':{
-                    'match':[
-                        {
-                            'filter':ur'/k/department/(?P<department_id>[0-9]+)',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'department',
-                            'format':ur'/k/department/{department id}',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_department_home',
-                    'namespace':'knowledge.department',
-                    'key generator':'knowledge',
                 },
                 
                 'knowledge.playlist':{
@@ -7184,6 +7054,158 @@ configuration = {
                     'type':'xml',
                 },
             },
+        },
+        'medium':{
+            'match':ur'^resource://(?P<host>[^/]+)(?P<relative>/m/.*)$',
+            'branch':{
+                'medium.asset.movie':{
+                    'match':[
+                        {
+                            'filter':ur'/m/asset/movie/(?P<movie_id>[0-9]+)',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'movie asset',
+                            'format':ur'/m/asset/movie/{movie id}',
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset_movie',
+                    'collection reference':'medium_resource_movie',
+                    'namespace':'medium.asset.movie',
+                },
+                'medium.asset.music.track':{
+                    'match':[
+                        {
+                            'filter':ur'/m/asset/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'music asset',
+                            'format':ur'/m/asset/music/track/{album id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset_music_track',
+                    'collection reference':'medium_resource_music',
+                    'namespace':'medium.asset.music.track',
+                },
+                'medium.asset.tvshow.episode':{
+                    'match':[
+                        {
+                            'filter':ur'/m/asset/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tv show asset',
+                            'format':ur'/m/asset/tvshow/episode/{tv show id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset_tvshow_episode',
+                    'collection reference':'medium_resource_tvshow',
+                    'namespace':'medium.asset.tvshow.episode',
+                },
+                'medium.resource.movie.language':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<movie_id>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'movie resource with language',
+                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{language}/{movie id}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_movie',
+                    'namespace':'medium.resource.movie',
+                },
+                'medium.resource.movie':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<movie_id>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'movie resource',
+                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{movie id}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_movie',
+                    'namespace':'medium.resource.movie',
+                },
+                'medium.resource.tvshow.language':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tv show episode resource with language',
+                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{language}/{tv show id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_tvshow',
+                    'namespace':'medium.resource.tvshow',
+                },
+                'medium.resource.tvshow':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tv show episode resource',
+                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{tv show id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_tvshow',
+                    'namespace':'medium.resource.tvshow',
+                },
+                'medium.resource.music.language':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'music track resource with language',
+                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{language}/{album id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_music',
+                    'namespace':'medium.resource.music',
+                },
+                'medium.resource.music':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'music track resource',
+                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{album id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_music',
+                    'namespace':'medium.resource.music',
+                },
+            }
         },
     },
     'expression':[
