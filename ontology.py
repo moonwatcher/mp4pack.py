@@ -274,8 +274,7 @@ class Space(object):
         if 'synonym' in self.node:
             for synonym in self.node['synonym']:
                 for e in self.element.values():
-                    if e.node[synonym] is not None and \
-                    e.node[synonym] not in self._synonym:
+                    if e.node[synonym] is not None and e.node[synonym] not in self._synonym:
                         self._synonym[e.node[synonym]] = e
     
 

@@ -17,10 +17,6 @@ from service import Resolver
 class Environment(object):
     def __init__(self):
         self.log = logging.getLogger('environment')
-        
-        from config import configuration
-        self.node = configuration
-        
         self.ontology = None
         self.state = {
             'default':{},
@@ -253,7 +249,15 @@ class Environment(object):
     # Load environment
     
     def load(self):
-        self.load_node(self.node)
+        
+        import config.system
+        self.load_node(config.system.configuration)
+        
+        import config.namespace
+        self.load_node(config.namespace.configuration)
+        
+        import config.service
+        self.load_node(config.service.configuration)
         
         # Override the default home folder from env if specified
         home = os.getenv('MPK_HOME')

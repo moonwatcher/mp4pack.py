@@ -4,6 +4,7 @@ import re
 import logging
 import copy
 import json
+import urlparse
 from datetime import datetime
 from ontology import Ontology
 from pymongo import json_util
@@ -22,17 +23,30 @@ class Resolver(object):
         
         from tvdb import TVDbHandler
         self.handlers['tvdb'] = TVDbHandler(self, self.env.service['tvdb'])
+        
+        from home import HomeHandler
+        self.handlers['home'] = HomeHandler(self, self.env.service['home'])
+        
     
     
     def resolve(self, uri, location=None):
         result = None
-        for handler in self.handlers.values():
-            match = handler.match(uri)
-            if match is not None:
-                parsed = match.groupdict()
-                if parsed['host'] in self.env.repository:
-                    result = handler.resolve(parsed['relative'], self.env.repository[parsed['host']], location)
-                break
+        if uri is not None:
+            repository = None
+            p = urlparse.urlparse(uri)
+            if p.hostname is not None:
+                if p.hostname in self.env.repository:
+                    repository = self.env.repository[p.hostname]
+                else:
+                    self.log.warnning(u'Unresolvable host name %s', p.hostname)
+            else:
+                repository = self.env.repository[self.env.host]
+                
+            if repository is not None:
+                for handler in self.handlers.values():
+                    if handler.match(p.path):
+                        result = handler.resolve(p.path, repository, location)
+                        break
         return result
     
     
@@ -100,6 +114,7 @@ class ResourceHandler(object):
         return self.pattern.search(uri)
     
     
+    # Resolve attempts to locate the record by uri
     def resolve(self, uri, repository, location):
         result = None
         taken = False
@@ -121,6 +136,7 @@ class ResourceHandler(object):
         return result
     
     
+    # Produce will attempt to create the record out of available resources
     def produce(self, uri, repository, location):
         taken = False
         for branch in self.branch.values():
@@ -134,18 +150,14 @@ class ResourceHandler(object):
                         'match':match,
                         'uri':uri,
                         'parameter':None,
-                        'stream':[],
+                        'source':[],
                         'result':[],
                     }
                     
-                    # parse the parameters from the uri
-                    query['parameter'] = Ontology(self.env, branch['namespace'])
+                    # decode parameters from the uri
+                    query['parameter'] = Ontology(self.env, 'ns.service.genealogy')
                     for k,v in m.groupdict().iteritems():
                         query['parameter'].decode(k,v)
-                        
-                    # add an api key if one is specified for the handler
-                    if 'api key' in self.node:
-                        query['parameter']['api key'] = self.node['api key']
                         
                     self.fetch(query)
                     self.parse(query)
@@ -153,50 +165,52 @@ class ResourceHandler(object):
                     break
     
     
+    def fetch(self, query):
+        pass
+    
+    
+    def parse(self, query):
+        pass
+    
+    
     def store(self, query):
         for entry in query['result']:
             record = None
             collection = query['repository'].database[entry['branch']['collection']]
             
-            # Build all the resolvable URIs
-            entry[u'head'][u'uri'] = []
+            # Build all the resolvable URIs from the genealogy
+            entry['record'][u'head'][u'uri'] = []
             for resolvable in entry['branch']['resolvable']:
                 try:
-                    entry[u'head']['uri'].append(resolvable['format'].format(**entry['parameter']))
+                    entry['record'][u'head']['uri'].append(resolvable['format'].format(**entry['record'][u'head'][u'genealogy']))
                 except KeyError, e:
-                    self.log.debug(u'Could not create uri for %s because %s was missing', resolvable['name'], e)
+                    self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
                     
-            # set the modified date
-            entry[u'head'][u'modified'] = datetime.utcnow()
+            # Set the modified date
+            entry['record'][u'head'][u'modified'] = datetime.utcnow()
             
-            # try to locate an existing record
-            for uri in entry[u'head'][u'uri']:
+            # Try to locate an existing record
+            for uri in entry['record'][u'head'][u'uri']:
                 record = collection.find_one({u'head.uri':uri})
                 if record is not None:
                     break
                     
+            # This is an update, we already have an existing record
             if record is not None:
-                # This is an update, we already have an existing record
-                for k,v in entry['head']:
+                for k,v in entry['record'][u'head']:
                     record[u'head'][k] = v
+                record[u'body'] = entry['record'][u'body']
+                
+            # This is an insert, no previous existing record was found
             else:
-                # This is an insert, no previous existing record was found
-                record = { u'head':entry[u'head'] }
+                record = entry['record']
                 record[u'head'][u'created'] = record[u'head'][u'modified']
                 
-                # issue a new id if a generator is specified,
-                # otherwise create a new mongodb ObjectId
-                if 'key generator' in entry['branch']:
-                    record['_id'] = self.resolver.issue(query['repository'].host, entry['branch']['key generator'])
-                else:
-                    record['_id'] = ObjectId()
-                    
-            # update the record's body
-            record[u'body'] = entry[u'body']
-            
-            # save the record to database
+            # Save the record to database
             self.log.debug(u'Storing %s', unicode(record[u'head']))
             collection.save(record)
+    
+    
     
     
     def remove(self, uri, repository):
@@ -242,13 +256,5 @@ class ResourceHandler(object):
                 collection.save(result)
                 break
         return result
-    
-    
-    def fetch(self, query):
-        pass
-    
-    
-    def parse(self, query):
-        pass
     
 

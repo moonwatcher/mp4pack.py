@@ -1,38 +1,45 @@
 # -*- coding: utf-8 -*-
 
-import json
-from StringIO import StringIO
-from urllib2 import Request, urlopen, URLError, HTTPError
+from service import ResourceHandler
 
 class HomeHandler(ResourceHandler):
-    def __init__(self, node):
-        ResourceHandler.__init__(self, node)
+    def __init__(self, resolver, node):
+        ResourceHandler.__init__(self, resolver, node)
     
     
     def fetch(self, query):
         if 'depend' in query['match']:
-            document = self.resolver.resolve(query['match']['depend'].format(**query['parameter']))
-            if document is not None:
-                query['stream'].append(document)
+            
+            # ensure default language
+            query['parameter']['language']
+            
+            # fetch dependencies
+            for dependency in query['match']['depend']:
+                document = self.resolver.resolve(dependency.format(**query['parameter']))
+                if document is not None:
+                    query['source'].append(document)
     
     
     def parse(self, query):
-        for stream in query['stream']:
-                 entry = {
-                     u'branch':query['branch'],
-                     u'parameter':query['parameter'],
-                     u'head':{},
-                     u'body':document,
-                 }
-                 
-                 # update index
-                 ns = self.env.namespace[entry['branch']['namespace']]
-                 if 'index' in query['branch']:
-                     for index in query['branch']['index']:
-                         prototype = ns.find(index)
-                         if prototype and prototype.node['tmdb'] in document:
-                             entry[u'parameter'][index] = prototype.cast(document[prototype.node['tmdb']])
-                             
-                 query['result'].append(entry)
+        entry = {
+            'branch':query['branch'],
+            'record':{
+                u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
+                u'body':None,
+            }
+        }
+        
+        # Collect concepts from the genealogy in the head of source documents
+        if 'index' in query['branch']:
+            for source in query['source']:
+                for index in query['branch']['index']:
+                    if index in source[u'head'][u'genealogy']:
+                        entry['record'][u'head'][u'genealogy'][index] = source[u'head'][u'genealogy'][index]
+                        
+        # Issue a new id if a generator is specified
+        if 'generate' in entry['branch']:
+            entry['record'][u'head'][u'genealogy'][entry['branch']['generate']['key']] = self.resolver.issue(query['repository'].host, entry['branch']['generate']['name'])
+            
+        query['result'].append(entry)
     
 

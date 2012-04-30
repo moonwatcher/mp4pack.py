@@ -16,7 +16,7 @@ class MediumHandler(ResourceHandler):
                 crawler = Crawler(query['location'])
                 if crawler.valid:
                     self.log.debug(u'Crawling %s', query['location']['path'])
-                    query['stream'].append(crawler)
+                    query['source'].append(crawler)
                     
         elif query['branch']['type'] == 'reference':
             # For assets, query the resource collection to collect the relevent resources
@@ -26,7 +26,7 @@ class MediumHandler(ResourceHandler):
     
     def parse(self, query):
         if query['branch']['type'] == 'crawl':
-            for crawler in query['stream']:
+            for crawler in query['source']:
                 entry = {
                     u'branch':query['branch'],
                     u'parameter':Ontology.clone(query['parameter']),
