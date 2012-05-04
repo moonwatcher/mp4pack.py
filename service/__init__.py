@@ -38,7 +38,7 @@ class Resolver(object):
                 if p.hostname in self.env.repository:
                     repository = self.env.repository[p.hostname]
                 else:
-                    self.log.warnning(u'Unresolvable host name %s', p.hostname)
+                    self.log.warning(u'Unresolvable host name %s', p.hostname)
             else:
                 repository = self.env.repository[self.env.host]
                 
@@ -92,12 +92,11 @@ class ResourceHandler(object):
         self.branch = {}
         
         for name, branch in self.node['branch'].iteritems():
-            if 'namespace' in branch:
-                branch['name'] = name
-                branch['persistant'] = 'collection' in branch
-                for match in branch['match']:
-                    match['pattern'] = re.compile(match['filter'])
-                self.branch[name] = branch
+            branch['name'] = name
+            branch['persistent'] = 'collection' in branch
+            for match in branch['match']:
+                match['pattern'] = re.compile(match['filter'])
+            self.branch[name] = branch
     
     
     @property
@@ -123,7 +122,7 @@ class ResourceHandler(object):
                 m = match['pattern'].search(uri)
                 if m is not None:
                     taken = True
-                    if branch['persistant']:
+                    if branch['persistent']:
                         collection = repository.database[branch['collection']]
                         result = collection.find_one({u'head.uri':uri})
                         
@@ -131,6 +130,9 @@ class ResourceHandler(object):
                         if result is None:
                             self.produce(uri, repository, location)
                             result = collection.find_one({u'head.uri':uri})
+                    else:
+                        self.produce(uri, repository, location)
+                        
                     break
             if taken: break
         return result
@@ -197,8 +199,14 @@ class ResourceHandler(object):
                     
             # This is an update, we already have an existing record
             if record is not None:
-                for k,v in entry['record'][u'head']:
+                
+                # Make a pseudo empty body for bodyless records
+                if u'body' not in entry['record']:
+                    entry['record'][u'body'] = None
+                    
+                for k,v in entry['record'][u'head'].iteritems():
                     record[u'head'][k] = v
+                print record[u'head']
                 record[u'body'] = entry['record'][u'body']
                 
             # This is an insert, no previous existing record was found
@@ -220,7 +228,7 @@ class ResourceHandler(object):
                 m = match['pattern'].search(uri)
                 if m is not None:
                     taken = True
-                    if branch['persistant']:
+                    if branch['persistent']:
                         self.log.debug(u'Dropping %s', uri)
                         collection = repository.database[branch['collection']]
                         collection.remove({u'head.uri':uri})
@@ -237,7 +245,7 @@ class ResourceHandler(object):
                     m = match['pattern'].search(uri)
                     if m is not None:
                         taken = True
-                        if branch['persistant']:
+                        if branch['persistent']:
                             collection = repository.database[branch['collection']]
                             result = collection.find_one({u'head.uri':uri})
                             if result is not None: break

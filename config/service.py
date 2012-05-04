@@ -8,39 +8,35 @@ configuration = {
                 'home.movie':{
                     'match':[
                         {
-                            'filter':ur'/h/movie/(?P<movie_id>[0-9]+)',
+                            'filter':ur'^/h/movie/(?P<movie_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/movie/~/(?P<movie_handle>[^/]+)',
+                            'filter':ur'^/h/movie/~/(?P<movie_handle>[^/]+)$',
                         },
                         {
-                            'filter':ur'/h/movie/tmdb/(?P<tmdb_movie_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tmdb/movie/{tmdb movie id}',
-                            ],
+                            'filter':ur'^/h/movie/tmdb/(?P<tmdb_movie_id>[0-9]+)$',
+                            'depend':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
                         },
                         {
-                            'filter':ur'/h/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
-                            ],
+                            'filter':ur'^/h/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
+                            'depend':ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'movie knowledge by id',
+                            'name':u'movie home by id',
                             'format':ur'/h/movie/{movie id}',
                         },
                         {
-                            'name':u'movie knowledge by id',
+                            'name':u'movie home by handle',
                             'format':ur'/h/movie/~/{movie handle}',
                         },
                         {
-                            'name':u'movie knowledge by tmdb id',
+                            'name':u'movie home by tmdb id',
                             'format':ur'/h/movie/tmdb/{tmdb movie id}',
                         },
                         {
-                            'name':u'movie knowledge by imdb id',
+                            'name':u'movie home by imdb id',
                             'format':ur'/h/movie/imdb/{imdb movie id}',
                         },
                     ],
@@ -53,29 +49,27 @@ configuration = {
                 'home.tvshow.show':{
                     'match':[
                         {
-                            'filter':ur'/h/tvshow/show/(?P<tv_show_id>[0-9]+)',
+                            'filter':ur'^/h/tvshow/show/(?P<tv_show_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/tvshow/show/~/(?P<tv_show_handle>[^/]+)',
+                            'filter':ur'^/h/tvshow/show/~/(?P<tv_show_handle>[^/]+)$',
                         },
                         {
-                            'filter':ur'/h/tvshow/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/show/{tvdb tv show id}',
-                            ],
+                            'filter':ur'^/h/tvshow/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'show knowledge by tv show id',
+                            'name':u'show home by tv show id',
                             'format':ur'/h/tvshow/show/{tv show id}',
                         },
                         {
-                            'name':u'show knowledge by tv show handle',
+                            'name':u'show home by tv show handle',
                             'format':ur'/h/tvshow/show/~/{tv show handle}',
                         },
                         {
-                            'name':u'show knowledge by tvdb tv show id',
+                            'name':u'show home by tvdb tv show id',
                             'format':ur'/h/tvshow/show/tvdb/{tvdb tv show id}',
                         },
                     ],
@@ -92,22 +86,18 @@ configuration = {
                 'home.tvshow.season':{
                     'match':[
                         {
-                            'filter':ur'/h/tvshow/season/(?P<disk_id>[0-9]+)',
+                            'filter':ur'^/h/tvshow/season/(?P<disk_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                            'filter':ur'^/h/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/tvshow/season/tvdb/(?P<tvdb_tv_season_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/season/{tvdb tv season id}',
-                            ],
+                            'filter':ur'^/h/tvshow/season/tvdb/(?P<tvdb_tv_season_id>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/season/{tvdb tv season id}',
                         },
                         {
-                            'filter':ur'/h/tvshow/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
-                            ],
+                            'filter':ur'^/h/tvshow/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
                         },
                     ],
                     'collect':[
@@ -115,19 +105,19 @@ configuration = {
                     ],
                     'resolvable':[
                         {
-                            'name':u'season knowledge by disk id',
+                            'name':u'season home by disk id',
                             'format':ur'/h/tvshow/season/{disk id}',
                         },
                         {
-                            'name':u'season knowledge by tv show id',
+                            'name':u'season home by tv show id',
                             'format':ur'/h/tvshow/season/{tv show id}/{disk position}',
                         },
                         {
-                            'name':u'season knowledge by tvdb tv season id',
+                            'name':u'season home by tvdb tv season id',
                             'format':ur'/h/tvshow/season/tvdb/{tvdb tv season id}',
                         },
                         {
-                            'name':u'season knowledge by tvdb tv show id',
+                            'name':u'season home by tvdb tv show id',
                             'format':ur'/h/tvshow/season/tvdb/{tvdb tv show id}/{disk position}',
                         },
                     ],
@@ -146,60 +136,54 @@ configuration = {
                 'home.tvshow.episode':{
                     'match':[
                         {
-                            'filter':ur'/h/tvshow/episode/(?P<track_id>[0-9]+)',
+                            'filter':ur'^/h/tvshow/episode/(?P<track_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/tvshow/episode/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/h/tvshow/episode/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/h/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/tvshow/episode/tvdb/(?P<tvdb_tv_episode_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/episode/{tvdb tv episode id}',
-                            ],
+                            'filter':ur'^/h/tvshow/episode/tvdb/(?P<tvdb_tv_episode_id>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/episode/{tvdb tv episode id}',
                         },
                         {
-                            'filter':ur'/h/tvshow/episode/tvdb/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/episode/{tvdb tv season id}/{track position}',
-                            ],
+                            'filter':ur'^/h/tvshow/episode/tvdb/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/episode/{tvdb tv season id}/{track position}',
                         },
                         {
-                            'filter':ur'/h/tvshow/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
-                            'depend':[
-                                ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}',
-                            ],
+                            'filter':ur'^/h/tvshow/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}',
                         },
                     ],
                     'collect':[
-                        ur'/h/tvshow/season/tvdb/{tvdb tv season id}',
                         ur'/h/tvshow/season/tvdb/{tvdb tv show id}/{disk position}',
+                        ur'/h/tvshow/season/tvdb/{tvdb tv season id}',
                     ],
                     'resolvable':[
                         {
-                            'name':u'episode knowledge by track id',
+                            'name':u'episode home by track id',
                             'format':ur'/h/tvshow/episode/{track id}',
                         },
                         {
-                            'name':u'episode knowledge by disk id',
+                            'name':u'episode home by disk id',
                             'format':ur'/h/tvshow/episode/{disk id}/{track position}',
                         },
                         {
-                            'name':u'episode knowledge by tv show id',
+                            'name':u'episode home by tv show id',
                             'format':ur'/h/tvshow/episode/{tv show id}/{disk position}/{track position}',
                         },
                         {
-                            'name':u'episode knowledge by tvdb tv episode id',
+                            'name':u'episode home by tvdb tv episode id',
                             'format':ur'/h/tvshow/episode/tvdb/{tvdb tv episode id}',
                         },
                         {
-                            'name':u'episode knowledge by tvdb tv season id',
+                            'name':u'episode home by tvdb tv season id',
                             'format':ur'/h/tvshow/episode/tvdb/{tvdb tv season id}/{track position}',
                         },
                         {
-                            'name':u'episode knowledge by tvdb tv show id',
+                            'name':u'episode home by tvdb tv show id',
                             'format':ur'/h/tvshow/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}',
                         },
                     ],
@@ -221,19 +205,19 @@ configuration = {
                 'home.music.album':{
                     'match':[
                         {
-                            'filter':ur'/h/music/album/(?P<album_id>[0-9]+)',
+                            'filter':ur'^/h/music/album/(?P<album_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/music/album/~/(?P<album_handle>[^/]+)',
+                            'filter':ur'^/h/music/album/~/(?P<album_handle>[^/]+)$',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'music album',
+                            'name':u'music home by album id',
                             'format':ur'/h/music/album/{album id}',
                         },
                         {
-                            'name':u'music album',
+                            'name':u'music home by album handle',
                             'format':ur'/h/music/album/~/{album handle}',
                         },
                     ],
@@ -246,26 +230,26 @@ configuration = {
                 'home.music.disk':{
                     'match':[
                         {
-                            'filter':ur'/h/music/disk/(?P<disk_id>[0-9]+)',
+                            'filter':ur'^/h/music/disk/(?P<disk_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/music/disk/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                            'filter':ur'^/h/music/disk/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/music/disk/~/(?P<album_handle>[^/]+)/(?P<disk_position>[0-9]+)',
+                            'filter':ur'^/h/music/disk/~/(?P<album_handle>[^/]+)/(?P<disk_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'music disk by disk id',
+                            'name':u'music disk home by disk id',
                             'format':ur'/h/music/disk/{disk id}',
                         },
                         {
-                            'name':u'music disk by album id',
+                            'name':u'music disk home by album id',
                             'format':ur'/h/music/disk/{album id}/{disk position}',
                         },
                         {
-                            'name':u'music disk by album id',
+                            'name':u'music disk home by album handle',
                             'format':ur'/h/music/disk/~/{album handle}/{disk position}',
                         },
                     ],
@@ -278,33 +262,33 @@ configuration = {
                 'home.music.track':{
                     'match':[
                         {
-                            'filter':ur'/h/music/track/(?P<track_id>[0-9]+)',
+                            'filter':ur'^/h/music/track/(?P<track_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/music/track/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/h/music/track/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/h/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/music/track/~/(?P<album_handle>[^/]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/h/music/track/~/(?P<album_handle>[^/]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'music track by track id',
+                            'name':u'music track home by track id',
                             'format':ur'/h/music/track/{track id}',
                         },
                         {
-                            'name':u'music track by disk id',
+                            'name':u'music track home by disk id',
                             'format':ur'/h/music/track/{disk id}/{track position}',
                         },
                         {
-                            'name':u'music track by album id',
+                            'name':u'music track home by album id',
                             'format':ur'/h/music/track/{album id}/{disk position}/{track position}',
                         },
                         {
-                            'name':u'music track by album id',
+                            'name':u'music track home by album handle',
                             'format':ur'/h/music/track/~/{album handle}/{disk position}/{track position}',
                         },
                     ],
@@ -317,80 +301,72 @@ configuration = {
                 'home.person':{
                     'match':[
                         {
-                            'filter':ur'/h/person/(?P<person_id>[0-9]+)',
+                            'filter':ur'^/h/person/(?P<person_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/person/tmdb/(?P<tmdb_person_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/person/{tmdb person id}',
-                            ],
+                            'filter':ur'^/h/person/tmdb/(?P<tmdb_person_id>[0-9]+)$',
+                            'depend':ur'/c/tmdb/person/{tmdb person id}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'person by knowledge id',
+                            'name':u'person home by person id',
                             'format':ur'/h/person/{person id}',
                         },
                         {
-                            'name':u'person by tmdb id',
+                            'name':u'person home by tmdb person id',
                             'format':ur'/h/person/tmdb/{tmdb person id}',
                         },
                     ],
                     'type':'json',
                     'collection':'home_person',
                     'namespace':'home.person',
-                    'key generator':'knowledge',
                     'generate':{'name':'knowledge', 'key':'person id'},
                     'index':['person id', 'tmdb person id'],
                 },
                 'home.company':{
                     'match':[
                         {
-                            'filter':ur'/h/company/(?P<company_id>[0-9]+)',
+                            'filter':ur'^/h/company/(?P<company_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/company/tmdb/(?P<tmdb_company_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/company/{tmdb company id}',
-                            ],
+                            'filter':ur'^/h/company/tmdb/(?P<tmdb_company_id>[0-9]+)$',
+                            'depend':ur'/c/tmdb/company/{tmdb company id}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'company by knowledge id',
+                            'name':u'company home by company id',
                             'format':ur'/h/company/{company id}',
                         },
                         {
-                            'name':u'company by tmdb id',
+                            'name':u'company home by tmdb company id',
                             'format':ur'/h/company/tmdb/{tmdb company id}',
                         },
                     ],
                     'type':'json',
                     'collection':'home_company',
                     'namespace':'home.company',
-                    'key generator':'knowledge',
                     'generate':{'name':'knowledge', 'key':'company id'},
                     'index':['company id', 'tmdb company id'],
                 },
                 'home.genre':{
                     'match':[
                         {
-                            'filter':ur'/h/genre/(?P<genre_id>[0-9]+)',
+                            'filter':ur'^/h/genre/(?P<genre_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/h/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)',
-                            'depend':[
-                                ur'/c/tmdb/genre/{tmdb genre id}',
-                            ],
+                            'filter':ur'^/h/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)$',
+                            'depend':ur'/c/tmdb/genre/{tmdb genre id}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'genre',
+                            'name':u'genre home by genre id',
                             'format':ur'/h/genre/{genre id}',
                         },
                         {
-                            'name':u'genre by tmdb id',
+                            'name':u'genre home by tmdb genre id',
                             'format':ur'/h/genre/tmdb/{tmdb genre id}',
                         },
                     ],
@@ -398,17 +374,16 @@ configuration = {
                     'collection':'home_genre',
                     'namespace':'home.genre',
                     'generate':{'name':'knowledge', 'key':'genre id'},
-                    'key generator':'knowledge',
                 },
                 'home.job':{
                     'match':[
                         {
-                            'filter':ur'/h/job/(?P<job_id>[0-9]+)',
+                            'filter':ur'^/h/job/(?P<job_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'job',
+                            'name':u'job home by job id',
                             'format':ur'/h/job/{job id}',
                         },
                     ],
@@ -416,17 +391,16 @@ configuration = {
                     'collection':'home_job',
                     'namespace':'home.job',
                     'generate':{'name':'knowledge', 'key':'job id'},
-                    'key generator':'knowledge',
                 },
                 'home.department':{
                     'match':[
                         {
-                            'filter':ur'/h/department/(?P<department_id>[0-9]+)',
+                            'filter':ur'^/h/department/(?P<department_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'department',
+                            'name':u'department home by department id',
                             'format':ur'/h/department/{department id}',
                         },
                     ],
@@ -434,7 +408,6 @@ configuration = {
                     'collection':'home_department',
                     'namespace':'home.department',
                     'generate':{'name':'knowledge', 'key':'department id'},
-                    'key generator':'knowledge',
                 },
             },
         },
@@ -444,7 +417,7 @@ configuration = {
                 'knowledge.configuration':{
                     'match':[
                         {
-                            'filter':ur'/k/configuration',
+                            'filter':ur'^/k/configuration$',
                         },
                     ],
                     'resolvable':[
@@ -460,7 +433,7 @@ configuration = {
                 'knowledge.playlist':{
                     'match':[
                         {
-                            'filter':ur'/k/playlist/(?P<playlist_id>[0-9]+)',
+                            'filter':ur'^/k/playlist/(?P<playlist_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -477,7 +450,7 @@ configuration = {
                 'knowledge.movie':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -488,13 +461,13 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_movie',
-                    'namespace':'knowledge.movie',
+                    'namespace':'ns.knowledge.movie',
                     'index':['movie id', 'language'],
                 },
                 'knowledge.movie.cast':{
                     'match':[
                         {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)/cast',
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/cast$',
                         },
                     ],
                     'resolvable':[
@@ -510,7 +483,7 @@ configuration = {
                 'knowledge.movie.image':{
                     'match':[
                         {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)/image',
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
@@ -526,7 +499,7 @@ configuration = {
                 'knowledge.movie.keyword':{
                     'match':[
                         {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)/keyword',
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/keyword$',
                         },
                     ],
                     'resolvable':[
@@ -542,7 +515,7 @@ configuration = {
                 'knowledge.movie.release':{
                     'match':[
                         {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)/release',
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/release$',
                         },
                     ],
                     'resolvable':[
@@ -558,7 +531,7 @@ configuration = {
                 'knowledge.movie.clip':{
                     'match':[
                         {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)/clip',
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/clip$',
                         },
                     ],
                     'resolvable':[
@@ -574,7 +547,7 @@ configuration = {
                 'knowledge.movie.translation':{
                     'match':[
                         {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)/translation',
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/translation$',
                         },
                     ],
                     'resolvable':[
@@ -590,7 +563,7 @@ configuration = {
                 'knowledge.movie.alternative':{
                     'match':[
                         {
-                            'filter':ur'/k/movie/(?P<movie_id>[0-9]+)/alternative',
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/alternative$',
                         },
                     ],
                     'resolvable':[
@@ -607,7 +580,7 @@ configuration = {
                 'knowledge.music.album':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/music/album/(?P<album_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/album/(?P<album_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -624,7 +597,7 @@ configuration = {
                 'knowledge.music.album.image':{
                     'match':[
                         {
-                            'filter':ur'/k/music/album/(?P<album_id>[0-9]+)/image',
+                            'filter':ur'^/k/music/album/(?P<album_id>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
@@ -640,10 +613,10 @@ configuration = {
                 'knowledge.music.disk':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/music/disk/(?P<disk_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/disk/(?P<disk_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/music/disk/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/disk/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -664,13 +637,13 @@ configuration = {
                 'knowledge.music.track':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/music/track/(?P<track_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<track_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/music/track/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -696,7 +669,7 @@ configuration = {
                 'knowledge.tvshow.show':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/tvshow/show/(?P<tv_show_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tvshow/show/(?P<tv_show_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -707,13 +680,13 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_tvshow_show',
-                    'namespace':'knowledge.tvshow.show',
+                    'namespace':'ns.knowledge.tvshow.show',
                     'index':['tv show id', 'language'],
                 },
                 'knowledge.tvshow.show.image':{
                     'match':[
                         {
-                            'filter':ur'/k/tvshow/show/(?P<tv_show_id>[0-9]+)/image',
+                            'filter':ur'^/k/tvshow/show/(?P<tv_show_id>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
@@ -729,7 +702,7 @@ configuration = {
                 'knowledge.tvshow.show.credit':{
                     'match':[
                         {
-                            'filter':ur'/k/tvshow/show/(?P<tv_show_id>[0-9]+)/credit',
+                            'filter':ur'^/k/tvshow/show/(?P<tv_show_id>[0-9]+)/credit$',
                         },
                     ],
                     'resolvable':[
@@ -745,10 +718,10 @@ configuration = {
                 'knowledge.tvshow.season':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/tvshow/season/(?P<disk_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tvshow/season/(?P<disk_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -763,13 +736,13 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_tvshow_season',
-                    'namespace':'knowledge.tvshow.season',
+                    'namespace':'ns.knowledge.tvshow.season',
                     'index':['tv show id', 'disk id', 'disk position'],
                 },
                 'knowledge.tvshow.season.image':{
                     'match':[
                         {
-                            'filter':ur'/k/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/image',
+                            'filter':ur'^/k/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
@@ -785,7 +758,7 @@ configuration = {
                 'knowledge.tvshow.season.credit':{
                     'match':[
                         {
-                            'filter':ur'/k/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/credit',
+                            'filter':ur'^/k/tvshow/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/credit$',
                         },
                     ],
                     'resolvable':[
@@ -801,13 +774,13 @@ configuration = {
                 'knowledge.tvshow.episode':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/tvshow/episode/(?P<track_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tvshow/episode/(?P<track_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/tvshow/episode/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tvshow/episode/(?P<disk_id>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -826,13 +799,13 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_tvshow_episode',
-                    'namespace':'knowledge.tvshow.episode',
+                    'namespace':'ns.knowledge.tvshow.episode',
                     'index':['tv show id', 'track id', 'disk id', 'disk position', 'track position', 'language'],
                 },
                 'knowledge.tvshow.episode.image':{
                     'match':[
                         {
-                            'filter':ur'/k/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)/image',
+                            'filter':ur'^/k/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
@@ -848,7 +821,7 @@ configuration = {
                 'knowledge.tvshow.episode.credit':{
                     'match':[
                         {
-                            'filter':ur'/k/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)/credit',
+                            'filter':ur'^/k/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)/credit$',
                         },
                     ],
                     'resolvable':[
@@ -865,7 +838,7 @@ configuration = {
                 'knowledge.person':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -876,12 +849,12 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_person',
-                    'namespace':'knowledge.person',
+                    'namespace':'ns.knowledge.person',
                 },
                 'knowledge.person.image':{
                     'match':[
                         {
-                            'filter':ur'/k/person/(?P<person_id>[0-9]+)/image',
+                            'filter':ur'^/k/person/(?P<person_id>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
@@ -897,7 +870,7 @@ configuration = {
                 'knowledge.person.credit':{
                     'match':[
                         {
-                            'filter':ur'/k/person/(?P<person_id>[0-9]+)/credit',
+                            'filter':ur'^/k/person/(?P<person_id>[0-9]+)/credit$',
                         },
                     ],
                     'resolvable':[
@@ -913,7 +886,7 @@ configuration = {
                 'knowledge.company':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/company/(?P<company_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/company/(?P<company_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -924,12 +897,12 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_company',
-                    'namespace':'knowledge.company',
+                    'namespace':'ns.knowledge.company',
                 },
                 'knowledge.company.image':{
                     'match':[
                         {
-                            'filter':ur'/k/company/(?P<company_id>[0-9]+)/image',
+                            'filter':ur'^/k/company/(?P<company_id>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
@@ -945,7 +918,7 @@ configuration = {
                 'knowledge.company.credit':{
                     'match':[
                         {
-                            'filter':ur'/k/company/(?P<company_id>[0-9]+)/credit',
+                            'filter':ur'^/k/company/(?P<company_id>[0-9]+)/credit$',
                         },
                     ],
                     'resolvable':[
@@ -961,7 +934,7 @@ configuration = {
                 'knowledge.genre':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/genre/(?P<genre_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/genre/(?P<genre_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -972,12 +945,12 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_genre',
-                    'namespace':'knowledge.genre',
+                    'namespace':'ns.knowledge.genre',
                 },
                 'knowledge.job':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/job/(?P<job_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/job/(?P<job_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -988,12 +961,12 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_job',
-                    'namespace':'knowledge.job',
+                    'namespace':'ns.knowledge.job',
                 },
                 'knowledge.department':{
                     'match':[
                         {
-                            'filter':ur'/k/(?P<language>[a-z]{2})/department/(?P<department_id>[0-9]+)',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/department/(?P<department_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -1004,7 +977,7 @@ configuration = {
                     ],
                     'type':'json',
                     'collection':'knowledge_department',
-                    'namespace':'knowledge.department',
+                    'namespace':'ns.knowledge.department',
                 },
             },
         },
@@ -1026,7 +999,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_configuration',
-                    'namespace':'tmdb.configuration',
+                    'namespace':'ns.tmdb.configuration',
                     'type':'json',
                 },
                 'tmdb.movie':{
@@ -1051,7 +1024,7 @@ configuration = {
                         }
                     ],
                     'collection':'tmdb_movie',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id', 'language', 'imdb movie id'],
                 },
@@ -1069,7 +1042,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_movie_cast',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
@@ -1087,7 +1060,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_movie_image',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
@@ -1105,7 +1078,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_movie_keyword',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
@@ -1123,7 +1096,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_movie_release',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
@@ -1141,7 +1114,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_movie_trailer',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
@@ -1159,7 +1132,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_movie_translation',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
@@ -1177,7 +1150,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_movie_alternative',
-                    'namespace':'tmdb.movie',
+                    'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
@@ -1195,7 +1168,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_collection',
-                    'namespace':'tmdb.collection',
+                    'namespace':'ns.tmdb.collection',
                     'type':'json',
                     'index':['tmdb collection id', 'language'],
                 },
@@ -1213,7 +1186,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_person',
-                    'namespace':'tmdb.person',
+                    'namespace':'ns.tmdb.person',
                     'type':'json',
                 },
                 'tmdb.person.image':{
@@ -1230,7 +1203,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_person_image',
-                    'namespace':'tmdb.person.image',
+                    'namespace':'ns.tmdb.person.image',
                     'type':'json',
                 },
                 'tmdb.person.credit':{
@@ -1247,7 +1220,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_person_credit',
-                    'namespace':'tmdb.person.credit',
+                    'namespace':'ns.tmdb.person.credit',
                     'type':'json',
                 },
                 'tmdb.company':{
@@ -1264,7 +1237,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_company',
-                    'namespace':'tmdb.company',
+                    'namespace':'ns.tmdb.company',
                     'type':'json',
                 },
                 'tmdb.company.credit':{
@@ -1282,7 +1255,7 @@ configuration = {
                         },
                     ],
                     'collection':'tmdb_company_credit',
-                    'namespace':'tmdb.company.credit',
+                    'namespace':'ns.tmdb.company.credit',
                     'type':'json',
                 },
             },
@@ -1307,8 +1280,10 @@ configuration = {
             }
         },
         'tvdb':{
-            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/all/en.xml
             # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/en.xml
+            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/all/en.xml
+            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/all/en.zip
+            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/default/8/5/en.xml
             'api key':u'7B3B400B0146EA83',
             'match':ur'^/c(?:/[a-z]{2})?/tvdb/.*$',
             'branch':{
@@ -1325,10 +1300,67 @@ configuration = {
                             'format':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
                         },
                     ],
+                    'produce':[
+                        {
+                            'tag':u'Series',
+                            'reference':'tvdb.show',
+                            'coalesce':False,
+                        },
+                    ],
+                    'index':[
+                        'tvdb tv show id',
+                    ],
                     'collection':'tvdb_tv_show',
-                    'namespace':'tvdb.show',
+                    'namespace':'ns.tvdb.show',
                     'type':'xml',
-                    'produce':['tvdb.show'],
+                },
+                'tvdb.show.cast':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/actors.xml',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb show cast by tvdb show id',
+                            'format':ur'/c/tvdb/show/{tvdb tv show id}/cast',
+                        },
+                    ],
+                    'produce':[
+                        {
+                            'tag':u'Actor',
+                            'reference':'tvdb.show.cast',
+                            'coalesce':True,
+                        },
+                    ],
+                    'collection':'tvdb_tv_show_cast',
+                    'namespace':'ns.tvdb.show.cast',
+                    'type':'xml',
+                },
+                'tvdb.show.image':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
+                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/banners.xml',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tvdb show image by tvdb show id',
+                            'format':ur'/c/tvdb/show/{tvdb tv show id}/image',
+                        },
+                    ],
+                    'produce':[
+                        {
+                            'tag':u'Banner',
+                            'reference':'tvdb.show.image',
+                            'coalesce':True,
+                        },
+                    ],
+                    'collection':'tvdb_tv_show_image',
+                    'namespace':'ns.tvdb.show.image',
+                    'type':'xml',
                 },
                 'tvdb.season':{
                     'match':[
@@ -1349,11 +1381,14 @@ configuration = {
                             'format':ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
                         },
                     ],
+                    'index':[
+                        'tvdb tv show id',
+                        'tvdb tv season id',
+                        'disk position',
+                    ],
                     'collection':'tvdb_tv_season',
                     'namespace':'tvdb.season',
                     'type':'xml',
-                    'produce':['tvdb.season'],
-                    'index':['tvdb tv show id', 'tvdb tv season id', 'disk position'],
                 },
                 'tvdb.episode':{
                     'match':[
@@ -1383,47 +1418,23 @@ configuration = {
                             'format':ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}',
                         },
                     ],
+                    'produce':[
+                        {
+                            'tag':u'Episode',
+                            'reference':'tvdb.episode',
+                            'coalesce':False,
+                        },
+                    ],
+                    'index':[
+                        'tvdb tv show id',
+                        'tvdb tv season id',
+                        'tvdb tv episode id',
+                        'disk position',
+                        'track position',
+                    ],
                     'collection':'tvdb_tv_episode',
-                    'namespace':'tvdb.episode',
+                    'namespace':'ns.tvdb.episode',
                     'type':'xml',
-                    'produce':['tvdb.episode'],
-                    'index':['tvdb tv show id', 'tvdb tv season id', 'tvdb tv episode id', 'disk position', 'track position'],
-                },
-                'tvdb.show.image':{
-                    'match':[
-                        {
-                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/banners.xml',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'tvdb show image by tvdb show id',
-                            'format':ur'/c/tvdb/show/{tvdb tv show id}/image',
-                        },
-                    ],
-                    'collection':'tvdb_tv_show_image',
-                    'namespace':'tvdb.show.image',
-                    'type':'xml',
-                    'produce':['tvdb.show.image'],
-                },
-                'tvdb.show.cast':{
-                    'match':[
-                        {
-                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/actors.xml',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'tvdb show cast by tvdb show id',
-                            'format':ur'/c/tvdb/show/{tvdb tv show id}/cast',
-                        },
-                    ],
-                    'collection':'tvdb_tv_show_cast',
-                    'namespace':'tvdb.show.cast',
-                    'type':'xml',
-                    'produce':['tvdb.show.cast'],
                 },
                 'tvdb.show.complete':{
                     'match':[
@@ -1432,8 +1443,29 @@ configuration = {
                             'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/all/{language}.zip',
                         },
                     ],
+                    'produce':[
+                        {
+                            'tag':u'Series',
+                            'reference':'tvdb.show',
+                            'coalesce':False,
+                        },
+                        {
+                            'tag':u'Episode',
+                            'reference':'tvdb.episode',
+                            'coalesce':False,
+                        },
+                        {
+                            'tag':u'Banner',
+                            'reference':'tvdb.show.image',
+                            'coalesce':True,
+                        },
+                        {
+                            'tag':u'Actor',
+                            'reference':'tvdb.show.cast',
+                            'coalesce':True,
+                        },
+                    ],
                     'type':'zip',
-                    'produce':['tvdb.show', 'tvdb.episode', 'tvdb.show.image', 'tvdb.show.cast'],
                 },
                 
                 'tvdb.update.daily':{
@@ -1481,36 +1513,6 @@ configuration = {
                     ],
                     'type':'zip',
                 },
-                'tvdb.update.episode':{
-                    'match':[
-                        {
-                            'filter':ur'/c/tvdb/update/episode/(?P<time>[0-9]+)',
-                            'remote':ur'http://www.thetvdb.com/api/Updates.php?type=episode&time={time}',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'tvdb episode update since',
-                            'format':ur'/c/tvdb/update/episode/{time}',
-                        },
-                    ],
-                    'type':'xml',
-                },
-                'tvdb.update.show':{
-                    'match':[
-                        {
-                            'filter':ur'/c/tvdb/update/show/(?P<time>[0-9]+)',
-                            'remote':ur'http://www.thetvdb.com/api/Updates.php?type=series&time={time}',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'tvdb show update since',
-                            'format':ur'/c/tvdb/update/show/{time}',
-                        },
-                    ],
-                    'type':'xml',
-                },
             },
         },
         'medium':{
@@ -1519,7 +1521,7 @@ configuration = {
                 'medium.asset.movie':{
                     'match':[
                         {
-                            'filter':ur'/m/asset/movie/(?P<movie_id>[0-9]+)',
+                            'filter':ur'^/m/asset/movie/(?P<movie_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -1536,7 +1538,7 @@ configuration = {
                 'medium.asset.music.track':{
                     'match':[
                         {
-                            'filter':ur'/m/asset/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/m/asset/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -1553,7 +1555,7 @@ configuration = {
                 'medium.asset.tvshow.episode':{
                     'match':[
                         {
-                            'filter':ur'/m/asset/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)',
+                            'filter':ur'^/m/asset/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[

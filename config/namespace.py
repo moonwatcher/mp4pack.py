@@ -1932,26 +1932,28 @@ configuration = {
                 'profile':None,
                 'volume':None,
                 'movie id':None,
-                'movie handle':None,
-                'imdb movie id':None,
-                'tmdb movie id':None,
+                'album id':None,
+                'tv show id':None,
                 'disk id':None,
                 'track id':None,
-                'track position':None,
-                'disk position':None,
-                'album id':None,
-                'album handle':None,
-                'tv show id':None,
-                'tv show handle':None,
-                'tvdb tv show id':None,
                 'person id':None,
-                'tmdb person id':None,
                 'company id':None,
-                'tmdb company id':None,
                 'genre id':None,
-                'tmdb genre id':None,
                 'job id':None,
                 'department id':None,
+                'track position':None,
+                'disk position':None,
+                'movie handle':None,
+                'album handle':None,
+                'tv show handle':None,
+                'imdb movie id':None,
+                'tmdb movie id':None,
+                'tmdb person id':None,
+                'tmdb company id':None,
+                'tmdb genre id':None,
+                'tvdb tv show id':None,
+                'tvdb tv season id':None,
+                'tvdb tv episode id':None,
             },
             'rule':[
                 'rule.system.default.language',
@@ -3160,7 +3162,7 @@ configuration = {
                 'rule.medium.stream.default.primary',
             ],
         },
-        'knowledge.movie':{
+        'ns.knowledge.movie':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3174,7 +3176,7 @@ configuration = {
                 'tmdb movie id':None,
             },
         },
-        'knowledge.tvshow.show':{
+        'ns.knowledge.tvshow.show':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3186,7 +3188,7 @@ configuration = {
                 'tv show id':None,
             },
         },
-        'knowledge.tvshow.season':{
+        'ns.knowledge.tvshow.season':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3199,7 +3201,7 @@ configuration = {
                 'tv season':None,
             },
         },
-        'knowledge.tvshow.episode':{
+        'ns.knowledge.tvshow.episode':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3213,7 +3215,7 @@ configuration = {
                 'tv episode':None,
             },
         },
-        'knowledge.person':{
+        'ns.knowledge.person':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3225,7 +3227,7 @@ configuration = {
                 'person id':None,
             },
         },
-        'knowledge.network':{
+        'ns.knowledge.company':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3234,22 +3236,10 @@ configuration = {
             },
             'synonym':['keyword'],
             'element':{
-                'network id':None,
+                'company id':None,
             },
         },
-        'knowledge.studio':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-            },
-            'synonym':['keyword'],
-            'element':{
-                'studio id':None,
-            },
-        },
-        'knowledge.job':{
+        'ns.knowledge.job':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3261,7 +3251,7 @@ configuration = {
                 'job id':None,
             },
         },
-        'knowledge.department':{
+        'ns.knowledge.department':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3273,7 +3263,7 @@ configuration = {
                 'department id':None,
             },
         },
-        'knowledge.genre':{
+        'ns.knowledge.genre':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3285,7 +3275,7 @@ configuration = {
                 'genre id':None,
             },
         },
-        'tmdb.configuration':{
+        'ns.tmdb.configuration':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3298,7 +3288,7 @@ configuration = {
                 'language':None,
             },
         },
-        'tmdb.movie':{
+        'ns.tmdb.movie':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3317,7 +3307,7 @@ configuration = {
                 'language':None,
             },
         },
-        'tmdb.movie.cast':{
+        'ns.tmdb.movie.cast':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3328,7 +3318,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.movie.image':{
+        'ns.tmdb.movie.image':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3339,7 +3329,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.movie.keyword':{
+        'ns.tmdb.movie.keyword':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3350,7 +3340,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.movie.release':{
+        'ns.tmdb.movie.release':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3361,7 +3351,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.movie.trailer':{
+        'ns.tmdb.movie.trailer':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3372,7 +3362,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.movie.translation':{
+        'ns.tmdb.movie.translation':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3383,7 +3373,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.movie.alternative':{
+        'ns.tmdb.movie.alternative':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3394,7 +3384,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'tmdb.collection':{
+        'ns.tmdb.collection':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3410,7 +3400,7 @@ configuration = {
                 'language':None,
             },
         },
-        'tmdb.person':{
+        'ns.tmdb.person':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3425,7 +3415,7 @@ configuration = {
                 },
             },
         },
-        'tmdb.person.image':{
+        'ns.tmdb.person.image':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3440,7 +3430,7 @@ configuration = {
                 },
             },
         },
-        'tmdb.person.credit':{
+        'ns.tmdb.person.credit':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3455,7 +3445,7 @@ configuration = {
                 },
             },
         },
-        'tmdb.company':{
+        'ns.tmdb.company':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3470,7 +3460,7 @@ configuration = {
                 },
             },
         },
-        'tmdb.company.credit':{
+        'ns.tmdb.company.credit':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -3485,7 +3475,7 @@ configuration = {
                 },
             },
         },
-        'tvdb.show.cast':{
+        'ns.tvdb.show.cast':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3512,10 +3502,8 @@ configuration = {
                     'tvdb':'SortOrder',
                 },
             },
-            'tag':u'Actor',
-            'coalesce':True,
         },
-        'tvdb.show.image':{
+        'ns.tvdb.show.image':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3573,10 +3561,8 @@ configuration = {
                     'enabled':False,
                 },
             },
-            'tag':u'Banner',
-            'coalesce':True,
         },
-        'tvdb.show':{
+        'ns.tvdb.show':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3662,10 +3648,8 @@ configuration = {
                     'enabled':False,
                 },
             },
-            'tag':u'Series',
-            'coalesce':False,
         },
-        'tvdb.episode':{
+        'ns.tvdb.episode':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3746,8 +3730,6 @@ configuration = {
                     'enabled':False,
                 },
             },
-            'tag':u'Episode',
-            'coalesce':False,
         },
     },
     'rule':{

@@ -13,33 +13,45 @@ class HomeHandler(ResourceHandler):
             # ensure default language
             query['parameter']['language']
             
-            # fetch dependencies
-            for dependency in query['match']['depend']:
-                document = self.resolver.resolve(dependency.format(**query['parameter']))
-                if document is not None:
-                    query['source'].append(document)
+            if 'index' in query['branch']:
+                # Resolve the dependency document
+                dependee = self.resolver.resolve(query['match']['depend'].format(**query['parameter']))
+                if dependee is not None:
+                    for index in query['branch']['index']:
+                        if index in dependee[u'head'][u'genealogy']:
+                            query['parameter'][index] = dependee[u'head'][u'genealogy'][index]
+                            
+                    if 'collect' in query['branch']:
+                        for pattern in query['branch']['collect']:
+                            try:
+                                related = self.resolver.resolve(pattern.format(**query['parameter']))
+                            except KeyError, e:
+                                self.log.debug(u'Could not create reference uri for pattern %s because parameter %s was missing', pattern, e)
+                                
+                            if related is not None:
+                                for index in query['branch']['index']:
+                                    if index in related[u'head'][u'genealogy']:
+                                        query['parameter'][index] = related[u'head'][u'genealogy'][index]
+                                        
+                                # we only need one of the documents in collect
+                                break
+                    query['source'].append(dependee)
     
     
     def parse(self, query):
-        entry = {
-            'branch':query['branch'],
-            'record':{
-                u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
-                u'body':None,
+        if query['source']:
+            # Only create a new home document if the dependency is satisfied
+            entry = {
+                'branch':query['branch'],
+                'record':{
+                    u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
+                }
             }
-        }
-        
-        # Collect concepts from the genealogy in the head of source documents
-        if 'index' in query['branch']:
-            for source in query['source']:
-                for index in query['branch']['index']:
-                    if index in source[u'head'][u'genealogy']:
-                        entry['record'][u'head'][u'genealogy'][index] = source[u'head'][u'genealogy'][index]
-                        
-        # Issue a new id if a generator is specified
-        if 'generate' in entry['branch']:
-            entry['record'][u'head'][u'genealogy'][entry['branch']['generate']['key']] = self.resolver.issue(query['repository'].host, entry['branch']['generate']['name'])
             
-        query['result'].append(entry)
+            # Issue a new id if a generator is specified
+            if 'generate' in entry['branch']:
+                entry['record'][u'head'][u'genealogy'][entry['branch']['generate']['key']] = self.resolver.issue(query['repository'].host, entry['branch']['generate']['name'])
+                
+            query['result'].append(entry)
     
 
