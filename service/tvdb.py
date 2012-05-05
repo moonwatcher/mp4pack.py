@@ -2,6 +2,7 @@
 
 from io import BytesIO
 from StringIO import StringIO
+import gzip
 from zipfile import BadZipfile, ZipFile
 from xml.etree import  cElementTree as ElementTree
 from urllib2 import Request, urlopen, URLError, HTTPError
@@ -41,6 +42,7 @@ class TVDbHandler(ResourceHandler):
                     try:
                         # TVDB returns xml that is sometimes gzip encoded
                         if 'content-encoding' in response.info() and response.info()['content-encoding'] == 'gzip':
+                            self.log.debug(u'Got gzip encoded response from server when fetching %s', query['remote url'])
                             query['source'].append(StringIO(gzip.GzipFile(fileobj=BytesIO(response.read())).read()))
                         else:
                             query['source'].append(StringIO(response.read()))
@@ -151,5 +153,6 @@ class TVDbHandler(ResourceHandler):
                         for entry in batch:
                             entry['record'][u'body'] = entry['record'][u'body'].node
                             query['result'].append(entry)
+    
 
 
