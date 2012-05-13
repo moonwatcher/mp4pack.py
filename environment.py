@@ -165,109 +165,110 @@ class Environment(object):
         return self.state['subtitle filter']
     
     
-    def load_node(self, node):
-        if 'default' in node:
-            for k,e in node['default'].iteritems():
-                self.default[k] = e
-                
-        if 'system' in node:
-            for k,e in node['system'].iteritems():
-                self.system[k] = e
-                
-        if 'archetype' in node:
-            for k,e in node['archetype'].iteritems():
-                e['key'] = k
-                self.archetype[k] = e
-                
-        if 'enumeration' in node:
-            for k,e in node['enumeration'].iteritems():
-                e['key'] = k
-                self.enumeration[k] = Enumeration(self, e)
-                
-        if 'namespace' in node:
-            for k,e in node['namespace'].iteritems():
-                e['key'] = k
-                self.namespace[k] = PrototypeSpace(self, e)
-                
-        if 'rule' in node:
-            for k,e in node['rule'].iteritems():
-                e['key'] = k
-                self.rule[k] = Rule(self, e)
-                
-        if 'service' in node:
-            for k,e in node['service'].iteritems():
-                e['name'] = k
-                self.service[k] = e
-                
-        if 'expression' in node:
-            for e in node['expression']:
-                if 'flags' not in e: e['flags'] = 0
-                self.expression[e['name']] = re.compile(e['definition'], e['flags'])
-                
-        if 'constant' in node:
-            for k,v in node['constant'].iteritems():
-                self.constant[k] = v
-                
-        if 'command' in node:
-            for e in node['command']:
-                self.command[e['name']] = e
-                self.which(e)
-                
-        if 'kind' in node:
-            for k,e in node['kind'].iteritems():
-                e['name'] = k
-                self.kind[k] = e
-                
-        if 'profile' in node:
-            for k,e in node['profile'].iteritems():
-                e['name'] = k
-                self.profile[k] = e
-                for action in self.default['profile']:
-                    if action not in e:
-                        e[action] = self.default['profile'][action]
-                        
-        if 'repository' in node:
-            for k,e in node['repository'].iteritems():
-                e['host'] = k
-                self.repository[k] = Repository(self, e)
-                
-        if 'subtitle filter' in node:
-            for k,e in node['subtitle filter'].iteritems():
-                e['name'] = k
-                self.subtitle_filter[k] = e
-                
-        if 'interface' in node:
-            for k,e in node['interface'].iteritems():
-                e['key'] = k
-                self.interface[k] = e
-        
-        # if 'available' in node:
-        # if 'report' in node:
-        # if 'format' in node:
-    
-    
-    # Load environment
-    
     def load(self):
+        relative = os.path.dirname(__file__)
+        self.load_config(os.path.join(relative,'config/system.py'))
+        self.load_config(os.path.join(relative,'config/namespace.py'))
+        self.load_config(os.path.join(relative,'config/service.py'))
+        self.load_config(os.path.join(relative,'config/resource.py'))
         
-        import config.system
-        self.load_node(config.system.configuration)
-        
-        import config.namespace
-        self.load_node(config.namespace.configuration)
-        
-        import config.service
-        self.load_node(config.service.configuration)
-        
-        # Override the default home folder from env if specified
+        # Override the default home folder from env if specified and valid
         home = os.getenv('MPK_HOME')
         if home:
             home = os.path.realpath(os.path.expanduser(os.path.expandvars(home)))
             if os.path.isdir(home):
                 self.system['home'] = home
-                
         self.system['conf'] = os.path.join(self.home, u'mpk.conf')
-        self.load_external(self.system['conf'])
+        
+        self.load_config(self.system['conf'])
+    
+    
+    def load_config(self, path):
+        if path and os.path.isfile(path):
+            try:
+                node = eval(open(path, 'r').read())
+                self.log.debug(u'Loading configuration dictionary %s', path)
+            except IOError, e:
+                self.log.warning(u'Failed to load configuration file %s', path)
+                self.log.debug(u'Exception raised: %s', unicode(e))
+            else:
+                if isinstance(node, dict):
+                    if 'default' in node:
+                        for k,e in node['default'].iteritems():
+                            self.default[k] = e
+                            
+                    if 'system' in node:
+                        for k,e in node['system'].iteritems():
+                            self.system[k] = e
+                            
+                    if 'archetype' in node:
+                        for k,e in node['archetype'].iteritems():
+                            e['key'] = k
+                            self.archetype[k] = e
+                            
+                    if 'enumeration' in node:
+                        for k,e in node['enumeration'].iteritems():
+                            e['key'] = k
+                            self.enumeration[k] = Enumeration(self, e)
+                            
+                    if 'namespace' in node:
+                        for k,e in node['namespace'].iteritems():
+                            e['key'] = k
+                            self.namespace[k] = PrototypeSpace(self, e)
+                            
+                    if 'rule' in node:
+                        for k,e in node['rule'].iteritems():
+                            e['key'] = k
+                            self.rule[k] = Rule(self, e)
+                            
+                    if 'service' in node:
+                        for k,e in node['service'].iteritems():
+                            e['name'] = k
+                            self.service[k] = e
+                            
+                    if 'expression' in node:
+                        for e in node['expression']:
+                            if 'flags' not in e: e['flags'] = 0
+                            self.expression[e['name']] = re.compile(e['definition'], e['flags'])
+                            
+                    if 'constant' in node:
+                        for k,v in node['constant'].iteritems():
+                            self.constant[k] = v
+                            
+                    if 'command' in node:
+                        for e in node['command']:
+                            self.command[e['name']] = e
+                            self.which(e)
+                            
+                    if 'kind' in node:
+                        for k,e in node['kind'].iteritems():
+                            e['name'] = k
+                            self.kind[k] = e
+                            
+                    if 'profile' in node:
+                        for k,e in node['profile'].iteritems():
+                            e['name'] = k
+                            self.profile[k] = e
+                            for action in self.default['profile']:
+                                if action not in e:
+                                    e[action] = self.default['profile'][action]
+                                    
+                    if 'repository' in node:
+                        for k,e in node['repository'].iteritems():
+                            e['host'] = k
+                            self.repository[k] = Repository(self, e)
+                            
+                    if 'subtitle filter' in node:
+                        for k,e in node['subtitle filter'].iteritems():
+                            e['name'] = k
+                            self.subtitle_filter[k] = e
+                            
+                    if 'interface' in node:
+                        for k,e in node['interface'].iteritems():
+                            e['key'] = k
+                            self.interface[k] = e
+                else:
+                    self.log.warning(u'Configuration file %s does not contain a valid dictionary', path)
     
     
     def load_interactive(self, ontology):
@@ -276,24 +277,13 @@ class Environment(object):
         # Load conf file from command line argument
         if 'configuration path' in self.ontology:
             self.ontology['configuration path'] = os.path.realpath(os.path.expanduser(os.path.expandvars(self.ontology['configuration path'])))
-            self.load_external(self.ontology['configuration path'])
+            self.load_config(self.ontology['configuration path'])
             
         # Override some value from command line
         for e in ('domain', 'host', 'language'):
             if e in self.ontology:
                 self.system[e] = self.ontology[e]
         # self._load_dynamic_rules()
-    
-    
-    def load_external(self, path):
-        if path and os.path.isfile(path):
-            try:
-                external = eval(open(path).read())
-                self.log.debug(u'Load external config file %s', path)
-                self.load_node(external)
-            except IOError, e:
-                self.log.warning(u'Failed to load config file %s', path)
-                self.log.debug(u'Exception raised: %s', unicode(e))
     
     
     def _load_dynamic_rules(self):

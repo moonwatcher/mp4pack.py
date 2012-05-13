@@ -63,7 +63,17 @@ class CommandLineParser(object):
     
 
 
+
 def main():
+    
+    # A node for collecting runtime statistics
+    import json
+    from datetime import datetime
+    node = {
+        'start':datetime.now(),
+        'job':[],
+    }
+    
     # Initialize logging and set the initial log level
     logging.basicConfig()
     logging.getLogger().setLevel(logging.DEBUG)
@@ -93,7 +103,10 @@ def main():
         job = ResourceJob(queue, env.ontology.project('ns.system.job'))
     job.run()
     
-    sys.stderr.write(job.document)
+    node['job'].append(job.node)
+    node['end'] = datetime.now()
+    node['duration'] = unicode(node['end'] - node['start'])
+    sys.stderr.write(json.dumps(node, sort_keys=True, indent=4,  default=env.default_json_handler))
 
 
 def test(env):

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import re
-import logging
-
-configuration = {
+{
     'archetype':{
         'character encoding':{
             'name':u'Character encoding',
@@ -91,30 +88,6 @@ configuration = {
             'keyword':u'kind',
             'type':'unicode',
         },
-        'simple name':{
-            'name':u'Simple name',
-            'keyword':u'simple_name',
-            'type':'unicode',
-            'simplify':True,
-        },
-        'movie handle':{
-            'name':u'Movie handle',
-            'keyword':u'movie_handle',
-            'type':'unicode',
-            'simplify':True,
-        },
-        'album handle':{
-            'name':u'Album handle',
-            'keyword':u'album_handle',
-            'type':'unicode',
-            'simplify':True,
-        },
-        'tv show handle':{
-            'name':u'TV show handle',
-            'keyword':u'tv_show_handle',
-            'type':'unicode',
-            'simplify':True,
-        },
         'tvdb tv show id':{
             'name':u'TVDb TV show ID',
             'keyword':u'tvdb_tv_show_id',
@@ -185,10 +158,39 @@ configuration = {
             'keyword':u'tmdb_keyword_id',
             'type':'int',
         },
+        'rt movie id':{
+            'name':u'Rotten tomatoes movie ID',
+            'keyword':u'rt_movie_id',
+            'type':'int',
+        },
         'zap2it tv show id':{
             'name':u'Zap2It TV show ID',
             'keyword':u'zap2it_tv_show_id',
             'type':'unicode',
+        },
+        'simple name':{
+            'name':u'Simple name',
+            'keyword':u'simple_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'movie handle':{
+            'name':u'Movie handle',
+            'keyword':u'movie_handle',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'album handle':{
+            'name':u'Album handle',
+            'keyword':u'album_handle',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'tv show handle':{
+            'name':u'TV show handle',
+            'keyword':u'tv_show_handle',
+            'type':'unicode',
+            'simplify':True,
         },
         'keywords':{
             'name':u'Keywords',
@@ -1947,6 +1949,8 @@ configuration = {
                 'album handle':None,
                 'tv show handle':None,
                 'imdb movie id':None,
+                'imdb tv show id':None,
+                'imdb tv episode id':None,
                 'tmdb movie id':None,
                 'tmdb person id':None,
                 'tmdb company id':None,
@@ -3351,7 +3355,7 @@ configuration = {
             'synonym':['keyword'],
             'element':{},
         },
-        'ns.tmdb.movie.trailer':{
+        'ns.tmdb.movie.clip':{
             'default':{
                 'keyword':None,
                 'plural':None,
@@ -5026,16 +5030,16 @@ configuration = {
                 },
             ],
         },
-        'rule.uri.tmdb.movie.trailer':{
-            'name':'tmdb movie trailer uri',
-            'provide':set(('tmdb movie trailer uri',)),
+        'rule.uri.tmdb.movie.clip':{
+            'name':'tmdb movie clip uri',
+            'provide':set(('tmdb movie clip uri',)),
             'branch':[
                 {
                     'requires':set(('tmdb movie id',)),
                     'apply':[
                         {
-                            'property':'tmdb movie trailer uri',
-                            'format':u'/c/tmdb/movie/{tmdb movie id}/trailer',
+                            'property':'tmdb movie clip uri',
+                            'format':u'/c/tmdb/movie/{tmdb movie id}/clip',
                         },
                     ],
                 },

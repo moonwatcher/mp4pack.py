@@ -837,6 +837,7 @@ class Subtitles(Text):
                 if track['stream kind'] == 'caption' and 'content' in track:
                     self._caption_track = track
                     self._caption = Caption.from_node(self.env, track['content'])
+                    break
                     
             if self._caption is None:
                 self._caption = Caption(self.env)

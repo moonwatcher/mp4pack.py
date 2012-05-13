@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-configuration = {
+{
     'service':{
         'home':{
             'match':ur'^/h/.*$',
@@ -20,6 +20,10 @@ configuration = {
                         {
                             'filter':ur'^/h/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
                             'depend':ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
+                        },
+                        {
+                            'filter':ur'^/h/movie/rt/(?P<rt_movie_id>[0-9]+)$',
+                            'depend':ur'/c/rt/movie/{rt movie id}',
                         },
                     ],
                     'resolvable':[
@@ -58,6 +62,9 @@ configuration = {
                             'filter':ur'^/h/tvshow/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)$',
                             'depend':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
                         },
+                        {
+                            'filter':ur'^/h/tvshow/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$',
+                        },
                     ],
                     'resolvable':[
                         {
@@ -72,6 +79,10 @@ configuration = {
                             'name':u'show home by tvdb tv show id',
                             'format':ur'/h/tvshow/show/tvdb/{tvdb tv show id}',
                         },
+                        {
+                            'name':u'show home by imdb tv show id',
+                            'format':ur'/h/tvshow/show/imdb/{imdb tv show id}'
+                        },
                     ],
                     'type':'json',
                     'collection':'home_tvshow_show',
@@ -81,6 +92,7 @@ configuration = {
                         'tv show id',
                         'tv show handle',
                         'tvdb tv show id',
+                        'imdb tv show id',
                     ],
                 },
                 'home.tvshow.season':{
@@ -98,6 +110,10 @@ configuration = {
                         {
                             'filter':ur'^/h/tvshow/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
                             'depend':ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
+                        },
+                        {
+                            'filter':ur'^/h/tvshow/season/imdb/(?P<imdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
+                            'depend':ur'/c/{language}/imdb/season/{imdb tv show id}/{disk position}',
                         },
                     ],
                     'collect':[
@@ -120,6 +136,10 @@ configuration = {
                             'name':u'season home by tvdb tv show id',
                             'format':ur'/h/tvshow/season/tvdb/{tvdb tv show id}/{disk position}',
                         },
+                        {
+                            'name':u'season home by imdb tv show id',
+                            'format':ur'/h/tvshow/season/imdb/{imdb tv show id}/{disk position}',
+                        },
                     ],
                     'type':'json',
                     'collection':'home_tvshow_season',
@@ -130,6 +150,7 @@ configuration = {
                         'disk id',
                         'disk position',
                         'tvdb tv show id',
+                        'imdb tv show id',
                         'tvdb tv season id',
                     ],
                 },
@@ -155,6 +176,12 @@ configuration = {
                         {
                             'filter':ur'^/h/tvshow/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                             'depend':ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}',
+                        },
+                        {
+                            'filter':ur'^/h/tvshow/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$',
+                        },
+                        {
+                            'filter':ur'^/h/tvshow/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                     ],
                     'collect':[
@@ -186,6 +213,14 @@ configuration = {
                             'name':u'episode home by tvdb tv show id',
                             'format':ur'/h/tvshow/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}',
                         },
+                        {
+                            'name':u'episode home by imdb tv episode id',
+                            'format':ur'/h/tvshow/episode/imdb/{imdb tv episode id}',
+                        },
+                        {
+                            'name':u'episode home by imdb tv show id',
+                            'format':ur'/h/tvshow/episode/imdb/{imdb tv show id}/{disk position}/{track position}',
+                        },
                     ],
                     'type':'json',
                     'collection':'home_tvshow_episode',
@@ -200,6 +235,8 @@ configuration = {
                         'tvdb tv show id',
                         'tvdb tv season id',
                         'tvdb tv episode id',
+                        'imdb tv show id',
+                        'imdb tv episode id',
                     ],
                 },
                 'home.music.album':{
@@ -981,6 +1018,158 @@ configuration = {
                 },
             },
         },
+        'medium':{
+            'match':ur'^/m(?:/[a-z]{2})?/.*$',
+            'branch':{
+                'medium.asset.movie':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/asset/movie/(?P<movie_id>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'movie asset',
+                            'format':ur'/m/asset/movie/{movie id}',
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset_movie',
+                    'collection reference':'medium_resource_movie',
+                    'namespace':'medium.asset.movie',
+                },
+                'medium.asset.music.track':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/asset/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'music asset',
+                            'format':ur'/m/asset/music/track/{album id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset_music_track',
+                    'collection reference':'medium_resource_music',
+                    'namespace':'medium.asset.music.track',
+                },
+                'medium.asset.tvshow.episode':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/asset/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tv show asset',
+                            'format':ur'/m/asset/tvshow/episode/{tv show id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset_tvshow_episode',
+                    'collection reference':'medium_resource_tvshow',
+                    'namespace':'medium.asset.tvshow.episode',
+                },
+                'medium.resource.movie.language':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<movie_id>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'movie resource with language',
+                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{language}/{movie id}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_movie',
+                    'namespace':'medium.resource.movie',
+                },
+                'medium.resource.movie':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<movie_id>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'movie resource',
+                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{movie id}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_movie',
+                    'namespace':'medium.resource.movie',
+                },
+                'medium.resource.tvshow.language':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tv show episode resource with language',
+                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{language}/{tv show id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_tvshow',
+                    'namespace':'medium.resource.tvshow',
+                },
+                'medium.resource.tvshow':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tv show episode resource',
+                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{tv show id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_tvshow',
+                    'namespace':'medium.resource.tvshow',
+                },
+                'medium.resource.music.language':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'music track resource with language',
+                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{language}/{album id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_music',
+                    'namespace':'medium.resource.music',
+                },
+                'medium.resource.music':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'music track resource',
+                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{album id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource_music',
+                    'namespace':'medium.resource.music',
+                },
+            }
+        },
         'tmdb':{
             'api key':u'a8b9f96dde091408a03cb4c78477bd14',
             'match':ur'^/c(?:/[a-z]{2})?/tmdb/.*$',
@@ -1100,20 +1289,20 @@ configuration = {
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.trailer':{
+                'tmdb.movie.clip':{
                     'match':[
                         {
-                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/trailer$',
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/clip$',
                             'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/trailers?api_key={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tmdb movie trailer by tmdb id',
-                            'format':ur'/c/tmdb/movie/{tmdb movie id}/trailer',
+                            'name':u'tmdb movie clip by tmdb id',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/clip',
                         },
                     ],
-                    'collection':'tmdb_movie_trailer',
+                    'collection':'tmdb_movie_clip',
                     'namespace':'ns.tmdb.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
@@ -1280,10 +1469,6 @@ configuration = {
             }
         },
         'tvdb':{
-            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/en.xml
-            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/all/en.xml
-            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/all/en.zip
-            # http://www.thetvdb.com/api/7B3B400B0146EA83/series/73255/default/8/5/en.xml
             'api key':u'7B3B400B0146EA83',
             'match':ur'^/c(?:/[a-z]{2})?/tvdb/.*$',
             'branch':{
@@ -1309,6 +1494,7 @@ configuration = {
                     ],
                     'index':[
                         'tvdb tv show id',
+                        'imdb tv show id',
                     ],
                     'collection':'tvdb_tv_show',
                     'namespace':'ns.tvdb.show',
@@ -1384,6 +1570,7 @@ configuration = {
                     'index':[
                         'tvdb tv show id',
                         'tvdb tv season id',
+                        'imdb tv show id',
                         'disk position',
                     ],
                     'collection':'tvdb_tv_season',
@@ -1429,6 +1616,8 @@ configuration = {
                         'tvdb tv show id',
                         'tvdb tv season id',
                         'tvdb tv episode id',
+                        'imdb tv show id',
+                        'imdb tv episode id',
                         'disk position',
                         'track position',
                     ],
@@ -1515,157 +1704,109 @@ configuration = {
                 },
             },
         },
-        'medium':{
-            'match':ur'^/m(?:/[a-z]{2})?/.*$',
+        'rt':{
+            'api key':u'wyeeuz4yjjqvyjgtju68c6p3',
+            'match':ur'^/c(?:/[a-z]{2})?/rt/.*$',
             'branch':{
-                'medium.asset.movie':{
+                'rt.movie':{
                     'match':[
                         {
-                            'filter':ur'^/m/asset/movie/(?P<movie_id>[0-9]+)$',
+                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)$',
+                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}.json?apikey={api key}',
+                        },
+                        {
+                            'filter':ur'^/c/rt/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
+                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movie_alias.json?apikey={api key}&type=imdb&id={imdb movie id}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'movie asset',
-                            'format':ur'/m/asset/movie/{movie id}',
+                            'name':u'rotten tomatoes movie by rt movie id',
+                            'format':ur'/c/rt/movie/{rt movie id}',
                         },
+                        {
+                            'name':u'rotten tomatoes movie by imdb id',
+                            'format':ur'/c/rt/movie/imdb/{imdb movie id}',
+                        }
                     ],
-                    'type':'reference',
-                    'collection':'medium_asset_movie',
-                    'collection reference':'medium_resource_movie',
-                    'namespace':'medium.asset.movie',
+                    'collection':'rt_movie',
+                    'namespace':'ns.rt.movie',
+                    'type':'json',
+                    'index':['rt movie id', 'imdb movie id'],
                 },
-                'medium.asset.music.track':{
+                'rt.movie.cast':{
                     'match':[
                         {
-                            'filter':ur'^/m/asset/music/track/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/cast$',
+                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/cast.json?apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'music asset',
-                            'format':ur'/m/asset/music/track/{album id}/{disk position}/{track position}',
+                            'name':u'rotten tomatoes movie cast by rt movie id',
+                            'format':ur'/c/rt/movie/{rt movie id}/cast',
                         },
                     ],
-                    'type':'reference',
-                    'collection':'medium_asset_music_track',
-                    'collection reference':'medium_resource_music',
-                    'namespace':'medium.asset.music.track',
+                    'collection':'rt_movie_cast',
+                    'namespace':'ns.rt.movie',
+                    'type':'json',
+                    'index':['rt movie id'],
                 },
-                'medium.asset.tvshow.episode':{
+                'rt.movie.clip':{
                     'match':[
                         {
-                            'filter':ur'^/m/asset/tvshow/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/clip$',
+                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/clips.json?apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'tv show asset',
-                            'format':ur'/m/asset/tvshow/episode/{tv show id}/{disk position}/{track position}',
+                            'name':u'rotten tomatoes movie clip by rt movie id',
+                            'format':ur'/c/rt/movie/{rt movie id}/clip',
                         },
                     ],
-                    'type':'reference',
-                    'collection':'medium_asset_tvshow_episode',
-                    'collection reference':'medium_resource_tvshow',
-                    'namespace':'medium.asset.tvshow.episode',
+                    'collection':'rt_movie_clip',
+                    'namespace':'ns.rt.movie',
+                    'type':'json',
+                    'index':['rt movie id'],
                 },
-                'medium.resource.movie.language':{
+                'rt.movie.review':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<movie_id>[0-9]+)$',
+                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/clip$',
+                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/reviews.json?apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'movie resource with language',
-                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{language}/{movie id}',
+                            'name':u'rotten tomatoes movie review by rt movie id',
+                            'format':ur'/c/rt/movie/{rt movie id}/review',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_movie',
-                    'namespace':'medium.resource.movie',
+                    'collection':'rt_movie_review',
+                    'namespace':'ns.rt.movie',
+                    'type':'json',
+                    'index':['rt movie id'],
                 },
-                'medium.resource.movie':{
+                'rt.movie.similar':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/movie/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<movie_id>[0-9]+)$',
+                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/similar$',
+                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/similar.json?apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'movie resource',
-                            'format':ur'/m/resource/{volume}/movie/{kind}/{profile}/{movie id}',
+                            'name':u'rotten tomatoes similar movies by rt movie id',
+                            'format':ur'/c/rt/movie/{rt movie id}/similar',
                         },
                     ],
-                    'type':'crawl',
-                    'collection':'medium_resource_movie',
-                    'namespace':'medium.resource.movie',
+                    'collection':'rt_movie_similar',
+                    'namespace':'ns.rt.movie',
+                    'type':'json',
+                    'index':['rt movie id'],
                 },
-                'medium.resource.tvshow.language':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'tv show episode resource with language',
-                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{language}/{tv show id}/{disk position}/{track position}',
-                        },
-                    ],
-                    'type':'crawl',
-                    'collection':'medium_resource_tvshow',
-                    'namespace':'medium.resource.tvshow',
-                },
-                'medium.resource.tvshow':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/tvshow/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'tv show episode resource',
-                            'format':ur'/m/resource/{volume}/tvshow/{kind}/{profile}/{tv show id}/{disk position}/{track position}',
-                        },
-                    ],
-                    'type':'crawl',
-                    'collection':'medium_resource_tvshow',
-                    'namespace':'medium.resource.tvshow',
-                },
-                'medium.resource.music.language':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<language>[a-z]{2})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'music track resource with language',
-                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{language}/{album id}/{disk position}/{track position}',
-                        },
-                    ],
-                    'type':'crawl',
-                    'collection':'medium_resource_music',
-                    'namespace':'medium.resource.music',
-                },
-                'medium.resource.music':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/resource/(?P<volume>[^/]+)/music/(?P<kind>[^\.]{3,4})/(?P<profile>[^/]{2,})/(?P<album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'music track resource',
-                            'format':ur'/m/resource/{volume}/music/{kind}/{profile}/{album id}/{disk position}/{track position}',
-                        },
-                    ],
-                    'type':'crawl',
-                    'collection':'medium_resource_music',
-                    'namespace':'medium.resource.music',
-                },
-            }
-        },
+            },
+        }
     },
 }
