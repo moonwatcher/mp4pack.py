@@ -26,7 +26,7 @@ class TVDbHandler(ResourceHandler):
         
         # calculate a remote url if the match specifies one
         if 'remote' in query['match']:
-            query['remote url'] = query['match']['remote'].format(**query['parameter'])
+            query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
             
             self.log.debug(u'Fetching %s', query['remote url'])
             request = Request(query['remote url'])

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import os
 from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 
@@ -9,22 +8,22 @@ from service import ResourceHandler
 from ontology import Ontology
 
 
-class TMDbHandler(ResourceHandler):
+class RottenTomatoesHandler(ResourceHandler):
     def __init__(self, resolver, node):
         ResourceHandler.__init__(self, resolver, node)
     
     
     def fetch(self, query):
-        # Add TMDB api key to the parameter list
+        # Add Rotten Tomatoes api key to the parameter list
         query['parameter']['api key'] = self.node['api key']
+        
+        query['parameter']['trimmed imdb movie id']
         
         # Try to build the remote url and get the resource
         if 'remote' in query['match']:
             query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
             
             self.log.debug(u'Fetching %s', query['remote url'])
-            
-            # TMDB requires the request to specify the type of the request as json
             request = Request(query['remote url'], None, {'Accept': 'application/json'})
             
             try:
@@ -55,14 +54,19 @@ class TMDbHandler(ResourceHandler):
                     }
                 }
                 
+                # Rotten tomatoes holds the imdb id without the tt prefix, inside the alternate_ids dictionary
+                # This is a unique case so we handle it separately 
+                if 'alternate_ids' in document and 'imdb' in document['alternate_ids'] and document['alternate_ids']['imdb']:
+                    entry['record'][u'head'][u'genealogy'][u'imdb movie id'] = u'tt{0}'.format(document['alternate_ids']['imdb'])
+                    
                 # Use the decalred namespace for the branch to decode stuff 
                 # from the document and augment the genealogy
                 ns = self.env.namespace[entry['branch']['namespace']]
                 if 'index' in query['branch']:
                     for index in query['branch']['index']:
                         prototype = ns.find(index)
-                        if prototype and prototype.node['tmdb'] in document:
-                            entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['tmdb']])
+                        if prototype and prototype.node['rottentomatoes'] in document:
+                            entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['rottentomatoes']])
                             
                 query['result'].append(entry)
     

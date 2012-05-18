@@ -7,7 +7,7 @@
             'branch':{
                 'home.movie':{
                     'match':[
-                        {
+                        { 
                             'filter':ur'^/h/movie/(?P<movie_id>[0-9]+)$',
                         },
                         {
@@ -22,8 +22,8 @@
                             'depend':ur'/c/{language}/tmdb/movie/imdb/{imdb movie id}',
                         },
                         {
-                            'filter':ur'^/h/movie/rt/(?P<rt_movie_id>[0-9]+)$',
-                            'depend':ur'/c/rt/movie/{rt movie id}',
+                            'filter':ur'^/h/movie/rottentomatoes/(?P<rottentomatoes_movie_id>[0-9]+)$',
+                            'depend':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}',
                         },
                     ],
                     'resolvable':[
@@ -43,12 +43,22 @@
                             'name':u'movie home by imdb id',
                             'format':ur'/h/movie/imdb/{imdb movie id}',
                         },
+                        {
+                            'name':u'movie home by rottentomatoes movie id',
+                            'format':ur'/h/movie/rottentomatoes/{rottentomatoes movie id}',
+                        },
                     ],
                     'type':'json',
                     'collection':'home_movie',
                     'namespace':'home.movie',
                     'generate':{'name':'knowledge', 'key':'movie id'},
-                    'index':['movie id', 'tmdb movie id', 'imdb movie id', 'movie handle'],
+                    'index':[
+                        'movie id',
+                        'tmdb movie id',
+                        'imdb movie id',
+                        'movie handle',
+                        'rottentomatoes movie id',
+                    ],
                 },
                 'home.tvshow.show':{
                     'match':[
@@ -113,7 +123,6 @@
                         },
                         {
                             'filter':ur'^/h/tvshow/season/imdb/(?P<imdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
-                            'depend':ur'/c/{language}/imdb/season/{imdb tv show id}/{disk position}',
                         },
                     ],
                     'collect':[
@@ -343,6 +352,9 @@
                         {
                             'filter':ur'^/h/person/tmdb/(?P<tmdb_person_id>[0-9]+)$',
                             'depend':ur'/c/tmdb/person/{tmdb person id}',
+                        },
+                        {
+                            'filter':ur'^/h/person/imdb/(?P<imdb_person_id>nm[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -1172,13 +1184,14 @@
         },
         'tmdb':{
             'api key':u'a8b9f96dde091408a03cb4c78477bd14',
+            'remote base':u'http://api.themoviedb.org/3',
             'match':ur'^/c(?:/[a-z]{2})?/tmdb/.*$',
             'branch':{
                 'tmdb.configuration':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/configuration$',
-                            'remote':ur'http://api.themoviedb.org/3/configuration?api_key={api key}',
+                            'remote':ur'configuration?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1195,11 +1208,11 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}?language={language}&api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}?language={language}&api_key={api key}',
                         },
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{imdb movie id}?language={language}&api_key={api key}',
+                            'remote':ur'movie/{imdb movie id}?language={language}&api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1221,7 +1234,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/casts?api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}/casts?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1239,7 +1252,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/image$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/images?api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}/images?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1257,7 +1270,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/keyword$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/keywords?api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}/keywords?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1275,7 +1288,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/release$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/releases?api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}/releases?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1293,7 +1306,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/clip$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/trailers?api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}/trailers?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1311,7 +1324,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/translation$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/translations?api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}/translations?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1329,7 +1342,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/alternative$',
-                            'remote':ur'http://api.themoviedb.org/3/movie/{tmdb movie id}/alternative_titles?api_key={api key}',
+                            'remote':ur'movie/{tmdb movie id}/alternative_titles?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1347,7 +1360,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/collection/(?P<tmdb_collection_id>[0-9]+)$',
-                            'remote':ur'http://api.themoviedb.org/3/collection/{tmdb collection id}?language={language}&api_key={api key}',
+                            'remote':ur'collection/{tmdb collection id}?language={language}&api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1365,7 +1378,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)$',
-                            'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}?api_key={api key}',
+                            'remote':ur'person/{tmdb person id}?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1382,7 +1395,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/image$',
-                            'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}?api_key={api key}',
+                            'remote':ur'person/{tmdb person id}?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1399,7 +1412,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/credit$',
-                            'remote':ur'http://api.themoviedb.org/3/person/{tmdb person id}/credits?api_key={api key}',
+                            'remote':ur'person/{tmdb person id}/credits?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1416,7 +1429,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)$',
-                            'remote':ur'http://api.themoviedb.org/3/company/{tmdb company id}?api_key={api key}',
+                            'remote':ur'company/{tmdb company id}?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1434,7 +1447,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)/credit$',
-                            'remote':ur'http://api.themoviedb.org/3/company/{tmdb company id}/movies?page={page}&api_key={api key}',
+                            'remote':ur'company/{tmdb company id}/movies?page={page}&api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1470,13 +1483,14 @@
         },
         'tvdb':{
             'api key':u'7B3B400B0146EA83',
+            'remote base':u'http://www.thetvdb.com/api',
             'match':ur'^/c(?:/[a-z]{2})?/tvdb/.*$',
             'branch':{
                 'tvdb.show':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/{language}.xml',
+                            'remote':ur'{api key}/series/{tvdb tv show id}/{language}.xml',
                         },
                     ],
                     'resolvable':[
@@ -1504,7 +1518,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/actors.xml',
+                            'remote':ur'{api key}/series/{tvdb tv show id}/actors.xml',
                         },
                     ],
                     'resolvable':[
@@ -1528,7 +1542,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/banners.xml',
+                            'remote':ur'{api key}/series/{tvdb tv show id}/banners.xml',
                         },
                     ],
                     'resolvable':[
@@ -1581,14 +1595,14 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_episode_id>[0-9]+)$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/episodes/{tvdb tv episode id}/{language}.xml',
+                            'remote':ur'{api key}/episodes/{tvdb tv episode id}/{language}.xml',
                         },
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/default/{disk position}/{track position}/{language}.xml',
+                            'remote':ur'{api key}/series/{tvdb tv show id}/default/{disk position}/{track position}/{language}.xml',
                         },
                     ],
                     'resolvable':[
@@ -1629,7 +1643,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/complete$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/series/{tvdb tv show id}/all/{language}.zip',
+                            'remote':ur'{api key}/series/{tvdb tv show id}/all/{language}.zip',
                         },
                     ],
                     'produce':[
@@ -1661,7 +1675,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/update/day$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_day.zip',
+                            'remote':ur'{api key}/updates/updates_day.zip',
                         },
                     ],
                     'resolvable':[
@@ -1676,7 +1690,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/update/week$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_week.zip',
+                            'remote':ur'{api key}/updates/updates_week.zip',
                         },
                     ],
                     'resolvable':[
@@ -1691,7 +1705,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/update/month$',
-                            'remote':ur'http://www.thetvdb.com/api/{api key}/updates/updates_month.zip',
+                            'remote':ur'{api key}/updates/updates_month.zip',
                         },
                     ],
                     'resolvable':[
@@ -1704,109 +1718,163 @@
                 },
             },
         },
-        'rt':{
+        'rottentomatoes':{
             'api key':u'wyeeuz4yjjqvyjgtju68c6p3',
-            'match':ur'^/c(?:/[a-z]{2})?/rt/.*$',
+            'remote base':u'http://api.rottentomatoes.com/api/public/v1.0',
+            'match':ur'^/c(?:/[a-z]{2})?/rottentomatoes/.*$',
             'branch':{
-                'rt.movie':{
+                'rottentomatoes.movie':{
                     'match':[
                         {
-                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)$',
-                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}.json?apikey={api key}',
+                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)$',
+                            'remote':ur'movies/{rottentomatoes movie id}.json?apikey={api key}',
                         },
                         {
-                            'filter':ur'^/c/rt/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
-                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movie_alias.json?apikey={api key}&type=imdb&id={imdb movie id}',
+                            'filter':ur'^/c/rottentomatoes/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
+                            'remote':ur'movie_alias.json?apikey={api key}&type=imdb&id={trimmed imdb movie id}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'rotten tomatoes movie by rt movie id',
-                            'format':ur'/c/rt/movie/{rt movie id}',
+                            'name':u'rotten tomatoes movie by rottentomatoes movie id',
+                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}',
                         },
                         {
                             'name':u'rotten tomatoes movie by imdb id',
-                            'format':ur'/c/rt/movie/imdb/{imdb movie id}',
+                            'format':ur'/c/rottentomatoes/movie/imdb/{imdb movie id}',
                         }
                     ],
-                    'collection':'rt_movie',
-                    'namespace':'ns.rt.movie',
+                    'collection':'rottentomatoes_movie',
+                    'namespace':'ns.rottentomatoes.movie',
                     'type':'json',
-                    'index':['rt movie id', 'imdb movie id'],
+                    'index':['rottentomatoes movie id'],
                 },
-                'rt.movie.cast':{
+                'rottentomatoes.movie.cast':{
                     'match':[
                         {
-                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/cast$',
-                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/cast.json?apikey={api key}',
+                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/cast$',
+                            'remote':ur'movies/{rottentomatoes movie id}/cast.json?apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'rotten tomatoes movie cast by rt movie id',
-                            'format':ur'/c/rt/movie/{rt movie id}/cast',
+                            'name':u'rotten tomatoes movie cast by rottentomatoes movie id',
+                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/cast',
                         },
                     ],
-                    'collection':'rt_movie_cast',
-                    'namespace':'ns.rt.movie',
+                    'collection':'rottentomatoes_movie_cast',
+                    'namespace':'ns.rottentomatoes.movie',
                     'type':'json',
-                    'index':['rt movie id'],
+                    'index':['rottentomatoes movie id'],
                 },
-                'rt.movie.clip':{
+                'rottentomatoes.movie.clip':{
                     'match':[
                         {
-                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/clip$',
-                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/clips.json?apikey={api key}',
+                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
+                            'remote':ur'movies/{rottentomatoes movie id}/clips.json?apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'rotten tomatoes movie clip by rt movie id',
-                            'format':ur'/c/rt/movie/{rt movie id}/clip',
+                            'name':u'rotten tomatoes movie clip by rottentomatoes movie id',
+                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/clip',
                         },
                     ],
-                    'collection':'rt_movie_clip',
-                    'namespace':'ns.rt.movie',
+                    'collection':'rottentomatoes_movie_clip',
+                    'namespace':'ns.rottentomatoes.movie',
                     'type':'json',
-                    'index':['rt movie id'],
+                    'index':['rottentomatoes movie id'],
                 },
-                'rt.movie.review':{
+                'rottentomatoes.movie.review':{
                     'match':[
                         {
-                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/clip$',
-                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/reviews.json?apikey={api key}',
+                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
+                            'remote':ur'movies/{rottentomatoes movie id}/reviews.json?review_type=top_critic&apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'rotten tomatoes movie review by rt movie id',
-                            'format':ur'/c/rt/movie/{rt movie id}/review',
+                            'name':u'rotten tomatoes movie review by rottentomatoes movie id',
+                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/review',
                         },
                     ],
-                    'collection':'rt_movie_review',
-                    'namespace':'ns.rt.movie',
+                    'collection':'rottentomatoes_movie_review',
+                    'namespace':'ns.rottentomatoes.movie',
                     'type':'json',
-                    'index':['rt movie id'],
+                    'index':['rottentomatoes movie id'],
                 },
-                'rt.movie.similar':{
+                'rottentomatoes.movie.similar':{
                     'match':[
                         {
-                            'filter':ur'^/c/rt/movie/(?P<rt_movie_id>[0-9]+)/similar$',
-                            'remote':ur'http://api.rottentomatoes.com/api/public/v1.0/movies/{rt movie id}/similar.json?apikey={api key}',
+                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/similar$',
+                            'remote':ur'movies/{rottentomatoes movie id}/similar.json?apikey={api key}',
                         },
                     ],
                     'resolvable':[
                         {
-                            'name':u'rotten tomatoes similar movies by rt movie id',
-                            'format':ur'/c/rt/movie/{rt movie id}/similar',
+                            'name':u'rotten tomatoes similar movies by rottentomatoes movie id',
+                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/similar',
                         },
                     ],
-                    'collection':'rt_movie_similar',
-                    'namespace':'ns.rt.movie',
+                    'collection':'rottentomatoes_movie_similar',
+                    'namespace':'ns.rottentomatoes.movie',
                     'type':'json',
-                    'index':['rt movie id'],
+                    'index':['rottentomatoes movie id'],
                 },
             },
-        }
+        },
+        'facebook':{
+            'match':ur'^/c/facebook/.*$',
+            'remote base':u'http://graph.facebook.com',
+            'branch':{
+                'facebook.movie':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/facebook/movie/(?P<facebook_movie_id>[0-9]+)$',
+                            'remote':ur'{facebook movie id}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'facebook movie by facebook id',
+                            'format':ur'/c/facebook/movie/{facebook movie id}',
+                        }
+                    ],
+                    'collection':'facebook_movie',
+                    'namespace':'ns.facebook.movie',
+                    'type':'json',
+                    'index':['facebook movie id'],
+                },
+            },
+        },
+        'wikipedia':{
+            'match':ur'^/c(?:/[a-z]{2})?/wikipedia/.*$',
+            'branch':{
+                'wikipedia.movie':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/wikipedia/movie/(?P<wikipedia_movie_id>[0-9]+)$',
+                            'remote':ur'',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'wikipedia movie by wikipedia id',
+                            'format':ur'/c/wikipedia/movie/{wikipedia movie id}',
+                        }
+                    ],
+                    'collection':'wikipedia_movie',
+                    'namespace':'ns.wikipedia.movie',
+                    'type':'json',
+                    'index':['wikipedia movie id'],
+                },
+                'wikipedia.person':{
+                },
+                'wikipedia.company':{
+                },
+                'wikipedia.tvshow.show':{
+                },
+            },
+        },
     },
 }

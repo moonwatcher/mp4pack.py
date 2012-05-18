@@ -24,6 +24,9 @@ class Resolver(object):
         from tvdb import TVDbHandler
         self.handlers['tvdb'] = TVDbHandler(self, self.env.service['tvdb'])
         
+        from rottentomatoes import RottenTomatoesHandler
+        self.handlers['rottentomatoes'] = RottenTomatoesHandler(self, self.env.service['rottentomatoes'])
+        
         from home import HomeHandler
         self.handlers['home'] = HomeHandler(self, self.env.service['home'])
         

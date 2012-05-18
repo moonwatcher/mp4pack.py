@@ -128,6 +128,11 @@
             'keyword':u'imdb_movie_id',
             'type':'unicode'
         },
+        'trimmed imdb movie id':{
+            'name':u'Trimmed IMDb movie ID',
+            'keyword':u'trimmed_imdb_movie_id',
+            'type':'unicode'
+        },
         'tmdb movie id':{
             'name':u'TMDb movie ID',
             'keyword':u'tmdb_movie_id',
@@ -158,9 +163,9 @@
             'keyword':u'tmdb_keyword_id',
             'type':'int',
         },
-        'rt movie id':{
+        'rottentomatoes movie id':{
             'name':u'Rotten tomatoes movie ID',
-            'keyword':u'rt_movie_id',
+            'keyword':u'rottentomatoes_movie_id',
             'type':'int',
         },
         'zap2it tv show id':{
@@ -1951,6 +1956,7 @@
                 'imdb movie id':None,
                 'imdb tv show id':None,
                 'imdb tv episode id':None,
+                'trimmed imdb movie id':None,
                 'tmdb movie id':None,
                 'tmdb person id':None,
                 'tmdb company id':None,
@@ -1958,9 +1964,11 @@
                 'tvdb tv show id':None,
                 'tvdb tv season id':None,
                 'tvdb tv episode id':None,
+                'rottentomatoes movie id':None,
             },
             'rule':[
                 'rule.system.default.language',
+                'rule.knowledge.movie.imdb.trimmed',
             ],
         },
         
@@ -3735,6 +3743,26 @@
                 },
             },
         },
+        'ns.rottentomatoes.movie':{
+            'default':{
+                'keyword':None,
+                'plural':None,
+                'unescape xml':False,
+                'auto cast':True,
+                'rottentomatoes':None,
+            },
+            'synonym':['keyword', 'rottentomatoes'],
+            'element':{
+                'rottentomatoes movie id':{
+                    'rottentomatoes':'id',
+                },
+                'imdb movie id':{
+                    'rottentomatoes':'imdb',
+                },
+                'language':None,
+            },
+        },
+        
     },
     'rule':{
         'rule.system.default.routing':{
@@ -4523,6 +4551,20 @@
                 },
             ],
         },
+        
+        'rule.knowledge.movie.imdb.trimmed':{
+            'name':'trimmed imdb movie id',
+            'provide':set(('trimmed imdb movie id',)),
+            'branch':[
+                {
+                    'requires':set(('imdb movie id',)),
+                    'decode':[
+                        {'property':'imdb movie id', 'expression':ur'^tt(?P<trimmed_imdb_movie_id>[0-9]+)$'},
+                    ],
+                },
+            ],
+        },
+        
         
         'rule.knowledge.movie.uri':{
             'name':'movie uri',
