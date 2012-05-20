@@ -48,10 +48,6 @@ class HomeHandler(ResourceHandler):
                 }
             }
             
-            # Issue a new id if a generator is specified
-            if 'generate' in entry['branch']:
-                entry['record'][u'head'][u'genealogy'][entry['branch']['generate']['key']] = self.resolver.issue(query['repository'].host, entry['branch']['generate']['name'])
-                
             query['result'].append(entry)
     
 

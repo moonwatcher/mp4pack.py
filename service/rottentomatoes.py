@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import json
 from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError

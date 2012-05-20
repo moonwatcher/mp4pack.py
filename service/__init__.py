@@ -183,6 +183,10 @@ class ResourceHandler(object):
             record = None
             collection = query['repository'].database[entry['branch']['collection']]
             
+            # Make a pseudo empty body for bodyless records
+            if u'body' not in entry['record']:
+                entry['record'][u'body'] = None
+                
             # Build all the resolvable URIs from the genealogy
             entry['record'][u'head'][u'uri'] = []
             for resolvable in entry['branch']['resolvable']:
@@ -202,14 +206,14 @@ class ResourceHandler(object):
                     
             # This is an update, we already have an existing record
             if record is not None:
+                # Compute the union of the two uri lists
+                record[u'head'][u'uri'] = list(set(record[u'head'][u'uri']).union(entry['record'][u'head'][u'uri']))
                 
-                # Make a pseudo empty body for bodyless records
-                if u'body' not in entry['record']:
-                    entry['record'][u'body'] = None
-                    
-                for k,v in entry['record'][u'head'].iteritems():
-                    record[u'head'][k] = v
-                print record[u'head']
+                # Compute the union of the two genealogy dictionaries
+                # New computed genealogy overrides the existing
+                record[u'head'][u'genealogy'] = dict(record[u'head'][u'genealogy'].items() + entry['record'][u'head'][u'genealogy'].items())
+                
+                # New body overrides the existing
                 record[u'body'] = entry['record'][u'body']
                 
             # This is an insert, no previous existing record was found
@@ -217,6 +221,18 @@ class ResourceHandler(object):
                 record = entry['record']
                 record[u'head'][u'created'] = record[u'head'][u'modified']
                 
+                # Issue a new id if a generator is specified
+                if 'generate' in entry['branch']:
+                    record[u'head'][u'genealogy'][entry['branch']['generate']['key']] = self.resolver.issue(query['repository'].host, entry['branch']['generate']['name'])
+                    
+                    # Build all the resolvable URIs from the genealogy again to account for the generated one
+                    record[u'head'][u'uri'] = []
+                    for resolvable in entry['branch']['resolvable']:
+                        try:
+                            record[u'head']['uri'].append(resolvable['format'].format(**record[u'head'][u'genealogy']))
+                        except KeyError, e:
+                            self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
+                            
             # Save the record to database
             self.log.debug(u'Storing %s', unicode(record[u'head']))
             collection.save(record)
