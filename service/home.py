@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 from service import ResourceHandler
 
 class HomeHandler(ResourceHandler):
@@ -49,5 +50,59 @@ class HomeHandler(ResourceHandler):
             }
             
             query['result'].append(entry)
+    
+    
+    def store(self, query):
+        for entry in query['result']:
+            record = None
+            collection = query['repository'].database[entry['branch']['collection']]
+            
+            # Set the modified date
+            entry['record'][u'head'][u'modified'] = datetime.utcnow()
+            
+            # Build all the resolvable URIs from the genealogy
+            entry['record'][u'head'][u'alternate'] = []
+            for resolvable in entry['branch']['resolvable']:
+                try:
+                    entry['record'][u'head']['alternate'].append(resolvable['format'].format(**entry['record'][u'head'][u'genealogy']))
+                except KeyError, e:
+                    self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
+                    
+            # Try to locate an existing record
+            for uri in entry['record'][u'head'][u'alternate']:
+                record = collection.find_one({u'head.alternate':uri})
+                if record is not None:
+                    break
+                    
+            # This is an update, we already have an existing record
+            if record is not None:
+                # Compute the union of the two uri lists
+                record[u'head'][u'alternate'] = list(set(record[u'head'][u'alternate']).union(entry['record'][u'head'][u'alternate']))
+                
+                # Compute the union of the two genealogy dictionaries
+                # New computed genealogy overrides the existing
+                record[u'head'][u'genealogy'] = dict(record[u'head'][u'genealogy'].items() + entry['record'][u'head'][u'genealogy'].items())
+                
+            # This is an insert, no previous existing record was found
+            else:
+                record = entry['record']
+                record[u'head'][u'created'] = record[u'head'][u'modified']
+                
+                # Issue a new id
+                record[u'head'][u'genealogy'][u'home id'] = self.resolver.issue(query['repository'].host, self.node['key generator'])
+                if 'key' in entry['branch']:
+                    record[u'head'][u'genealogy'][entry['branch']['key']] = record[u'head'][u'genealogy'][u'home id']
+                    
+                    # Rebuild all the resolvable URIs from the genealogy again to account for the assigned id
+                    record[u'head'][u'alternate'] = []
+                    for resolvable in entry['branch']['resolvable']:
+                        try:
+                            record[u'head']['alternate'].append(resolvable['format'].format(**record[u'head'][u'genealogy']))
+                        except KeyError, e:
+                            self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
+                            
+            # Save the record to database
+            self.log.debug(u'Storing %s', unicode(record[u'head']))
+            collection.save(record)
     
 

@@ -17,15 +17,15 @@ class AssetCache(object):
         self.asset = {}
     
     
-    def find_asset(self, ontology):
+    def find_asset(self, uri):
         result = None
-        if ontology and 'asset uri' in ontology:
-            if ontology['asset uri'] in self.asset:
-                result = self.asset[ontology['asset uri']]
+        if uri:
+            if uri in self.asset:
+                result = self.asset[uri]
             else:
-                result = Asset(self, ontology)
+                result = Asset(self, uri)
                 if result.valid:
-                    self.assets[ontology['asset uri']] = result
+                    self.assets[uri] = result
                 else:
                     result = None
         return result
@@ -34,7 +34,7 @@ class AssetCache(object):
     def find(self, ontology):
         result = None
         if ontology:
-            asset = self.find_asset(ontology.project('ns.medium.asset.location'))
+            asset = self.find_asset(ontology['asset uri'])
             if asset:
                 result = asset.find(ontology)
         return result
@@ -46,10 +46,10 @@ class AssetCache(object):
 
 
 class Asset(object):
-    def __init__(self, cache, ontology):
+    def __init__(self, cache, uri):
         self.log = logging.getLogger('asset')
         self.cache = cache
-        self.ontology = ontology
+        self.uri = uri
         self.resource = {}
         self.volatile = False
         self.touched = False
@@ -57,7 +57,7 @@ class Asset(object):
     
     
     def __unicode__(self):
-        return unicode(self.ontology['asset uri'])
+        return unicode(self.uri)
     
     
     @property
@@ -67,14 +67,13 @@ class Asset(object):
     
     @property
     def valid(self):
-        return self.ontology is not None and 'asset uri' in self.ontology
+        return self.uri
     
     
     @property
     def node(self):
         if self._node is None:
-            if self.managed:
-                self._node = self.env.resolver.resolve(self.ontology['asset uri'])
+            self._node = self.env.resolver.resolve(self.uri)
             if self._node is None:
                 self.crawl()
         return self._node
@@ -263,8 +262,6 @@ class Resource(object):
     def node(self):
         if self._node is None:
             self._node = self.env.resolver.resolve(self.ontology['resource uri'])
-            if self._node is None:
-                self.crawl()
         return self._node
     
     
@@ -303,14 +300,6 @@ class Resource(object):
         self.volatile = True
     
     
-    def crawl(self):
-        if self.available:
-            crawler = Crawler(self.ontology)
-            if crawler.valid:
-                self.node = crawler.node
-                self.volatile = True
-    
-    
     def flush(self):
         # Flush meta to node
         if self._meta is not None:
@@ -344,13 +333,14 @@ class Resource(object):
                 self.log.debug(u'Dropped orphan resource document %s', unicode(self))
     
     
+    
+    
     def read(self):
         pass
     
     
     def write(self):
         pass
-    
     
     
     def fetch(self, job):

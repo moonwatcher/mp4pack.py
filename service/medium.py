@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import uuid
 from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 

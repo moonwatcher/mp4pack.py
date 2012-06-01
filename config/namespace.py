@@ -37,6 +37,11 @@
             'keyword':u'path',
             'type':'unicode',
         },
+        'path sha1':{
+            'name':u'Path SHA1',
+            'keyword':u'path_sha1',
+            'type':'unicode',
+        },
         'managed':{
             'name':u'Managed',
             'keyword':u'managed',
@@ -890,6 +895,11 @@
             'name':u'MongoDB URL',
             'keyword':u'mongodb_url',
             'type':'unicode',
+        },
+        'home id':{
+            'name':u'Home ID',
+            'keyword':u'home_id',
+            'type':'int',
         },
         'movie id':{
             'name':u'Movie ID',
@@ -1915,63 +1925,7 @@
         },
     },
     'namespace':{
-        'ns.service.genealogy':{
-            'default':{
-                'keyword':None,
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'atom':None,
-            },
-            'synonym':['keyword'],
-            'element':{
-                'url':None,
-                'path':None,
-                'file name':None,
-                'directory':None,
-                'scheme':None,
-                'host':None,
-                'volume relative path':None,
-                'managed':None,
-                'media kind':None,
-                'kind':None,
-                'language':None,
-                'profile':None,
-                'volume':None,
-                'movie id':None,
-                'album id':None,
-                'tv show id':None,
-                'disk id':None,
-                'track id':None,
-                'person id':None,
-                'company id':None,
-                'genre id':None,
-                'job id':None,
-                'department id':None,
-                'track position':None,
-                'disk position':None,
-                'movie handle':None,
-                'album handle':None,
-                'tv show handle':None,
-                'imdb movie id':None,
-                'imdb tv show id':None,
-                'imdb tv episode id':None,
-                'trimmed imdb movie id':None,
-                'tmdb movie id':None,
-                'tmdb person id':None,
-                'tmdb company id':None,
-                'tmdb genre id':None,
-                'tvdb tv show id':None,
-                'tvdb tv season id':None,
-                'tvdb tv episode id':None,
-                'rottentomatoes movie id':None,
-            },
-            'rule':[
-                'rule.system.default.language',
-                'rule.knowledge.movie.imdb.trimmed',
-            ],
-        },
-        
+        # System
         'ns.system.command.default':{
             'default':{
                 'keyword':None,
@@ -2130,15 +2084,64 @@
                 'rule.system.mongodb.url',
             ],
         },
-        'ns.medium.resource.hint':{
+        
+        # Referencing
+        'ns.service.genealogy':{
             'default':{
+                'keyword':None,
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
+                'atom':None,
             },
             'synonym':['keyword'],
             'element':{
-            }
+                'url':None,
+                'path':None,
+                'file name':None,
+                'directory':None,
+                'scheme':None,
+                'host':None,
+                'volume relative path':None,
+                'managed':None,
+                'media kind':None,
+                'kind':None,
+                'language':None,
+                'profile':None,
+                'volume':None,
+                'home id':None,
+                'movie id':None,
+                'album id':None,
+                'tv show id':None,
+                'disk id':None,
+                'track id':None,
+                'person id':None,
+                'company id':None,
+                'genre id':None,
+                'job id':None,
+                'department id':None,
+                'track position':None,
+                'disk position':None,
+                'movie handle':None,
+                'album handle':None,
+                'tv show handle':None,
+                'imdb movie id':None,
+                'imdb tv show id':None,
+                'imdb tv episode id':None,
+                'trimmed imdb movie id':None,
+                'tmdb movie id':None,
+                'tmdb person id':None,
+                'tmdb company id':None,
+                'tmdb genre id':None,
+                'tvdb tv show id':None,
+                'tvdb tv season id':None,
+                'tvdb tv episode id':None,
+                'rottentomatoes movie id':None,
+            },
+            'rule':[
+                'rule.system.default.language',
+                'rule.knowledge.movie.imdb.trimmed',
+            ],
         },
         'ns.medium.resource.location':{
             'default':{
@@ -2154,6 +2157,7 @@
                 'scheme':None,
                 'host':None,
                 'path':None,
+                'path sha1':None,
                 'managed':None,
                 'media kind':None,
                 'directory':None,
@@ -2162,16 +2166,32 @@
                 'language':None,
                 'profile':None,
                 'volume':None,
-                'name':None,
-                'simple name':None,
+                'home id':None,
+                'movie id':None,
+                'album id':None,
+                'tv show id':None,
+                'disk id':None,
+                'track id':None,
+                'track position':None,
+                'disk position':None,
+                'movie handle':None,
                 'album handle':None,
                 'tv show handle':None,
                 'imdb movie id':None,
+                'imdb tv show id':None,
+                'imdb tv episode id':None,
                 'tmdb movie id':None,
+                'tvdb tv show id':None,
+                'tvdb tv season id':None,
+                'tvdb tv episode id':None,
+                'rottentomatoes movie id':None,
+                'name':None,
+                'simple name':None,
                 'track genealogy':None,
-                'track position':None,
-                'disk position':None,
                 'volume relative path':None,
+                'resource uri':None,
+                'asset uri':None,
+                'home uri':None,
             },
             'rule':[
                 'rule.medium.resource.track.genealogy',
@@ -2182,36 +2202,10 @@
                 'rule.medium.resource.path.cache',
                 'rule.medium.resource.uri',
                 'rule.medium.asset.uri',
+                'rule.medium.home.uri',
             ],
         },
-        'ns.medium.asset.location':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'atom':None,
-            },
-            'synonym':['keyword'],
-            'element':{
-                'scheme':None,
-                'host':None,
-                'managed':None,
-                'media kind':None,
-                'album id':None,
-                'album handle':None,
-                'tv show id':None,
-                'tv show handle':None,
-                'movie id':None,
-                'imdb movie id':None,
-                'tmdb movie id':None,
-                'track position':None,
-                'disk position':None,
-            },
-            'rule':[
-                'rule.medium.asset.uri',
-            ],
-        },
+        
         'ns.medium.resource.url.decode':{
             'default':{
                 'auto cast':True,
@@ -2228,18 +2222,40 @@
                 'volume path':None,
                 'kind':None,
                 'media kind':None,
+                'movie id':None,
+                'album id':None,
+                'tv show id':None,
+                'disk id':None,
+                'track id':None,
+                'track position':None,
+                'disk position':None,
+                'movie handle':None,
                 'album handle':None,
                 'tv show handle':None,
                 'imdb movie id':None,
+                'imdb tv show id':None,
+                'imdb tv episode id':None,
                 'tmdb movie id':None,
-                'disk position':None,
-                'track position':None,
+                'tvdb tv show id':None,
+                'tvdb tv season id':None,
+                'tvdb tv episode id':None,
+                'rottentomatoes movie id':None,
                 'name':None,
             },
             'rule':[
                 'rule.medium.resource.directory.parse',
                 'rule.medium.resource.filename.parse',
             ],
+        },
+        'ns.medium.resource.hint':{
+            'default':{
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+            },
+            'synonym':['keyword'],
+            'element':{
+            }
         },
         'ns.medium.resource.tag.meta':{
             'default':{
@@ -3762,7 +3778,6 @@
                 'language':None,
             },
         },
-        
     },
     'rule':{
         'rule.system.default.routing':{
@@ -3833,77 +3848,218 @@
                 },
             ],
         },
+        
+        'rule.medium.home.uri':{
+            'name':'Home URI',
+            'provide':set(('home uri',)),
+            'branch':[
+                {
+                    'requires':set((
+                        'media kind',
+                        'movie id',
+                    )),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/movie/{movie id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'movie handle',
+                    )),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/movie/~/{movie handle}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'tmdb movie id',
+                    )),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/movie/tmdb/{tmdb movie id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'imdb movie id',
+                    )),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/movie/imdb/{imdb movie id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'rottentomatoes movie id',
+                    )),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/movie/rottentomatoes/{rottentomatoes movie id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'track id',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/{track id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'disk id',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/{disk id}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'tv show id',
+                        'disk position',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/{tv show id}/{disk position}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'tv show handle',
+                        'disk position',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/~/{tv show handle}/{disk position}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'tvdb tv episode id',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv episode id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'tvdb tv season id',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv season id}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'tvdb tv show id',
+                        'disk position',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'imdb tv episode id',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/imdb/{imdb tv episode id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'imdb tv show id',
+                        'disk position',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/imdb/{imdb tv show id}/{disk position}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'track id',
+                    )),
+                    'equal':{'media kind':'music', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/music/track/{track id}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'disk id',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'music', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/music/track/{disk id}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'album id',
+                        'disk position',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'music', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/music/track/{album id}/{disk position}/{track position}', },
+                    ],
+                },
+                {
+                    'requires':set((
+                        'media kind',
+                        'album handle',
+                        'disk position',
+                        'track position',
+                    )),
+                    'equal':{'media kind':'music', },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/music/track/~/{album handle}/{disk position}/{track position}', },
+                    ],
+                },
+            ],
+        },
         'rule.medium.asset.uri':{
             'name':'Asset URI',
             'provide':set(('asset uri',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'tv show id', 'disk position', 'track position')),
-                    'equal':{'media kind':'tvshow', },
+                    'requires':set(('home id',)),
                     'apply':[
                         {
                             'property':'asset uri',
-                            'format':u'/m/asset/tvshow/episode/{tv show id}/{disk position}/{track position}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tv show handle', 'disk position', 'track position')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/m/asset/tvshow/episode/{tv show handle}/{disk position}/{track position}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'album id', 'disk position', 'track position')),
-                    'equal':{'media kind':'music', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/m/asset/music/track/{album id}/{disk position}/{track position}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'album handle', 'disk position', 'track position')),
-                    'equal':{'media kind':'music', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/m/asset/music/track/{album handle}/{disk position}/{track position}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'movie id',)),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/m/asset/movie/{movie id}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'imdb movie id',)),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/m/asset/movie/imdb/{imdb movie id}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tmdb movie id',)),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/m/asset/movie/tmdb/{tmdb movie id}',
+                            'format':u'/m/asset/{home id}',
                         },
                     ],
                 },
@@ -3911,110 +4067,222 @@
         },
         'rule.medium.resource.uri':{
             'name':'Resource URI',
-            'provide':set(('resource uri', 'managed')),
+            'provide':set(('resource uri',)),
             'branch':[
                 {
-                    'requires':set((
-                        'volume',
-                        'media kind',
-                        'kind',
-                        'profile',
-                        'tv show handle',
-                        'disk position',
-                        'track position',
-                        'language',
-                    )),
-                    'equal':{'media kind':'tvshow', },
+                    'requires':set(('path sha1',)),
                     'apply':[
                         {
                             'property':'resource uri',
-                            'format':u'/m/resource/{volume}/tvshow/{kind}/{profile}/{language}/{tv show id}/{disk position}/{track position}',
+                            'format':u'/m/resource/sha1/{path sha1}',
                         },
-                        { 'property':'managed', 'value':True, },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.filename.parse':{
+            'name':'Parse file name',
+            'provide':set((
+                'kind',
+                'media kind',
+                'disk position',
+                'track position',
+                'imdb movie id',
+                'tmdb movie id',
+                'tv show handle',
+                'album handle',
+                'name',
+            )),
+            'branch':[
+                {
+                    'requires':set(('file name',)),
+                    'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'decode':[
+                        {'property':'file name', 'expression':ur'^(?P<tv_show_handle>.{2,}) s(?P<disk_position>[0-9]+)e(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                    ],
+                    'apply':[
+                        {'property':'media kind', 'value':u'tvshow',},
                     ],
                 },
                 {
-                    'requires':set((
-                        'volume',
-                        'media kind',
-                        'kind',
-                        'profile',
-                        'album id',
-                        'disk position',
-                        'track position',
-                        'language',
-                    )),
-                    'equal':{'media kind':'music', },
+                    'requires':set(('file name',)),
+                    'match':{'property':'file name', 'expression':ur'^.{2,} d[0-9]+t[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'decode':[
+                        {'property':'file name', 'expression':ur'^(?P<album_handle>.{2,}) d(?P<disk_position>[0-9]+)t(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                    ],
                     'apply':[
-                        {
-                            'property':'resource uri',
-                            'format':u'/m/resource/{volume}/music/{kind}/{profile}/{language}/{album id}/{disk position}/{track position}',
-                        },
-                        { 'property':'managed', 'value':True, },
+                        {'property':'media kind', 'value':u'music',},
                     ],
                 },
                 {
-                    'requires':set((
-                        'volume',
-                        'media kind',
-                        'kind',
-                        'profile',
-                        'album id',
-                        'disk position',
-                        'track position',
-                    )),
-                    'equal':{'media kind':'music', },
+                    'requires':set(('file name',)),
+                    'match':{'property':'file name', 'expression':ur'^IMDbtt[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'decode':[
+                        {'property':'file name', 'expression':ur'^IMDb(?P<imdb_movie_id>tt[0-9]+)(?: (?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                    ],
                     'apply':[
-                        {
-                            'property':'resource uri',
-                            'format':u'/m/resource/{volume}/music/{kind}/{profile}/{album id}/{disk position}/{track position}',
-                        },
-                        { 'property':'managed', 'value':True, },
+                        {'property':'media kind', 'value':u'movie',},
                     ],
                 },
                 {
-                    'requires':set((
-                        'volume',
-                        'media kind',
-                        'kind',
-                        'profile',
-                        'movie id',
-                        'language',
-                    )),
-                    'equal':{'media kind':'movie', },
+                    'requires':set(('file name',)),
+                    'match':{'property':'file name', 'expression':ur'^TMDb[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'decode':[
+                        {'property':'file name', 'expression':ur'^TMDb(?P<tmdb_movie_id>[0-9]+)(?: (?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                    ],
                     'apply':[
+                        {'property':'media kind', 'value':u'movie',},
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.directory.parse':{
+            'name':'Parse directory fragments',
+            'provide':set((
+                'volume path',
+                'profile',
+                'language',
+            )),
+            'branch':[
+                {
+                    'requires':set(('directory',)),
+                    'match':{'property':'directory', 'expression':ur'^/.+/tvshow|music/[a-z0-9]{3,4}/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
+                    'decode':[
                         {
-                            'property':'resource uri',
-                            'format':u'/m/resource/{volume}/movie/{kind}/{profile}/{language}/{movie id}',
+                            'property':'directory',
+                            'expression':ur'^(?P<volume_path>/.+)/tvshow|music/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
                         },
-                        { 'property':'managed', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set((
-                        'volume',
-                        'media kind',
-                        'kind',
-                        'profile',
-                        'movie id',
-                    )),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
+                    'requires':set(('directory',)),
+                    'match':{'property':'directory', 'expression':ur'^/.+/movie/[a-z0-9]{3,4}/[^/]{2,}(?:/[a-z]{2})?$', },
+                    'decode':[
                         {
-                            'property':'resource uri',
-                            'format':u'/m/resource/{volume}/movie/{kind}/{profile}/{movie id}',
+                            'property':'directory',
+                            'expression':ur'^(?P<volume_path>/.+)/movie/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})(?:/(?P<language>[a-z]{2}))?$',
                         },
-                        { 'property':'managed', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('host', 'path')),
-                    'apply':[
+                    'requires':set(('directory',)),
+                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
+                    'decode':[
                         {
-                            'property':'resource uri',
-                            'format':u'/{host}{path}',
+                            'property':'directory',
+                            'expression':ur'^.*/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
                         },
-                        { 'property':'managed', 'value':False, },
+                    ],
+                },
+                {
+                    'requires':set(('directory',)),
+                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{2,}(?:/[a-z]{2})?$', },
+                    'decode':[
+                        {
+                            'property':'directory',
+                            'expression':ur'^.*/(?P<profile>[^/]{2,})(?:/(?P<language>[a-z]{2}))?$',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('directory',)),
+                    'match':{'property':'directory', 'expression':ur'^.*/[a-z]{2}$', },
+                    'decode':[
+                        {
+                            'property':'directory',
+                            'expression':ur'^.*/(?P<language>[a-z]{2})$',
+                        },
+                    ],
+                },
+            ],
+        },
+        
+        'rule.medium.resource.kind.language':{
+            'name':'Kind language dependency',
+            'provide':set(('language dependent',)),
+            'branch':[
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'m4v', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':False, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'m4a', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':False, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'mkv', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':False, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'avi', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':False, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'srt', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'ass', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'chpl', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'ac3', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'dts', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'flac', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'png', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
+                    ],
+                },
+                {
+                    'requires':set(('kind',)),
+                    'equal':{'kind':'jpg', },
+                    'apply':[
+                        { 'property':'language dependent', 'value':True, },
                     ],
                 },
             ],
@@ -4119,122 +4387,6 @@
                 },
             ],
         },
-        'rule.medium.resource.directory.parse':{
-            'name':'Parse directory fragments',
-            'provide':set((
-                'volume path',
-                'profile',
-                'language',
-            )),
-            'branch':[
-                {
-                    'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^/.+/tvshow|music/[a-z0-9]{3,4}/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
-                    'decode':[
-                        {
-                            'property':'directory',
-                            'expression':ur'^(?P<volume_path>/.+)/tvshow|music/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^/.+/movie/[a-z0-9]{3,4}/[^/]{2,}(?:/[a-z]{2})?$', },
-                    'decode':[
-                        {
-                            'property':'directory',
-                            'expression':ur'^(?P<volume_path>/.+)/movie/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})(?:/(?P<language>[a-z]{2}))?$',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
-                    'decode':[
-                        {
-                            'property':'directory',
-                            'expression':ur'^.*/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{2,}(?:/[a-z]{2})?$', },
-                    'decode':[
-                        {
-                            'property':'directory',
-                            'expression':ur'^.*/(?P<profile>[^/]{2,})(?:/(?P<language>[a-z]{2}))?$',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^.*/[a-z]{2}$', },
-                    'decode':[
-                        {
-                            'property':'directory',
-                            'expression':ur'^.*/(?P<language>[a-z]{2})$',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.medium.resource.filename.parse':{
-            'name':'Parse file name',
-            'provide':set((
-                'kind',
-                'media kind',
-                'disk position',
-                'track position',
-                'imdb movie id',
-                'tmdb movie id',
-                'tv show handle',
-                'album handle',
-                'name',
-            )),
-            'branch':[
-                {
-                    'requires':set(('file name',)),
-                    'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
-                    'decode':[
-                        {'property':'file name', 'expression':ur'^(?P<tv_show_handle>.{2,}) s(?P<disk_position>[0-9]+)e(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
-                    ],
-                    'apply':[
-                        {'property':'media kind', 'value':u'tvshow',},
-                    ],
-                },
-                {
-                    'requires':set(('file name',)),
-                    'match':{'property':'file name', 'expression':ur'^.{2,} d[0-9]+t[0-9]+(?: .*)?\.[^\.]{3,4}$', },
-                    'decode':[
-                        {'property':'file name', 'expression':ur'^(?P<album_handle>.{2,}) d(?P<disk_position>[0-9]+)t(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
-                    ],
-                    'apply':[
-                        {'property':'media kind', 'value':u'music',},
-                    ],
-                },
-                {
-                    'requires':set(('file name',)),
-                    'match':{'property':'file name', 'expression':ur'^IMDbtt[0-9]+(?: .*)?\.[^\.]{3,4}$', },
-                    'decode':[
-                        {'property':'file name', 'expression':ur'^IMDb(?P<imdb_movie_id>tt[0-9]+)(?: (?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
-                    ],
-                    'apply':[
-                        {'property':'media kind', 'value':u'movie',},
-                    ],
-                },
-                {
-                    'requires':set(('file name',)),
-                    'match':{'property':'file name', 'expression':ur'^TMDb[0-9]+(?: .*)?\.[^\.]{3,4}$', },
-                    'decode':[
-                        {'property':'file name', 'expression':ur'^TMDb(?P<tmdb_movie_id>[0-9]+)(?: (?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
-                    ],
-                    'apply':[
-                        {'property':'media kind', 'value':u'movie',},
-                    ],
-                },
-            ],
-        },
         'rule.medium.resource.filename.canonic':{
             'name':'Compose a canonic file name',
             'provide':set(('canonic file name',)),
@@ -4327,6 +4479,7 @@
                 },
             ],
         },
+        
         'rule.medium.stream.audio.name':{
             'name':'audio track name',
             'provide':set(('name',)),
@@ -4612,7 +4765,7 @@
                     'apply':[
                         {
                             'property':'episode uri',
-                            'format':u'/k/{language}/tvshow/episode/{tv show id}/{disk position}/{track position}',
+                            'format':u'/k/{language}/tv/episode/{tv show id}/{disk position}/{track position}',
                         },
                     ],
                 },
@@ -4622,7 +4775,7 @@
                     'apply':[
                         {
                             'property':'episode uri',
-                            'format':u'/k/{language}/tvshow/episode/~/{tv show handle}/{disk position}/{track position}',
+                            'format':u'/k/{language}/tv/episode/~/{tv show handle}/{disk position}/{track position}',
                         },
                     ],
                 },
@@ -4632,7 +4785,7 @@
                     'apply':[
                         {
                             'property':'episode uri',
-                            'format':u'/k/{language}/tvshow/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}',
+                            'format':u'/k/{language}/tv/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}',
                         },
                     ],
                 },

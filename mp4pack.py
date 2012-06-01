@@ -96,7 +96,6 @@ def main():
     # Initialize a processing queue
     queue = Queue(env)
     
-    #test(env)
     if 'uris' in env.ontology:
         job = ServiceJob(queue, env.ontology.project('ns.system.job'))
     else:
@@ -107,28 +106,6 @@ def main():
     node['end'] = datetime.now()
     node['duration'] = unicode(node['end'] - node['start'])
     #sys.stderr.write(json.dumps(node, sort_keys=True, indent=4,  default=env.default_json_handler))
-
-
-def test(env):
-    from crawler import Crawler
-    paths = [
-        'file://yoshi/Users/lg/Downloads/samurai jack s01e07 jack and the three blind archers.m4v',
-        'file://multivac/net/vito/media/tlv/eta/movie/mkv/1080/IMDbtt0076759 star wars episode iv - a new hope.mkv',
-        'file://multivac/net/multivac/Volumes/alphaville/alpha/tvshow/srt/clean/3rd rock from the sun/1/eng/3rd rock from the sun s01e02 post nasal dick.srt',
-        'file://yoshi/Users/lg/Downloads/mpk/pool/epsilon/tvshow/dts/original/weeds/7/en/weeds s07e01 bags.dts',
-    ]
-    import json
-    import datetime
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
-    
-    for path in paths:
-        o = env.parse_url(path)
-        c = Crawler(o)
-        n = c.node
-        print o['resource uri']
-        print o['asset uri']
-        #print json.dumps(n, sort_keys=True, indent=4,  default=dthandler)
-
 
 
 if __name__ == '__main__':

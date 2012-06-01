@@ -65,7 +65,7 @@ class Resolver(object):
     
     def save(self, node):
         for handler in self.handlers.values():
-            for uri in node['head']['uri']:
+            for uri in node['head']['alternate']:
                 match = handler.match(uri)
                 if match is not None:
                     parsed = match.groupdict()
@@ -76,12 +76,15 @@ class Resolver(object):
     
     def issue(self, host, name):
         result = None
-        if host in self.env.repository:
-            repository = self.env.repository[host]
-            issued = repository.database.counters.find_and_modify(query={u'_id':name}, update={u'$inc':{u'next':1}, u'$set':{u'modified':datetime.now()}}, new=True, upsert=True)
-            if issued is not None:
-                self.log.debug(u'New key %d issued for key pool %s', issued[u'next'], issued[u'_id'])
-                result = issued[u'next']
+        if name == 'oid':
+            result = ObjectId()
+        else:
+            if host in self.env.repository:
+                repository = self.env.repository[host]
+                issued = repository.database.counters.find_and_modify(query={u'_id':name}, update={u'$inc':{u'next':1}, u'$set':{u'modified':datetime.now()}}, new=True, upsert=True)
+                if issued is not None:
+                    self.log.debug(u'New key %d issued for key pool %s', issued[u'next'], issued[u'_id'])
+                    result = issued[u'next']
         return result
     
 
@@ -99,6 +102,10 @@ class ResourceHandler(object):
             branch['persistent'] = 'collection' in branch
             for match in branch['match']:
                 match['pattern'] = re.compile(match['filter'])
+                
+                # Default the lookup method to uri lookup
+                if 'method' not in match: match['method'] = 'uri'
+                
             self.branch[name] = branch
     
     
@@ -127,12 +134,12 @@ class ResourceHandler(object):
                     taken = True
                     if branch['persistent']:
                         collection = repository.database[branch['collection']]
-                        result = collection.find_one({u'head.uri':uri})
+                        result = collection.find_one({u'head.alternate':uri})
                         
                         # If record does not exists try to produce it and lookup again
                         if result is None:
                             self.produce(uri, repository, location)
-                            result = collection.find_one({u'head.uri':uri})
+                            result = collection.find_one({u'head.alternate':uri})
                     else:
                         self.produce(uri, repository, location)
                         
@@ -141,7 +148,7 @@ class ResourceHandler(object):
         return result
     
     
-    # Produce will attempt to create the record out of available resources
+    # Produce will attempt to create the record
     def produce(self, uri, repository, location):
         taken = False
         for branch in self.branch.values():
@@ -154,13 +161,12 @@ class ResourceHandler(object):
                         'branch':branch,
                         'match':match,
                         'uri':uri,
-                        'parameter':None,
+                        'parameter':Ontology(self.env, 'ns.service.genealogy'),
                         'source':[],
                         'result':[],
                     }
                     
                     # decode parameters from the uri
-                    query['parameter'] = Ontology(self.env, 'ns.service.genealogy')
                     for k,v in m.groupdict().iteritems():
                         query['parameter'].decode(k,v)
                         
@@ -183,31 +189,31 @@ class ResourceHandler(object):
             record = None
             collection = query['repository'].database[entry['branch']['collection']]
             
+            # Set the modified date
+            entry['record'][u'head'][u'modified'] = datetime.utcnow()
+            
             # Make a pseudo empty body for bodyless records
             if u'body' not in entry['record']:
                 entry['record'][u'body'] = None
                 
             # Build all the resolvable URIs from the genealogy
-            entry['record'][u'head'][u'uri'] = []
+            entry['record'][u'head'][u'alternate'] = []
             for resolvable in entry['branch']['resolvable']:
                 try:
-                    entry['record'][u'head']['uri'].append(resolvable['format'].format(**entry['record'][u'head'][u'genealogy']))
+                    entry['record'][u'head']['alternate'].append(resolvable['format'].format(**entry['record'][u'head'][u'genealogy']))
                 except KeyError, e:
                     self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
                     
-            # Set the modified date
-            entry['record'][u'head'][u'modified'] = datetime.utcnow()
-            
             # Try to locate an existing record
-            for uri in entry['record'][u'head'][u'uri']:
-                record = collection.find_one({u'head.uri':uri})
+            for uri in entry['record'][u'head'][u'alternate']:
+                record = collection.find_one({u'head.alternate':uri})
                 if record is not None:
                     break
                     
             # This is an update, we already have an existing record
             if record is not None:
                 # Compute the union of the two uri lists
-                record[u'head'][u'uri'] = list(set(record[u'head'][u'uri']).union(entry['record'][u'head'][u'uri']))
+                record[u'head'][u'alternate'] = list(set(record[u'head'][u'alternate']).union(entry['record'][u'head'][u'alternate']))
                 
                 # Compute the union of the two genealogy dictionaries
                 # New computed genealogy overrides the existing
@@ -221,18 +227,6 @@ class ResourceHandler(object):
                 record = entry['record']
                 record[u'head'][u'created'] = record[u'head'][u'modified']
                 
-                # Issue a new id if a generator is specified
-                if 'generate' in entry['branch']:
-                    record[u'head'][u'genealogy'][entry['branch']['generate']['key']] = self.resolver.issue(query['repository'].host, entry['branch']['generate']['name'])
-                    
-                    # Build all the resolvable URIs from the genealogy again to account for the generated one
-                    record[u'head'][u'uri'] = []
-                    for resolvable in entry['branch']['resolvable']:
-                        try:
-                            record[u'head']['uri'].append(resolvable['format'].format(**record[u'head'][u'genealogy']))
-                        except KeyError, e:
-                            self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
-                            
             # Save the record to database
             self.log.debug(u'Storing %s', unicode(record[u'head']))
             collection.save(record)
@@ -250,7 +244,7 @@ class ResourceHandler(object):
                     if branch['persistent']:
                         self.log.debug(u'Dropping %s', uri)
                         collection = repository.database[branch['collection']]
-                        collection.remove({u'head.uri':uri})
+                        collection.remove({u'head.alternate':uri})
                     break
             if taken: break
     
@@ -259,14 +253,14 @@ class ResourceHandler(object):
         result = None
         taken = False
         for branch in self.branch.values():
-            for uri in node['head']['uri']:
+            for uri in node['head']['alternate']:
                 for match in branch['match']:
                     m = match['pattern'].search(uri)
                     if m is not None:
                         taken = True
                         if branch['persistent']:
                             collection = repository.database[branch['collection']]
-                            result = collection.find_one({u'head.uri':uri})
+                            result = collection.find_one({u'head.alternate':uri})
                             if result is not None: break
                 if result is not None: break
                 

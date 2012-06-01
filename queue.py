@@ -124,7 +124,8 @@ class Job(object):
     
     
     def filter(self, path):
-        return path and ( self._inclusion is None or self._inclusion.search(path) is not None ) and \
+        return path and \
+        ( self._inclusion is None or self._inclusion.search(path) is not None ) and \
         ( self._exclusion is None or self._exclusion.search(path) is None )
     
     

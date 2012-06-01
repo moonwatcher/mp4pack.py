@@ -5,6 +5,7 @@ import re
 import logging
 import copy
 import urlparse
+import hashlib
 from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
 from chardet.universaldetector import UniversalDetector
@@ -384,6 +385,7 @@ class Environment(object):
                     if result['host'] in self.repository and 'volume path' in result:
                         result['volume'] = self.repository[result['host']].volume.parse(result['volume path'])
                         del result['volume path']
+                result['path sha1'] = hashlib.sha1(result['path']).hexdigest()
         return result
     
     
