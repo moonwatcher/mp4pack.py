@@ -39,6 +39,7 @@
                         {
                             'name':u'movie home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'movie home by id',
@@ -91,6 +92,7 @@
                         {
                             'name':u'show home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'show home by tv show id',
@@ -145,6 +147,7 @@
                         {
                             'name':u'season home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'season home by disk id',
@@ -219,6 +222,7 @@
                         {
                             'name':u'episode home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'episode home by track id',
@@ -285,6 +289,7 @@
                         {
                             'name':u'music album home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'music album home by album id',
@@ -315,6 +320,7 @@
                         {
                             'name':u'music disk home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'music disk home by disk id',
@@ -352,6 +358,7 @@
                         {
                             'name':u'music track home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'music track home by track id',
@@ -391,6 +398,7 @@
                         {
                             'name':u'person home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'person home by person id',
@@ -419,6 +427,7 @@
                         {
                             'name':u'company home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'company home by company id',
@@ -447,6 +456,7 @@
                         {
                             'name':u'genre home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'genre home by genre id',
@@ -470,6 +480,7 @@
                         {
                             'name':u'job home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'job home by job id',
@@ -489,6 +500,7 @@
                         {
                             'name':u'department home by home id',
                             'format':ur'/h/{home id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'department home by department id',
@@ -1084,6 +1096,7 @@
                         {
                             'name':u'asset by home id',
                             'format':ur'/m/asset/{home id}',
+                            'canonical':True,
                         },
                     ],
                     'type':'reference',
@@ -1092,13 +1105,14 @@
                 'medium.resource':{
                     'match':[
                         {
-                            'filter':ur'^/m/resource/sha1/(?P<path_sha1>[0-9a-f]{40})$',
+                            'filter':ur'^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})$',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'resource',
-                            'format':ur'/m/resource/sha1/{path sha1}',
+                            'format':ur'/m/resource/sha1/{path digest}',
+                            'canonical':True,
                         },
                     ],
                     'type':'crawl',
@@ -1124,6 +1138,7 @@
                         {
                             'name':u'tmdb configuration',
                             'format':ur'/c/tmdb/configuration',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_configuration',
@@ -1145,6 +1160,7 @@
                         {
                             'name':u'tmdb movie by tmdb id',
                             'format':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'tmdb movie by imdb id',
@@ -1167,6 +1183,7 @@
                         {
                             'name':u'tmdb movie cast by tmdb id',
                             'format':ur'/c/tmdb/movie/{tmdb movie id}/cast',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_movie_cast',
@@ -1185,6 +1202,7 @@
                         {
                             'name':u'tmdb movie image by tmdb id',
                             'format':ur'/c/tmdb/movie/{tmdb movie id}/image',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_movie_image',
@@ -1203,6 +1221,7 @@
                         {
                             'name':u'tmdb movie keyword by tmdb id',
                             'format':ur'/c/tmdb/movie/{tmdb movie id}/keyword',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_movie_keyword',
@@ -1221,6 +1240,7 @@
                         {
                             'name':u'tmdb movie release by tmdb id',
                             'format':ur'/c/tmdb/movie/{tmdb movie id}/release',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_movie_release',
@@ -1239,6 +1259,7 @@
                         {
                             'name':u'tmdb movie clip by tmdb id',
                             'format':ur'/c/tmdb/movie/{tmdb movie id}/clip',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_movie_clip',
@@ -1257,6 +1278,7 @@
                         {
                             'name':u'tmdb movie translation by tmdb id',
                             'format':ur'/c/tmdb/movie/{tmdb movie id}/translation',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_movie_translation',
@@ -1275,6 +1297,7 @@
                         {
                             'name':u'tmdb movie alternative by tmdb id',
                             'format':ur'/c/tmdb/movie/{tmdb movie id}/alternative',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_movie_alternative',
@@ -1293,6 +1316,7 @@
                         {
                             'name':u'tmdb collection by tmdb id',
                             'format':ur'/c/{language}/tmdb/collection/{tmdb collection id}',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_collection',
@@ -1311,6 +1335,7 @@
                         {
                             'name':u'tmdb person by tmdb id',
                             'format':ur'/c/tmdb/person/{tmdb person id}',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_person',
@@ -1328,6 +1353,7 @@
                         {
                             'name':u'tmdb person image by tmdb id',
                             'format':ur'/c/tmdb/person/{tmdb person id}/image',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_person_image',
@@ -1345,6 +1371,7 @@
                         {
                             'name':u'tmdb person credit by tmdb id',
                             'format':ur'/c/tmdb/person/{tmdb person id}/credit',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_person_credit',
@@ -1362,6 +1389,7 @@
                         {
                             'name':u'tmdb company by tmdb id',
                             'format':ur'/c/tmdb/company/{tmdb company id}',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_company',
@@ -1380,6 +1408,7 @@
                         {
                             'name':u'tmdb company credit by tmdb id',
                             'format':ur'/c/tmdb/company/{tmdb company id}/credit',
+                            'canonical':True,
                         },
                     ],
                     'collection':'tmdb_company_credit',
@@ -1423,6 +1452,7 @@
                         {
                             'name':u'tvdb show by tvdb show id',
                             'format':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
+                            'canonical':True,
                         },
                     ],
                     'produce':[
@@ -1451,6 +1481,7 @@
                         {
                             'name':u'tvdb show cast by tvdb show id',
                             'format':ur'/c/tvdb/show/{tvdb tv show id}/cast',
+                            'canonical':True,
                         },
                     ],
                     'produce':[
@@ -1475,6 +1506,7 @@
                         {
                             'name':u'tvdb show image by tvdb show id',
                             'format':ur'/c/tvdb/show/{tvdb tv show id}/image',
+                            'canonical':True,
                         },
                     ],
                     'produce':[
@@ -1501,6 +1533,7 @@
                         {
                             'name':u'tvdb season by tvdb season id',
                             'format':ur'/c/{language}/tvdb/season/{tvdb tv season id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'tvdb season by tvdb show id',
@@ -1535,6 +1568,7 @@
                         {
                             'name':u'tvdb episode by tvdb episode id',
                             'format':ur'/c/{language}/tvdb/episode/{tvdb tv episode id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'tvdb episode by tvdb season id',
@@ -1608,6 +1642,7 @@
                         {
                             'name':u'tvdb daily update',
                             'format':ur'/c/tvdb/update/day',
+                            'canonical':True,
                         },
                     ],
                     'type':'zip',
@@ -1623,6 +1658,7 @@
                         {
                             'name':u'tvdb weekly update',
                             'format':ur'/c/tvdb/update/week',
+                            'canonical':True,
                         },
                     ],
                     'type':'zip',
@@ -1638,6 +1674,7 @@
                         {
                             'name':u'tvdb monthly update',
                             'format':ur'/c/tvdb/update/month',
+                            'canonical':True,
                         },
                     ],
                     'type':'zip',
@@ -1664,6 +1701,7 @@
                         {
                             'name':u'rotten tomatoes movie by rottentomatoes movie id',
                             'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'rotten tomatoes movie by imdb id',
@@ -1686,6 +1724,7 @@
                         {
                             'name':u'rotten tomatoes movie cast by rottentomatoes movie id',
                             'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/cast',
+                            'canonical':True,
                         },
                     ],
                     'collection':'rottentomatoes_movie_cast',
@@ -1704,6 +1743,7 @@
                         {
                             'name':u'rotten tomatoes movie clip by rottentomatoes movie id',
                             'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/clip',
+                            'canonical':True,
                         },
                     ],
                     'collection':'rottentomatoes_movie_clip',
@@ -1722,6 +1762,7 @@
                         {
                             'name':u'rotten tomatoes movie review by rottentomatoes movie id',
                             'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/review',
+                            'canonical':True,
                         },
                     ],
                     'collection':'rottentomatoes_movie_review',
@@ -1740,6 +1781,7 @@
                         {
                             'name':u'rotten tomatoes similar movies by rottentomatoes movie id',
                             'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/similar',
+                            'canonical':True,
                         },
                     ],
                     'collection':'rottentomatoes_movie_similar',

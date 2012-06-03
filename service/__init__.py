@@ -30,6 +30,9 @@ class Resolver(object):
         from home import HomeHandler
         self.handlers['home'] = HomeHandler(self, self.env.service['home'])
         
+        from medium import MediumHandler
+        self.handlers['medium'] = MediumHandler(self, self.env.service['medium'])
+        
     
     
     def resolve(self, uri, location=None):
@@ -200,7 +203,10 @@ class ResourceHandler(object):
             entry['record'][u'head'][u'alternate'] = []
             for resolvable in entry['branch']['resolvable']:
                 try:
-                    entry['record'][u'head']['alternate'].append(resolvable['format'].format(**entry['record'][u'head'][u'genealogy']))
+                    link = resolvable['format'].format(**entry['record'][u'head'][u'genealogy'])
+                    entry['record'][u'head']['alternate'].append(link)
+                    if 'canonical' in resolvable and resolvable['canonical']:
+                        entry['record'][u'head']['canonical'] = link
                 except KeyError, e:
                     self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
                     
@@ -212,6 +218,7 @@ class ResourceHandler(object):
                     
             # This is an update, we already have an existing record
             if record is not None:
+            
                 # Compute the union of the two uri lists
                 record[u'head'][u'alternate'] = list(set(record[u'head'][u'alternate']).union(entry['record'][u'head'][u'alternate']))
                 

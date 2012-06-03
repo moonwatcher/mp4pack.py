@@ -64,7 +64,10 @@ class HomeHandler(ResourceHandler):
             entry['record'][u'head'][u'alternate'] = []
             for resolvable in entry['branch']['resolvable']:
                 try:
-                    entry['record'][u'head']['alternate'].append(resolvable['format'].format(**entry['record'][u'head'][u'genealogy']))
+                    link = resolvable['format'].format(**entry['record'][u'head'][u'genealogy'])
+                    entry['record'][u'head']['alternate'].append(link)
+                    if 'canonical' in resolvable and resolvable['canonical']:
+                        entry['record'][u'head']['canonical'] = link
                 except KeyError, e:
                     self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
                     
@@ -97,7 +100,10 @@ class HomeHandler(ResourceHandler):
                     record[u'head'][u'alternate'] = []
                     for resolvable in entry['branch']['resolvable']:
                         try:
-                            record[u'head']['alternate'].append(resolvable['format'].format(**record[u'head'][u'genealogy']))
+                            link = resolvable['format'].format(**record[u'head'][u'genealogy'])
+                            record[u'head']['alternate'].append(link)
+                            if 'canonical' in resolvable and resolvable['canonical']:
+                                record[u'head']['canonical'] = link
                         except KeyError, e:
                             self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
                             

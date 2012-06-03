@@ -42,7 +42,6 @@ class Crawler(object):
     @property
     def node(self):
         return {
-            'location':self.ontology.node,
             'meta':self.meta.node,
             'stream':[ o.node for o in self.stream ],
         }
@@ -159,7 +158,7 @@ class Crawler(object):
                     self._stream.append(o)
     
     
-    def _load_ass(self, lines):
+    def _load_ass(self):
         if self.ontology['kind'] == 'ass':
             content = self._read()
             if content:

@@ -37,9 +37,9 @@
             'keyword':u'path',
             'type':'unicode',
         },
-        'path sha1':{
+        'path digest':{
             'name':u'Path SHA1',
-            'keyword':u'path_sha1',
+            'keyword':u'path_digest',
             'type':'unicode',
         },
         'managed':{
@@ -901,6 +901,22 @@
             'keyword':u'home_id',
             'type':'int',
         },
+        'album id':{
+            'name':u'Album ID',
+            'keyword':u'album_id',
+            'type':'int',
+        },
+        'disk id':{
+            'name':u'Disk ID',
+            'keyword':u'disk_id',
+            'type':'int',
+        },
+        'track id':{
+            'name':u'Track ID',
+            'keyword':u'track_id',
+            'type':'int',
+        },
+        
         'movie id':{
             'name':u'Movie ID',
             'keyword':u'movie_id',
@@ -2098,6 +2114,7 @@
             'element':{
                 'url':None,
                 'path':None,
+                'path digest':None,
                 'file name':None,
                 'directory':None,
                 'scheme':None,
@@ -2157,7 +2174,7 @@
                 'scheme':None,
                 'host':None,
                 'path':None,
-                'path sha1':None,
+                'path digest':None,
                 'managed':None,
                 'media kind':None,
                 'directory':None,
@@ -4070,11 +4087,11 @@
             'provide':set(('resource uri',)),
             'branch':[
                 {
-                    'requires':set(('path sha1',)),
+                    'requires':set(('path digest',)),
                     'apply':[
                         {
                             'property':'resource uri',
-                            'format':u'/m/resource/sha1/{path sha1}',
+                            'format':u'/m/resource/sha1/{path digest}',
                         },
                     ],
                 },
@@ -4090,6 +4107,7 @@
                 'imdb movie id',
                 'tmdb movie id',
                 'tv show handle',
+                'tvdb tv show id',
                 'album handle',
                 'name',
             )),
@@ -4098,7 +4116,7 @@
                     'requires':set(('file name',)),
                     'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
-                        {'property':'file name', 'expression':ur'^(?P<tv_show_handle>.{2,}) s(?P<disk_position>[0-9]+)e(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                        {'property':'file name', 'expression':ur'^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disk_position>[0-9]+)e(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
                     'apply':[
                         {'property':'media kind', 'value':u'tvshow',},
