@@ -17,26 +17,25 @@ class AssetCache(object):
         self.asset = {}
     
     
-    def find_asset(self, uri):
+    def find_asset(self, location):
         result = None
-        if uri:
-            if uri in self.asset:
-                result = self.asset[uri]
+        if location:
+            if 'asset uri' in location and location['asset uri'] in self.asset:
+                result = self.asset[location['asset uri']]
             else:
-                result = Asset(self, uri)
+                result = Asset(self, location)
                 if result.valid:
-                    self.assets[uri] = result
-                else:
-                    result = None
+                    self.asset[result.uri] = result
+                else: result = None
         return result
     
     
-    def find(self, ontology):
+    def find(self, location):
         result = None
-        if ontology:
-            asset = self.find_asset(ontology['asset uri'])
+        if location:
+            asset = self.find_asset(location)
             if asset:
-                result = asset.find(ontology)
+                result = asset.find(location)
         return result
     
     
@@ -46,14 +45,19 @@ class AssetCache(object):
 
 
 class Asset(object):
-    def __init__(self, cache, uri):
+    def __init__(self, cache, location):
         self.log = logging.getLogger('asset')
         self.cache = cache
-        self.uri = uri
+        self.location = location.project('ns.medium.asset.location')
         self.resource = {}
         self.volatile = False
-        self.touched = False
         self._node = None
+        
+        if 'asset uri' not in self.location and 'home uri' in self.location:
+            home = self.env.resolver.resolve(self.location['home uri'])
+            if home is not None:
+                self.location['home id'] = home['head']['genealogy']['home id']
+            
     
     
     def __unicode__(self):
@@ -64,18 +68,20 @@ class Asset(object):
     def env(self):
         return self.cache.env
     
+    @property
+    def uri(self):
+        return self.location['asset uri']
+    
     
     @property
     def valid(self):
-        return self.uri
+        return self.uri is not None
     
     
     @property
     def node(self):
         if self._node is None:
             self._node = self.env.resolver.resolve(self.uri)
-            if self._node is None:
-                self.crawl()
         return self._node
     
     
@@ -84,97 +90,44 @@ class Asset(object):
         pass
     
     
-    def crawl(self):
-        self._node = {
-            'head':{},
-            'body':{
-                'resource':{},
-            },
-        }
-        
+    def find(self, location):
         result = None
-        if self.valid:
-            o = Ontology.clone(self.ontology)
-            del o['path']
-            del o['url']
-            result = []
-            self.log.debug(u'Scanning %s for resources related to %s', self.env.host, unicode(self))
-            for volume in self.env.repository[self.env.host].volume.element.values():
-                if volume['scan']:
-                    o['volume'] = volume['name']
-                    for kind in self.env.kind.values():
-                        o['kind'] = kind['name']
-                        for profile in self.env.profile.values():
-                            o['profile'] = profile['name']
-                            if kind['name'] not in self.env.kind_with_language:
-                                if o['path'] and os.path.exists(o['path']):
-                                    self.log.debug(u'Discovered %s', o['path'])
-                                    x = self.find(Ontology.clone(o))
-                            else:
-                                for language in self.env.enumeration['language'].element.keys():
-                                    o['language'] = language
-                                    if o['path'] and os.path.exists(o['path']):
-                                        self.log.debug(u'Discovered %s', o['path'])
-                                        x = self.find(Ontology.clone(o))
-                                        
-                                    del o['language']
-                            del o['profile']
-                        del o['kind']
-                    del o['volume']
-        self.volatile = True
-        return result
-    
-    
-    def find(self, ontology):
-        result = None
-        if ontology and 'resource uri' in ontology:
-            if ontology['resource uri'] in self.resource:
-                result = self.resource[ontology['resource uri']]
+        if location and 'resource uri' in location:
+            if location['resource uri'] in self.resource:
+                result = self.resource[location['resource uri']]
             else:
-                result = Resource.create(self, ontology)
+                result = Resource.create(self, location)
                 if result and result.valid:
-                    self.resource[ontology['resource uri']] = result
+                    self.volatile = True
+                    self.resource[result.uri] = result
                 else: result = None
         return result
     
     
     def commit(self):
-        self._node = None
-        for resource in self.resource.values():
-            if resource.managed:
-                if resource.available and resource.volatile and resource.indexed:
-                    resource.commit()
-                    self.node['body']['resource'][resource.ontology['resource uri']] = resource.ontology.node
-                    self.volatile = True
-                    
-                elif (not resource.available or not resource.indexed) and resource.ontology['resource uri'] in self.node['body']['resource']:
-                    del self.node['body']['resource'][resource.ontology['resource uri']]
-                    self.volatile = True
-                del self.resource[resource.ontology['resource uri']]
-            else:
+        if self.volatile:
+            for resource in self.resource.values():
                 resource.commit()
                 
-        if self.volatile:
-            self.env.resolver.save(self.node)
-            self.log.debug(u'Saved asset document %s', unicode(self))
             self._node = None
+            self.resource = {}
+            self.env.resolver.remove(self.uri)
             self.volatile = False
-            self.touched = False
-    
     
     def touch(self):
-        if not self.touched:
-            for ref in self.node['body']['resource'].values():
-                self.find(Ontology(self.env, 'ns.medium.resource.location', ref['location']))
-        self.touched = True
+        for ref in self.node['body']['reference'].values():
+            location = Ontology(self.env, 'ns.medium.resource.location', ref['genealogy'])
+            self.find(location)
+
+
     
 
 
 class Resource(object):
-    def __init__(self, asset, ontology):
+    def __init__(self, asset, location):
         self.log = logging.getLogger('resource')
         self.asset = asset
-        self.ontology = ontology
+        self.location = location
         self.volatile = False
         
         self._node = None
@@ -184,30 +137,30 @@ class Resource(object):
     
     
     def __unicode__(self):
-        return unicode(self.ontology['resource uri'])
+        return unicode(self.uri)
     
     
     @classmethod
-    def create(cls, asset, ontology):
+    def create(cls, asset, location):
         result = None
-        if ontology:
-            if'container' in ontology:
-                if ontology['container'] == 'mp4':
-                    result = MP4(asset, ontology)
-                elif ontology['container'] == 'matroska':
-                    result = Matroska(asset, ontology)
-                elif ontology['container'] == 'subtitles':
-                    result = Subtitles(asset, ontology)
-                elif ontology['container'] == 'chapters':
-                    result = TableOfContent(asset, ontology)
-                elif ontology['container'] == 'image':
-                    result = Artwork(asset, ontology)
-                elif ontology['container'] == 'raw audio':
-                    result = RawAudio(asset, ontology)
-                elif ontology['container'] == 'avi':
-                    result = Avi(asset, ontology)
+        if location and 'resource uri' in location:
+            if'container' in location:
+                if location['container'] == 'mp4':
+                    result = MP4(asset, location)
+                elif location['container'] == 'matroska':
+                    result = Matroska(asset, location)
+                elif location['container'] == 'subtitles':
+                    result = Subtitles(asset, location)
+                elif location['container'] == 'chapters':
+                    result = TableOfContent(asset, location)
+                elif location['container'] == 'image':
+                    result = Artwork(asset, location)
+                elif location['container'] == 'raw audio':
+                    result = RawAudio(asset, location)
+                elif location['container'] == 'avi':
+                    result = Avi(asset, location)
             else:
-                result = cls(asset, ontology)
+                result = cls(asset, location)
         return result
     
     
@@ -220,27 +173,33 @@ class Resource(object):
     def cache(self):
         return self.asset.cache
     
+    @property
+    def uri(self):
+        return self.location['resource uri']
+    
     
     @property
     def valid(self):
-        return self.ontology is not None and 'resource uri' in self.ontology
+        return self.location is not None and \
+        'resource uri' in self.location and \
+        'home uri' in self.location
     
     
     @property
     def managed(self):
-        return self.ontology['managed']
+        return self.location['managed']
     
     
     @property
     def indexed(self):
-        self.ontology['host'] in self.env.repository and \
-        self.ontology['volume'] in self.env.repository[self.ontology['host']]['volume'] and \
-        self.env.repository[self.ontology['host']]['volume'][self.ontology['volume']]['index']
+        self.location['host'] in self.env.repository and \
+        self.location['volume'] in self.env.repository[self.location['host']]['volume'] and \
+        self.env.repository[self.location['host']]['volume'][self.location['volume']]['index']
     
     
     @property
     def local(self):
-        return self.ontology['domain'] == self.env.domain
+        return self.location['domain'] == self.env.domain
     
     
     @property
@@ -250,7 +209,7 @@ class Resource(object):
     
     @property
     def path(self):
-        return self.ontology['path']
+        return self.location['path']
     
     
     @property
@@ -261,7 +220,7 @@ class Resource(object):
     @property
     def node(self):
         if self._node is None:
-            self._node = self.env.resolver.resolve(self.ontology['resource uri'])
+            self._node = self.env.resolver.resolve(self.location['resource uri'], self.location)
         return self._node
     
     
@@ -329,7 +288,7 @@ class Resource(object):
                     self._node = None
                     self.volatile = False
             else:
-                self.env.resolver.remove(self.ontology['resource uri'])
+                self.env.resolver.remove(self.uri)
                 self.log.debug(u'Dropped orphan resource document %s', unicode(self))
     
     
@@ -343,49 +302,49 @@ class Resource(object):
         pass
     
     
-    def fetch(self, job):
+    def fetch(self, task):
         if self.remote and \
         not self.available and \
-        self.ontology['path in cache'] and \
-        self.env.varify_directory(self.ontology['path in cache']):
-            if self.ontology['scheme'] == self.env.runtime['resource scheme']:
+        self.location['path in cache'] and \
+        self.env.varify_directory(self.location['path in cache']):
+            if self.location['scheme'] == self.env.runtime['resource scheme']:
                 command = self.env.initialize_command('rsync', self.log)
                 if command:
                     command.append(u'--partial')
                     command.append(u'--rsh')
-                    command.append(u'ssh -p {0}'.format(self.env.repository[self.ontology['host']]['remote']['download port']))
-                    command.append(u'{0}:{1}'.format(self.ontology['domain'], self.ontology['path'].replace(u' ', ur'\ ')))
-                    command.append(self.ontology['path in cache'])
+                    command.append(u'ssh -p {0}'.format(self.env.repository[self.location['host']]['remote']['download port']))
+                    command.append(u'{0}:{1}'.format(self.location['domain'], self.location['path'].replace(u' ', ur'\ ')))
+                    command.append(self.location['path in cache'])
                     
-                    message = u'Fetch \'{0}\' from {1}'.format(self.ontology['volume relative path'], self.ontology['domain'])
+                    message = u'Fetch \'{0}\' from {1}'.format(self.location['volume relative path'], self.location['domain'])
                     self.env.execute(command, message, False, pipeout=True, pipeerr=False, log=self.log)
                     
             else:
-                if self.ontology['url']:
+                if self.location['url']:
                     try:
-                        self.log.debug(u'Retrieve %s', self.ontology['url'])
-                        filename, headers = urllib.urlretrieve(self.ontology['url'].encode('utf-8'), self.ontology['path in cache'].encode('utf-8'))
+                        self.log.debug(u'Retrieve %s', self.location['url'])
+                        filename, headers = urllib.urlretrieve(self.location['url'].encode('utf-8'), self.location['path in cache'].encode('utf-8'))
                         result = True
                     except IOError:
                         result = False
-                        self.env.purge_path(self.ontology['path in cache'])
-                        self.log.warning(u'Failed to retrieve %s', self.ontology['url'])
+                        self.env.purge_path(self.location['path in cache'])
+                        self.log.warning(u'Failed to retrieve %s', self.location['url'])
                         
-        self.env.purge_if_not_exist(self.ontology['path in cache'])
+        self.env.purge_if_not_exist(self.location['path in cache'])
     
     
-    def delete(self, job):
+    def delete(self, task):
         if self.path:
             self.env.purge_path(self.path)
     
     
-    def copy(self, job):
-        if 'path' in ontology:
-            if self.env.varify_path_is_available(ontology['path'], ontology['overwrite']):
+    def copy(self, task):
+        if 'path' in task.ontology:
+            if self.env.varify_path_is_available(task.ontology['path'], task.job.ontology['overwrite']):
                 command = self.env.initialize_command('rsync', self.log)
                 if command:
-                    command.extend([self.path, ontology['path']])
-                    message = u'Copy ' + self.path + u' --> ' + ontology['path']
+                    command.extend([self.path, job.ontology['path']])
+                    message = u'Copy ' + self.path + u' --> ' + job.ontology['path']
                     self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
                     if self.env.purge_if_not_exist(ontology['path']):
                         self.asset.find(ontology)
@@ -422,8 +381,8 @@ class Resource(object):
 
 
 class Container(Resource):
-    def __init__(self, asset, ontology):
-        Resource.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        Resource.__init__(self, asset, location)
     
     
     def tag(self, task):
@@ -456,8 +415,8 @@ class Container(Resource):
 
 
 class AudioVideoContainer(Container):
-    def __init__(self, asset, ontology):
-        Container.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        Container.__init__(self, asset, location)
     
     
     @property
@@ -469,7 +428,7 @@ class AudioVideoContainer(Container):
     def extract(self, task): 
         for track in task.transform.single_result.track:
             if track['enabled'] and track['stream kind'] == 'menu':
-                o = Ontology.clone(self.ontology)
+                o = Ontology.clone(self.location)
                 del o['path']
                 del o['url']
                 o['host'] = task.job.ontology['host']
@@ -601,8 +560,8 @@ class AudioVideoContainer(Container):
 
 
 class Text(Container):
-    def __init__(self, asset, ontology):
-        Container.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        Container.__init__(self, asset, location)
     
     
     def write(self):
@@ -622,8 +581,8 @@ class Text(Container):
 
 
 class Artwork(Container):
-    def __init__(self, asset, ontology):
-        Container.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        Container.__init__(self, asset, location)
     
     
     def transcode(self, task):
@@ -655,8 +614,8 @@ class Artwork(Container):
 
 
 class Matroska(AudioVideoContainer):
-    def __init__(self, asset, ontology):
-        AudioVideoContainer.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        AudioVideoContainer.__init__(self, asset, location)
     
     
     def extract(self, task):
@@ -668,7 +627,7 @@ class Matroska(AudioVideoContainer):
             taken = False
             for track in task.transform.single_result.track:
                 if track['enabled']:
-                    o = Ontology.clone(self.ontology)
+                    o = Ontology.clone(self.location)
                     del o['path']
                     del o['url']
                     o['host'] = task.job.ontology['host']
@@ -695,8 +654,8 @@ class Matroska(AudioVideoContainer):
 
 
 class MP4(AudioVideoContainer):
-    def __init__(self, asset, ontology):
-        AudioVideoContainer.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        AudioVideoContainer.__init__(self, asset, location)
     
     
     def tag(self, task):
@@ -781,8 +740,8 @@ class MP4(AudioVideoContainer):
 
 
 class RawAudio(Container):
-    def __init__(self, asset, ontology):
-        Container.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        Container.__init__(self, asset, location)
     
     
     def transcode(self, task):
@@ -813,8 +772,8 @@ class RawAudio(Container):
 
 
 class Subtitles(Text):
-    def __init__(self, asset, ontology):
-        Text.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        Text.__init__(self, asset, location)
         self._caption_track = None
         self._caption = None
         
@@ -873,8 +832,8 @@ class Subtitles(Text):
 
 
 class TableOfContent(Text):
-    def __init__(self, asset, ontology):
-        Text.__init__(self, asset, ontology)
+    def __init__(self, asset, location):
+        Text.__init__(self, asset, location)
         self._menu_track = None
         self._menu = None
     

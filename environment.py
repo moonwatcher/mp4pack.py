@@ -376,15 +376,18 @@ class Environment(object):
                 if 'file name' in decoded and 'directory' in decoded:
                     decoded['media kind']
                     decoded['volume path']
+                    decoded['profile']
                     result = Ontology(self, 'ns.medium.resource.location')
                     result['url'] = url
                     result['path'] = parsed.path
                     result['scheme'] = parsed.scheme or u'file'
                     result['host'] = parsed.hostname or self.host
-                    for k,v in decoded.iteritems(): result[k] = v
+                    for k,v in decoded.iteritems():
+                        result[k] = v
                     if result['host'] in self.repository and 'volume path' in result:
                         result['volume'] = self.repository[result['host']].volume.parse(result['volume path'])
                         del result['volume path']
+                        
                 result['path digest'] = hashlib.sha1(result['path']).hexdigest()
         return result
     

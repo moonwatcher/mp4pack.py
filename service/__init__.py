@@ -57,13 +57,22 @@ class Resolver(object):
     
     
     def remove(self, uri):
-        for handler in self.handlers.values():
-            match = handler.match(uri)
-            if match is not None:
-                parsed = match.groupdict()
-                if parsed['host'] in self.env.repository:
-                    handler.remove(parsed['relative'], self.env.repository[parsed['host']])
-                break
+        if uri is not None:
+            repository = None
+            p = urlparse.urlparse(uri)
+            if p.hostname is not None:
+                if p.hostname in self.env.repository:
+                    repository = self.env.repository[p.hostname]
+                else:
+                    self.log.warning(u'Unresolvable host name %s', p.hostname)
+            else:
+                repository = self.env.repository[self.env.host]
+                
+            if repository is not None:
+                for handler in self.handlers.values():
+                    if handler.match(p.path):
+                        result = handler.remove(p.path, repository)
+                        break
     
     
     def save(self, node):
@@ -126,7 +135,6 @@ class ResourceHandler(object):
         return self.pattern.search(uri)
     
     
-    # Resolve attempts to locate the record by uri
     def resolve(self, uri, repository, location):
         result = None
         taken = False
@@ -151,6 +159,50 @@ class ResourceHandler(object):
         return result
     
     
+    def remove(self, uri, repository):
+        taken = False
+        for branch in self.branch.values():
+            for match in branch['match']:
+                m = match['pattern'].search(uri)
+                if m is not None:
+                    taken = True
+                    if branch['persistent']:
+                        self.log.debug(u'Dropping %s', uri)
+                        collection = repository.database[branch['collection']]
+                        collection.remove({u'head.alternate':uri})
+                    break
+            if taken: break
+    
+    
+    
+    def save(self, node, repository):
+        taken = False
+        uri = node['head']['canonical']
+        for branch in self.branch.values():
+            for match in branch['match']:
+                m = match['pattern'].search(uri)
+                if m is not None:
+                    taken = True
+                    query = {
+                        'repository':repository,
+                        'location':None,
+                        'branch':branch,
+                        'match':match,
+                        'uri':uri,
+                        'parameter':None,
+                        'source':None,
+                        'result':[
+                            {
+                                'branch':branch,
+                                'record':node,
+                            },
+                        ],
+                    }
+                    self.store(query)
+                    break
+            if taken: break
+    
+    
     # Produce will attempt to create the record
     def produce(self, uri, repository, location):
         taken = False
@@ -158,6 +210,7 @@ class ResourceHandler(object):
             for match in branch['match']:
                 m = match['pattern'].search(uri)
                 if m is not None:
+                    taken = True
                     query = {
                         'repository':repository,
                         'location':location,
@@ -177,6 +230,7 @@ class ResourceHandler(object):
                     self.parse(query)
                     self.store(query)
                     break
+            if taken: break
     
     
     def fetch(self, query):
@@ -241,48 +295,3 @@ class ResourceHandler(object):
     
     
     
-    def remove(self, uri, repository):
-        taken = False
-        for branch in self.branch.values():
-            for match in branch['match']:
-                m = match['pattern'].search(uri)
-                if m is not None:
-                    taken = True
-                    if branch['persistent']:
-                        self.log.debug(u'Dropping %s', uri)
-                        collection = repository.database[branch['collection']]
-                        collection.remove({u'head.alternate':uri})
-                    break
-            if taken: break
-    
-    
-    def save(self, node, repository):
-        result = None
-        taken = False
-        for branch in self.branch.values():
-            for uri in node['head']['alternate']:
-                for match in branch['match']:
-                    m = match['pattern'].search(uri)
-                    if m is not None:
-                        taken = True
-                        if branch['persistent']:
-                            collection = repository.database[branch['collection']]
-                            result = collection.find_one({u'head.alternate':uri})
-                            if result is not None: break
-                if result is not None: break
-                
-            if taken:
-                now = datetime.utcnow()
-                if result is None:
-                    result = { u'head':{ u'created':now, }, }
-                result[u'body'] = node[u'body']
-                
-                # always update the modified field
-                result[u'head'][u'modified'] = now
-                
-                # save the entry to db
-                collection.save(result)
-                break
-        return result
-    
-

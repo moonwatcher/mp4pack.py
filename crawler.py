@@ -300,10 +300,10 @@ class Crawler(object):
     
     
     def _detect_encoding(self, content):
-        if 'character encoding' not in self.meta:
+        if 'encoding' not in self.ontology:
             result = self.env.detect_encoding(content.splitlines())
             self.log.debug(u'%s encoding detected for %s with confidence %s', result['encoding'], unicode(self), result['confidence'])
-            self.meta['character encoding'] = result['character encoding']
+            self.ontology['encoding'] = result['encoding']
     
     
     def _fix(self, ontology):

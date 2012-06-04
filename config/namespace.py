@@ -2222,7 +2222,50 @@
                 'rule.medium.home.uri',
             ],
         },
-        
+        'ns.medium.asset.location':{
+            'default':{
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'mediainfo':None,
+                'atom':None,
+            },
+            'synonym':['keyword'],
+            'element':{
+                'url':None,
+                'scheme':None,
+                'host':None,
+                'media kind':None,
+                'home id':None,
+                'movie id':None,
+                'album id':None,
+                'tv show id':None,
+                'disk id':None,
+                'track id':None,
+                'track position':None,
+                'disk position':None,
+                'movie handle':None,
+                'album handle':None,
+                'tv show handle':None,
+                'imdb movie id':None,
+                'imdb tv show id':None,
+                'imdb tv episode id':None,
+                'tmdb movie id':None,
+                'tvdb tv show id':None,
+                'tvdb tv season id':None,
+                'tvdb tv episode id':None,
+                'rottentomatoes movie id':None,
+                'name':None,
+                'simple name':None,
+                'asset uri':None,
+                'home uri':None,
+            },
+            'rule':[
+                'rule.medium.asset.uri',
+                'rule.medium.home.uri',
+            ],
+        },
+
         'ns.medium.resource.url.decode':{
             'default':{
                 'auto cast':True,
@@ -4164,11 +4207,11 @@
             'branch':[
                 {
                     'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^/.+/tvshow|music/[a-z0-9]{3,4}/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
+                    'match':{'property':'directory', 'expression':ur'^/.+/(?:tvshow|music)/[a-z0-9]{3,4}/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
                     'decode':[
                         {
                             'property':'directory',
-                            'expression':ur'^(?P<volume_path>/.+)/tvshow|music/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
+                            'expression':ur'^(?P<volume_path>/.+)/(?:tvshow|music)/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
                         },
                     ],
                 },

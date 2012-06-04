@@ -15,14 +15,16 @@ class MediumHandler(ResourceHandler):
     
     def fetch(self, query):
         if query['branch']['type'] == 'crawl':
-            # First try and locate the home record with the home uri
-            # If the home is resolvable we can get the home id
-            if query['location'] and 'home uri' in query['location']:
-                home = self.resolver.resolve(query['location']['home uri'])
-                if home is not None:
-                    query['location']['home id'] = home['head']['genealogy']['home id']
-                    
-                    # Now use the crawler to build a record
+            if query['location']:
+                # If we don't have the home id but we can construct one of the home URIs
+                # we can resolve the home record and get the home id
+                if 'home id' not in query['location'] and 'home uri' in query['location']:
+                    home = self.resolver.resolve(query['location']['home uri'])
+                    if home is not None:
+                        query['location']['home id'] = home['head']['genealogy']['home id']
+                        
+                # If we identified the home id we proceed to crawl
+                if 'home id' in query['location']:
                     crawler = Crawler(query['location'])
                     if crawler.valid:
                         self.log.debug(u'Crawling %s', query['location']['path'])
@@ -30,9 +32,9 @@ class MediumHandler(ResourceHandler):
                     
         elif query['branch']['type'] == 'reference':
             # For assets, query the resource collection to collect the relevent resources
+            node = {'reference':{},}
             collection = query['repository'].database['medium_resource']
             resources = collection.find({u'head.genealogy.home id':query['parameter']['home id']})
-            node = {'reference':{},}
             for resource in resources:
                 node['reference'][resource['head']['canonical']] = resource['head']
             query['source'].append(node)

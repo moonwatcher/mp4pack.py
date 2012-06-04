@@ -126,7 +126,7 @@
                 },
                 {
                     'instruction':{
-                        'name':'info',
+                        'name':'report',
                         'help':'Print information about resources',
                     },
                     'argument':[

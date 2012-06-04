@@ -279,9 +279,12 @@ class ResourceTask(Task):
             self.query = Query(self.resource.asset.resource.values())
             self.transform = Transform()
             action = getattr(self, self.ontology['action'], None)
-            if action: action()
+            if action:
+                action()
+            else:
+               self.log.debug(u'Unknown task action %s, aborting task %s', self.ontology['action'], unicode(self))
         else:
-            self.debug(u'Resource invalid, aborting task %s', unicode(self))
+            self.log.debug(u'Resource invalid, aborting task %s', unicode(self))
         self.close()
     
     
@@ -341,7 +344,7 @@ class ResourceTask(Task):
     
     
     def report(self):
-        print self.resource.node
+        print json.dumps(self.resource.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
 
 
