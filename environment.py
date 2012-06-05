@@ -30,7 +30,6 @@ class Environment(object):
             'expression':{},
             'constant':{},
             'command':{},
-            'kind':{},
             'profile':{},
             'repository':{},
             'subtitle filter':{},
@@ -147,11 +146,6 @@ class Environment(object):
     
     
     @property
-    def kind(self):
-        return self.state['kind']
-    
-    
-    @property
     def profile(self):
         return self.state['profile']
     
@@ -184,6 +178,7 @@ class Environment(object):
         self.load_config(self.system['conf'])
     
     
+    
     def load_config(self, path):
         if path and os.path.isfile(path):
             try:
@@ -194,80 +189,7 @@ class Environment(object):
                 self.log.debug(u'Exception raised: %s', unicode(e))
             else:
                 if isinstance(node, dict):
-                    if 'default' in node:
-                        for k,e in node['default'].iteritems():
-                            self.default[k] = e
-                            
-                    if 'system' in node:
-                        for k,e in node['system'].iteritems():
-                            self.system[k] = e
-                            
-                    if 'archetype' in node:
-                        for k,e in node['archetype'].iteritems():
-                            e['key'] = k
-                            self.archetype[k] = e
-                            
-                    if 'enumeration' in node:
-                        for k,e in node['enumeration'].iteritems():
-                            e['key'] = k
-                            self.enumeration[k] = Enumeration(self, e)
-                            
-                    if 'namespace' in node:
-                        for k,e in node['namespace'].iteritems():
-                            e['key'] = k
-                            self.namespace[k] = PrototypeSpace(self, e)
-                            
-                    if 'rule' in node:
-                        for k,e in node['rule'].iteritems():
-                            e['key'] = k
-                            self.rule[k] = Rule(self, e)
-                            
-                    if 'service' in node:
-                        for k,e in node['service'].iteritems():
-                            e['name'] = k
-                            self.service[k] = e
-                            
-                    if 'expression' in node:
-                        for e in node['expression']:
-                            if 'flags' not in e: e['flags'] = 0
-                            self.expression[e['name']] = re.compile(e['definition'], e['flags'])
-                            
-                    if 'constant' in node:
-                        for k,v in node['constant'].iteritems():
-                            self.constant[k] = v
-                            
-                    if 'command' in node:
-                        for e in node['command']:
-                            self.command[e['name']] = e
-                            self.which(e)
-                            
-                    if 'kind' in node:
-                        for k,e in node['kind'].iteritems():
-                            e['name'] = k
-                            self.kind[k] = e
-                            
-                    if 'profile' in node:
-                        for k,e in node['profile'].iteritems():
-                            e['name'] = k
-                            self.profile[k] = e
-                            for action in self.default['profile']:
-                                if action not in e:
-                                    e[action] = self.default['profile'][action]
-                                    
-                    if 'repository' in node:
-                        for k,e in node['repository'].iteritems():
-                            e['host'] = k
-                            self.repository[k] = Repository(self, e)
-                            
-                    if 'subtitle filter' in node:
-                        for k,e in node['subtitle filter'].iteritems():
-                            e['name'] = k
-                            self.subtitle_filter[k] = e
-                            
-                    if 'interface' in node:
-                        for k,e in node['interface'].iteritems():
-                            e['key'] = k
-                            self.interface[k] = e
+                    self._load_config_node(node)
                 else:
                     self.log.warning(u'Configuration file %s does not contain a valid dictionary', path)
     
@@ -284,13 +206,90 @@ class Environment(object):
         for e in ('domain', 'host', 'language'):
             if e in self.ontology:
                 self.system[e] = self.ontology[e]
-        # self._load_dynamic_rules()
+        self._load_dynamic_rules()
+    
+    
+    def _load_config_node(self, node):
+        if node:
+            if 'default' in node:
+                for k,e in node['default'].iteritems():
+                    self.default[k] = e
+                    
+            if 'system' in node:
+                for k,e in node['system'].iteritems():
+                    self.system[k] = e
+                    
+            if 'archetype' in node:
+                for k,e in node['archetype'].iteritems():
+                    e['key'] = k
+                    self.archetype[k] = e
+                    
+            if 'enumeration' in node:
+                for k,e in node['enumeration'].iteritems():
+                    e['key'] = k
+                    self.enumeration[k] = Enumeration(self, e)
+                    
+            if 'namespace' in node:
+                for k,e in node['namespace'].iteritems():
+                    e['key'] = k
+                    self.namespace[k] = PrototypeSpace(self, e)
+                    
+            if 'rule' in node:
+                for k,e in node['rule'].iteritems():
+                    e['key'] = k
+                    self.rule[k] = Rule(self, e)
+                    
+            if 'service' in node:
+                for k,e in node['service'].iteritems():
+                    e['name'] = k
+                    self.service[k] = e
+                    
+            if 'expression' in node:
+                for e in node['expression']:
+                    if 'flags' not in e: e['flags'] = 0
+                    self.expression[e['name']] = re.compile(e['definition'], e['flags'])
+                    
+            if 'constant' in node:
+                for k,v in node['constant'].iteritems():
+                    self.constant[k] = v
+                    
+            if 'command' in node:
+                for e in node['command']:
+                    self.command[e['name']] = e
+                    self.which(e)
+                    
+            if 'profile' in node:
+                for k,e in node['profile'].iteritems():
+                    e['name'] = k
+                    self.profile[k] = e
+                    for action in self.default['profile']:
+                        if action not in e:
+                            e[action] = self.default['profile'][action]
+                            
+            if 'repository' in node:
+                for k,e in node['repository'].iteritems():
+                    e['host'] = k
+                    self.repository[k] = Repository(self, e)
+                    
+            if 'subtitle filter' in node:
+                for k,e in node['subtitle filter'].iteritems():
+                    e['name'] = k
+                    self.subtitle_filter[k] = e
+                    
+            if 'interface' in node:
+                for k,e in node['interface'].iteritems():
+                    e['key'] = k
+                    self.interface[k] = e
+    
+    
     
     
     def _load_dynamic_rules(self):
-        # default host
-        rule = {
-            'name':'default host',
+        node = { 'rule':{}, }
+        
+        # Default host
+        node['rule']['rule.system.default.host'] = {
+            'name':'Default host',
             'provide':set(('host',)),
             'branch':[
                 {
@@ -300,106 +299,57 @@ class Environment(object):
                 },
             ],
         }
-        self._load_rule(rule)
         
-        # default language
-        rule = {
-            'name':'default language',
+        # Default language
+        node['rule']['rule.system.default.language'] = {
+            'name':'Default language',
             'provide':set(('language',)),
             'branch':[
                 {
                     'apply':(
                         {'property':'language', 'value':self.language},
-                    ),
+                    ), 
                 },
             ],
         }
-        self._load_rule(rule)
         
-        # volume location
-        rule = {
-            'name':'volume location',
-            'provide':set(('volume path', 'domain')),
+        # Volume location
+        node['rule']['rule.system.volume.location'] = {
+            'name':'Volume location',
+            'provide':set(('volume path', )),
             'branch':[],
         }
-        for volume in self.volume.values():
-            branch = {
-                'requires':set(('volume', 'host')),
-                'equal':{'volume':volume['name'], 'host':volume['host']},
-                'apply':(
-                    {'property':'domain', 'value':volume['domain']},
-                    {'property':'volume path', 'value':volume['path']},
-                ),
-            }
-            rule['branch'].append(branch)
-        self._load_rule(rule)
+        for repository in self.repository.values():
+            for volume in repository.volume.element.values():
+                node['rule']['rule.system.volume.location']['branch'].append(
+                    {
+                        'requires':set(('volume', 'host', 'domain')),
+                        'equal':{'volume':volume.key, 'host':repository.host, 'domain':repository.domain},
+                        'apply':(
+                            {'property':'volume path', 'value':volume.node['real']},
+                        ),
+                    }
+                )
         
-        # cache
-        rule = {
-            'name':'cache location',
+        # Cache location
+        node['rule']['rule.system.cache.location'] = {
+            'name':'Cache location',
             'provide':set(('cache root',)),
-            'branch':[
-                {
-                    'apply':({'property':'cache root', 'value':self.repository[self.host]['cache']['path']},),
-                }
-            ],
-        }
-        self._load_rule(rule)
-        
-        rule = {
-            'name':'container for kind',
-            'provide':set(('container',)),
             'branch':[],
         }
-        for kind in self.kind.values():
-            branch = {
-                'requires':set(('kind',)),
-                'equal':{'kind':kind['name'] },
-                'apply':(
-                    {'property':'container', 'value':kind['container']},
-                ),
-            }
-            rule['branch'].append(branch)
-        self._load_rule(rule)
+        for repository in self.repository.values():
+            node['rule']['rule.system.cache.location']['branch'].append(
+                {
+                    'requires':set(('host',)),
+                    'equal':{'host':repository.host},
+                    'apply':(
+                        {'property':'cache root', 'value':repository.node['cache']['path']},
+                    ),
+                }
+            )
         
+        self._load_config_node(node)
     
-    
-    # Path manipulation
-    
-    def parse_url(self, url):
-        result = None
-        if url:
-            parsed = urlparse.urlparse(url)
-            if parsed.path:
-                decoded = Ontology(self, 'ns.medium.resource.url.decode')
-                decoded['directory'], decoded['file name'] = os.path.split(parsed.path)
-                if 'file name' in decoded and 'directory' in decoded:
-                    decoded['media kind']
-                    decoded['volume path']
-                    decoded['profile']
-                    result = Ontology(self, 'ns.medium.resource.location')
-                    result['url'] = url
-                    result['path'] = parsed.path
-                    result['scheme'] = parsed.scheme or u'file'
-                    result['host'] = parsed.hostname or self.host
-                    for k,v in decoded.iteritems():
-                        result[k] = v
-                    if result['host'] in self.repository and 'volume path' in result:
-                        result['volume'] = self.repository[result['host']].volume.parse(result['volume path'])
-                        del result['volume path']
-                        
-                result['path digest'] = hashlib.sha1(result['path']).hexdigest()
-        return result
-    
-    
-    def canonic_path_for(self, path):
-        result = path
-        real_path = os.path.realpath(os.path.abspath(path))
-        for vol_path, vol in self.lookup['volume'].iteritems():
-            if os.path.commonprefix([vol_path, real_path]) == vol_path:
-                result = real_path.replace(vol_path, vol['path'])
-                break
-        return result
     
     
     def varify_directory(self, path):
@@ -456,8 +406,8 @@ class Environment(object):
         return result
     
     
-    # Command execution
     
+    # Command execution
     def initialize_command(self, command, log):
         if command in self.command and self.command[command]['path']:
             return [ self.command[command]['path'] ]
@@ -545,9 +495,13 @@ class Repository(object):
         self.node = node
         self.mongodb = Ontology(self.env, 'ns.system.mongodb', self.node['mongodb'])
         self._volume = None
+        self._mapping = None
         self._connection = None
         if 'routing' not in self.node:
             self.node['routing'] = []
+        if 'mapping' not in self.node:
+            self.node['mapping'] = []
+        
     
     
     @property
@@ -570,6 +524,13 @@ class Repository(object):
         if self._volume is None:
             self.reload()
         return self._volume
+    
+    
+    @property
+    def mapping(self):
+        if self._mapping is None:
+            self.reload()
+        return self._mapping
     
     
     @property
@@ -602,31 +563,68 @@ class Repository(object):
     
     
     def reload(self):
-        # reload the volume enumeration
-        for key, volume in self.node['volume']['element'].iteritems():
-            volume['host'] = self.host
-            volume['domain'] = self.domain
-            volume['virtual'] = u'/{0}'.format(key)
-            volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
-            
-            volume['alternative'] = set()
-            volume['alternative'].add(volume['real'])
-            volume['alternative'].add(volume['virtual'])
-            for alias in volume['alias']:
-                volume['alternative'].add(os.path.realpath(os.path.expanduser(os.path.expandvars(alias))))
-                
-        self._volume = Enumeration(self.env, self.node['volume'])
-        
-        for key, volume in self.node['volume']['element'].iteritems():
-            for alt in volume['alternative']:
-                e = self._volume.search(alt)
-                if e is None: self._volume.map(key, alt)
-                elif e.key != key:
-                    self.log.error('Alias %s for %s on %s already mapped to volume %s', alt, key, self.host, e.key)
+        # Load path mappings
+        self._mapping = {}
+        for mapping in self.node['mapping']:
+            mapping['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(mapping['path'])))
+            for alt in mapping['alternate']:
+                alternate = os.path.realpath(os.path.expanduser(os.path.expandvars(alt)))
+                if alternate not in self._mapping:
+                    self._mapping[alternate] = mapping['real']
+                else:
+                    self.log.warning('Path %s on %s already mapped to %s', alternate, self.host, self._mapping[alternate])
                     
-        # reload routing rules
+        # Load the volume enumeration
+        for key, volume in self.node['volume']['element'].iteritems():
+            volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
+        self._volume = Enumeration(self.env, self.node['volume'])
+                    
+                        
+        # Load routing rules
         routing = self.env.rule['rule.system.default.routing']
         for branch in self.node['routing']:
             routing.add_branch(branch)
+    
+    
+    def parse_path(self, path):
+        result = None
+        if path:
+            path = self.normalize(path)
+            decoded = Ontology(self.env, 'ns.medium.resource.url.decode')
+            decoded['directory'], decoded['file name'] = os.path.split(path)
+            if 'file name' in decoded and 'directory' in decoded:
+                decoded['media kind']
+                decoded['volume path']
+                decoded['profile']
+                
+                result = Ontology(self.env, 'ns.medium.resource.location')
+                for k,v in decoded.iteritems(): result[k] = v
+                result['host'] = self.host
+                result['domain'] = self.domain
+                result['path'] = path
+                result['path digest'] = hashlib.sha1(path).hexdigest()
+                
+                # Check if the path resides in a volume
+                for volume in self.volume.element.values():
+                    if os.path.commonprefix((volume.node['real'], path)) == volume.node['real']:
+                        result['volume relative path'] = os.path.relpath(path, volume.node['real'])    
+                        result['volume'] = volume.key
+        return result
+    
+    
+    def normalize(self, path):
+        result = path
+        # If the repository has mappings defined
+        # check if the path is in an alternate location
+        # and replace the prefix with the canonical one
+        if path and self.mapping:
+            for alt, real in self.mapping.iteritems():
+                if os.path.commonprefix((alt, path)) == alt:
+                    result = path.replace(alt, real)
+                    # result = os.path.join(real, os.path.relpath(path, alt))
+                    break
+        return result
+
+    
     
 

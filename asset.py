@@ -144,20 +144,21 @@ class Resource(object):
     def create(cls, asset, location):
         result = None
         if location and 'resource uri' in location:
-            if'container' in location:
-                if location['container'] == 'mp4':
+            kind = location.env.enumeration['kind'].find(location['kind'])
+            if kind:
+                if kind.node['container'] == 'mp4':
                     result = MP4(asset, location)
-                elif location['container'] == 'matroska':
+                elif kind.node['container'] == 'matroska':
                     result = Matroska(asset, location)
-                elif location['container'] == 'subtitles':
+                elif kind.node['container'] == 'subtitles':
                     result = Subtitles(asset, location)
-                elif location['container'] == 'chapters':
+                elif kind.node['container'] == 'chapters':
                     result = TableOfContent(asset, location)
-                elif location['container'] == 'image':
+                elif kind.node['container'] == 'image':
                     result = Artwork(asset, location)
-                elif location['container'] == 'raw audio':
+                elif kind.node['container'] == 'raw audio':
                     result = RawAudio(asset, location)
-                elif location['container'] == 'avi':
+                elif kind.node['container'] == 'avi':
                     result = Avi(asset, location)
             else:
                 result = cls(asset, location)
@@ -239,7 +240,7 @@ class Resource(object):
                 self._stream = []
                 for stream in self.node['body']['stream']:
                     mtype = self.env.enumeration['stream kind'].find(stream['stream kind'])
-                    self._stream.append(Ontology(self.env, mtype.node['namepsace'], stream))
+                    self._stream.append(Ontology(self.env, mtype.node['namespace'], stream))
         return self._stream
     
     
@@ -426,7 +427,7 @@ class AudioVideoContainer(Container):
     
     
     def extract(self, task): 
-        for track in task.transform.single_result.track:
+        for track in task.transform.single_result.stream:
             if track['enabled'] and track['stream kind'] == 'menu':
                 o = Ontology.clone(self.location)
                 del o['path']
@@ -457,7 +458,7 @@ class AudioVideoContainer(Container):
         if command:
             audio_options = {'--audio':[]}
             
-            for track in task.transform.single_result.track:
+            for track in task.transform.single_result.stream:
                 if track['stream kind'] == 'video':
                     for flag in track['handbrake flags']:
                         command.append(flag)
@@ -510,12 +511,12 @@ class AudioVideoContainer(Container):
                     #command.append(self.asset.meta['full name'])
                     
                     command.append(u'--audio-tracks')
-                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['stream kind'] == 'audio']))
+                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.stream if track['stream kind'] == 'audio']))
                     command.append(u'--video-tracks')
-                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.track if track['stream kind'] == 'video']))
+                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.stream if track['stream kind'] == 'video']))
                     
                 # Iterate the tracks
-                for track in pivot.track:
+                for track in pivot.stream:
                     if track['kind'] != 'menu':
                         if 'language' in track:
                             command.append(u'--language')
@@ -588,7 +589,7 @@ class Artwork(Container):
     def transcode(self, task):
         from PIL import Image
         product = task.product[0]
-        track = [ t for t in transform.single_result.track if t['stream kind'] == 'image' ]
+        track = [ t for t in transform.single_result.stream if t['stream kind'] == 'image' ]
         if track: track = track[0]
         else: track = None
         if track:
@@ -625,7 +626,7 @@ class Matroska(AudioVideoContainer):
             command.extend([u'tracks', self.path ])
             
             taken = False
-            for track in task.transform.single_result.track:
+            for track in task.transform.single_result.stream:
                 if track['enabled']:
                     o = Ontology.clone(self.location)
                     del o['path']
@@ -701,7 +702,7 @@ class MP4(AudioVideoContainer):
                 
         for pivot in task.transform.result:
             if pivot.ontology['kind'] == 'srt':
-                track = pivot.track[0]
+                track = pivot.stream[0]
                 message = u'Update subtitles {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
@@ -746,7 +747,7 @@ class RawAudio(Container):
     
     def transcode(self, task):
         product = task.product[0]
-        track = [ t for t in task.transform.single_result.track if t['stream kind'] == 'audio' ]
+        track = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'audio' ]
         if track: track = track[0]
         else: track = None
         if track:
@@ -782,7 +783,7 @@ class Subtitles(Text):
     @property
     def caption(self):
         if self._caption is None:
-            for track in self.track:
+            for track in self.stream:
                 if track['stream kind'] == 'caption' and 'content' in track:
                     self._caption_track = track
                     self._caption = Caption.from_node(self.env, track['content'])
@@ -811,7 +812,7 @@ class Subtitles(Text):
     def transcode(self, task):
         product = task.product[0]
         product.caption = self.caption
-        track = [ t for t in task.transform.single_result.track if t['stream kind'] == 'caption' ]
+        track = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'caption' ]
         if track: track = track[0]
         else: track = None
         if track:
@@ -841,7 +842,7 @@ class TableOfContent(Text):
     @property
     def menu(self):
         if self._menu is None:
-            for track in self.track:
+            for track in self.stream:
                 if track['stream kind'] == 'menu' and 'content' in track:
                     self._menu_track = track
                     self._menu = Menu.from_node(self.env, track['content'])
@@ -869,7 +870,7 @@ class TableOfContent(Text):
     def transcode(self, task):
         product = task.product[0]
         product.menu = self.menu
-        track = [ t for t in transform.single_result.track if t['stream kind'] == 'menu' ]
+        track = [ t for t in transform.single_result.stream if t['stream kind'] == 'menu' ]
         if track: track = track[0]
         else: track = None
         if track:

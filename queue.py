@@ -77,6 +77,15 @@ class Job(object):
     
     
     def load(self):
+        self.log.debug('Open job %s', unicode(self))
+        self.task = []
+        self.node = {
+            'uuid':unicode(self.uuid),
+            'start':datetime.now(),
+            'command':self.ontology.node,
+            'task':[],
+        }
+        
         if 'inclusion' in self.ontology:
             try:
                 self._inclusion = re.compile(self.ontology['inclusion'], re.UNICODE)
@@ -98,26 +107,14 @@ class Job(object):
     
     
     def run(self):
-        self.open()
         self.load()
         for task in self.task:
             task.run()
             self.node['task'].append(task.node)
-        self.close()
+        self.unload()
     
     
-    def open(self):
-        self.log.debug('Open job %s', unicode(self))
-        self.task = []
-        self.node = {
-            'uuid':unicode(self.uuid),
-            'start':datetime.now(),
-            'command':self.ontology.node,
-            'task':[],
-        }
-    
-    
-    def close(self):
+    def unload(self):
         self.node['end'] = datetime.now()
         self.node['duration'] = unicode(self.node['end'] - self.node['start'])
         self.log.debug('Close job %s', unicode(self))
@@ -163,10 +160,6 @@ class Task(object):
     
     
     def load(self):
-        pass
-    
-    
-    def open(self):
         self.log.debug('Opening task %s', unicode(self))
         self.node = {
             'uuid':unicode(self.uuid),
@@ -175,7 +168,7 @@ class Task(object):
         }
     
     
-    def close(self):
+    def unload(self):
         self.node['end'] = datetime.now()
         self.node['duration'] = unicode(self.node['end'] - self.node['start'])
         self.log.debug('Closing task %s', unicode(self))
@@ -216,7 +209,7 @@ class ResourceJob(Job):
             targets = sorted(set(targets))
             self.log.debug(u'Found %d files to process', len(targets))
             for path in targets:
-                self.enqueue(ResourceTask(self, self.ontology.project('ns.system.task'), u'file://{}'.format(path)))
+                self.enqueue(ResourceTask(self, self.ontology.project('ns.system.task'), path))
     
     
     def filter(self, path):
@@ -242,14 +235,15 @@ class ResourceJob(Job):
 
 
 class ResourceTask(Task):
-    def __init__(self, job, ontology, url):
+    def __init__(self, job, ontology, path):
         Task.__init__(self, job, ontology)
-        self.location = self.env.parse_url(url)
+        self.location = self.env.repository[self.env.host].parse_path(path)
         self.resource = None
         self.query = None
         self.transform = None
         self.product = None
         self._profile = None
+        print self.location
     
     
     @property
@@ -268,14 +262,21 @@ class ResourceTask(Task):
     def load(self):
         Task.load(self)
         self.resource = self.cache.find(self.location)
+        if self.resource:
+            self.resource.asset.touch()
+            self.node['resource'] = self.resource.location
+    
+    
+    def unload(self):
+        if self.resource:
+            self.resource.asset.commit()
+        Task.unload(self)
     
     
     def run(self):
-        self.open()
         self.load()
         if self.resource:
             self.product = []
-            self.resource.asset.touch()
             self.query = Query(self.resource.asset.resource.values())
             self.transform = Transform()
             action = getattr(self, self.ontology['action'], None)
@@ -285,8 +286,7 @@ class ResourceTask(Task):
                self.log.debug(u'Unknown task action %s, aborting task %s', self.ontology['action'], unicode(self))
         else:
             self.log.debug(u'Resource invalid, aborting task %s', unicode(self))
-        self.close()
-    
+        self.unload()
     
     def tag(self):
         self.resource.tag(self)
@@ -380,16 +380,13 @@ class ServiceTask(Task):
     
     
     def run(self):
-        self.open()
         self.load()
-        
         if self.document is not None:
             action = getattr(self, self.ontology['action'], None)
             if action: action()
         else:
             self.log.debug(u'Could not resolve document %s, aborting task %s', self.uri, unicode(self))
-            
-        self.close()
+        self.unload()
     
     
     def get(self):

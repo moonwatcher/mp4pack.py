@@ -127,13 +127,13 @@ class Query(object):
     
     
     def add(self, resource):
-        if resource.ontology['resource id'] not in self.resource:
-            self.resource[resource.ontology['resource id']] = resource
+        if resource.location['resource id'] not in self.resource:
+            self.resource[resource.location['resource id']] = resource
     
     
     def remove(self, resource):
-        if resource.ontology['resource id'] in self.resource:
-            del self.resource[resource.ontology['resource id']]
+        if resource.location['resource id'] in self.resource:
+            del self.resource[resource.location['resource id']]
     
     
     def resolve(self, profile):
@@ -147,19 +147,19 @@ class Query(object):
     
     def select(self, constraint):
         for resource in self.space:
-            if resource.ontology.match(constraint):
+            if resource.location.match(constraint):
                 self.add(resource)
     
     
     def intersect(self, constraint):
         for k in self.resource.keys():
-            if not self.resource[k].ontology.match(constraint):
+            if not self.resource[k].location.match(constraint):
                 self.remove(self.resource[k])
     
     
     def subtract(self, constraint):
         for k in self.resource.keys():
-            if self.resource[k].ontology.match(constraint):
+            if self.resource[k].location.match(constraint):
                 self.remove(self.resource[k])
     
 
@@ -167,8 +167,8 @@ class Query(object):
 class Pivot(object):
     def __init__(self, resource, rule):
         self.resource = resource
-        self.ontology = Ontology.clone(resource.ontology)
-        self.track = []
+        self.ontology = Ontology.clone(resource.location)
+        self.stream = []
         if 'override' in rule:
             for k,v in rule['override'].iteritems():
                 self.ontology[k] = v
@@ -176,19 +176,19 @@ class Pivot(object):
     
     @property
     def id(self):
-        return self.resource.ontology['resource id']
+        return self.resource.location['resource id']
     
     
     @property
     def taken(self):
-        return len(self.track) > 0
+        return len(self.stream) > 0
     
     
     def scan(self, profile):
         for rule in profile:
             for branch in rule['branch']:
                 taken = False
-                for track in self.resource.track:
+                for track in self.resource.stream:
                     if track.match(branch):
                         taken = True
                         self._pick_track(track, rule)
@@ -206,7 +206,7 @@ class Pivot(object):
         if 'override' in rule:
             for k,v in rule['override'].iteritems():
                 o[k] = v
-        self.track.append(o)
+        self.stream.append(o)
     
 
 
@@ -234,7 +234,7 @@ class Transform(object):
                 for branch in rule['branch']:
                     taken = False
                     for resource in space:
-                        if resource.ontology.match(branch):
+                        if resource.location.match(branch):
                             taken = True
                             pivot = self._find_pivot(resource, rule)
                             taken = taken and pivot.scan(rule['track'])
@@ -247,8 +247,8 @@ class Transform(object):
     
     def _find_pivot(self, resource, rule):
         pivot = None
-        if resource.ontology['resource id'] in self._result:
-            pivot = self._result[resource.ontology['resource id']]
+        if resource.location['resource id'] in self._result:
+            pivot = self._result[resource.location['resource id']]
             
         else:
             pivot = Pivot(resource, rule)
