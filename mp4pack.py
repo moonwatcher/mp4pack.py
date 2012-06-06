@@ -64,17 +64,6 @@ class CommandLineParser(object):
 
 
 
-def test(env, queue):
-    location = env.parse_url('/Users/lg/Downloads/mpk/pool/beta/tvshow/m4v/A4/weeds/5/TVDb74845 s05e01 wonderful wonderful.m4v')
-    resource = queue.cache.find(location)
-    resource.asset.touch()
-    print resource.asset.resource
-    #node = env.resolver.resolve(location['resource uri'], location)
-
-    #location = env.parse_url('/Users/lg/Downloads/mpk/pool/alpha/tvshow/srt/clean/weeds/5/en/TVDb74845 s05e01 wonderful wonderful.srt')
-    #node = env.resolver.resolve(location['resource uri'], location)
-    #env.resolver.remove('resource://yoshi/m/asset/8')
-
 def main():
     
     # A node for collecting runtime statistics
@@ -112,8 +101,6 @@ def main():
     else:
         job = ResourceJob(queue, env.ontology.project('ns.system.job'))
     job.run()
-    
-    #test(env, queue)
     
     node['job'].append(job.node)
     node['end'] = datetime.now()

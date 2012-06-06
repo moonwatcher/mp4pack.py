@@ -429,14 +429,17 @@ class AudioVideoContainer(Container):
     def extract(self, task): 
         for track in task.transform.single_result.stream:
             if track['enabled'] and track['stream kind'] == 'menu':
+            
                 o = Ontology.clone(self.location)
-                del o['path']
-                del o['url']
-                o['host'] = task.job.ontology['host']
-                o['volume'] = task.job.ontology['volume']
-                o['profile'] = task.job.ontology['profile']
+                del o['volume path']
+                del o['file name']
+                del o['directory']
+                o['host'] = task.ontology['host']
+                o['volume'] = task.ontology['volume']
+                o['profile'] = task.ontology['profile']
                 o['language'] = track['language']
                 o['kind'] = track['kind']
+                
                 product = self.asset.find(o)
                 self.env.varify_directory(product.path)
                 product.menu = Menu.from_node(self.env, track['content'])
@@ -628,12 +631,14 @@ class Matroska(AudioVideoContainer):
             taken = False
             for track in task.transform.single_result.stream:
                 if track['enabled']:
+                    
                     o = Ontology.clone(self.location)
-                    del o['path']
-                    del o['url']
-                    o['host'] = task.job.ontology['host']
-                    o['volume'] = task.job.ontology['volume']
-                    o['profile'] = task.job.ontology['profile']
+                    del o['volume path']
+                    del o['file name']
+                    del o['directory']
+                    o['host'] = task.ontology['host']
+                    o['volume'] = task.ontology['volume']
+                    o['profile'] = task.ontology['profile']
                     o['language'] = track['language']
                     o['kind'] = track['kind']
                     product = self.asset.find(o)

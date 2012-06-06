@@ -5,6 +5,7 @@ import copy
 import re
 import unicodedata
 import plistlib
+import hashlib
 
 from datetime import datetime
 
@@ -110,6 +111,8 @@ class Ontology(dict):
             if key in self.namespace.deduction.dependency:
                 for rule in self.namespace.deduction.dependency[key]:
                     for branch in rule.branch:
+                        
+                        # Check preconditions are satisfied
                         taken = True
                         if 'requires' in branch:
                             unsatisfied = branch['requires'].difference(self)
@@ -128,6 +131,8 @@ class Ontology(dict):
                             if 'apply' in branch:
                                 for x in branch['apply']:
                                     if not dict.__contains__(self, x['property']):
+                                        if 'digest' in x:
+                                            dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']]).hexdigest())
                                         if 'reference' in x:
                                             dict.__setitem__(self, x['property'], self[x['reference']])
                                         if 'format' in x:
@@ -145,6 +150,8 @@ class Ontology(dict):
                                             if k is not None and v is not None:
                                                 dict.__setitem__(self, k, v)
                                                 
+                            # Mark all the atom the rule provieds as depending on the requirements
+                            # This was removing the requirement also removes the dependent atom
                             if 'requires' in branch:
                                 for req in branch['requires']:
                                     if req not in self.dependency:

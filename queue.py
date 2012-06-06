@@ -8,6 +8,7 @@ import urlparse
 import urllib
 import uuid
 import json
+import hashlib 
 
 from ontology import Ontology
 from asset import AssetCache
@@ -243,7 +244,6 @@ class ResourceTask(Task):
         self.transform = None
         self.product = None
         self._profile = None
-        print self.location
     
     
     @property
@@ -309,12 +309,14 @@ class ResourceTask(Task):
         self.transform.resolve(self.query.result, self.profile['pack'])
         
         o = Ontology.clone(self.location)
-        del o['path']
-        del o['url']
+        del o['volume path']
+        del o['file name']
+        del o['directory']
         o['host'] = self.env.host
-        o['volume'] = self.job.ontology['volume']
-        o['profile'] = self.job.ontology['profile']
-        o['kind'] = self.job.ontology['kind']
+        o['volume'] = self.ontology['volume']
+        o['profile'] = self.ontology['profile']
+        o['kind'] = self.ontology['kind']
+
         product = self.resource.asset.find(o)
         self.product.append(product)
         self.resource.pack(self)
@@ -326,12 +328,14 @@ class ResourceTask(Task):
         self.transform.resolve(self.query.result, self.profile['transcode'])
         
         o = Ontology.clone(self.location)
-        del o['path']
-        del o['url']
+        del o['volume path']
+        del o['file name']
+        del o['directory']
         o['host'] = self.env.host
-        o['volume'] = self.job.ontology['volume']
-        o['profile'] = self.job.ontology['profile']
-        o['kind'] = self.job.ontology['kind']
+        o['volume'] = self.ontology['volume']
+        o['profile'] = self.ontology['profile']
+        o['kind'] = self.ontology['kind']
+
         product = self.resource.asset.find(o)
         self.product.append(product)
         self.resource.transcode(self)

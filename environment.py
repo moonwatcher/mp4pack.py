@@ -4,7 +4,6 @@ import os
 import re
 import logging
 import copy
-import urlparse
 import hashlib
 from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
@@ -589,26 +588,30 @@ class Repository(object):
     def parse_path(self, path):
         result = None
         if path:
-            path = self.normalize(path)
             decoded = Ontology(self.env, 'ns.medium.resource.url.decode')
+            
+            # Set directory and file name
             decoded['directory'], decoded['file name'] = os.path.split(path)
+            
             if 'file name' in decoded and 'directory' in decoded:
-                decoded['media kind']
-                decoded['volume path']
+                # Normalize the directory
+                decoded['directory'] = self.normalize(decoded['directory'])
+            
+                # Check if the directory resides in a volume
+                for volume in self.volume.element.values():
+                    if os.path.commonprefix((volume.node['real'], decoded['directory'])) == volume.node['real']:
+                        decoded['volume'] = volume.key
+            
+                # Hack to trigger rule.medium.resource.filename.parse
+                decoded['kind']
+                # Hack to trigger rule.medium.resource.directory.parse
                 decoded['profile']
                 
-                result = Ontology(self.env, 'ns.medium.resource.location')
+                result = decoded.project('ns.medium.resource.location')
                 for k,v in decoded.iteritems(): result[k] = v
+                
                 result['host'] = self.host
                 result['domain'] = self.domain
-                result['path'] = path
-                result['path digest'] = hashlib.sha1(path).hexdigest()
-                
-                # Check if the path resides in a volume
-                for volume in self.volume.element.values():
-                    if os.path.commonprefix((volume.node['real'], path)) == volume.node['real']:
-                        result['volume relative path'] = os.path.relpath(path, volume.node['real'])    
-                        result['volume'] = volume.key
         return result
     
     
