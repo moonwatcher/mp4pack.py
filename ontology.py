@@ -41,7 +41,8 @@ class Ontology(dict):
     
     
     def match(self, fact):
-        return all((k in self and self[k] == v) for k,v in fact.iteritems())
+        result =  all((k in self and self[k] == v) for k,v in fact.iteritems())
+        return result
     
     
     def project(self, namespace):

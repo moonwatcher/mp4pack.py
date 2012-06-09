@@ -52,6 +52,9 @@ class MediumHandler(ResourceHandler):
                 }
                 query['result'].append(entry)
                 
+                # Hack to force path digest
+                entry['record'][u'head'][u'genealogy']['path digest']
+                
         elif query['branch']['type'] == 'reference':
             for node in query['source']:
                 entry = {

@@ -288,6 +288,38 @@ class ResourceTask(Task):
             self.log.debug(u'Resource invalid, aborting task %s', unicode(self))
         self.unload()
     
+    def copy(self):
+        o = Ontology.clone(self.location)
+        del o['volume path']
+        del o['file name']
+        del o['directory']
+        o['host'] = self.env.host
+        o['volume'] = self.ontology['volume']
+        if 'profile' in self.ontology:
+            o['profile'] = self.ontology['profile']
+        product = self.resource.asset.find(o)
+        self.product.append(product)
+        self.resource.copy(self)
+    
+    
+    def delete(self):
+        self.resource.delete(self)
+    
+    
+    def move(self):
+        o = Ontology.clone(self.location)
+        del o['volume path']
+        del o['file name']
+        del o['directory']
+        o['host'] = self.env.host
+        o['volume'] = self.ontology['volume']
+        if 'profile' in self.ontology:
+            o['profile'] = self.ontology['profile']
+        product = self.resource.asset.find(o)
+        self.product.append(product)
+        self.resource.move(self)
+    
+    
     def tag(self):
         self.resource.tag(self)
     

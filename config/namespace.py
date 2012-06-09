@@ -42,11 +42,6 @@
             'keyword':u'path_digest',
             'type':'unicode',
         },
-        'managed':{
-            'name':u'Managed',
-            'keyword':u'managed',
-            'type':'bool',
-        },
         'directory':{
             'name':u'Directory',
             'keyword':u'directory',
@@ -55,11 +50,6 @@
         'file name':{
             'name':u'File name',
             'keyword':u'file_name',
-            'type':'unicode',
-        },
-        'cache root':{
-            'name':u'Cache root',
-            'keyword':u'cache_root',
             'type':'unicode',
         },
         'path in cache':{
@@ -389,7 +379,7 @@
         'hd video':{
             'name':u'HD video',
             'keyword':u'hd_video',
-            'type':'bool',
+            'type':'int',
             'atom':'hdvd',
         },
         'tv show':{
@@ -1631,23 +1621,23 @@
         'stream kind':{
             'synonym':['key'],
             'element':{
-                'video':{   'name':u'Video',    'namespace':'ns.medium.resource.crawl.stream.video' },
-                'audio':{   'name':u'Audio',    'namespace':'ns.medium.resource.crawl.stream.audio' },
-                'image':{   'name':u'Image',    'namespace':'ns.medium.resource.crawl.stream.image' },
-                'caption':{ 'name':u'Caption',  'namespace':'ns.medium.resource.crawl.stream.text' },
-                'menu':{    'name':u'Menu',     'namespace':'ns.medium.resource.crawl.stream.text' },
-                'preview':{ 'name':u'Preview',  'namespace':'ns.medium.resource.crawl.stream.video' },
+                'video':{   'name':u'Video',    'namespace':'ns.medium.resource.stream.video' },
+                'audio':{   'name':u'Audio',    'namespace':'ns.medium.resource.stream.audio' },
+                'image':{   'name':u'Image',    'namespace':'ns.medium.resource.stream.image' },
+                'caption':{ 'name':u'Caption',  'namespace':'ns.medium.resource.stream.text' },
+                'menu':{    'name':u'Menu',     'namespace':'ns.medium.resource.stream.text' },
+                'preview':{ 'name':u'Preview',  'namespace':'ns.medium.resource.stream.video' },
             },
         },
         'mediainfo stream type':{
             'synonym':['mediainfo'],
             'element':{
-                'video':{   'name':u'Video',    'namespace':'ns.medium.resource.crawl.stream.video',  'mediainfo':u'Video'     },
-                'audio':{   'name':u'Audio',    'namespace':'ns.medium.resource.crawl.stream.audio',  'mediainfo':u'Audio'     },
-                'image':{   'name':u'Image',    'namespace':'ns.medium.resource.crawl.stream.image',  'mediainfo':u'Image'     },
-                'text':{    'name':u'Text',     'namespace':'ns.medium.resource.crawl.stream.text',   'mediainfo':u'Text'   },
-                'menu':{    'name':u'Menu',     'namespace':None,                           'mediainfo':u'Menu'      },
-                'general':{ 'name':u'General',  'namespace':'ns.medium.resource.crawl.meta',          'mediainfo':u'General'   },
+                'video':{   'name':u'Video',    'namespace':'ns.medium.resource.stream.video',  'mediainfo':u'Video'     },
+                'audio':{   'name':u'Audio',    'namespace':'ns.medium.resource.stream.audio',  'mediainfo':u'Audio'     },
+                'image':{   'name':u'Image',    'namespace':'ns.medium.resource.stream.image',  'mediainfo':u'Image'     },
+                'text':{    'name':u'Text',     'namespace':'ns.medium.resource.stream.text',   'mediainfo':u'Text'   },
+                'menu':{    'name':u'Menu',     'namespace':None,                               'mediainfo':u'Menu'      },
+                'general':{ 'name':u'General',  'namespace':'ns.medium.resource.meta',    'mediainfo':u'General'   },
             },
         },
         'kind':{
@@ -1941,6 +1931,27 @@
         },
     },
     'namespace':{
+        # Mongodb
+        'ns.system.mongodb':{
+            'default':{
+                'keyword':None,
+                'plural':None,
+                'auto cast':True,
+            },
+            'synonym':['keyword'],
+            'element':{
+                'host':None,
+                'database':None,
+                'port':None,
+                'username':None,
+                'password':None,
+                'mongodb url':None,
+            },
+            'rule':[
+                'rule.system.mongodb.url',
+            ],
+        },
+        
         # System
         'ns.system.command.default':{
             'default':{
@@ -2042,6 +2053,9 @@
                 },
                 'action':None,
             },
+            'rule':[
+                'rule.system.default.routing',
+            ],
         },
         'ns.system.task':{
             'default':{
@@ -2080,24 +2094,8 @@
                 },
                 'action':None,
             },
-        },
-        'ns.system.mongodb':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'auto cast':True,
-            },
-            'synonym':['keyword'],
-            'element':{
-                'host':None,
-                'database':None,
-                'port':None,
-                'username':None,
-                'password':None,
-                'mongodb url':None,
-            },
             'rule':[
-                'rule.system.mongodb.url',
+                'rule.system.default.routing',
             ],
         },
         
@@ -2120,7 +2118,6 @@
                 'scheme':None,
                 'host':None,
                 'volume relative path':None,
-                'managed':None,
                 'media kind':None,
                 'kind':None,
                 'language':None,
@@ -2158,6 +2155,9 @@
             'rule':[
                 'rule.system.default.language',
                 'rule.knowledge.movie.imdb.trimmed',
+                'rule.medium.resource.path.implicit',
+                'rule.medium.resource.path.digest',
+                
             ],
         },
         'ns.medium.resource.location':{
@@ -2175,7 +2175,6 @@
                 'host':None,
                 'path':None,
                 'path digest':None,
-                'managed':None,
                 'media kind':None,
                 'directory':None,
                 'file name':None,
@@ -2224,6 +2223,7 @@
                 'rule.medium.home.uri',
                 'rule.medium.resource.path.digest',
                 'rule.medium.resource.kind.language',
+                'rule.system.default.routing',
             ],
         },
         'ns.medium.asset.location':{
@@ -2269,7 +2269,7 @@
                 'rule.medium.home.uri',
             ],
         },
-
+        
         'ns.medium.resource.url.decode':{
             'default':{
                 'auto cast':True,
@@ -2616,7 +2616,7 @@
                 'rule.itunes.album.name',
             ],
         },
-        'ns.medium.resource.crawl.meta':{
+        'ns.medium.resource.meta':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -2900,7 +2900,7 @@
                 'rule.itunes.itunextc.parse',
             ],
         },
-        'ns.medium.resource.crawl.stream.audio':{
+        'ns.medium.resource.stream.audio':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -2920,6 +2920,7 @@
                     'mediainfo':'StreamKind',
                 },
                 'stream kind':None,
+                'kind':None,
                 'stream name':{
                     'mediainfo':'Title',
                 },
@@ -2990,7 +2991,7 @@
                 'rule.medium.stream.audio.kind',
             ],
         },
-        'ns.medium.resource.crawl.stream.video':{
+        'ns.medium.resource.stream.video':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3105,7 +3106,7 @@
                 'rule.medium.stream.default.primary',
             ],
         },
-        'ns.medium.resource.crawl.stream.text':{
+        'ns.medium.resource.stream.text':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -3177,7 +3178,7 @@
                 'rule.medium.stream.default.primary',
             ],
         },
-        'ns.medium.resource.crawl.stream.image':{
+        'ns.medium.resource.stream.image':{
             'default':{
                 'auto cast':True,
                 'plural':None,
@@ -4264,136 +4265,90 @@
         
         'rule.medium.resource.kind.language':{
             'name':'Kind language dependency',
-            'provide':set(('language dependent',)),
+            'provide':set(('localized',)),
             'branch':[
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'m4v', },
                     'apply':[
-                        { 'property':'language dependent', 'value':False, },
+                        { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'m4a', },
                     'apply':[
-                        { 'property':'language dependent', 'value':False, },
+                        { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'mkv', },
                     'apply':[
-                        { 'property':'language dependent', 'value':False, },
+                        { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'avi', },
                     'apply':[
-                        { 'property':'language dependent', 'value':False, },
+                        { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'srt', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'ass', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'chpl', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'ac3', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'dts', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'flac', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'png', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
                     'requires':set(('kind',)),
                     'equal':{'kind':'jpg', },
                     'apply':[
-                        { 'property':'language dependent', 'value':True, },
-                    ],
-                },
-            ],
-        },
-        'rule.medium.resource.path.volumeRelative':{
-            'name':'volume relative path',
-            'provide':set(('volume relative path',)),
-            'branch':[
-                {
-                    'requires':set(('media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'language', 'canonic file name')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'volume relative path',
-                            'format':u'{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}/{language}/{canonic file name}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'canonic file name')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'volume relative path',
-                            'format':u'{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}/{canonic file name}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'kind', 'profile', 'language', 'canonic file name')),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'volume relative path',
-                            'format':u'{media kind}/{kind}/{profile}/{language}/{canonic file name}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'kind', 'profile', 'canonic file name')),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'volume relative path',
-                            'format':u'{media kind}/{kind}/{profile}/{canonic file name}',
-                        },
+                        { 'property':'localized', 'value':True, },
                     ],
                 },
             ],
@@ -4508,8 +4463,8 @@
             'provide':set(('canonic directory',)),
             'branch':[
                 {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'language dependent')),
-                    'equal':{'media kind':'tvshow', 'language dependent':False, },
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'localized')),
+                    'equal':{'media kind':'tvshow', 'localized':False, },
                     'apply':[
                         {
                             'property':'canonic directory',
@@ -4518,8 +4473,8 @@
                     ],
                 },
                 {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'language', 'language dependent')),
-                    'equal':{'media kind':'tvshow', 'language dependent':True, },
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'language', 'localized')),
+                    'equal':{'media kind':'tvshow', 'localized':True, },
                     'apply':[
                         {
                             'property':'canonic directory',
@@ -4529,7 +4484,7 @@
                 },
                 {
                     'requires':set(('volume path', 'media kind', 'kind', 'profile')),
-                    'equal':{'media kind':'movie', 'language dependent':False, },
+                    'equal':{'media kind':'movie', 'localized':False, },
                     'apply':[
                         {
                             'property':'canonic directory',
@@ -4539,7 +4494,7 @@
                 },
                 {
                     'requires':set(('volume path', 'media kind', 'kind', 'profile', 'language')),
-                    'equal':{'media kind':'movie', 'language dependent':True, },
+                    'equal':{'media kind':'movie', 'localized':True, },
                     'apply':[
                         {
                             'property':'canonic directory',
@@ -4609,7 +4564,6 @@
                 },
             ],
         },
-        
         
         'rule.medium.stream.audio.name':{
             'name':'audio track name',
@@ -4711,49 +4665,49 @@
             'provide':set(('kind',)),
             'branch':[
                 {
-                    'requires':set(('format')),
-                    'equal':{'format':'AC-3'},
+                    'requires':set(('format',)),
+                    'equal':{'stream kind':'audio', 'format':'AC-3'},
                     'apply':[
                         { 'property':'kind', 'value':'ac3' },
                     ],
                 },
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'DTS'},
                     'apply':[
                         { 'property':'kind', 'value':'dts' },
                     ],
                 },
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'MPEG Audio'},
                     'apply':[
                         { 'property':'kind', 'value':'mp3' },
                     ],
                 },
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'AAC'},
                     'apply':[
                         { 'property':'kind', 'value':'aac' },
                     ],
                 },
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'PCM'},
                     'apply':[
                         { 'property':'kind', 'value':'pcm' },
                     ],
                 },
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'FLAC'},
                     'apply':[
                         { 'property':'kind', 'value':'flac' },
                     ],
                 },
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'Vorbis'},
                     'apply':[
                         { 'property':'kind', 'value':'ogg' },
@@ -4786,14 +4740,14 @@
             'provide':set(('kind',)),
             'branch':[
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'LZ77'},
                     'apply':[
                         { 'property':'kind', 'value':'png' },
                     ],
                 },
                 {
-                    'requires':set(('format')),
+                    'requires':set(('format',)),
                     'equal':{'format':'JPEG'},
                     'apply':[
                         { 'property':'kind', 'value':'jpg' },
@@ -4803,7 +4757,7 @@
         },
         'rule.medium.stream.text.kind':{
             'name':'Kind for text stream',
-            'provide':set(('kind')),
+            'provide':set(('kind',)),
             'branch':[
                 {
                     'requires':set(('stream kind', 'format')),
@@ -4827,7 +4781,7 @@
                     ],
                 },
                 {
-                    'requires':set(('stream kind')),
+                    'requires':set(('stream kind',)),
                     'equal':{'stream kind':'menu'},
                     'apply':[
                         { 'property':'kind', 'value':'chpl' },
@@ -4848,7 +4802,6 @@
                 },
             ],
         },
-        
         
         'rule.knowledge.movie.uri':{
             'name':'movie uri',

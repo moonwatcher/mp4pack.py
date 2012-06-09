@@ -475,48 +475,6 @@
             }
         },
     },
-    'kind':{
-        'm4v':{
-            'container':'mp4',
-        },
-        'm4a':{
-            'container':'mp4',
-        },
-        'mkv':{
-            'container':'matroska',
-        },
-        'avi':{
-            'container':'avi',
-        },
-        'srt':{
-            'container':'subtitles',
-            'language dependent':True,
-        },
-        'ass':{
-            'container':'subtitles',
-            'language dependent':True,
-        },
-        'chpl':{
-            'container':'chapters',
-            'language dependent':True,
-        },
-        'jpg':{
-            'container':'image',
-            'language dependent':True,
-        },
-        'png':{
-            'container':'image',
-            'language dependent':True,
-        },
-        'ac3':{
-            'container':'raw audio',
-            'language dependent':True,
-        },
-        'dts':{
-            'container':'raw audio',
-            'language dependent':True,
-        },
-    },
     'profile':{
         'normal':{},
         'clean':{},

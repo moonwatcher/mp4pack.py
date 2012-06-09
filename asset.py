@@ -187,11 +187,6 @@ class Resource(object):
     
     
     @property
-    def managed(self):
-        return self.location['managed']
-    
-    
-    @property
     def indexed(self):
         self.location['host'] in self.env.repository and \
         self.location['volume'] in self.env.repository[self.location['host']]['volume'] and \
@@ -229,7 +224,7 @@ class Resource(object):
     def meta(self):
         if self._meta is None:
             if self.node:
-                self._meta = Ontology(self.env, 'ns.medium.resource.crawl.meta', self.node['body']['meta'])
+                self._meta = Ontology(self.env, 'ns.medium.resource.meta', self.node['body']['meta'])
         return self._meta
     
     
@@ -281,16 +276,15 @@ class Resource(object):
     
     def commit(self):
         self.flush()
-        if self.managed:
-            if self.available:
-                if self.volatile:
-                    self.env.resolver.save(self.node)
-                    self.log.debug(u'Saved resource document %s', unicode(self))
-                    self._node = None
-                    self.volatile = False
-            else:
-                self.env.resolver.remove(self.uri)
-                self.log.debug(u'Dropped orphan resource document %s', unicode(self))
+        if self.available:
+            if self.volatile:
+                self.env.resolver.save(self.node)
+                self.log.debug(u'Saved resource document %s', unicode(self))
+                self._node = None
+                self.volatile = False
+        else:
+            self.env.resolver.remove(self.uri)
+            self.log.debug(u'Dropped orphan resource document %s', unicode(self))
     
     
     
@@ -302,6 +296,35 @@ class Resource(object):
     def write(self):
         pass
     
+    
+    def delete(self, task):
+        self.env.purge_path(self.path)
+    
+    
+    def copy(self, task):
+        product = task.product[0]
+        if self.env.varify_path_is_available(product.path, task.ontology['overwrite']):
+            command = self.env.initialize_command('rsync', self.log)
+            if command:
+                command.append(self.path)
+                command.append(product.path)
+                message = u'Copy ' + self.path + u' --> ' + product.path
+                self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
+    
+    
+    def move(self, task):
+        product = task.product[0]
+        if os.path.exists(product.path) and os.path.samefile(self.path, product.path):
+            self.log.debug(u'No move necessary for %s', unicode(self))
+        else:
+            if self.env.varify_path_is_available(product.path, False):
+                command = self.env.initialize_command('mv', self.log)
+                if command:
+                    command.extend([self.path, product.path])
+                    message = u'Move {0} --> {1}'.format(self.path, product.path)
+                    self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
+            else:
+                self.log.warning(u'Refuse to overwrite destination %s with %s', product.path, self.path)
     
     def fetch(self, task):
         if self.remote and \
@@ -319,66 +342,9 @@ class Resource(object):
                     
                     message = u'Fetch \'{0}\' from {1}'.format(self.location['volume relative path'], self.location['domain'])
                     self.env.execute(command, message, False, pipeout=True, pipeerr=False, log=self.log)
-                    
-            else:
-                if self.location['url']:
-                    try:
-                        self.log.debug(u'Retrieve %s', self.location['url'])
-                        filename, headers = urllib.urlretrieve(self.location['url'].encode('utf-8'), self.location['path in cache'].encode('utf-8'))
-                        result = True
-                    except IOError:
-                        result = False
-                        self.env.purge_path(self.location['path in cache'])
-                        self.log.warning(u'Failed to retrieve %s', self.location['url'])
-                        
         self.env.purge_if_not_exist(self.location['path in cache'])
     
     
-    def delete(self, task):
-        if self.path:
-            self.env.purge_path(self.path)
-    
-    
-    def copy(self, task):
-        if 'path' in task.ontology:
-            if self.env.varify_path_is_available(task.ontology['path'], task.job.ontology['overwrite']):
-                command = self.env.initialize_command('rsync', self.log)
-                if command:
-                    command.extend([self.path, job.ontology['path']])
-                    message = u'Copy ' + self.path + u' --> ' + job.ontology['path']
-                    self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
-                    if self.env.purge_if_not_exist(ontology['path']):
-                        self.asset.find(ontology)
-    
-    
-    def move(self, job):
-        if 'path' in ontology:
-            if os.path.exists(ontology['path']) and os.path.samefile(self.path, ontology['path']):
-                self.log.debug(u'No move needed for %s', unicode(self))
-            else:
-                if self.env.varify_path_is_available(ontology['path'], False):
-                    command = self.env.initialize_command('mv', self.log)
-                    if command:
-                        command.extend([self.path, ontology['path']])
-                        message = u'Rename {0} --> {1}'.format(self.path, ontology['path'])
-                        self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
-                else:
-                    self.log.warning(u'Not renaming %s, destination exists: %s', self.path, ontology['path'])
-    
-    
-    def compare(self, job):
-        result = False
-        if os.path.exists(self.path) and os.path.exists(ontology['path']):
-            source_md5 = hashlib.md5(file(self.path).read()).hexdigest()
-            dest_md5 = hashlib.md5(file(ontology['path']).read()).hexdigest()
-            if source_md5 == dest_md5:
-                self.log.info(u'md5 match: %s %s',source_md5, unicode(self))
-                result = True
-            else:
-                self.log.error(u'md5 mismatch: %s is not %s for %s', source_md5, dest_md5, unicode(self))
-        return result
-    
-
 
 
 class Container(Resource):

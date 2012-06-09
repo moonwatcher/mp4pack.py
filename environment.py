@@ -205,6 +205,7 @@ class Environment(object):
         for e in ('domain', 'host', 'language'):
             if e in self.ontology:
                 self.system[e] = self.ontology[e]
+        self.ontology['host'] = self.host
         self._load_dynamic_rules()
     
     
@@ -329,23 +330,6 @@ class Environment(object):
                         ),
                     }
                 )
-        
-        # Cache location
-        node['rule']['rule.system.cache.location'] = {
-            'name':'Cache location',
-            'provide':set(('cache root',)),
-            'branch':[],
-        }
-        for repository in self.repository.values():
-            node['rule']['rule.system.cache.location']['branch'].append(
-                {
-                    'requires':set(('host',)),
-                    'equal':{'host':repository.host},
-                    'apply':(
-                        {'property':'cache root', 'value':repository.node['cache']['path']},
-                    ),
-                }
-            )
         
         self._load_config_node(node)
     
