@@ -382,8 +382,8 @@ class Environment(object):
                 result = False
                 try:
                     os.removedirs(os.path.dirname(path))
-                except OSError:
-                    pass
+                except OSError, oserr:
+                    self.log.debug(oserr)
         else:
             result = False
         return result

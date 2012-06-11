@@ -24,7 +24,7 @@ class Crawler(object):
     
     
     def __unicode__(self):
-        return unicode(self.ontology['resource id'])
+        return unicode(self.ontology['resource uri'])
     
     
     @property

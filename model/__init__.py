@@ -127,13 +127,13 @@ class Query(object):
     
     
     def add(self, resource):
-        if resource.location['resource id'] not in self.resource:
-            self.resource[resource.location['resource id']] = resource
+        if resource.location['resource uri'] not in self.resource:
+            self.resource[resource.location['resource uri']] = resource
     
     
     def remove(self, resource):
-        if resource.location['resource id'] in self.resource:
-            del self.resource[resource.location['resource id']]
+        if resource.location['resource uri'] in self.resource:
+            del self.resource[resource.location['resource uri']]
     
     
     def resolve(self, profile):
@@ -176,7 +176,7 @@ class Pivot(object):
     
     @property
     def id(self):
-        return self.resource.location['resource id']
+        return self.resource.location['resource uri']
     
     
     @property
@@ -247,8 +247,8 @@ class Transform(object):
     
     def _find_pivot(self, resource, rule):
         pivot = None
-        if resource.location['resource id'] in self._result:
-            pivot = self._result[resource.location['resource id']]
+        if resource.location['resource uri'] in self._result:
+            pivot = self._result[resource.location['resource uri']]
             
         else:
             pivot = Pivot(resource, rule)

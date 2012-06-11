@@ -2989,6 +2989,7 @@
                 'rule.medium.stream.default.position',
                 'rule.medium.stream.default.id',
                 'rule.medium.stream.audio.kind',
+                'rule.system.default.enabled',
             ],
         },
         'ns.medium.resource.stream.video':{
@@ -3104,6 +3105,7 @@
                 'rule.medium.stream.default.id',
                 'rule.medium.stream.video.kind',
                 'rule.medium.stream.default.primary',
+                'rule.system.default.enabled',
             ],
         },
         'ns.medium.resource.stream.text':{
@@ -3176,6 +3178,7 @@
                 'rule.medium.stream.default.id',
                 'rule.medium.stream.text.kind',
                 'rule.medium.stream.default.primary',
+                'rule.system.default.enabled',
             ],
         },
         'ns.medium.resource.stream.image':{
@@ -3253,6 +3256,7 @@
                 'rule.medium.stream.default.id',
                 'rule.medium.stream.image.kind',
                 'rule.medium.stream.default.primary',
+                'rule.system.default.enabled',
             ],
         },
         'ns.knowledge.movie':{
@@ -4262,7 +4266,178 @@
                 },
             ],
         },
-        
+        'rule.medium.resource.filename.canonic':{
+            'name':'Canonic file name',
+            'provide':set(('canonic file name',)),
+            'branch':[
+                {
+                    'requires':set(('media kind', 'tvdb tv show id', 'track genealogy', 'simple name', 'kind')),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'TVDb{tvdb tv show id} {track genealogy} {simple name}.{kind}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('media kind', 'tvdb tv show id', 'track genealogy', 'kind')),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'TVDb{tvdb tv show id} {track genealogy}.{kind}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('media kind', 'imdb movie id', 'simple name', 'kind')),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'IMDb{imdb movie id} {simple name}.{kind}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('media kind', 'tmdb movie id', 'simple name', 'kind')),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'TMDb{tmdb movie id} {simple name}.{kind}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('media kind', 'imdb movie id', 'kind')),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'IMDb{imdb movie id}.{kind}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('media kind', 'tmdb movie id', 'kind')),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'TMDb{tmdb movie id}.{kind}',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.directory.canonic':{
+            'name':'Canonic directory',
+            'provide':set(('canonic directory',)),
+            'branch':[
+                {
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'localized')),
+                    'equal':{'media kind':'tvshow', 'localized':False, },
+                    'apply':[
+                        {
+                            'property':'canonic directory',
+                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'language', 'localized')),
+                    'equal':{'media kind':'tvshow', 'localized':True, },
+                    'apply':[
+                        {
+                            'property':'canonic directory',
+                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}/{language}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'localized')),
+                    'equal':{'media kind':'movie', 'localized':False, },
+                    'apply':[
+                        {
+                            'property':'canonic directory',
+                            'format':u'{volume path}/{media kind}/{kind}/{profile}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'language', 'localized')),
+                    'equal':{'media kind':'movie', 'localized':True, },
+                    'apply':[
+                        {
+                            'property':'canonic directory',
+                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{language}',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.path.canonic':{
+            'name':'canonic path',
+            'provide':set(('canonic path',)),
+            'branch':[
+                {
+                    'requires':set(('canonic directory', 'canonic file name')),
+                    'apply':[
+                        {
+                            'property':'canonic path',
+                            'format':u'{caonic directory}/{caonic file name}',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.filename.implicit':{
+            'name':'implicit filename',
+            'provide':set(('file name',)),
+            'branch':[
+                {
+                    'requires':set(('canonic file name',)),
+                    'apply':[
+                        {
+                            'property':'file name',
+                            'reference':u'canonic file name',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.directory.implicit':{
+            'name':'implicit directory',
+            'provide':set(('directory',)),
+            'branch':[
+                {
+                    'requires':set(('canonic directory',)),
+                    'apply':[
+                        {
+                            'property':'directory',
+                            'reference':u'canonic directory',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.path.implicit':{
+            'name':'implicit path',
+            'provide':set(('path',)),
+            'branch':[
+                {
+                    'requires':set(('directory', 'file name',)),
+                    'apply':[
+                        {
+                            'property':'path',
+                            'format':u'{directory}/{file name}',
+                        },
+                    ],
+                },
+            ],
+        },
         'rule.medium.resource.kind.language':{
             'name':'Kind language dependency',
             'provide':set(('localized',)),
@@ -4391,180 +4566,6 @@
                 },
             ],
         },
-        
-        'rule.medium.resource.filename.canonic':{
-            'name':'Canonic file name',
-            'provide':set(('canonic file name',)),
-            'branch':[
-                {
-                    'requires':set(('media kind', 'tvdb tv show id', 'track genealogy', 'simple name', 'kind')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'canonic file name',
-                            'format':u'TVDb{tvdb tv show id} {track genealogy} {simple name}.{kind}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tvdb tv show id', 'track genealogy', 'kind')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'canonic file name',
-                            'format':u'TVDb{tvdb tv show id} {track genealogy}.{kind}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'imdb movie id', 'simple name', 'kind')),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'canonic file name',
-                            'format':u'IMDb{imdb movie id} {simple name}.{kind}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tmdb movie id', 'simple name', 'kind')),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'canonic file name',
-                            'format':u'TMDb{tmdb movie id} {simple name}.{kind}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'imdb movie id', 'kind')),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'canonic file name',
-                            'format':u'IMDb{imdb movie id}.{kind}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tmdb movie id', 'kind')),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'canonic file name',
-                            'format':u'TMDb{tmdb movie id}.{kind}',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.medium.resource.directory.canonic':{
-            'name':'Canonic directory',
-            'provide':set(('canonic directory',)),
-            'branch':[
-                {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'localized')),
-                    'equal':{'media kind':'tvshow', 'localized':False, },
-                    'apply':[
-                        {
-                            'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'language', 'localized')),
-                    'equal':{'media kind':'tvshow', 'localized':True, },
-                    'apply':[
-                        {
-                            'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}/{language}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile')),
-                    'equal':{'media kind':'movie', 'localized':False, },
-                    'apply':[
-                        {
-                            'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'language')),
-                    'equal':{'media kind':'movie', 'localized':True, },
-                    'apply':[
-                        {
-                            'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{language}',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.medium.resource.path.canonic':{
-            'name':'canonic path',
-            'provide':set(('canonic path',)),
-            'branch':[
-                {
-                    'requires':set(('canonic directory', 'canonic file name')),
-                    'apply':[
-                        {
-                            'property':'canonic path',
-                            'format':u'{caonic directory}/{caonic file name}',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.medium.resource.filename.implicit':{
-            'name':'implicit filename',
-            'provide':set(('file name',)),
-            'branch':[
-                {
-                    'requires':set(('canonic file name',)),
-                    'apply':[
-                        {
-                            'property':'file name',
-                            'reference':u'canonic file name',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.medium.resource.directory.implicit':{
-            'name':'implicit directory',
-            'provide':set(('directory',)),
-            'branch':[
-                {
-                    'requires':set(('canonic directory',)),
-                    'apply':[
-                        {
-                            'property':'directory',
-                            'reference':u'canonic directory',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.medium.resource.path.implicit':{
-            'name':'implicit path',
-            'provide':set(('path',)),
-            'branch':[
-                {
-                    'requires':set(('directory', 'file name',)),
-                    'apply':[
-                        {
-                            'property':'path',
-                            'format':u'{directory}/{file name}',
-                        },
-                    ],
-                },
-            ],
-        },
-        
         'rule.medium.stream.audio.name':{
             'name':'audio track name',
             'provide':set(('name',)),
@@ -4875,7 +4876,6 @@
                 },
             ],
         },
-        
         'rule.knowledge.track.number':{
             'name':'Compute the composite track number',
             'provide':set(('track number',)),

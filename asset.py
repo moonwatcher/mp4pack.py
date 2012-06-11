@@ -309,7 +309,7 @@ class Resource(object):
                 command.append(self.path)
                 command.append(product.path)
                 message = u'Copy ' + self.path + u' --> ' + product.path
-                self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
     
     def move(self, task):
@@ -322,7 +322,8 @@ class Resource(object):
                 if command:
                     command.extend([self.path, product.path])
                     message = u'Move {0} --> {1}'.format(self.path, product.path)
-                    self.env.execute(command, message, options.debug, pipeout=True, pipeerr=False, log=self.log)
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                    self.env.purge_if_not_exist(self.path)
             else:
                 self.log.warning(u'Refuse to overwrite destination %s with %s', product.path, self.path)
     
@@ -393,8 +394,8 @@ class AudioVideoContainer(Container):
     
     
     def extract(self, task): 
-        for track in task.transform.single_result.stream:
-            if track['enabled'] and track['stream kind'] == 'menu':
+        for stream in task.transform.single_result.stream:
+            if stream['enabled'] and stream['stream kind'] == 'menu':
             
                 o = Ontology.clone(self.location)
                 del o['volume path']
@@ -403,14 +404,14 @@ class AudioVideoContainer(Container):
                 o['host'] = task.ontology['host']
                 o['volume'] = task.ontology['volume']
                 o['profile'] = task.ontology['profile']
-                o['language'] = track['language']
-                o['kind'] = track['kind']
+                o['language'] = stream['language']
+                o['kind'] = stream['kind']
                 
                 product = self.asset.find(o)
                 self.env.varify_directory(product.path)
-                product.menu = Menu.from_node(self.env, track['content'])
+                product.menu = Menu.from_node(self.env, stream['content'])
                 product.write()
-                track['enabled'] = False
+                stream['enabled'] = False
                 task.product.append(product)
     
     
@@ -427,25 +428,25 @@ class AudioVideoContainer(Container):
         if command:
             audio_options = {'--audio':[]}
             
-            for track in task.transform.single_result.stream:
-                if track['stream kind'] == 'video':
-                    for flag in track['handbrake flags']:
+            for stream in task.transform.single_result.stream:
+                if stream['stream kind'] == 'video':
+                    for flag in stream['handbrake flags']:
                         command.append(flag)
                         
-                    for k,v in track['handbrake parameters'].iteritems():
+                    for k,v in stream['handbrake parameters'].iteritems():
                         command.append(k)
                         command.append(unicode(v))
                         
                     x264_config = []
-                    for k,v in track['handbrake x264 settings'].iteritems():
+                    for k,v in stream['handbrake x264 settings'].iteritems():
                         x264_config.append(u'{0}={1}'.format(k, unicode(v)))
                     x264_config = u':'.join(x264_config)
                     command.append(u'--encopts')
                     command.append(x264_config)
                     
-                elif track['stream kind'] == 'audio':
-                    audio_options['--audio'].append(unicode(track['stream position']))
-                    for k,v in track['encoder settings'].iteritems():
+                elif stream['stream kind'] == 'audio':
+                    audio_options['--audio'].append(unicode(stream['stream position']))
+                    for k,v in stream['encoder settings'].iteritems():
                         if k not in audio_options:
                             audio_options[k] = []
                         audio_options[k].append(unicode(v))
@@ -480,32 +481,32 @@ class AudioVideoContainer(Container):
                     #command.append(self.asset.meta['full name'])
                     
                     command.append(u'--audio-tracks')
-                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.stream if track['stream kind'] == 'audio']))
+                    command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'audio']))
                     command.append(u'--video-tracks')
-                    command.append(u','.join([ unicode(track['stream id']) for track in pivot.stream if track['stream kind'] == 'video']))
+                    command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'video']))
                     
                 # Iterate the tracks
-                for track in pivot.stream:
-                    if track['kind'] != 'menu':
-                        if 'language' in track:
+                for stream in pivot.stream:
+                    if stream['kind'] != 'menu':
+                        if 'language' in stream:
                             command.append(u'--language')
-                            command.append(u'{0}:{1}'.format(track['stream id'], self.env.enumeration['language'].find(track['language']).node['ISO 639-1']))
+                            command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
                             
-                        if 'name' in track:
+                        if 'name' in stream:
                             command.append(u'--track-name')
-                            command.append(u'{0}:{1}'.format(track['stream id'], track['name']))
+                            command.append(u'{0}:{1}'.format(stream['stream id'], stream['name']))
                             
                         if 'delay' in pivot.resource.hint:
                             command.append(u'--sync')
-                            command.append(u'{0}:{1}'.format(track['stream id'], pivot.resource.hint['delay']))
+                            command.append(u'{0}:{1}'.format(stream['stream id'], pivot.resource.hint['delay']))
                             
-                        if track['kind'] == 'srt':
+                        if stream['kind'] == 'srt':
                             command.append(u'--sub-charset')
-                            command.append(u'{0}:{1}'.format(track['stream id'], u'UTF-8'))
+                            command.append(u'{0}:{1}'.format(stream['stream id'], u'UTF-8'))
                             
                     else:
                         command.append(u'--chapter-language')
-                        command.append(self.env.enumeration['language'].find(track['language']).node['ISO 639-1'])
+                        command.append(self.env.enumeration['language'].find(stream['language']).node['ISO 639-1'])
                         command.append(u'--chapter-charset')
                         command.append(u'UTF-8')
                         command.append(u'--chapters')
@@ -558,17 +559,17 @@ class Artwork(Container):
     def transcode(self, task):
         from PIL import Image
         product = task.product[0]
-        track = [ t for t in transform.single_result.stream if t['stream kind'] == 'image' ]
-        if track: track = track[0]
-        else: track = None
-        if track:
+        stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'image' ]
+        if stream: stream = stream[0]
+        else: stream = None
+        if stream:
             image = Image.open(source.resource.path)
             factor = None
-            if 'max length' in track and max(image.size) > track['max length']:
-                factor = float(track['max length']) / float(max(image.size))
+            if 'max length' in stream and max(image.size) > stream['max length']:
+                factor = float(stream['max length']) / float(max(image.size))
                 
-            elif 'min length' in track and min(image.size) > track['min length']:
-                factor = float(track['min length']) / float(min(image.size))
+            elif 'min length' in stream and min(image.size) > stream['min length']:
+                factor = float(stream['min length']) / float(min(image.size))
                 
             if factor is not None:
                 resize = (int(round(image.size[0] * factor)), int(round(image.size[1] * factor)))
@@ -595,8 +596,8 @@ class Matroska(AudioVideoContainer):
             command.extend([u'tracks', self.path ])
             
             taken = False
-            for track in task.transform.single_result.stream:
-                if track['enabled']:
+            for stream in task.transform.single_result.stream:
+                if stream['enabled']:
                     
                     o = Ontology.clone(self.location)
                     del o['volume path']
@@ -605,18 +606,18 @@ class Matroska(AudioVideoContainer):
                     o['host'] = task.ontology['host']
                     o['volume'] = task.ontology['volume']
                     o['profile'] = task.ontology['profile']
-                    o['language'] = track['language']
-                    o['kind'] = track['kind']
+                    o['language'] = stream['language']
+                    o['kind'] = stream['kind']
                     product = self.asset.find(o)
                     self.env.varify_directory(product.path)
                     
                     # Leave a hint about the delay
-                    if 'delay' in track:
-                        product.hint['delay'] = track['delay']
+                    if 'delay' in stream:
+                        product.hint['delay'] = stream['delay']
                         
-                    command.append(u'{0}:{1}'.format(unicode(track['stream id']), product.path))
+                    command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
                     task.product.append(product)
-                    track['enabled'] = False
+                    stream['enabled'] = False
                     taken = True
                     
             if taken:
@@ -673,16 +674,16 @@ class MP4(AudioVideoContainer):
                 
         for pivot in task.transform.result:
             if pivot.ontology['kind'] == 'srt':
-                track = pivot.stream[0]
+                stream = pivot.stream[0]
                 message = u'Update subtitles {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
                     command.extend([
                         u'-o', self.path,
                         u'-i', pivot.resource.path,
-                        u'-l', self.env.enumeration['language'].find(track['language']).name,
-                        u'-n', track['name'],
-                        u'-a', unicode(int(round(self.meta['height'] * track['height'])))
+                        u'-l', self.env.enumeration['language'].find(stream['language']).name,
+                        u'-n', stream['name'],
+                        u'-a', unicode(int(round(self.meta['height'] * stream['height'])))
                     ])
                     self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                     
@@ -718,10 +719,10 @@ class RawAudio(Container):
     
     def transcode(self, task):
         product = task.product[0]
-        track = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'audio' ]
-        if track: track = track[0]
-        else: track = None
-        if track:
+        stream = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'audio' ]
+        if stream: stream = stream[0]
+        else: stream = None
+        if stream:
             
             # Clone the hint ontology
             product.hint = Ontology.clone(self.hint)
@@ -732,7 +733,7 @@ class RawAudio(Container):
             command.append(u'-i')
             command.append(self.path)
             
-            for k,v in track['ffmpeg parameters'].iteritems():
+            for k,v in stream['ffmpeg parameters'].iteritems():
                 command.append(k)
                 command.append(unicode(v))
                 
@@ -754,10 +755,10 @@ class Subtitles(Text):
     @property
     def caption(self):
         if self._caption is None:
-            for track in self.stream:
-                if track['stream kind'] == 'caption' and 'content' in track:
-                    self._caption_track = track
-                    self._caption = Caption.from_node(self.env, track['content'])
+            for stream in self.stream:
+                if stream['stream kind'] == 'caption' and 'content' in stream:
+                    self._caption_track = stream
+                    self._caption = Caption.from_node(self.env, stream['content'])
                     break
                     
             if self._caption is None:
@@ -783,12 +784,12 @@ class Subtitles(Text):
     def transcode(self, task):
         product = task.product[0]
         product.caption = self.caption
-        track = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'caption' ]
-        if track: track = track[0]
-        else: track = None
-        if track:
+        stream = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'caption' ]
+        if stream: stream = stream[0]
+        else: stream = None
+        if stream:
             
-            for name in track['subtitle filters']:
+            for name in stream['subtitle filters']:
                 product.caption.filter(name)
                 
             if 'time shift' in task.job.ontology:
@@ -813,10 +814,10 @@ class TableOfContent(Text):
     @property
     def menu(self):
         if self._menu is None:
-            for track in self.stream:
-                if track['stream kind'] == 'menu' and 'content' in track:
-                    self._menu_track = track
-                    self._menu = Menu.from_node(self.env, track['content'])
+            for stream in self.stream:
+                if stream['stream kind'] == 'menu' and 'content' in stream:
+                    self._menu_track = stream
+                    self._menu = Menu.from_node(self.env, stream['content'])
                     
             if self._menu is None:
                 self._menu = Menu(self.env)
@@ -841,10 +842,10 @@ class TableOfContent(Text):
     def transcode(self, task):
         product = task.product[0]
         product.menu = self.menu
-        track = [ t for t in transform.single_result.stream if t['stream kind'] == 'menu' ]
-        if track: track = track[0]
-        else: track = None
-        if track:
+        stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'menu' ]
+        if stream: stream = stream[0]
+        else: stream = None
+        if stream:
             
             if 'time shift' in task.job.ontology:
                 product.menu.shift(task.job.ontology['time shift'])

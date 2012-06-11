@@ -127,7 +127,7 @@
                 {
                     'instruction':{
                         'name':'report',
-                        'help':'Print information about resources',
+                        'help':'Report information about resource',
                     },
                     'argument':[
                         'scan path',
@@ -143,7 +143,7 @@
                 {
                     'instruction':{
                         'name':'copy',
-                        'help':'Deploy resources into repository',
+                        'help':'Copy resource into location',
                     },
                     'argument':[
                         'scan path',
@@ -160,17 +160,32 @@
                 },
                 {
                     'instruction':{
-                        'name':'rename',
-                        'help':'Rename files to pattern',
+                        'name':'move',
+                        'help':'Move resource into location',
                     },
                     'argument':[
                         'scan path',
+                        'volume',
+                        'profile',
                         'inclusion',
                         'exclusion',
                         'recursive',
                         'overwrite',
                         'sync',
                         'crawl',
+                        'download',
+                    ]
+                },
+                {
+                    'instruction':{
+                        'name':'delete',
+                        'help':'Delete resource',
+                    },
+                    'argument':[
+                        'scan path',
+                        'inclusion',
+                        'exclusion',
+                        'recursive',
                     ]
                 },
                 {
