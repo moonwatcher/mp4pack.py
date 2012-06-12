@@ -9,6 +9,9 @@
             'rename':{
             },
             'extract':{
+                'pivot':[
+                    { 'operator':'this' },
+                ],
                 'transform':[
                     {
                         'mode':'select',
@@ -59,10 +62,11 @@
                 ],
             },
             'pack':{
-                'query':[
-                    { 'action':'select', 'constraint':{'kind':'srt'} },
-                    { 'action':'select', 'constraint':{'kind':'chpl'} },
-                    { 'action':'select', 'constraint':{'kind':'ac3'} },
+                'pivot':[
+                    { 'operator':'this' },
+                    { 'operator':'select', 'constraint':{'kind':'srt'} },
+                    { 'operator':'select', 'constraint':{'kind':'chpl'} },
+                    { 'operator':'select', 'constraint':{'kind':'ac3'} },
                 ],
                 'transform':[
                     {
@@ -101,7 +105,7 @@
                                 'branch':[
                                     {'stream kind':'caption'},
                                 ],
-                                'override':{'name':'Smart', 'language':'swe'},
+                                'override':{'name':'Smart', 'language':'sv'},
                             },
                         ],
                     },
@@ -171,10 +175,10 @@
                 ],
             },
             'update':{
-                'query':[
-                    { 'action':'select', 'constraint':{'kind':'srt'} },
-                    { 'action':'select', 'constraint':{'kind':'chpl'} },
-                    { 'action':'select', 'constraint':{'kind':'png'} },
+                'pivot':[
+                    { 'operator':'select', 'constraint':{'kind':'srt'} },
+                    { 'operator':'select', 'constraint':{'kind':'chpl'} },
+                    { 'operator':'select', 'constraint':{'kind':'png'} },
                 ],
                 'transform':[
                     {
@@ -213,7 +217,7 @@
                                 'branch':[
                                     {'stream kind':'caption'},
                                 ],
-                                'override':{'name':'Smart', 'height':0.148, 'language':'swe'},
+                                'override':{'name':'Smart', 'height':0.148, 'language':'sv'},
                             },
                         ],
                     },
@@ -252,6 +256,9 @@
                 ],
             },
             'transcode':{
+                'pivot':[
+                    { 'operator':'this' },
+                ],
                 'transform':[
                     {
                         'description':'Audio and video streams from a matroska or m4v file',

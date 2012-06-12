@@ -133,7 +133,7 @@ class Ontology(dict):
                                 for x in branch['apply']:
                                     if not dict.__contains__(self, x['property']):
                                         if 'digest' in x:
-                                            dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']]).hexdigest())
+                                            dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']].encode('utf-8')).hexdigest())
                                         if 'reference' in x:
                                             dict.__setitem__(self, x['property'], self[x['reference']])
                                         if 'format' in x:

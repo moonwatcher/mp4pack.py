@@ -31,8 +31,8 @@ class Environment(object):
             'command':{},
             'profile':{},
             'repository':{},
-            'subtitle filter':{},
             'interface':{},
+            'subtitle filter':{},
         }
         
         self._resolver = None
@@ -47,11 +47,6 @@ class Environment(object):
     
     
     # Runtime properties
-    @property
-    def system(self):
-        return self.state['system']
-    
-    
     @property
     def home(self):
         return self.system['home']
@@ -72,31 +67,15 @@ class Environment(object):
         return self.system['language']
     
     
-    # Lazy loaders for processors
-    @property
-    def resolver(self):
-        if self._resolver is None:
-            self._resolver = Resolver(self)
-        return self._resolver
-    
-    
-    @property
-    def caption_filter(self):
-        if  self._caption_filter is None:
-            self._caption_filter = CaptionFilterCache(self)
-        return self._caption_filter
-    
-    
-    @property
-    def universal_detector(self):
-        if self._universal_detector is None:
-            self._universal_detector = UniversalDetector()
-        return self._universal_detector
-    
-    
+    # Environment configuration
     @property
     def default(self):
         return self.state['default']
+    
+    
+    @property
+    def system(self):
+        return self.state['system']
     
     
     @property
@@ -140,11 +119,6 @@ class Environment(object):
     
     
     @property
-    def interface(self):
-        return self.state['interface']
-    
-    
-    @property
     def profile(self):
         return self.state['profile']
     
@@ -155,9 +129,36 @@ class Environment(object):
     
     
     @property
+    def interface(self):
+        return self.state['interface']
+    
+    
+    @property
     def subtitle_filter(self):
         return self.state['subtitle filter']
     
+    
+    # Lazy loaders for processors
+    @property
+    def resolver(self):
+        if self._resolver is None:
+            self._resolver = Resolver(self)
+        return self._resolver
+    
+    
+    @property
+    def caption_filter(self):
+        if  self._caption_filter is None:
+            self._caption_filter = CaptionFilterCache(self)
+        return self._caption_filter
+    
+    
+    @property
+    def universal_detector(self):
+        if self._universal_detector is None:
+            self._universal_detector = UniversalDetector()
+        return self._universal_detector
+
     
     def load(self):
         relative = os.path.dirname(__file__)

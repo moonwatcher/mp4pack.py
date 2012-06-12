@@ -269,9 +269,9 @@ class Resource(object):
             self._stream = None
             
         # Flush hint to node
-        if self._hint is not None:
-            self.node['body']['hint'] = self._hint.node
-            self._hint = None
+        #if self._hint is not None:
+        #    self.node['body']['hint'] = self._hint.node
+        #    self._hint = None
     
     
     def commit(self):
@@ -394,7 +394,7 @@ class AudioVideoContainer(Container):
     
     
     def extract(self, task): 
-        for stream in task.transform.single_result.stream:
+        for stream in task.transform.single_pivot.stream:
             if stream['enabled'] and stream['stream kind'] == 'menu':
             
                 o = Ontology.clone(self.location)
@@ -428,7 +428,7 @@ class AudioVideoContainer(Container):
         if command:
             audio_options = {'--audio':[]}
             
-            for stream in task.transform.single_result.stream:
+            for stream in task.transform.single_pivot.stream:
                 if stream['stream kind'] == 'video':
                     for flag in stream['handbrake flags']:
                         command.append(flag)
@@ -470,13 +470,13 @@ class AudioVideoContainer(Container):
             command.append(u'--output')
             command.append(product.path)
             
-            for pivot in task.transform.result:
+            for pivot in task.transform.pivot.values():
                 # Global resource flags
-                if 'mkvmerge flags' in pivot.ontology:
-                    for flag in pivot.ontology['mkvmerge flags']:
+                if 'mkvmerge flags' in pivot.location:
+                    for flag in pivot.location['mkvmerge flags']:
                         command.append(flag)
                         
-                if pivot.ontology['kind'] in ('mkv', 'm4v', 'avi'):
+                if pivot.location['kind'] in ('mkv', 'm4v', 'avi'):
                     #command.append(u'--title')
                     #command.append(self.asset.meta['full name'])
                     
@@ -596,7 +596,7 @@ class Matroska(AudioVideoContainer):
             command.extend([u'tracks', self.path ])
             
             taken = False
-            for stream in task.transform.single_result.stream:
+            for stream in task.transform.single_pivot.stream:
                 if stream['enabled']:
                     
                     o = Ontology.clone(self.location)
@@ -672,8 +672,8 @@ class MP4(AudioVideoContainer):
                 ])
                 self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                 
-        for pivot in task.transform.result:
-            if pivot.ontology['kind'] == 'srt':
+        for pivot in task.transform.pivot.values():
+            if pivot.location['kind'] == 'srt':
                 stream = pivot.stream[0]
                 message = u'Update subtitles {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
@@ -687,7 +687,7 @@ class MP4(AudioVideoContainer):
                     ])
                     self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                     
-            elif pivot.ontology['kind'] == 'png':
+            elif pivot.location['kind'] == 'png':
                 message = u'Update artwork {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
@@ -698,7 +698,7 @@ class MP4(AudioVideoContainer):
                     ])
                     self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                     
-            elif pivot.ontology['kind'] == 'chpl':
+            elif pivot.location['kind'] == 'chpl':
                 message = u'Update chapters {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
@@ -719,7 +719,7 @@ class RawAudio(Container):
     
     def transcode(self, task):
         product = task.product[0]
-        stream = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'audio' ]
+        stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'audio' ]
         if stream: stream = stream[0]
         else: stream = None
         if stream:
@@ -784,7 +784,7 @@ class Subtitles(Text):
     def transcode(self, task):
         product = task.product[0]
         product.caption = self.caption
-        stream = [ t for t in task.transform.single_result.stream if t['stream kind'] == 'caption' ]
+        stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'caption' ]
         if stream: stream = stream[0]
         else: stream = None
         if stream:

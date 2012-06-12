@@ -13,7 +13,7 @@ import hashlib
 from ontology import Ontology
 from asset import AssetCache
 from datetime import datetime
-from model import Transform, Query
+from model import ResourceTransform
 
 class Queue(object):
     def __init__(self, env):
@@ -188,7 +188,7 @@ class ResourceJob(Job):
     
     @property
     def profile(self):
-        if self._profile is None and 'profile' in self.job.ontology:
+        if self._profile is None and 'profile' in self.ontology:
             self._profile = self.env.profile[self.ontology['profile']]
         return self._profile
     
@@ -222,7 +222,7 @@ class ResourceJob(Job):
         if os.path.isfile(path):
             dname, fname = os.path.split(path)
             if self.filter(fname):
-                result.append(os.path.realpath(path))
+                result.append(unicode(os.path.realpath(path), 'utf-8'))
                 
         # Recursively scan decendent paths and aggregate the results
         elif (recursive or depth > 0) and os.path.isdir(path) and \
@@ -240,7 +240,6 @@ class ResourceTask(Task):
         Task.__init__(self, job, ontology)
         self.location = self.env.repository[self.env.host].parse_path(path)
         self.resource = None
-        self.query = None
         self.transform = None
         self.product = None
         self._profile = None
@@ -264,12 +263,16 @@ class ResourceTask(Task):
         self.resource = self.cache.find(self.location)
         if self.resource:
             self.resource.asset.touch()
-            self.node['resource'] = self.resource.location
+            self.transform = ResourceTransform(self.resource)
     
     
     def unload(self):
         if self.resource:
             self.resource.asset.commit()
+            
+            # Add the resource location and transform to the node 
+            self.node['resource'] = self.resource.location
+            self.node['transform'] = self.transform.node
         Task.unload(self)
     
     
@@ -277,8 +280,13 @@ class ResourceTask(Task):
         self.load()
         if self.resource:
             self.product = []
-            self.query = Query(self.resource.asset.resource.values())
-            self.transform = Transform()
+            
+            if self.profile:
+                # preform the transform on the resource
+                self.transform.transform(self.profile, self.ontology['action'])
+                # self.log.debug(unicode(self.transform).encode('utf-8'))
+            
+            # locate a method that implements the action and invoke it
             action = getattr(self, self.ontology['action'], None)
             if action:
                 action()
@@ -297,6 +305,8 @@ class ResourceTask(Task):
         o['volume'] = self.ontology['volume']
         if 'profile' in self.ontology:
             o['profile'] = self.ontology['profile']
+        
+        print o
         product = self.resource.asset.find(o)
         self.product.append(product)
         self.resource.copy(self)
@@ -329,17 +339,9 @@ class ResourceTask(Task):
     
     
     def extract(self):
-        self.query.add(self.resource)
-        self.query.resolve(self.profile['extract'])
-        self.transform.resolve(self.query.result, self.profile['extract'])
         self.resource.extract(self)
     
-    
     def pack(self):
-        self.query.add(self.resource)
-        self.query.resolve(self.profile['pack'])
-        self.transform.resolve(self.query.result, self.profile['pack'])
-        
         o = Ontology.clone(self.location)
         del o['volume path']
         del o['file name']
@@ -348,17 +350,13 @@ class ResourceTask(Task):
         o['volume'] = self.ontology['volume']
         o['profile'] = self.ontology['profile']
         o['kind'] = self.ontology['kind']
-
         product = self.resource.asset.find(o)
         self.product.append(product)
+        
         self.resource.pack(self)
     
     
     def transcode(self):
-        self.query.add(self.resource)
-        self.query.resolve(self.profile['transcode'])
-        self.transform.resolve(self.query.result, self.profile['transcode'])
-        
         o = Ontology.clone(self.location)
         del o['volume path']
         del o['file name']
@@ -367,15 +365,13 @@ class ResourceTask(Task):
         o['volume'] = self.ontology['volume']
         o['profile'] = self.ontology['profile']
         o['kind'] = self.ontology['kind']
-
         product = self.resource.asset.find(o)
         self.product.append(product)
+        
         self.resource.transcode(self)
     
     
     def update(self):
-        self.query.resolve(self.profile['update'])
-        self.transform.resolve(self.query.result, self.profile['update'])
         self.resource.update(self)
     
     

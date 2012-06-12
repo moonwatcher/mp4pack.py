@@ -76,14 +76,13 @@ class Resolver(object):
     
     
     def save(self, node):
+        uri = node['head']['canonical']
+        repository = self.env.repository[self.env.host]
         for handler in self.handlers.values():
-            for uri in node['head']['alternate']:
-                match = handler.match(uri)
-                if match is not None:
-                    parsed = match.groupdict()
-                    if parsed['host'] in self.env.repository:
-                        handler.save(node, self.env.repository[parsed['host']])
-                    break
+            match = handler.match(uri)
+            if match is not None:
+                handler.save(node, repository)
+                break
     
     
     def issue(self, host, name):

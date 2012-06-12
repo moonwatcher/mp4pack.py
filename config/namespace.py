@@ -3849,6 +3849,10 @@
         },
     },
     'rule':{
+        # rule.system.default.host
+        # rule.system.default.language
+        # rule.system.volume.location
+        
         'rule.system.default.routing':{
             'name':'Default volume and profile',
             'provide':set(('volume', 'profile',)),
@@ -3860,17 +3864,6 @@
                 {
                     'apply':[
                         {'property':'enabled', 'value':True,},
-                    ],
-                },
-            ],
-        },
-        'rule.system.default.language':{
-            'name':'Default language',
-            'provide':set(('language',)),
-            'branch':[
-                {
-                    'apply':[
-                        {'property':'language', 'value':'en',},
                     ],
                 },
             ],
@@ -4216,41 +4209,41 @@
             'branch':[
                 {
                     'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^/.+/(?:tvshow|music)/[a-z0-9]{3,4}/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
+                    'match':{'property':'directory', 'expression':ur'^/.+/(?:tvshow|music)/[a-z0-9]{3,4}/[^/]{3,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
                     'decode':[
                         {
                             'property':'directory',
-                            'expression':ur'^(?P<volume_path>/.+)/(?:tvshow|music)/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
+                            'expression':ur'^(?P<volume_path>/.+)/(?:tvshow|music)/[a-z0-9]{3,4}/(?P<profile>[^/]{3,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
                         },
                     ],
                 },
                 {
                     'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^/.+/movie/[a-z0-9]{3,4}/[^/]{2,}(?:/[a-z]{2})?$', },
+                    'match':{'property':'directory', 'expression':ur'^/.+/movie/[a-z0-9]{3,4}/[^/]{3,}(?:/[a-z]{2})?$', },
                     'decode':[
                         {
                             'property':'directory',
-                            'expression':ur'^(?P<volume_path>/.+)/movie/[a-z0-9]{3,4}/(?P<profile>[^/]{2,})(?:/(?P<language>[a-z]{2}))?$',
+                            'expression':ur'^(?P<volume_path>/.+)/movie/[a-z0-9]{3,4}/(?P<profile>[^/]{3,})(?:/(?P<language>[a-z]{2}))?$',
                         },
                     ],
                 },
                 {
                     'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{2,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
+                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{3,}/[^/]{2,}/[0-9]+(?:/[a-z]{2})?$', },
                     'decode':[
                         {
                             'property':'directory',
-                            'expression':ur'^.*/(?P<profile>[^/]{2,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
+                            'expression':ur'^.*/(?P<profile>[^/]{3,})/[^/]{2,}/[0-9]+(?:/(?P<language>[a-z]{2}))?$',
                         },
                     ],
                 },
                 {
                     'requires':set(('directory',)),
-                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{2,}(?:/[a-z]{2})?$', },
+                    'match':{'property':'directory', 'expression':ur'^.*/[^/]{3,}(?:/[a-z]{2})?$', },
                     'decode':[
                         {
                             'property':'directory',
-                            'expression':ur'^.*/(?P<profile>[^/]{2,})(?:/(?P<language>[a-z]{2}))?$',
+                            'expression':ur'^.*/(?P<profile>[^/]{3,})(?:/(?P<language>[a-z]{2}))?$',
                         },
                     ],
                 },

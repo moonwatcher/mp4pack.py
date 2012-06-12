@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import json
 import logging
 from datetime import datetime
 
@@ -114,35 +115,75 @@ class Timestamp(object):
         },
     }
 
-
-class Query(object):
-    def __init__(self, space):
-        self.space = space
-        self.resource = {}
+class ResourceTransform(object):
+    def __init__(self, resource):
+        self.resource = resource
+        self.pivot = {}
     
     
     @property
-    def result(self):
-        return self.resource.values()
+    def env(self):
+        return self.resource.env
+    
+    
+    @property
+    def node(self):
+        return { u'pivot':[ p.node for p in self.pivot.values() ] }
+    
+    
+    @property
+    def space(self):
+        return self.resource.asset.resource.values()
+    
+    
+    @property
+    def single_pivot(self):
+        if len(self.pivot) > 0:
+            return self.pivot.values()[0]
+        else:
+            return None
+    
+    
+    def transform(self, profile, action):
+        if action in profile:
+            # First use the pivot section to select resources to pivot
+            if 'pivot' in profile[action]:
+                for branch in profile[action]['pivot']:
+                    if 'operator' in branch:
+                        operator = getattr(self, branch['operator'], None)
+                        if operator:
+                            if 'constraint' in branch:
+                                operator(branch['constraint'])
+                            else:
+                                operator()
+                                
+            # Than use the transform to resolve the pivots on the selected resources
+            if 'transform' in profile[action] and self.pivot:
+                for template in profile[action]['transform']:
+                    for branch in template['branch']:
+                        taken = False
+                        for pivot in self.pivot.values():
+                            if pivot.location.match(branch):
+                                taken = pivot.transform(template)
+                                if template['mode'] == 'choose':
+                                    break
+                                    
+                        if template['mode'] == 'choose' and taken:
+                            break
     
     
     def add(self, resource):
-        if resource.location['resource uri'] not in self.resource:
-            self.resource[resource.location['resource uri']] = resource
+        if resource.uri not in self.pivot:
+            self.pivot[resource.uri] = ResourcePivot(resource)
     
     
     def remove(self, resource):
-        if resource.location['resource uri'] in self.resource:
-            del self.resource[resource.location['resource uri']]
+        if resource.uri in self.pivot:
+            del self.pivot[resource.uri]
     
     
-    def resolve(self, profile):
-        if 'query' in profile:
-            for branch in profile['query']:
-                if 'action' in branch:
-                    action = getattr(self, branch['action'], None)
-                    if action and 'constraint' in branch:
-                        action(branch['constraint'])
+    def this(self):
+        self.add(self.resource)
     
     
     def select(self, constraint):
@@ -152,31 +193,40 @@ class Query(object):
     
     
     def intersect(self, constraint):
-        for k in self.resource.keys():
-            if not self.resource[k].location.match(constraint):
-                self.remove(self.resource[k])
+        for k in self.selected.keys():
+            if not self.selected[k].location.match(constraint):
+                self.remove(self.selected[k])
     
     
     def subtract(self, constraint):
-        for k in self.resource.keys():
-            if self.resource[k].location.match(constraint):
-                self.remove(self.resource[k])
+        for k in self.selected.keys():
+            if self.selected[k].location.match(constraint):
+                self.remove(self.selected[k])
     
 
 
-class Pivot(object):
-    def __init__(self, resource, rule):
+class ResourcePivot(object):
+    def __init__(self, resource):
         self.resource = resource
-        self.ontology = Ontology.clone(resource.location)
+        self.location = Ontology.clone(resource.location)
         self.stream = []
-        if 'override' in rule:
-            for k,v in rule['override'].iteritems():
-                self.ontology[k] = v
     
     
     @property
-    def id(self):
-        return self.resource.location['resource uri']
+    def node(self):
+        return {
+            u'location':self.location,
+            u'stream':self.stream,
+        }
+    
+    
+    def __unicode__(self):
+        return unicode(self.node)
+    
+    
+    @property
+    def uri(self):
+        return self.resource.uri
     
     
     @property
@@ -184,75 +234,30 @@ class Pivot(object):
         return len(self.stream) > 0
     
     
-    def scan(self, profile):
-        for rule in profile:
-            for branch in rule['branch']:
-                taken = False
-                for track in self.resource.stream:
-                    if track.match(branch):
-                        taken = True
-                        self._pick_track(track, rule)
-                        if rule['mode'] == 'choose':
-                            break
-                            
-                if rule['mode'] == 'choose' and taken:
-                    break
-                    
-        return self.taken
-    
-    
-    def _pick_track(self, track, rule):
-        o = Ontology.clone(track)
-        if 'override' in rule:
-            for k,v in rule['override'].iteritems():
-                o[k] = v
-        self.stream.append(o)
-    
-
-
-class Transform(object):
-    def __init__(self):
-        self._result = {}
-    
-    
-    @property
-    def result(self):
-        return self._result.values()
-    
-    
-    @property
-    def single_result(self):
-        if len(self._result) > 0:
-            return self._result.values()[0]
-        else:
-            return None
-    
-    
-    def resolve(self, space, profile):
-        if 'transform' in profile:
-            for rule in profile['transform']:
+    def transform(self, template):
+        # apply overrides on the pivot location from the template
+        if 'override' in template:
+            for k,v in template['override'].iteritems():
+                self.location[k] = v
+                
+        # apply track rules from the template
+        if 'track' in template:
+            for rule in template['track']:
                 for branch in rule['branch']:
                     taken = False
-                    for resource in space:
-                        if resource.location.match(branch):
+                    for stream in self.resource.stream:
+                        if stream.match(branch):
                             taken = True
-                            pivot = self._find_pivot(resource, rule)
-                            taken = taken and pivot.scan(rule['track'])
+                            s = Ontology.clone(stream)
+                            if 'override' in rule:
+                                for k,v in rule['override'].iteritems(): s[k] = v
+                            self.stream.append(s)
+                            
                             if rule['mode'] == 'choose':
                                 break
                                 
                     if rule['mode'] == 'choose' and taken:
                         break
-    
-    
-    def _find_pivot(self, resource, rule):
-        pivot = None
-        if resource.location['resource uri'] in self._result:
-            pivot = self._result[resource.location['resource uri']]
-            
-        else:
-            pivot = Pivot(resource, rule)
-            self._result[pivot.id] = pivot
-        return pivot
+        return self.taken
     
 
