@@ -2013,6 +2013,7 @@
             },
             'synonym':['keyword'],
             'element':{
+                'action':None,
                 'domain':None,
                 'host':None,
                 'volume':None,
@@ -2051,7 +2052,6 @@
                 'debug':{
                     'auto cast':False,
                 },
-                'action':None,
             },
             'rule':[
                 'rule.system.default.routing',
@@ -2065,6 +2065,7 @@
             },
             'synonym':['keyword'],
             'element':{
+                'action':None,
                 'domain':None,
                 'host':None,
                 'volume':None,
@@ -2092,10 +2093,9 @@
                 'debug':{
                     'auto cast':False,
                 },
-                'action':None,
             },
             'rule':[
-                'rule.system.default.routing',
+                'rule.task.default.profile'
             ],
         },
         
@@ -3861,6 +3861,83 @@
         # rule.system.default.host
         # rule.system.default.language
         # rule.system.volume.location
+
+        'rule.task.default.profile':{
+            'name':'Default task profile',
+            'provide':set(('profile',)),
+            'branch':[
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'report'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'copy'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'move'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'delete'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'extract'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'pack'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'tag'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'optimize'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'transcode'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'update'},
+                    'apply':(
+                        {'property':'profile', 'value':u'base',},
+                    ),
+                },
+            ]
+        },
         
         'rule.system.default.routing':{
             'name':'Default volume and profile',

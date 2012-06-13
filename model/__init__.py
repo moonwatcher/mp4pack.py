@@ -145,10 +145,10 @@ class ResourceTransform(object):
     
     
     def transform(self, profile, action):
-        if action in profile:
+        if action in profile['action']:
             # First use the pivot section to select resources to pivot
-            if 'pivot' in profile[action]:
-                for branch in profile[action]['pivot']:
+            if 'pivot' in profile['action'][action]:
+                for branch in profile['action'][action]['pivot']:
                     if 'operator' in branch:
                         operator = getattr(self, branch['operator'], None)
                         if operator:
@@ -158,8 +158,8 @@ class ResourceTransform(object):
                                 operator()
                                 
             # Than use the transform to resolve the pivots on the selected resources
-            if 'transform' in profile[action] and self.pivot:
-                for template in profile[action]['transform']:
+            if 'transform' in profile['action'][action] and self.pivot:
+                for template in profile['action'][action]['transform']:
                     for branch in template['branch']:
                         taken = False
                         for pivot in self.pivot.values():

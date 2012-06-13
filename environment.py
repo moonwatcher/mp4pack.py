@@ -262,10 +262,11 @@ class Environment(object):
             if 'profile' in node:
                 for k,e in node['profile'].iteritems():
                     e['name'] = k
+                    if 'action' not in e: e['action'] = {}
                     self.profile[k] = e
-                    for action in self.default['profile']:
-                        if action not in e:
-                            e[action] = self.default['profile'][action]
+                    for action in self.default['profile']['action']:
+                        if action not in e['action']:
+                            e['action'][action] = self.default['profile']['action'][action]
                             
             if 'repository' in node:
                 for k,e in node['repository'].iteritems():

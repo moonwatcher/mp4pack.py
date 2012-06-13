@@ -186,13 +186,6 @@ class ResourceJob(Job):
         self._profile = None
     
     
-    @property
-    def profile(self):
-        if self._profile is None and 'profile' in self.ontology:
-            self._profile = self.env.profile[self.ontology['profile']]
-        return self._profile
-    
-    
     def load(self):
         Job.load(self)
         
@@ -253,31 +246,27 @@ class ResourceTask(Task):
     @property
     def profile(self):
         if self._profile is None:
-            if self._profile is None and 'profile' in self.ontology:
-                self._profile = self.env.profile[self.ontology['profile']]
+            self._profile = self.env.profile[self.ontology['profile']]
         return self._profile
     
     
     def load(self):
         Task.load(self)
         self.resource = self.cache.find(self.location)
-        if self.resource:
-            self.resource.asset.touch()
-            self.transform = ResourceTransform(self.resource)
     
     
     def unload(self):
         if self.resource:
-        
-            # we need to make sure products are indexed
+            
+            # Mark products as volatile to make sure they are indexed
             for p in self.product:
                 p.volatile = True
                 
-            # commit the asset 
+            # Commit the asset 
             self.resource.asset.commit()
             
             # Add the resource location and transform to the node 
-            self.node['resource'] = self.resource.location
+            self.node['origin'] = self.location.node
             self.node['transform'] = self.transform.node
         Task.unload(self)
     
@@ -285,20 +274,27 @@ class ResourceTask(Task):
     def run(self):
         self.load()
         if self.resource:
-            self.product = []
-            
-            if self.profile:
-                # preform the transform on the resource
-                self.transform.transform(self.profile, self.ontology['action'])
-            
-            # locate a method that implements the action and invoke it
+        
+            # locate a method that implements the action
             action = getattr(self, self.ontology['action'], None)
+            
             if action:
+                # prepare a task product
+                self.product = []
+                
+                # ensure all resources are loaded in the asset
+                self.resource.asset.touch()
+                
+                # initialize a transform
+                self.transform = ResourceTransform(self.resource)
+                self.transform.transform(self.profile, self.ontology['action'])
+                    
+                # invoke the action
                 action()
             else:
                self.log.debug(u'Unknown task action %s, aborting task %s', self.ontology['action'], unicode(self))
         else:
-            self.log.debug(u'Resource invalid, aborting task %s', unicode(self))
+            self.log.debug(u'Invalid resource, aborting task %s', unicode(self))
         self.unload()
     
     def copy(self):
