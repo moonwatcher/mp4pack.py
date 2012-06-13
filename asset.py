@@ -109,6 +109,7 @@ class Asset(object):
             for resource in self.resource.values():
                 resource.commit()
                 
+            # cleanup
             self._node = None
             self.resource = {}
             self.env.resolver.remove(self.uri)
@@ -598,7 +599,6 @@ class Matroska(AudioVideoContainer):
             taken = False
             for stream in task.transform.single_pivot.stream:
                 if stream['enabled']:
-                    
                     o = Ontology.clone(self.location)
                     del o['volume path']
                     del o['file name']
@@ -608,6 +608,7 @@ class Matroska(AudioVideoContainer):
                     o['profile'] = task.ontology['profile']
                     o['language'] = stream['language']
                     o['kind'] = stream['kind']
+                    
                     product = self.asset.find(o)
                     self.env.varify_directory(product.path)
                     
@@ -619,11 +620,11 @@ class Matroska(AudioVideoContainer):
                     task.product.append(product)
                     stream['enabled'] = False
                     taken = True
-                    
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
                 self.env.execute(command, message, task.job.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
+
 
 
 class MP4(AudioVideoContainer):

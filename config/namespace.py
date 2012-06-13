@@ -2110,6 +2110,7 @@
             },
             'synonym':['keyword'],
             'element':{
+                'domain':None,
                 'url':None,
                 'path':None,
                 'path digest':None,
@@ -2155,9 +2156,16 @@
             'rule':[
                 'rule.system.default.language',
                 'rule.knowledge.movie.imdb.trimmed',
-                'rule.medium.resource.path.implicit',
                 'rule.medium.resource.path.digest',
-                
+
+                'rule.medium.resource.filename.canonic',
+                'rule.medium.resource.directory.canonic',
+                'rule.medium.resource.path.canonic',
+                'rule.medium.resource.filename.implicit',
+                'rule.medium.resource.directory.implicit',
+                'rule.medium.resource.path.implicit',
+                'rule.system.volume.location',
+                'rule.medium.resource.kind.language',
             ],
         },
         'ns.medium.resource.location':{
@@ -2170,6 +2178,7 @@
             },
             'synonym':['keyword'],
             'element':{
+                'domain':None,
                 'url':None,
                 'scheme':None,
                 'host':None,

@@ -268,6 +268,12 @@ class ResourceTask(Task):
     
     def unload(self):
         if self.resource:
+        
+            # we need to make sure products are indexed
+            for p in self.product:
+                p.volatile = True
+                
+            # commit the asset 
             self.resource.asset.commit()
             
             # Add the resource location and transform to the node 
@@ -284,7 +290,6 @@ class ResourceTask(Task):
             if self.profile:
                 # preform the transform on the resource
                 self.transform.transform(self.profile, self.ontology['action'])
-                # self.log.debug(unicode(self.transform).encode('utf-8'))
             
             # locate a method that implements the action and invoke it
             action = getattr(self, self.ontology['action'], None)
