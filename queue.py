@@ -304,12 +304,10 @@ class ResourceTask(Task):
         del o['directory']
         o['host'] = self.env.host
         o['volume'] = self.ontology['volume']
-        if 'profile' in self.ontology:
-            o['profile'] = self.ontology['profile']
-        
-        print o
+        o['profile'] = self.ontology['profile']
         product = self.resource.asset.find(o)
         self.product.append(product)
+        
         self.resource.copy(self)
     
     
@@ -324,10 +322,10 @@ class ResourceTask(Task):
         del o['directory']
         o['host'] = self.env.host
         o['volume'] = self.ontology['volume']
-        if 'profile' in self.ontology:
-            o['profile'] = self.ontology['profile']
+        o['profile'] = self.ontology['profile']
         product = self.resource.asset.find(o)
         self.product.append(product)
+        
         self.resource.move(self)
     
     
