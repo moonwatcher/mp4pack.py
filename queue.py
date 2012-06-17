@@ -315,20 +315,32 @@ class ResourceTask(Task):
     
     
     
-    def produce(self):
+    def produce(self, override=None):
+        # copy the location ontology
         o = Ontology.clone(self.location)
+        
+        # allow the location to recalculate those concepts 
         del o['volume path']
         del o['file name']
         del o['directory']
+        
+        # set some location concepts from the task
         o['host'] = self.env.host
         o['volume'] = self.ontology['volume']
         o['profile'] = self.ontology['profile']
-        if 'kind' in self.ontology:
-            o['kind'] = self.ontology['kind']
-            
+        
+        # if an override was given set some concepts from it 
+        if override:
+            if 'kind' in override:
+                o['kind'] = override['kind']
+            if 'language' in override:
+                o['language'] = override['language']
+        
+        # try to produce a new resource
         product = self.resource.asset.find(o)
         if product:
             self.product.append(product)
+            
         return product
     
 

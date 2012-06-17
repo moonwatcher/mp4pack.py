@@ -404,23 +404,12 @@ class AudioVideoContainer(Container):
     def explode(self, task): 
         for stream in task.transform.single_pivot.stream:
             if stream['enabled'] and stream['stream kind'] == 'menu':
-            
-                o = Ontology.clone(self.location)
-                del o['volume path']
-                del o['file name']
-                del o['directory']
-                o['host'] = task.ontology['host']
-                o['volume'] = task.ontology['volume']
-                o['profile'] = task.ontology['profile']
-                o['language'] = stream['language']
-                o['kind'] = stream['kind']
-                
-                product = self.asset.find(o)
-                self.env.varify_directory(product.path)
-                product.menu = Menu.from_node(self.env, stream['content'])
-                product.write()
-                stream['enabled'] = False
-                task.product.append(product)
+                product = task.produce(stream)
+                if product:
+                    self.env.varify_directory(product.path)
+                    product.menu = Menu.from_node(self.env, stream['content'])
+                    product.write()
+                    stream['enabled'] = False
     
     
     def pack(self, task):
@@ -431,7 +420,7 @@ class AudioVideoContainer(Container):
     
     
     def transcode(self, task):
-        product = task.produce()
+        product = task.produce(task.ontology)
         if product:
             command = self.env.initialize_command('handbrake', self.log)
             if command:
@@ -471,7 +460,7 @@ class AudioVideoContainer(Container):
     
     
     def _pack_mkv(self, task):
-        product = task.produce()
+        product = task.produce(task.ontology)
         if product:
             command = self.env.initialize_command('mkvmerge', self.log)
             if command:
@@ -527,7 +516,7 @@ class AudioVideoContainer(Container):
     
     
     def _pack_m4v(self, task):
-        product = task.produce()
+        product = task.produce(task.ontology)
         if product:
             command = self.env.initialize_command('subler', self.log)
             if command:
@@ -567,7 +556,7 @@ class Artwork(Container):
     
     def transcode(self, task):
         from PIL import Image
-        product = task.produce()
+        product = task.produce(task.ontology)
         if product:
             stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'image' ]
             if stream: stream = stream[0]
@@ -608,27 +597,17 @@ class Matroska(AudioVideoContainer):
             taken = False
             for stream in task.transform.single_pivot.stream:
                 if stream['enabled']:
-                    o = Ontology.clone(self.location)
-                    del o['volume path']
-                    del o['file name']
-                    del o['directory']
-                    o['host'] = task.ontology['host']
-                    o['volume'] = task.ontology['volume']
-                    o['profile'] = task.ontology['profile']
-                    o['language'] = stream['language']
-                    o['kind'] = stream['kind']
-                    
-                    product = self.asset.find(o)
-                    self.env.varify_directory(product.path)
-                    
-                    # Leave a hint about the delay
-                    if 'delay' in stream:
-                        product.hint['delay'] = stream['delay']
+                    product = task.produce(stream)
+                    if product:
+                        self.env.varify_directory(product.path)
                         
-                    command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
-                    task.product.append(product)
-                    stream['enabled'] = False
-                    taken = True
+                        # Leave a hint about the delay
+                        if 'delay' in stream:
+                            product.hint['delay'] = stream['delay']
+                            
+                        command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
+                        stream['enabled'] = False
+                        taken = True
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
                 self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
@@ -728,7 +707,7 @@ class RawAudio(Container):
     
     
     def transcode(self, task):
-        product = task.produce()
+        product = task.produce(task.ontology)
         if product:
             stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'audio' ]
             if stream: stream = stream[0]
@@ -793,7 +772,7 @@ class Subtitles(Text):
     
     
     def transcode(self, task):
-        product = task.produce()
+        product = task.produce(task.ontology)
         if product:
             product.caption = self.caption
             stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'caption' ]
@@ -852,7 +831,7 @@ class TableOfContent(Text):
     
     
     def transcode(self, task):
-        product = task.produce()
+        product = task.produce(task.ontology)
         if product:
             product.menu = self.menu
             stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'menu' ]
