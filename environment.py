@@ -19,7 +19,6 @@ class Environment(object):
         self.log = logging.getLogger('environment')
         self.ontology = None
         self.state = {
-            'default':{},
             'system':{},
             'archetype':{},
             'enumeration':{},
@@ -30,6 +29,7 @@ class Environment(object):
             'constant':{},
             'command':{},
             'profile':{},
+            'preset':{},
             'repository':{},
             'interface':{},
             'subtitle filter':{},
@@ -68,11 +68,6 @@ class Environment(object):
     
     
     # Environment configuration
-    @property
-    def default(self):
-        return self.state['default']
-    
-    
     @property
     def system(self):
         return self.state['system']
@@ -116,6 +111,11 @@ class Environment(object):
     @property
     def command(self):
         return self.state['command']
+    
+    
+    @property
+    def preset(self):
+        return self.state['preset']
     
     
     @property
@@ -212,10 +212,6 @@ class Environment(object):
     
     def _load_config_node(self, node):
         if node:
-            if 'default' in node:
-                for k,e in node['default'].iteritems():
-                    self.default[k] = e
-                    
             if 'system' in node:
                 for k,e in node['system'].iteritems():
                     self.system[k] = e
@@ -262,11 +258,12 @@ class Environment(object):
             if 'profile' in node:
                 for k,e in node['profile'].iteritems():
                     e['name'] = k
-                    if 'action' not in e: e['action'] = {}
                     self.profile[k] = e
-                    for action in self.default['profile']['action']:
-                        if action not in e['action']:
-                            e['action'][action] = self.default['profile']['action'][action]
+                            
+            if 'preset' in node:
+                for k,e in node['preset'].iteritems():
+                    e['name'] = k
+                    self.preset[k] = e
                             
             if 'repository' in node:
                 for k,e in node['repository'].iteritems():

@@ -76,13 +76,17 @@ class Resolver(object):
     
     
     def save(self, node):
-        uri = node['head']['canonical']
-        repository = self.env.repository[self.env.host]
-        for handler in self.handlers.values():
-            match = handler.match(uri)
-            if match is not None:
-                handler.save(node, repository)
-                break
+        if node:
+            if 'canonical' in node[u'head'] and node[u'head']['canonical']:
+                uri = node['head']['canonical']
+                repository = self.env.repository[self.env.host]
+                for handler in self.handlers.values():
+                    match = handler.match(uri)
+                    if match is not None:
+                        handler.save(node, repository)
+                        break
+            else:
+                self.log.error(u'URIs are missing, refusing to save record %s', unicode(node[u'head']))        
     
     
     def issue(self, host, name):
@@ -197,6 +201,7 @@ class ResourceHandler(object):
                             },
                         ],
                     }
+                    self.log.debug(u'Saving %s', query['uri'])
                     self.store(query)
                     break
             if taken: break
@@ -287,9 +292,15 @@ class ResourceHandler(object):
                 record = entry['record']
                 record[u'head'][u'created'] = record[u'head'][u'modified']
                 
-            # Save the record to database
-            self.log.debug(u'Storing %s', unicode(record[u'head']))
-            collection.save(record)
+            # Check that canonical and alternate are set
+            if 'canonical' in record[u'head'] and record[u'head']['canonical'] and \
+            'alternate' in record[u'head'] and record[u'head']['alternate']:
+                # Save the record to database
+                self.log.debug(u'Storing %s', unicode(record[u'head']['canonical']))
+                collection.save(record)
+            else:
+                self.log.error(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
+                
     
     
     

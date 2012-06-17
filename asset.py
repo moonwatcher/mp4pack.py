@@ -4,6 +4,7 @@ import os
 import logging
 import hashlib
 import re
+import json
 
 from ontology import Ontology
 from model.menu import Chapter, Menu
@@ -298,35 +299,46 @@ class Resource(object):
         pass
     
     
-    def delete(self, task):
-        self.env.purge_path(self.path)
+    def report(self, task):
+    	print json.dumps(self.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
     
     def copy(self, task):
-        product = task.product[0]
-        if self.env.varify_path_is_available(product.path, task.ontology['overwrite']):
-            command = self.env.initialize_command('rsync', self.log)
-            if command:
-                command.append(self.path)
-                command.append(product.path)
-                message = u'Copy ' + self.path + u' --> ' + product.path
-                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+        product = task.produce()
+        if product:
+            if self.env.varify_path_is_available(product.path, task.ontology['overwrite']):
+                command = self.env.initialize_command('rsync', self.log)
+                if command:
+                    command.append(self.path)
+                    command.append(product.path)
+                    message = u'Copy ' + self.path + u' --> ' + product.path
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
     
     def move(self, task):
-        product = task.product[0]
-        if os.path.exists(product.path) and os.path.samefile(self.path, product.path):
-            self.log.debug(u'No move necessary for %s', unicode(self))
-        else:
-            if self.env.varify_path_is_available(product.path, False):
-                command = self.env.initialize_command('mv', self.log)
-                if command:
-                    command.extend([self.path, product.path])
-                    message = u'Move {0} --> {1}'.format(self.path, product.path)
-                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-                    self.env.purge_if_not_exist(self.path)
+        product = task.produce()
+        if product:
+            if os.path.exists(product.path) and os.path.samefile(self.path, product.path):
+                self.log.debug(u'No move necessary for %s', unicode(self))
             else:
-                self.log.warning(u'Refuse to overwrite destination %s with %s', product.path, self.path)
+                if self.env.varify_path_is_available(product.path, False):
+                    command = self.env.initialize_command('mv', self.log)
+                    if command:
+                        command.extend([self.path, product.path])
+                        message = u'Move {0} --> {1}'.format(self.path, product.path)
+                        self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                        self.env.purge_if_not_exist(self.path)
+                else:
+                    self.log.warning(u'Refuse to overwrite destination %s with %s', product.path, self.path)
+    
+    def delete(self, task):
+        command = self.env.initialize_command('rm', self.log)
+        if command:
+            command.append(self.path)
+            message = u'Remove {0}'.format(self.path)
+            self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+            self.env.purge_if_not_exist(self.path)
+    
     
     def fetch(self, task):
         if self.remote and \
@@ -354,6 +366,14 @@ class Container(Resource):
         Resource.__init__(self, asset, location)
     
     
+    def explode(self, task):
+        pass
+    
+    
+    def pack(self, task):
+        pass
+    
+    
     def tag(self, task):
         pass
     
@@ -362,23 +382,11 @@ class Container(Resource):
         pass
     
     
-    def extract(self, task):
-        pass
-    
-    
-    def pack(self, task):
-        pass
-    
-    
     def transcode(self, task):
         pass
     
     
     def update(self, task):
-        pass
-    
-    
-    def report(self, task):
         pass
     
 
@@ -393,8 +401,7 @@ class AudioVideoContainer(Container):
         return self.meta['width'] >= self.env.constant['hd threshold']
     
     
-    
-    def extract(self, task): 
+    def explode(self, task): 
         for stream in task.transform.single_pivot.stream:
             if stream['enabled'] and stream['stream kind'] == 'menu':
             
@@ -417,115 +424,116 @@ class AudioVideoContainer(Container):
     
     
     def pack(self, task):
-        if task.job.ontology['kind'] == 'mkv':
+        if task.ontology['kind'] == 'mkv':
             self._pack_mkv(task)
-        elif task.job.ontology['kind'] == 'm4v':
+        elif task.ontology['kind'] == 'm4v':
             self._pack_m4v(task)
     
     
     def transcode(self, task):
-        product = task.product[0]
-        command = self.env.initialize_command('handbrake', self.log)
-        if command:
-            audio_options = {'--audio':[]}
-            
-            for stream in task.transform.single_pivot.stream:
-                if stream['stream kind'] == 'video':
-                    for flag in stream['handbrake flags']:
-                        command.append(flag)
-                        
-                    for k,v in stream['handbrake parameters'].iteritems():
-                        command.append(k)
-                        command.append(unicode(v))
-                        
-                    x264_config = []
-                    for k,v in stream['handbrake x264 settings'].iteritems():
-                        x264_config.append(u'{0}={1}'.format(k, unicode(v)))
-                    x264_config = u':'.join(x264_config)
-                    command.append(u'--encopts')
-                    command.append(x264_config)
-                    
-                elif stream['stream kind'] == 'audio':
-                    audio_options['--audio'].append(unicode(stream['stream position']))
-                    for k,v in stream['encoder settings'].iteritems():
-                        if k not in audio_options:
-                            audio_options[k] = []
-                        audio_options[k].append(unicode(v))
-                        
-            for k,v in audio_options.iteritems():
-                command.append(k)
-                command.append(u','.join(v))
+        product = task.produce()
+        if product:
+            command = self.env.initialize_command('handbrake', self.log)
+            if command:
+                audio_options = {'--audio':[]}
                 
-            command.extend([u'--input', self.path, u'--output', product.path])
-            message = u'Transcode {0} --> {1}'.format(self.path, product.path)
-            self.env.varify_directory(product.path)
-            self.env.execute(command, message, task.job.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
+                for stream in task.transform.single_pivot.stream:
+                    if stream['stream kind'] == 'video':
+                        for flag in stream['handbrake flags']:
+                            command.append(flag)
+                            
+                        for k,v in stream['handbrake parameters'].iteritems():
+                            command.append(k)
+                            command.append(unicode(v))
+                            
+                        x264_config = []
+                        for k,v in stream['handbrake x264 settings'].iteritems():
+                            x264_config.append(u'{0}={1}'.format(k, unicode(v)))
+                        x264_config = u':'.join(x264_config)
+                        command.append(u'--encopts')
+                        command.append(x264_config)
+                        
+                    elif stream['stream kind'] == 'audio':
+                        audio_options['--audio'].append(unicode(stream['stream position']))
+                        for k,v in stream['encoder settings'].iteritems():
+                            if k not in audio_options:
+                                audio_options[k] = []
+                            audio_options[k].append(unicode(v))
+                            
+                for k,v in audio_options.iteritems():
+                    command.append(k)
+                    command.append(u','.join(v))
+                    
+                command.extend([u'--input', self.path, u'--output', product.path])
+                message = u'Transcode {0} --> {1}'.format(self.path, product.path)
+                self.env.varify_directory(product.path)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
     def _pack_mkv(self, task):
-        command = self.env.initialize_command('mkvmerge', self.log)
-        if command:
-            product = task.product[0]
-            
-            # Output
-            command.append(u'--output')
-            command.append(product.path)
-            
-            for pivot in task.transform.pivot.values():
-                # Global resource flags
-                if 'mkvmerge flags' in pivot.location:
-                    for flag in pivot.location['mkvmerge flags']:
-                        command.append(flag)
-                        
-                if pivot.location['kind'] in ('mkv', 'm4v', 'avi'):
-                    #command.append(u'--title')
-                    #command.append(self.asset.meta['full name'])
-                    
-                    command.append(u'--audio-tracks')
-                    command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'audio']))
-                    command.append(u'--video-tracks')
-                    command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'video']))
-                    
-                # Iterate the tracks
-                for stream in pivot.stream:
-                    if stream['kind'] != 'menu':
-                        if 'language' in stream:
-                            command.append(u'--language')
-                            command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
-                            
-                        if 'name' in stream:
-                            command.append(u'--track-name')
-                            command.append(u'{0}:{1}'.format(stream['stream id'], stream['name']))
-                            
-                        if 'delay' in pivot.resource.hint:
-                            command.append(u'--sync')
-                            command.append(u'{0}:{1}'.format(stream['stream id'], pivot.resource.hint['delay']))
-                            
-                        if stream['kind'] == 'srt':
-                            command.append(u'--sub-charset')
-                            command.append(u'{0}:{1}'.format(stream['stream id'], u'UTF-8'))
-                            
-                    else:
-                        command.append(u'--chapter-language')
-                        command.append(self.env.enumeration['language'].find(stream['language']).node['ISO 639-1'])
-                        command.append(u'--chapter-charset')
-                        command.append(u'UTF-8')
-                        command.append(u'--chapters')
-                        
-                command.append(pivot.resource.path)
+        product = task.produce()
+        if product:
+            command = self.env.initialize_command('mkvmerge', self.log)
+            if command:
+                # Output
+                command.append(u'--output')
+                command.append(product.path)
                 
-            message = u'Pack {0} --> {1}'.format(self.path, product.path)
-            self.env.execute(command, message, task.job.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
+                for pivot in task.transform.pivot.values():
+                    # Global resource flags
+                    if 'mkvmerge flags' in pivot.location:
+                        for flag in pivot.location['mkvmerge flags']:
+                            command.append(flag)
+                            
+                    if pivot.location['kind'] in ('mkv', 'm4v', 'avi'):
+                        #command.append(u'--title')
+                        #command.append(self.asset.meta['full name'])
+                        
+                        command.append(u'--audio-tracks')
+                        command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'audio']))
+                        command.append(u'--video-tracks')
+                        command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'video']))
+                        
+                    # Iterate the tracks
+                    for stream in pivot.stream:
+                        if stream['kind'] != 'menu':
+                            if 'language' in stream:
+                                command.append(u'--language')
+                                command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
+                                
+                            if 'name' in stream:
+                                command.append(u'--track-name')
+                                command.append(u'{0}:{1}'.format(stream['stream id'], stream['name']))
+                                
+                            if 'delay' in pivot.resource.hint:
+                                command.append(u'--sync')
+                                command.append(u'{0}:{1}'.format(stream['stream id'], pivot.resource.hint['delay']))
+                                
+                            if stream['kind'] == 'srt':
+                                command.append(u'--sub-charset')
+                                command.append(u'{0}:{1}'.format(stream['stream id'], u'UTF-8'))
+                                
+                        else:
+                            command.append(u'--chapter-language')
+                            command.append(self.env.enumeration['language'].find(stream['language']).node['ISO 639-1'])
+                            command.append(u'--chapter-charset')
+                            command.append(u'UTF-8')
+                            command.append(u'--chapters')
+                            
+                    command.append(pivot.resource.path)
+                    
+                message = u'Pack {0} --> {1}'.format(self.path, product.path)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
     def _pack_m4v(self, task):
-        command = self.env.initialize_command('subler', self.log)
-        if command:
-            product = task.product[0]
-            
-            command.extend([u'-o', product.path, u'-i', self.path])
-            message = u'Pack {0} --> {1}'.format(unicode(self), unicode(product))
-            self.env.execute(command, message, options.debug, pipeout=False, pipeerr=False, log=self.log)
+        product = task.produce()
+        if product:
+            command = self.env.initialize_command('subler', self.log)
+            if command:
+                command.extend([u'-o', product.path, u'-i', self.path])
+                message = u'Pack {0} --> {1}'.format(unicode(self), unicode(product))
+                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
     
@@ -559,29 +567,30 @@ class Artwork(Container):
     
     def transcode(self, task):
         from PIL import Image
-        product = task.product[0]
-        stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'image' ]
-        if stream: stream = stream[0]
-        else: stream = None
-        if stream:
-            image = Image.open(source.resource.path)
-            factor = None
-            if 'max length' in stream and max(image.size) > stream['max length']:
-                factor = float(stream['max length']) / float(max(image.size))
-                
-            elif 'min length' in stream and min(image.size) > stream['min length']:
-                factor = float(stream['min length']) / float(min(image.size))
-                
-            if factor is not None:
-                resize = (int(round(image.size[0] * factor)), int(round(image.size[1] * factor)))
-                self.log.debug(u'Resize artwork: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
-                image = image.resize(resize, Image.ANTIALIAS)
-                
-            try:
-                image.save(product.path)
-            except IOError as err:
-                self.log.error(u'Failed to transcode artwork %s', unicode(self))
-                self.log.debug(u'Exception raised: %s', err)
+        product = task.produce()
+        if product:
+            stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'image' ]
+            if stream: stream = stream[0]
+            else: stream = None
+            if stream:
+                image = Image.open(source.resource.path)
+                factor = None
+                if 'max length' in stream and max(image.size) > stream['max length']:
+                    factor = float(stream['max length']) / float(max(image.size))
+                    
+                elif 'min length' in stream and min(image.size) > stream['min length']:
+                    factor = float(stream['min length']) / float(min(image.size))
+                    
+                if factor is not None:
+                    resize = (int(round(image.size[0] * factor)), int(round(image.size[1] * factor)))
+                    self.log.debug(u'Resize artwork: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
+                    image = image.resize(resize, Image.ANTIALIAS)
+                    
+                try:
+                    image.save(product.path)
+                except IOError as err:
+                    self.log.error(u'Failed to transcode artwork %s', unicode(self))
+                    self.log.debug(u'Exception raised: %s', err)
     
 
 
@@ -590,8 +599,8 @@ class Matroska(AudioVideoContainer):
         AudioVideoContainer.__init__(self, asset, location)
     
     
-    def extract(self, task):
-        AudioVideoContainer.extract(self, task)
+    def explode(self, task):
+        AudioVideoContainer.explode(self, task)
         command = self.env.initialize_command('mkvextract', self.log)
         if command:
             command.extend([u'tracks', self.path ])
@@ -622,7 +631,7 @@ class Matroska(AudioVideoContainer):
                     taken = True
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
-                self.env.execute(command, message, task.job.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
 
 
@@ -642,7 +651,7 @@ class MP4(AudioVideoContainer):
         command = self.env.initialize_command('subler', self.log)
         if command:
             command.extend([u'-O', u'-o', self.path])
-            self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+            self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
     
     def update(self, task):
@@ -658,7 +667,7 @@ class MP4(AudioVideoContainer):
                     self.path,
                     u'-r'
                 ])
-                self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                 
             # Drop chapters
             message = u'Drop existing chapters in {0}'.format(self.path)
@@ -671,7 +680,7 @@ class MP4(AudioVideoContainer):
                     u'-c',
                     u'/dev/null'
                 ])
-                self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                 
         for pivot in task.transform.pivot.values():
             if pivot.location['kind'] == 'srt':
@@ -686,7 +695,7 @@ class MP4(AudioVideoContainer):
                         u'-n', stream['name'],
                         u'-a', unicode(int(round(self.meta['height'] * stream['height'])))
                     ])
-                    self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                     
             elif pivot.location['kind'] == 'png':
                 message = u'Update artwork {0} --> {1}'.format(pivot.resource.path, self.path)
@@ -697,7 +706,7 @@ class MP4(AudioVideoContainer):
                         u'-t', 
                         u'{{{0}:{1}}}'.format(u'Artwork', pivot.resource.path)
                     ])
-                    self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                     
             elif pivot.location['kind'] == 'chpl':
                 message = u'Update chapters {0} --> {1}'.format(pivot.resource.path, self.path)
@@ -709,7 +718,7 @@ class MP4(AudioVideoContainer):
                         pivot.resource.path,
                         u'-p'
                     ])
-                    self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
 
 
@@ -719,29 +728,30 @@ class RawAudio(Container):
     
     
     def transcode(self, task):
-        product = task.product[0]
-        stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'audio' ]
-        if stream: stream = stream[0]
-        else: stream = None
-        if stream:
-            
-            # Clone the hint ontology
-            product.hint = Ontology.clone(self.hint)
-            
-            command = self.env.initialize_command('ffmpeg', self.log)
-            command.append(u'-threads')
-            command.append(unicode(self.env.system['threads']))
-            command.append(u'-i')
-            command.append(self.path)
-            
-            for k,v in stream['ffmpeg parameters'].iteritems():
-                command.append(k)
-                command.append(unicode(v))
+        product = task.produce()
+        if product:
+            stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'audio' ]
+            if stream: stream = stream[0]
+            else: stream = None
+            if stream:
                 
-            command.append(product.path)
-            message = u'Transcode {0} --> {1}'.format(self.path, product.path)
-            self.env.varify_directory(product.path)
-            self.env.execute(command, message, task.job.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                # Clone the hint ontology
+                product.hint = Ontology.clone(self.hint)
+                
+                command = self.env.initialize_command('ffmpeg', self.log)
+                command.append(u'-threads')
+                command.append(unicode(self.env.system['threads']))
+                command.append(u'-i')
+                command.append(self.path)
+                
+                for k,v in stream['ffmpeg parameters'].iteritems():
+                    command.append(k)
+                    command.append(unicode(v))
+                    
+                command.append(product.path)
+                message = u'Transcode {0} --> {1}'.format(self.path, product.path)
+                self.env.varify_directory(product.path)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
 
 
@@ -783,25 +793,26 @@ class Subtitles(Text):
     
     
     def transcode(self, task):
-        product = task.product[0]
-        product.caption = self.caption
-        stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'caption' ]
-        if stream: stream = stream[0]
-        else: stream = None
-        if stream:
-            
-            for name in stream['subtitle filters']:
-                product.caption.filter(name)
+        product = task.produce()
+        if product:
+            product.caption = self.caption
+            stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'caption' ]
+            if stream: stream = stream[0]
+            else: stream = None
+            if stream:
                 
-            if 'time shift' in task.job.ontology:
-                product.caption.shift(task.job.ontology['time shift'])
-                
-            if 'time scale' in task.job.ontology:
-                product.caption.scale(task.job.ontology['time scale'])
-                
-            product.caption.normalize()
-            self.env.varify_directory(product.path)
-            product.write()
+                for name in stream['subtitle filters']:
+                    product.caption.filter(name)
+                    
+                if 'time shift' in task.ontology:
+                    product.caption.shift(task.ontology['time shift'])
+                    
+                if 'time scale' in task.ontology:
+                    product.caption.scale(task.ontology['time scale'])
+                    
+                product.caption.normalize()
+                self.env.varify_directory(product.path)
+                product.write()
     
 
 
@@ -841,21 +852,22 @@ class TableOfContent(Text):
     
     
     def transcode(self, task):
-        product = task.product[0]
-        product.menu = self.menu
-        stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'menu' ]
-        if stream: stream = stream[0]
-        else: stream = None
-        if stream:
-            
-            if 'time shift' in task.job.ontology:
-                product.menu.shift(task.job.ontology['time shift'])
+        product = task.produce()
+        if product:
+            product.menu = self.menu
+            stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'menu' ]
+            if stream: stream = stream[0]
+            else: stream = None
+            if stream:
                 
-            if 'time scale' in task.job.ontology:
-                product.menu.scale(task.job.ontology['time scale'])
-                
-            product.menu.normalize()
-            self.env.varify_directory(product.path)
-            product.write()
+                if 'time shift' in task.ontology:
+                    product.menu.shift(task.ontology['time shift'])
+                    
+                if 'time scale' in task.ontology:
+                    product.menu.scale(task.ontology['time scale'])
+                    
+                product.menu.normalize()
+                self.env.varify_directory(product.path)
+                product.write()
     
 

@@ -83,7 +83,7 @@ class Job(object):
         self.node = {
             'uuid':unicode(self.uuid),
             'start':datetime.now(),
-            'command':self.ontology.node,
+            'ontology':self.ontology.node,
             'task':[],
         }
         
@@ -165,7 +165,7 @@ class Task(object):
         self.node = {
             'uuid':unicode(self.uuid),
             'start':datetime.now(),
-            'command':self.ontology.node,
+            'ontology':self.ontology.node,
         }
     
     
@@ -183,7 +183,6 @@ class Task(object):
 class ResourceJob(Job):
     def __init__(self, queue, ontology):
         Job.__init__(self, queue, ontology)
-        self._profile = None
     
     
     def load(self):
@@ -235,7 +234,8 @@ class ResourceTask(Task):
         self.resource = None
         self.transform = None
         self.product = None
-        self._profile = None
+        self.action = None
+        self._preset = None
     
     
     @property
@@ -244,60 +244,78 @@ class ResourceTask(Task):
     
     
     @property
-    def profile(self):
-        if self._profile is None:
-            self._profile = self.env.profile[self.ontology['profile']]
-        return self._profile
-    
+    def preset(self):
+        if self._preset is None:
+            if self.ontology['preset'] in self.env.preset:
+                self._preset = self.env.preset[self.ontology['preset']]
+        return self._preset
     
     def load(self):
         Task.load(self)
-        self.resource = self.cache.find(self.location)
+        
+        if self.location:
+    
+            # Add the resource location and transform to the node 
+            self.node['origin'] = self.location.node
+            
+            self.resource = self.cache.find(self.location)
+            
+            if self.resource:
+                # if the action is defined in the preset, the preset supports the action
+                if self.ontology['action'] in self.preset['action']:
+                    
+                    # locate a method that implements the action
+                    self.action = getattr(self.resource, self.ontology['action'], None)
+                    
+                    if self.action is None:
+                        self.log.warning(u'Unknown action %s, aborting task %s', self.ontology['action'], unicode(self))
+                else:
+                    self.log.warning(u'Action %s is not defined for preset %s, aborting task %s', self.ontology['action'], self.ontology['preset'], unicode(self))
+            else:
+                self.log.debug(u'Invalid resource, aborting task %s', unicode(self))
     
     
     def unload(self):
-        if self.resource:
+        if self.action:
             
             # Mark products as volatile to make sure they are indexed
-            for p in self.product:
-                p.volatile = True
-                
+            # and add their location to the task node
+            if self.product:
+                self.node['product'] = []
+                for p in self.product:
+                    p.volatile = True
+                    self.node['product'].append(p.location.node)
+                    
             # Commit the asset 
             self.resource.asset.commit()
             
-            # Add the resource location and transform to the node 
-            self.node['origin'] = self.location.node
-            self.node['transform'] = self.transform.node
         Task.unload(self)
     
     
     def run(self):
         self.load()
-        if self.resource:
-        
-            # locate a method that implements the action
-            action = getattr(self, self.ontology['action'], None)
+        if self.action:
+            # prepare a task product
+            self.product = []
             
-            if action:
-                # prepare a task product
-                self.product = []
+            # if the action preset is not None or empty initialize the transform
+            if self.preset['action'][self.ontology['action']]:
                 
                 # ensure all resources are loaded in the asset
                 self.resource.asset.touch()
                 
                 # initialize a transform
                 self.transform = ResourceTransform(self.resource)
-                self.transform.transform(self.profile, self.ontology['action'])
-                    
-                # invoke the action
-                action()
-            else:
-               self.log.debug(u'Unknown task action %s, aborting task %s', self.ontology['action'], unicode(self))
-        else:
-            self.log.debug(u'Invalid resource, aborting task %s', unicode(self))
+                self.transform.transform(self.preset, self.ontology['action'])
+                self.node['transform'] = self.transform.node
+                
+            # invoke the action
+            self.action(self)
         self.unload()
     
-    def copy(self):
+    
+    
+    def produce(self):
         o = Ontology.clone(self.location)
         del o['volume path']
         del o['file name']
@@ -305,77 +323,13 @@ class ResourceTask(Task):
         o['host'] = self.env.host
         o['volume'] = self.ontology['volume']
         o['profile'] = self.ontology['profile']
+        if 'kind' in self.ontology:
+            o['kind'] = self.ontology['kind']
+            
         product = self.resource.asset.find(o)
-        self.product.append(product)
-        
-        self.resource.copy(self)
-    
-    
-    def delete(self):
-        self.resource.delete(self)
-    
-    
-    def move(self):
-        o = Ontology.clone(self.location)
-        del o['volume path']
-        del o['file name']
-        del o['directory']
-        o['host'] = self.env.host
-        o['volume'] = self.ontology['volume']
-        o['profile'] = self.ontology['profile']
-        product = self.resource.asset.find(o)
-        self.product.append(product)
-        
-        self.resource.move(self)
-    
-    
-    def tag(self):
-        self.resource.tag(self)
-    
-    
-    def optimize(self):
-        self.resource.optimize(self)
-    
-    
-    def extract(self):
-        self.resource.extract(self)
-    
-    def pack(self):
-        o = Ontology.clone(self.location)
-        del o['volume path']
-        del o['file name']
-        del o['directory']
-        o['host'] = self.env.host
-        o['volume'] = self.ontology['volume']
-        o['profile'] = self.ontology['profile']
-        o['kind'] = self.ontology['kind']
-        product = self.resource.asset.find(o)
-        self.product.append(product)
-        
-        self.resource.pack(self)
-    
-    
-    def transcode(self):
-        o = Ontology.clone(self.location)
-        del o['volume path']
-        del o['file name']
-        del o['directory']
-        o['host'] = self.env.host
-        o['volume'] = self.ontology['volume']
-        o['profile'] = self.ontology['profile']
-        o['kind'] = self.ontology['kind']
-        product = self.resource.asset.find(o)
-        self.product.append(product)
-        
-        self.resource.transcode(self)
-    
-    
-    def update(self):
-        self.resource.update(self)
-    
-    
-    def report(self):
-        print json.dumps(self.resource.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
+        if product:
+            self.product.append(product)
+        return product
     
 
 

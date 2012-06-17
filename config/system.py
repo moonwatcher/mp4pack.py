@@ -90,6 +90,7 @@
     'command':[
         {'name':'rsync',        'binary':u'rsync', },
         {'name':'mv',           'binary':u'mv', },
+        {'name':'rm',           'binary':u'rm', },
         {'name':'handbrake',    'binary':u'HandbrakeCLI', },
         {'name':'subler',       'binary':u'SublerCLI', },
         {'name':'mkvmerge',     'binary':u'mkvmerge', },
@@ -190,13 +191,12 @@
                 },
                 {
                     'instruction':{
-                        'name':'extract',
+                        'name':'explode',
                         'help':'Explode streams from container',
                     },
                     'argument':[
                         'scan path',
-                        'volume',
-                        'profile',
+                        'preset',
                         'inclusion',
                         'exclusion',
                         'recursive',
@@ -215,6 +215,7 @@
                         'kind',
                         'volume',
                         'profile',
+                        'preset',
                         'inclusion',
                         'exclusion',
                         'recursive',
@@ -231,6 +232,7 @@
                     },
                     'argument':[
                         'scan path',
+                        'preset',
                         'inclusion',
                         'exclusion',
                         'recursive',
@@ -263,6 +265,7 @@
                         'kind',
                         'volume',
                         'profile',
+                        'preset',
                         'inclusion',
                         'exclusion',
                         'recursive',
@@ -304,6 +307,7 @@
                         'scan path',
                         'kind',
                         'volume',
+                        'preset',
                         'profile',
                         'inclusion',
                         'exclusion',
@@ -346,6 +350,14 @@
                         'help':'Select profile',
                         'metavar':'PROFILE',
                         'dest':'profile',
+                    },
+                },
+                'preset':{
+                    'flag':['-s', '--preset'],
+                    'parameter':{ 
+                        'help':'Select preset',
+                        'metavar':'PRESET',
+                        'dest':'preset',
                     },
                 },
                 'recursive':{

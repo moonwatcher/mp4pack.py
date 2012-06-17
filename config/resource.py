@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 {
-    'default':{
-        'profile':{
+    'preset':{
+        'normal':{
+        	'description':u'Base empty profile to mirror the default profile',
             'action':{
                 'report':{},
                 'copy':{},
                 'move':{},
                 'delete':{},
-                'extract':{
+                'explode':{
                     'pivot':[
                         { 'operator':'this' },
                     ],
@@ -485,7 +486,6 @@
         },
     },
     'profile':{
-        'base':{ 'description':u'Base empty profile to mirror the default profile' },
         'normal':{},
         'clean':{},
         'original':{},

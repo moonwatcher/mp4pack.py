@@ -63,6 +63,11 @@
             'type':'int',
             'format':'byte',
         },
+        'preset':{
+            'name':u'Preset',
+            'keyword':u'Preset',
+            'type':'unicode'
+        },
         'profile':{
             'name':u'Profile',
             'keyword':u'profile',
@@ -1966,6 +1971,7 @@
                 'host':None,
                 'volume':None,
                 'profile':None,
+                'preset':None,
                 'recursive':{
                     'auto cast':False,
                 },
@@ -2014,6 +2020,7 @@
             'synonym':['keyword'],
             'element':{
                 'action':None,
+                'preset':None,
                 'domain':None,
                 'host':None,
                 'volume':None,
@@ -2066,6 +2073,7 @@
             'synonym':['keyword'],
             'element':{
                 'action':None,
+                'preset':None,
                 'domain':None,
                 'host':None,
                 'volume':None,
@@ -2095,7 +2103,7 @@
                 },
             },
             'rule':[
-                'rule.task.default.profile'
+                'rule.task.default.preset'
             ],
         },
         
@@ -2154,18 +2162,19 @@
                 'rottentomatoes movie id':None,
             },
             'rule':[
-                'rule.system.default.language',
-                'rule.knowledge.movie.imdb.trimmed',
-                'rule.medium.resource.path.digest',
-
+                'rule.system.volume.location',
+                'rule.medium.resource.track.genealogy',
                 'rule.medium.resource.filename.canonic',
                 'rule.medium.resource.directory.canonic',
                 'rule.medium.resource.path.canonic',
                 'rule.medium.resource.filename.implicit',
                 'rule.medium.resource.directory.implicit',
                 'rule.medium.resource.path.implicit',
-                'rule.system.volume.location',
+                'rule.medium.resource.path.digest',
                 'rule.medium.resource.kind.language',
+                'rule.system.default.routing',
+                'rule.system.default.language',
+                'rule.knowledge.movie.imdb.trimmed',
             ],
         },
         'ns.medium.resource.location':{
@@ -2227,12 +2236,12 @@
                 'rule.medium.resource.filename.implicit',
                 'rule.medium.resource.directory.implicit',
                 'rule.medium.resource.path.implicit',
-                'rule.medium.resource.uri',
-                'rule.medium.asset.uri',
-                'rule.medium.home.uri',
                 'rule.medium.resource.path.digest',
                 'rule.medium.resource.kind.language',
                 'rule.system.default.routing',
+                'rule.medium.resource.uri',
+                'rule.medium.asset.uri',
+                'rule.medium.home.uri',
             ],
         },
         'ns.medium.asset.location':{
@@ -3862,83 +3871,82 @@
         # rule.system.default.language
         # rule.system.volume.location
 
-        'rule.task.default.profile':{
-            'name':'Default task profile',
-            'provide':set(('profile',)),
+        'rule.task.default.preset':{
+            'name':'Default task preset',
+            'provide':set(('preset',)),
             'branch':[
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'report'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'copy'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'move'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'delete'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
-                    'equal':{'action':'extract'},
+                    'equal':{'action':'explode'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'pack'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'tag'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'optimize'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'transcode'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'update'},
                     'apply':(
-                        {'property':'profile', 'value':u'base',},
+                        {'property':'preset', 'value':u'normal',},
                     ),
                 },
             ]
         },
-        
         'rule.system.default.routing':{
             'name':'Default volume and profile',
             'provide':set(('volume', 'profile',)),
@@ -4894,26 +4902,6 @@
                         {
                             'property':'movie uri',
                             'format':u'/k/{language}/movie/{movie id}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tmdb movie id',)),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/k/{language}/movie/tmdb/{tmdb movie id}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'imdb movie id',)),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'asset uri',
-                            'format':u'/k/{language}/movie/imdb/{imdb movie id}',
                         },
                     ],
                 },
