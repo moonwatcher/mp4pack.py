@@ -192,7 +192,7 @@ class ResourceJob(Job):
         if self.ontology['scan path']:
             for path in self.ontology['scan path']:
                 if os.path.exists(path):
-                    path = os.path.realpath(os.path.abspath(os.path.expanduser(os.path.expandvars(path))))
+                    path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
                     files = self._scan_path(path, self.ontology['recursive'])
                     self.log.debug(u'Found %d files in %s', len(files), path)
                     targets.extend(files)
@@ -214,7 +214,7 @@ class ResourceJob(Job):
         if os.path.isfile(path):
             dname, fname = os.path.split(path)
             if self.filter(fname):
-                result.append(unicode(os.path.realpath(path), 'utf-8'))
+                result.append(unicode(path, 'utf-8'))
                 
         # Recursively scan decendent paths and aggregate the results
         elif (recursive or depth > 0) and os.path.isdir(path) and \

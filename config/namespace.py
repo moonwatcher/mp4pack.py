@@ -715,9 +715,9 @@
             'keyword':u'stream_id',
             'type':'int',
         },
-        'stream position':{
+        'stream kind position':{
             'name':u'Stream position',
-            'keyword':u'stream_position',
+            'keyword':u'stream_kind_position',
             'type':'int',
         },
         'stream size':{
@@ -1237,6 +1237,24 @@
             'name':u'Action',
             'keyword':u'action',
             'type':'unicode',
+        },
+        'handbrake parameters':{
+            'name':u'HandBrake parameters',
+            'keyword':u'handbrake_parameters',
+            'type':'unicode',
+            'plural':'dict',
+        },
+        'handbrake x264 settings':{
+            'name':u'HandBrake x264 settings',
+            'keyword':u'handbrake_x264_settings',
+            'type':'unicode',
+            'plural':'dict',
+        },
+        'handbrake audio encoder settings':{
+            'name':u'HandBrake audio encoder settings',
+            'keyword':u'handbrake_audio_encoder_settings',
+            'type':'unicode',
+            'plural':'dict',
         },
     },
     'enumeration':{
@@ -2060,9 +2078,6 @@
                     'auto cast':False,
                 },
             },
-            'rule':[
-                'rule.system.default.routing',
-            ],
         },
         'ns.system.task':{
             'default':{
@@ -2931,7 +2946,7 @@
                 'stream id':{
                     'mediainfo':'ID',
                 },
-                'stream position':{
+                'stream kind position':{
                     'mediainfo':'StreamKindPos',
                 },
                 'stream type':{
@@ -3002,12 +3017,14 @@
                     'mediainfo':'Encoded_Date',
                 },
                 'primary':None,
+                'handbrake audio encoder settings':None,
             },
             'rule':[
                 'rule.medium.stream.default.position',
                 'rule.medium.stream.default.id',
                 'rule.medium.stream.audio.kind',
                 'rule.system.default.enabled',
+                'rule.medium.stream.audio.name',
             ],
         },
         'ns.medium.resource.stream.video':{
@@ -3023,7 +3040,7 @@
                 'stream id':{
                     'mediainfo':'ID',
                 },
-                'stream position':{
+                'stream kind position':{
                     'mediainfo':'StreamKindPos',
                 },
                 'stream type':{
@@ -3110,13 +3127,14 @@
                 },
                 'encoder settings':{
                     'mediainfo':'Encoded_Library_Settings',
-                    'plural':'dict',
                     'plural format':'mediainfo key value list',
                 },
                 'encoded date':{
                     'mediainfo':'Encoded_Date',
                 },
                 'primary':None,
+                'handbrake parameters':None,
+                'handbrake x264 settings':None,
             },
             'rule':[
                 'rule.medium.stream.default.position',
@@ -3139,7 +3157,7 @@
                 'stream id':{
                     'mediainfo':'ID',
                 },
-                'stream position':{
+                'stream kind position':{
                     'mediainfo':'StreamKindPos',
                 },
                 'stream type':{
@@ -3197,6 +3215,7 @@
                 'rule.medium.stream.text.kind',
                 'rule.medium.stream.default.primary',
                 'rule.system.default.enabled',
+                'rule.system.default.language',
             ],
         },
         'ns.medium.resource.stream.image':{
@@ -3212,7 +3231,7 @@
                 'stream id':{
                     'mediainfo':'ID',
                 },
-                'stream position':{
+                'stream kind position':{
                     'mediainfo':'StreamKindPos',
                 },
                 'stream type':{
@@ -4716,18 +4735,18 @@
             ],
         },
         'rule.medium.stream.default.position':{
-            'name':'Default stream position',
-            'provide':set(('stream position',)),
+            'name':'Default stream kind position',
+            'provide':set(('stream kind position',)),
             'branch':[
                 {
                     'apply':[
-                        {'property':'stream position', 'value':1,},
+                        {'property':'stream kind position', 'value':1,},
                     ],
                 },
             ],
         },
         'rule.medium.stream.default.primary':{
-            'name':'Default stream position',
+            'name':'Default primary stream',
             'provide':set(('primary',)),
             'branch':[
                 {

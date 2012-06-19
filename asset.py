@@ -309,10 +309,12 @@ class Resource(object):
             if self.env.varify_path_is_available(product.path, task.ontology['overwrite']):
                 command = self.env.initialize_command('rsync', self.log)
                 if command:
-                    command.append(self.path)
+                    # Resolving the real path means the semantic 
+                    # for copy is to copy the source, not the link
+                    command.append(os.path.realpath(self.path))
                     command.append(product.path)
                     message = u'Copy ' + self.path + u' --> ' + product.path
-                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
     def move(self, task):
@@ -428,12 +430,9 @@ class AudioVideoContainer(Container):
                 
                 for stream in task.transform.single_pivot.stream:
                     if stream['stream kind'] == 'video':
-                        for flag in stream['handbrake flags']:
-                            command.append(flag)
-                            
                         for k,v in stream['handbrake parameters'].iteritems():
                             command.append(k)
-                            command.append(unicode(v))
+                            if v is not None: command.append(unicode(v))
                             
                         x264_config = []
                         for k,v in stream['handbrake x264 settings'].iteritems():
@@ -443,10 +442,9 @@ class AudioVideoContainer(Container):
                         command.append(x264_config)
                         
                     elif stream['stream kind'] == 'audio':
-                        audio_options['--audio'].append(unicode(stream['stream position']))
-                        for k,v in stream['encoder settings'].iteritems():
-                            if k not in audio_options:
-                                audio_options[k] = []
+                        audio_options['--audio'].append(unicode(stream['stream kind position']))
+                        for k,v in stream['handbrake audio encoder settings'].iteritems():
+                            if k not in audio_options: audio_options[k] = []
                             audio_options[k].append(unicode(v))
                             
                 for k,v in audio_options.iteritems():
@@ -485,7 +483,7 @@ class AudioVideoContainer(Container):
                         
                     # Iterate the tracks
                     for stream in pivot.stream:
-                        if stream['kind'] != 'menu':
+                        if stream['stream kind'] != 'menu':
                             if 'language' in stream:
                                 command.append(u'--language')
                                 command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))

@@ -170,7 +170,7 @@ class Environment(object):
         # Override the default home folder from env if specified and valid
         home = os.getenv('MPK_HOME')
         if home:
-            home = os.path.realpath(os.path.expanduser(os.path.expandvars(home)))
+            home = os.path.expanduser(os.path.expandvars(home))
             if os.path.isdir(home):
                 self.system['home'] = home
         self.system['conf'] = os.path.join(self.home, u'mpk.conf')
@@ -199,7 +199,7 @@ class Environment(object):
         
         # Load conf file from command line argument
         if 'configuration path' in self.ontology:
-            self.ontology['configuration path'] = os.path.realpath(os.path.expanduser(os.path.expandvars(self.ontology['configuration path'])))
+            self.ontology['configuration path'] = os.path.expanduser(os.path.expandvars(self.ontology['configuration path']))
             self.load_config(self.ontology['configuration path'])
             
         # Override some value from command line
@@ -560,8 +560,7 @@ class Repository(object):
         for key, volume in self.node['volume']['element'].iteritems():
             volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
         self._volume = Enumeration(self.env, self.node['volume'])
-                    
-                        
+        
         # Load routing rules
         routing = self.env.rule['rule.system.default.routing']
         for branch in self.node['routing']:

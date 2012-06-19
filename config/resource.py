@@ -121,7 +121,7 @@
                                 {
                                     'mode':'choose',
                                     'branch':[
-                                        {'stream kind':'caption'},
+                                        {'stream kind':'menu'},
                                     ],
                                 },
                             ],
@@ -196,11 +196,9 @@
                                         {'stream kind':'video'},
                                     ],
                                     'override':{
-                                        'handbrake flags':[
-                                            '--large-file',
-                                            '--loose-anamorphic',
-                                        ],
                                         'handbrake parameters':{
+                                            '--large-file':None,
+                                            '--loose-anamorphic':None,
                                             '--quality':18,
                                             '--encoder':'x264',
                                             '--maxWidth':1280,
@@ -227,7 +225,7 @@
                                         {'stream kind':'audio', 'kind':'ac3'},
                                     ],
                                     'override':{
-                                        'encoder settings':{'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'}
+                                        'handbrake audio encoder settings':{'--aencoder':'copy', '--ab':'auto', '--mixdown':'auto'}
                                     },
                                 },
                                 {
@@ -237,7 +235,7 @@
                                         {'stream kind':'audio', 'kind':'ac3'},
                                     ],
                                     'override':{
-                                        'encoder settings':{'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
+                                        'handbrake audio encoder settings':{'--aencoder':'ca_aac', '--ab':160, '--mixdown':'dpl2'}
                                     },
                                 },
                                 {
@@ -248,7 +246,7 @@
                                         {'stream kind':'audio', 'kind':'aac', 'channels':2},
                                     ],
                                     'override':{
-                                        'encoder settings':{'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
+                                        'handbrake audio encoder settings':{'--aencoder':'ca_aac', '--ab':128, '--mixdown':'stereo'}
                                     },
                                 },
                                 {
@@ -259,7 +257,7 @@
                                         {'stream kind':'audio', 'kind':'aac', 'channels':1},
                                     ],
                                     'override':{
-                                        'encoder settings':{'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
+                                        'handbrake audio encoder settings':{'--aencoder':'ca_aac', '--ab':64, '--mixdown':'mono'},
                                     },
                                 },
                             ]
