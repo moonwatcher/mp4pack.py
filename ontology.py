@@ -101,9 +101,9 @@ class Ontology(dict):
         dict.clear(self)
     
     
-    def decode(self, synonym, value):
+    def decode(self, synonym, value, axis=None):
         if synonym and value is not None:
-            k,v = self.namespace.decode(synonym, value)
+            k,v = self.namespace.decode(synonym, value, axis)
             self.__setitem__(k, v)
     
     
@@ -237,24 +237,35 @@ class Space(object):
     
     
     def find(self, key):
+        # returns an element by key
         if key is not None and key in self.element:
             return self.element[key]
         else: return None
     
     
-    def search(self, synonym):
-        if synonym is not None and synonym in self.synonym:
-            return self.synonym[synonym]
-        else: return None
+    def search(self, synonym, axis=None):
+        element = None
+        # returns an element by synonym
+        if synonym is not None and 'synonym' in self.node:
+            if axis is None:
+                for x in self.node['synonym']:
+                    if synonym in self.synonym[x]:
+                        element = self.synonym[x][synonym]
+                        break
+            elif axis in self.node['synonym'] and synonym in self.synonym[axis]:
+                element = self.synonym[axis][synonym]
+        return element
     
     
-    def parse(self, synonym):
-        element = self.search(synonym)
+    def parse(self, synonym, axis=None):
+        # returns the key by synonym
+        element = self.search(synonym, axis)
         if element is not None: return element.key
         else: return None
     
     
     def format(self, key):
+        # returns an element name by key 
         element = self.find(key)
         if element is not None: return element.name
         else: return None
@@ -281,6 +292,11 @@ class Space(object):
         self._synonym = {}
         if 'synonym' in self.node:
             for synonym in self.node['synonym']:
+                self._synonym[synonym] = {}
+                for e in self.element.values():
+                    if e.node[synonym] is not None:
+                        self._synonym[synonym][e.node[synonym]] = e
+                
                 for e in self.element.values():
                     if e.node[synonym] is not None and e.node[synonym] not in self._synonym:
                         self._synonym[e.node[synonym]] = e
@@ -339,8 +355,8 @@ class PrototypeSpace(Space):
                 self.element[prototype.key] = prototype
     
     
-    def decode(self, synonym, value):
-        prototype = self.search(synonym)
+    def decode(self, synonym, value, axis=None):
+        prototype = self.search(synonym, axis)
         if prototype:
             return (prototype.key, prototype.cast(value))
         else:

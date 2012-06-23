@@ -6,7 +6,7 @@
             'match':ur'^/h/.*$',
             'key generator':'knowledge',
             'branch':{
-                'home':{
+                'service.home':{
                     'match':[
                         {
                             'filter':ur'^/h/(?P<home_id>[0-9]+)$',
@@ -14,7 +14,7 @@
                     ],
                     'collection':'home',
                 },
-                'home.movie':{
+                'service.home.movie':{
                     'match':[
                         {
                             'filter':ur'^/h/movie/(?P<movie_id>[0-9]+)$',
@@ -72,7 +72,7 @@
                         'rottentomatoes movie id',
                     ],
                 },
-                'home.tv.show':{
+                'service.home.tv.show':{
                     'match':[
                         {
                             'filter':ur'^/h/tv/show/(?P<tv_show_id>[0-9]+)$',
@@ -120,7 +120,7 @@
                         'imdb tv show id',
                     ],
                 },
-                'home.tv.season':{
+                'service.home.tv.season':{
                     'match':[
                         {
                             'filter':ur'^/h/tv/season/(?P<disk_id>[0-9]+)$',
@@ -181,7 +181,7 @@
                         'tvdb tv season id',
                     ],
                 },
-                'home.tv.episode':{
+                'service.home.tv.episode':{
                     'match':[
                         {
                             'filter':ur'^/h/tv/episode/(?P<track_id>[0-9]+)$',
@@ -276,7 +276,7 @@
                         'imdb tv episode id',
                     ],
                 },
-                'home.music.album':{
+                'service.home.music.album':{
                     'match':[
                         {
                             'filter':ur'^/h/music/album/(?P<album_id>[0-9]+)$',
@@ -304,7 +304,7 @@
                     'key':'album id',
                     'index':['album id', 'album handle'],
                 },
-                'home.music.disk':{
+                'service.home.music.disk':{
                     'match':[
                         {
                             'filter':ur'^/h/music/disk/(?P<disk_id>[0-9]+)$',
@@ -339,7 +339,7 @@
                     'key':'disk id',
                     'index':['album id', 'disk id', 'disk position', 'album handle'],
                 },
-                'home.music.track':{
+                'service.home.music.track':{
                     'match':[
                         {
                             'filter':ur'^/h/music/track/(?P<track_id>[0-9]+)$',
@@ -381,7 +381,7 @@
                     'key':'track id',
                     'index':['album id', 'disk id', 'track id', 'disk position', 'track position', 'album handle'],
                 },
-                'home.person':{
+                'service.home.person':{
                     'match':[
                         {
                             'filter':ur'^/h/person/(?P<person_id>[0-9]+)$',
@@ -413,7 +413,7 @@
                     'key':'person id',
                     'index':['person id', 'tmdb person id'],
                 },
-                'home.company':{
+                'service.home.company':{
                     'match':[
                         {
                             'filter':ur'^/h/company/(?P<company_id>[0-9]+)$',
@@ -442,14 +442,14 @@
                     'key':'company id',
                     'index':['company id', 'tmdb company id'],
                 },
-                'home.genre':{
+                'service.home.genre':{
                     'match':[
                         {
                             'filter':ur'^/h/genre/(?P<genre_id>[0-9]+)$',
                         },
                         {
                             'filter':ur'^/h/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)$',
-                            'depend':ur'/c/tmdb/genre/{tmdb genre id}',
+                            'depend':ur'/c/{language}/tmdb/genre/{tmdb genre id}',
                         },
                     ],
                     'resolvable':[
@@ -469,8 +469,9 @@
                     ],
                     'collection':'home',
                     'key':'genre id',
+                    'index':['genre id', 'tmdb genre id'],
                 },
-                'home.job':{
+                'service.home.job':{
                     'match':[
                         {
                             'filter':ur'^/h/job/(?P<job_id>[0-9]+)$',
@@ -490,7 +491,7 @@
                     'collection':'home',
                     'key':'job id',
                 },
-                'home.department':{
+                'service.home.department':{
                     'match':[
                         {
                             'filter':ur'^/h/department/(?P<department_id>[0-9]+)$',
@@ -512,10 +513,48 @@
                 },
             },
         },
+        'medium':{
+            'match':ur'^/m/.*$',
+            'branch':{
+                'service.medium.asset':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/asset/(?P<home_id>[0-9]+)$',
+                            'depend':ur'/h/{home id}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'asset by home id',
+                            'format':ur'/m/asset/{home id}',
+                            'canonical':True,
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset',
+                },
+                'service.medium.resource':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'resource',
+                            'format':ur'/m/resource/sha1/{path digest}',
+                            'canonical':True,
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource',
+                },
+            }
+        },
         'knowledge':{
             'match':ur'^/k/.*$',
             'branch':{
-                'knowledge.configuration':{
+                'service.knowledge.configuration':{
                     'match':[
                         {
                             'filter':ur'^/k/configuration$',
@@ -531,7 +570,7 @@
                     'collection':'knowledge_configuration',
                 },
                 
-                'knowledge.playlist':{
+                'service.knowledge.playlist':{
                     'match':[
                         {
                             'filter':ur'^/k/playlist/(?P<playlist_id>[0-9]+)$',
@@ -548,7 +587,7 @@
                     'namespace':'knowledge.playlist',
                 },
                 
-                'knowledge.movie':{
+                'service.knowledge.movie':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$',
@@ -565,7 +604,7 @@
                     'namespace':'ns.knowledge.movie',
                     'index':['movie id', 'language'],
                 },
-                'knowledge.movie.cast':{
+                'service.knowledge.movie.cast':{
                     'match':[
                         {
                             'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/cast$',
@@ -581,7 +620,7 @@
                     'collection':'knowledge_movie_cast',
                     'namespace':'knowledge.movie.cast',
                 },
-                'knowledge.movie.image':{
+                'service.knowledge.movie.image':{
                     'match':[
                         {
                             'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/image$',
@@ -597,7 +636,7 @@
                     'collection':'knowledge_movie_image',
                     'namespace':'knowledge.movie.image',
                 },
-                'knowledge.movie.keyword':{
+                'service.knowledge.movie.keyword':{
                     'match':[
                         {
                             'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/keyword$',
@@ -613,7 +652,7 @@
                     'collection':'knowledge_movie_keyword',
                     'namespace':'knowledge.movie.keyword',
                 },
-                'knowledge.movie.release':{
+                'service.knowledge.movie.release':{
                     'match':[
                         {
                             'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/release$',
@@ -629,7 +668,7 @@
                     'collection':'knowledge_movie_release',
                     'namespace':'knowledge.movie.release',
                 },
-                'knowledge.movie.clip':{
+                'service.knowledge.movie.clip':{
                     'match':[
                         {
                             'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/clip$',
@@ -645,7 +684,7 @@
                     'collection':'knowledge_movie_clip',
                     'namespace':'knowledge.movie.clip',
                 },
-                'knowledge.movie.translation':{
+                'service.knowledge.movie.translation':{
                     'match':[
                         {
                             'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/translation$',
@@ -661,7 +700,7 @@
                     'collection':'knowledge_movie_translation',
                     'namespace':'knowledge.movie.translation',
                 },
-                'knowledge.movie.alternative':{
+                'service.knowledge.movie.alternative':{
                     'match':[
                         {
                             'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/alternative$',
@@ -678,7 +717,7 @@
                     'namespace':'knowledge.movie.alternative',
                 },
                 
-                'knowledge.music.album':{
+                'service.knowledge.music.album':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/music/album/(?P<album_id>[0-9]+)$',
@@ -695,7 +734,7 @@
                     'namespace':'knowledge.music.album',
                     'index':['album id', 'language'],
                 },
-                'knowledge.music.album.image':{
+                'service.knowledge.music.album.image':{
                     'match':[
                         {
                             'filter':ur'^/k/music/album/(?P<album_id>[0-9]+)/image$',
@@ -711,7 +750,7 @@
                     'collection':'knowledge_music_album_image',
                     'namespace':'knowledge.music.album.image',
                 },
-                'knowledge.music.disk':{
+                'service.knowledge.music.disk':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/music/disk/(?P<disk_id>[0-9]+)$',
@@ -735,7 +774,7 @@
                     'namespace':'knowledge.music.disk',
                     'index':['album id', 'disk id', 'disk position', 'language'],
                 },
-                'knowledge.music.track':{
+                'service.knowledge.music.track':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<track_id>[0-9]+)$',
@@ -767,7 +806,7 @@
                     'index':['album id', 'disk id', 'track id', 'disk position', 'track position', 'language'],
                 },
                 
-                'knowledge.tv.show':{
+                'service.knowledge.tv.show':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/tv/show/(?P<tv_show_id>[0-9]+)$',
@@ -784,7 +823,7 @@
                     'namespace':'ns.knowledge.tvshow.show',
                     'index':['tv show id', 'language'],
                 },
-                'knowledge.tv.show.image':{
+                'service.knowledge.tv.show.image':{
                     'match':[
                         {
                             'filter':ur'^/k/tv/show/(?P<tv_show_id>[0-9]+)/image$',
@@ -800,7 +839,7 @@
                     'collection':'knowledge_tvshow_show_image',
                     'namespace':'knowledge.tv.show.image',
                 },
-                'knowledge.tv.show.credit':{
+                'service.knowledge.tv.show.credit':{
                     'match':[
                         {
                             'filter':ur'^/k/tv/show/(?P<tv_show_id>[0-9]+)/credit$',
@@ -816,7 +855,7 @@
                     'collection':'knowledge_tvshow_show_credit',
                     'namespace':'knowledge.tv.show.credit',
                 },
-                'knowledge.tv.season':{
+                'service.knowledge.tv.season':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/tv/season/(?P<disk_id>[0-9]+)$',
@@ -840,7 +879,7 @@
                     'namespace':'ns.knowledge.tvshow.season',
                     'index':['tv show id', 'disk id', 'disk position'],
                 },
-                'knowledge.tv.season.image':{
+                'service.knowledge.tv.season.image':{
                     'match':[
                         {
                             'filter':ur'^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/image$',
@@ -856,7 +895,7 @@
                     'collection':'knowledge_tvshow_season_image',
                     'namespace':'knowledge.tv.season.image',
                 },
-                'knowledge.tv.season.credit':{
+                'service.knowledge.tv.season.credit':{
                     'match':[
                         {
                             'filter':ur'^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/credit$',
@@ -872,7 +911,7 @@
                     'collection':'knowledge_tvshow_season_credit',
                     'namespace':'knowledge.tv.season.credit',
                 },
-                'knowledge.tv.episode':{
+                'service.knowledge.tv.episode':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/tv/episode/(?P<track_id>[0-9]+)$',
@@ -903,7 +942,7 @@
                     'namespace':'ns.knowledge.tvshow.episode',
                     'index':['tv show id', 'track id', 'disk id', 'disk position', 'track position', 'language'],
                 },
-                'knowledge.tv.episode.image':{
+                'service.knowledge.tv.episode.image':{
                     'match':[
                         {
                             'filter':ur'^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)/image$',
@@ -919,7 +958,7 @@
                     'collection':'knowledge_tvshow_episode_image',
                     'namespace':'knowledge.tv.episode.image',
                 },
-                'knowledge.tv.episode.credit':{
+                'service.knowledge.tv.episode.credit':{
                     'match':[
                         {
                             'filter':ur'^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)/credit$',
@@ -936,7 +975,7 @@
                     'namespace':'knowledge.tv.episode.credit',
                 },
                 
-                'knowledge.person':{
+                'service.knowledge.person':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)$',
@@ -952,7 +991,7 @@
                     'collection':'knowledge_person',
                     'namespace':'ns.knowledge.person',
                 },
-                'knowledge.person.image':{
+                'service.knowledge.person.image':{
                     'match':[
                         {
                             'filter':ur'^/k/person/(?P<person_id>[0-9]+)/image$',
@@ -968,7 +1007,7 @@
                     'collection':'knowledge_person_image',
                     'namespace':'knowledge.person.image',
                 },
-                'knowledge.person.credit':{
+                'service.knowledge.person.credit':{
                     'match':[
                         {
                             'filter':ur'^/k/person/(?P<person_id>[0-9]+)/credit$',
@@ -984,7 +1023,7 @@
                     'collection':'knowledge_person_credit',
                     'namespace':'knowledge.person.credit',
                 },
-                'knowledge.company':{
+                'service.knowledge.company':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/company/(?P<company_id>[0-9]+)$',
@@ -1000,7 +1039,7 @@
                     'collection':'knowledge_company',
                     'namespace':'ns.knowledge.company',
                 },
-                'knowledge.company.image':{
+                'service.knowledge.company.image':{
                     'match':[
                         {
                             'filter':ur'^/k/company/(?P<company_id>[0-9]+)/image$',
@@ -1016,7 +1055,7 @@
                     'collection':'knowledge_company_image',
                     'namespace':'knowledge.company.image',
                 },
-                'knowledge.company.credit':{
+                'service.knowledge.company.credit':{
                     'match':[
                         {
                             'filter':ur'^/k/company/(?P<company_id>[0-9]+)/credit$',
@@ -1032,7 +1071,7 @@
                     'collection':'knowledge_company_credit',
                     'namespace':'knowledge.company.credit',
                 },
-                'knowledge.genre':{
+                'service.knowledge.genre':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/genre/(?P<genre_id>[0-9]+)$',
@@ -1048,7 +1087,7 @@
                     'collection':'knowledge_genre',
                     'namespace':'ns.knowledge.genre',
                 },
-                'knowledge.job':{
+                'service.knowledge.job':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/job/(?P<job_id>[0-9]+)$',
@@ -1064,7 +1103,7 @@
                     'collection':'knowledge_job',
                     'namespace':'ns.knowledge.job',
                 },
-                'knowledge.department':{
+                'service.knowledge.department':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/department/(?P<department_id>[0-9]+)$',
@@ -1082,52 +1121,13 @@
                 },
             },
         },
-        'medium':{
-            'match':ur'^/m/.*$',
-            'branch':{
-                'medium.asset':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/asset/(?P<home_id>[0-9]+)$',
-                            'depend':ur'/h/{home id}',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'asset by home id',
-                            'format':ur'/m/asset/{home id}',
-                            'canonical':True,
-                        },
-                    ],
-                    'type':'reference',
-                    'collection':'medium_asset',
-                },
-                'medium.resource':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'resource',
-                            'format':ur'/m/resource/sha1/{path digest}',
-                            'canonical':True,
-                        },
-                    ],
-                    'type':'crawl',
-                    'collection':'medium_resource',
-                },
-            }
-        },
-        
         
         'tmdb':{
             'api key':u'a8b9f96dde091408a03cb4c78477bd14',
             'remote base':u'http://api.themoviedb.org/3',
             'match':ur'^/c(?:/[a-z]{2})?/tmdb/.*$',
             'branch':{
-                'tmdb.configuration':{
+                'service.remote.tmdb.configuration':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/configuration$',
@@ -1142,10 +1142,28 @@
                         },
                     ],
                     'collection':'tmdb_configuration',
-                    'namespace':'ns.tmdb.configuration',
                     'type':'json',
                 },
-                'tmdb.movie':{
+                'service.remote.tmdb.genre':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/genre/(?P<tmdb_genre_id>[0-9]+)$',
+                            'remote':ur'genre/{tmdb genre id}?language={language}&api_key={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tmdb genre by tmdb id',
+                            'format':ur'/c/{language}/tmdb/genre/{tmdb genre id}',
+                            'canonical':True,
+                        },
+                    ],
+                    'collection':'tmdb_genre',
+                    'namespace':'ns.knowledge.genre',
+                    'type':'json',
+                    'index':['tmdb genre id'],
+                },
+                'service.remote.tmdb.movie':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)$',
@@ -1168,11 +1186,11 @@
                         }
                     ],
                     'collection':'tmdb_movie',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id', 'language', 'imdb movie id'],
                 },
-                'tmdb.movie.cast':{
+                'service.remote.tmdb.movie.cast':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast$',
@@ -1187,11 +1205,11 @@
                         },
                     ],
                     'collection':'tmdb_movie_cast',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.image':{
+                'service.remote.tmdb.movie.image':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/image$',
@@ -1206,11 +1224,11 @@
                         },
                     ],
                     'collection':'tmdb_movie_image',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.keyword':{
+                'service.remote.tmdb.movie.keyword':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/keyword$',
@@ -1225,11 +1243,11 @@
                         },
                     ],
                     'collection':'tmdb_movie_keyword',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.release':{
+                'service.remote.tmdb.movie.release':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/release$',
@@ -1244,11 +1262,11 @@
                         },
                     ],
                     'collection':'tmdb_movie_release',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.clip':{
+                'service.remote.tmdb.movie.clip':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/clip$',
@@ -1263,11 +1281,11 @@
                         },
                     ],
                     'collection':'tmdb_movie_clip',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.translation':{
+                'service.remote.tmdb.movie.translation':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/translation$',
@@ -1282,11 +1300,11 @@
                         },
                     ],
                     'collection':'tmdb_movie_translation',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.movie.alternative':{
+                'service.remote.tmdb.movie.alternative':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/alternative$',
@@ -1301,11 +1319,11 @@
                         },
                     ],
                     'collection':'tmdb_movie_alternative',
-                    'namespace':'ns.tmdb.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'tmdb.collection':{
+                'service.remote.tmdb.collection':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/collection/(?P<tmdb_collection_id>[0-9]+)$',
@@ -1320,11 +1338,11 @@
                         },
                     ],
                     'collection':'tmdb_collection',
-                    'namespace':'ns.tmdb.collection',
+                    'namespace':'ns.knowledge.collection',
                     'type':'json',
                     'index':['tmdb collection id', 'language'],
                 },
-                'tmdb.person':{
+                'service.remote.tmdb.person':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)$',
@@ -1339,14 +1357,14 @@
                         },
                     ],
                     'collection':'tmdb_person',
-                    'namespace':'ns.tmdb.person',
+                    'namespace':'ns.knowledge.person',
                     'type':'json',
                 },
-                'tmdb.person.image':{
+                'service.remote.tmdb.person.image':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/image$',
-                            'remote':ur'person/{tmdb person id}?api_key={api key}',
+                            'remote':ur'person/{tmdb person id}/images?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1357,10 +1375,10 @@
                         },
                     ],
                     'collection':'tmdb_person_image',
-                    'namespace':'ns.tmdb.person.image',
+                    'namespace':'ns.knowledge.person',
                     'type':'json',
                 },
-                'tmdb.person.credit':{
+                'service.remote.tmdb.person.credit':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/credit$',
@@ -1375,10 +1393,10 @@
                         },
                     ],
                     'collection':'tmdb_person_credit',
-                    'namespace':'ns.tmdb.person.credit',
+                    'namespace':'ns.knowledge.person',
                     'type':'json',
                 },
-                'tmdb.company':{
+                'service.remote.tmdb.company':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)$',
@@ -1393,15 +1411,15 @@
                         },
                     ],
                     'collection':'tmdb_company',
-                    'namespace':'ns.tmdb.company',
+                    'namespace':'ns.knowledge.company',
                     'type':'json',
                 },
-                'tmdb.company.credit':{
-                    #There is the issue of paging...
+                'service.remote.tmdb.company.credit':{
+                    # There is the issue of paging... page={page}&
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)/credit$',
-                            'remote':ur'company/{tmdb company id}/movies?page={page}&api_key={api key}',
+                            'remote':ur'company/{tmdb company id}/movies?api_key={api key}',
                         },
                     ],
                     'resolvable':[
@@ -1412,36 +1430,17 @@
                         },
                     ],
                     'collection':'tmdb_company_credit',
-                    'namespace':'ns.tmdb.company.credit',
+                    'namespace':'ns.tmdb.company',
                     'type':'json',
                 },
             },
-            'status codes':{
-                1:'Success.',
-                2:'Invalid service - This service does not exist.',
-                3:'Authentication failed - You do not have permissions to access the service.',
-                4:'Invalid format - This service doesn\'t exist in that format.',
-                5:'Invalid parameters - Your request parameters are incorrect.',
-                6:'Invalid id - The pre-requisite id is invalid or not found.',
-                7:'Invalid API key - You must be granted a valid key.',
-                8:'Duplicate entry - The data you tried to submit already exists.',
-                9:'Service offline - This service is temporarily offline. Try again later.',
-                10:'Suspended API key - Access to your account has been suspended, contact TMDb.',
-                11:'Internal error - Something went wrong. Contact TMDb.',
-                12:'The item/record was updated successfully.',
-                13:'The item/record was deleted successfully.',
-                14:'Authentication failed.',
-                15:'Failed.',
-                16:'Device denied.',
-                17:'Session denied.',
-            }
         },
         'tvdb':{
             'api key':u'7B3B400B0146EA83',
             'remote base':u'http://www.thetvdb.com/api',
             'match':ur'^/c(?:/[a-z]{2})?/tvdb/.*$',
             'branch':{
-                'tvdb.show':{
+                'service.remote.tvdb.show':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)$',
@@ -1458,7 +1457,7 @@
                     'produce':[
                         {
                             'tag':u'Series',
-                            'reference':'tvdb.show',
+                            'reference':'service.remote.tvdb.show',
                             'coalesce':False,
                         },
                     ],
@@ -1467,10 +1466,10 @@
                         'imdb tv show id',
                     ],
                     'collection':'tvdb_tv_show',
-                    'namespace':'ns.tvdb.show',
+                    'namespace':'ns.knowledge.tvshow.show',
                     'type':'xml',
                 },
-                'tvdb.show.cast':{
+                'service.remote.tvdb.show.cast':{
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
@@ -1487,15 +1486,15 @@
                     'produce':[
                         {
                             'tag':u'Actor',
-                            'reference':'tvdb.show.cast',
+                            'reference':'service.remote.tvdb.show.cast',
                             'coalesce':True,
                         },
                     ],
                     'collection':'tvdb_tv_show_cast',
-                    'namespace':'ns.tvdb.show.cast',
+                    'namespace':'ns.knowledge.cast',
                     'type':'xml',
                 },
-                'tvdb.show.image':{
+                'service.remote.tvdb.show.image':{
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
@@ -1512,15 +1511,15 @@
                     'produce':[
                         {
                             'tag':u'Banner',
-                            'reference':'tvdb.show.image',
+                            'reference':'service.remote.tvdb.show.image',
                             'coalesce':True,
                         },
                     ],
                     'collection':'tvdb_tv_show_image',
-                    'namespace':'ns.tvdb.show.image',
+                    'namespace':'ns.knowledge.image',
                     'type':'xml',
                 },
-                'tvdb.season':{
+                'service.remote.tvdb.season':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/season/(?P<tvdb_tv_season_id>[0-9]+)$',
@@ -1547,10 +1546,10 @@
                         'disk position',
                     ],
                     'collection':'tvdb_tv_season',
-                    'namespace':'tvdb.season',
+                    'namespace':'ns.knowledge.tvshow.season',
                     'type':'xml',
                 },
-                'tvdb.episode':{
+                'service.remote.tvdb.episode':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_episode_id>[0-9]+)$',
@@ -1582,7 +1581,7 @@
                     'produce':[
                         {
                             'tag':u'Episode',
-                            'reference':'tvdb.episode',
+                            'reference':'service.remote.tvdb.episode',
                             'coalesce':False,
                         },
                     ],
@@ -1596,10 +1595,10 @@
                         'track position',
                     ],
                     'collection':'tvdb_tv_episode',
-                    'namespace':'ns.tvdb.episode',
+                    'namespace':'ns.knowledge.tvshow.episode',
                     'type':'xml',
                 },
-                'tvdb.show.complete':{
+                'service.remote.tvdb.show.complete':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/complete$',
@@ -1609,29 +1608,29 @@
                     'produce':[
                         {
                             'tag':u'Series',
-                            'reference':'tvdb.show',
+                            'reference':'service.remote.tvdb.show',
                             'coalesce':False,
                         },
                         {
                             'tag':u'Episode',
-                            'reference':'tvdb.episode',
+                            'reference':'service.remote.tvdb.episode',
                             'coalesce':False,
                         },
                         {
                             'tag':u'Banner',
-                            'reference':'tvdb.show.image',
+                            'reference':'service.remote.tvdb.show.image',
                             'coalesce':True,
                         },
                         {
                             'tag':u'Actor',
-                            'reference':'tvdb.show.cast',
+                            'reference':'service.remote.tvdb.show.cast',
                             'coalesce':True,
                         },
                     ],
                     'type':'zip',
                 },
                 
-                'tvdb.update.daily':{
+                'service.remote.tvdb.update.daily':{
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/update/day$',
@@ -1647,7 +1646,7 @@
                     ],
                     'type':'zip',
                 },
-                'tvdb.update.weekly':{
+                'service.remote.tvdb.update.weekly':{
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/update/week$',
@@ -1663,7 +1662,7 @@
                     ],
                     'type':'zip',
                 },
-                'tvdb.update.monthly':{
+                'service.remote.tvdb.update.monthly':{
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/update/month$',
@@ -1686,7 +1685,7 @@
             'remote base':u'http://api.rottentomatoes.com/api/public/v1.0',
             'match':ur'^/c(?:/[a-z]{2})?/rottentomatoes/.*$',
             'branch':{
-                'rottentomatoes.movie':{
+                'service.remote.rottentomatoes.movie':{
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)$',
@@ -1709,11 +1708,11 @@
                         }
                     ],
                     'collection':'rottentomatoes_movie',
-                    'namespace':'ns.rottentomatoes.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['rottentomatoes movie id'],
                 },
-                'rottentomatoes.movie.cast':{
+                'service.remote.rottentomatoes.movie.cast':{
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/cast$',
@@ -1728,11 +1727,11 @@
                         },
                     ],
                     'collection':'rottentomatoes_movie_cast',
-                    'namespace':'ns.rottentomatoes.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['rottentomatoes movie id'],
                 },
-                'rottentomatoes.movie.clip':{
+                'service.remote.rottentomatoes.movie.clip':{
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
@@ -1747,11 +1746,11 @@
                         },
                     ],
                     'collection':'rottentomatoes_movie_clip',
-                    'namespace':'ns.rottentomatoes.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['rottentomatoes movie id'],
                 },
-                'rottentomatoes.movie.review':{
+                'service.remote.rottentomatoes.movie.review':{
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
@@ -1766,11 +1765,11 @@
                         },
                     ],
                     'collection':'rottentomatoes_movie_review',
-                    'namespace':'ns.rottentomatoes.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['rottentomatoes movie id'],
                 },
-                'rottentomatoes.movie.similar':{
+                'service.remote.rottentomatoes.movie.similar':{
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/similar$',
@@ -1785,7 +1784,7 @@
                         },
                     ],
                     'collection':'rottentomatoes_movie_similar',
-                    'namespace':'ns.rottentomatoes.movie',
+                    'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['rottentomatoes movie id'],
                 },

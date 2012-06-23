@@ -51,7 +51,7 @@ class TMDbHandler(ResourceHandler):
                     'branch':query['branch'],
                     'record':{
                         u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
-                        u'body':document,
+                        u'body':{ u'original':document },
                     }
                 }
                 
@@ -64,6 +64,11 @@ class TMDbHandler(ResourceHandler):
                         if prototype and prototype.node['tmdb'] in document:
                             entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['tmdb']])
                             
+                # make a caonical node
+                canonical = Ontology(self.env, entry['branch']['namespace'])
+                for k,v in document.iteritems():
+                    canonical.decode(k,v, 'tmdb')
+                entry['record']['body']['canonical'] = canonical.node
                 query['result'].append(entry)
     
 

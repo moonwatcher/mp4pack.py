@@ -105,7 +105,7 @@ def main():
     node['job'].append(job.node)
     node['end'] = datetime.now()
     node['duration'] = unicode(node['end'] - node['start'])
-    sys.stderr.write(json.dumps(node, sort_keys=True, indent=4,  default=env.default_json_handler))
+    #sys.stderr.write(json.dumps(node, sort_keys=True, indent=4,  default=env.default_json_handler))
 
 
 if __name__ == '__main__':

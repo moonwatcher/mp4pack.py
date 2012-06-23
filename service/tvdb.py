@@ -95,7 +95,7 @@ class TVDbHandler(ResourceHandler):
                         for node in element.findall(product['tag']):
                             o = Ontology(self.env, product['branch']['namespace'])
                             for item in node.getchildren():
-                                o.decode(item.tag, item.text)
+                                o.decode(item.tag, item.text, 'tvdb')
                             entry['record'][u'body'].append(o.node)
                             
                         if entry['record'][u'body']:
@@ -108,7 +108,7 @@ class TVDbHandler(ResourceHandler):
                             # Decode concepts from the element and populate the ontology
                             o = Ontology(self.env, product['branch']['namespace'])
                             for item in node.getchildren():
-                                o.decode(item.tag, item.text)
+                                o.decode(item.tag, item.text, 'tvdb')
                                 
                             entry = {
                                 'branch':product['branch'],
@@ -129,7 +129,7 @@ class TVDbHandler(ResourceHandler):
                         # TVDB does not explicitly define a tv season, however, it does assign it an id.
                         # When processing episodes we need to deduce the existence of a season
                         # The season record will be created before the episodes
-                        if batch and product['branch']['name'] == 'tvdb.episode':
+                        if batch and product['branch']['name'] == 'service.remote.tvdb.episode':
                             seasons = {}
                             for entry in batch:
                                 o = entry['record'][u'body']
@@ -143,7 +143,7 @@ class TVDbHandler(ResourceHandler):
                             for genealogy in seasons.values():
                                 query['result'].append(
                                     {
-                                        'branch':self.branch['tvdb.season'],
+                                        'branch':self.branch['service.remote.tvdb.season'],
                                         'record':{
                                             u'head':{ u'genealogy':genealogy },
                                         }

@@ -336,7 +336,7 @@ class ResourceTask(Task):
             if 'language' in override:
                 o['language'] = override['language']
         
-        # try to produce a new resource
+        # try to produce the resource
         product = self.resource.asset.find(o)
         if product:
             self.product.append(product)
