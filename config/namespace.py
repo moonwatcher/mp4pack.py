@@ -1698,6 +1698,21 @@
                 'description':{
                     'tmdb':'overview',
                 },
+                'backdrop url':{
+                    'tmdb':'backdrop_path',
+                },
+                'genres':{
+                    'tmdb':'genres',
+                },
+                'production companies':{
+                    'tmdb':'production_companies',
+                },
+                'backdrops':{
+                    'tmdb':'backdrops',
+                },
+                'posters':{
+                    'tmdb':'posters',
+                },                
             },
         },
         'ns.knowledge.tvshow.show':{

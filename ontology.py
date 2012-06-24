@@ -107,6 +107,10 @@ class Ontology(dict):
             self.__setitem__(k, v)
     
     
+    def decode_all(self, mapping, axis=None):
+        for k,v in mapping.iteritems():
+            self.decode(k,v, axis)
+    
     def _resolve(self, key):
         if not dict.__contains__(self, key):
             if key in self.namespace.deduction.dependency:
@@ -610,6 +614,9 @@ class Prototype(Element):
                     
             if literals:
                 result = [ caster(l) for l in literals ]
+        else:
+            result = [ caster(v) for v in value ]
+            
         if result:
             result = [ v for v in result if v is not None ]
         if not result:
@@ -636,6 +643,11 @@ class Prototype(Element):
         return result
     
     
+    def _cast_embed(self, value):
+        result = Ontology(self.env, self.node['namespace'])
+        result.decode_all(value)
+        return result
+        
     def _remove_accents(self, value):
         result = None
         if value:

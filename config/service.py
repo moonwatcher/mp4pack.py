@@ -1430,7 +1430,7 @@
                         },
                     ],
                     'collection':'tmdb_company_credit',
-                    'namespace':'ns.tmdb.company',
+                    'namespace':'ns.knowledge.company',
                     'type':'json',
                 },
             },
@@ -1629,7 +1629,6 @@
                     ],
                     'type':'zip',
                 },
-                
                 'service.remote.tvdb.update.daily':{
                     'match':[
                         {

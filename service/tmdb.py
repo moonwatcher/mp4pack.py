@@ -66,8 +66,7 @@ class TMDbHandler(ResourceHandler):
                             
                 # make a caonical node
                 canonical = Ontology(self.env, entry['branch']['namespace'])
-                for k,v in document.iteritems():
-                    canonical.decode(k,v, 'tmdb')
+                canonical.decode_all(document, 'tmdb')
                 entry['record']['body']['canonical'] = canonical.node
                 query['result'].append(entry)
     

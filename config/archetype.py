@@ -2,6 +2,49 @@
 
 {
     'archetype':{
+        'genres':{
+            'name':'Genres',
+            'keyword':'genres',
+            'type':'embed',
+            'namespace':'ns.knowledge.genre',
+            'plural':'list',
+        },
+        'production companies':{
+            'name':'Production companies',
+            'keyword':'production_companies',
+            'type':'embed',
+            'namespace':'ns.knowledge.company',
+            'plural':'list',
+        },
+        'production countries':{
+            'name':'Production countries',
+            'keyword':'production_countries',
+            'type':'embed',
+            'namespace':'ns.knowledge.country',
+            'plural':'list',
+        },
+        'spoken languages':{
+            'name':'Spoken languages',
+            'keyword':'spoken_languages',
+            'type':'embed',
+            'namespace':'ns.knowledge.languages',
+            'plural':'list',
+        },
+        'backdrops':{
+            'name':'Backdrops',
+            'keyword':'backdrops',
+            'type':'embed',
+            'namespace':'ns.knowledge.image',
+            'plural':'list',
+        },
+        'posters':{
+            'name':'Posters',
+            'keyword':'posters',
+            'type':'embed',
+            'namespace':'ns.knowledge.image',
+            'plural':'list',
+        },
+        
         'character encoding':{
             'name':u'Character encoding',
             'keyword':u'character_encoding',
