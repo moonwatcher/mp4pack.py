@@ -820,7 +820,7 @@
                     ],
                     'type':'json',
                     'collection':'knowledge_tvshow_show',
-                    'namespace':'ns.knowledge.tvshow.show',
+                    'namespace':'ns.knowledge.tv.show',
                     'index':['tv show id', 'language'],
                 },
                 'service.knowledge.tv.show.image':{
@@ -876,7 +876,7 @@
                     ],
                     'type':'json',
                     'collection':'knowledge_tvshow_season',
-                    'namespace':'ns.knowledge.tvshow.season',
+                    'namespace':'ns.knowledge.tv.season',
                     'index':['tv show id', 'disk id', 'disk position'],
                 },
                 'service.knowledge.tv.season.image':{
@@ -939,7 +939,7 @@
                     ],
                     'type':'json',
                     'collection':'knowledge_tvshow_episode',
-                    'namespace':'ns.knowledge.tvshow.episode',
+                    'namespace':'ns.knowledge.tv.episode',
                     'index':['tv show id', 'track id', 'disk id', 'disk position', 'track position', 'language'],
                 },
                 'service.knowledge.tv.episode.image':{
@@ -1466,7 +1466,7 @@
                         'imdb tv show id',
                     ],
                     'collection':'tvdb_tv_show',
-                    'namespace':'ns.knowledge.tvshow.show',
+                    'namespace':'ns.knowledge.tv.show',
                     'type':'xml',
                 },
                 'service.remote.tvdb.show.cast':{
@@ -1546,7 +1546,7 @@
                         'disk position',
                     ],
                     'collection':'tvdb_tv_season',
-                    'namespace':'ns.knowledge.tvshow.season',
+                    'namespace':'ns.knowledge.tv.season',
                     'type':'xml',
                 },
                 'service.remote.tvdb.episode':{
@@ -1595,7 +1595,7 @@
                         'track position',
                     ],
                     'collection':'tvdb_tv_episode',
-                    'namespace':'ns.knowledge.tvshow.episode',
+                    'namespace':'ns.knowledge.tv.episode',
                     'type':'xml',
                 },
                 'service.remote.tvdb.show.complete':{
@@ -1676,6 +1676,128 @@
                         },
                     ],
                     'type':'zip',
+                },
+            },
+        },
+        'itunes':{
+            'remote base':u'http://itunes.apple.com',
+            'match':ur'^/c(?:/[a-z]{2})?/itunes/.*$',
+            'branch':{
+                'service.remote.itunes.movie':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/movie/(?P<itunes_movie_id>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes movie id}&entity=movie',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':'itunes movie by itunes id',
+                            'format':ur'/c/itunes/movie/{itunes movie id}',
+                            'canonical':True,
+                        },
+                    ],
+                    'collection':'itunes_movie',
+                    'namespace':'ns.knowledge.movie',
+                    'type':'json',
+                    'index':['itunes movie id'],
+                },
+                'service.remote.itunes.person':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/person/(?P<itunes_person_id>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes person id}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'itunes person by itunes id',
+                            'format':ur'/c/itunes/person/{itunes movie id}',
+                            'canonical':True,
+                        },
+                    ],
+                    'collection':'itunes_person',
+                    'namespace':'ns.knowledge.person',
+                    'type':'json',
+                    'index':['itunes person id'],
+                },
+                'service.remote.itunes.show':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/show/(?P<itunes_tv_show_id>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes tv show id}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':'itunes tv show by itunes id',
+                            'format':ur'/c/itunes/show/{itunes tv show id}',
+                            'canonical':True,
+                        },
+                    ],
+                    'collection':'itunes_tv_show',
+                    'namespace':'ns.knowledge.tv.show',
+                    'type':'json',
+                    'index':['itunes tv show id'],
+                },
+                'service.remote.itunes.season':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/season/(?P<itunes_tv_season_id>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes tv season id}',
+                        },
+                        {
+                            'filter':ur'^/c/itunes/season/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':'itunes tv season by itunes id',
+                            'format':ur'/c/itunes/season/{itunes tv season id}',
+                            'canonical':True,
+                        },
+                        {
+                            'name':'itunes tv season by itunes show id',
+                            'format':ur'/c/itunes/season/{itunes tv show id}/{disk position}',
+                        },
+                    ],
+                    'collection':'itunes_tv_season',
+                    'namespace':'ns.knowledge.tv.season',
+                    'type':'json',
+                    'index':['itunes tv show id', 'itunes tv season id', 'disk position'],
+                },
+                'service.remote.itunes.episode':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/episode/(?P<itunes_tv_episode_id>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes tv episode id}',
+                        },
+                        {
+                            'filter':ur'^/c/itunes/episode/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                        {
+                            'filter':ur'^/c/itunes/episode/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':'itunes tv episode by itunes id',
+                            'format':ur'/c/itunes/episode/{itunes tv episode id}',
+                            'canonical':True,
+                        },
+                        {
+                            'name':'itunes tv episode by itunes season id',
+                            'format':ur'/c/itunes/episode/{itunes tv season id}/{track position}',
+                        },
+                        {
+                            'name':'itunes tv episode by itunes show id',
+                            'format':ur'/c/itunes/episode/{itunes tv show id}/{disk position}/{track position}',
+                        },
+                    ],
+                    'collection':'itunes_tv_episode',
+                    'namespace':'ns.knowledge.tv.episode',
+                    'type':'json',
+                    'index':['itunes tv show id', 'itunes tv season id', 'itunes tv episode id', 'disk position', 'track position'],
                 },
             },
         },

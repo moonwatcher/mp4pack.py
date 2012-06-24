@@ -223,6 +223,11 @@
                 'tvdb tv season id':None,
                 'tvdb tv episode id':None,
                 'rottentomatoes movie id':None,
+                'itunes person id':None,
+                'itunes movie id':None,
+                'itunes tv show id':None,
+                'itunes tv season id':None,
+                'itunes tv episode id':None,
             },
             'rule':[
                 'rule.system.volume.location',
@@ -282,6 +287,11 @@
                 'tvdb tv season id':None,
                 'tvdb tv episode id':None,
                 'rottentomatoes movie id':None,
+                'itunes person id':None,
+                'itunes movie id':None,
+                'itunes tv show id':None,
+                'itunes tv season id':None,
+                'itunes tv episode id':None,
                 'name':None,
                 'simple name':None,
                 'track genealogy':None,
@@ -339,6 +349,11 @@
                 'tvdb tv season id':None,
                 'tvdb tv episode id':None,
                 'rottentomatoes movie id':None,
+                'itunes person id':None,
+                'itunes movie id':None,
+                'itunes tv show id':None,
+                'itunes tv season id':None,
+                'itunes tv episode id':None,
                 'name':None,
                 'simple name':None,
                 'asset uri':None,
@@ -383,6 +398,11 @@
                 'tvdb tv season id':None,
                 'tvdb tv episode id':None,
                 'rottentomatoes movie id':None,
+                'itunes person id':None,
+                'itunes movie id':None,
+                'itunes tv show id':None,
+                'itunes tv season id':None,
+                'itunes tv episode id':None,
                 'name':None,
             },
             'rule':[
@@ -1619,9 +1639,12 @@
                 'auto cast':True,
                 'tmdb':None,
             },
-            'synonym':['keyword', 'tmdb'],
+            'synonym':['keyword', 'tmdb', 'itunes'],
             'element':{
                 'person id':None,
+                'itunes person id':{
+                    'itunes':'artistId',
+                },                
                 'tmdb person id':{
                     'tmdb':'id',
                 },
@@ -1745,10 +1768,14 @@
                 'auto cast':True,
                 'tmdb':None,
                 'rottentomatoes':None,
+                'itunes':None,
             },
-            'synonym':['keyword','tmdb', 'rottentomatoes'],
+            'synonym':['keyword','tmdb', 'rottentomatoes', 'itunes'],
             'element':{
                 'movie id':None,
+                'itunes movie id':{
+                    'itunes':'trackId',
+                },
                 'tmdb movie id':{
                     'tmdb':'id',
                 },
@@ -1791,6 +1818,7 @@
                 },
                 'release date':{
                     'tmdb':u'release_date',
+                    'rottentomatoes':u'release_date',
                 },
                 'description':{
                     'tmdb':'overview',
@@ -1847,19 +1875,26 @@
                 'reviews':{
                     'rottentomatoes':'reviews',
                 },
+                'rating':{
+                    'rottentomatoes':'mpaa_rating',
+                },
             },
         },
-        'ns.knowledge.tvshow.show':{
+        'ns.knowledge.tv.show':{
             'default':{
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
                 'tvdb':None,
                 'keyword':None,
+                'itunes':None,
             },
-            'synonym':['tvdb', 'keyword'],
+            'synonym':['tvdb', 'keyword', 'itunes'],
             'element':{
                 'tv show id':None,
+                'itunes tv show id':{
+                    'itunes':'artistId',
+                },
                 'tvdb tv show id':{
                     'tvdb':'id',
                 },
@@ -1936,18 +1971,25 @@
                 },
             },
         },
-        'ns.knowledge.tvshow.season':{
+        'ns.knowledge.tv.season':{
             'default':{
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
                 'tvdb':None,
                 'keyword':None,
+                'itunes':None,
             },
-            'synonym':['tvdb', 'keyword'],
+            'synonym':['tvdb', 'keyword', 'itunes'],
             'element':{
                 'tv show id':None,
                 'tv season':None,
+                'itunes tv show id':{
+                    'itunes':'artistId',
+                },
+                'itunes tv season id':{
+                    'itunes':'collectionId',
+                },
                 'tvdb tv show id':{
                     'tvdb':'seriesid',
                 },
@@ -1962,19 +2004,29 @@
                 },
             },
         },
-        'ns.knowledge.tvshow.episode':{
+        'ns.knowledge.tv.episode':{
             'default':{
                 'auto cast':True,
                 'plural':None,
                 'unescape xml':False,
                 'tvdb':None,
                 'keyword':None,
+                'itunes':None,
             },
-            'synonym':['tvdb', 'keyword'],
+            'synonym':['tvdb', 'keyword', 'itunes'],
             'element':{
                 'tv show id':None,
                 'tv season':None,
                 'tv episode':None,
+                'itunes tv show id':{
+                    'itunes':'artistId',
+                },
+                'itunes tv season id':{
+                    'itunes':'collectionId',
+                },
+                'itunes tv episode id':{
+                    'itunes':'trackId',
+                },    
                 'tvdb tv show id':{
                     'tvdb':'seriesid',
                 },

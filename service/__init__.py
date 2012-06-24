@@ -21,6 +21,9 @@ class Resolver(object):
         from tmdb import TMDbHandler
         self.handlers['tmdb'] = TMDbHandler(self, self.env.service['tmdb'])
         
+        from itunes import iTunesHandler
+        self.handlers['itunes'] = iTunesHandler(self, self.env.service['itunes'])
+        
         from tvdb import TVDbHandler
         self.handlers['tvdb'] = TVDbHandler(self, self.env.service['tvdb'])
         

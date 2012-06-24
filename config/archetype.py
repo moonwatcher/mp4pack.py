@@ -2,6 +2,31 @@
 
 {
     'archetype':{
+        'itunes person id':{
+            'name':u'iTunes person ID',
+            'keyword':u'itunes_person_id',
+            'type':'int',
+        },
+        'itunes movie id':{
+            'name':u'iTunes movie ID',
+            'keyword':u'itunes_movie_id',
+            'type':'int',
+        },
+        'itunes tv show id':{
+            'name':u'iTunes TV show ID',
+            'keyword':u'itunes_tv_show_id',
+            'type':'int',
+        },
+        'itunes tv season id':{
+            'name':u'iTunes TV season ID',
+            'keyword':u'itunes_tv_season_id',
+            'type':'int',
+        },
+        'itunes tv episode id':{
+            'name':u'iTunes TV episode ID',
+            'keyword':u'itunes_tv_episode_id',
+            'type':'int',
+        },    
         'genres':{
             'name':'Genres',
             'keyword':'genres',
