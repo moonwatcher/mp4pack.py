@@ -362,7 +362,7 @@ class PrototypeSpace(Space):
     def decode(self, synonym, value, axis=None):
         prototype = self.search(synonym, axis)
         if prototype:
-            return (prototype.key, prototype.cast(value))
+            return (prototype.key, prototype.cast(value, axis))
         else:
             return (None, None)
     
@@ -388,7 +388,7 @@ class Prototype(Element):
             self.node['type'] = 'unicode'
             
         # find the cast and format functions
-        c = getattr(self, '_cast_{0}'.format(self.node['type']), None) or (lambda x: x)
+        c = getattr(self, '_cast_{0}'.format(self.node['type']), None) or (lambda x,y: x)
         f = getattr(self, '_format_{0}'.format(self.node['type']), None) or (lambda x: x)
         
         if not self.node['plural']:
@@ -397,13 +397,13 @@ class Prototype(Element):
         else:
             if self.node['plural'] == 'list':
                 self._format = lambda x: self._format_list(x, f)
-                self._cast = lambda x: self._cast_list(x, c)
+                self._cast = lambda x,y: self._cast_list(x, c, y)
             elif self.node['plural'] == 'dict':
                 self._format = lambda x: self._format_dict(x, f)
-                self._cast = lambda x: self._cast_dict(x, c)
+                self._cast = lambda x,y: self._cast_dict(x, c, y)
                 
         if not self.node['auto cast']:
-            self._cast = lambda x: x
+            self._cast = lambda x,y: x
     
     
     @property
@@ -411,9 +411,9 @@ class Prototype(Element):
         return self.node['keyword']
     
     
-    def cast(self, value):
+    def cast(self, value, axis=None):
         if value is not None:
-            return self._cast(value)
+            return self._cast(value, axis)
         else:
             return None
     
@@ -521,11 +521,11 @@ class Prototype(Element):
         return value
     
     
-    def _cast_enum(self, value):
+    def _cast_enum(self, value, axis=None):
         return self.env.enumeration[self.node['enumeration']].parse(value)
     
     
-    def _cast_int(self, value):
+    def _cast_int(self, value, axis=None):
         result = None
         try:
             result = int(value)
@@ -534,7 +534,7 @@ class Prototype(Element):
         return result
     
     
-    def _cast_float(self, value):
+    def _cast_float(self, value, axis=None):
         result = None
         try:
             result = float(value)
@@ -543,7 +543,7 @@ class Prototype(Element):
         return result
     
     
-    def _cast_unicode(self, value):
+    def _cast_unicode(self, value, axis=None):
         result = unicode(value.strip())
         if not result:
             result = None
@@ -554,7 +554,7 @@ class Prototype(Element):
         return result
     
     
-    def _cast_date(self, value):
+    def _cast_date(self, value, axis=None):
         result = None
         if 'format' in self.node and self.node['format'] == 'unix time':
             result = self._cast_int(value)
@@ -580,14 +580,14 @@ class Prototype(Element):
         return result
     
     
-    def _cast_bool(self, value):
+    def _cast_bool(self, value, axis=None):
         result = False
         if self.env.expression['true value'].search(value) is not None:
             result = True
         return result
     
     
-    def _cast_plist(self, value):
+    def _cast_plist(self, value, axis=None):
         # Clean and parse plist into a dictionary
         result = value.replace(u'&quot;', u'"')
         result = self.env.expression['clean xml'].sub(u'', result).strip()
@@ -595,7 +595,7 @@ class Prototype(Element):
         return result
     
     
-    def _cast_list(self, value, caster):
+    def _cast_list(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
             literals = None
@@ -613,9 +613,9 @@ class Prototype(Element):
                     literals = value.split(u'|')
                     
             if literals:
-                result = [ caster(l) for l in literals ]
+                result = [ caster(l, axis) for l in literals ]
         else:
-            result = [ caster(v) for v in value ]
+            result = [ caster(v, axis) for v in value ]
             
         if result:
             result = [ v for v in result if v is not None ]
@@ -624,7 +624,7 @@ class Prototype(Element):
         return result
     
     
-    def _cast_dict(self, value, caster):
+    def _cast_dict(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
             if self.node['plural format'] == 'mediainfo key value list':
@@ -634,7 +634,7 @@ class Prototype(Element):
                     for literal in literals:
                         pair = literal.split(u'=')
                         if len(pair) == 2:
-                            result[pair[0].strip()] = caster(pair[1])
+                            result[pair[0].strip()] = caster(pair[1], axis)
                 else:
                     self.log.error(u'Could not parse dictionary %s', value)
                     result = None
@@ -643,9 +643,9 @@ class Prototype(Element):
         return result
     
     
-    def _cast_embed(self, value):
+    def _cast_embed(self, value, axis=None):
         result = Ontology(self.env, self.node['namespace'])
-        result.decode_all(value)
+        result.decode_all(value, axis)
         return result
         
     def _remove_accents(self, value):
