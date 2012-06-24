@@ -44,7 +44,116 @@
             'namespace':'ns.knowledge.image',
             'plural':'list',
         },
-        
+        'profiles':{
+            'name':'Profiles',
+            'keyword':'profiles',
+            'type':'embed',
+            'namespace':'ns.knowledge.image',
+            'plural':'list',
+        },
+        'belongs to collection':{
+            'name':'Belongs to collection',
+            'keyword':'belongs_to_collection',
+            'type':'embed',
+            'namespace':'ns.knowledge.collection',
+        },
+        'cast':{
+            'name':'Cast',
+            'keyword':'cast',
+            'type':'embed',
+            'namespace':'ns.knowledge.cast',
+            'plural':'list',
+        },
+        'crew':{
+            'name':'Crew',
+            'keyword':'crew',
+            'type':'embed',
+            'namespace':'ns.knowledge.cast',
+            'plural':'list',
+        },
+        'movies':{
+            'name':'Movies',
+            'keyword':'movies',
+            'type':'embed',
+            'namespace':'ns.knowledge.movie',
+            'plural':'list',
+        },
+        'certifications':{
+            'name':'Certification',
+            'keyword':'certification',
+            'type':'embed',
+            'namespace':'ns.knowledge.rating',
+            'plural':'list',
+        },
+        'titles':{
+            'name':'Titles',
+            'keyword':'titles',
+            'type':'embed',
+            'namespace':'ns.knowledge.title',
+            'plural':'list',
+        },
+        'reviews':{
+            'name':'Reviews',
+            'keyword':'reviews',
+            'type':'embed',
+            'namespace':'ns.knowledge.review',
+            'plural':'list',
+        },
+        'critics consensus':{
+            'name':u'Critics consensus',
+            'keyword':u'critics_consensus',
+            'type':'unicode',
+        },
+        'audience rating':{
+            'name':u'Audience rating',
+            'keyword':u'audience_rating',
+            'type':'unicode',
+        },
+        'critics rating':{
+            'name':u'Critics rating',
+            'keyword':u'critics_rating',
+            'type':'unicode',
+        },
+        'audience score':{
+            'name':u'Audience score',
+            'keyword':u'audience_score',
+            'type':'int',
+        },
+        'critics score':{
+            'name':u'Critics score',
+            'keyword':u'critics_score',
+            'type':'int',
+        },
+        'critic name':{
+            'name':u'Critic name',
+            'keyword':u'critic_name',
+            'type':'unicode',
+        },
+        'freshness':{
+            'name':u'Freshness',
+            'keyword':u'freshness',
+            'type':'unicode',
+        },
+        'original critic score':{
+            'name':u'Original critic score',
+            'keyword':u'original critic score',
+            'type':'unicode',
+        },
+        'review publication':{
+            'name':u'Review publication',
+            'keyword':u'review_publication',
+            'type':'unicode',
+        },
+        'review quote':{
+            'name':u'Review quote',
+            'keyword':u'review_quote',
+            'type':'unicode',
+        },
+        'review url':{
+            'name':u'Review url',
+            'keyword':u'review_url',
+            'type':'unicode',
+        },
         'character encoding':{
             'name':u'Character encoding',
             'keyword':u'character_encoding',
@@ -675,10 +784,10 @@
             'type':'plist',
             'atom':'iTunMOVI',
         },
-        'cast':{
-            'name':u'Cast',
+        'actors':{
+            'name':u'Actors',
             'type':'unicode',
-            'keyword':u'cast',
+            'keyword':u'actors',
             'plural':'list',
         },
         'directors':{

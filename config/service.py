@@ -1247,21 +1247,21 @@
                     'type':'json',
                     'index':['tmdb movie id'],
                 },
-                'service.remote.tmdb.movie.release':{
+                'service.remote.tmdb.movie.rating':{
                     'match':[
                         {
-                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/release$',
+                            'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/rating$',
                             'remote':ur'movie/{tmdb movie id}/releases?api_key={api key}',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'tmdb movie release by tmdb id',
-                            'format':ur'/c/tmdb/movie/{tmdb movie id}/release',
+                            'format':ur'/c/tmdb/movie/{tmdb movie id}/rating',
                             'canonical':True,
                         },
                     ],
-                    'collection':'tmdb_movie_release',
+                    'collection':'tmdb_movie_rating',
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['tmdb movie id'],
@@ -1709,6 +1709,25 @@
                     'collection':'rottentomatoes_movie',
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
+                    'index':['rottentomatoes movie id', 'imdb movie id'],
+                },
+                'service.remote.rottentomatoes.movie.review':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/review$',
+                            'remote':ur'movies/{rottentomatoes movie id}/reviews.json?review_type=top_critic&apikey={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'rotten tomatoes movie review by rottentomatoes movie id',
+                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/review',
+                            'canonical':True,
+                        },
+                    ],
+                    'collection':'rottentomatoes_movie_review',
+                    'namespace':'ns.knowledge.movie',
+                    'type':'json',
                     'index':['rottentomatoes movie id'],
                 },
                 'service.remote.rottentomatoes.movie.cast':{
@@ -1730,44 +1749,7 @@
                     'type':'json',
                     'index':['rottentomatoes movie id'],
                 },
-                'service.remote.rottentomatoes.movie.clip':{
-                    'match':[
-                        {
-                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
-                            'remote':ur'movies/{rottentomatoes movie id}/clips.json?apikey={api key}',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'rotten tomatoes movie clip by rottentomatoes movie id',
-                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/clip',
-                            'canonical':True,
-                        },
-                    ],
-                    'collection':'rottentomatoes_movie_clip',
-                    'namespace':'ns.knowledge.movie',
-                    'type':'json',
-                    'index':['rottentomatoes movie id'],
-                },
-                'service.remote.rottentomatoes.movie.review':{
-                    'match':[
-                        {
-                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
-                            'remote':ur'movies/{rottentomatoes movie id}/reviews.json?review_type=top_critic&apikey={api key}',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'rotten tomatoes movie review by rottentomatoes movie id',
-                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/review',
-                            'canonical':True,
-                        },
-                    ],
-                    'collection':'rottentomatoes_movie_review',
-                    'namespace':'ns.knowledge.movie',
-                    'type':'json',
-                    'index':['rottentomatoes movie id'],
-                },
+                
                 'service.remote.rottentomatoes.movie.similar':{
                     'match':[
                         {
@@ -1783,6 +1765,25 @@
                         },
                     ],
                     'collection':'rottentomatoes_movie_similar',
+                    'namespace':'ns.knowledge.movie',
+                    'type':'json',
+                    'index':['rottentomatoes movie id'],
+                },
+                'service.remote.rottentomatoes.movie.clip':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
+                            'remote':ur'movies/{rottentomatoes movie id}/clips.json?apikey={api key}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'rotten tomatoes movie clip by rottentomatoes movie id',
+                            'format':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}/clip',
+                            'canonical':True,
+                        },
+                    ],
+                    'collection':'rottentomatoes_movie_clip',
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['rottentomatoes movie id'],

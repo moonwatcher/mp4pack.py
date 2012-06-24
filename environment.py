@@ -165,6 +165,7 @@ class Environment(object):
         self.load_config(os.path.join(relative,'config/system.py'))
         self.load_config(os.path.join(relative,'config/enumeration.py'))
         self.load_config(os.path.join(relative,'config/archetype.py'))
+        self.load_config(os.path.join(relative,'config/rule.py'))
         self.load_config(os.path.join(relative,'config/namespace.py'))
         self.load_config(os.path.join(relative,'config/service.py'))
         self.load_config(os.path.join(relative,'config/resource.py'))

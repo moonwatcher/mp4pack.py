@@ -51,14 +51,19 @@ class RottenTomatoesHandler(ResourceHandler):
                     'branch':query['branch'],
                     'record':{
                         u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
-                        u'body':document,
+                        u'body':{ u'original':document },
                     }
                 }
                 
                 # Rotten tomatoes holds the imdb id without the tt prefix, inside the alternate_ids dictionary
-                # This is a unique case so we handle it separately 
-                if 'alternate_ids' in document and 'imdb' in document['alternate_ids'] and document['alternate_ids']['imdb']:
-                    entry['record'][u'head'][u'genealogy'][u'imdb movie id'] = u'tt{0}'.format(document['alternate_ids']['imdb'])
+                if entry['branch']['name'] == 'service.remote.rottentomatoes.movie' and 'alternate_ids' in document \
+                and 'imdb' in document['alternate_ids'] and document['alternate_ids']['imdb']:
+                    document[u'imdb_id'] = u'tt{0}'.format(document['alternate_ids']['imdb'])
+                    
+                # flatten the review links
+                if entry['branch']['name'] == 'service.remote.rottentomatoes.movie.review' and 'reviews' in document:
+                    for r in document['reviews']:
+                        if 'links' in r and 'review' in r['links']: r['review_link'] = r['links']['review']
                     
                 # Use the decalred namespace for the branch to decode stuff 
                 # from the document and augment the genealogy
@@ -69,6 +74,15 @@ class RottenTomatoesHandler(ResourceHandler):
                         if prototype and prototype.node['rottentomatoes'] in document:
                             entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['rottentomatoes']])
                             
+                # make a caonical node
+                canonical = Ontology(self.env, entry['branch']['namespace'])
+                canonical.decode_all(document, 'rottentomatoes')
+
+                # The ratings are stored in a sub container
+                if 'ratings' in document:
+                    canonical.decode_all(document['ratings'], 'rottentomatoes')
+
+                entry['record']['body']['canonical'] = canonical.node
                 query['result'].append(entry)
     
 
