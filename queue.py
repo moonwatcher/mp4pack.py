@@ -381,8 +381,6 @@ class ServiceTask(Task):
         if self.document is not None:
             action = getattr(self, self.ontology['action'], None)
             if action: action()
-        else:
-            self.log.debug(u'Could not resolve document %s, aborting task %s', self.uri, unicode(self))
         self.unload()
     
     

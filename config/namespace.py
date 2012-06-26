@@ -228,6 +228,7 @@
                 'itunes tv show id':None,
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
+                'itunes genre id':None,
             },
             'rule':[
                 'rule.system.volume.location',
@@ -292,6 +293,7 @@
                 'itunes tv show id':None,
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
+                'itunes genre id':None,
                 'name':None,
                 'simple name':None,
                 'track genealogy':None,
@@ -1575,15 +1577,20 @@
                 'unescape xml':False,
                 'keyword':None,
                 'tmdb':None,
+                'itunes':None,
             },
-            'synonym':['keyword', 'tmdb'],
+            'synonym':['keyword', 'tmdb', 'itunes'],
             'element':{
                 'genre id':None,
                 'tmdb genre id':{
                     'tmdb':'id',
                 },
+                'itunes genre id':{
+                    'itunes':'id',
+                },
                 'name':{
                     'tmdb':'name',
+                    'itunes':'name',
                 },
             },
         },
@@ -1706,30 +1713,6 @@
                 'name':{
                     'tmdb':'name',
                 },
-            },
-        },
-        'ns.knowledge.job':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-            },
-            'synonym':['keyword'],
-            'element':{
-                'job id':None,
-            },
-        },
-        'ns.knowledge.department':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-            },
-            'synonym':['keyword'],
-            'element':{
-                'department id':None,
             },
         },
         'ns.knowledge.collection':{
@@ -2099,6 +2082,31 @@
                     'tvdb':'EpImgFlag',
                     'enabled':False,
                 },
+            },
+        },
+        
+        'ns.knowledge.job':{
+            'default':{
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'synonym':['keyword'],
+            'element':{
+                'job id':None,
+            },
+        },
+        'ns.knowledge.department':{
+            'default':{
+                'auto cast':True,
+                'plural':None,
+                'unescape xml':False,
+                'keyword':None,
+            },
+            'synonym':['keyword'],
+            'element':{
+                'department id':None,
             },
         },
     },

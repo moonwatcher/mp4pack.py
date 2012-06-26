@@ -1683,6 +1683,51 @@
             'remote base':u'http://itunes.apple.com',
             'match':ur'^/c(?:/[a-z]{2})?/itunes/.*$',
             'branch':{
+                'service.remote.itunes.genre':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/genre/(?P<itunes_genre_id>[0-9]+)$',
+                            'remote':'WebObjects/MZStoreServices.woa/ws/genres?id={itunes genre id}',
+                        },
+                    ],
+                    'process':'parse_itunes_genres',            
+                    'produce':[
+                        {
+                            'reference':'service.remote.itunes.genre',
+                            'condition':{'kind': 'genre'},
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':'itunes genre by itunes id',
+                            'format':ur'/c/itunes/genre/{itunes genre id}',
+                            'canonical':True,
+                        },
+                    ],
+                    'collection':'itunes_genre',
+                    'namespace':'ns.knowledge.genre',
+                    'type':'json',
+                    'index':['itunes genre id'],
+                },
+                'service.remote.itunes.genre.complete':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/genre/complete',
+                            'remote':'WebObjects/MZStoreServices.woa/ws/genres',
+                        },
+                    ],
+                    'process':'parse_itunes_genres',            
+                    'produce':[
+                        {
+                            'reference':'service.remote.itunes.genre',
+                            'condition':{'kind': 'genre'},
+                        },
+                    ],
+                    'namespace':'ns.knowledge.genre',
+                    'type':'json',
+                    'index':['itunes genre id'],
+                },
+                
                 'service.remote.itunes.movie':{
                     'match':[
                         {
@@ -1690,6 +1735,12 @@
                             'remote':ur'lookup?id={itunes movie id}&entity=movie',
                         },
                     ],
+                    'produce':[
+                        {
+                            'reference':'service.remote.itunes.movie',
+                            'condition':{'wrapperType':'track', 'kind': 'feature-movie'},
+                        },
+                    ],                    
                     'resolvable':[
                         {
                             'name':'itunes movie by itunes id',

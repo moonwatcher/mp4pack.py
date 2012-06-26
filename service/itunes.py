@@ -26,7 +26,6 @@ class iTunesHandler(ResourceHandler):
             query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
             
             self.log.debug(u'Fetching %s', query['remote url'])
-            
             request = Request(query['remote url'], None, {'Accept': 'application/json'})
             
             try:
@@ -47,9 +46,18 @@ class iTunesHandler(ResourceHandler):
                 self.log.warning(u'Failed to decode JSON document %s', query['remote url'])
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
+                if 'process' in query['branch']:
+                
+                    # locate a method that implements the action
+                    action = getattr(self, query['branch']['process'], None)
+                    if action is not None:
+                        document = {'results':action(document)}
+                        document['resultCount'] = len(document['results'])
+                    else:
+                        self.log.warning(u'Ignoring unknown process function %s', query['branch']['process'])
+                        
                 if not document['resultCount'] > 0:
                     self.log.warning(u'No results found for query %s', query['remote url'])
-                
                 else:
                     for element in document['results']:
                         for product in query['branch']['produce']:
@@ -79,7 +87,26 @@ class iTunesHandler(ResourceHandler):
                                 canonical.decode_all(element, 'itunes')
                                 entry['record']['body']['canonical'] = canonical.node
                                 query['result'].append(entry)
-                                print entry
+    
+        
+    def parse_itunes_genres(self, document, parent=None):
+        result = []
+        if document:
+            for key,element in document.iteritems():
+                try:
+                    geID = int(key)
+                except ValueError, e:
+                    self.log.warning(u'Invalid genre id %s', key)
+                else:
+                    record = dict([(k,v) for k,v in element.iteritems() if not k == 'subgenres'])
+                    record['kind']= 'genre'
+                    if parent:
+                        record['parentGenreId'] = parent
+                    result.append(record)
+                    
+                    if 'subgenres' in element and element['subgenres']:
+                        result.extend(self.parse_itunes_genres(element['subgenres'], geID))
+        return result
                             
     
 
