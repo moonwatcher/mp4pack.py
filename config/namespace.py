@@ -1638,6 +1638,7 @@
                 'unescape xml':False,
                 'auto cast':True,
                 'tmdb':None,
+                'itunes':None,
             },
             'synonym':['keyword', 'tmdb', 'itunes'],
             'element':{
@@ -2041,6 +2042,7 @@
                 },
                 'track position':{
                     'tvdb':'EpisodeNumber',
+                    'itunes':'trackNumber',
                 },
                 'name':{
                     'tvdb':'EpisodeName',

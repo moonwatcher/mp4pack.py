@@ -1712,7 +1712,7 @@
                     'resolvable':[
                         {
                             'name':u'itunes person by itunes id',
-                            'format':ur'/c/itunes/person/{itunes movie id}',
+                            'format':ur'/c/itunes/person/{itunes person id}',
                             'canonical':True,
                         },
                     ],
@@ -1725,9 +1725,15 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/show/(?P<itunes_tv_show_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv show id}',
+                            'remote':ur'lookup?id={itunes tv show id}&entity=tvShow',
                         },
                     ],
+                    'produce':[
+                        {
+                            'reference':'service.remote.itunes.show',
+                            'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
+                        },
+                    ],                    
                     'resolvable':[
                         {
                             'name':'itunes tv show by itunes id',
@@ -1744,12 +1750,23 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/season/(?P<itunes_tv_season_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv season id}',
+                            'remote':ur'lookup?id={itunes tv season id}&entity=tvSeason',
                         },
                         {
                             'filter':ur'^/c/itunes/season/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes tv show id}&entity=tvSeason&limit=500',
                         },
                     ],
+                    'produce':[
+                        {
+                            'reference':'service.remote.itunes.show',
+                            'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
+                        },
+                        {
+                            'reference':'service.remote.itunes.season',
+                            'condition':{'wrapperType':'collection', 'collectionType':'TV Season'},
+                        },
+                    ],                    
                     'resolvable':[
                         {
                             'name':'itunes tv season by itunes id',
@@ -1770,15 +1787,31 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/episode/(?P<itunes_tv_episode_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv episode id}',
+                            'remote':ur'lookup?id={itunes tv episode id}&entity=tvEpisode',
                         },
                         {
                             'filter':ur'^/c/itunes/episode/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes tv season id}&entity=tvEpisode&limit=500',
                         },
                         {
                             'filter':ur'^/c/itunes/episode/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes tv show id}&entity=tvEpisode&limit=500',
                         },
                     ],
+                    'produce':[
+                        {
+                            'reference':'service.remote.itunes.show',
+                            'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
+                        },
+                        {
+                            'reference':'service.remote.itunes.season',
+                            'condition':{'wrapperType':'collection', 'collectionType':'TV Season'},
+                        },
+                        {
+                            'reference':'service.remote.itunes.episode',
+                            'condition':{'wrapperType':'track', 'kind':'tv-episode'},
+                        },
+                    ],                    
                     'resolvable':[
                         {
                             'name':'itunes tv episode by itunes id',
