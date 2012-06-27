@@ -345,6 +345,11 @@
             'keyword':u'tmdb_keyword_id',
             'type':'int',
         },
+        'tmdb popularity':{
+            'name':u'TMDb popularity score',
+            'keyword':u'tmdb_popularity',
+            'type':'float',
+        },
         'rottentomatoes movie id':{
             'name':u'Rotten tomatoes movie ID',
             'keyword':u'rottentomatoes_movie_id',

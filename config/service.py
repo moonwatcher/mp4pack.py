@@ -1126,6 +1126,38 @@
             'api key':u'a8b9f96dde091408a03cb4c78477bd14',
             'remote base':u'http://api.themoviedb.org/3',
             'match':ur'^/c(?:/[a-z]{2})?/tmdb/.*$',
+            'search':{
+                'service.search.tmdb.movie':{
+                    'parameter':set(('api key', 'query', 'page', 'language', 'year')),
+                    'remote':'search/movie',
+                    'trigger':[
+                        {
+                            'namespace':'ns.knowledge.movie',
+                            'format':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
+                        },
+                    ],                    
+                },
+                'service.search.tmdb.person':{
+                    'parameter':set(('api key', 'query', 'page')),
+                    'remote':'search/person',
+                    'trigger':[
+                        {
+                            'namespace':'ns.knowledge.person',
+                            'format':ur'/c/tmdb/person/{tmdb person id}',
+                        },
+                    ],                    
+                },
+                'service.search.tmdb.company':{
+                    'parameter':set(('api key', 'query', 'page')),
+                    'remote':'search/company',
+                    'trigger':[
+                        {
+                            'namespace':'ns.knowledge.company',
+                            'format':ur'/c/tmdb/company/{tmdb company id}',
+                        },
+                    ],                    
+                },
+            },
             'branch':{
                 'service.remote.tmdb.configuration':{
                     'match':[
@@ -1709,25 +1741,31 @@
                     'type':'json',
                     'index':['itunes genre id'],
                 },
-                'service.remote.itunes.genre.complete':{
+                'service.remote.itunes.person':{
                     'match':[
                         {
-                            'filter':ur'^/c/itunes/genre/complete',
-                            'remote':'WebObjects/MZStoreServices.woa/ws/genres',
+                            'filter':ur'^/c/itunes/person/(?P<itunes_person_id>[0-9]+)$',
+                            'remote':ur'lookup?id={itunes person id}',
                         },
                     ],
-                    'process':'parse_itunes_genres',            
                     'produce':[
                         {
-                            'reference':'service.remote.itunes.genre',
-                            'condition':{'kind': 'genre'},
+                            'reference':'service.remote.itunes.person',
+                            'condition':{'wrapperType':'artist', 'artistType':'Movie Artist'}
+                        }
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'itunes person by itunes id',
+                            'format':ur'/c/itunes/person/{itunes person id}',
+                            'canonical':True,
                         },
                     ],
-                    'namespace':'ns.knowledge.genre',
+                    'collection':'itunes_person',
+                    'namespace':'ns.knowledge.person',
                     'type':'json',
-                    'index':['itunes genre id'],
+                    'index':['itunes person id'],
                 },
-                
                 'service.remote.itunes.movie':{
                     'match':[
                         {
@@ -1752,25 +1790,6 @@
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
                     'index':['itunes movie id'],
-                },
-                'service.remote.itunes.person':{
-                    'match':[
-                        {
-                            'filter':ur'^/c/itunes/person/(?P<itunes_person_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes person id}',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'itunes person by itunes id',
-                            'format':ur'/c/itunes/person/{itunes person id}',
-                            'canonical':True,
-                        },
-                    ],
-                    'collection':'itunes_person',
-                    'namespace':'ns.knowledge.person',
-                    'type':'json',
-                    'index':['itunes person id'],
                 },
                 'service.remote.itunes.show':{
                     'match':[
@@ -1882,6 +1901,25 @@
                     'namespace':'ns.knowledge.tv.episode',
                     'type':'json',
                     'index':['itunes tv show id', 'itunes tv season id', 'itunes tv episode id', 'disk position', 'track position'],
+                },
+
+                'service.remote.itunes.genre.complete':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/genre/complete',
+                            'remote':'WebObjects/MZStoreServices.woa/ws/genres',
+                        },
+                    ],
+                    'process':'parse_itunes_genres',            
+                    'produce':[
+                        {
+                            'reference':'service.remote.itunes.genre',
+                            'condition':{'kind': 'genre'},
+                        },
+                    ],
+                    'namespace':'ns.knowledge.genre',
+                    'type':'json',
+                    'index':['itunes genre id'],
                 },
             },
         },

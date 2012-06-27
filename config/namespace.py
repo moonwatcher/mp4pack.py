@@ -1667,6 +1667,7 @@
                 },
                 'name':{
                     'tmdb':'name',
+                    'itunes':'artistName',
                 },
                 'biography':{
                     'tmdb':u'biography',
@@ -1861,6 +1862,9 @@
                 },
                 'rating':{
                     'rottentomatoes':'mpaa_rating',
+                },
+                'tmdb popularity':{
+                    'tmdb':'popularity',
                 },
             },
         },
