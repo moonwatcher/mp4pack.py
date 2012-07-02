@@ -4,11 +4,6 @@
     'namespace':{
         # Mongodb
         'ns.system.mongodb':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'auto cast':True,
-            },
             'synonym':['keyword'],
             'element':{
                 'host':None,
@@ -22,15 +17,9 @@
                 'rule.system.mongodb.url',
             ],
         },
-        
+
         # System
         'ns.system.command.default':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'auto cast':True,
-                'unescape xml':False,
-            },
             'synonym':['key'],
             'element':{
                 'domain':None,
@@ -78,11 +67,6 @@
             },
         },
         'ns.system.job':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'auto cast':True,
-            },
             'synonym':['keyword'],
             'element':{
                 'action':None,
@@ -128,11 +112,6 @@
             },
         },
         'ns.system.task':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'auto cast':True,
-            },
             'synonym':['keyword'],
             'element':{
                 'action':None,
@@ -169,16 +148,9 @@
                 'rule.task.default.preset'
             ],
         },
-        
+
         # Medium
         'ns.service.genealogy':{
-            'default':{
-                'keyword':None,
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'atom':None,
-            },
             'synonym':['keyword'],
             'element':{
                 'domain':None,
@@ -247,13 +219,6 @@
             ],
         },
         'ns.medium.resource.location':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'atom':None,
-            },
             'synonym':['keyword'],
             'element':{
                 'domain':None,
@@ -319,13 +284,6 @@
             ],
         },
         'ns.medium.asset.location':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'atom':None,
-            },
             'synonym':['keyword'],
             'element':{
                 'url':None,
@@ -367,12 +325,6 @@
             ],
         },
         'ns.medium.resource.url.decode':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'atom':None,
-            },
             'synonym':['keyword'],
             'element':{
                 'directory':None,
@@ -413,25 +365,11 @@
             ],
         },
         'ns.medium.resource.hint':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-            },
             'synonym':['keyword'],
             'element':{
             }
         },
         'ns.medium.resource.tag.meta':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'subler':None,
-                'atom':None,
-                'keyword':None,
-            },
             'synonym':['mediainfo', 'keyword'],
             'element':{
                 'kind':None,
@@ -718,15 +656,6 @@
             ],
         },
         'ns.medium.resource.meta':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'subler':None,
-                'atom':None,
-                'keyword':None,
-            },
             'synonym':['mediainfo', 'keyword'],
             'element':{
                 'kind':None,
@@ -1002,13 +931,6 @@
             ],
         },
         'ns.medium.resource.stream.audio':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'atom':None,
-            },
             'synonym':['mediainfo'],
             'element':{
                 'stream id':{
@@ -1096,13 +1018,6 @@
             ],
         },
         'ns.medium.resource.stream.video':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'atom':None,
-            },
             'synonym':['mediainfo'],
             'element':{
                 'stream id':{
@@ -1213,13 +1128,6 @@
             ],
         },
         'ns.medium.resource.stream.text':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'atom':None,
-            },
             'synonym':['mediainfo'],
             'element':{
                 'stream id':{
@@ -1287,13 +1195,6 @@
             ],
         },
         'ns.medium.resource.stream.image':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'mediainfo':None,
-                'atom':None,
-            },
             'synonym':['mediainfo'],
             'element':{
                 'stream id':{
@@ -1364,16 +1265,52 @@
                 'rule.system.default.enabled',
             ],
         },
-        
+
         # Knowledge
-        'ns.knowledge.keyword':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'tmdb':None,
+        'ns.search.query':{
+            'synonym':['keyword','tmdb', 'rottentomatoes', 'itunes'],
+            'element':{
+                'api key':{
+                    'tmdb':'api_key',
+                    'rottentomatoes':'apikey',
+                    'tvdb':'api key',
+                },
+                'query':{
+                    'tmdb':'query',
+                },
+                'page':{
+                    'tmdb':'page',
+                },
+                'language':{
+                    'tmdb':'language',
+                },
+                'year':{
+                    'tmdb':'year',
+                },
+                'itunes genre id':{
+                    'itunes':'id',
+                },
+                'itunes person id':{
+                    'itunes':'id',
+                },
+                'itunes movie id':{
+                    'itunes':'id',
+                },
+                'itunes tv show id':{
+                    'itunes':'id',
+                },
+                'itunes tv season id':{
+                    'itunes':'id',
+                },
+                'itunes tv episode id':{
+                    'itunes':'id',
+                },
+                'trimmed imdb movie id':{
+                    'rottentomatoes':'id',
+                }
             },
+        },
+        'ns.knowledge.keyword':{
             'synonym':['keyword', 'tmdb'],
             'element':{
                 'keyword id':None,
@@ -1386,13 +1323,6 @@
             },
         },
         'ns.knowledge.review':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'rottentomatoes':None,
-            },
             'synonym':['keyword', 'rottentomatoes'],
             'element':{
                 'critic name':{
@@ -1412,18 +1342,10 @@
                 },
                 'review url':{
                     'rottentomatoes':u'review_link',
-                },                
+                },
             },
         },
         'ns.knowledge.rating':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'tmdb':None,
-                'tvdb':None,
-            },
             'synonym':['keyword', 'tmdb', 'tvdb'],
             'element':{
                 'rating':{
@@ -1434,19 +1356,12 @@
                     'tmdb':'iso_3166_1',
                 },
                 'release date':{
-                    'tvdb':'FirstAired',    
+                    'tvdb':'FirstAired',
                     'tmdb':u'release_date',
                 },
             },
         },
         'ns.knowledge.title':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'tmdb':None,
-            },
             'synonym':['keyword', 'tmdb'],
             'element':{
                 'title':{
@@ -1458,13 +1373,6 @@
             },
         },
         'ns.knowledge.company.credit':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'tmdb':None,
-            },
             'synonym':['keyword', 'tmdb'],
             'element':{
                 'tmdb movie id':{
@@ -1494,13 +1402,6 @@
             },
         },
         'ns.knowledge.person.credit':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'tmdb':None,
-            },
             'synonym':['keyword', 'tmdb'],
             'element':{
                 'tmdb movie id':{
@@ -1530,14 +1431,6 @@
             },
         },
         'ns.knowledge.cast':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'tmdb':None,
-                'tvdb':None,
-            },
             'synonym':['keyword', 'tmdb', 'tvdb'],
             'element':{
                 'tvdb person id':{
@@ -1571,14 +1464,6 @@
             },
         },
         'ns.knowledge.genre':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-                'tmdb':None,
-                'itunes':None,
-            },
             'synonym':['keyword', 'tmdb', 'itunes'],
             'element':{
                 'genre id':None,
@@ -1595,14 +1480,6 @@
             },
         },
         'ns.knowledge.image':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'unescape xml':False,
-                'auto cast':True,
-                'tmdb':None,
-                'tvdb':None,
-            },
             'synonym':['keyword', 'tmdb', 'tvdb'],
             'element':{
                 'height':{
@@ -1639,20 +1516,12 @@
             },
         },
         'ns.knowledge.person':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'unescape xml':False,
-                'auto cast':True,
-                'tmdb':None,
-                'itunes':None,
-            },
             'synonym':['keyword', 'tmdb', 'itunes'],
             'element':{
                 'person id':None,
                 'itunes person id':{
                     'itunes':'artistId',
-                },                
+                },
                 'tmdb person id':{
                     'tmdb':'id',
                 },
@@ -1692,13 +1561,6 @@
             },
         },
         'ns.knowledge.company':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'unescape xml':False,
-                'auto cast':True,
-                'tmdb':None,
-            },
             'synonym':['keyword', 'tmdb'],
             'element':{
                 'company id':None,
@@ -1717,13 +1579,6 @@
             },
         },
         'ns.knowledge.collection':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'unescape xml':False,
-                'auto cast':True,
-                'tmdb':None,
-            },
             'synonym':['keyword', 'tmdb'],
             'element':{
                 'collection id':None,
@@ -1746,15 +1601,6 @@
             },
         },
         'ns.knowledge.movie':{
-            'default':{
-                'keyword':None,
-                'plural':None,
-                'unescape xml':False,
-                'auto cast':True,
-                'tmdb':None,
-                'rottentomatoes':None,
-                'itunes':None,
-            },
             'synonym':['keyword','tmdb', 'rottentomatoes', 'itunes'],
             'element':{
                 'movie id':None,
@@ -1794,7 +1640,7 @@
                 },
                 'revenue':{
                     'tmdb':'revenue',
-                },                
+                },
                 'vote average':{
                     'tmdb':u'vote_average',
                 },
@@ -1826,7 +1672,7 @@
                 },
                 'posters':{
                     'tmdb':'posters',
-                },     
+                },
                 'belongs to collection':{
                     'tmdb':'belongs_to_collection',
                 },
@@ -1844,7 +1690,7 @@
                 },
                 'critics consensus':{
                     'rottentomatoes':u'critics_consensus',
-                },            
+                },
                 'audience rating':{
                     'rottentomatoes':u'audience_rating',
                 },
@@ -1869,14 +1715,6 @@
             },
         },
         'ns.knowledge.tv.show':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'tvdb':None,
-                'keyword':None,
-                'itunes':None,
-            },
             'synonym':['tvdb', 'keyword', 'itunes'],
             'element':{
                 'tv show id':None,
@@ -1960,14 +1798,6 @@
             },
         },
         'ns.knowledge.tv.season':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'tvdb':None,
-                'keyword':None,
-                'itunes':None,
-            },
             'synonym':['tvdb', 'keyword', 'itunes'],
             'element':{
                 'tv show id':None,
@@ -1993,14 +1823,6 @@
             },
         },
         'ns.knowledge.tv.episode':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'tvdb':None,
-                'keyword':None,
-                'itunes':None,
-            },
             'synonym':['tvdb', 'keyword', 'itunes'],
             'element':{
                 'tv show id':None,
@@ -2014,7 +1836,7 @@
                 },
                 'itunes tv episode id':{
                     'itunes':'trackId',
-                },    
+                },
                 'tvdb tv show id':{
                     'tvdb':'seriesid',
                 },
@@ -2088,26 +1910,14 @@
                 },
             },
         },
-        
+
         'ns.knowledge.job':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-            },
             'synonym':['keyword'],
             'element':{
                 'job id':None,
             },
         },
         'ns.knowledge.department':{
-            'default':{
-                'auto cast':True,
-                'plural':None,
-                'unescape xml':False,
-                'keyword':None,
-            },
             'synonym':['keyword'],
             'element':{
                 'department id':None,

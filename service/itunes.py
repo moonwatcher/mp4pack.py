@@ -21,12 +21,9 @@ class iTunesHandler(ResourceHandler):
                     product['branch'] = self.branch[product['reference']]    
     
     def fetch(self, query):
-        # Try to build the remote url and get the resource
-        if 'remote' in query['match']:
-            query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
-            
-            self.log.debug(u'Fetching %s', query['remote url'])
+        if 'remote url' in query:
             request = Request(query['remote url'], None, {'Accept': 'application/json'})
+            self.log.debug(u'Fetching %s', query['remote url'])
             
             try:
                 response = urlopen(request)

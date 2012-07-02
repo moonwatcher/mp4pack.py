@@ -176,24 +176,39 @@ class Space(object):
     def __init__(self, env, node):
         self.log = logging.getLogger('Space')
         self.env = env
-        self.node = node
         self._element = None
         self._synonym = None
         self._deduction = None
-        
-        if 'default' not in self.node:
-            self.node['default'] = {}
+
+        self.node = {
+            'default':{
+                'enabled':True,
+                'simplify':False,
+                'unescape xml':False,
+                'auto cast':True,
+                'keyword':None,
+                'plural':None,
+                'atom':None,
+                'tmdb':None,
+                'rottentomatoes':None,
+                'itunes':None,
+                'tvdb':None,
+                'mediainfo':None,
+                'subler':None,
+            },
+            'synonym':[],
+            'element':{},
+            'rule':[],
+        }
+        self.extend(node)
+    
+    def extend(self, node):
+        for k,v in node.iteritems():
+            if k in ['default', 'element']:
+                if v: self.node[k].update(v)
             
-        if 'rule' not in self.node:
-            self.node['rule'] = []
-            
-        if 'enabled' not in self.default:
-            self.default['enabled'] = True
-            
-        if 'match' in self.node:
-            self.node['pattern'] = re.compile(self.node['match']['expression'], self.node['match']['flags'])
-        else:
-            self.node['pattern'] = None
+            elif k in ['synonym', 'rule']:
+                if v: self.node[k].extend(v)
     
     
     @property
@@ -225,15 +240,6 @@ class Space(object):
     @property
     def default(self):
         return self.node['default']
-    
-    
-    @property
-    def pattern(self):
-        return self.node['pattern']
-    
-    
-    def match(self, key):
-        return not self.pattern or self.pattern.search(key) is not None
     
     
     def contains(self, key):
@@ -344,9 +350,6 @@ class Element(object):
 class PrototypeSpace(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
-        
-        if 'simplify' not in self.default:
-            self.default['simplify'] = False
     
     
     def _load_element(self):

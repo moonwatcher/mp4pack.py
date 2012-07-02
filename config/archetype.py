@@ -1411,6 +1411,26 @@
             'type':'int',
         },
         
+        'api key':{
+            'name':u'API Key',
+            'keyword':u'api_key',
+            'type':'unicode',
+        },
+        'query':{
+            'name':u'Query',
+            'keyword':u'query',
+            'type':'unicode',
+        },
+        'page':{
+            'name':u'Page',
+            'keyword':u'page',
+            'type':'int',
+        },
+        'year':{
+            'name':u'Year',
+            'keyword':u'year',
+            'type':'int',
+        },
         'recursive':{
             'name':u'Recursive',
             'keyword':u'recursive',

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import os
 import re
 import logging
 import copy
 import json
+import urllib
 import urlparse
 from datetime import datetime
 from ontology import Ontology
@@ -114,6 +116,7 @@ class ResourceHandler(object):
         self.node = node
         self.pattern = re.compile(self.node['match'])
         self.branch = {}
+        self.procedure = {}
         
         for name, branch in self.node['branch'].iteritems():
             branch['name'] = name
@@ -210,7 +213,6 @@ class ResourceHandler(object):
             if taken: break
     
     
-    # Produce will attempt to create the record
     def produce(self, uri, repository, location):
         taken = False
         for branch in self.branch.values():
@@ -233,11 +235,57 @@ class ResourceHandler(object):
                     for k,v in m.groupdict().iteritems():
                         query['parameter'].decode(k,v)
                         
+                    self.prepare(query)
                     self.fetch(query)
                     self.parse(query)
                     self.store(query)
                     break
             if taken: break
+    
+    
+    def prepare(self, query):
+        # Add an API Key if the resolver has one
+        if 'api key' in self.node:
+            query['parameter']['api key'] = self.node['api key']
+            
+        # Compute the remote URL if required
+        if 'remote' in query['match']:
+            query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
+
+            if 'query parameter' in query['match']:
+                p = Ontology(self.env, 'ns.search.query')
+                
+                # Collect matching parameters from the query parameter
+                for k,v in query['parameter'].iteritems():
+                    if k in query['match']['query parameter']:
+                        p[k] = v
+
+                # Collect matching parameters from the location
+                if query['location']:
+                    for k,v in query['location'].iteritems():
+                        if k in query['match']['query parameter']:
+                            p[k] = v
+
+                # utf8 encode, url escape and add them to the query string
+                parameter = {}
+                for k,v in p.iteritems():
+                    prototype = p.namespace.find(k)
+                    if prototype and self.name in prototype.node:
+                        parameter[prototype.node[self.name]] = unicode(v).encode('utf8')
+
+                if parameter:
+                    # break up the url
+                    parsed = list(urlparse.urlparse(query['remote url']))
+                    extra = unicode(urllib.urlencode(parameter), 'utf8')
+                    
+                    # add the parameters to the existing query fragment
+                    if parsed[4]:
+                        parsed[4] = u'{}&{}'.format(parsed[4], extra)
+                    else:
+                        parsed[4] = extra
+                        
+                    # reassemble the url
+                    query['remote url'] = urlparse.urlunparse(parsed)
     
     
     def fetch(self, query):

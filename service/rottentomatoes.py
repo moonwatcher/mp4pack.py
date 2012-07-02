@@ -13,19 +13,15 @@ class RottenTomatoesHandler(ResourceHandler):
     def __init__(self, resolver, node):
         ResourceHandler.__init__(self, resolver, node)
     
+    def prepare(self, query):
+        query['parameter']['trimmed imdb movie id']
+        ResourceHandler.prepare(self, query)
+        
     
     def fetch(self, query):
-        # Add Rotten Tomatoes api key to the parameter list
-        query['parameter']['api key'] = self.node['api key']
-        
-        query['parameter']['trimmed imdb movie id']
-        
-        # Try to build the remote url and get the resource
-        if 'remote' in query['match']:
-            query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
-            
-            self.log.debug(u'Fetching %s', query['remote url'])
+        if 'remote url' in query:
             request = Request(query['remote url'], None, {'Accept': 'application/json'})
+            self.log.debug(u'Fetching %s', query['remote url'])
             
             try:
                 response = urlopen(request)

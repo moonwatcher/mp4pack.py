@@ -22,15 +22,9 @@ class TVDbHandler(ResourceHandler):
     
     
     def fetch(self, query):
-        # Add TVDB api key to the parameter list
-        query['parameter']['api key'] = self.node['api key']
-        
-        # calculate a remote url if the match specifies one
-        if 'remote' in query['match']:
-            query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
-            
-            self.log.debug(u'Fetching %s', query['remote url'])
+        if 'remote url' in query:
             request = Request(query['remote url'])
+            self.log.debug(u'Fetching %s', query['remote url'])
             
             try:
                 response = urlopen(request)

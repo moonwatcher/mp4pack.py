@@ -569,7 +569,7 @@
                     'type':'json',
                     'collection':'knowledge_configuration',
                 },
-                
+
                 'service.knowledge.playlist':{
                     'match':[
                         {
@@ -586,7 +586,7 @@
                     'collection':'knowledge_playlist',
                     'namespace':'knowledge.playlist',
                 },
-                
+
                 'service.knowledge.movie':{
                     'match':[
                         {
@@ -716,7 +716,7 @@
                     'collection':'knowledge_movie_alternative',
                     'namespace':'knowledge.movie.alternative',
                 },
-                
+
                 'service.knowledge.music.album':{
                     'match':[
                         {
@@ -805,7 +805,7 @@
                     'namespace':'knowledge.music.track',
                     'index':['album id', 'disk id', 'track id', 'disk position', 'track position', 'language'],
                 },
-                
+
                 'service.knowledge.tv.show':{
                     'match':[
                         {
@@ -974,7 +974,7 @@
                     'collection':'knowledge_tvshow_episode_credit',
                     'namespace':'knowledge.tv.episode.credit',
                 },
-                
+
                 'service.knowledge.person':{
                     'match':[
                         {
@@ -1121,49 +1121,68 @@
                 },
             },
         },
-        
+
         'tmdb':{
             'api key':u'a8b9f96dde091408a03cb4c78477bd14',
             'remote base':u'http://api.themoviedb.org/3',
             'match':ur'^/c(?:/[a-z]{2})?/tmdb/.*$',
-            'search':{
+            'branch':{
                 'service.search.tmdb.movie':{
-                    'parameter':set(('api key', 'query', 'page', 'language', 'year')),
-                    'remote':'search/movie',
+                    'match':[
+                        {
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/search$',
+                            'query parameter':set(('api key', 'query', 'page', 'language', 'year')),
+                            'remote':ur'search/movie',
+                        },
+                    ],
                     'trigger':[
                         {
                             'namespace':'ns.knowledge.movie',
                             'format':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
                         },
-                    ],                    
+                    ],
+                    'type':'search',
                 },
                 'service.search.tmdb.person':{
-                    'parameter':set(('api key', 'query', 'page')),
-                    'remote':'search/person',
+                    'match':[
+                        {
+                            'filter':ur'^/c/tmdb/person/search$',
+                            'query parameter':set(('api key', 'query', 'page')),
+                            'remote':'search/person',
+                        },
+                    ],
                     'trigger':[
                         {
                             'namespace':'ns.knowledge.person',
                             'format':ur'/c/tmdb/person/{tmdb person id}',
                         },
-                    ],                    
+                    ],
+                    'type':'search',
                 },
                 'service.search.tmdb.company':{
-                    'parameter':set(('api key', 'query', 'page')),
-                    'remote':'search/company',
+                    'match':[
+                        {
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/search$',
+                            'query parameter':set(('api key', 'query', 'page')),
+                            'remote':'search/company',
+                        },
+                    ],
                     'trigger':[
                         {
                             'namespace':'ns.knowledge.company',
                             'format':ur'/c/tmdb/company/{tmdb company id}',
                         },
-                    ],                    
+                    ],
+                    'type':'search',
                 },
-            },
-            'branch':{
+
+
                 'service.remote.tmdb.configuration':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/configuration$',
-                            'remote':ur'configuration?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'configuration',
                         },
                     ],
                     'resolvable':[
@@ -1174,13 +1193,14 @@
                         },
                     ],
                     'collection':'tmdb_configuration',
-                    'type':'json',
+                    'type':'document',
                 },
                 'service.remote.tmdb.genre':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/genre/(?P<tmdb_genre_id>[0-9]+)$',
-                            'remote':ur'genre/{tmdb genre id}?language={language}&api_key={api key}',
+                            'query parameter':set(('api key', 'language')),
+                            'remote':ur'genre/{tmdb genre id}',
                         },
                     ],
                     'resolvable':[
@@ -1192,18 +1212,20 @@
                     ],
                     'collection':'tmdb_genre',
                     'namespace':'ns.knowledge.genre',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb genre id'],
                 },
                 'service.remote.tmdb.movie':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)$',
-                            'remote':ur'movie/{tmdb movie id}?language={language}&api_key={api key}',
+                            'query parameter':set(('api key', 'language')),
+                            'remote':ur'movie/{tmdb movie id}',
                         },
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
-                            'remote':ur'movie/{imdb movie id}?language={language}&api_key={api key}',
+                            'query parameter':set(('api key', 'language')),
+                            'remote':ur'movie/{imdb movie id}',
                         },
                     ],
                     'resolvable':[
@@ -1219,14 +1241,15 @@
                     ],
                     'collection':'tmdb_movie',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id', 'language', 'imdb movie id'],
                 },
                 'service.remote.tmdb.movie.cast':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast$',
-                            'remote':ur'movie/{tmdb movie id}/casts?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movie/{tmdb movie id}/casts',
                         },
                     ],
                     'resolvable':[
@@ -1238,14 +1261,15 @@
                     ],
                     'collection':'tmdb_movie_cast',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id'],
                 },
                 'service.remote.tmdb.movie.image':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/image$',
-                            'remote':ur'movie/{tmdb movie id}/images?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movie/{tmdb movie id}/images',
                         },
                     ],
                     'resolvable':[
@@ -1257,14 +1281,15 @@
                     ],
                     'collection':'tmdb_movie_image',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id'],
                 },
                 'service.remote.tmdb.movie.keyword':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/keyword$',
-                            'remote':ur'movie/{tmdb movie id}/keywords?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movie/{tmdb movie id}/keywords',
                         },
                     ],
                     'resolvable':[
@@ -1276,14 +1301,15 @@
                     ],
                     'collection':'tmdb_movie_keyword',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id'],
                 },
                 'service.remote.tmdb.movie.rating':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/rating$',
-                            'remote':ur'movie/{tmdb movie id}/releases?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movie/{tmdb movie id}/releases',
                         },
                     ],
                     'resolvable':[
@@ -1295,14 +1321,15 @@
                     ],
                     'collection':'tmdb_movie_rating',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id'],
                 },
                 'service.remote.tmdb.movie.clip':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/clip$',
-                            'remote':ur'movie/{tmdb movie id}/trailers?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movie/{tmdb movie id}/trailers',
                         },
                     ],
                     'resolvable':[
@@ -1314,14 +1341,15 @@
                     ],
                     'collection':'tmdb_movie_clip',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id'],
                 },
                 'service.remote.tmdb.movie.translation':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/translation$',
-                            'remote':ur'movie/{tmdb movie id}/translations?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movie/{tmdb movie id}/translations',
                         },
                     ],
                     'resolvable':[
@@ -1333,14 +1361,15 @@
                     ],
                     'collection':'tmdb_movie_translation',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id'],
                 },
                 'service.remote.tmdb.movie.alternative':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/alternative$',
-                            'remote':ur'movie/{tmdb movie id}/alternative_titles?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movie/{tmdb movie id}/alternative_titles',
                         },
                     ],
                     'resolvable':[
@@ -1352,14 +1381,15 @@
                     ],
                     'collection':'tmdb_movie_alternative',
                     'namespace':'ns.knowledge.movie',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb movie id'],
                 },
                 'service.remote.tmdb.collection':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/collection/(?P<tmdb_collection_id>[0-9]+)$',
-                            'remote':ur'collection/{tmdb collection id}?language={language}&api_key={api key}',
+                            'query parameter':set(('api key', 'language')),
+                            'remote':ur'collection/{tmdb collection id}',
                         },
                     ],
                     'resolvable':[
@@ -1371,14 +1401,15 @@
                     ],
                     'collection':'tmdb_collection',
                     'namespace':'ns.knowledge.collection',
-                    'type':'json',
+                    'type':'document',
                     'index':['tmdb collection id', 'language'],
                 },
                 'service.remote.tmdb.person':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)$',
-                            'remote':ur'person/{tmdb person id}?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'person/{tmdb person id}',
                         },
                     ],
                     'resolvable':[
@@ -1390,13 +1421,14 @@
                     ],
                     'collection':'tmdb_person',
                     'namespace':'ns.knowledge.person',
-                    'type':'json',
+                    'type':'document',
                 },
                 'service.remote.tmdb.person.image':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/image$',
-                            'remote':ur'person/{tmdb person id}/images?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'person/{tmdb person id}/images',
                         },
                     ],
                     'resolvable':[
@@ -1408,13 +1440,14 @@
                     ],
                     'collection':'tmdb_person_image',
                     'namespace':'ns.knowledge.person',
-                    'type':'json',
+                    'type':'document',
                 },
                 'service.remote.tmdb.person.credit':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/credit$',
-                            'remote':ur'person/{tmdb person id}/credits?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'person/{tmdb person id}/credits',
                         },
                     ],
                     'resolvable':[
@@ -1426,13 +1459,14 @@
                     ],
                     'collection':'tmdb_person_credit',
                     'namespace':'ns.knowledge.person',
-                    'type':'json',
+                    'type':'document',
                 },
                 'service.remote.tmdb.company':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)$',
-                            'remote':ur'company/{tmdb company id}?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'company/{tmdb company id}',
                         },
                     ],
                     'resolvable':[
@@ -1444,14 +1478,14 @@
                     ],
                     'collection':'tmdb_company',
                     'namespace':'ns.knowledge.company',
-                    'type':'json',
+                    'type':'document',
                 },
                 'service.remote.tmdb.company.credit':{
-                    # There is the issue of paging... page={page}&
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)/credit$',
-                            'remote':ur'company/{tmdb company id}/movies?api_key={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'company/{tmdb company id}/movies',
                         },
                     ],
                     'resolvable':[
@@ -1463,7 +1497,7 @@
                     ],
                     'collection':'tmdb_company_credit',
                     'namespace':'ns.knowledge.company',
-                    'type':'json',
+                    'type':'document',
                 },
             },
         },
@@ -1719,10 +1753,11 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/genre/(?P<itunes_genre_id>[0-9]+)$',
-                            'remote':'WebObjects/MZStoreServices.woa/ws/genres?id={itunes genre id}',
+                            'query parameter':set(('itunes genre id',)),
+                            'remote':'WebObjects/MZStoreServices.woa/ws/genres',
                         },
                     ],
-                    'process':'parse_itunes_genres',            
+                    'process':'parse_itunes_genres',
                     'produce':[
                         {
                             'reference':'service.remote.itunes.genre',
@@ -1745,7 +1780,8 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/person/(?P<itunes_person_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes person id}',
+                            'query parameter':set(('itunes person id',)),
+                            'remote':ur'lookup',
                         },
                     ],
                     'produce':[
@@ -1770,7 +1806,8 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/movie/(?P<itunes_movie_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes movie id}&entity=movie',
+                            'query parameter':set(('itunes movie id',)),
+                            'remote':ur'lookup?entity=movie',
                         },
                     ],
                     'produce':[
@@ -1778,7 +1815,7 @@
                             'reference':'service.remote.itunes.movie',
                             'condition':{'wrapperType':'track', 'kind': 'feature-movie'},
                         },
-                    ],                    
+                    ],
                     'resolvable':[
                         {
                             'name':'itunes movie by itunes id',
@@ -1795,7 +1832,8 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/show/(?P<itunes_tv_show_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv show id}&entity=tvShow',
+                            'query parameter':set(('itunes tv show id',)),
+                            'remote':ur'lookup?entity=tvShow',
                         },
                     ],
                     'produce':[
@@ -1803,7 +1841,7 @@
                             'reference':'service.remote.itunes.show',
                             'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
                         },
-                    ],                    
+                    ],
                     'resolvable':[
                         {
                             'name':'itunes tv show by itunes id',
@@ -1820,11 +1858,13 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/season/(?P<itunes_tv_season_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv season id}&entity=tvSeason',
+                            'query parameter':set(('itunes tv season id',)),
+                            'remote':ur'lookup?entity=tvSeason',
                         },
                         {
                             'filter':ur'^/c/itunes/season/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv show id}&entity=tvSeason&limit=500',
+                            'query parameter':set(('itunes tv show id',)),
+                            'remote':ur'lookup?entity=tvSeason&limit=500',
                         },
                     ],
                     'produce':[
@@ -1836,7 +1876,7 @@
                             'reference':'service.remote.itunes.season',
                             'condition':{'wrapperType':'collection', 'collectionType':'TV Season'},
                         },
-                    ],                    
+                    ],
                     'resolvable':[
                         {
                             'name':'itunes tv season by itunes id',
@@ -1857,15 +1897,18 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/episode/(?P<itunes_tv_episode_id>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv episode id}&entity=tvEpisode',
+                            'query parameter':set(('itunes tv episode id',)),
+                            'remote':ur'lookup?entity=tvEpisode',
                         },
                         {
                             'filter':ur'^/c/itunes/episode/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv season id}&entity=tvEpisode&limit=500',
+                            'query parameter':set(('itunes tv season id',)),
+                            'remote':ur'lookup?entity=tvEpisode&limit=500',
                         },
                         {
                             'filter':ur'^/c/itunes/episode/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                            'remote':ur'lookup?id={itunes tv show id}&entity=tvEpisode&limit=500',
+                            'query parameter':set(('itunes tv show id',)),
+                            'remote':ur'lookup?entity=tvEpisode&limit=500',
                         },
                     ],
                     'produce':[
@@ -1881,7 +1924,7 @@
                             'reference':'service.remote.itunes.episode',
                             'condition':{'wrapperType':'track', 'kind':'tv-episode'},
                         },
-                    ],                    
+                    ],
                     'resolvable':[
                         {
                             'name':'itunes tv episode by itunes id',
@@ -1910,7 +1953,7 @@
                             'remote':'WebObjects/MZStoreServices.woa/ws/genres',
                         },
                     ],
-                    'process':'parse_itunes_genres',            
+                    'process':'parse_itunes_genres',
                     'produce':[
                         {
                             'reference':'service.remote.itunes.genre',
@@ -1932,11 +1975,13 @@
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)$',
-                            'remote':ur'movies/{rottentomatoes movie id}.json?apikey={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movies/{rottentomatoes movie id}.json',
                         },
                         {
                             'filter':ur'^/c/rottentomatoes/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$',
-                            'remote':ur'movie_alias.json?apikey={api key}&type=imdb&id={trimmed imdb movie id}',
+                            'query parameter':set(('api key', 'trimmed imdb movie id')),
+                            'remote':ur'movie_alias.json?type=imdb',
                         },
                     ],
                     'resolvable':[
@@ -1959,7 +2004,8 @@
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/review$',
-                            'remote':ur'movies/{rottentomatoes movie id}/reviews.json?review_type=top_critic&apikey={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movies/{rottentomatoes movie id}/reviews.json?review_type=top_critic',
                         },
                     ],
                     'resolvable':[
@@ -1978,7 +2024,8 @@
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/cast$',
-                            'remote':ur'movies/{rottentomatoes movie id}/cast.json?apikey={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movies/{rottentomatoes movie id}/cast.json',
                         },
                     ],
                     'resolvable':[
@@ -1993,12 +2040,13 @@
                     'type':'json',
                     'index':['rottentomatoes movie id'],
                 },
-                
+
                 'service.remote.rottentomatoes.movie.similar':{
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/similar$',
-                            'remote':ur'movies/{rottentomatoes movie id}/similar.json?apikey={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movies/{rottentomatoes movie id}/similar.json',
                         },
                     ],
                     'resolvable':[
@@ -2017,7 +2065,8 @@
                     'match':[
                         {
                             'filter':ur'^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$',
-                            'remote':ur'movies/{rottentomatoes movie id}/clips.json?apikey={api key}',
+                            'query parameter':set(('api key',)),
+                            'remote':ur'movies/{rottentomatoes movie id}/clips.json',
                         },
                     ],
                     'resolvable':[
