@@ -11,6 +11,8 @@ from datetime import datetime
 from ontology import Ontology
 from pymongo import json_util
 from bson.objectid import ObjectId
+from StringIO import StringIO
+from urllib2 import Request, urlopen, URLError, HTTPError
 
 class Resolver(object):
     def __init__(self, env):
@@ -244,52 +246,66 @@ class ResourceHandler(object):
     
     
     def prepare(self, query):
-        # Add an API Key if the resolver has one
+        # Add an API Key, if the resolver has one
         if 'api key' in self.node:
             query['parameter']['api key'] = self.node['api key']
             
-        # Compute the remote URL if required
+        # Compute the remote URL, if required
         if 'remote' in query['match']:
-            query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
-
-            if 'query parameter' in query['match']:
-                p = Ontology(self.env, 'ns.search.query')
-                
-                # Collect matching parameters from the query parameter
-                for k,v in query['parameter'].iteritems():
-                    if k in query['match']['query parameter']:
-                        p[k] = v
-
-                # Collect matching parameters from the location
-                if query['location']:
-                    for k,v in query['location'].iteritems():
+            try:
+                query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
+            except KeyError, e:
+                self.log.error(u'Could not compute remote URL for %s because %s was missing from the genealogy', query['uri'], e)
+            else:
+                if 'query parameter' in query['match']:
+                    p = Ontology(self.env, 'ns.search.query')
+                    
+                    # Collect matching parameters from the query parameter
+                    for k,v in query['parameter'].iteritems():
                         if k in query['match']['query parameter']:
                             p[k] = v
-
-                # utf8 encode, url escape and add them to the query string
-                parameter = {}
-                for k,v in p.iteritems():
-                    prototype = p.namespace.find(k)
-                    if prototype and self.name in prototype.node:
-                        parameter[prototype.node[self.name]] = unicode(v).encode('utf8')
-
-                if parameter:
-                    # break up the url
-                    parsed = list(urlparse.urlparse(query['remote url']))
-                    extra = unicode(urllib.urlencode(parameter), 'utf8')
-                    
-                    # add the parameters to the existing query fragment
-                    if parsed[4]:
-                        parsed[4] = u'{}&{}'.format(parsed[4], extra)
-                    else:
-                        parsed[4] = extra
+    
+                    # Collect matching parameters from the location
+                    if query['location']:
+                        for k,v in query['location'].iteritems():
+                            if k in query['match']['query parameter']:
+                                p[k] = v
+    
+                    # Rename the parameters to the resolver's syntax and utf8 encode them 
+                    parameter = {}
+                    for k,v in p.iteritems():
+                        prototype = p.namespace.find(k)
+                        if prototype and self.name in prototype.node:
+                            parameter[prototype.node[self.name]] = unicode(v).encode('utf8')
+    
+                    if parameter:
+                        # Break up the URL
+                        parsed = list(urlparse.urlparse(query['remote url']))
                         
-                    # reassemble the url
-                    query['remote url'] = urlparse.urlunparse(parsed)
+                        # URL escape the parameters, encode as a query string and convert back to unicode
+                        extra = unicode(urllib.urlencode(parameter), 'utf8')
+                        
+                        # Append the parameters to the existing query fragment
+                        if parsed[4]: parsed[4] = u'{}&{}'.format(parsed[4], extra)
+                        else: parsed[4] = extra
+                            
+                        # Reassemble the URL
+                        query['remote url'] = urlparse.urlunparse(parsed)
     
     
     def fetch(self, query):
-        pass
+        if 'remote url' in query:
+            request = Request(query['remote url'], None, {'Accept': 'application/json'})
+            self.log.debug(u'Fetching %s', query['remote url'])
+
+            try:
+                response = urlopen(request)
+            except HTTPError, e:
+                self.log.warning(u'Server returned an error when requesting %s: %s', query['remote url'], e.code)
+            except URLError, e:
+                self.log.warning(u'Could not reach server when requesting %s: %s', query['remote url'], e.reason)
+            else:
+                query['source'].append(StringIO(response.read()))
     
     
     def parse(self, query):
@@ -300,39 +316,23 @@ class ResourceHandler(object):
         for entry in query['result']:
             record = None
             collection = query['repository'].database[entry['branch']['collection']]
-            
-            # Set the modified date
             entry['record'][u'head'][u'modified'] = datetime.utcnow()
+            self._compute_resolvables(entry)
             
             # Make a pseudo empty body for bodyless records
-            if u'body' not in entry['record']:
-                entry['record'][u'body'] = None
-                
-            # Build all the resolvable URIs from the genealogy
-            entry['record'][u'head'][u'alternate'] = []
-            for resolvable in entry['branch']['resolvable']:
-                try:
-                    link = resolvable['format'].format(**entry['record'][u'head'][u'genealogy'])
-                    entry['record'][u'head']['alternate'].append(link)
-                    if 'canonical' in resolvable and resolvable['canonical']:
-                        entry['record'][u'head']['canonical'] = link
-                except KeyError, e:
-                    self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
-                    
+            if u'body' not in entry['record']: entry['record'][u'body'] = None
+            
             # Try to locate an existing record
             for uri in entry['record'][u'head'][u'alternate']:
                 record = collection.find_one({u'head.alternate':uri})
-                if record is not None:
-                    break
+                if record is not None: break
                     
             # This is an update, we already have an existing record
             if record is not None:
-            
                 # Compute the union of the two uri lists
                 record[u'head'][u'alternate'] = list(set(record[u'head'][u'alternate']).union(entry['record'][u'head'][u'alternate']))
                 
-                # Compute the union of the two genealogy dictionaries
-                # New computed genealogy overrides the existing
+                # Compute the union of the two genealogy dictionaries, new overrides existing
                 record[u'head'][u'genealogy'] = dict(record[u'head'][u'genealogy'].items() + entry['record'][u'head'][u'genealogy'].items())
                 
                 # New body overrides the existing
@@ -340,19 +340,41 @@ class ResourceHandler(object):
                 
             # This is an insert, no previous existing record was found
             else:
+                entry['record'][u'head'][u'created'] = entry['record'][u'head'][u'modified']
+                
+                # In case we need to issue keys
+                if 'key generator' in self.node:
+                    # Issue a new id
+                    entry['record'][u'head'][u'genealogy'][self.node['key generator']['element']] = self.resolver.issue(query['repository'].host, self.node['key generator']['space'])
+                    if 'key' in entry['branch']:
+                        entry['record'][u'head'][u'genealogy'][entry['branch']['key']] = entry['record'][u'head'][u'genealogy'][self.node['key generator']['element']]
+                        
+                    # Rebuild all the resolvable URIs from the genealogy again to account for the assigned id
+                    self._compute_resolvables(entry)
+                    
+                # The new record is the one to save
                 record = entry['record']
-                record[u'head'][u'created'] = record[u'head'][u'modified']
                 
             # Check that canonical and alternate are set
-            if 'canonical' in record[u'head'] and record[u'head']['canonical'] and \
-            'alternate' in record[u'head'] and record[u'head']['alternate']:
-                # Save the record to database
-                self.log.debug(u'Storing %s', unicode(record[u'head']['canonical']))
+            if 'canonical' in record[u'head'] and record[u'head']['canonical'] and 'alternate' in record[u'head'] and record[u'head']['alternate']:
+                self.log.debug(u'Persisting %s', unicode(record[u'head']['canonical']))
                 collection.save(record)
             else:
                 self.log.error(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
                 
+    def _compute_resolvables(self, entry):
+        entry['record'][u'head'][u'alternate'] = []
+        entry['record'][u'head']['canonical'] = None
+        
+        # Build all the resolvable URIs from the genealogy
+        for resolvable in entry['branch']['resolvable']:
+            try:
+                link = resolvable['format'].format(**entry['record'][u'head'][u'genealogy'])
+                entry['record'][u'head']['alternate'].append(link)
+                if 'canonical' in resolvable and resolvable['canonical']:
+                    entry['record'][u'head']['canonical'] = link
+                    
+            except KeyError, e:
+                self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
     
-    
-    
-    
+

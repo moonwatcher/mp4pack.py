@@ -18,21 +18,6 @@ class RottenTomatoesHandler(ResourceHandler):
         ResourceHandler.prepare(self, query)
         
     
-    def fetch(self, query):
-        if 'remote url' in query:
-            request = Request(query['remote url'], None, {'Accept': 'application/json'})
-            self.log.debug(u'Fetching %s', query['remote url'])
-            
-            try:
-                response = urlopen(request)
-            except HTTPError, e:
-                self.log.warning(u'Server returned an error when requesting %s: %s', query['remote url'], e.code)
-            except URLError, e:
-                self.log.warning(u'Could not reach server when requesting %s: %s', query['remote url'], e.reason)
-            else:
-                query['source'].append(StringIO(response.read()))
-    
-    
     def parse(self, query):
         for source in query['source']:
             try:

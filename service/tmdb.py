@@ -12,20 +12,6 @@ class TMDbHandler(ResourceHandler):
         ResourceHandler.__init__(self, resolver, node)
 
 
-    def fetch(self, query):
-        if 'remote url' in query:
-            request = Request(query['remote url'], None, {'Accept': 'application/json'})
-            self.log.debug(u'Fetching %s', query['remote url'])
-
-            try:
-                response = urlopen(request)
-            except HTTPError, e:
-                self.log.warning(u'Server returned an error when requesting %s: %s', query['remote url'], e.code)
-            except URLError, e:
-                self.log.warning(u'Could not reach server when requesting %s: %s', query['remote url'], e.reason)
-            else:
-                query['source'].append(StringIO(response.read()))
-
     def parse(self, query):
         for source in query['source']:
             try:
@@ -48,17 +34,20 @@ class TMDbHandler(ResourceHandler):
     
                     # Use the decalred namespace for the branch to decode stuff
                     # from the document and augment the genealogy
-                    ns = self.env.namespace[entry['branch']['namespace']]
-                    if 'index' in query['branch']:
-                        for index in query['branch']['index']:
-                            prototype = ns.find(index)
-                            if prototype and prototype.node['tmdb'] in document:
-                                entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['tmdb']])
+                    if 'namespace' in entry['branch']:
+                        ns = self.env.namespace[entry['branch']['namespace']]
+                        if 'index' in query['branch']:
+                            for index in query['branch']['index']:
+                                prototype = ns.find(index)
+                                if prototype and prototype.node['tmdb'] in document:
+                                    entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['tmdb']])
     
-                    # make a caonical node
-                    canonical = Ontology(self.env, entry['branch']['namespace'])
-                    canonical.decode_all(document, 'tmdb')
-                    entry['record']['body']['canonical'] = canonical.node
+                        # make a caonical node
+                        canonical = Ontology(self.env, entry['branch']['namespace'])
+                        canonical.decode_all(document, 'tmdb')
+                        entry['record']['body']['canonical'] = canonical.node
+                    
+                    # Append the entry to the query result    
                     query['result'].append(entry)
                     
                 elif query['branch']['type'] == 'search':

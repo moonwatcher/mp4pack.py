@@ -4,7 +4,7 @@
     'service':{
         'home':{
             'match':ur'^/h/.*$',
-            'key generator':'knowledge',
+            'key generator':{'space':'knowledge', 'element':u'home id' },
             'branch':{
                 'service.home':{
                     'match':[
