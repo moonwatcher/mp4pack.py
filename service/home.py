@@ -22,20 +22,6 @@ class HomeHandler(ResourceHandler):
                         if index in dependee[u'head'][u'genealogy']:
                             query['parameter'][index] = dependee[u'head'][u'genealogy'][index]
                             
-                    if 'collect' in query['branch']:
-                        for pattern in query['branch']['collect']:
-                            try:
-                                related = self.resolver.resolve(pattern.format(**query['parameter']))
-                            except KeyError, e:
-                                self.log.debug(u'Could not create reference uri for pattern %s because parameter %s was missing', pattern, e)
-                                
-                            if related is not None:
-                                for index in query['branch']['index']:
-                                    if index in related[u'head'][u'genealogy']:
-                                        query['parameter'][index] = related[u'head'][u'genealogy'][index]
-                                        
-                                # we only need one of the documents in collect
-                                break
                     query['source'].append(dependee)
     
     

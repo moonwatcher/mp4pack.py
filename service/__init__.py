@@ -239,6 +239,7 @@ class ResourceHandler(object):
                         
                     self.prepare(query)
                     self.fetch(query)
+                    self.collect(query)
                     self.parse(query)
                     self.store(query)
                     break
@@ -292,7 +293,6 @@ class ResourceHandler(object):
                         # Reassemble the URL
                         query['remote url'] = urlparse.urlunparse(parsed)
     
-    
     def fetch(self, query):
         if 'remote url' in query:
             request = Request(query['remote url'], None, {'Accept': 'application/json'})
@@ -307,6 +307,19 @@ class ResourceHandler(object):
             else:
                 query['source'].append(StringIO(response.read()))
     
+    
+    def collect(self, query):
+        if 'collect' in query['branch']:
+            for pattern in query['branch']['collect']:
+                try:
+                    related = self.resolver.resolve(pattern.format(**query['parameter']))
+                except KeyError, e:
+                    self.log.debug(u'Could not create reference uri for pattern %s because parameter %s was missing', pattern, e)
+                else:
+                    if related is not None:
+                        for index in query['branch']['index']:
+                            if index in related[u'head'][u'genealogy']:
+                                query['parameter'][index] = related[u'head'][u'genealogy'][index]
     
     def parse(self, query):
         pass

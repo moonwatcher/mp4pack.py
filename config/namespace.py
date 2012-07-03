@@ -201,6 +201,8 @@
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
                 'itunes genre id':None,
+                'itunes album id':None,
+                'itunes music track id':None,
             },
             'rule':[
                 'rule.system.volume.location',
@@ -259,6 +261,8 @@
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
                 'itunes genre id':None,
+                'itunes album id':None,
+                'itunes music track id':None,
                 'name':None,
                 'simple name':None,
                 'track genealogy':None,
@@ -1275,14 +1279,16 @@
                     'rottentomatoes':'apikey',
                     'tvdb':'api key',
                 },
-                'query':{
+                'term':{
                     'tmdb':'query',
+                    'itunes':'term',
                 },
                 'page':{
                     'tmdb':'page',
                 },
                 'language':{
                     'tmdb':'language',
+                    'tvdb':'language',
                 },
                 'year':{
                     'tmdb':'year',
@@ -1305,9 +1311,21 @@
                 'itunes tv episode id':{
                     'itunes':'id',
                 },
+                'itunes album id':{
+                    'itunes':'id',
+                },
+                'itunes music track id':{
+                    'itunes':'id',
+                },
                 'trimmed imdb movie id':{
                     'rottentomatoes':'id',
-                }
+                },
+                'imdb tv show id':{
+                    'tvdb':'imdbid',
+                },
+                'tv show':{
+                    'tvdb':'seriesname',  
+                },
             },
         },
         'ns.knowledge.keyword':{
@@ -1907,6 +1925,40 @@
                     'type':'int',
                     'tvdb':'EpImgFlag',
                     'enabled':False,
+                },
+            },
+        },
+
+        'ns.knowledge.music.album':{
+            'synonym':['keyword', 'itunes'],
+            'element':{
+                'album id':None,
+                'album':{
+                    'itunes':'collectionName',
+                },
+                'itunes album id':{
+                    'itunes':'collectionId',
+                },
+            },
+        },
+        'ns.knowledge.music.track':{
+            'synonym':['keyword', 'itunes'],
+            'element':{
+                'album id':None,
+                'album':{
+                    'itunes':'collectionName',
+                },
+                'itunes album id':{
+                    'itunes':'collectionId',
+                },
+                'itunes music track id':{
+                    'itunes':'trackId',
+                },
+                'disk position':{
+                    'tvdb':'discNumber',
+                },
+                'track position':{
+                    'itunes':'trackNumber',
                 },
             },
         },

@@ -75,79 +75,95 @@ class TVDbHandler(ResourceHandler):
                 self.log.warning(u'Failed to decode xml document %s', query['remote url'])
                 self.log.warning(u'Exception raised %s', unicode(e))
             else:
-                for product in query['branch']['produce']:
-                    if product['coalesce']:
-                        # Coalescing records all collect under a single document
-                        # i.e. images and cast for a show
-                        entry = {
-                            'branch':product['branch'],
-                            'record':{
-                                u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy') },
-                                u'body':[],
-                            }
-                        }
-                        for node in element.findall(product['tag']):
-                            o = Ontology(self.env, product['branch']['namespace'])
-                            for item in node.getchildren():
-                                o.decode(item.tag, item.text, 'tvdb')
-                            entry['record'][u'body'].append(o.node)
-                            
-                        if entry['record'][u'body']:
-                            query['result'].append(entry)
-                            
-                    else:
-                        batch = []
-                        for node in element.findall(product['tag']):
-                            
-                            # Decode concepts from the element and populate the ontology
-                            o = Ontology(self.env, product['branch']['namespace'])
-                            for item in node.getchildren():
-                                o.decode(item.tag, item.text, 'tvdb')
-                                
+                if query['branch']['parse type'] == 'document':
+                    for product in query['branch']['produce']:
+                        if product['coalesce']:
+                            # Coalescing records all collect under a single document
+                            # i.e. images and cast for a show
                             entry = {
                                 'branch':product['branch'],
                                 'record':{
                                     u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy') },
-                                    u'body':o,
+                                    u'body':[],
                                 }
                             }
-                            
-                            # Augment the genealogy with stuff from the ontology
-                            if 'index' in product['branch']:
-                                for index in product['branch']['index']:
-                                    if index in o:
-                                        entry['record'][u'head'][u'genealogy'][index] = o[index]
-                                        
-                            batch.append(entry)
-                            
-                        # TVDB does not explicitly define a tv season, however, it does assign it an id.
-                        # When processing episodes we need to deduce the existence of a season
-                        # The season record will be created before the episodes
-                        if batch and product['branch']['name'] == 'service.remote.tvdb.episode':
-                            seasons = {}
-                            for entry in batch:
-                                o = entry['record'][u'body']
-                                if o['tvdb tv season id'] not in seasons:
-                                    genealogy = Ontology(self.env, 'ns.service.genealogy')
-                                    genealogy['tvdb tv season id'] = o['tvdb tv season id']
-                                    genealogy['tvdb tv show id'] = o['tvdb tv show id']
-                                    genealogy['disk position'] = o['disk position']
-                                    genealogy['language'] = o['language']
-                                    seasons[o['tvdb tv season id']] = genealogy
-                            for genealogy in seasons.values():
-                                query['result'].append(
-                                    {
-                                        'branch':self.branch['service.remote.tvdb.season'],
-                                        'record':{
-                                            u'head':{ u'genealogy':genealogy },
-                                        }
-                                    }
-                                )
+                            for node in element.findall(product['tag']):
+                                o = Ontology(self.env, product['branch']['namespace'])
+                                for item in node.getchildren():
+                                    o.decode(item.tag, item.text, self.name)
+                                entry['record'][u'body'].append(o.node)
                                 
-                        # make an entry out of each ontology and append to the query result
-                        for entry in batch:
-                            entry['record'][u'body'] = entry['record'][u'body'].node
-                            query['result'].append(entry)
+                            if entry['record'][u'body']:
+                                query['result'].append(entry)
+                                
+                        else:
+                            batch = []
+                            for node in element.findall(product['tag']):
+                                
+                                # Decode concepts from the element and populate the ontology
+                                o = Ontology(self.env, product['branch']['namespace'])
+                                for item in node.getchildren():
+                                    o.decode(item.tag, item.text, self.name)
+                                    
+                                entry = {
+                                    'branch':product['branch'],
+                                    'record':{
+                                        u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy') },
+                                        u'body':o,
+                                    }
+                                }
+                                
+                                # Augment the genealogy with stuff from the ontology
+                                if 'index' in product['branch']:
+                                    for index in product['branch']['index']:
+                                        if index in o:
+                                            entry['record'][u'head'][u'genealogy'][index] = o[index]
+                                            
+                                batch.append(entry)
+                                
+                            # TVDB does not explicitly define a tv season, however, it does assign it an id.
+                            # When processing episodes we need to deduce the existence of a season
+                            # The season record will be created before the episodes
+                            if batch and product['branch']['name'] == 'service.document.tvdb.episode':
+                                seasons = {}
+                                for entry in batch:
+                                    o = entry['record'][u'body']
+                                    if o['tvdb tv season id'] not in seasons:
+                                        genealogy = Ontology(self.env, 'ns.service.genealogy')
+                                        genealogy['tvdb tv season id'] = o['tvdb tv season id']
+                                        genealogy['tvdb tv show id'] = o['tvdb tv show id']
+                                        genealogy['disk position'] = o['disk position']
+                                        genealogy['language'] = o['language']
+                                        seasons[o['tvdb tv season id']] = genealogy
+                                for genealogy in seasons.values():
+                                    query['result'].append(
+                                        {
+                                            'branch':self.branch['service.document.tvdb.season'],
+                                            'record':{
+                                                u'head':{ u'genealogy':genealogy },
+                                            }
+                                        }
+                                    )
+                                    
+                            # make an entry out of each ontology and append to the query result
+                            for entry in batch:
+                                entry['record'][u'body'] = entry['record'][u'body'].node
+                                query['result'].append(entry)
+                
+                elif query['branch']['parse type'] == 'search':
+                    for trigger in query['branch']['trigger']:
+                        for node in element.findall(trigger['tag']):
+                            # Decode concepts from the element and populate the ontology
+                            o = Ontology(self.env, trigger['namespace'])
+                            for item in node.getchildren():
+                                o.decode(item.tag, item.text, self.name)
+                                
+                            # Make a URI and trigger a resolution
+                            ref = o.project('ns.service.genealogy')
+                            ref['language']
+                            uri = trigger['format'].format(**ref)
+                            self.log.debug(u'Trigger %s resolution', uri)
+                            self.resolver.resolve(uri)
     
 
 

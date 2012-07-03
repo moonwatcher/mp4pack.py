@@ -26,7 +26,171 @@
             'name':u'iTunes TV episode ID',
             'keyword':u'itunes_tv_episode_id',
             'type':'int',
-        },    
+        },
+        'itunes album id':{
+            'name':u'iTunes album ID',
+            'keyword':u'itunes_album_id',
+            'type':'int',
+        }, 
+        'itunes music track id':{
+            'name':u'iTunes music track ID',
+            'keyword':u'itunes_music_track_id',
+            'type':'int',
+        }, 
+        'itunes content id':{
+            'name':u'iTunes content ID',
+            'keyword':u'itunes_content_id',
+            'type':'int',
+            'atom':'cnID',
+        },
+        'itunes account':{
+            'name':u'iTunes account ID',
+            'keyword':u'itunes_account_id',
+            'type':'unicode',
+            'atom':'apID',
+        },
+        'itunes artist id':{
+            'name':u'iTunes artist ID',
+            'keyword':u'itunes_artist_id',
+            'type':'int',
+            'atom':'atID',
+        },
+        'itunes composer id':{
+            'name':u'iTunes composer ID',
+            'keyword':u'itunes_composer_id',
+            'type':'int',
+            'atom':'cmID',
+        },
+        'itunes playlist id':{
+            'name':u'iTunes playlist ID',
+            'keyword':u'itunes_playlist_id',
+            'type':'int',
+            'atom':'plID',
+        },
+        'itunes genre id':{
+            'name':u'iTunes genre ID',
+            'keyword':u'itunes_genre_id',
+            'type':'int',
+            'atom':'geID',
+        },
+        'itunes country id':{
+            'name':u'iTunes country ID',
+            'keyword':u'itunes_country_id',
+            'type':'enum',
+            'atom':'sfID',
+            'enumeration':'country',
+        },
+        'itunes account type':{
+            'name':u'iTunes account type',
+            'keyword':u'itunes_account_type',
+            'type':'enum',
+            'atom':'akID',
+            'enumeration':'itunes account type',
+        },
+        'itunes episode global id':{
+            'name':u'Episode global ID',
+            'keyword':u'episode_global_id',
+            'type':'int',
+            'atom':'egid',
+        },
+        'xid':{
+            'name':u'iTunes extra ID',
+            'keyword':u'xid',
+            'type':'unicode',
+            'atom':'xid',
+        },
+        
+        'tvdb tv show id':{
+            'name':u'TVDb TV show ID',
+            'keyword':u'tvdb_tv_show_id',
+            'type':'int',
+        },
+        'tvdb tv season id':{
+            'name':u'TVDb TV season ID',
+            'keyword':u'tvdb_tv_season_id',
+            'type':'int',
+        },
+        'tvdb tv episode id':{
+            'name':u'TVDb TV episode ID',
+            'keyword':u'tvdb_tv_episode_id',
+            'type':'int',
+        },
+        'tvdb person id':{
+            'name':u'TVDb person ID',
+            'keyword':u'tvdb_person_id',
+            'type':'int',
+        },
+        'tvdb image id':{
+            'name':u'TVDb image ID',
+            'keyword':u'tvdb_image_id',
+            'type':'int',
+        },
+        'imdb tv show id':{
+            'name':u'IMDb TV show ID',
+            'keyword':u'imdb_tv_show_id',
+            'type':'unicode',
+        },
+        'imdb tv episode id':{
+            'name':u'IMDb TV episode ID',
+            'keyword':u'imdb_tv_episode_id',
+            'type':'unicode',
+        },
+        'imdb movie id':{
+            'name':u'IMDb movie ID',
+            'keyword':u'imdb_movie_id',
+            'type':'unicode'
+        },
+        'trimmed imdb movie id':{
+            'name':u'Trimmed IMDb movie ID',
+            'keyword':u'trimmed_imdb_movie_id',
+            'type':'unicode'
+        },
+        'tmdb movie id':{
+            'name':u'TMDb movie ID',
+            'keyword':u'tmdb_movie_id',
+            'type':'int',
+        },
+        'tmdb collection id':{
+            'name':u'TMDb collection ID',
+            'keyword':u'tmdb_collection_id',
+            'type':'int'
+        },
+        'tmdb person id':{
+            'name':u'TMDb person ID',
+            'keyword':u'tmdb_person_id',
+            'type':'int',
+        },
+        'tmdb company id':{
+            'name':u'TMDb company ID',
+            'keyword':u'tmdb_company_id',
+            'type':'int',
+        },
+        'tmdb genre id':{
+            'name':u'TMDb genre ID',
+            'keyword':u'tmdb_genre_id',
+            'type':'int',
+        },
+        'tmdb keyword id':{
+            'name':u'TMDb keyword ID',
+            'keyword':u'tmdb_keyword_id',
+            'type':'int',
+        },
+        'tmdb popularity':{
+            'name':u'TMDb popularity score',
+            'keyword':u'tmdb_popularity',
+            'type':'float',
+        },
+        'rottentomatoes movie id':{
+            'name':u'Rotten tomatoes movie ID',
+            'keyword':u'rottentomatoes_movie_id',
+            'type':'int',
+        },
+        'zap2it tv show id':{
+            'name':u'Zap2It TV show ID',
+            'keyword':u'zap2it_tv_show_id',
+            'type':'unicode',
+        },
+        
         'genres':{
             'name':'Genres',
             'keyword':'genres',
@@ -268,96 +432,6 @@
         'kind':{
             'name':u'Kind',
             'keyword':u'kind',
-            'type':'unicode',
-        },
-        'tvdb tv show id':{
-            'name':u'TVDb TV show ID',
-            'keyword':u'tvdb_tv_show_id',
-            'type':'int',
-        },
-        'tvdb tv season id':{
-            'name':u'TVDb TV season ID',
-            'keyword':u'tvdb_tv_season_id',
-            'type':'int',
-        },
-        'tvdb tv episode id':{
-            'name':u'TVDb TV episode ID',
-            'keyword':u'tvdb_tv_episode_id',
-            'type':'int',
-        },
-        'tvdb person id':{
-            'name':u'TVDb person ID',
-            'keyword':u'tvdb_person_id',
-            'type':'int',
-        },
-        'tvdb image id':{
-            'name':u'TVDb image ID',
-            'keyword':u'tvdb_image_id',
-            'type':'int',
-        },
-        'imdb tv show id':{
-            'name':u'IMDb TV show ID',
-            'keyword':u'imdb_tv_show_id',
-            'type':'unicode',
-        },
-        'imdb tv episode id':{
-            'name':u'IMDb TV episode ID',
-            'keyword':u'imdb_tv_episode_id',
-            'type':'unicode',
-        },
-        'imdb movie id':{
-            'name':u'IMDb movie ID',
-            'keyword':u'imdb_movie_id',
-            'type':'unicode'
-        },
-        'trimmed imdb movie id':{
-            'name':u'Trimmed IMDb movie ID',
-            'keyword':u'trimmed_imdb_movie_id',
-            'type':'unicode'
-        },
-        'tmdb movie id':{
-            'name':u'TMDb movie ID',
-            'keyword':u'tmdb_movie_id',
-            'type':'int',
-        },
-        'tmdb collection id':{
-            'name':u'TMDb collection ID',
-            'keyword':u'tmdb_collection_id',
-            'type':'int'
-        },
-        'tmdb person id':{
-            'name':u'TMDb person ID',
-            'keyword':u'tmdb_person_id',
-            'type':'int',
-        },
-        'tmdb company id':{
-            'name':u'TMDb company ID',
-            'keyword':u'tmdb_company_id',
-            'type':'int',
-        },
-        'tmdb genre id':{
-            'name':u'TMDb genre ID',
-            'keyword':u'tmdb_genre_id',
-            'type':'int',
-        },
-        'tmdb keyword id':{
-            'name':u'TMDb keyword ID',
-            'keyword':u'tmdb_keyword_id',
-            'type':'int',
-        },
-        'tmdb popularity':{
-            'name':u'TMDb popularity score',
-            'keyword':u'tmdb_popularity',
-            'type':'float',
-        },
-        'rottentomatoes movie id':{
-            'name':u'Rotten tomatoes movie ID',
-            'keyword':u'rottentomatoes_movie_id',
-            'type':'int',
-        },
-        'zap2it tv show id':{
-            'name':u'Zap2It TV show ID',
-            'keyword':u'zap2it_tv_show_id',
             'type':'unicode',
         },
         'simple name':{
@@ -712,68 +786,6 @@
             'name':u'Encoded date',
             'keyword':u'encoded_date',
             'type':'date',
-        },
-        'xid':{
-            'name':u'iTunes extra ID',
-            'keyword':u'xid',
-            'type':'unicode',
-            'atom':'xid',
-        },
-        'itunes content id':{
-            'name':u'iTunes content ID',
-            'keyword':u'itunes_content_id',
-            'type':'int',
-            'atom':'cnID',
-        },
-        'itunes account':{
-            'name':u'iTunes account ID',
-            'keyword':u'itunes_account_id',
-            'type':'unicode',
-            'atom':'apID',
-        },
-        'itunes artist id':{
-            'name':u'iTunes artist ID',
-            'keyword':u'itunes_artist_id',
-            'type':'int',
-            'atom':'atID',
-        },
-        'itunes composer id':{
-            'name':u'iTunes composer ID',
-            'keyword':u'itunes_composer_id',
-            'type':'int',
-            'atom':'cmID',
-        },
-        'itunes playlist id':{
-            'name':u'iTunes playlist ID',
-            'keyword':u'itunes_playlist_id',
-            'type':'int',
-            'atom':'plID',
-        },
-        'itunes genre id':{
-            'name':u'iTunes genre ID',
-            'keyword':u'itunes_genre_id',
-            'type':'int',
-            'atom':'geID',
-        },
-        'itunes country id':{
-            'name':u'iTunes country ID',
-            'keyword':u'itunes_country_id',
-            'type':'enum',
-            'atom':'sfID',
-            'enumeration':'country',
-        },
-        'itunes account type':{
-            'name':u'iTunes account type',
-            'keyword':u'itunes_account_type',
-            'type':'enum',
-            'atom':'akID',
-            'enumeration':'itunes account type',
-        },
-        'itunes episode global id':{
-            'name':u'Episode global ID',
-            'keyword':u'episode_global_id',
-            'type':'int',
-            'atom':'egid',
         },
         'podcast':{
             'name':u'Podcast',
@@ -1416,9 +1428,9 @@
             'keyword':u'api_key',
             'type':'unicode',
         },
-        'query':{
-            'name':u'Query',
-            'keyword':u'query',
+        'term':{
+            'name':u'Term',
+            'keyword':u'term',
             'type':'unicode',
         },
         'page':{
