@@ -82,7 +82,7 @@
                         },
                         {
                             'filter':ur'^/h/tv/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)$',
-                            'depend':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
+                            'depend':ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                         },
                         {
                             'filter':ur'^/h/tv/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$',
@@ -130,11 +130,11 @@
                         },
                         {
                             'filter':ur'^/h/tv/season/tvdb/(?P<tvdb_tv_season_id>[0-9]+)$',
-                            'depend':ur'/c/{language}/tvdb/season/{tvdb tv season id}',
+                            'depend':ur'/c/{language}/tvdb/tv/season/{tvdb tv season id}',
                         },
                         {
                             'filter':ur'^/h/tv/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
-                            'depend':ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
+                            'depend':ur'/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disk position}',
                         },
                         {
                             'filter':ur'^/h/tv/season/imdb/(?P<imdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
@@ -197,15 +197,15 @@
                         },
                         {
                             'filter':ur'^/h/tv/episode/tvdb/(?P<tvdb_tv_episode_id>[0-9]+)$',
-                            'depend':ur'/c/{language}/tvdb/episode/{tvdb tv episode id}',
+                            'depend':ur'/c/{language}/tvdb/tv/episode/{tvdb tv episode id}',
                         },
                         {
                             'filter':ur'^/h/tv/episode/tvdb/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
-                            'depend':ur'/c/{language}/tvdb/episode/{tvdb tv season id}/{track position}',
+                            'depend':ur'/c/{language}/tvdb/tv/episode/{tvdb tv season id}/{track position}',
                         },
                         {
                             'filter':ur'^/h/tv/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                            'depend':ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}',
+                            'depend':ur'/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disk position}/{track position}',
                         },
                         {
                             'filter':ur'^/h/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$',
@@ -1508,12 +1508,12 @@
                 'service.search.tvdb.tv.show':{
                     'match':[
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/search$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/show/search$',
                             'query parameter':set(('tv show', 'language',)),
                             'remote':ur'GetSeries.php',
                         },
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/search/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/show/search/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$',
                             'query parameter':set(('imdb tv show id', 'language',)),
                             'remote':ur'GetSeriesByRemoteID.php',
                         },
@@ -1522,7 +1522,7 @@
                         {
                             'tag':u'Series',
                             'namespace':'ns.knowledge.tv.show',
-                            'format':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
+                            'format':ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                         },
                     ],
                     'parse type':'search',
@@ -1531,26 +1531,26 @@
                 'service.document.tvdb.tv.show':{
                     'match':[
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)$',
                             'remote':ur'{api key}/series/{tvdb tv show id}/{language}.xml',
                         },
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'tvdb show by tvdb show id',
-                            'format':ur'/c/{language}/tvdb/show/{tvdb tv show id}',
+                            'format':ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                             'canonical':True,
                         },
                         {
                             'name':u'tvdb show by imdb show id',
-                            'format':ur'/c/{language}/tvdb/show/imdb/{imdb tv show id}',
+                            'format':ur'/c/{language}/tvdb/tv/show/imdb/{imdb tv show id}',
                         },
                     ],
                     'collect':[
-                        ur'/c/{language}/tvdb/show/search/imdb/{imdb tv show id}',
+                        ur'/c/{language}/tvdb/tv/show/search/imdb/{imdb tv show id}',
                     ],
                     'produce':[
                         {
@@ -1571,14 +1571,14 @@
                 'service.document.tvdb.tv.show.cast':{
                     'match':[
                         {
-                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
+                            'filter':ur'^/c/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
                             'remote':ur'{api key}/series/{tvdb tv show id}/actors.xml',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'tvdb show cast by tvdb show id',
-                            'format':ur'/c/tvdb/show/{tvdb tv show id}/cast',
+                            'format':ur'/c/tvdb/tv/show/{tvdb tv show id}/cast',
                             'canonical':True,
                         },
                     ],
@@ -1597,14 +1597,14 @@
                 'service.document.tvdb.tv.show.image':{
                     'match':[
                         {
-                            'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
+                            'filter':ur'^/c/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
                             'remote':ur'{api key}/series/{tvdb tv show id}/banners.xml',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'tvdb show image by tvdb show id',
-                            'format':ur'/c/tvdb/show/{tvdb tv show id}/image',
+                            'format':ur'/c/tvdb/tv/show/{tvdb tv show id}/image',
                             'canonical':True,
                         },
                     ],
@@ -1623,25 +1623,25 @@
                 'service.document.tvdb.tv.season':{
                     'match':[
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/season/(?P<tvdb_tv_season_id>[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/season/(?P<tvdb_tv_season_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/season/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/season/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'tvdb season by tvdb season id',
-                            'format':ur'/c/{language}/tvdb/season/{tvdb tv season id}',
+                            'format':ur'/c/{language}/tvdb/tv/season/{tvdb tv season id}',
                             'canonical':True,
                         },
                         {
                             'name':u'tvdb season by tvdb show id',
-                            'format':ur'/c/{language}/tvdb/season/{tvdb tv show id}/{disk position}',
+                            'format':ur'/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disk position}',
                         },
                         {
                             'name':u'tvdb season by imdb show id',
-                            'format':ur'/c/{language}/tvdb/season/imdb/{imdb tv show id}/{disk position}',
+                            'format':ur'/c/{language}/tvdb/tv/season/imdb/{imdb tv show id}/{disk position}',
                         },
                     ],
                     'index':[
@@ -1658,41 +1658,41 @@
                 'service.document.tvdb.tv.episode':{
                     'match':[
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_episode_id>[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/(?P<tvdb_tv_episode_id>[0-9]+)$',
                             'remote':ur'{api key}/episodes/{tvdb tv episode id}/{language}.xml',
                         },
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
                         },
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                             'remote':ur'{api key}/series/{tvdb tv show id}/default/{disk position}/{track position}/{language}.xml',
                         },
                     ],
                     'collect':[
-                        ur'/c/{language}/tvdb/show/{tvdb tv show id}',
+                        ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                     ],
                     'resolvable':[
                         {
                             'name':u'tvdb episode by tvdb episode id',
-                            'format':ur'/c/{language}/tvdb/episode/{tvdb tv episode id}',
+                            'format':ur'/c/{language}/tvdb/tv/episode/{tvdb tv episode id}',
                             'canonical':True,
                         },
                         {
                             'name':u'tvdb episode by tvdb season id',
-                            'format':ur'/c/{language}/tvdb/episode/{tvdb tv season id}/{track position}',
+                            'format':ur'/c/{language}/tvdb/tv/episode/{tvdb tv season id}/{track position}',
                         },
                         {
                             'name':u'tvdb episode by tvdb show id',
-                            'format':ur'/c/{language}/tvdb/episode/{tvdb tv show id}/{disk position}/{track position}',
+                            'format':ur'/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disk position}/{track position}',
                         },
                         {
                             'name':u'tvdb episode by imdb episode id',
-                            'format':ur'/c/{language}/tvdb/episode/imdb/{imdb tv episode id}',
+                            'format':ur'/c/{language}/tvdb/tv/episode/imdb/{imdb tv episode id}',
                         },
                         {
                             'name':u'tvdb episode by imdb show id',
-                            'format':ur'/c/{language}/tvdb/episode/imdb/{imdb tv show id}/{disk position}/{track position}',
+                            'format':ur'/c/{language}/tvdb/tv/episode/imdb/{imdb tv show id}/{disk position}/{track position}',
                         },
                     ],
                     'produce':[
@@ -1719,7 +1719,7 @@
                 'service.document.tvdb.tv.show.complete':{
                     'match':[
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/complete$',
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/complete$',
                             'remote':ur'{api key}/series/{tvdb tv show id}/all/{language}.zip',
                         },
                     ],
@@ -1849,7 +1849,11 @@
                         {
                             'reference':'service.document.itunes.person',
                             'condition':{'wrapperType':'artist', 'artistType':'Movie Artist'}
-                        }
+                        },
+                        {
+                            'reference':'service.document.itunes.person',
+                            'condition':{'wrapperType':'artist', 'artistType':'Artist'}
+                        },
                     ],
                     'resolvable':[
                         {
@@ -1897,12 +1901,12 @@
                 'service.document.itunes.tv.show':{
                     'match':[
                         {
-                            'filter':ur'^/c/itunes/show/(?P<itunes_tv_show_id>[0-9]+)$',
+                            'filter':ur'^/c/itunes/tv/show/(?P<itunes_tv_show_id>[0-9]+)$',
                             'query parameter':set(('itunes tv show id',)),
                             'remote':ur'lookup?entity=tvShow',
                         },
                         {
-                            'filter':ur'^/c/itunes/show/search$',
+                            'filter':ur'^/c/itunes/tv/show/search$',
                             'query parameter':set(('term',)),
                             'remote':ur'search?entity=tvShow&attribute=showTerm',
                         },
@@ -1916,7 +1920,7 @@
                     'resolvable':[
                         {
                             'name':'itunes tv show by itunes id',
-                            'format':ur'/c/itunes/show/{itunes tv show id}',
+                            'format':ur'/c/itunes/tv/show/{itunes tv show id}',
                             'canonical':True,
                         },
                     ],
@@ -1928,12 +1932,12 @@
                 'service.document.itunes.tv.season':{
                     'match':[
                         {
-                            'filter':ur'^/c/itunes/season/(?P<itunes_tv_season_id>[0-9]+)$',
+                            'filter':ur'^/c/itunes/tv/season/(?P<itunes_tv_season_id>[0-9]+)$',
                             'query parameter':set(('itunes tv season id',)),
                             'remote':ur'lookup?entity=tvSeason',
                         },
                         {
-                            'filter':ur'^/c/itunes/season/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
+                            'filter':ur'^/c/itunes/tv/season/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)$',
                             'query parameter':set(('itunes tv show id',)),
                             'remote':ur'lookup?entity=tvSeason&limit=500',
                         },
@@ -1951,12 +1955,12 @@
                     'resolvable':[
                         {
                             'name':'itunes tv season by itunes id',
-                            'format':ur'/c/itunes/season/{itunes tv season id}',
+                            'format':ur'/c/itunes/tv/season/{itunes tv season id}',
                             'canonical':True,
                         },
                         {
                             'name':'itunes tv season by itunes show id',
-                            'format':ur'/c/itunes/season/{itunes tv show id}/{disk position}',
+                            'format':ur'/c/itunes/tv/season/{itunes tv show id}/{disk position}',
                         },
                     ],
                     'collection':'itunes_tv_season',
@@ -1967,17 +1971,17 @@
                 'service.document.itunes.tv.episode':{
                     'match':[
                         {
-                            'filter':ur'^/c/itunes/episode/(?P<itunes_tv_episode_id>[0-9]+)$',
+                            'filter':ur'^/c/itunes/tv/episode/(?P<itunes_tv_episode_id>[0-9]+)$',
                             'query parameter':set(('itunes tv episode id',)),
                             'remote':ur'lookup?entity=tvEpisode',
                         },
                         {
-                            'filter':ur'^/c/itunes/episode/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'^/c/itunes/tv/episode/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_position>[0-9]+)$',
                             'query parameter':set(('itunes tv season id',)),
                             'remote':ur'lookup?entity=tvEpisode&limit=500',
                         },
                         {
-                            'filter':ur'^/c/itunes/episode/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'^/c/itunes/tv/episode/(?P<itunes_tv_show_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                             'query parameter':set(('itunes tv show id',)),
                             'remote':ur'lookup?entity=tvEpisode&limit=500',
                         },
@@ -1999,16 +2003,16 @@
                     'resolvable':[
                         {
                             'name':'itunes tv episode by itunes id',
-                            'format':ur'/c/itunes/episode/{itunes tv episode id}',
+                            'format':ur'/c/itunes/tv/episode/{itunes tv episode id}',
                             'canonical':True,
                         },
                         {
                             'name':'itunes tv episode by itunes season id',
-                            'format':ur'/c/itunes/episode/{itunes tv season id}/{track position}',
+                            'format':ur'/c/itunes/tv/episode/{itunes tv season id}/{track position}',
                         },
                         {
                             'name':'itunes tv episode by itunes show id',
-                            'format':ur'/c/itunes/episode/{itunes tv show id}/{disk position}/{track position}',
+                            'format':ur'/c/itunes/tv/episode/{itunes tv show id}/{disk position}/{track position}',
                         },
                     ],
                     'collection':'itunes_tv_episode',
@@ -2019,12 +2023,12 @@
                 'service.document.itunes.music.album':{
                     'match':[
                         {
-                            'filter':ur'^/c/itunes/album/(?P<itunes_music_album_id>[0-9]+)$',
+                            'filter':ur'^/c/itunes/music/album/(?P<itunes_music_album_id>[0-9]+)$',
                             'query parameter':set(('itunes music album id',)),
                             'remote':ur'lookup?entity=album',
                         },
                         {
-                            'filter':ur'^/c/itunes/album/search$',
+                            'filter':ur'^/c/itunes/music/album/search$',
                             'query parameter':set(('term',)),
                             'remote':ur'search?entity=album&attribute=albumTerm',
                         },
@@ -2038,7 +2042,7 @@
                     'resolvable':[
                         {
                             'name':'itunes album by itunes id',
-                            'format':ur'/c/itunes/album/{itunes music album id}',
+                            'format':ur'/c/itunes/music/album/{itunes music album id}',
                             'canonical':True,
                         },
                     ],
@@ -2050,12 +2054,12 @@
                 'service.document.itunes.music.track':{
                     'match':[
                         {
-                            'filter':ur'^/c/itunes/track/(?P<itunes_music_track_id>[0-9]+)$',
+                            'filter':ur'^/c/itunes/music/track/(?P<itunes_music_track_id>[0-9]+)$',
                             'query parameter':set(('itunes music track id',)),
                             'remote':ur'lookup?entity=song',
                         },
                         {
-                            'filter':ur'^/c/itunes/track/(?P<itunes_music_album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'filter':ur'^/c/itunes/music/track/(?P<itunes_music_album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
                             'query parameter':set(('itunes music album id',)),
                             'remote':ur'lookup?entity=song&limit=500',
                         },
@@ -2073,12 +2077,12 @@
                     'resolvable':[
                         {
                             'name':'itunes music track by itunes id',
-                            'format':ur'/c/itunes/track/{itunes music track id}',
+                            'format':ur'/c/itunes/music/track/{itunes music track id}',
                             'canonical':True,
                         },
                         {
                             'name':'itunes music track by itunes album id',
-                            'format':ur'/c/itunes/track/{itunes music album id}/{disk position}/{track position}',
+                            'format':ur'/c/itunes/music/track/{itunes music album id}/{disk position}/{track position}',
                         },
                     ],
                     'collection':'itunes_music_track',

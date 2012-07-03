@@ -1640,6 +1640,7 @@
                     'tmdb':'homepage',
                 },
                 'title':{
+                    'itunes':'trackName',
                     'tmdb':'title',
                     'rottentomatoes':'title',
                 },
@@ -1668,10 +1669,14 @@
                 'release date':{
                     'tmdb':u'release_date',
                     'rottentomatoes':u'release_date',
+                    'itunes':'releaseDate',
                 },
                 'description':{
                     'tmdb':'overview',
                     'rottentomatoes':'synopsis',
+                },
+                'long description':{
+                    'itunes':'longDescription',
                 },
                 'backdrop url':{
                     'tmdb':'backdrop_path',
@@ -1726,9 +1731,13 @@
                 },
                 'rating':{
                     'rottentomatoes':'mpaa_rating',
+                    'itunes':'contentAdvisoryRating',
                 },
                 'tmdb popularity':{
                     'tmdb':'popularity',
+                },
+                'artist':{
+                    'itunes':'artistName',  
                 },
             },
         },
@@ -1750,6 +1759,7 @@
                 },
                 'tv show':{
                     'tvdb':'SeriesName',
+                    'itunes':'artistName',
                 },
                 'modified date':{
                     'tvdb':'lastupdated',
@@ -1835,6 +1845,24 @@
                 'disk position':{
                     'tvdb':'SeasonNumber',
                 },
+                'track total':{
+                    'itunes':'trackCount',
+                },
+                'tv show':{
+                    'itunes':'artistName',
+                },
+                'rating':{
+                    'itunes':'contentAdvisoryRating',
+                },
+                'copyright':{
+                    'itunes':'copyright',    
+                },
+                'release date':{
+                    'itunes':'releaseDate',
+                },
+                'long description':{
+                    'itunes':'longDescription',    
+                },
                 'language':{
                     'tvdb':'Language',
                 },
@@ -1871,8 +1899,15 @@
                     'tvdb':'EpisodeNumber',
                     'itunes':'trackNumber',
                 },
+                'track total':{
+                    'itunes':'trackCount',
+                },
                 'name':{
                     'tvdb':'EpisodeName',
+                    'itunes':'trackName',
+                },
+                'tv show':{
+                    'itunes':'artistName',
                 },
                 'absolute tv episode':{
                     'tvdb':'absolute_number',
@@ -1883,17 +1918,21 @@
                 'modified date':{
                     'tvdb':'lastupdated',
                     'format':'unix time',
-                    # decode from int
                 },
                 'language':{
                     'tvdb':'Language',
                 },
                 'release date':{
                     'tvdb':'FirstAired',
+                    'itunes':'releaseDate',
                 },
                 'description':{
                     'tvdb':'Overview',
                     'unescape xml':True,
+                    'itunes':'shortDescription',
+                },
+                'long description':{
+                    'itunes':'longDescription',    
                 },
                 'tv episode id':{
                     'tvdb':'ProductionCode',
@@ -1926,6 +1965,9 @@
                     'tvdb':'EpImgFlag',
                     'enabled':False,
                 },
+                'rating':{
+                    'itunes':'contentAdvisoryRating',
+                },
             },
         },
 
@@ -1938,6 +1980,21 @@
                 },
                 'itunes music album id':{
                     'itunes':'collectionId',
+                },
+                'itunes artist id':{
+                    'itunes':'artistId',
+                },
+                'artist':{
+                    'itunes':'artistName',  
+                },
+                'copyright':{
+                    'itunes':'copyright',    
+                },
+                'release date':{
+                    'itunes':'releaseDate',
+                },                
+                'track total':{
+                    'itunes':'trackCount',
                 },
             },
         },
@@ -1955,10 +2012,28 @@
                     'itunes':'trackId',
                 },
                 'disk position':{
-                    'tvdb':'discNumber',
+                    'itunes':'discNumber',
+                },
+                'disk total':{
+                    'itunes':'discCount',
                 },
                 'track position':{
                     'itunes':'trackNumber',
+                },
+                'track total':{
+                    'itunes':'trackCount',
+                },
+                'name':{
+                    'itunes':'trackName',
+                },
+                'itunes artist id':{
+                    'itunes':'artistId',
+                },
+                'artist':{
+                    'itunes':'artistName',  
+                },
+                'release date':{
+                    'itunes':'releaseDate',
                 },
             },
         },

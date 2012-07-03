@@ -69,6 +69,9 @@ class iTunesHandler(ResourceHandler):
                                 canonical.decode_all(element, 'itunes')
                                 entry['record']['body']['canonical'] = canonical.node
                                 query['result'].append(entry)
+                                
+                                # Only produce once for each element
+                                break
     
         
     def parse_itunes_genres(self, document, parent=None):
