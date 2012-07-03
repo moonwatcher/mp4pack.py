@@ -45,30 +45,25 @@ class iTunesHandler(ResourceHandler):
                         for product in query['branch']['produce']:
                             if satisfies(element, product['condition']):
                                 
-                                # Initialize the genealogy by projecting the query parameter space on the ns.service.genealogy namespace
-                                # This will get rid of the api key
                                 entry = {
                                     'branch':product['branch'],
                                     'record':{
-                                        u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
+                                        u'head':{ u'genealogy':Ontology(self.env, 'ns.service.genealogy'), },
                                         u'body':{ u'original':element },
                                     }
                                 }
                                 
-                                # Use the decalred namespace for the branch to decode stuff 
-                                # from the document and augment the genealogy
-                                ns = self.env.namespace[entry['branch']['namespace']]
-                                if 'index' in query['branch']:
-                                    for index in query['branch']['index']:
-                                        prototype = ns.find(index)
-                                        if prototype and prototype.node['itunes'] in element:
-                                            entry['record'][u'head'][u'genealogy'][index] = prototype.cast(element[prototype.node['itunes']])
-                                            
                                 # make a caonical node
                                 canonical = Ontology(self.env, entry['branch']['namespace'])
                                 canonical.decode_all(element, 'itunes')
                                 entry['record']['body']['canonical'] = canonical.node
                                 query['result'].append(entry)
+                                
+                                # Copy indexed values from the canonical node to the genealogy
+                                if 'index' in query['branch']:
+                                    for index in query['branch']['index']:
+                                        entry['record'][u'head'][u'genealogy'][index] = canonical[index]
+                                
                                 
                                 # Only produce once for each element
                                 break

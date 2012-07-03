@@ -1413,6 +1413,18 @@
                 },
             ],
         },
+        'rule.itunes.tv.season.parse':{
+            'name':'Parse itunes tv season',
+            'provide':set(('disk position',)),
+            'branch':[
+                {
+                    'requires':set(('album',)),
+                    'decode':[
+                        {'property':'album', 'expression':ur', Season (?P<disk_position>[0-9]+)$',},
+                    ],
+                },
+            ],
+        },        
         'rule.uri.tmdb.configuration':{
             'name':'tmdb configuration uri',
             'provide':set(('tmdb configuration uri',)),

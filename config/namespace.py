@@ -1866,7 +1866,13 @@
                 'language':{
                     'tvdb':'Language',
                 },
+                'album':{
+                    'itunes':'collectionName',
+                },
             },
+            'rule':[
+                'rule.itunes.tv.season.parse',
+            ],
         },
         'ns.knowledge.tv.episode':{
             'synonym':['tvdb', 'keyword', 'itunes'],
@@ -1968,7 +1974,13 @@
                 'rating':{
                     'itunes':'contentAdvisoryRating',
                 },
+                'album':{
+                    'itunes':'collectionName',
+                },
             },
+            'rule':[
+                'rule.itunes.tv.season.parse',
+            ],
         },
 
         'ns.knowledge.music.album':{
