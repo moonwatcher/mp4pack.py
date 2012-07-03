@@ -1505,7 +1505,7 @@
             'remote base':u'http://www.thetvdb.com/api',
             'match':ur'^/c(?:/[a-z]{2})?/tvdb/.*$',
             'branch':{
-                'service.search.tvdb.show':{
+                'service.search.tvdb.tv.show':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/search$',
@@ -1528,8 +1528,7 @@
                     'parse type':'search',
                     'type':'xml',
                 },
-            
-                'service.document.tvdb.show':{
+                'service.document.tvdb.tv.show':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)$',
@@ -1556,7 +1555,7 @@
                     'produce':[
                         {
                             'tag':u'Series',
-                            'reference':'service.document.tvdb.show',
+                            'reference':'service.document.tvdb.tv.show',
                             'coalesce':False,
                         },
                     ],
@@ -1569,7 +1568,7 @@
                     'parse type':'document',
                     'type':'xml',
                 },
-                'service.document.tvdb.show.cast':{
+                'service.document.tvdb.tv.show.cast':{
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$',
@@ -1586,7 +1585,7 @@
                     'produce':[
                         {
                             'tag':u'Actor',
-                            'reference':'service.document.tvdb.show.cast',
+                            'reference':'service.document.tvdb.tv.show.cast',
                             'coalesce':True,
                         },
                     ],
@@ -1595,7 +1594,7 @@
                     'parse type':'document',
                     'type':'xml',
                 },
-                'service.document.tvdb.show.image':{
+                'service.document.tvdb.tv.show.image':{
                     'match':[
                         {
                             'filter':ur'^/c/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/image$',
@@ -1612,7 +1611,7 @@
                     'produce':[
                         {
                             'tag':u'Banner',
-                            'reference':'service.document.tvdb.show.image',
+                            'reference':'service.document.tvdb.tv.show.image',
                             'coalesce':True,
                         },
                     ],
@@ -1621,7 +1620,7 @@
                     'parse type':'document',
                     'type':'xml',
                 },
-                'service.document.tvdb.season':{
+                'service.document.tvdb.tv.season':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/season/(?P<tvdb_tv_season_id>[0-9]+)$',
@@ -1656,7 +1655,7 @@
                     'parse type':'document',
                     'type':'xml',
                 },
-                'service.document.tvdb.episode':{
+                'service.document.tvdb.tv.episode':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/episode/(?P<tvdb_tv_episode_id>[0-9]+)$',
@@ -1699,7 +1698,7 @@
                     'produce':[
                         {
                             'tag':u'Episode',
-                            'reference':'service.document.tvdb.episode',
+                            'reference':'service.document.tvdb.tv.episode',
                             'coalesce':False,
                         },
                     ],
@@ -1717,7 +1716,7 @@
                     'parse type':'document',
                     'type':'xml',
                 },
-                'service.document.tvdb.show.complete':{
+                'service.document.tvdb.tv.show.complete':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/show/(?P<tvdb_tv_show_id>[0-9]+)/complete$',
@@ -1727,22 +1726,22 @@
                     'produce':[
                         {
                             'tag':u'Series',
-                            'reference':'service.document.tvdb.show',
+                            'reference':'service.document.tvdb.tv.show',
                             'coalesce':False,
                         },
                         {
                             'tag':u'Episode',
-                            'reference':'service.document.tvdb.episode',
+                            'reference':'service.document.tvdb.tv.episode',
                             'coalesce':False,
                         },
                         {
                             'tag':u'Banner',
-                            'reference':'service.document.tvdb.show.image',
+                            'reference':'service.document.tvdb.tv.show.image',
                             'coalesce':True,
                         },
                         {
                             'tag':u'Actor',
-                            'reference':'service.document.tvdb.show.cast',
+                            'reference':'service.document.tvdb.tv.show.cast',
                             'coalesce':True,
                         },
                     ],
@@ -1895,7 +1894,7 @@
                     'type':'json',
                     'index':['itunes movie id'],
                 },
-                'service.document.itunes.show':{
+                'service.document.itunes.tv.show':{
                     'match':[
                         {
                             'filter':ur'^/c/itunes/show/(?P<itunes_tv_show_id>[0-9]+)$',
@@ -1910,7 +1909,7 @@
                     ],
                     'produce':[
                         {
-                            'reference':'service.document.itunes.show',
+                            'reference':'service.document.itunes.tv.show',
                             'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
                         },
                     ],
@@ -1926,7 +1925,7 @@
                     'type':'json',
                     'index':['itunes tv show id'],
                 },
-                'service.document.itunes.season':{
+                'service.document.itunes.tv.season':{
                     'match':[
                         {
                             'filter':ur'^/c/itunes/season/(?P<itunes_tv_season_id>[0-9]+)$',
@@ -1941,11 +1940,11 @@
                     ],
                     'produce':[
                         {
-                            'reference':'service.document.itunes.show',
+                            'reference':'service.document.itunes.tv.show',
                             'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
                         },
                         {
-                            'reference':'service.document.itunes.season',
+                            'reference':'service.document.itunes.tv.season',
                             'condition':{'wrapperType':'collection', 'collectionType':'TV Season'},
                         },
                     ],
@@ -1965,7 +1964,7 @@
                     'type':'json',
                     'index':['itunes tv show id', 'itunes tv season id', 'disk position'],
                 },
-                'service.document.itunes.episode':{
+                'service.document.itunes.tv.episode':{
                     'match':[
                         {
                             'filter':ur'^/c/itunes/episode/(?P<itunes_tv_episode_id>[0-9]+)$',
@@ -1985,15 +1984,15 @@
                     ],
                     'produce':[
                         {
-                            'reference':'service.document.itunes.show',
+                            'reference':'service.document.itunes.tv.show',
                             'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
                         },
                         {
-                            'reference':'service.document.itunes.season',
+                            'reference':'service.document.itunes.tv.season',
                             'condition':{'wrapperType':'collection', 'collectionType':'TV Season'},
                         },
                         {
-                            'reference':'service.document.itunes.episode',
+                            'reference':'service.document.itunes.tv.episode',
                             'condition':{'wrapperType':'track', 'kind':'tv-episode'},
                         },
                     ],
@@ -2017,11 +2016,11 @@
                     'type':'json',
                     'index':['itunes tv show id', 'itunes tv season id', 'itunes tv episode id', 'disk position', 'track position'],
                 },
-                'service.document.itunes.album':{
+                'service.document.itunes.music.album':{
                     'match':[
                         {
-                            'filter':ur'^/c/itunes/album/(?P<itunes_album_id>[0-9]+)$',
-                            'query parameter':set(('itunes album id',)),
+                            'filter':ur'^/c/itunes/album/(?P<itunes_music_album_id>[0-9]+)$',
+                            'query parameter':set(('itunes music album id',)),
                             'remote':ur'lookup?entity=album',
                         },
                         {
@@ -2032,23 +2031,23 @@
                     ],
                     'produce':[
                         {
-                            'reference':'service.document.itunes.album',
+                            'reference':'service.document.itunes.music.album',
                             'condition':{'wrapperType':'collection', 'collectionType':'Album'},
                         },
                     ],
                     'resolvable':[
                         {
                             'name':'itunes album by itunes id',
-                            'format':ur'/c/itunes/album/{itunes album id}',
+                            'format':ur'/c/itunes/album/{itunes music album id}',
                             'canonical':True,
                         },
                     ],
-                    'collection':'itunes_album',
+                    'collection':'itunes_music_album',
                     'namespace':'ns.knowledge.music.album',
                     'type':'json',
-                    'index':['itunes album id'],
+                    'index':['itunes music album id'],
                 },
-                'service.document.itunes.track':{
+                'service.document.itunes.music.track':{
                     'match':[
                         {
                             'filter':ur'^/c/itunes/track/(?P<itunes_music_track_id>[0-9]+)$',
@@ -2056,18 +2055,18 @@
                             'remote':ur'lookup?entity=song',
                         },
                         {
-                            'filter':ur'^/c/itunes/track/(?P<itunes_album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
-                            'query parameter':set(('itunes album id',)),
+                            'filter':ur'^/c/itunes/track/(?P<itunes_music_album_id>[0-9]+)/(?P<disk_position>[0-9]+)/(?P<track_position>[0-9]+)$',
+                            'query parameter':set(('itunes music album id',)),
                             'remote':ur'lookup?entity=song&limit=500',
                         },
                     ],
                     'produce':[
                         {
-                            'reference':'service.document.itunes.track',
+                            'reference':'service.document.itunes.music.track',
                             'condition':{'wrapperType':'track', 'kind':'song'},
                         },
                         {
-                            'reference':'service.document.itunes.album',
+                            'reference':'service.document.itunes.music.album',
                             'condition':{'wrapperType':'collection', 'collectionType':'Album'},
                         },
                     ],
@@ -2079,13 +2078,13 @@
                         },
                         {
                             'name':'itunes music track by itunes album id',
-                            'format':ur'/c/itunes/track/{itunes album id}/{disk position}/{track position}',
+                            'format':ur'/c/itunes/track/{itunes music album id}/{disk position}/{track position}',
                         },
                     ],
                     'collection':'itunes_music_track',
                     'namespace':'ns.knowledge.music.track',
                     'type':'json',
-                    'index':['itunes music track id', 'itunes album id', 'disk position', 'track position'],
+                    'index':['itunes music track id', 'itunes music album id', 'disk position', 'track position'],
                 },
 
                 'service.document.itunes.genre.complete':{

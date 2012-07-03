@@ -201,7 +201,7 @@
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
                 'itunes genre id':None,
-                'itunes album id':None,
+                'itunes music album id':None,
                 'itunes music track id':None,
             },
             'rule':[
@@ -261,7 +261,7 @@
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
                 'itunes genre id':None,
-                'itunes album id':None,
+                'itunes music album id':None,
                 'itunes music track id':None,
                 'name':None,
                 'simple name':None,
@@ -1311,7 +1311,7 @@
                 'itunes tv episode id':{
                     'itunes':'id',
                 },
-                'itunes album id':{
+                'itunes music album id':{
                     'itunes':'id',
                 },
                 'itunes music track id':{
@@ -1936,7 +1936,7 @@
                 'album':{
                     'itunes':'collectionName',
                 },
-                'itunes album id':{
+                'itunes music album id':{
                     'itunes':'collectionId',
                 },
             },
@@ -1948,7 +1948,7 @@
                 'album':{
                     'itunes':'collectionName',
                 },
-                'itunes album id':{
+                'itunes music album id':{
                     'itunes':'collectionId',
                 },
                 'itunes music track id':{

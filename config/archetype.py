@@ -2,6 +2,98 @@
 
 {
     'archetype':{
+        'home id':{
+            'name':u'Home ID',
+            'keyword':u'home_id',
+            'type':'int',
+        },
+        'album id':{
+            'name':u'Album ID',
+            'keyword':u'album_id',
+            'type':'int',
+        },
+        'disk id':{
+            'name':u'Disk ID',
+            'keyword':u'disk_id',
+            'type':'int',
+        },
+        'track id':{
+            'name':u'Track ID',
+            'keyword':u'track_id',
+            'type':'int',
+        },
+        'movie id':{
+            'name':u'Movie ID',
+            'keyword':u'movie_id',
+            'type':'int',
+        },
+        'collection id':{
+            'name':u'Collection ID',
+            'keyword':u'collection_id',
+            'type':'int',
+        },
+        'tv show id':{
+            'name':u'TV show ID',
+            'keyword':u'tv_show_id',
+            'type':'int',
+        },
+        'person id':{
+            'name':u'Person ID',
+            'keyword':u'person_id',
+            'type':'int',
+        },
+        'company id':{
+            'name':u'Company ID',
+            'keyword':u'company_id',
+            'type':'int',
+        },
+        'network id':{
+            'name':u'Network ID',
+            'keyword':u'network_id',
+            'type':'int',
+        },
+        'studio id':{
+            'name':u'Studio ID',
+            'keyword':u'studio_id',
+            'type':'int',
+        },
+        'job id':{
+            'name':u'Job ID',
+            'keyword':u'job_id',
+            'type':'int',
+        },
+        'department id':{
+            'name':u'Department ID',
+            'keyword':u'department_id',
+            'type':'int',
+        },
+        'keyword id':{
+            'name':u'Keyword ID',
+            'keyword':u'keyword_id',
+            'type':'int',
+        },
+        'genre id':{
+            'name':u'Genre ID',
+            'keyword':u'genre_id',
+            'type':'int',
+        },
+
+        'home uri':{
+            'name':u'Home URI',
+            'keyword':'home_uri',
+            'type':'unicode',
+        },
+        'asset uri':{
+            'name':u'Asset URI',
+            'keyword':'asset_uri',
+            'type':'unicode',
+        },
+        'resource uri':{
+            'name':u'Resource URI',
+            'keyword':'resource_uri',
+            'type':'unicode',
+        },
+    
         'itunes person id':{
             'name':u'iTunes person ID',
             'keyword':u'itunes_person_id',
@@ -27,9 +119,9 @@
             'keyword':u'itunes_tv_episode_id',
             'type':'int',
         },
-        'itunes album id':{
+        'itunes music album id':{
             'name':u'iTunes album ID',
-            'keyword':u'itunes_album_id',
+            'keyword':u'itunes_music_album_id',
             'type':'int',
         }, 
         'itunes music track id':{
@@ -125,6 +217,7 @@
             'keyword':u'tvdb_image_id',
             'type':'int',
         },
+        
         'imdb tv show id':{
             'name':u'IMDb TV show ID',
             'keyword':u'imdb_tv_show_id',
@@ -145,6 +238,7 @@
             'keyword':u'trimmed_imdb_movie_id',
             'type':'unicode'
         },
+
         'tmdb movie id':{
             'name':u'TMDb movie ID',
             'keyword':u'tmdb_movie_id',
@@ -180,6 +274,7 @@
             'keyword':u'tmdb_popularity',
             'type':'float',
         },
+
         'rottentomatoes movie id':{
             'name':u'Rotten tomatoes movie ID',
             'keyword':u'rottentomatoes_movie_id',
@@ -391,11 +486,6 @@
         'file name':{
             'name':u'File name',
             'keyword':u'file_name',
-            'type':'unicode',
-        },
-        'path in cache':{
-            'name':u'Path in cache',
-            'keyword':u'path_in_cache',
             'type':'unicode',
         },
         'exploded path':{
@@ -1120,82 +1210,6 @@
             'keyword':u'mongodb_url',
             'type':'unicode',
         },
-        'home id':{
-            'name':u'Home ID',
-            'keyword':u'home_id',
-            'type':'int',
-        },
-        'album id':{
-            'name':u'Album ID',
-            'keyword':u'album_id',
-            'type':'int',
-        },
-        'disk id':{
-            'name':u'Disk ID',
-            'keyword':u'disk_id',
-            'type':'int',
-        },
-        'track id':{
-            'name':u'Track ID',
-            'keyword':u'track_id',
-            'type':'int',
-        },
-        
-        'movie id':{
-            'name':u'Movie ID',
-            'keyword':u'movie_id',
-            'type':'int',
-        },
-        'collection id':{
-            'name':u'Collection ID',
-            'keyword':u'collection_id',
-            'type':'int',
-        },
-        'tv show id':{
-            'name':u'TV show ID',
-            'keyword':u'tv_show_id',
-            'type':'int',
-        },
-        'person id':{
-            'name':u'Person ID',
-            'keyword':u'person_id',
-            'type':'int',
-        },
-        'company id':{
-            'name':u'Company ID',
-            'keyword':u'company_id',
-            'type':'int',
-        },
-        'network id':{
-            'name':u'Network ID',
-            'keyword':u'network_id',
-            'type':'int',
-        },
-        'studio id':{
-            'name':u'Studio ID',
-            'keyword':u'studio_id',
-            'type':'int',
-        },
-        'job id':{
-            'name':u'Job ID',
-            'keyword':u'job_id',
-            'type':'int',
-        },
-        'department id':{
-            'name':u'Department ID',
-            'keyword':u'department_id',
-            'type':'int',
-        },
-        'keyword id':{
-            'name':u'Keyword ID',
-            'keyword':u'keyword_id',
-            'type':'int',
-        },
-        'genre id':{
-            'name':u'Genre ID',
-            'keyword':u'genre_id',
-            'type':'int',
-        },
         'sort order':{
             'name':u'Sort order',
             'keyword':u'sort_order',
@@ -1555,21 +1569,6 @@
             'keyword':u'handbrake_audio_encoder_settings',
             'type':'unicode',
             'plural':'dict',
-        },
-        'home uri':{
-            'name':u'Home URI',
-            'keyword':'home_uri',
-            'type':'unicode',
-        },
-        'asset uri':{
-            'name':u'Asset URI',
-            'keyword':'asset_uri',
-            'type':'unicode',
-        },
-        'resource uri':{
-            'name':u'Resource URI',
-            'keyword':'resource_uri',
-            'type':'unicode',
         },
     },
 }
