@@ -26,48 +26,46 @@ class RottenTomatoesHandler(ResourceHandler):
                 self.log.warning(u'Failed to decode JSON document %s', query['remote url'])
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
-                # Initialize the genealogy by projecting the query parameter space on the ns.service.genealogy namespace
-                # This will get rid of the api key
-                entry = {
-                    'branch':query['branch'],
-                    'record':{
-                        u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
-                        u'body':{ u'original':document },
+                if 'error' in document:
+                    self.log.warning(u'API error: %s', document['error'])
+                else:
+                    entry = {
+                        'branch':query['branch'],
+                        'record':{
+                            u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
+                            u'body':{ u'original':document },
+                        }
                     }
-                }
-                
-                # Overrides
-                if entry['branch']['name'] == 'service.remote.rottentomatoes.movie':
-                    # Rotten tomatoes holds the imdb id without the tt prefix, inside the alternate_ids dictionary
-                    if 'alternate_ids' in document and 'imdb' in document['alternate_ids'] and document['alternate_ids']['imdb']:
-                        document[u'imdb_id'] = u'tt{0}'.format(document['alternate_ids']['imdb'])
-                    if 'release_dates' in document and 'theater' in document['release_dates']:
-                        document[u'release_date'] = document['release_dates']['theater']
                     
-                if entry['branch']['name'] == 'service.remote.rottentomatoes.movie.review' and 'reviews' in document:
-                    # Flatten the review links
-                    for r in document['reviews']:
-                        if 'links' in r and 'review' in r['links']: r['review_link'] = r['links']['review']
-                    
-                # Use the decalred namespace for the branch to decode stuff 
-                # from the document and augment the genealogy
-                ns = self.env.namespace[entry['branch']['namespace']]
-                if 'index' in query['branch']:
-                    for index in query['branch']['index']:
-                        prototype = ns.find(index)
-                        if prototype and prototype.node['rottentomatoes'] in document:
-                            entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['rottentomatoes']])
-                            
-                # make a caonical node
-                canonical = Ontology(self.env, entry['branch']['namespace'])
-                canonical.decode_all(document, 'rottentomatoes')
-
-                if entry['branch']['name'] == 'service.remote.rottentomatoes.movie':
-                    # The ratings are stored in a sub container
-                    if 'ratings' in document:
-                        canonical.decode_all(document['ratings'], 'rottentomatoes')
-
-                entry['record']['body']['canonical'] = canonical.node
-                query['result'].append(entry)
+                    # Rotten tomatoes specific overrides
+                    if entry['branch']['name'] == 'service.remote.rottentomatoes.movie':
+                        # Rotten tomatoes holds the imdb id without the tt prefix, inside the alternate_ids dictionary
+                        if 'alternate_ids' in document and 'imdb' in document['alternate_ids'] and document['alternate_ids']['imdb']:
+                            document[u'imdb_id'] = u'tt{0}'.format(document['alternate_ids']['imdb'])
+                        if 'release_dates' in document and 'theater' in document['release_dates']:
+                            document[u'release_date'] = document['release_dates']['theater']
+                        
+                    if entry['branch']['name'] == 'service.remote.rottentomatoes.movie.review' and 'reviews' in document:
+                        # Flatten the review links
+                        for r in document['reviews']:
+                            if 'links' in r and 'review' in r['links']: r['review_link'] = r['links']['review']
+                        
+                    # make a caonical node
+                    canonical = Ontology(self.env, entry['branch']['namespace'])
+                    canonical.decode_all(document, 'rottentomatoes')
+    
+                    # Movie ratings are stored in a sub container, simply decode them directly from there
+                    if entry['branch']['name'] == 'service.remote.rottentomatoes.movie':
+                        if 'ratings' in document:
+                            canonical.decode_all(document['ratings'], 'rottentomatoes')
+    
+                    # Copy indexed values from the canonical node to the genealogy
+                    if 'index' in query['branch']:
+                        for index in query['branch']['index']:
+                            if index in canonical:
+                                entry['record'][u'head'][u'genealogy'][index] = canonical[index]
+    
+                    entry['record']['body']['canonical'] = canonical.node
+                    query['result'].append(entry)
     
 

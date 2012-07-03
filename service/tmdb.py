@@ -32,20 +32,17 @@ class TMDbHandler(ResourceHandler):
                         }
                     }
     
-                    # Use the decalred namespace for the branch to decode stuff
-                    # from the document and augment the genealogy
-                    if 'namespace' in entry['branch']:
-                        ns = self.env.namespace[entry['branch']['namespace']]
-                        if 'index' in query['branch']:
-                            for index in query['branch']['index']:
-                                prototype = ns.find(index)
-                                if prototype and prototype.node['tmdb'] in document:
-                                    entry['record'][u'head'][u'genealogy'][index] = prototype.cast(document[prototype.node['tmdb']])
-    
+                    if 'namespace' in query['branch']:
                         # make a caonical node
                         canonical = Ontology(self.env, entry['branch']['namespace'])
                         canonical.decode_all(document, 'tmdb')
                         entry['record']['body']['canonical'] = canonical.node
+
+                        # Copy indexed values from the canonical node to the genealogy
+                        if 'index' in query['branch']:
+                            for index in query['branch']['index']:
+                                if index in canonical:
+                                    entry['record'][u'head'][u'genealogy'][index] = canonical[index]
                     
                     # Append the entry to the query result    
                     query['result'].append(entry)

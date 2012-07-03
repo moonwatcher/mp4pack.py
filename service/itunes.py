@@ -62,7 +62,8 @@ class iTunesHandler(ResourceHandler):
                                 # Copy indexed values from the canonical node to the genealogy
                                 if 'index' in query['branch']:
                                     for index in query['branch']['index']:
-                                        entry['record'][u'head'][u'genealogy'][index] = canonical[index]
+                                        if index in canonical:
+                                            entry['record'][u'head'][u'genealogy'][index] = canonical[index]
                                 
                                 
                                 # Only produce once for each element
