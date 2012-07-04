@@ -643,8 +643,8 @@
                 },
             },
             'rule':[
-                'rule.knowledge.disc.number',
-                'rule.knowledge.track.number',
+                'rule.knowledge.disc.position',
+                'rule.knowledge.track.position',
                 'rule.knowledge.default.track.count',
                 'rule.knowledge.default.disc.count',
                 'rule.knowledge.default.episode',
@@ -929,8 +929,8 @@
                 },
             },
             'rule':[
-                'rule.knowledge.disc.number',
-                'rule.knowledge.track.number',
+                'rule.knowledge.disc.position',
+                'rule.knowledge.track.position',
                 'rule.itunes.itunextc.parse',
             ],
         },

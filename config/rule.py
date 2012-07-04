@@ -1024,61 +1024,8 @@
                     ],
                 },
             ],
-        },
-        
-        'rule.knowledge.movie.uri':{
-            'name':'movie uri',
-            'provide':set(('movie uri',)),
-            'branch':[
-                {
-                    'requires':set(('media kind', 'movie id',)),
-                    'equal':{'media kind':'movie', },
-                    'apply':[
-                        {
-                            'property':'movie uri',
-                            'format':u'/k/{language}/movie/{movie id}',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.knowledge.episode.uri':{
-            'name':'episode uri',
-            'provide':set(('episode uri',)),
-            'branch':[
-                {
-                    'requires':set(('media kind', 'tv show id', 'disc number', 'track number')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'episode uri',
-                            'format':u'/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tv show handle', 'disc number', 'track number')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'episode uri',
-                            'format':u'/k/{language}/tv/episode/~/{tv show handle}/{disc number}/{track number}',
-                        },
-                    ],
-                },
-                {
-                    'requires':set(('media kind', 'tvdb tv show id', 'disc number', 'track number')),
-                    'equal':{'media kind':'tvshow', },
-                    'apply':[
-                        {
-                            'property':'episode uri',
-                            'format':u'/k/{language}/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}',
-                        },
-                    ],
-                },
-            ],
-        },
-        'rule.knowledge.track.number':{
+        },        
+        'rule.knowledge.track.position':{
             'name':'Compute the composite track position',
             'provide':set(('track position',)),
             'branch':[
@@ -1098,7 +1045,7 @@
                 },
             ],
         },
-        'rule.knowledge.disc.number':{
+        'rule.knowledge.disc.position':{
             'name':'Compute the composite disc position',
             'provide':set(('disc position',)),
             'branch':[
@@ -1425,6 +1372,59 @@
                 },
             ],
         },        
+        
+        'rule.knowledge.movie.uri':{
+            'name':'movie uri',
+            'provide':set(('movie uri',)),
+            'branch':[
+                {
+                    'requires':set(('media kind', 'movie id',)),
+                    'equal':{'media kind':'movie', },
+                    'apply':[
+                        {
+                            'property':'movie uri',
+                            'format':u'/k/{language}/movie/{movie id}',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.knowledge.episode.uri':{
+            'name':'episode uri',
+            'provide':set(('episode uri',)),
+            'branch':[
+                {
+                    'requires':set(('media kind', 'tv show id', 'disc number', 'track number')),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        {
+                            'property':'episode uri',
+                            'format':u'/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('media kind', 'tv show handle', 'disc number', 'track number')),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        {
+                            'property':'episode uri',
+                            'format':u'/k/{language}/tv/episode/~/{tv show handle}/{disc number}/{track number}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('media kind', 'tvdb tv show id', 'disc number', 'track number')),
+                    'equal':{'media kind':'tvshow', },
+                    'apply':[
+                        {
+                            'property':'episode uri',
+                            'format':u'/k/{language}/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}',
+                        },
+                    ],
+                },
+            ],
+        },
         'rule.uri.tmdb.configuration':{
             'name':'tmdb configuration uri',
             'provide':set(('tmdb configuration uri',)),
