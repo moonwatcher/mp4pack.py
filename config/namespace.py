@@ -1769,6 +1769,7 @@
                 },
                 'modified date':{
                     'tvdb':'lastupdated',
+                    'format':'unix time',
                 },
                 'release date':{
                     'tvdb':'FirstAired',
@@ -1965,7 +1966,7 @@
                     'plural format':'tvdb list',
                 },
                 'screenwriters':{
-                    'tvdb':'Screenwriter',
+                    'tvdb':'Writer',
                     'plural format':'tvdb list',
                 },
                 'rating':{
