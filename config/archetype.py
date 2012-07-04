@@ -618,18 +618,6 @@
             'type':'unicode',
             'atom':'©alb',
         },
-        'track position':{
-            'name':u'Track position',
-            'keyword':u'track_position',
-            'type':'unicode',
-            'atom':'trkn',
-        },
-        'disc position':{
-            'name':u'Disc position',
-            'keyword':u'disc_position',
-            'type':'unicode',
-            'atom':'disk',
-        },
         'track number':{
             'name':u'Track number',
             'keyword':u'track_number',
@@ -640,6 +628,12 @@
             'keyword':u'track_count',
             'type':'int',
         },
+        'track position':{
+            'name':u'Track position',
+            'keyword':u'track_position',
+            'type':'unicode',
+            'atom':'trkn',
+        },
         'disc number':{
             'name':u'Disc number',
             'keyword':u'disc_number',
@@ -649,6 +643,12 @@
             'name':u'Disc count',
             'keyword':u'disc_count',
             'type':'int',
+        },
+        'disc position':{
+            'name':u'Disc position',
+            'keyword':u'disc_position',
+            'type':'unicode',
+            'atom':'disk',
         },
         'grouping':{
             'name':u'Grouping',
