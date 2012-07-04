@@ -170,15 +170,15 @@
                 'movie id':None,
                 'album id':None,
                 'tv show id':None,
-                'disk id':None,
+                'disc id':None,
                 'track id':None,
                 'person id':None,
                 'company id':None,
                 'genre id':None,
                 'job id':None,
                 'department id':None,
-                'track position':None,
-                'disk position':None,
+                'track number':None,
+                'disc number':None,
                 'movie handle':None,
                 'album handle':None,
                 'tv show handle':None,
@@ -240,10 +240,10 @@
                 'movie id':None,
                 'album id':None,
                 'tv show id':None,
-                'disk id':None,
+                'disc id':None,
                 'track id':None,
-                'track position':None,
-                'disk position':None,
+                'track number':None,
+                'disc number':None,
                 'movie handle':None,
                 'album handle':None,
                 'tv show handle':None,
@@ -298,10 +298,10 @@
                 'movie id':None,
                 'album id':None,
                 'tv show id':None,
-                'disk id':None,
+                'disc id':None,
                 'track id':None,
-                'track position':None,
-                'disk position':None,
+                'track number':None,
+                'disc number':None,
                 'movie handle':None,
                 'album handle':None,
                 'tv show handle':None,
@@ -341,10 +341,10 @@
                 'movie id':None,
                 'album id':None,
                 'tv show id':None,
-                'disk id':None,
+                'disc id':None,
                 'track id':None,
-                'track position':None,
-                'disk position':None,
+                'track number':None,
+                'disc number':None,
                 'movie handle':None,
                 'album handle':None,
                 'tv show handle':None,
@@ -416,22 +416,22 @@
                     'mediainfo':'stik',
                     'subler':'Media Kind',
                 },
-                'track position':{
+                'track number':{
                     'mediainfo':'Track_Position',
                 },
-                'track total':{
+                'track count':{
                     'mediainfo':'Track_Position_Total',
                 },
-                'disk position':{
+                'disc number':{
                     'mediainfo':'Part_Position',
                 },
-                'disk total':{
+                'disc count':{
                     'mediainfo':'Part_Position_Total',
                 },
-                'track number':{
+                'track position':{
                     'subler':'Track #',
                 },
-                'disk number':{
+                'disc position':{
                     'subler':'Disk #',
                 },
                 'tv season':{
@@ -643,10 +643,10 @@
                 },
             },
             'rule':[
-                'rule.knowledge.disk.number',
+                'rule.knowledge.disc.number',
                 'rule.knowledge.track.number',
-                'rule.knowledge.default.track.total',
-                'rule.knowledge.default.disk.total',
+                'rule.knowledge.default.track.count',
+                'rule.knowledge.default.disc.count',
                 'rule.knowledge.default.episode',
                 'rule.knowledge.sort.name',
                 'rule.knowledge.sort.artist',
@@ -702,22 +702,22 @@
                     'mediainfo':'stik',
                     'subler':'Media Kind',
                 },
-                'track position':{
+                'track number':{
                     'mediainfo':'Track_Position',
                 },
-                'track total':{
+                'track count':{
                     'mediainfo':'Track_Position_Total',
                 },
-                'disk position':{
+                'disc number':{
                     'mediainfo':'Part_Position',
                 },
-                'disk total':{
+                'disc count':{
                     'mediainfo':'Part_Position_Total',
                 },
-                'track number':{
+                'track position':{
                     'subler':'Track #',
                 },
-                'disk number':{
+                'disc position':{
                     'subler':'Disk #',
                 },
                 'tv season':{
@@ -929,7 +929,7 @@
                 },
             },
             'rule':[
-                'rule.knowledge.disk.number',
+                'rule.knowledge.disc.number',
                 'rule.knowledge.track.number',
                 'rule.itunes.itunextc.parse',
             ],
@@ -1528,7 +1528,7 @@
                 'tvdb image id':{
                     'tvdb':'id',
                 },
-                'disk position':{
+                'disc number':{
                     'tvdb':'Season',
                 },
             },
@@ -1842,10 +1842,10 @@
                 'tvdb tv season id':{
                     'tvdb':'seasonid',
                 },
-                'disk position':{
+                'disc number':{
                     'tvdb':'SeasonNumber',
                 },
-                'track total':{
+                'track count':{
                     'itunes':'trackCount',
                 },
                 'tv show':{
@@ -1898,14 +1898,14 @@
                 'tvdb tv episode id':{
                     'tvdb':'id',
                 },
-                'disk position':{
+                'disc number':{
                     'tvdb':'SeasonNumber',
                 },
-                'track position':{
+                'track number':{
                     'tvdb':'EpisodeNumber',
                     'itunes':'trackNumber',
                 },
-                'track total':{
+                'track count':{
                     'itunes':'trackCount',
                 },
                 'name':{
@@ -2005,7 +2005,7 @@
                 'release date':{
                     'itunes':'releaseDate',
                 },                
-                'track total':{
+                'track count':{
                     'itunes':'trackCount',
                 },
             },
@@ -2023,16 +2023,16 @@
                 'itunes music track id':{
                     'itunes':'trackId',
                 },
-                'disk position':{
+                'disc number':{
                     'itunes':'discNumber',
                 },
-                'disk total':{
+                'disc count':{
                     'itunes':'discCount',
                 },
-                'track position':{
+                'track number':{
                     'itunes':'trackNumber',
                 },
-                'track total':{
+                'track count':{
                     'itunes':'trackCount',
                 },
                 'name':{

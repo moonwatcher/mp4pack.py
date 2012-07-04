@@ -207,36 +207,36 @@
                 {
                     'requires':set((
                         'media kind',
-                        'disk id',
-                        'track position',
+                        'disc id',
+                        'track number',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/{disk id}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/{disc id}/{track number}', },
                     ],
                 },
                 {
                     'requires':set((
                         'media kind',
                         'tv show id',
-                        'disk position',
-                        'track position',
+                        'disc number',
+                        'track number',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/{tv show id}/{disk position}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/{tv show id}/{disc number}/{track number}', },
                     ],
                 },
                 {
                     'requires':set((
                         'media kind',
                         'tv show handle',
-                        'disk position',
-                        'track position',
+                        'disc number',
+                        'track number',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/~/{tv show handle}/{disk position}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/~/{tv show handle}/{disc number}/{track number}', },
                     ],
                 },
                 {
@@ -253,23 +253,23 @@
                     'requires':set((
                         'media kind',
                         'tvdb tv season id',
-                        'track position',
+                        'track number',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv season id}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv season id}/{track number}', },
                     ],
                 },
                 {
                     'requires':set((
                         'media kind',
                         'tvdb tv show id',
-                        'disk position',
-                        'track position',
+                        'disc number',
+                        'track number',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}', },
                     ],
                 },
                 {
@@ -286,12 +286,12 @@
                     'requires':set((
                         'media kind',
                         'imdb tv show id',
-                        'disk position',
-                        'track position',
+                        'disc number',
+                        'track number',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/imdb/{imdb tv show id}/{disk position}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}', },
                     ],
                 },
                 {
@@ -307,36 +307,36 @@
                 {
                     'requires':set((
                         'media kind',
-                        'disk id',
-                        'track position',
+                        'disc id',
+                        'track number',
                     )),
                     'equal':{'media kind':'music', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/music/track/{disk id}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/music/track/{disc id}/{track number}', },
                     ],
                 },
                 {
                     'requires':set((
                         'media kind',
                         'album id',
-                        'disk position',
-                        'track position',
+                        'disc number',
+                        'track number',
                     )),
                     'equal':{'media kind':'music', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/music/track/{album id}/{disk position}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/music/track/{album id}/{disc number}/{track number}', },
                     ],
                 },
                 {
                     'requires':set((
                         'media kind',
                         'album handle',
-                        'disk position',
-                        'track position',
+                        'disc number',
+                        'track number',
                     )),
                     'equal':{'media kind':'music', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/music/track/~/{album handle}/{disk position}/{track position}', },
+                        { 'property':'home uri', 'format':u'/h/music/track/~/{album handle}/{disc number}/{track number}', },
                     ],
                 },
             ],
@@ -376,8 +376,8 @@
             'provide':set((
                 'kind',
                 'media kind',
-                'disk position',
-                'track position',
+                'disc number',
+                'track number',
                 'imdb movie id',
                 'tmdb movie id',
                 'tv show handle',
@@ -390,7 +390,7 @@
                     'requires':set(('file name',)),
                     'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
-                        {'property':'file name', 'expression':ur'^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disk_position>[0-9]+)e(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                        {'property':'file name', 'expression':ur'^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
                     'apply':[
                         {'property':'media kind', 'value':u'tvshow',},
@@ -400,7 +400,7 @@
                     'requires':set(('file name',)),
                     'match':{'property':'file name', 'expression':ur'^.{2,} d[0-9]+t[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
-                        {'property':'file name', 'expression':ur'^(?P<album_handle>.{2,}) d(?P<disk_position>[0-9]+)t(?P<track_position>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                        {'property':'file name', 'expression':ur'^(?P<album_handle>.{2,}) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\s*(?P<name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
                     'apply':[
                         {'property':'media kind', 'value':u'music',},
@@ -559,22 +559,22 @@
             'provide':set(('canonic directory',)),
             'branch':[
                 {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'localized')),
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disc number', 'localized')),
                     'equal':{'media kind':'tvshow', 'localized':False, },
                     'apply':[
                         {
                             'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}',
+                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disc number}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disk position', 'language', 'localized')),
+                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tvdb tv show id', 'disc number', 'language', 'localized')),
                     'equal':{'media kind':'tvshow', 'localized':True, },
                     'apply':[
                         {
                             'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disk position}/{language}',
+                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tvdb tv show id}/{disc number}/{language}',
                         },
                     ],
                 },
@@ -755,22 +755,22 @@
             'provide':set(('track genealogy',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'disk position', 'track position')),
+                    'requires':set(('media kind', 'disc number', 'track number')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
                         {
                             'property':'track genealogy',
-                            'format':u's{disk position:02d}e{track position:02d}',
+                            'format':u's{disc number:02d}e{track number:02d}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'disk position', 'track position')),
+                    'requires':set(('media kind', 'disc number', 'track number')),
                     'equal':{'media kind':'music', },
                     'apply':[
                         {
                             'property':'track genealogy',
-                            'format':u'd{disk position:02d}t{track position:02d}',
+                            'format':u'd{disc number:02d}t{track number:02d}',
                         },
                     ],
                 },
@@ -1047,113 +1047,113 @@
             'provide':set(('episode uri',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'tv show id', 'disk position', 'track position')),
+                    'requires':set(('media kind', 'tv show id', 'disc number', 'track number')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
                         {
                             'property':'episode uri',
-                            'format':u'/k/{language}/tv/episode/{tv show id}/{disk position}/{track position}',
+                            'format':u'/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'tv show handle', 'disk position', 'track position')),
+                    'requires':set(('media kind', 'tv show handle', 'disc number', 'track number')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
                         {
                             'property':'episode uri',
-                            'format':u'/k/{language}/tv/episode/~/{tv show handle}/{disk position}/{track position}',
+                            'format':u'/k/{language}/tv/episode/~/{tv show handle}/{disc number}/{track number}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'tvdb tv show id', 'disk position', 'track position')),
+                    'requires':set(('media kind', 'tvdb tv show id', 'disc number', 'track number')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
                         {
                             'property':'episode uri',
-                            'format':u'/k/{language}/tv/episode/tvdb/{tvdb tv show id}/{disk position}/{track position}',
+                            'format':u'/k/{language}/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}',
                         },
                     ],
                 },
             ],
         },
         'rule.knowledge.track.number':{
-            'name':'Compute the composite track number',
-            'provide':set(('track number',)),
+            'name':'Compute the composite track position',
+            'provide':set(('track position',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'track position', 'track total')),
+                    'requires':set(('media kind', 'track number', 'track count')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'track number', 'format':u'{track position} / {track total}', },
+                        { 'property':'track position', 'format':u'{track number} / {track count}', },
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'track position', 'track total')),
+                    'requires':set(('media kind', 'track number', 'track count')),
                     'equal':{'media kind':'music', },
                     'apply':[
-                        { 'property':'track number', 'format':u'{track position} / {track total}', },
+                        { 'property':'track position', 'format':u'{track number} / {track count}', },
                     ],
                 },
             ],
         },
-        'rule.knowledge.disk.number':{
-            'name':'Compute the composite disk number',
-            'provide':set(('disk number',)),
+        'rule.knowledge.disc.number':{
+            'name':'Compute the composite disc position',
+            'provide':set(('disc position',)),
             'branch':[
                 {
-                    'requires':set(('disk position', 'disk total')),
+                    'requires':set(('disc number', 'disc count')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'disk number', 'format':u'{disk position} / {disk total}', },
+                        { 'property':'disc position', 'format':u'{disc number} / {disc count}', },
                     ],
                 },
                 {
-                    'requires':set(('disk position', 'disk total')),
+                    'requires':set(('disc number', 'disc count')),
                     'equal':{'media kind':'music', },
                     'apply':[
-                        { 'property':'disk number', 'format':u'{disk position} / {disk total}', },
+                        { 'property':'disc position', 'format':u'{disc number} / {disc count}', },
                     ],
                 },
             ],
         },
-        'rule.knowledge.default.track.total':{
-            'name':'Default track total',
-            'provide':set(('track total',)),
+        'rule.knowledge.default.track.count':{
+            'name':'Default track count',
+            'provide':set(('track count',)),
             'branch':[
                 {
                     'requires':set(('media kind',)),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        {'property':'track total', 'value':0},
+                        {'property':'track count', 'value':0},
                     ],
                 },
                 {
                     'requires':set(('media kind',)),
                     'equal':{'media kind':'music', },
                     'apply':[
-                        {'property':'track total', 'value':0},
+                        {'property':'track count', 'value':0},
                     ],
                 },
             ],
         },
-        'rule.knowledge.default.disk.total':{
-            'name':'Default disk total',
-            'provide':set(('disk total',)),
+        'rule.knowledge.default.disc.count':{
+            'name':'Default disc count',
+            'provide':set(('disc count',)),
             'branch':[
                 {
                     'requires':set(('media kind',)),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        {'property':'disk total', 'value':0},
+                        {'property':'disc count', 'value':0},
                     ],
                 },
                 {
                     'requires':set(('media kind',)),
                     'equal':{'media kind':'music', },
                     'apply':[
-                        {'property':'disk total', 'value':0},
+                        {'property':'disc count', 'value':0},
                     ],
                 },
             ],
@@ -1163,11 +1163,11 @@
             'provide':set(('tv episode', 'tv season')),
             'branch':[
                 {
-                    'requires':set(('media kind', 'track position', 'disk position')),
+                    'requires':set(('media kind', 'track number', 'disc number')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'tv episode', 'reference':'track position', },
-                        { 'property':'tv season', 'reference':'disk position', },
+                        { 'property':'tv episode', 'reference':'track number', },
+                        { 'property':'tv season', 'reference':'disc number', },
                     ],
                 },
             ],
@@ -1415,12 +1415,12 @@
         },
         'rule.itunes.tv.season.parse':{
             'name':'Parse itunes tv season',
-            'provide':set(('disk position',)),
+            'provide':set(('disc number',)),
             'branch':[
                 {
                     'requires':set(('album',)),
                     'decode':[
-                        {'property':'album', 'expression':ur', Season (?P<disk_position>[0-9]+)$',},
+                        {'property':'album', 'expression':ur', Season (?P<disc_number>[0-9]+)$',},
                     ],
                 },
             ],

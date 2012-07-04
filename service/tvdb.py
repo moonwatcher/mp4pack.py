@@ -132,7 +132,7 @@ class TVDbHandler(ResourceHandler):
                                         genealogy = Ontology(self.env, 'ns.service.genealogy')
                                         genealogy['tvdb tv season id'] = o['tvdb tv season id']
                                         genealogy['tvdb tv show id'] = o['tvdb tv show id']
-                                        genealogy['disk position'] = o['disk position']
+                                        genealogy['disc number'] = o['disc number']
                                         genealogy['language'] = o['language']
                                         seasons[o['tvdb tv season id']] = genealogy
                                 for genealogy in seasons.values():

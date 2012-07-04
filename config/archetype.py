@@ -12,9 +12,9 @@
             'keyword':u'album_id',
             'type':'int',
         },
-        'disk id':{
-            'name':u'Disk ID',
-            'keyword':u'disk_id',
+        'disc id':{
+            'name':u'Disc ID',
+            'keyword':u'disc_id',
             'type':'int',
         },
         'track id':{
@@ -618,36 +618,36 @@
             'type':'unicode',
             'atom':'©alb',
         },
-        'track number':{
-            'name':u'Track number',
-            'keyword':u'track_number',
-            'type':'unicode',
-            'atom':'trkn',
-        },
-        'disk number':{
-            'name':u'Disk number',
-            'keyword':u'disk_number',
-            'type':'unicode',
-            'atom':'disk',
-        },
         'track position':{
             'name':u'Track position',
             'keyword':u'track_position',
+            'type':'unicode',
+            'atom':'trkn',
+        },
+        'disc position':{
+            'name':u'Disc position',
+            'keyword':u'disc_position',
+            'type':'unicode',
+            'atom':'disk',
+        },
+        'track number':{
+            'name':u'Track number',
+            'keyword':u'track_number',
             'type':'int',
         },
-        'track total':{
-            'name':u'Track total',
-            'keyword':u'track_total',
+        'track count':{
+            'name':u'Track count',
+            'keyword':u'track_count',
             'type':'int',
         },
-        'disk position':{
-            'name':u'Disk position',
-            'keyword':u'disk_position',
+        'disc number':{
+            'name':u'Disc number',
+            'keyword':u'disc_number',
             'type':'int',
         },
-        'disk total':{
-            'name':u'Disk total',
-            'keyword':u'disk_total',
+        'disc count':{
+            'name':u'Disc count',
+            'keyword':u'disc_count',
             'type':'int',
         },
         'grouping':{
