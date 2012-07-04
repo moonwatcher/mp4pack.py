@@ -1286,22 +1286,22 @@
             'provide':set(('full name',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'tv show', 'tv episode id', 'name')),
+                    'requires':set(('media kind', 'tv show', 'tv episode production code', 'name')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
                         {
                             'property':'full name',
-                            'format':u'{tv show} {tv episode id} {name}',
+                            'format':u'{tv show} {tv episode production code} {name}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'tv show', 'tv episode id')),
+                    'requires':set(('media kind', 'tv show', 'tv episode production code')),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
                         {
                             'property':'full name',
-                            'format':u'{tv show} {tv episode id}',
+                            'format':u'{tv show} {tv episode production code}',
                         },
                     ],
                 },

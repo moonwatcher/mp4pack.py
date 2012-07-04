@@ -264,6 +264,7 @@
                 'itunes music album id':None,
                 'itunes music track id':None,
                 'name':None,
+                'person name':None,
                 'simple name':None,
                 'track genealogy':None,
                 'resource uri':None,
@@ -319,6 +320,7 @@
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
                 'name':None,
+                'person name':None,
                 'simple name':None,
                 'asset uri':None,
                 'home uri':None,
@@ -362,6 +364,7 @@
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
                 'name':None,
+                'person name':None,
             },
             'rule':[
                 'rule.medium.resource.directory.parse',
@@ -486,7 +489,7 @@
                     'mediainfo':'tvsh',
                     'subler':'TV Show',
                 },
-                'tv episode id':{
+                'tv episode production code':{
                     'mediainfo':'tven',
                     'subler':'TV Episode ID',
                 },
@@ -574,7 +577,7 @@
                     'mediainfo':'apID',
                     'subler':'iTunes Account',
                 },
-                'itunes artist id':{
+                'itunes person id':{
                     'mediainfo':'atID',
                 },
                 'itunes composer id':{
@@ -772,7 +775,7 @@
                     'mediainfo':'tvsh',
                     'subler':'TV Show',
                 },
-                'tv episode id':{
+                'tv episode production code':{
                     'mediainfo':'tven',
                     'subler':'TV Episode ID',
                 },
@@ -860,7 +863,7 @@
                     'mediainfo':'apID',
                     'subler':'iTunes Account',
                 },
-                'itunes artist id':{
+                'itunes person id':{
                     'mediainfo':'atID',
                 },
                 'itunes composer id':{
@@ -1434,8 +1437,8 @@
                 'title':{
                     'tmdb':'title',
                 },
-                'character':{
-                    'tmdb':'character',
+                'character name':{
+                    'tmdb':'character name',
                 },
                 'job':{
                     'tmdb':'job',
@@ -1461,11 +1464,11 @@
                     'tvdb':'Image',
                     'tmdb':'profile_path',
                 },
-                'name':{
+                'person name':{
                     'tvdb':'Name',
                     'tmdb':'name',
                 },
-                'character':{
+                'character name':{
                     'tvdb':'Role',
                     'tmdb':'character',
                 },
@@ -1525,6 +1528,9 @@
                     'tmdb':'file_path',
                     'tvdb':'BannerPath',
                 },
+                'thumbnail url':{
+                    'tvdb':'ThumbnailPath',
+                },
                 'tvdb image id':{
                     'tvdb':'id',
                 },
@@ -1552,7 +1558,7 @@
                 'homepage':{
                     'tmdb':'homepage',
                 },
-                'name':{
+                'person name':{
                     'tmdb':'name',
                     'itunes':'artistName',
                 },
@@ -1804,24 +1810,22 @@
                     'tvdb':'poster',
                 },
                 'banner url':{
-                    'name':u'Banner URL',
-                    'keyword':u'banner_url',
-                    'type':'unicode',
                     'tvdb':'banner',
                 },
                 'fan art url':{
-                    'name':u'Fan Art URL',
-                    'keyword':u'fan_art_url',
-                    'type':'unicode',
                     'tvdb':'fanart',
                 },
                 'tv show air day':{
                     'tvdb':'Airs_DayOfWeek',
-                    'enabled':False,
                 },
                 'tv show air time':{
                     'tvdb':'Airs_Time',
-                    'enabled':False,
+                },
+                'cast':{
+                    'tvdb':'Actor',
+                },
+                'posters':{
+                    'tvdb':'Banner',
                 },
             },
         },
@@ -1875,7 +1879,7 @@
             ],
         },
         'ns.knowledge.tv.episode':{
-            'synonym':['tvdb', 'keyword', 'itunes'],
+            'synonym':['keyword', 'tvdb', 'itunes'],
             'element':{
                 'tv show id':None,
                 'tv season':None,
@@ -1940,7 +1944,7 @@
                 'long description':{
                     'itunes':'longDescription',    
                 },
-                'tv episode id':{
+                'tv episode production code':{
                     'tvdb':'ProductionCode',
                 },
                 'vote average':{
@@ -1964,13 +1968,6 @@
                     'tvdb':'Screenwriter',
                     'plural format':'tvdb list',
                 },
-                'tvdb image flag':{
-                    'name':u'TVDb image flag',
-                    'keyword':u'tvdb_image_flag',
-                    'type':'int',
-                    'tvdb':'EpImgFlag',
-                    'enabled':False,
-                },
                 'rating':{
                     'itunes':'contentAdvisoryRating',
                 },
@@ -1993,7 +1990,7 @@
                 'itunes music album id':{
                     'itunes':'collectionId',
                 },
-                'itunes artist id':{
+                'itunes person id':{
                     'itunes':'artistId',
                 },
                 'artist':{
@@ -2038,7 +2035,7 @@
                 'name':{
                     'itunes':'trackName',
                 },
-                'itunes artist id':{
+                'itunes person id':{
                     'itunes':'artistId',
                 },
                 'artist':{

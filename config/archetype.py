@@ -2,6 +2,17 @@
 
 {
     'archetype':{
+        'job id':{
+            'name':u'Job ID',
+            'keyword':u'job_id',
+            'type':'int',
+        },
+        'department id':{
+            'name':u'Department ID',
+            'keyword':u'department_id',
+            'type':'int',
+        },
+
         'home id':{
             'name':u'Home ID',
             'keyword':u'home_id',
@@ -47,26 +58,6 @@
             'keyword':u'company_id',
             'type':'int',
         },
-        'network id':{
-            'name':u'Network ID',
-            'keyword':u'network_id',
-            'type':'int',
-        },
-        'studio id':{
-            'name':u'Studio ID',
-            'keyword':u'studio_id',
-            'type':'int',
-        },
-        'job id':{
-            'name':u'Job ID',
-            'keyword':u'job_id',
-            'type':'int',
-        },
-        'department id':{
-            'name':u'Department ID',
-            'keyword':u'department_id',
-            'type':'int',
-        },
         'keyword id':{
             'name':u'Keyword ID',
             'keyword':u'keyword_id',
@@ -98,6 +89,7 @@
             'name':u'iTunes person ID',
             'keyword':u'itunes_person_id',
             'type':'int',
+            'atom':'atID',
         },
         'itunes movie id':{
             'name':u'iTunes movie ID',
@@ -140,12 +132,6 @@
             'keyword':u'itunes_account_id',
             'type':'unicode',
             'atom':'apID',
-        },
-        'itunes artist id':{
-            'name':u'iTunes artist ID',
-            'keyword':u'itunes_artist_id',
-            'type':'int',
-            'atom':'atID',
         },
         'itunes composer id':{
             'name':u'iTunes composer ID',
@@ -286,158 +272,53 @@
             'type':'unicode',
         },
         
-        'genres':{
-            'name':'Genres',
-            'keyword':'genres',
-            'type':'embed',
-            'namespace':'ns.knowledge.genre',
-            'plural':'list',
-        },
-        'production companies':{
-            'name':'Production companies',
-            'keyword':'production_companies',
-            'type':'embed',
-            'namespace':'ns.knowledge.company',
-            'plural':'list',
-        },
-        'production countries':{
-            'name':'Production countries',
-            'keyword':'production_countries',
-            'type':'embed',
-            'namespace':'ns.knowledge.country',
-            'plural':'list',
-        },
-        'spoken languages':{
-            'name':'Spoken languages',
-            'keyword':'spoken_languages',
-            'type':'embed',
-            'namespace':'ns.knowledge.languages',
-            'plural':'list',
-        },
-        'backdrops':{
-            'name':'Backdrops',
-            'keyword':'backdrops',
-            'type':'embed',
-            'namespace':'ns.knowledge.image',
-            'plural':'list',
-        },
-        'posters':{
-            'name':'Posters',
-            'keyword':'posters',
-            'type':'embed',
-            'namespace':'ns.knowledge.image',
-            'plural':'list',
-        },
-        'profiles':{
-            'name':'Profiles',
-            'keyword':'profiles',
-            'type':'embed',
-            'namespace':'ns.knowledge.image',
-            'plural':'list',
-        },
-        'belongs to collection':{
-            'name':'Belongs to collection',
-            'keyword':'belongs_to_collection',
-            'type':'embed',
-            'namespace':'ns.knowledge.collection',
-        },
-        'cast':{
-            'name':'Cast',
-            'keyword':'cast',
-            'type':'embed',
-            'namespace':'ns.knowledge.cast',
-            'plural':'list',
-        },
-        'crew':{
-            'name':'Crew',
-            'keyword':'crew',
-            'type':'embed',
-            'namespace':'ns.knowledge.cast',
-            'plural':'list',
-        },
-        'movies':{
-            'name':'Movies',
-            'keyword':'movies',
-            'type':'embed',
-            'namespace':'ns.knowledge.movie',
-            'plural':'list',
-        },
-        'certifications':{
-            'name':'Certification',
-            'keyword':'certification',
-            'type':'embed',
-            'namespace':'ns.knowledge.rating',
-            'plural':'list',
-        },
-        'titles':{
-            'name':'Titles',
-            'keyword':'titles',
-            'type':'embed',
-            'namespace':'ns.knowledge.title',
-            'plural':'list',
-        },
-        'reviews':{
-            'name':'Reviews',
-            'keyword':'reviews',
-            'type':'embed',
-            'namespace':'ns.knowledge.review',
-            'plural':'list',
-        },
-        'critics consensus':{
-            'name':u'Critics consensus',
-            'keyword':u'critics_consensus',
+        'person name':{
+            'name':u'Person name',
+            'keyword':u'person_name',
             'type':'unicode',
         },
-        'audience rating':{
-            'name':u'Audience rating',
-            'keyword':u'audience_rating',
+        'character name':{
+            'name':u'Character name',
+            'keyword':u'character_name',
             'type':'unicode',
         },
-        'critics rating':{
-            'name':u'Critics rating',
-            'keyword':u'critics_rating',
+        
+        'image url':{
+            'name':u'Image URL',
+            'keyword':u'image_url',
             'type':'unicode',
         },
-        'audience score':{
-            'name':u'Audience score',
-            'keyword':u'audience_score',
-            'type':'int',
-        },
-        'critics score':{
-            'name':u'Critics score',
-            'keyword':u'critics_score',
-            'type':'int',
-        },
-        'critic name':{
-            'name':u'Critic name',
-            'keyword':u'critic_name',
+        'thumbnail url':{
+            'name':u'Thumbnail URL',
+            'keyword':u'thumbnail_url',
             'type':'unicode',
         },
-        'freshness':{
-            'name':u'Freshness',
-            'keyword':u'freshness',
+        'poster url':{
+            'name':u'Poster URL',
+            'keyword':u'poster_url',
             'type':'unicode',
         },
-        'original critic score':{
-            'name':u'Original critic score',
-            'keyword':u'original critic score',
+        'backdrop url':{
+            'name':u'Backdrop URL',
+            'keyword':u'backdrop_url',
             'type':'unicode',
         },
-        'review publication':{
-            'name':u'Review publication',
-            'keyword':u'review_publication',
+        'profile url':{
+            'name':u'Profile URL',
+            'keyword':u'profile_url',
             'type':'unicode',
         },
-        'review quote':{
-            'name':u'Review quote',
-            'keyword':u'review_quote',
+        'banner url':{
+            'name':u'Banner URL',
+            'keyword':u'banner_url',
             'type':'unicode',
         },
-        'review url':{
-            'name':u'Review url',
-            'keyword':u'review_url',
+        'fan art url':{
+            'name':u'Fan Art URL',
+            'keyword':u'fan_art_url',
             'type':'unicode',
         },
+        
         'character encoding':{
             'name':u'Character encoding',
             'keyword':u'character_encoding',
@@ -759,9 +640,9 @@
             'keyword':u'track_genealogy',
             'type':'unicode',
         },
-        'tv episode id':{
-            'name':u'TV episode ID',
-            'keyword':u'tv_episode_id',
+        'tv episode production code':{
+            'name':u'TV episode production code',
+            'keyword':u'tv_episode_production_code',
             'type':'unicode',
             'atom':'tven',
         },
@@ -1170,26 +1051,6 @@
             'type':'unicode',
             'plural':'dict',
         },
-        'character':{
-            'name':u'Character',
-            'keyword':u'character',
-            'type':'unicode',
-        },
-        'image url':{
-            'name':u'Image URL',
-            'keyword':u'image_url',
-            'type':'unicode',
-        },
-        'poster url':{
-            'name':u'Poster URL',
-            'keyword':u'poster_url',
-            'type':'unicode',
-        },
-        'backdrop url':{
-            'name':u'Backdrop URL',
-            'keyword':u'backdrop_url',
-            'type':'unicode',
-        },
         'database':{
             'name':u'Database',
             'keyword':u'database',
@@ -1223,7 +1084,7 @@
         'tv show air time':{
             'name':u'TV show air time',
             'keyword':u'tv_show_air_time',
-            'type':'time',
+            'type':'unicode',
         },
         'track subtitle':{
             'name':'Track subtitle',
@@ -1569,6 +1430,159 @@
             'keyword':u'handbrake_audio_encoder_settings',
             'type':'unicode',
             'plural':'dict',
+        },
+
+        'genres':{
+            'name':'Genres',
+            'keyword':'genres',
+            'type':'embed',
+            'namespace':'ns.knowledge.genre',
+            'plural':'list',
+        },
+        'production companies':{
+            'name':'Production companies',
+            'keyword':'production_companies',
+            'type':'embed',
+            'namespace':'ns.knowledge.company',
+            'plural':'list',
+        },
+        'production countries':{
+            'name':'Production countries',
+            'keyword':'production_countries',
+            'type':'embed',
+            'namespace':'ns.knowledge.country',
+            'plural':'list',
+        },
+        'spoken languages':{
+            'name':'Spoken languages',
+            'keyword':'spoken_languages',
+            'type':'embed',
+            'namespace':'ns.knowledge.languages',
+            'plural':'list',
+        },
+        'backdrops':{
+            'name':'Backdrops',
+            'keyword':'backdrops',
+            'type':'embed',
+            'namespace':'ns.knowledge.image',
+            'plural':'list',
+        },
+        'posters':{
+            'name':'Posters',
+            'keyword':'posters',
+            'type':'embed',
+            'namespace':'ns.knowledge.image',
+            'plural':'list',
+        },
+        'profiles':{
+            'name':'Profiles',
+            'keyword':'profiles',
+            'type':'embed',
+            'namespace':'ns.knowledge.image',
+            'plural':'list',
+        },
+        'belongs to collection':{
+            'name':'Belongs to collection',
+            'keyword':'belongs_to_collection',
+            'type':'embed',
+            'namespace':'ns.knowledge.collection',
+        },
+        'cast':{
+            'name':'Cast',
+            'keyword':'cast',
+            'type':'embed',
+            'namespace':'ns.knowledge.cast',
+            'plural':'list',
+        },
+        'crew':{
+            'name':'Crew',
+            'keyword':'crew',
+            'type':'embed',
+            'namespace':'ns.knowledge.cast',
+            'plural':'list',
+        },
+        'movies':{
+            'name':'Movies',
+            'keyword':'movies',
+            'type':'embed',
+            'namespace':'ns.knowledge.movie',
+            'plural':'list',
+        },
+        'certifications':{
+            'name':'Certification',
+            'keyword':'certification',
+            'type':'embed',
+            'namespace':'ns.knowledge.rating',
+            'plural':'list',
+        },
+        'titles':{
+            'name':'Titles',
+            'keyword':'titles',
+            'type':'embed',
+            'namespace':'ns.knowledge.title',
+            'plural':'list',
+        },
+        'reviews':{
+            'name':'Reviews',
+            'keyword':'reviews',
+            'type':'embed',
+            'namespace':'ns.knowledge.review',
+            'plural':'list',
+        },
+        'critics consensus':{
+            'name':u'Critics consensus',
+            'keyword':u'critics_consensus',
+            'type':'unicode',
+        },
+        'audience rating':{
+            'name':u'Audience rating',
+            'keyword':u'audience_rating',
+            'type':'unicode',
+        },
+        'critics rating':{
+            'name':u'Critics rating',
+            'keyword':u'critics_rating',
+            'type':'unicode',
+        },
+        'audience score':{
+            'name':u'Audience score',
+            'keyword':u'audience_score',
+            'type':'int',
+        },
+        'critics score':{
+            'name':u'Critics score',
+            'keyword':u'critics_score',
+            'type':'int',
+        },
+        'critic name':{
+            'name':u'Critic name',
+            'keyword':u'critic_name',
+            'type':'unicode',
+        },
+        'freshness':{
+            'name':u'Freshness',
+            'keyword':u'freshness',
+            'type':'unicode',
+        },
+        'original critic score':{
+            'name':u'Original critic score',
+            'keyword':u'original critic score',
+            'type':'unicode',
+        },
+        'review publication':{
+            'name':u'Review publication',
+            'keyword':u'review_publication',
+            'type':'unicode',
+        },
+        'review quote':{
+            'name':u'Review quote',
+            'keyword':u'review_quote',
+            'type':'unicode',
+        },
+        'review url':{
+            'name':u'Review url',
+            'keyword':u'review_url',
+            'type':'unicode',
         },
     },
 }

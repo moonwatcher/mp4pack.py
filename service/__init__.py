@@ -314,7 +314,7 @@ class ResourceHandler(object):
                 try:
                     related = self.resolver.resolve(pattern.format(**query['parameter']))
                 except KeyError, e:
-                    self.log.debug(u'Could not create reference uri for pattern %s because parameter %s was missing', pattern, e)
+                    self.log.debug(u'Could not create collectable reference uri for pattern %s because parameter %s was missing', pattern, e)
                 else:
                     if related is not None:
                         for index in query['branch']['index']:

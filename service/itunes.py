@@ -55,7 +55,7 @@ class iTunesHandler(ResourceHandler):
                                 
                                 # make a caonical node
                                 canonical = Ontology(self.env, entry['branch']['namespace'])
-                                canonical.decode_all(element, 'itunes')
+                                canonical.decode_all(element, self.name)
                                 entry['record']['body']['canonical'] = canonical.node
                                 query['result'].append(entry)
                                 

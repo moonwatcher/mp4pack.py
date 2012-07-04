@@ -1590,7 +1590,7 @@
                         },
                     ],
                     'collection':'tvdb_tv_show_cast',
-                    'namespace':'ns.knowledge.cast',
+                    'namespace':'ns.knowledge.tv.show',
                     'parse type':'document',
                     'type':'xml',
                 },
@@ -1616,7 +1616,7 @@
                         },
                     ],
                     'collection':'tvdb_tv_show_image',
-                    'namespace':'ns.knowledge.image',
+                    'namespace':'ns.knowledge.tv.show',
                     'parse type':'document',
                     'type':'xml',
                 },
@@ -1628,6 +1628,9 @@
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/season/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$',
                         },
+                    ],
+                    'collect':[
+                        ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                     ],
                     'resolvable':[
                         {
@@ -1667,6 +1670,12 @@
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
                             'remote':ur'{api key}/series/{tvdb tv show id}/default/{disc number}/{track number}/{language}.xml',
+                        },
+                        {
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$',
+                        },
+                        {
+                            'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
                         },
                     ],
                     'collect':[
@@ -1723,6 +1732,9 @@
                             'remote':ur'{api key}/series/{tvdb tv show id}/all/{language}.zip',
                         },
                     ],
+                    'collect':[
+                        ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
+                    ],
                     'produce':[
                         {
                             'tag':u'Series',
@@ -1744,6 +1756,10 @@
                             'reference':'service.document.tvdb.tv.show.cast',
                             'coalesce':True,
                         },
+                    ],
+                    'index':[
+                        'tvdb tv show id',
+                        'imdb tv show id',
                     ],
                     'parse type':'document',
                     'type':'zip',
