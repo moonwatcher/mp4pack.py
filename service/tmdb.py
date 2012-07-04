@@ -33,17 +33,17 @@ class TMDbHandler(ResourceHandler):
                     }
     
                     if 'namespace' in query['branch']:
+
                         # make a caonical node
-                        canonical = Ontology(self.env, entry['branch']['namespace'])
-                        canonical.decode_all(document, 'tmdb')
-                        entry['record']['body']['canonical'] = canonical.node
+                        entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
+                        entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
 
                         # Copy indexed values from the canonical node to the genealogy
-                        if 'index' in query['branch']:
-                            for index in query['branch']['index']:
-                                if index in canonical:
-                                    entry['record'][u'head'][u'genealogy'][index] = canonical[index]
-                    
+                        if 'index' in entry['branch']:
+                            for index in entry['branch']['index']:
+                                if index in entry['record']['body']['canonical']:
+                                    entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
+                                    
                     # Append the entry to the query result    
                     query['result'].append(entry)
                     
@@ -53,7 +53,7 @@ class TMDbHandler(ResourceHandler):
                             for trigger in query['branch']['trigger']:
                                 # Decode a reference
                                 o = Ontology(self.env, trigger['namespace'])
-                                o.decode_all(result, 'tmdb')
+                                o.decode_all(result, self.name)
                                 
                                 # Make a URI and trigger a resolution
                                 ref = o.project('ns.service.genealogy')
