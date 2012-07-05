@@ -1831,7 +1831,7 @@
             },
         },
         'ns.knowledge.tv.season':{
-            'synonym':['tvdb', 'keyword', 'itunes'],
+            'synonym':['keyword', 'tvdb', 'itunes'],
             'element':{
                 'tv show id':None,
                 'tv season':None,
@@ -1847,6 +1847,8 @@
                 'tvdb tv season id':{
                     'tvdb':'seasonid',
                 },
+                'imdb tv show id':None,
+                'disc count':None,
                 'disc number':{
                     'tvdb':'SeasonNumber',
                 },

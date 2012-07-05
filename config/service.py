@@ -1175,7 +1175,6 @@
                     ],
                     'parse type':'search',
                 },
-                
                 'service.document.tmdb.configuration':{
                     'match':[
                         {
@@ -2106,7 +2105,6 @@
                     'type':'json',
                     'index':['itunes music track id', 'itunes music album id', 'disc number', 'track number'],
                 },
-
                 'service.document.itunes.genre.complete':{
                     'match':[
                         {

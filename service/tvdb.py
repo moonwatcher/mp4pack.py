@@ -141,14 +141,7 @@ class TVDbHandler(ResourceHandler):
                                     for entry in batch:
                                         episode = entry['record'][u'head'][u'genealogy']
                                         if episode['tvdb tv season id'] not in seasons:
-                                            season = Ontology(self.env, 'ns.service.genealogy')
-                                            seasons[episode['tvdb tv season id']] = season
-                                            
-                                            season['imdb tv show id'] = episode['imdb tv show id']
-                                            season['tvdb tv show id'] = episode['tvdb tv show id']
-                                            season['tvdb tv season id'] = episode['tvdb tv season id']
-                                            season['disc number'] = episode['disc number']
-                                            season['language'] = episode['language']
+                                            seasons[episode['tvdb tv season id']] = episode.project('ns.knowledge.tv.season').project('ns.service.genealogy')
                                             
                                     # Make an entry for every season we find
                                     for season in seasons.values():
