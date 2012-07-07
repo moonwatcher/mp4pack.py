@@ -342,23 +342,6 @@ class Resource(object):
             self.env.purge_if_not_exist(self.path)
     
     
-    def fetch(self, task):
-        if self.remote and \
-        not self.available and \
-        self.location['path in cache'] and \
-        self.env.varify_directory(self.location['path in cache']):
-            if self.location['scheme'] == self.env.runtime['resource scheme']:
-                command = self.env.initialize_command('rsync', self.log)
-                if command:
-                    command.append(u'--partial')
-                    command.append(u'--rsh')
-                    command.append(u'ssh -p {0}'.format(self.env.repository[self.location['host']]['remote']['download port']))
-                    command.append(u'{0}:{1}'.format(self.location['domain'], self.location['path'].replace(u' ', ur'\ ')))
-                    command.append(self.location['path in cache'])
-                    
-                    message = u'Fetch \'{0}\' from {1}'.format(self.location['volume relative path'], self.location['domain'])
-                    self.env.execute(command, message, False, pipeout=True, pipeerr=False, log=self.log)
-        self.env.purge_if_not_exist(self.location['path in cache'])
     
     
 
@@ -488,9 +471,9 @@ class AudioVideoContainer(Container):
                                 command.append(u'--language')
                                 command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
                                 
-                            if 'name' in stream:
+                            if 'stream name' in stream:
                                 command.append(u'--track-name')
-                                command.append(u'{0}:{1}'.format(stream['stream id'], stream['name']))
+                                command.append(u'{0}:{1}'.format(stream['stream id'], stream['stream name']))
                                 
                             if 'delay' in pivot.resource.hint:
                                 command.append(u'--sync')
@@ -669,7 +652,7 @@ class MP4(AudioVideoContainer):
                         u'-o', self.path,
                         u'-i', pivot.resource.path,
                         u'-l', self.env.enumeration['language'].find(stream['language']).name,
-                        u'-n', stream['name'],
+                        u'-n', stream['stream name'],
                         u'-a', unicode(int(round(self.meta['height'] * stream['height'])))
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)

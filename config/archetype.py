@@ -53,6 +53,11 @@
             'keyword':u'person_id',
             'type':'int',
         },
+        'character id':{
+            'name':u'Character ID',
+            'keyword':u'character_id',
+            'type':'int',
+        },
         'company id':{
             'name':u'Company ID',
             'keyword':u'company_id',
@@ -127,12 +132,6 @@
             'type':'int',
             'atom':'cnID',
         },
-        'itunes account':{
-            'name':u'iTunes account ID',
-            'keyword':u'itunes_account_id',
-            'type':'unicode',
-            'atom':'apID',
-        },
         'itunes composer id':{
             'name':u'iTunes composer ID',
             'keyword':u'itunes_composer_id',
@@ -158,6 +157,12 @@
             'atom':'sfID',
             'enumeration':'country',
         },
+        'itunes account':{
+            'name':u'iTunes account ID',
+            'keyword':u'itunes_account_id',
+            'type':'unicode',
+            'atom':'apID',
+        },
         'itunes account type':{
             'name':u'iTunes account type',
             'keyword':u'itunes_account_type',
@@ -178,6 +183,11 @@
             'atom':'xid',
         },
         
+        'tvdb person id':{
+            'name':u'TVDb person ID',
+            'keyword':u'tvdb_person_id',
+            'type':'int',
+        },
         'tvdb tv show id':{
             'name':u'TVDb TV show ID',
             'keyword':u'tvdb_tv_show_id',
@@ -193,17 +203,27 @@
             'keyword':u'tvdb_tv_episode_id',
             'type':'int',
         },
-        'tvdb person id':{
-            'name':u'TVDb person ID',
-            'keyword':u'tvdb_person_id',
-            'type':'int',
-        },
         'tvdb image id':{
             'name':u'TVDb image ID',
             'keyword':u'tvdb_image_id',
             'type':'int',
         },
         
+        'imdb person id':{
+            'name':u'IMDb person ID',
+            'keyword':u'imdb_person_id',
+            'type':'unicode'
+        },
+        'imdb character id':{
+            'name':u'IMDb character ID',
+            'keyword':u'imdb_character_id',
+            'type':'unicode'
+        },
+        'imdb movie id':{
+            'name':u'IMDb movie ID',
+            'keyword':u'imdb_movie_id',
+            'type':'unicode'
+        },
         'imdb tv show id':{
             'name':u'IMDb TV show ID',
             'keyword':u'imdb_tv_show_id',
@@ -213,11 +233,6 @@
             'name':u'IMDb TV episode ID',
             'keyword':u'imdb_tv_episode_id',
             'type':'unicode',
-        },
-        'imdb movie id':{
-            'name':u'IMDb movie ID',
-            'keyword':u'imdb_movie_id',
-            'type':'unicode'
         },
         'trimmed imdb movie id':{
             'name':u'Trimmed IMDb movie ID',
@@ -271,7 +286,61 @@
             'keyword':u'zap2it_tv_show_id',
             'type':'unicode',
         },
-        
+
+        'country code':{
+            'name':u'ISO 3166-1 alpha-2 country code',
+            'keyword':u'country_code',
+            'type':'enum',
+            'enumeration':'country',
+        },        
+        'language code':{
+            'name':u'ISO 639-1 language code',
+            'keyword':u'language_code',
+            'type':'enum',
+            'enumeration':'language',
+        },        
+
+        'country name':{
+            'name':u'Country name',
+            'keyword':u'country_name',
+            'type':'unicode',
+        },        
+        'native country name':{
+            'name':u'Native country name',
+            'keyword':u'native_country_name',
+            'type':'unicode',
+        },        
+        'language name':{
+            'name':u'Language name',
+            'keyword':u'language_name',
+            'type':'unicode',
+        },        
+        'native language name':{
+            'name':u'Native language name',
+            'keyword':u'native_language_name',
+            'type':'unicode',
+        },
+        'genre name':{
+            'name':u'Genre name',
+            'keyword':u'genre_name',
+            'type':'unicode',
+            'atom':'©gen',
+        },        
+        'keyword name':{
+            'name':u'Keyword name',
+            'keyword':u'keyword_name',
+            'type':'unicode',
+        },
+        'collection name':{
+            'name':u'Collection name',
+            'keyword':u'collection_name',
+            'type':'unicode',
+        },
+        'company name':{
+            'name':u'Company name',
+            'keyword':u'company_name',
+            'type':'unicode',
+        },
         'person name':{
             'name':u'Person name',
             'keyword':u'person_name',
@@ -282,40 +351,263 @@
             'keyword':u'character_name',
             'type':'unicode',
         },
+        'tv show name':{
+            'name':u'TV show name',
+            'keyword':u'tv_show_name',
+            'type':'unicode',
+            'atom':'tvsh',
+        },
+        'tv episode name':{
+            'name':u'TV episode name',
+            'keyword':u'tv_episode_name',
+            'type':'unicode',
+        },
+        'movie title':{
+            'name':u'Movie title',
+            'keyword':u'movie title',
+            'type':'unicode',
+        },
+        'original movie title':{
+            'name':u'Original movie title',
+            'keyword':u'original_movie_title',
+            'type':'unicode',
+        },
+        'music album name':{
+            'name':u'Music album name',
+            'keyword':u'music_album_name',
+            'type':'unicode',
+        },
+        'music track name':{
+            'name':u'Music track name',
+            'keyword':u'music_track_name',
+            'type':'unicode',
+        },
         
-        'image url':{
-            'name':u'Image URL',
-            'keyword':u'image_url',
+        'critic name':{
+            'name':u'Critic name',
+            'keyword':u'critic_name',
             'type':'unicode',
         },
-        'thumbnail url':{
-            'name':u'Thumbnail URL',
-            'keyword':u'thumbnail_url',
+        'album name':{
+            'name':u'Album name',
+            'keyword':u'album_name',
             'type':'unicode',
+            'atom':'©alb',
         },
-        'poster url':{
-            'name':u'Poster URL',
-            'keyword':u'poster_url',
+        'track name':{
+            'name':u'Track name',
+            'keyword':u'track_name',
             'type':'unicode',
+            'atom':'©nam',
         },
-        'backdrop url':{
-            'name':u'Backdrop URL',
-            'keyword':u'backdrop_url',
+        'artist name':{
+            'name':u'Artist',
+            'keyword':u'artist_name',
             'type':'unicode',
+            'atom':'@ART',
         },
-        'profile url':{
-            'name':u'Profile URL',
-            'keyword':u'profile_url',
+        'composer name':{
+            'name':u'Composer',
+            'keyword':u'composer_name',
             'type':'unicode',
+            'atom':'©wrt',
         },
-        'banner url':{
-            'name':u'Banner URL',
-            'keyword':u'banner_url',
+        'album artist name':{
+            'name':u'Album artist',
+            'description':u'Artist for the whole album, if different than the individual tracks.',
+            'keyword':u'album_artist_name',
             'type':'unicode',
+            'atom':'aART',
         },
-        'fan art url':{
-            'name':u'Fan Art URL',
-            'keyword':u'fan_art_url',
+        'tv network name':{
+            'name':u'TV network',
+            'keyword':u'tv_network',
+            'type':'unicode',
+            'atom':'tvnn',
+        },
+        
+        'simple company name':{
+            'name':u'Simple company name',
+            'keyword':u'simple_company_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple person name':{
+            'name':u'Simple person name',
+            'keyword':u'simple_person_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple genre name':{
+            'name':u'Simple genre name',
+            'keyword':u'simple_genre_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple character name':{
+            'name':u'Simple character name',
+            'keyword':u'simple_character_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple tv show name':{
+            'name':u'Simple tv show name',
+            'keyword':u'simple_tv_show_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple tv episode name':{
+            'name':u'Simple tv episode name',
+            'keyword':u'simple_tv_episode_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple movie title':{
+            'name':u'Simple movie title',
+            'keyword':u'simple_movie_title',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple music album name':{
+            'name':u'Simple music album name',
+            'keyword':u'simple_music_album_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple music track name':{
+            'name':u'Simple music track name',
+            'keyword':u'simple_music_track_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        
+        'simple name':{
+            'name':u'Simple name',
+            'keyword':u'simple_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        
+        'sort name':{
+            'name':u'Sort name',
+            'keyword':u'sort_name',
+            'type':'unicode',
+            'atom':'sonm',
+        },
+        'sort artist':{
+            'name':u'Sort artist',
+            'keyword':u'sort_artist',
+            'type':'unicode',
+            'atom':'soar',
+        },
+        'sort composer':{
+            'name':u'Sort composer',
+            'keyword':u'sort_composer',
+            'type':'unicode',
+            'atom':'soco',
+        },
+        'sort album artist':{
+            'name':u'Sort album artist',
+            'keyword':u'sort_album_artist',
+            'type':'unicode',
+            'atom':'soaa',
+        },
+        'sort album':{
+            'name':u'Sort album',
+            'keyword':u'sort_album',
+            'type':'unicode',
+            'atom':'soal',
+        },
+        'sort tv show':{
+            'name':u'Sort TV show',
+            'keyword':u'sort_tv_show',
+            'type':'unicode',
+            'atom':'sosn',
+        },
+
+        'simple name':{
+            'name':u'Simple name',
+            'keyword':u'simple_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'movie handle':{
+            'name':u'Movie handle',
+            'keyword':u'movie_handle',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'album handle':{
+            'name':u'Album handle',
+            'keyword':u'album_handle',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'tv show handle':{
+            'name':u'TV show handle',
+            'keyword':u'tv_show_handle',
+            'type':'unicode',
+            'simplify':True,
+        },
+
+        'track number':{
+            'name':u'Track number',
+            'keyword':u'track_number',
+            'type':'int',
+        },
+        'track count':{
+            'name':u'Track count',
+            'keyword':u'track_count',
+            'type':'int',
+        },
+        'track position':{
+            'name':u'Track position',
+            'keyword':u'track_position',
+            'type':'unicode',
+            'atom':'trkn',
+        },
+        'disc number':{
+            'name':u'Disc number',
+            'keyword':u'disc_number',
+            'type':'int',
+        },
+        'disc count':{
+            'name':u'Disc count',
+            'keyword':u'disc_count',
+            'type':'int',
+        },
+        'disc position':{
+            'name':u'Disc position',
+            'keyword':u'disc_position',
+            'type':'unicode',
+            'atom':'disk',
+        },
+        'tv season number':{
+            'name':u'TV season number',
+            'keyword':u'tv_season_number',
+            'type':'int',
+            'atom':'tvsn',
+        },
+        'tv episode number':{
+            'name':u'TV episode number',
+            'keyword':u'tv_episode_number',
+            'type':'int',
+            'atom':'tves',
+        },
+        'absolute tv episode number':{
+            'name':u'Absolute TV episode',
+            'keyword':'absolute_tv_episode',
+            'type':'int',
+        },
+        'tv episode production code':{
+            'name':u'TV episode production code',
+            'keyword':u'tv_episode_production_code',
+            'type':'unicode',
+            'atom':'tven',
+        },
+        'track genealogy':{
+            'name':u'Track genealogy',
+            'keyword':u'track_genealogy',
             'type':'unicode',
         },
         
@@ -405,41 +697,6 @@
             'keyword':u'kind',
             'type':'unicode',
         },
-        'simple name':{
-            'name':u'Simple name',
-            'keyword':u'simple_name',
-            'type':'unicode',
-            'simplify':True,
-        },
-        'movie handle':{
-            'name':u'Movie handle',
-            'keyword':u'movie_handle',
-            'type':'unicode',
-            'simplify':True,
-        },
-        'album handle':{
-            'name':u'Album handle',
-            'keyword':u'album_handle',
-            'type':'unicode',
-            'simplify':True,
-        },
-        'tv show handle':{
-            'name':u'TV show handle',
-            'keyword':u'tv_show_handle',
-            'type':'unicode',
-            'simplify':True,
-        },
-        'keywords':{
-            'name':u'Keywords',
-            'keyword':u'keywords',
-            'type':'unicode',
-            'plural':'list',
-        },
-        'tv show runtime':{
-            'name':u'TV show runtime',
-            'keyword':u'tv_show_runtime',
-            'type':'int',
-        },
         'tv show status':{
             'name':u'TV show status',
             'keyword':u'tv_show_status',
@@ -467,69 +724,6 @@
             'type':'enum',
             'atom':'stik',
             'enumeration':'media kind',
-        },
-        'name':{
-            'name':u'Name',
-            'keyword':u'name',
-            'type':'unicode',
-            'atom':'©nam',
-        },
-        'artist':{
-            'name':u'Artist',
-            'keyword':u'artist',
-            'type':'unicode',
-            'atom':'@ART',
-        },
-        'composer':{
-            'name':u'Composer',
-            'keyword':u'composer',
-            'type':'unicode',
-            'atom':'©wrt',
-        },
-        'album artist':{
-            'name':u'Album artist',
-            'description':u'Artist for the whole album, if different than the individual tracks.',
-            'keyword':u'album_artist',
-            'type':'unicode',
-            'atom':'aART',
-        },
-        'album':{
-            'name':u'Album name',
-            'keyword':u'album',
-            'type':'unicode',
-            'atom':'©alb',
-        },
-        'track number':{
-            'name':u'Track number',
-            'keyword':u'track_number',
-            'type':'int',
-        },
-        'track count':{
-            'name':u'Track count',
-            'keyword':u'track_count',
-            'type':'int',
-        },
-        'track position':{
-            'name':u'Track position',
-            'keyword':u'track_position',
-            'type':'unicode',
-            'atom':'trkn',
-        },
-        'disc number':{
-            'name':u'Disc number',
-            'keyword':u'disc_number',
-            'type':'int',
-        },
-        'disc count':{
-            'name':u'Disc count',
-            'keyword':u'disc_count',
-            'type':'int',
-        },
-        'disc position':{
-            'name':u'Disc position',
-            'keyword':u'disc_position',
-            'type':'unicode',
-            'atom':'disk',
         },
         'grouping':{
             'name':u'Grouping',
@@ -599,12 +793,6 @@
             'atom':'gnre',
             'enumeration':'genre',
         },
-        'genre':{
-            'name':u'User genre',
-            'keyword':u'genre',
-            'type':'unicode',
-            'atom':'©gen',
-        },
         'gapless':{
             'name':u'Gapless',
             'keyword':u'gapless',
@@ -628,82 +816,6 @@
             'keyword':u'hd_video',
             'type':'int',
             'atom':'hdvd',
-        },
-        'tv show':{
-            'name':u'TV show',
-            'keyword':u'tv_show',
-            'type':'unicode',
-            'atom':'tvsh',
-        },
-        'track genealogy':{
-            'name':u'Track genealogy',
-            'keyword':u'track_genealogy',
-            'type':'unicode',
-        },
-        'tv episode production code':{
-            'name':u'TV episode production code',
-            'keyword':u'tv_episode_production_code',
-            'type':'unicode',
-            'atom':'tven',
-        },
-        'tv season':{
-            'name':u'TV season',
-            'keyword':u'tv_season',
-            'type':'int',
-            'atom':'tvsn',
-        },
-        'tv episode':{
-            'name':u'TV episode',
-            'keyword':u'tv_episode',
-            'type':'int',
-            'atom':'tves',
-        },
-        'absolute tv episode':{
-            'name':u'Absolute TV episode',
-            'keyword':'absolute_tv_episode',
-            'type':'int',
-        },
-        'tv network':{
-            'name':u'TV network',
-            'keyword':u'tv_network',
-            'type':'unicode',
-            'atom':'tvnn',
-        },
-        'sort name':{
-            'name':u'Sort name',
-            'keyword':u'sort_name',
-            'type':'unicode',
-            'atom':'sonm',
-        },
-        'sort artist':{
-            'name':u'Sort artist',
-            'keyword':u'sort_artist',
-            'type':'unicode',
-            'atom':'soar',
-        },
-        'sort composer':{
-            'name':u'Sort composer',
-            'keyword':u'sort_composer',
-            'type':'unicode',
-            'atom':'soco',
-        },
-        'sort album artist':{
-            'name':u'Sort album artist',
-            'keyword':u'sort_album_artist',
-            'type':'unicode',
-            'atom':'soaa',
-        },
-        'sort album':{
-            'name':u'Sort album',
-            'keyword':u'sort_album',
-            'type':'unicode',
-            'atom':'soal',
-        },
-        'sort tv show':{
-            'name':u'Sort TV show',
-            'keyword':u'sort_tv_show',
-            'type':'unicode',
-            'atom':'sosn',
         },
         'encoding tool':{
             # mediainfo seems to mix @enc and @too into Encoded_Application
@@ -797,60 +909,24 @@
             'type':'plist',
             'atom':'iTunMOVI',
         },
-        'actors':{
-            'name':u'Actors',
-            'type':'unicode',
-            'keyword':u'actors',
-            'plural':'list',
-        },
-        'directors':{
-            'name':u'Directors',
-            'keyword':u'directors',
-            'type':'unicode',
-            'plural':'list',
-        },
-        'codirectors':{
-            'name':u'Codirectors',
-            'keyword':u'codirectors',
-            'type':'unicode',
-            'plural':'list',
-        },
-        'producers':{
-            'name':u'Producers',
-            'keyword':u'producers',
-            'type':'unicode',
-            'plural':'list',
-        },
-        'screenwriters':{
-            'name':u'Screenwriters',
-            'keyword':u'screenwriters',
-            'type':'unicode',
-            'plural':'list',
-        },
-        'studio':{
-            'name':u'Studio',
-            'keyword':u'studio',
-            'type':'unicode',
-            'plural':'list',
-        },
-        'rating standard':{
+        'content advisory standard':{
             'name':u'Rating standard',
-            'keyword':u'rating_standard',
+            'keyword':u'content_advisory_standard',
             'type':'unicode',
         },
-        'rating':{
+        'content advisory rating':{
             'name':u'Rating',
-            'keyword':u'rating',
+            'keyword':u'content_advisory_rating',
             'type':'unicode',
         },
-        'rating score':{
+        'content advisory score':{
             'name':u'Rating score',
-            'keyword':u'rating_score',
+            'keyword':u'content_advisory_score',
             'type':'int',
         },
-        'rating annotation':{
+        'content advisory annotation':{
             'name':u'Rating annotation',
-            'keyword':u'rating_annotation',
+            'keyword':u'content_advisory_ annotation',
             'type':'unicode',
         },
         'cover':{
@@ -1051,26 +1127,6 @@
             'type':'unicode',
             'plural':'dict',
         },
-        'database':{
-            'name':u'Database',
-            'keyword':u'database',
-            'type':'unicode',
-        },
-        'username':{
-            'name':u'Username',
-            'keyword':u'username',
-            'type':'unicode',
-        },
-        'password':{
-            'name':u'Password',
-            'keyword':u'password',
-            'type':'unicode',
-        },
-        'mongodb url':{
-            'name':u'MongoDB URL',
-            'keyword':u'mongodb_url',
-            'type':'unicode',
-        },
         'sort order':{
             'name':u'Sort order',
             'keyword':u'sort_order',
@@ -1267,16 +1323,6 @@
             'keyword':u'homepage',
             'type':'unicode',
         },
-        'title':{
-            'name':u'Title',
-            'keyword':u'title',
-            'type':'unicode',
-        },
-        'original title':{
-            'name':u'Original title',
-            'keyword':u'original title',
-            'type':'unicode',
-        },
         'tagline':{
             'name':u'Tagline',
             'keyword':u'tagline',
@@ -1313,9 +1359,9 @@
             'keyword':u'page',
             'type':'int',
         },
-        'year':{
+        'release year':{
             'name':u'Year',
-            'keyword':u'year',
+            'keyword':u'release_year',
             'type':'int',
         },
         'recursive':{
@@ -1431,7 +1477,70 @@
             'type':'unicode',
             'plural':'dict',
         },
+        
+        'database':{
+            'name':u'Database',
+            'keyword':u'database',
+            'type':'unicode',
+        },
+        'username':{
+            'name':u'Username',
+            'keyword':u'username',
+            'type':'unicode',
+        },
+        'password':{
+            'name':u'Password',
+            'keyword':u'password',
+            'type':'unicode',
+        },
+        'mongodb url':{
+            'name':u'MongoDB URL',
+            'keyword':u'mongodb_url',
+            'type':'unicode',
+        },
 
+        'keywords':{
+            'name':u'Keywords',
+            'keyword':u'keywords',
+            'type':'unicode',
+            'plural':'list',
+        },
+        'actors':{
+            'name':u'Actors',
+            'type':'unicode',
+            'keyword':u'actors',
+            'plural':'list',
+        },
+        'directors':{
+            'name':u'Directors',
+            'keyword':u'directors',
+            'type':'unicode',
+            'plural':'list',
+        },
+        'codirectors':{
+            'name':u'Codirectors',
+            'keyword':u'codirectors',
+            'type':'unicode',
+            'plural':'list',
+        },
+        'producers':{
+            'name':u'Producers',
+            'keyword':u'producers',
+            'type':'unicode',
+            'plural':'list',
+        },
+        'screenwriters':{
+            'name':u'Screenwriters',
+            'keyword':u'screenwriters',
+            'type':'unicode',
+            'plural':'list',
+        },
+        'studio':{
+            'name':u'Studio',
+            'keyword':u'studio',
+            'type':'unicode',
+            'plural':'list',
+        },
         'genres':{
             'name':'Genres',
             'keyword':'genres',
@@ -1519,7 +1628,7 @@
             'name':'Titles',
             'keyword':'titles',
             'type':'embed',
-            'namespace':'ns.knowledge.title',
+            'namespace':'ns.knowledge.movie',
             'plural':'list',
         },
         'reviews':{
@@ -1554,11 +1663,6 @@
             'keyword':u'critics_score',
             'type':'int',
         },
-        'critic name':{
-            'name':u'Critic name',
-            'keyword':u'critic_name',
-            'type':'unicode',
-        },
         'freshness':{
             'name':u'Freshness',
             'keyword':u'freshness',
@@ -1582,6 +1686,42 @@
         'review url':{
             'name':u'Review url',
             'keyword':u'review_url',
+            'type':'unicode',
+        },
+        
+        'image url':{
+            'name':u'Image URL',
+            'keyword':u'image_url',
+            'type':'unicode',
+        },
+        'thumbnail url':{
+            'name':u'Thumbnail URL',
+            'keyword':u'thumbnail_url',
+            'type':'unicode',
+        },
+        'poster url':{
+            'name':u'Poster URL',
+            'keyword':u'poster_url',
+            'type':'unicode',
+        },
+        'backdrop url':{
+            'name':u'Backdrop URL',
+            'keyword':u'backdrop_url',
+            'type':'unicode',
+        },
+        'profile url':{
+            'name':u'Profile URL',
+            'keyword':u'profile_url',
+            'type':'unicode',
+        },
+        'banner url':{
+            'name':u'Banner URL',
+            'keyword':u'banner_url',
+            'type':'unicode',
+        },
+        'fan art url':{
+            'name':u'Fan Art URL',
+            'keyword':u'fan_art_url',
             'type':'unicode',
         },
     },

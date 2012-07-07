@@ -287,7 +287,7 @@
                         },
                         {
                             'instruction':{
-                                'title':'Subtitle trascoding',
+                                'title':'Subtitle transcoding',
                             },
                             'argument':[
                                 'time shift',

@@ -81,14 +81,14 @@
                                     'branch':[
                                         {'stream kind':'caption', 'language':'he'},
                                     ],
-                                    'override':{'name':'Normal'},
+                                    'override':{'stream name':'Normal'},
                                 },
                                 {
                                     'mode':'choose',
                                     'branch':[
                                         {'stream kind':'caption', 'language':'en'},
                                     ],
-                                    'override':{'name':'Normal'},
+                                    'override':{'stream name':'Normal'},
                                 },
                             ],
                         },
@@ -105,7 +105,7 @@
                                     'branch':[
                                         {'stream kind':'caption'},
                                     ],
-                                    'override':{'name':'Smart', 'language':'sv'},
+                                    'override':{'stream name':'Smart', 'language':'sv'},
                                 },
                             ],
                         },
@@ -138,7 +138,7 @@
                                     'branch':[
                                         {'stream kind':'audio', 'kind':'ac3'},
                                     ],
-                                    'override':{'name':'Normal'},
+                                    'override':{'stream name':'Normal'},
                                 },
                             ],
                         },
@@ -418,14 +418,14 @@
                                     'branch':[
                                         {'stream kind':'caption', 'language':'he'},
                                     ],
-                                    'override':{'name':'Normal', 'height':0.132},
+                                    'override':{'stream name':'Normal', 'height':0.132},
                                 },
                                 {
                                     'mode':'choose',
                                     'branch':[
                                         {'stream kind':'caption', 'language':'en'},
                                     ],
-                                    'override':{'name':'Normal', 'height':0.132},
+                                    'override':{'stream name':'Normal', 'height':0.132},
                                 },
                             ],
                         },
@@ -442,7 +442,7 @@
                                     'branch':[
                                         {'stream kind':'caption'},
                                     ],
-                                    'override':{'name':'Smart', 'height':0.148, 'language':'sv'},
+                                    'override':{'stream name':'Smart', 'height':0.148, 'language':'sv'},
                                 },
                             ],
                         },

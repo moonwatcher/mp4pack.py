@@ -310,10 +310,10 @@ class Crawler(object):
         if ontology:
             
             # try to decode the genre as an enumerated genre type
-            if 'genre' in ontology:
-                element = self.env.enumeration['genre'].search(ontology['genre'])
+            if 'genre name' in ontology:
+                element = self.env.enumeration['genre'].search(ontology['genre name'])
                 if element:
-                    ontology['genre'] = element.name
+                    ontology['genre name'] = element.name
                     ontology['genre type'] = element.key
                     
             # count cover pieces

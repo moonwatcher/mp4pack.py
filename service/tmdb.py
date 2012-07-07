@@ -21,9 +21,6 @@ class TMDbHandler(ResourceHandler):
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
                 if query['branch']['parse type'] == 'document':
-                    # Initialize the genealogy by projecting the 
-                    # query parameter space on the ns.service.genealogy namespace
-                    # This will get rid of the api key
                     entry = {
                         'branch':query['branch'],
                         'record':{
@@ -33,7 +30,6 @@ class TMDbHandler(ResourceHandler):
                     }
     
                     if 'namespace' in query['branch']:
-
                         # make a caonical node
                         entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
                         entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)

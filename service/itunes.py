@@ -33,7 +33,7 @@ class iTunesHandler(ResourceHandler):
                     # locate a method that implements the action
                     action = getattr(self, query['branch']['process'], None)
                     if action is not None:
-                        document = {'results':action(document)}
+                        document = { 'results':action(document) }
                         document['resultCount'] = len(document['results'])
                     else:
                         self.log.warning(u'Ignoring unknown process function %s', query['branch']['process'])

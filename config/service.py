@@ -68,8 +68,11 @@
                         'movie id',
                         'tmdb movie id',
                         'imdb movie id',
-                        'movie handle',
+                        'itunes movie id',
                         'rottentomatoes movie id',
+                        'movie title',
+                        'simple movie title',
+                        'movie handle',
                     ],
                 },
                 'service.home.tv.show':{
@@ -115,9 +118,12 @@
                     'key':'tv show id',
                     'index':[
                         'tv show id',
-                        'tv show handle',
                         'tvdb tv show id',
                         'imdb tv show id',
+                        'itunes tv show id',
+                        'tv show name',
+                        'simple tv show name',
+                        'tv show handle',
                     ],
                 },
                 'service.home.tv.season':{
@@ -177,8 +183,12 @@
                         'disc id',
                         'disc number',
                         'tvdb tv show id',
-                        'imdb tv show id',
                         'tvdb tv season id',
+                        'imdb tv show id',
+                        'itunes tv show id',
+                        'itunes tv season id',
+                        'tv show name',
+                        'simple tv show name',
                     ],
                 },
                 'service.home.tv.episode':{
@@ -274,12 +284,23 @@
                         'tvdb tv episode id',
                         'imdb tv show id',
                         'imdb tv episode id',
+                        'itunes tv show id',
+                        'itunes tv season id',
+                        'itunes tv episode id',
+                        'tv show name',
+                        'tv episode name',
+                        'simple tv show name',
+                        'simple tv episode name',
                     ],
                 },
                 'service.home.music.album':{
                     'match':[
                         {
                             'filter':ur'^/h/music/album/(?P<album_id>[0-9]+)$',
+                        },
+                        {
+                            'filter':ur'^/h/music/album/itunes/(?P<itunes_music_album_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/music/album/{itunes music album id}',
                         },
                         {
                             'filter':ur'^/h/music/album/~/(?P<album_handle>[^/]+)$',
@@ -296,13 +317,23 @@
                             'format':ur'/h/music/album/{album id}',
                         },
                         {
+                            'name':u'music album home by itunes music album id',
+                            'format':ur'/h/music/album/itunes/{itunes music album id}',
+                        },
+                        {
                             'name':u'music album home by album handle',
                             'format':ur'/h/music/album/~/{album handle}',
                         },
                     ],
                     'collection':'home',
                     'key':'album id',
-                    'index':['album id', 'album handle'],
+                    'index':[
+                        'album id',
+                        'itunes music album id',
+                        'music album name',
+                        'simple music album name',
+                        'album handle'
+                    ],
                 },
                 'service.home.music.disc':{
                     'match':[
@@ -337,7 +368,15 @@
                     ],
                     'collection':'home',
                     'key':'disc id',
-                    'index':['album id', 'disc id', 'disc number', 'album handle'],
+                    'index':[
+                        'album id',
+                        'disc id',
+                        'disc number',
+                        'itunes music album id',
+                        'music album name',
+                        'simple music album name',
+                        'album handle',
+                    ],
                 },
                 'service.home.music.track':{
                     'match':[
@@ -349,6 +388,14 @@
                         },
                         {
                             'filter':ur'^/h/music/track/(?P<album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                        },
+                        {
+                            'filter':ur'^/h/music/track/itunes/(?P<itunes_music_track_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/music/track/{itunes music track id}',
+                        },
+                        {
+                            'filter':ur'^/h/music/track/itunes/(?P<itunes_music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'depend':ur'/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}',
                         },
                         {
                             'filter':ur'^/h/music/track/~/(?P<album_handle>[^/]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
@@ -373,13 +420,34 @@
                             'format':ur'/h/music/track/{album id}/{disc number}/{track number}',
                         },
                         {
+                            'name':u'music track home by itunes music track id',
+                            'format':ur'/h/music/track/itunes/{itunes music track id}',
+                        },
+                        {
+                            'name':u'music track home by itunes music album id',
+                            'format':ur'/h/music/track/itunes/{itunes music album id}/{disc number}/{track number}',
+                        },
+                        {
                             'name':u'music track home by album handle',
                             'format':ur'/h/music/track/~/{album handle}/{disc number}/{track number}',
                         },
                     ],
                     'collection':'home',
                     'key':'track id',
-                    'index':['album id', 'disc id', 'track id', 'disc number', 'track number', 'album handle'],
+                    'index':[
+                        'album id',
+                        'disc id',
+                        'track id',
+                        'disc number',
+                        'track number',
+                        'itunes music track id',
+                        'itunes music album id',
+                        'music album name',
+                        'music track name',
+                        'simple music album name',
+                        'simple music track name',
+                        'album handle',
+                    ],
                 },
                 'service.home.person':{
                     'match':[
@@ -389,6 +457,10 @@
                         {
                             'filter':ur'^/h/person/tmdb/(?P<tmdb_person_id>[0-9]+)$',
                             'depend':ur'/c/tmdb/person/{tmdb person id}',
+                        },
+                        {
+                            'filter':ur'^/h/person/itunes/(?P<itunes_person_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/person/{itunes person id}',
                         },
                         {
                             'filter':ur'^/h/person/imdb/(?P<imdb_person_id>nm[0-9]+)$',
@@ -408,10 +480,20 @@
                             'name':u'person home by tmdb person id',
                             'format':ur'/h/person/tmdb/{tmdb person id}',
                         },
+                        {
+                            'name':u'person home by itunes person id',
+                            'format':ur'/h/person/itunes/{itunes person id}',
+                        },
                     ],
                     'collection':'home',
                     'key':'person id',
-                    'index':['person id', 'tmdb person id'],
+                    'index':[
+                        'person id',
+                        'tmdb person id',
+                        'itunes person id',
+                        'person name',
+                        'simple person name',
+                    ],
                 },
                 'service.home.company':{
                     'match':[
@@ -440,7 +522,12 @@
                     ],
                     'collection':'home',
                     'key':'company id',
-                    'index':['company id', 'tmdb company id'],
+                    'index':[
+                        'company id',
+                        'tmdb company id',
+                        'company name',
+                        'simple company name',                        
+                    ],
                 },
                 'service.home.genre':{
                     'match':[
@@ -450,6 +537,10 @@
                         {
                             'filter':ur'^/h/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)$',
                             'depend':ur'/c/{language}/tmdb/genre/{tmdb genre id}',
+                        },
+                        {
+                            'filter':ur'^/h/genre/itunes/(?P<itunes_genre_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/genre/{itunes genre id}',
                         },
                     ],
                     'resolvable':[
@@ -466,10 +557,20 @@
                             'name':u'genre home by tmdb genre id',
                             'format':ur'/h/genre/tmdb/{tmdb genre id}',
                         },
+                        {
+                            'name':u'genre home by itunes genre id',
+                            'format':ur'/h/genre/itunes/{itunes genre id}',
+                        },
                     ],
                     'collection':'home',
                     'key':'genre id',
-                    'index':['genre id', 'tmdb genre id'],
+                    'index':[
+                        'genre id',
+                        'tmdb genre id',
+                        'itunes genre id',
+                        'genre name',
+                        'simple genre name',
+                    ],
                 },
                 'service.home.job':{
                     'match':[
@@ -1079,7 +1180,7 @@
                     ],
                     'resolvable':[
                         {
-                            'name':u'genre',
+                            'name':u'genre by genre id',
                             'format':ur'/k/{language}/genre/{genre id}',
                         },
                     ],
@@ -1131,7 +1232,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/search$',
-                            'query parameter':set(('api key', 'term', 'page', 'language', 'year')),
+                            'query parameter':set(('api key', 'term', 'page', 'language', 'release year')),
                             'remote':ur'search/movie',
                         },
                     ],
@@ -1211,7 +1312,12 @@
                     'collection':'tmdb_genre',
                     'namespace':'ns.knowledge.genre',
                     'parse type':'document',
-                    'index':['tmdb genre id'],
+                    'index':[
+                        'tmdb genre id',
+                        'genre name',
+                        'simple genre name',
+                        'language',
+                    ],
                 },
                 'service.document.tmdb.movie':{
                     'match':[
@@ -1240,7 +1346,13 @@
                     'collection':'tmdb_movie',
                     'namespace':'ns.knowledge.movie',
                     'parse type':'document',
-                    'index':['tmdb movie id', 'language', 'imdb movie id'],
+                    'index':[
+                        'tmdb movie id',
+                        'language',
+                        'imdb movie id',
+                        'movie title',
+                        'simple movie title',
+                    ],
                 },
                 'service.document.tmdb.movie.cast':{
                     'match':[
@@ -1420,6 +1532,11 @@
                     'collection':'tmdb_person',
                     'namespace':'ns.knowledge.person',
                     'parse type':'document',
+                    'index':[
+                        'tmdb person id',
+                        'person name',
+                        'simple person name',
+                    ],
                 },
                 'service.document.tmdb.person.image':{
                     'match':[
@@ -1477,6 +1594,11 @@
                     'collection':'tmdb_company',
                     'namespace':'ns.knowledge.company',
                     'parse type':'document',
+                    'index':[
+                        'tmdb company id',
+                        'company name',
+                        'simple company name',
+                    ],
                 },
                 'service.document.tmdb.company.credit':{
                     'match':[
@@ -1508,7 +1630,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tvdb/tv/show/search$',
-                            'query parameter':set(('tv show', 'language',)),
+                            'query parameter':set(('tv show name', 'language',)),
                             'remote':ur'GetSeries.php',
                         },
                         {
@@ -1561,6 +1683,8 @@
                     'index':[
                         'tvdb tv show id',
                         'imdb tv show id',
+                        'tv show name',
+                        'simple tv show name',
                     ],
                     'collection':'tvdb_tv_show',
                     'namespace':'ns.knowledge.tv.show',
@@ -1651,6 +1775,8 @@
                         'tvdb tv season id',
                         'imdb tv show id',
                         'disc number',
+                        'tv show name',
+                        'simple tv show name',
                     ],
                     'collection':'tvdb_tv_season',
                     'namespace':'ns.knowledge.tv.season',
@@ -1718,6 +1844,10 @@
                         'imdb tv episode id',
                         'disc number',
                         'track number',
+                        'tv show name',
+                        'tv episode name',
+                        'simple tv show name',
+                        'simple tv episode name',
                     ],
                     'collection':'tvdb_tv_episode',
                     'namespace':'ns.knowledge.tv.episode',
@@ -1845,7 +1975,11 @@
                     'collection':'itunes_genre',
                     'namespace':'ns.knowledge.genre',
                     'type':'json',
-                    'index':['itunes genre id'],
+                    'index':[
+                        'itunes genre id',
+                        'genre name',
+                        'simple genre name',
+                    ],
                 },
                 'service.document.itunes.person':{
                     'match':[
@@ -1880,7 +2014,11 @@
                     'collection':'itunes_person',
                     'namespace':'ns.knowledge.person',
                     'type':'json',
-                    'index':['itunes person id'],
+                    'index':[
+                        'itunes person id',
+                        'person name',
+                        'simple person name',
+                    ],
                 },
                 'service.document.itunes.movie':{
                     'match':[
@@ -1911,7 +2049,11 @@
                     'collection':'itunes_movie',
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
-                    'index':['itunes movie id'],
+                    'index':[
+                        'itunes movie id',
+                        'movie title',
+                        'simple movie title',
+                    ],
                 },
                 'service.document.itunes.tv.show':{
                     'match':[
@@ -1942,7 +2084,11 @@
                     'collection':'itunes_tv_show',
                     'namespace':'ns.knowledge.tv.show',
                     'type':'json',
-                    'index':['itunes tv show id'],
+                    'index':[
+                        'itunes tv show id',
+                        'tv show name',
+                        'simple tv show name',
+                    ],
                 },
                 'service.document.itunes.tv.season':{
                     'match':[
@@ -1981,7 +2127,13 @@
                     'collection':'itunes_tv_season',
                     'namespace':'ns.knowledge.tv.season',
                     'type':'json',
-                    'index':['itunes tv show id', 'itunes tv season id', 'disc number'],
+                    'index':[
+                        'itunes tv show id',
+                        'itunes tv season id',
+                        'disc number',
+                        'tv show name',
+                        'simple tv show name',
+                    ],
                 },
                 'service.document.itunes.tv.episode':{
                     'match':[
@@ -2033,7 +2185,17 @@
                     'collection':'itunes_tv_episode',
                     'namespace':'ns.knowledge.tv.episode',
                     'type':'json',
-                    'index':['itunes tv show id', 'itunes tv season id', 'itunes tv episode id', 'disc number', 'track number'],
+                    'index':[
+                        'itunes tv show id',
+                        'itunes tv season id',
+                        'itunes tv episode id',
+                        'disc number',
+                        'track number',
+                        'tv show name',
+                        'tv episode name',
+                        'simple tv show name',
+                        'simple tv episode name',
+                    ],
                 },
                 'service.document.itunes.music.album':{
                     'match':[
@@ -2064,7 +2226,11 @@
                     'collection':'itunes_music_album',
                     'namespace':'ns.knowledge.music.album',
                     'type':'json',
-                    'index':['itunes music album id'],
+                    'index':[
+                        'itunes music album id',
+                        'music album name',
+                        'simple music album name',
+                    ],
                 },
                 'service.document.itunes.music.track':{
                     'match':[
@@ -2103,7 +2269,16 @@
                     'collection':'itunes_music_track',
                     'namespace':'ns.knowledge.music.track',
                     'type':'json',
-                    'index':['itunes music track id', 'itunes music album id', 'disc number', 'track number'],
+                    'index':[
+                        'itunes music track id',
+                        'itunes music album id',
+                        'disc number',
+                        'track number',
+                        'music album name',
+                        'music track name',
+                        'simple music album name',
+                        'simple music track name',
+                    ],
                 },
                 'service.document.itunes.genre.complete':{
                     'match':[
@@ -2157,7 +2332,12 @@
                     'collection':'rottentomatoes_movie',
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
-                    'index':['rottentomatoes movie id', 'imdb movie id'],
+                    'index':[
+                        'rottentomatoes movie id',
+                        'imdb movie id',
+                        'movie title',
+                        'simple movie title',
+                    ],
                 },
                 'service.document.rottentomatoes.movie.review':{
                     'match':[
