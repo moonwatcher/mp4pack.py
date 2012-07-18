@@ -15,59 +15,59 @@ class Ontology(dict):
         self.log = logging.getLogger('ontology')
         self.env = env
         self.namespace = self.env.namespace[namespace]
-        
+
         # Make sure no empty concepts slipped in...
         for key in dict.keys(self):
             if dict.__getitem__(self, key) is None:
                 dict.__delitem__(self, key)
-                
+
         self.kernel = dict(self)
         self.dependency = {}
-    
-    
+
+
     def __unicode__(self):
         return unicode(self.kernel)
-    
-    
+
+
     @classmethod
     def clone(cls, other):
         o = cls(other.env, other.namespace.key, other.kernel)
         return o
-    
-    
+
+
     @property
     def node(self):
         return self.kernel
-    
-    
+
+
     def match(self, fact):
         result =  all((k in self and self[k] == v) for k,v in fact.iteritems())
         return result
-    
-    
+
+
     def project(self, namespace):
         o = Ontology(self.env, namespace)
         for k,v in self.kernel.iteritems():
             if o.namespace.contains(k):
                 o[k] = v
         return o
-    
-    
+
+
     def __setitem__(self, key, value):
         if key is not None:
             # Start by removing the concept to clean any implicit concepts
             # This also has the effect that setting a concept to None will effectively remove the concept,
-            # so concepts can be assumed to not be None
+            # so concepts can be assumed to not be None, but setting one to None removes it
             if dict.__contains__(self, key):
                 self.__delitem__(key)
-                
+
             # Concepts set by __setitem__ are considered kernel concepts
             if value is not None:
                 # self.log.debug(u'Set kernel concept %s', unicode({key:value}))
                 self.kernel[key] = value
                 dict.__setitem__(self, key, value)
-    
-    
+
+
     def __delitem__(self, key):
         # Even if the key is not present
         # We remove it's dependencies
@@ -76,47 +76,47 @@ class Ontology(dict):
                 if dict.__contains__(self, d):
                     self.__delitem__(d)
             del self.dependency[key]
-            
+
         # Silently ignore del for keys that are not present
         if dict.__contains__(self, key):
             # self.log.debug(u'Removed %s', unicode(key))
             if key in self.kernel:
                 del self.kernel[key]
             dict.__delitem__(self, key)
-    
-    
+
+
     def __contains__(self, key):
         self._resolve(key)
         return dict.__contains__(self, key)
-    
-    
+
+
     def __missing__(self, key):
         self._resolve(key)
         return self.get(key)
-    
-    
+
+
     def clear(self):
         self.kernel.clear()
         self.dependency.clear()
         dict.clear(self)
-    
-    
+
+
     def decode(self, synonym, value, axis=None):
         if synonym and value is not None:
             k,v = self.namespace.decode(synonym, value, axis)
             self.__setitem__(k, v)
-    
-    
+
+
     def decode_all(self, mapping, axis=None):
         for k,v in mapping.iteritems():
             self.decode(k,v, axis)
-    
+
     def _resolve(self, key):
         if not dict.__contains__(self, key):
             if key in self.namespace.deduction.dependency:
                 for rule in self.namespace.deduction.dependency[key]:
                     for branch in rule.branch:
-                        
+
                         # Check preconditions are satisfied
                         taken = True
                         if 'requires' in branch:
@@ -131,7 +131,7 @@ class Ontology(dict):
                                 taken = False
                         taken = taken and ('equal' not in branch or all((dict.__contains__(self, k) and dict.__getitem__(self, k) == v) for k,v in branch['equal'].iteritems()))
                         taken = taken and ('match' not in branch or branch['match']['pattern'].match(dict.__getitem__(self, branch['match']['property'])))
-                        
+
                         if taken:
                             if 'apply' in branch:
                                 for x in branch['apply']:
@@ -144,7 +144,7 @@ class Ontology(dict):
                                             dict.__setitem__(self, x['property'], x['format'].format(**self))
                                         elif 'value' in x:
                                             dict.__setitem__(self, x['property'], x['value'])
-                                            
+
                             if 'decode' in branch:
                                 for x in branch['decode']:
                                     match = x['pattern'].search(dict.__getitem__(self, x['property']))
@@ -154,7 +154,7 @@ class Ontology(dict):
                                             k,v = self.namespace.decode(synonym, raw)
                                             if k is not None and v is not None:
                                                 dict.__setitem__(self, k, v)
-                                                
+
                             # Mark all the atom the rule provieds as depending on the requirements
                             # This was removing the requirement also removes the dependent atom
                             if 'requires' in branch:
@@ -164,14 +164,14 @@ class Ontology(dict):
                                     else:
                                         self.dependency[req] = self.dependency[req].union(rule.provide)
                             break
-                            
+
                     if dict.__contains__(self, key):
                         # self.log.debug(u'Resolved %s', unicode({key:self[key]}))
                         break
-    
 
 
-# Generic Space and Element
+
+# Base Space and Element classes
 class Space(object):
     def __init__(self, env, node):
         self.log = logging.getLogger('Space')
@@ -201,58 +201,58 @@ class Space(object):
             'rule':[],
         }
         self.extend(node)
-    
+
     def extend(self, node):
         for k,v in node.iteritems():
             if k in ['default', 'element']:
                 if v: self.node[k].update(v)
-            
+
             elif k in ['synonym', 'rule']:
                 if v: self.node[k].extend(v)
-    
-    
+
+
     @property
     def key(self):
         return self.node['key']
-    
-    
+
+
     @property
     def element(self):
         if self._element is None:
             self._load_element()
         return self._element
-    
-    
+
+
     @property
     def synonym(self):
         if self._synonym is None:
             self._load_synonym()
         return self._synonym
-    
-    
+
+
     @property
     def deduction(self):
         if self._deduction is None:
             self._deduction = Deduction(self.env, self.node)
         return self._deduction
-    
-    
+
+
     @property
     def default(self):
         return self.node['default']
-    
-    
+
+
     def contains(self, key):
         return key is not None and key in self.element
-    
-    
+
+
     def find(self, key):
         # returns an element by key
         if key is not None and key in self.element:
             return self.element[key]
         else: return None
-    
-    
+
+
     def search(self, synonym, axis=None):
         element = None
         # returns an element by synonym
@@ -265,39 +265,39 @@ class Space(object):
             elif axis in self.node['synonym'] and synonym in self.synonym[axis]:
                 element = self.synonym[axis][synonym]
         return element
-    
-    
+
+
     def parse(self, synonym, axis=None):
         # returns the key by synonym
         element = self.search(synonym, axis)
         if element is not None: return element.key
         else: return None
-    
-    
+
+
     def format(self, key):
-        # returns an element name by key 
+        # returns an element name by key
         element = self.find(key)
         if element is not None: return element.name
         else: return None
-    
-    
+
+
     def map(self, key, synonym):
         if key is not None and synonym is not None and key in self.element:
             e = self.element[key]
             self.synonym[synonym] = e
-    
-    
+
+
     def add(self, key, node):
         if key is not None and node is not None:
             self.node['element'][key] = node
             self._element = None
             self._synonym = None
-    
-    
+
+
     def _load_element(self):
         pass
-    
-    
+
+
     def _load_synonym(self):
         self._synonym = {}
         if 'synonym' in self.node:
@@ -306,11 +306,11 @@ class Space(object):
                 for e in self.element.values():
                     if e.node[synonym] is not None:
                         self._synonym[synonym][e.node[synonym]] = e
-                
+
                 for e in self.element.values():
                     if e.node[synonym] is not None and e.node[synonym] not in self._synonym:
                         self._synonym[e.node[synonym]] = e
-    
+
 
 
 class Element(object):
@@ -318,40 +318,40 @@ class Element(object):
         self.log = logging.getLogger('Element')
         self.space = space
         self.node = node
-    
-    
+
+
     @property
     def env(self):
         return self.space.env
-    
-    
+
+
     @property
     def default(self):
         return self.space.default
-    
-    
+
+
     @property
     def enabled(self):
         return self.node is not None and self.node['enabled']
-    
-    
+
+
     @property
     def key(self):
         return self.node['key']
-    
-    
+
+
     @property
     def name(self):
         return self.node['name']
-    
+
 
 
 # Prototype Space and Prototype
 class PrototypeSpace(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
-    
-    
+
+
     def _load_element(self):
         self._element = {}
         for k,e in self.node['element'].iteritems():
@@ -360,40 +360,40 @@ class PrototypeSpace(Space):
             prototype = Prototype(self, e)
             if prototype.enabled:
                 self.element[prototype.key] = prototype
-    
-    
+
+
     def decode(self, synonym, value, axis=None):
         prototype = self.search(synonym, axis)
         if prototype:
             return (prototype.key, prototype.cast(value, axis))
         else:
             return (None, None)
-    
+
 
 
 class Prototype(Element):
     def __init__(self, space, node):
         Element.__init__(self, space, node)
-        
+
         # if the prototype has an archetype
         # start from the archetype and overlay the prototype
         if self.key in self.env.archetype:
             prototype = copy.deepcopy(self.env.archetype[self.key])
             self.node = dict(prototype.items() + self.node.items())
-            
+
         # apply defaults
         for field in self.default:
             if field not in self.node:
                 self.node[field] = self.default[field]
-                
+
         # set a default unicode type
         if 'type' not in self.node:
             self.node['type'] = 'unicode'
-            
+
         # find the cast and format functions
         c = getattr(self, '_cast_{0}'.format(self.node['type']), None) or (lambda x,y: x)
         f = getattr(self, '_format_{0}'.format(self.node['type']), None) or (lambda x: x)
-        
+
         if not self.node['plural']:
             self._cast = c
             self._format = f
@@ -404,39 +404,39 @@ class Prototype(Element):
             elif self.node['plural'] == 'dict':
                 self._format = lambda x: self._format_dict(x, f)
                 self._cast = lambda x,y: self._cast_dict(x, c, y)
-                
+
         if not self.node['auto cast']:
             self._cast = lambda x,y: x
-    
-    
+
+
     @property
     def keyword(self):
         return self.node['keyword']
-    
-    
+
+
     def cast(self, value, axis=None):
         if value is not None:
             return self._cast(value, axis)
         else:
             return None
-    
-    
+
+
     def format(self, value):
         if value is not None:
             return self._format(value)
         else:
             return None
-    
-    
-    
+
+
+
     def _wrap(self, value):
         result = value
         if len(value) > self.env.format['wrap width']:
             lines = textwrap.wrap(value, self.env.format['wrap width'])
             result = self.env.format['indent'].join(lines)
         return result
-    
-    
+
+
     def _format_byte_as_iec_60027_2(self, value):
         p = 0
         v = float(value)
@@ -444,8 +444,8 @@ class Prototype(Element):
             p += 1
             v /= 1024.0
         return u'{0:.2f} {1}'.format(v, self.env.enumeration['binary iec 60027 2'].get(p))
-    
-    
+
+
     def _format_bit_as_si(self, value):
         p = 0
         v = float(value)
@@ -453,81 +453,81 @@ class Prototype(Element):
             p += 1
             v /= 1000.0
         return u'{0:.2f} {1}'.format(v, self.env.enumeration['decimal si'].get(p))
-    
-    
+
+
     def _format_timecode(self, value):
         t = Timestamp(Timestamp.SRT)
         t.millisecond = value
         return t.timecode
-    
-    
+
+
     def _format_enum(self, value):
         return self.env.enumeration[self.node['enumeration']].format(value)
-    
-    
+
+
     def _format_float(self, value):
         return u'{0:.3f}'.format(value)
-    
-    
+
+
     def _format_int(self, value):
         result = unicode(value)
         if 'format' in self.node:
             if self.node['format'] == 'bitrate':
                 result = u'{0}/s'.format(self._format_bit_as_si(value))
-                
+
             elif self.node['format'] == 'millisecond':
                 result =  self._format_timecode(value)
-                
+
             elif self.node['format'] == 'byte':
                 result = self._format_byte_as_iec_60027_2(value)
-                
+
             elif self.node['format'] == 'bit':
                 result = u'{0} bit'.format(value)
-                
+
             elif self.node['format'] == 'frequency':
                 result = u'{0} Hz'.format(value)
-                
+
             elif self.node['format'] == 'pixel':
                 result = u'{0} px'.format(value)
-                
+
         return result
-    
-    
+
+
     def _format_bool(self, value):
         if value is True: return u'yes'
         else: return u'no'
-    
-    
+
+
     def _format_plist(self, value):
         return unicode(value)
-    
-    
+
+
     def _format_date(self, value):
         return unicode(value)
-    
-    
+
+
     def _format_list(self, value, formatter):
         if value:
             return u', '.join([ formatter(v) for v in value ])
         else:
             return None
-    
-    
+
+
     def _format_dict(self, value, formatter):
         if value:
             return u', '.join([ u'{0}:{1}'.format(k,formatter(v)) for k,v in value.iteritems() ])
         else:
             return None
-    
-    
+
+
     def _format_unicode(self, value):
         return value
-    
-    
+
+
     def _cast_enum(self, value, axis=None):
         return self.env.enumeration[self.node['enumeration']].parse(value)
-    
-    
+
+
     def _cast_int(self, value, axis=None):
         result = None
         try:
@@ -535,8 +535,8 @@ class Prototype(Element):
         except ValueError:
             self.log.error(u'Failed to decode: %s as an integer', value)
         return result
-    
-    
+
+
     def _cast_float(self, value, axis=None):
         result = None
         try:
@@ -544,8 +544,8 @@ class Prototype(Element):
         except ValueError:
             self.log.error(u'Failed to decode: %s as an integer', value)
         return result
-    
-    
+
+
     def _cast_unicode(self, value, axis=None):
         result = unicode(value.strip())
         if not result:
@@ -555,8 +555,8 @@ class Prototype(Element):
         if self.node['simplify']:
             result = self._simplify(result)
         return result
-    
-    
+
+
     def _cast_date(self, value, axis=None):
         result = None
         if 'format' in self.node and self.node['format'] == 'unix time':
@@ -564,9 +564,9 @@ class Prototype(Element):
             if result is not None:
                 result = datetime.utcfromtimestamp(result)
         else:
-            # Datetime conversion, must have at least a Year, Month and Day. 
+            # Datetime conversion, must have at least a Year, Month and Day.
             # If Year is present but Month and Day are missing they are set to 1
-            
+
             match = self.env.expression['full utc datetime'].search(value)
             if match:
                 parsed = dict([(k, int(v)) for k,v in match.groupdict().iteritems() if k != u'tzinfo' and v is not None])
@@ -581,23 +581,23 @@ class Prototype(Element):
             else:
                 self.log.debug(u'Failed to parse datetime %s', value)
         return result
-    
-    
+
+
     def _cast_bool(self, value, axis=None):
         result = False
         if self.env.expression['true value'].search(value) is not None:
             result = True
         return result
-    
-    
+
+
     def _cast_plist(self, value, axis=None):
         # Clean and parse plist into a dictionary
         result = value.replace(u'&quot;', u'"')
         result = self.env.expression['clean xml'].sub(u'', result).strip()
         result = plistlib.readPlistFromString(result.encode('utf-8'))
         return result
-    
-    
+
+
     def _cast_list(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
@@ -607,26 +607,26 @@ class Prototype(Element):
                     literals = value.split(u'/')
                 else:
                     self.log.error(u'Could not parse list %s', value)
-                    
+
             elif self.node['plural format'] == 'tvdb list':
                 value = self.env.expression['tvdb list separators'].sub(u'|', value)
                 value = self.env.expression['space around tvdb list item'].sub(u'|', value)
                 value = value.strip().strip(u'|')
                 if value:
                     literals = value.split(u'|')
-                    
+
             if literals:
                 result = [ caster(l, axis) for l in literals ]
         else:
             result = [ caster(v, axis) for v in value ]
-            
+
         if result:
             result = [ v for v in result if v is not None ]
         if not result:
             result = None
         return result
-    
-    
+
+
     def _cast_dict(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
@@ -644,21 +644,21 @@ class Prototype(Element):
         if not result:
             result = None
         return result
-    
-    
+
+
     def _cast_embed(self, value, axis=None):
         result = Ontology(self.env, self.node['namespace'])
         result.decode_all(value, axis)
         return result
-        
+
     def _remove_accents(self, value):
         result = None
         if value:
             nkfd = unicodedata.normalize('NFKD', value)
             result = self.env.constant['empty string'].join([c for c in nkfd if not unicodedata.combining(c)])
         return result
-    
-    
+
+
     def _simplify(self, value):
         result = None
         if value:
@@ -674,15 +674,15 @@ class Prototype(Element):
                 result = self._remove_accents(result)
                 result = result.lower()
         return result
-    
+
 
 
 # Enumeration and Enumerator
 class Enumeration(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
-    
-    
+
+
     def _load_element(self):
         self._element = {}
         for k,e in self.node['element'].iteritems():
@@ -691,18 +691,18 @@ class Enumeration(Space):
             enumerator = Enumerator(self, e)
             if enumerator.enabled:
                 self.element[enumerator.key] = enumerator
-    
+
 
 
 class Enumerator(Element):
     def __init__(self, space, node):
         Element.__init__(self, space, node)
-        
+
         # apply defaults
         for field in self.default:
             if field not in self.node:
                 self.node[field] = self.default[field]
-    
+
 
 
 # Deduction and Rule
@@ -713,22 +713,22 @@ class Deduction(object):
         self.node = node
         self._rule = None
         self._dependency = None
-    
-    
+
+
     @property
     def rule(self):
         if self._rule is None:
             self.reload()
         return self._rule
-    
-    
+
+
     @property
     def dependency(self):
         if self._dependency is None:
             self.reload()
         return self._dependency
-    
-    
+
+
     def reload(self):
         self._rule = {}
         self._dependency = {}
@@ -739,14 +739,14 @@ class Deduction(object):
                 if ref not in self.dependency:
                     self.dependency[ref] = []
                 self.dependency[ref].append(rule)
-    
-    
+
+
     def find(self, key):
         if key in self.rule:
             return self.rule[key]
         else:
             return None
-    
+
 
 
 class Rule(object):
@@ -754,39 +754,39 @@ class Rule(object):
         self.log = logging.getLogger('rule')
         self.env = env
         self.node = node
-        
+
         if 'branch' not in self.node:
             self.node['branch'] = []
-            
+
         for branch in self.branch:
             self._load_branch(branch)
-            
-    
-    
+
+
+
     def __unicode__(self):
         return self.node['key']
-    
-    
+
+
     @property
     def valid(self):
         return True
-    
-    
+
+
     @property
     def provide(self):
         return self.node['provide']
-    
-    
+
+
     @property
     def branch(self):
         return self.node['branch']
-    
-    
+
+
     def add_branch(self, branch):
         if self._load_branch(branch):
             self.branch.append(branch)
-    
-    
+
+
     def _load_branch(self, branch):
         result = False
         if branch is not None:
@@ -795,7 +795,7 @@ class Rule(object):
                     if 'flags' not in branch['match']:
                         branch['match']['flags'] = re.UNICODE
                     branch['match']['pattern'] = re.compile(branch['match']['expression'], branch['match']['flags'])
-                    
+
                 if 'decode' in branch:
                     for c in branch['decode']:
                         if 'flags' not in c:
@@ -806,6 +806,6 @@ class Rule(object):
                 self.log.error(u'Failed to load banch for rule %s', unicode(self))
                 self.log.debug(u'Exception raised: %s', unicode(e))
         return result
-    
+
 
 

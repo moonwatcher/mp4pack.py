@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
 
+# album id
+# track id
+
+# tv show id
+# tv season id
+# tv episode
+
+# movie id
+# movie version id
+
 {
     'service':{
         'home':{
@@ -1232,7 +1242,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/search$',
-                            'query parameter':set(('api key', 'term', 'page', 'language', 'release year')),
+                            'query parameter':set(('api key', 'term', 'release year', 'language', 'page')),
                             'remote':ur'search/movie',
                         },
                     ],
@@ -1848,6 +1858,7 @@
                         'tv episode name',
                         'simple tv show name',
                         'simple tv episode name',
+                        'tv episode production code',
                     ],
                     'collection':'tvdb_tv_episode',
                     'namespace':'ns.knowledge.tv.episode',

@@ -18,6 +18,7 @@
             'keyword':u'home_id',
             'type':'int',
         },
+        
         'album id':{
             'name':u'Album ID',
             'keyword':u'album_id',
@@ -33,19 +34,32 @@
             'keyword':u'track_id',
             'type':'int',
         },
+        
+        'tv show id':{
+            'name':u'TV show ID',
+            'keyword':u'tv_show_id',
+            'type':'int',
+        },
+        'tv season id':{
+            'name':u'TV season ID',
+            'keyword':u'tv_season_id',
+            'type':'int',
+        },
+        'tv episode id':{
+            'name':u'TV episode ID',
+            'keyword':u'tv_episode_id',
+            'type':'int',
+        },
+        
         'movie id':{
             'name':u'Movie ID',
             'keyword':u'movie_id',
             'type':'int',
         },
+        
         'collection id':{
             'name':u'Collection ID',
             'keyword':u'collection_id',
-            'type':'int',
-        },
-        'tv show id':{
-            'name':u'TV show ID',
-            'keyword':u'tv_show_id',
             'type':'int',
         },
         'person id':{
