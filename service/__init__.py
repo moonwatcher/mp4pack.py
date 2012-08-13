@@ -9,7 +9,7 @@ import urllib
 import urlparse
 from datetime import datetime
 from ontology import Ontology
-from pymongo import json_util
+from bson import json_util
 from bson.objectid import ObjectId
 from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError

@@ -2,14 +2,16 @@
 
 # album id
 # track id
+# album > disc > track
 
 # tv show id
 # tv season id
 # tv episode
+# tv show > tv season > tv episode
 
 # movie id
 # movie version id
-
+ 
 {
     'service':{
         'home':{
@@ -139,7 +141,7 @@
                 'service.home.tv.season':{
                     'match':[
                         {
-                            'filter':ur'^/h/tv/season/(?P<disc_id>[0-9]+)$',
+                            'filter':ur'^/h/tv/season/(?P<tv_season_id>[0-9]+)$',
                         },
                         {
                             'filter':ur'^/h/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$',
@@ -166,8 +168,8 @@
                             'canonical':True,
                         },
                         {
-                            'name':u'season home by disc id',
-                            'format':ur'/h/tv/season/{disc id}',
+                            'name':u'season home by tv season id',
+                            'format':ur'/h/tv/season/{tv season id}',
                         },
                         {
                             'name':u'season home by tv show id',
@@ -187,10 +189,10 @@
                         },
                     ],
                     'collection':'home',
-                    'key':'disc id',
+                    'key':'tv season id',
                     'index':[
                         'tv show id',
-                        'disc id',
+                        'tv season id',
                         'disc number',
                         'tvdb tv show id',
                         'tvdb tv season id',
@@ -204,10 +206,10 @@
                 'service.home.tv.episode':{
                     'match':[
                         {
-                            'filter':ur'^/h/tv/episode/(?P<track_id>[0-9]+)$',
+                            'filter':ur'^/h/tv/episode/(?P<tv_episode_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'^/h/tv/episode/(?P<disc_id>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'filter':ur'^/h/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$',
                         },
                         {
                             'filter':ur'^/h/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
@@ -245,12 +247,12 @@
                             'canonical':True,
                         },
                         {
-                            'name':u'episode home by track id',
-                            'format':ur'/h/tv/episode/{track id}',
+                            'name':u'episode home by tv episode id',
+                            'format':ur'/h/tv/episode/{tv episode id}',
                         },
                         {
-                            'name':u'episode home by disc id',
-                            'format':ur'/h/tv/episode/{disc id}/{track number}',
+                            'name':u'episode home by tv season id',
+                            'format':ur'/h/tv/episode/{tv season id}/{track number}',
                         },
                         {
                             'name':u'episode home by tv show id',
@@ -282,11 +284,11 @@
                         },
                     ],
                     'collection':'home',
-                    'key':'track id',
+                    'key':'tv episode id',
                     'index':[
                         'tv show id',
-                        'disc id',
-                        'track id',
+                        'tv season id',
+                        'tv episode id',
                         'disc number',
                         'track number'
                         'tvdb tv show id',
@@ -969,7 +971,7 @@
                 'service.knowledge.tv.season':{
                     'match':[
                         {
-                            'filter':ur'^/k/(?P<language>[a-z]{2})/tv/season/(?P<disc_id>[0-9]+)$',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_season_id>[0-9]+)$',
                         },
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$',
@@ -977,8 +979,8 @@
                     ],
                     'resolvable':[
                         {
-                            'name':u'season knowledge by disc id',
-                            'format':ur'/k/{language}/tv/season/{disc id}',
+                            'name':u'season knowledge by tv season id',
+                            'format':ur'/k/{language}/tv/season/{tv season id}',
                         },
                         {
                             'name':u'season knowledge by tv show id and position',
@@ -988,7 +990,11 @@
                     'type':'json',
                     'collection':'knowledge_tvshow_season',
                     'namespace':'ns.knowledge.tv.season',
-                    'index':['tv show id', 'disc id', 'disc number'],
+                    'index':[
+                        'tv show id',
+                        'tv season id',
+                        'disc number',
+                    ],
                 },
                 'service.knowledge.tv.season.image':{
                     'match':[
@@ -1025,10 +1031,10 @@
                 'service.knowledge.tv.episode':{
                     'match':[
                         {
-                            'filter':ur'^/k/(?P<language>[a-z]{2})/tv/episode/(?P<track_id>[0-9]+)$',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_episode_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'^/k/(?P<language>[a-z]{2})/tv/episode/(?P<disc_id>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$',
                         },
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
@@ -1036,12 +1042,12 @@
                     ],
                     'resolvable':[
                         {
-                            'name':u'episode knowledge by track id',
-                            'format':ur'/k/{language}/tv/episode/{track id}',
+                            'name':u'episode knowledge by tv episode id',
+                            'format':ur'/k/{language}/tv/episode/{tv episode id}',
                         },
                         {
-                            'name':u'episode knowledge by disc id',
-                            'format':ur'/k/{language}/tv/episode/{disc id}/{track number}',
+                            'name':u'episode knowledge by tv season id',
+                            'format':ur'/k/{language}/tv/episode/{tv season id}/{track number}',
                         },
                         {
                             'name':u'episode knowledge by tv show id',
@@ -1051,7 +1057,14 @@
                     'type':'json',
                     'collection':'knowledge_tvshow_episode',
                     'namespace':'ns.knowledge.tv.episode',
-                    'index':['tv show id', 'track id', 'disc id', 'disc number', 'track number', 'language'],
+                    'index':[
+                        'tv show id',
+                        'tv season id',
+                        'tv episode id',
+                        'disc number',
+                        'track number',
+                        'language',
+                    ],
                 },
                 'service.knowledge.tv.episode.image':{
                     'match':[

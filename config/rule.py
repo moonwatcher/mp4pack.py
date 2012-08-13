@@ -197,22 +197,22 @@
                 {
                     'requires':set((
                         'media kind',
-                        'track id',
+                        'tv episode id',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/{track id}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/{tv episode id}', },
                     ],
                 },
                 {
                     'requires':set((
                         'media kind',
-                        'disc id',
+                        'tv season id',
                         'track number',
                     )),
                     'equal':{'media kind':'tvshow', },
                     'apply':[
-                        { 'property':'home uri', 'format':u'/h/tv/episode/{disc id}/{track number}', },
+                        { 'property':'home uri', 'format':u'/h/tv/episode/{tv season id}/{track number}', },
                     ],
                 },
                 {

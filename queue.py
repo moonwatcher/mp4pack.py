@@ -385,7 +385,7 @@ class ServiceTask(Task):
     
     
     def get(self):
-        from pymongo import json_util
+        from bson import json_util
         #print json.dumps(self.document, sort_keys=True, indent=4,  default=json_util.default)
         print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
