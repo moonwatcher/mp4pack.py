@@ -307,17 +307,6 @@
                 {
                     'requires':set((
                         'media kind',
-                        'disc id',
-                        'track number',
-                    )),
-                    'equal':{'media kind':'music', },
-                    'apply':[
-                        { 'property':'home uri', 'format':u'/h/music/track/{disc id}/{track number}', },
-                    ],
-                },
-                {
-                    'requires':set((
-                        'media kind',
                         'album id',
                         'disc number',
                         'track number',

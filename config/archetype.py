@@ -24,11 +24,6 @@
             'keyword':u'album_id',
             'type':'int',
         },
-        'disc id':{
-            'name':u'Disc ID',
-            'keyword':u'disc_id',
-            'type':'int',
-        },
         'track id':{
             'name':u'Track ID',
             'keyword':u'track_id',
