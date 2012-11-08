@@ -41,20 +41,28 @@ class Resolver(object):
         self.handlers['medium'] = MediumHandler(self, self.env.service['medium'])
         
     
+    def find_repository(self, hostname):
+        repository = None
+        if hostname is None: 
+            hostname = self.env.host
+            
+        if hostname in self.env.repository:
+            repository = self.env.repository[hostname]
+        else:
+            self.log.warning(u'Unresolvable host name %s', hostname)
+            
+        if repository and not repository.valid:
+            self.log.warning(u'Could not start a repository for %s', hostname)
+            repository = None
+            
+        return repository
+    
     
     def resolve(self, uri, location=None):
         result = None
         if uri is not None:
-            repository = None
             p = urlparse.urlparse(uri)
-            if p.hostname is not None:
-                if p.hostname in self.env.repository:
-                    repository = self.env.repository[p.hostname]
-                else:
-                    self.log.warning(u'Unresolvable host name %s', p.hostname)
-            else:
-                repository = self.env.repository[self.env.host]
-                
+            repository = self.find_repository(p.hostname)
             if repository is not None:
                 for handler in self.handlers.values():
                     if handler.match(p.path):
@@ -65,16 +73,8 @@ class Resolver(object):
     
     def remove(self, uri):
         if uri is not None:
-            repository = None
             p = urlparse.urlparse(uri)
-            if p.hostname is not None:
-                if p.hostname in self.env.repository:
-                    repository = self.env.repository[p.hostname]
-                else:
-                    self.log.warning(u'Unresolvable host name %s', p.hostname)
-            else:
-                repository = self.env.repository[self.env.host]
-                
+            repository = self.find_repository(p.hostname)
             if repository is not None:
                 for handler in self.handlers.values():
                     if handler.match(p.path):
@@ -86,23 +86,24 @@ class Resolver(object):
         if node:
             if 'canonical' in node[u'head'] and node[u'head']['canonical']:
                 uri = node['head']['canonical']
-                repository = self.env.repository[self.env.host]
-                for handler in self.handlers.values():
-                    match = handler.match(uri)
-                    if match is not None:
-                        handler.save(node, repository)
-                        break
+                repository = self.find_repository(self.env.host)
+                if repository is not None:
+                    for handler in self.handlers.values():
+                        match = handler.match(uri)
+                        if match is not None:
+                            handler.save(node, repository)
+                            break
             else:
                 self.log.error(u'URIs are missing, refusing to save record %s', unicode(node[u'head']))        
     
     
-    def issue(self, host, name):
+    def issue(self, hostname, name):
         result = None
         if name == 'oid':
             result = ObjectId()
         else:
-            if host in self.env.repository:
-                repository = self.env.repository[host]
+            repository = self.find_repository(hostname)
+            if repository is not None:
                 issued = repository.database.counters.find_and_modify(query={u'_id':name}, update={u'$inc':{u'next':1}, u'$set':{u'modified':datetime.now()}}, new=True, upsert=True)
                 if issued is not None:
                     self.log.debug(u'New key %d issued for key pool %s', issued[u'next'], issued[u'_id'])

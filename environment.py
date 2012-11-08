@@ -163,6 +163,8 @@ class Environment(object):
     def load(self):
         relative = os.path.dirname(__file__)
         self.load_config(os.path.join(relative,'config/system.py'))
+        self.load_config(os.path.join(relative,'config/expression.py'))
+        self.load_config(os.path.join(relative,'config/interface.py'))
         self.load_config(os.path.join(relative,'config/enumeration.py'))
         self.load_config(os.path.join(relative,'config/archetype.py'))
         self.load_config(os.path.join(relative,'config/rule.py'))
@@ -489,9 +491,12 @@ class Repository(object):
         
     
     
+    def __unicode__(self):
+        return unicode(u'{}:{}'.format(self.domain, self.host))
+    
     @property
     def valid(self):
-        return True
+        return self.connection is not None
     
     
     @property
@@ -525,9 +530,8 @@ class Repository(object):
                 import pymongo
                 self.log.debug(u'Connecting to %s', self.mongodb['mongodb url'])
                 self._connection = pymongo.Connection(self.mongodb['mongodb url'])
-            except pymongo.errors.AutoReconnect, e:
-                self.log.warning(u'Failed to connect to %s', self.mongodb['mongodb url'])
-                self.log.debug(u'Exception raised: %s', e)
+            except pymongo.errors.PyMongoError, e:
+                self.log.error(u'Could not establish connection with %s because %s', self.mongodb['mongodb url'], e)
             else:
                 self.log.debug(u'Connection established with %s', self.host)
         return self._connection
@@ -536,7 +540,7 @@ class Repository(object):
     @property
     def database(self):
         if self.connection is not None:
-            return self.connection[self.mongodb['database']]
+            return self._connection[self.mongodb['database']]
         else:
             return None
     
