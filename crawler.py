@@ -66,7 +66,7 @@ class Crawler(object):
         # Propagate self._stream and self._menu from mediainfo
         command = self.env.initialize_command('mediainfo', self.log)
         if command:
-            command.extend([u'--Language=raw', u'--Output=XML', u'-f', self.ontology['path']])
+            command.extend([u'--Language=raw', u'--Output=XML', u'--Full', u'--SkipBinaryData', self.ontology['path']])
             proc_mediainfo = Popen(command, stdout=PIPE, stderr=PIPE)
             proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
             report = proc_grep.communicate()

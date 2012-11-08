@@ -594,10 +594,15 @@ class Prototype(Element):
         # Clean and parse plist into a dictionary
         result = value.replace(u'&quot;', u'"')
         result = self.env.expression['clean xml'].sub(u'', result).strip()
-        result = plistlib.readPlistFromString(result.encode('utf-8'))
+        try:
+            result = plistlib.readPlistFromString(result.encode('utf-8'))
+        except Exception, e:
+            self.log.debug(u'Could not parse plist %s', result)
+            result = None
+            
         return result
-
-
+    
+    
     def _cast_list(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
