@@ -216,6 +216,12 @@ class Environment(object):
     
     
     def _load_config_node(self, node):
+        def check(node):
+            if node and ('enable' not in node or node['enable']):
+                return True
+            else:
+                return False
+                
         if node:
             if 'system' in node:
                 for k,e in node['system'].iteritems():
@@ -223,13 +229,15 @@ class Environment(object):
                     
             if 'archetype' in node:
                 for k,e in node['archetype'].iteritems():
-                    e['key'] = k
-                    self.archetype[k] = e
+                    if check(e):
+                        e['key'] = k
+                        self.archetype[k] = e
                     
             if 'enumeration' in node:
                 for k,e in node['enumeration'].iteritems():
-                    e['key'] = k
-                    self.enumeration[k] = Enumeration(self, e)
+                    if check(e):
+                        e['key'] = k
+                        self.enumeration[k] = Enumeration(self, e)
                     
             if 'namespace' in node:
                 for k,e in node['namespace'].iteritems():
@@ -238,52 +246,62 @@ class Environment(object):
                     
             if 'rule' in node:
                 for k,e in node['rule'].iteritems():
-                    e['key'] = k
-                    self.rule[k] = Rule(self, e)
+                    if check(e):
+                        e['key'] = k
+                        self.rule[k] = Rule(self, e)
                     
             if 'service' in node:
                 for k,e in node['service'].iteritems():
-                    e['name'] = k
-                    self.service[k] = e
-                    
+                    if check(e):
+                        e['name'] = k
+                        self.service[k] = e
+                        
             if 'expression' in node:
                 for e in node['expression']:
-                    if 'flags' not in e: e['flags'] = 0
-                    self.expression[e['name']] = re.compile(e['definition'], e['flags'])
+                    if check(e):
+                        if 'flags' not in e:
+                            e['flags'] = 0
+                        self.expression[e['name']] = re.compile(e['definition'], e['flags'])
                     
             if 'constant' in node:
-                for k,v in node['constant'].iteritems():
-                    self.constant[k] = v
+                for k,e in node['constant'].iteritems():
+                    self.constant[k] = e
                     
             if 'command' in node:
                 for e in node['command']:
-                    self.command[e['name']] = e
-                    self.which(e)
+                    if check(e):
+                        self.command[e['name']] = e
+                        self.which(e)
                     
             if 'profile' in node:
                 for k,e in node['profile'].iteritems():
-                    e['name'] = k
-                    self.profile[k] = e
+                    if check(e):
+                        e['name'] = k
+                        self.profile[k] = e
                             
             if 'preset' in node:
                 for k,e in node['preset'].iteritems():
-                    e['name'] = k
-                    self.preset[k] = e
+                    if check(e):
+                        e['name'] = k
+                        self.preset[k] = e
                             
             if 'repository' in node:
                 for k,e in node['repository'].iteritems():
-                    e['host'] = k
-                    self.repository[k] = Repository(self, e)
+                    if check(e):
+                        e['host'] = k
+                        self.repository[k] = Repository(self, e)
                     
             if 'subtitle filter' in node:
                 for k,e in node['subtitle filter'].iteritems():
-                    e['name'] = k
-                    self.subtitle_filter[k] = e
+                    if check(e):
+                        e['name'] = k
+                        self.subtitle_filter[k] = e
                     
             if 'interface' in node:
                 for k,e in node['interface'].iteritems():
-                    e['key'] = k
-                    self.interface[k] = e
+                    if check(e):
+                        e['key'] = k
+                        self.interface[k] = e
     
     
     
@@ -552,19 +570,29 @@ class Repository(object):
     
     
     def reload(self):
+        def check(node):
+            if node and ('enable' not in node or node['enable']):
+                return True
+            else:
+                return False
+                
         # Load path mappings
         self._mapping = {}
         for mapping in self.node['mapping']:
-            mapping['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(mapping['path'])))
-            for alt in mapping['alternate']:
-                alternate = os.path.realpath(os.path.expanduser(os.path.expandvars(alt)))
-                if alternate not in self._mapping:
-                    self._mapping[alternate] = mapping['real']
-                else:
-                    self.log.warning('Path %s on %s already mapped to %s', alternate, self.host, self._mapping[alternate])
+            if check(mapping):
+                self.log.debug(u'Expanding path %s', mapping['path'])
+                mapping['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(mapping['path'])))
+                for alt in mapping['alternate']:
+                    self.log.debug(u'Expanding path %s', alt)
+                    alternate = os.path.realpath(os.path.expanduser(os.path.expandvars(alt)))
+                    if alternate not in self._mapping:
+                        self._mapping[alternate] = mapping['real']
+                    else:
+                        self.log.warning(u'Path %s on %s already mapped to %s', alternate, self.host, self._mapping[alternate])
                     
         # Load the volume enumeration
         for key, volume in self.node['volume']['element'].iteritems():
+            self.log.debug(u'Expanding path %s', volume['path'])
             volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
         self._volume = Enumeration(self.env, self.node['volume'])
         
