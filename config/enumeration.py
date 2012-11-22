@@ -655,9 +655,9 @@
                 'video':{   'name':u'Video',    'namespace':'ns.medium.resource.stream.video',  'mediainfo':u'Video'     },
                 'audio':{   'name':u'Audio',    'namespace':'ns.medium.resource.stream.audio',  'mediainfo':u'Audio'     },
                 'image':{   'name':u'Image',    'namespace':'ns.medium.resource.stream.image',  'mediainfo':u'Image'     },
-                'text':{    'name':u'Text',     'namespace':'ns.medium.resource.stream.text',   'mediainfo':u'Text'   },
+                'text':{    'name':u'Text',     'namespace':'ns.medium.resource.stream.text',   'mediainfo':u'Text'      },
                 'menu':{    'name':u'Menu',     'namespace':None,                               'mediainfo':u'Menu'      },
-                'general':{ 'name':u'General',  'namespace':'ns.medium.resource.meta',    'mediainfo':u'General'   },
+                'general':{ 'name':u'General',  'namespace':'ns.medium.resource.meta',          'mediainfo':u'General'   },
             },
         },
         'kind':{

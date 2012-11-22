@@ -35,6 +35,10 @@
                             'filter':ur'^/h/movie/~/(?P<movie_handle>[^/]+)$',
                         },
                         {
+                            'filter':ur'^/h/movie/itunes/(?P<itunes_movie_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/movie/{itunes movie id}',
+                        },
+                        {
                             'filter':ur'^/h/movie/tmdb/(?P<tmdb_movie_id>[0-9]+)$',
                             'depend':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
                         },
@@ -616,6 +620,8 @@
         'knowledge':{
             'match':ur'^/k/.*$',
             'branch':{
+                
+                # Global
                 'service.knowledge.configuration':{
                     'match':[
                         {
@@ -632,6 +638,7 @@
                     'collection':'knowledge_configuration',
                 },
 
+                # Playlist
                 'service.knowledge.playlist':{
                     'match':[
                         {
@@ -649,10 +656,25 @@
                     'namespace':'ns.knowledge.playlist',
                 },
 
+                # Movie
                 'service.document.knowledge.movie':{
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$',
+                            'compose':[
+                                {
+                                    'uri':ur'/h/movie/{movie id}',
+                                },
+                                {
+                                    'uri':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}',
+                                },
+                                {
+                                    'uri':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
+                                },
+                                {
+                                    'uri':ur'/c/itunes/movie/{itunes movie id}',
+                                },
+                            ],
                         },
                     ],
                     'resolvable':[
@@ -698,6 +720,22 @@
                     'collection':'knowledge_movie_image',
                     'namespace':'ns.knowledge.movie',
                 },
+                'service.document.knowledge.movie.clip':{
+                    'match':[
+                        {
+                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/clip$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'movie clip knowledge',
+                            'format':ur'/k/movie/{movie id}/clip',
+                        },
+                    ],
+                    'type':'json',
+                    'collection':'knowledge_movie_clip',
+                    'namespace':'ns.knowledge.movie',
+                },                
                 'service.document.knowledge.movie.keyword':{
                     'match':[
                         {
@@ -728,22 +766,6 @@
                     ],
                     'type':'json',
                     'collection':'knowledge_movie_rating',
-                    'namespace':'ns.knowledge.movie',
-                },
-                'service.document.knowledge.movie.clip':{
-                    'match':[
-                        {
-                            'filter':ur'^/k/movie/(?P<movie_id>[0-9]+)/clip$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'movie clip knowledge',
-                            'format':ur'/k/movie/{movie id}/clip',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_movie_clip',
                     'namespace':'ns.knowledge.movie',
                 },
                 'service.document.knowledge.movie.translation':{
@@ -779,6 +801,7 @@
                     'namespace':'ns.knowledge.movie',
                 },
 
+                # TV Show
                 'service.document.knowledge.tv.show':{
                     'match':[
                         {
@@ -926,22 +949,6 @@
                         'language',
                     ],
                 },
-                'service.document.knowledge.tv.episode.image':{
-                    'match':[
-                        {
-                            'filter':ur'^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/image$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'tv show episode image',
-                            'format':ur'/k/tv/episode/{tv show id}/{disc number}/{track number}/image',
-                        },
-                    ],
-                    'type':'json',
-                    'collection':'knowledge_tv_episode_image',
-                    'namespace':'ns.knowledge.tv.episode',
-                },
                 'service.document.knowledge.tv.episode.cast':{
                     'match':[
                         {
@@ -958,7 +965,24 @@
                     'collection':'knowledge_tv_episode_cast',
                     'namespace':'ns.knowledge.tv.episode',
                 },
+                'service.document.knowledge.tv.episode.image':{
+                    'match':[
+                        {
+                            'filter':ur'^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/image$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'tv show episode image',
+                            'format':ur'/k/tv/episode/{tv show id}/{disc number}/{track number}/image',
+                        },
+                    ],
+                    'type':'json',
+                    'collection':'knowledge_tv_episode_image',
+                    'namespace':'ns.knowledge.tv.episode',
+                },
 
+                # Music Album
                 'service.document.knowledge.music.album':{
                     'match':[
                         {
@@ -1017,6 +1041,7 @@
                     'index':['album id', 'track id', 'disc number', 'track number', 'language'],
                 },
 
+                # Structural elements
                 'service.document.knowledge.person':{
                     'match':[
                         {

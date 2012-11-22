@@ -171,8 +171,8 @@ class Ontology(dict):
 
 
 
-# Base Space and Element classes
 class Space(object):
+    """Base Space and Element classes"""
     def __init__(self, env, node):
         self.log = logging.getLogger('Space')
         self.env = env
@@ -346,7 +346,6 @@ class Element(object):
 
 
 
-# Prototype Space and Prototype
 class PrototypeSpace(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
@@ -629,6 +628,9 @@ class Prototype(Element):
             result = [ v for v in result if v is not None ]
         if not result:
             result = None
+        else:
+            if 'single element name' in self.node:
+                result = [ { self.node['single element name']:v } for v in result ]
         return result
 
 
@@ -682,7 +684,7 @@ class Prototype(Element):
 
 
 
-# Enumeration and Enumerator
+
 class Enumeration(Space):
     def __init__(self, env, node):
         Space.__init__(self, env, node)
@@ -710,7 +712,6 @@ class Enumerator(Element):
 
 
 
-# Deduction and Rule
 class Deduction(object):
     def __init__(self, env, node):
         self.log = logging.getLogger('deduction')

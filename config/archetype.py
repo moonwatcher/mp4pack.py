@@ -435,6 +435,18 @@
             'atom':'tvnn',
         },
         
+        'simple keyword name':{
+            'name':u'Simple keyword name',
+            'keyword':u'simple_keyword_name',
+            'type':'unicode',
+            'simplify':True,
+        },
+        'simple collection name':{
+            'name':u'Simple collection name',
+            'keyword':u'simple_collection_name',
+            'type':'unicode',
+            'simplify':True,
+        },
         'simple company name':{
             'name':u'Simple company name',
             'keyword':u'simple_company_name',
@@ -1599,9 +1611,9 @@
             'namespace':'ns.knowledge.image',
             'plural':'list',
         },
-        'belongs to collection':{
-            'name':'Belongs to collection',
-            'keyword':'belongs_to_collection',
+        'part of a collection':{
+            'name':'part of a collection',
+            'keyword':'part_of_a_collection',
             'type':'embed',
             'namespace':'ns.knowledge.collection',
         },
@@ -1630,7 +1642,7 @@
             'name':'Certification',
             'keyword':'certification',
             'type':'embed',
-            'namespace':'ns.knowledge.rating',
+            'namespace':'ns.knowledge.certification',
             'plural':'list',
         },
         'titles':{

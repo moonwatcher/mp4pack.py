@@ -1362,7 +1362,7 @@
             ],
         },        
         
-        'rule.knowledge.simple.movietitle':{
+        'rule.knowledge.simple.name.movie':{
             'name':'Simple movie title',
             'provide':set(('simple movie title',)),
             'branch':[
@@ -1374,55 +1374,7 @@
                 },
             ],
         },
-        'rule.knowledge.simple.companyname':{
-            'name':'Simple company name',
-            'provide':set(('simple company name',)),
-            'branch':[
-                {
-                    'requires':set(('company name',)),
-                    'decode':[
-                        {'property':'company name', 'expression':ur'^(?P<simple_company_name>.+)$'},
-                    ],
-                },
-            ],
-        },
-        'rule.knowledge.simple.personname':{
-            'name':'Simple person name',
-            'provide':set(('simple person name',)),
-            'branch':[
-                {
-                    'requires':set(('person name',)),
-                    'decode':[
-                        {'property':'person name', 'expression':ur'^(?P<simple_person_name>.+)$'},
-                    ],
-                },
-            ],
-        },
-        'rule.knowledge.simple.genrename':{
-            'name':'Simple genre name',
-            'provide':set(('simple genre name',)),
-            'branch':[
-                {
-                    'requires':set(('genre name',)),
-                    'decode':[
-                        {'property':'genre name', 'expression':ur'^(?P<simple_genre_name>.+)$'},
-                    ],
-                },
-            ],
-        },
-        'rule.knowledge.simple.charactername':{
-            'name':'Simple character name',
-            'provide':set(('simple character name',)),
-            'branch':[
-                {
-                    'requires':set(('character name',)),
-                    'decode':[
-                        {'property':'character name', 'expression':ur'^(?P<simple_character_name>.+)$'},
-                    ],
-                },
-            ],
-        },
-        'rule.knowledge.simple.tv.showname':{
+        'rule.knowledge.simple.name.tv.show':{
             'name':'Simple tv show name',
             'provide':set(('simple tv show name',)),
             'branch':[
@@ -1434,7 +1386,7 @@
                 },
             ],
         },
-        'rule.knowledge.simple.tv.episodename':{
+        'rule.knowledge.simple.name.tv.episode':{
             'name':'Simple tv episode name',
             'provide':set(('simple tv episode name',)),
             'branch':[
@@ -1446,7 +1398,7 @@
                 },
             ],
         },
-        'rule.knowledge.simple.music.albumname':{
+        'rule.knowledge.simple.name.music.album':{
             'name':'Simple music album name',
             'provide':set(('simple music album name',)),
             'branch':[
@@ -1458,7 +1410,7 @@
                 },
             ],
         },
-        'rule.knowledge.simple.music.trackname':{
+        'rule.knowledge.simple.name.music.track':{
             'name':'Simple music track name',
             'provide':set(('simple music track name',)),
             'branch':[
@@ -1466,6 +1418,78 @@
                     'requires':set(('music track name',)),
                     'decode':[
                         {'property':'music track name', 'expression':ur'^(?P<simple_music_track_name>.+)$'},
+                    ],
+                },
+            ],
+        },
+        'rule.knowledge.simple.name.person':{
+            'name':'Simple person name',
+            'provide':set(('simple person name',)),
+            'branch':[
+                {
+                    'requires':set(('person name',)),
+                    'decode':[
+                        {'property':'person name', 'expression':ur'^(?P<simple_person_name>.+)$'},
+                    ],
+                },
+            ],
+        },
+        'rule.knowledge.simple.name.company':{
+            'name':'Simple company name',
+            'provide':set(('simple company name',)),
+            'branch':[
+                {
+                    'requires':set(('company name',)),
+                    'decode':[
+                        {'property':'company name', 'expression':ur'^(?P<simple_company_name>.+)$'},
+                    ],
+                },
+            ],
+        },
+        'rule.knowledge.simple.name.collection':{
+            'name':'Simple collection name',
+            'provide':set(('simple collection name',)),
+            'branch':[
+                {
+                    'requires':set(('collection name',)),
+                    'decode':[
+                        {'property':'collection name', 'expression':ur'^(?P<simple_collection_name>.+)$'},
+                    ],
+                },
+            ],
+        },
+        'rule.knowledge.simple.name.keyword':{
+            'name':'Simple keyword name',
+            'provide':set(('simple keyword name',)),
+            'branch':[
+                {
+                    'requires':set(('keyword name',)),
+                    'decode':[
+                        {'property':'keyword name', 'expression':ur'^(?P<simple_keyword_name>.+)$'},
+                    ],
+                },
+            ],
+        },
+        'rule.knowledge.simple.name.genre':{
+            'name':'Simple genre name',
+            'provide':set(('simple genre name',)),
+            'branch':[
+                {
+                    'requires':set(('genre name',)),
+                    'decode':[
+                        {'property':'genre name', 'expression':ur'^(?P<simple_genre_name>.+)$'},
+                    ],
+                },
+            ],
+        },
+        'rule.knowledge.simple.name.character':{
+            'name':'Simple character name',
+            'provide':set(('simple character name',)),
+            'branch':[
+                {
+                    'requires':set(('character name',)),
+                    'decode':[
+                        {'property':'character name', 'expression':ur'^(?P<simple_character_name>.+)$'},
                     ],
                 },
             ],
