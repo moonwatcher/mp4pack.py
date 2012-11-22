@@ -101,6 +101,17 @@ class Ontology(dict):
         dict.clear(self)
 
 
+    def overlay(self, key, value):
+        if key:
+            k,v = self.namespace.overlay(key, self[key], value)
+            self.__setitem__(k, v)
+    
+
+    def overlay_all(self, mapping):
+        for k,v in mapping.iteritems():
+            self.overlay(k,v)
+    
+
     def decode(self, synonym, value, axis=None):
         if synonym and value is not None:
             k,v = self.namespace.decode(synonym, value, axis)
@@ -172,7 +183,6 @@ class Ontology(dict):
 
 
 class Space(object):
-    """Base Space and Element classes"""
     def __init__(self, env, node):
         self.log = logging.getLogger('Space')
         self.env = env
@@ -361,6 +371,13 @@ class PrototypeSpace(Space):
                 self.element[prototype.key] = prototype
 
 
+    def overlay(self, key, first, second):
+        prototype = self.find(key)
+        if prototype:
+            return (prototype.key, prototype.overlay(first, second))
+        else:
+            return (None, None)
+            
     def decode(self, synonym, value, axis=None):
         prototype = self.search(synonym, axis)
         if prototype:
@@ -392,10 +409,12 @@ class Prototype(Element):
         # find the cast and format functions
         c = getattr(self, '_cast_{0}'.format(self.node['type']), None) or (lambda x,y: x)
         f = getattr(self, '_format_{0}'.format(self.node['type']), None) or (lambda x: x)
+        o = getattr(self, '_overlay_{0}'.format(self.node['type']), None) or (lambda x,y: y)
 
         if not self.node['plural']:
             self._cast = c
             self._format = f
+            self._overlay = o
         else:
             if self.node['plural'] == 'list':
                 self._format = lambda x: self._format_list(x, f)
@@ -407,11 +426,9 @@ class Prototype(Element):
         if not self.node['auto cast']:
             self._cast = lambda x,y: x
 
-
     @property
     def keyword(self):
         return self.node['keyword']
-
 
     def cast(self, value, axis=None):
         if value is not None:
@@ -419,14 +436,23 @@ class Prototype(Element):
         else:
             return None
 
-
     def format(self, value):
         if value is not None:
             return self._format(value)
         else:
             return None
 
-
+    def overlay(self, first, second):
+        result = None
+        if first is None:
+            if second is not None:
+                result = second
+        elif second is None:
+            result = first
+        else:
+            result = self._overlay(first, second)
+        return result
+    
 
     def _wrap(self, value):
         result = value
@@ -434,7 +460,6 @@ class Prototype(Element):
             lines = textwrap.wrap(value, self.env.format['wrap width'])
             result = self.env.format['indent'].join(lines)
         return result
-
 
     def _format_byte_as_iec_60027_2(self, value):
         p = 0
@@ -444,7 +469,6 @@ class Prototype(Element):
             v /= 1024.0
         return u'{0:.2f} {1}'.format(v, self.env.enumeration['binary iec 60027 2'].get(p))
 
-
     def _format_bit_as_si(self, value):
         p = 0
         v = float(value)
@@ -453,20 +477,16 @@ class Prototype(Element):
             v /= 1000.0
         return u'{0:.2f} {1}'.format(v, self.env.enumeration['decimal si'].get(p))
 
-
     def _format_timecode(self, value):
         t = Timestamp(Timestamp.SRT)
         t.millisecond = value
         return t.timecode
 
-
     def _format_enum(self, value):
         return self.env.enumeration[self.node['enumeration']].format(value)
 
-
     def _format_float(self, value):
         return u'{0:.3f}'.format(value)
-
 
     def _format_int(self, value):
         result = unicode(value)
@@ -491,19 +511,15 @@ class Prototype(Element):
 
         return result
 
-
     def _format_bool(self, value):
         if value is True: return u'yes'
         else: return u'no'
 
-
     def _format_plist(self, value):
         return unicode(value)
 
-
     def _format_date(self, value):
         return unicode(value)
-
 
     def _format_list(self, value, formatter):
         if value:
@@ -511,21 +527,17 @@ class Prototype(Element):
         else:
             return None
 
-
     def _format_dict(self, value, formatter):
         if value:
             return u', '.join([ u'{0}:{1}'.format(k,formatter(v)) for k,v in value.iteritems() ])
         else:
             return None
 
-
     def _format_unicode(self, value):
         return value
 
-
     def _cast_enum(self, value, axis=None):
         return self.env.enumeration[self.node['enumeration']].parse(value)
-
 
     def _cast_int(self, value, axis=None):
         result = None
@@ -535,7 +547,6 @@ class Prototype(Element):
             self.log.error(u'Failed to decode: %s as an integer', value)
         return result
 
-
     def _cast_float(self, value, axis=None):
         result = None
         try:
@@ -543,7 +554,6 @@ class Prototype(Element):
         except ValueError:
             self.log.error(u'Failed to decode: %s as an integer', value)
         return result
-
 
     def _cast_unicode(self, value, axis=None):
         result = unicode(value.strip())
@@ -554,7 +564,6 @@ class Prototype(Element):
         if self.node['simplify']:
             result = self._simplify(result)
         return result
-
 
     def _cast_date(self, value, axis=None):
         result = None
@@ -581,13 +590,11 @@ class Prototype(Element):
                 self.log.debug(u'Failed to parse datetime %s', value)
         return result
 
-
     def _cast_bool(self, value, axis=None):
         result = False
         if self.env.expression['true value'].search(value) is not None:
             result = True
         return result
-
 
     def _cast_plist(self, value, axis=None):
         # Clean and parse plist into a dictionary
@@ -600,8 +607,7 @@ class Prototype(Element):
             result = None
             
         return result
-    
-    
+
     def _cast_list(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
@@ -633,7 +639,6 @@ class Prototype(Element):
                 result = [ { self.node['single element name']:v } for v in result ]
         return result
 
-
     def _cast_dict(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
@@ -652,7 +657,6 @@ class Prototype(Element):
             result = None
         return result
 
-
     def _cast_embed(self, value, axis=None):
         result = Ontology(self.env, self.node['namespace'])
         result.decode_all(value, axis)
@@ -664,7 +668,6 @@ class Prototype(Element):
             nkfd = unicodedata.normalize('NFKD', value)
             result = self.env.constant['empty string'].join([c for c in nkfd if not unicodedata.combining(c)])
         return result
-
 
     def _simplify(self, value):
         result = None

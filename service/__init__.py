@@ -39,6 +39,9 @@ class Resolver(object):
         
         from medium import MediumHandler
         self.handlers['medium'] = MediumHandler(self, self.env.service['medium'])
+
+        from knowledge import KnowledgeBaseHandler
+        self.handlers['knowledge'] = KnowledgeBaseHandler(self, self.env.service['knowledge'])
         
     
     def find_repository(self, hostname):

@@ -661,10 +661,7 @@
                     'match':[
                         {
                             'filter':ur'^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$',
-                            'compose':[
-                                {
-                                    'uri':ur'/h/movie/{movie id}',
-                                },
+                            'aggregate':[
                                 {
                                     'uri':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}',
                                 },
@@ -677,16 +674,20 @@
                             ],
                         },
                     ],
+                    'collect':[
+                        ur'/h/movie/{movie id}',
+                    ],
                     'resolvable':[
                         {
                             'name':u'movie knowledge by id',
                             'format':ur'/k/{language}/movie/{movie id}',
+                            'canonical':True,
                         },
                     ],
                     'type':'json',
                     'collection':'knowledge_movie',
-                    'namespace':'ns.knowledge.movie',
-                    'index':['movie id', 'language'],
+                    'namespace':'ns.knowledge.movie.canonical',
+                    'index':['movie id', 'language', 'tmdb movie id', 'rottentomatoes movie id', 'itunes movie id'],
                 },
                 'service.document.knowledge.movie.cast':{
                     'match':[
