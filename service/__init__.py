@@ -242,8 +242,8 @@ class ResourceHandler(object):
                         query['parameter'].decode(k,v)
                         
                     self.prepare(query)
-                    self.fetch(query)
                     self.collect(query)
+                    self.fetch(query)
                     self.parse(query)
                     self.store(query)
                     break

@@ -11,15 +11,12 @@ class KnowledgeBaseHandler(ResourceHandler):
         ResourceHandler.__init__(self, resolver, node)
     
     def fetch(self, query):
-        pass
-    
-    
-    def parse(self, query):
-        if 'aggregate' in query['match']:
+        if 'aggregate' in query['branch']:
             
             # ensure default language
             query['parameter']['language']
-            for reference in query['match']['aggregate']:
+            
+            for reference in query['branch']['aggregate']:
                 try:
                     related = self.resolver.resolve(reference['uri'].format(**query['parameter']))
                 except KeyError, e:
@@ -28,6 +25,9 @@ class KnowledgeBaseHandler(ResourceHandler):
                     if related is not None:
                         query['source'].append(related)
 
+    
+    
+    def parse(self, query):
         if 'namespace' in query['branch']:
             entry = {
                 'branch':query['branch'],
@@ -39,7 +39,7 @@ class KnowledgeBaseHandler(ResourceHandler):
     
             entry['record']['body'] = Ontology(self.env, entry['branch']['namespace'])
             for source in query['source']:
-                entry['record']['body'].overlay_all(source['body']['canonical'])
+                entry['record']['body'].merge_all(source['body']['canonical'])
                 
             query['result'].append(entry)
     
