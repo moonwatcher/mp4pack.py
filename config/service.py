@@ -426,7 +426,6 @@
                         'simple music track name',
                     ],
                 },
-
                 'service.home.person':{
                     'match':[
                         {
@@ -507,6 +506,7 @@
                         'simple company name',                        
                     ],
                 },
+                
                 'service.home.genre':{
                     'match':[
                         {

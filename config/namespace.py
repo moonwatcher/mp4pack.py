@@ -168,7 +168,7 @@
                 'volume':None,
                 'home id':None,
                 'movie id':None,
-                'album id':None,
+                'music album id':None,
                 'tv show id':None,
                 'tv season id':None,
                 'tv episode id':None,
@@ -272,7 +272,7 @@
                 'volume':None,
                 'home id':None,
                 'movie id':None,
-                'album id':None,
+                'music album id':None,
                 'tv show id':None,
                 'tv season id':None,
                 'tv episode id':None,
@@ -361,7 +361,7 @@
                 'media kind':None,
                 'home id':None,
                 'movie id':None,
-                'album id':None,
+                'music album id':None,
                 'tv show id':None,
                 'tv season id':None,
                 'tv episode id':None,
@@ -414,7 +414,7 @@
                 'kind':None,
                 'media kind':None,
                 'movie id':None,
-                'album id':None,
+                'music album id':None,
                 'tv show id':None,
                 'tv season id':None,
                 'tv episode id':None,
@@ -1554,7 +1554,7 @@
         'ns.knowledge.music.album.reference':{
             'synonym':['keyword',],
             'element':{
-                'album id':None,
+                'music album id':None,
                 'album name':None,
                 'itunes music album id':None,
                 'simple music album name':None,
@@ -1566,7 +1566,7 @@
         'ns.knowledge.music.track.reference':{
             'synonym':['keyword',],
             'element':{
-                'album id':None,
+                'music album id':None,
                 'itunes music album id':None,
                 'track id':None,
                 'itunes music track id':None,
@@ -2057,7 +2057,7 @@
         'ns.knowledge.music.album':{
             'synonym':['keyword', 'itunes'],
             'element':{
-                'album id':None,
+                'music album id':None,
                 'album name':None,
                 'music album name':{
                     'itunes':'collectionName',
@@ -2092,7 +2092,7 @@
         'ns.knowledge.music.track':{
             'synonym':['keyword', 'itunes'],
             'element':{
-                'album id':None,
+                'music album id':None,
                 'track id':None,
                 'album name':None,
                 'track name':None,
