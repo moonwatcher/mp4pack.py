@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-
-# album id
-# track id
-# album > disc > track
-
-# tv show id
-# tv season id
-# tv episode
-# tv show > tv season > tv episode
-
-# movie id
-# movie version id
  
 {
     'service':{
@@ -149,6 +137,7 @@
                         },
                         {
                             'filter':ur'^/h/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}',
                         },
                         {
                             'filter':ur'^/h/tv/season/tvdb/(?P<tvdb_tv_season_id>[0-9]+)$',
@@ -159,11 +148,14 @@
                             'depend':ur'/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}',
                         },
                         {
-                            'filter':ur'^/h/tv/season/imdb/(?P<imdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$',
+                            'filter':ur'^/h/tv/season/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}',
                         },
                     ],
                     'collect':[
+                        ur'/h/tv/show/{tv show id}',
                         ur'/h/tv/show/tvdb/{tvdb tv show id}',
+                        ur'/h/tv/show/imdb/{imdb tv show id}',
                     ],
                     'resolvable':[
                         {
@@ -214,9 +206,11 @@
                         },
                         {
                             'filter':ur'^/h/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}',
                         },
                         {
                             'filter':ur'^/h/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}',
                         },
                         {
                             'filter':ur'^/h/tv/episode/~/(?P<tv_show_handle>[^/]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
@@ -238,11 +232,18 @@
                         },
                         {
                             'filter':ur'^/h/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'depend':ur'/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}',
                         },
                     ],
                     'collect':[
+                        ur'/h/tv/show/{tv show id}',
+                        ur'/h/tv/show/tvdb/{tvdb tv show id}',
+                        ur'/h/tv/show/imdb/{imdb tv show id}',
+                        ur'/h/tv/season/{tv season id}',
+                        ur'/h/tv/season/{tv show id}/{disc number}',
                         ur'/h/tv/season/tvdb/{tvdb tv show id}/{disc number}',
                         ur'/h/tv/season/tvdb/{tvdb tv season id}',
+                        ur'/h/tv/season/imdb/{imdb tv show id}/{disc number}',
                     ],
                     'resolvable':[
                         {
@@ -294,7 +295,7 @@
                         'tv season id',
                         'tv episode id',
                         'disc number',
-                        'track number'
+                        'track number',
                         'tvdb tv show id',
                         'tvdb tv season id',
                         'tvdb tv episode id',
@@ -578,44 +579,6 @@
                     'key':'department id',
                 },
             },
-        },
-        'medium':{
-            'match':ur'^/m/.*$',
-            'branch':{
-                'service.medium.asset':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/asset/(?P<home_id>[0-9]+)$',
-                            'depend':ur'/h/{home id}',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'asset by home id',
-                            'format':ur'/m/asset/{home id}',
-                            'canonical':True,
-                        },
-                    ],
-                    'type':'reference',
-                    'collection':'medium_asset',
-                },
-                'service.medium.resource':{
-                    'match':[
-                        {
-                            'filter':ur'^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})$',
-                        },
-                    ],
-                    'resolvable':[
-                        {
-                            'name':u'resource',
-                            'format':ur'/m/resource/sha1/{path digest}',
-                            'canonical':True,
-                        },
-                    ],
-                    'type':'crawl',
-                    'collection':'medium_resource',
-                },
-            }
         },
         'knowledge':{
             'match':ur'^/k/.*$',
@@ -942,6 +905,7 @@
                     'index':[
                         'tv show id',
                         'tvdb tv show id',
+                        'imdb tv show id',
                         'itunes tv show id',
                         'language',
                     ],
@@ -1017,6 +981,8 @@
                     'namespace':'ns.knowledge.tv.season.canonical',
                     'index':[
                         'tv show id',
+                        'tvdb tv show id',
+                        'imdb tv show id',
                         'tv season id',
                         'disc number',
                         'tvdb tv season id',
@@ -1129,8 +1095,11 @@
                         'tv show id',
                         'tv season id',
                         'tv episode id',
+                        'tvdb tv show id',
+                        'imdb tv show id',
                         'disc number',
                         'track number',
+                        'imdb tv episode id',
                         'tvdb tv episode id',
                         'itunes tv episode id',
                         'language',
@@ -1407,6 +1376,7 @@
                 },
             },
         },
+        
         'tmdb':{
             'api key':u'a8b9f96dde091408a03cb4c78477bd14',
             'remote base':u'http://api.themoviedb.org/3',
@@ -2658,6 +2628,45 @@
                 'wikipedia.tvshow.show':{
                 },
             },
+        },
+
+        'medium':{
+            'match':ur'^/m/.*$',
+            'branch':{
+                'service.medium.asset':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/asset/(?P<home_id>[0-9]+)$',
+                            'depend':ur'/h/{home id}',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'asset by home id',
+                            'format':ur'/m/asset/{home id}',
+                            'canonical':True,
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_asset',
+                },
+                'service.medium.resource':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'resource',
+                            'format':ur'/m/resource/sha1/{path digest}',
+                            'canonical':True,
+                        },
+                    ],
+                    'type':'crawl',
+                    'collection':'medium_resource',
+                },
+            }
         },
     },
 }

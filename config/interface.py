@@ -28,6 +28,17 @@
                 },
                 {
                     'instruction':{
+                        'name':'remove',
+                        'help':'Remove a document by URI',
+                    },
+                    'argument':[
+                        'uris',
+                        'sync',
+                        'download',
+                    ]
+                },
+                {
+                    'instruction':{
                         'name':'report',
                         'help':'Report information about resource',
                     },
