@@ -19,9 +19,9 @@
             'type':'int',
         },
         
-        'album id':{
-            'name':u'Album ID',
-            'keyword':u'album_id',
+        'music album id':{
+            'name':u'Music album ID',
+            'keyword':u'music_album_id',
             'type':'int',
         },
         'track id':{

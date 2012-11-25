@@ -319,7 +319,7 @@
                 'service.home.music.album':{
                     'match':[
                         {
-                            'filter':ur'^/h/music/album/(?P<album_id>[0-9]+)$',
+                            'filter':ur'^/h/music/album/(?P<music_album_id>[0-9]+)$',
                         },
                         {
                             'filter':ur'^/h/music/album/itunes/(?P<itunes_music_album_id>[0-9]+)$',
@@ -336,8 +336,8 @@
                             'canonical':True,
                         },
                         {
-                            'name':u'music album home by album id',
-                            'format':ur'/h/music/album/{album id}',
+                            'name':u'music album home by music album id',
+                            'format':ur'/h/music/album/{music album id}',
                         },
                         {
                             'name':u'music album home by itunes music album id',
@@ -349,9 +349,9 @@
                         },
                     ],
                     'collection':'home',
-                    'key':'album id',
+                    'key':'music album id',
                     'index':[
-                        'album id',
+                        'music album id',
                         'itunes music album id',
                         'album handle'
                         'music album name',
@@ -364,7 +364,7 @@
                             'filter':ur'^/h/music/track/(?P<track_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'^/h/music/track/(?P<album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'filter':ur'^/h/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
                             'depend':ur'/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}',
                         },
                         {
@@ -380,7 +380,7 @@
                         },
                     ],
                     'collect':[
-                        ur'/h/music/album/{album id}',
+                        ur'/h/music/album/{music album id}',
                         ur'/h/music/album/itunes/{itunes music album id}',
                     ],
                     'resolvable':[
@@ -394,8 +394,8 @@
                             'format':ur'/h/music/track/{track id}',
                         },
                         {
-                            'name':u'music track home by album id',
-                            'format':ur'/h/music/track/{album id}/{disc number}/{track number}',
+                            'name':u'music track home by music album id',
+                            'format':ur'/h/music/track/{music album id}/{disc number}/{track number}',
                         },
                         {
                             'name':u'music track home by itunes music track id',
@@ -413,7 +413,7 @@
                     'collection':'home',
                     'key':'track id',
                     'index':[
-                        'album id',
+                        'music album id',
                         'itunes music album id',
                         'track id',
                         'itunes music track id',
@@ -426,6 +426,7 @@
                         'simple music track name',
                     ],
                 },
+
                 'service.home.person':{
                     'match':[
                         {
@@ -1184,30 +1185,30 @@
                 'service.document.knowledge.music.album':{
                     'match':[
                         {
-                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/album/(?P<album_id>[0-9]+)$',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/album/(?P<music_album_id>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'music album',
-                            'format':ur'/k/{language}/music/album/{album id}',
+                            'format':ur'/k/{language}/music/album/{music album id}',
                         },
                     ],
                     'type':'json',
                     'collection':'knowledge_music_album',
                     'namespace':'ns.knowledge.music.album',
-                    'index':['album id', 'language'],
+                    'index':['music album id', 'language'],
                 },
                 'service.document.knowledge.music.album.image':{
                     'match':[
                         {
-                            'filter':ur'^/k/music/album/(?P<album_id>[0-9]+)/image$',
+                            'filter':ur'^/k/music/album/(?P<music_album_id>[0-9]+)/image$',
                         },
                     ],
                     'resolvable':[
                         {
                             'name':u'music album image',
-                            'format':ur'/k/music/album/{album id}/image',
+                            'format':ur'/k/music/album/{music album id}/image',
                         },
                     ],
                     'type':'json',
@@ -1220,7 +1221,7 @@
                             'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<track_id>[0-9]+)$',
                         },
                         {
-                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
                         },
                     ],
                     'resolvable':[
@@ -1230,13 +1231,13 @@
                         },
                         {
                             'name':u'music track by album id',
-                            'format':ur'/k/{language}/music/track/{album id}/{disc number}/{track number}',
+                            'format':ur'/k/{language}/music/track/{music album id}/{disc number}/{track number}',
                         },
                     ],
                     'type':'json',
                     'collection':'knowledge_music_track',
                     'namespace':'ns.knowledge.music.track',
-                    'index':['album id', 'track id', 'disc number', 'track number', 'language'],
+                    'index':['music album id', 'track id', 'disc number', 'track number', 'language'],
                 },
 
                 'service.document.knowledge.person':{
