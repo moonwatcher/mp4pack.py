@@ -62,6 +62,10 @@
                             'format':ur'/h/movie/imdb/{imdb movie id}',
                         },
                         {
+                            'name':u'movie home by itunes id',
+                            'format':ur'/h/movie/itunes/{itunes movie id}',
+                        },
+                        {
                             'name':u'movie home by rottentomatoes movie id',
                             'format':ur'/h/movie/rottentomatoes/{rottentomatoes movie id}',
                         },
@@ -74,9 +78,9 @@
                         'imdb movie id',
                         'itunes movie id',
                         'rottentomatoes movie id',
+                        'movie handle',
                         'movie title',
                         'simple movie title',
-                        'movie handle',
                     ],
                 },
                 'service.home.tv.show':{
@@ -125,9 +129,9 @@
                         'tvdb tv show id',
                         'imdb tv show id',
                         'itunes tv show id',
+                        'tv show handle',
                         'tv show name',
                         'simple tv show name',
-                        'tv show handle',
                     ],
                 },
                 'service.home.tv.season':{
@@ -188,13 +192,14 @@
                     'key':'tv season id',
                     'index':[
                         'tv show id',
-                        'tv season id',
-                        'disc number',
                         'tvdb tv show id',
-                        'tvdb tv season id',
                         'imdb tv show id',
                         'itunes tv show id',
+                        'tv season id',
+                        'tvdb tv season id',
                         'itunes tv season id',
+                        'tv show handle',
+                        'disc number',
                         'tv show name',
                         'simple tv show name',
                     ],
@@ -292,21 +297,22 @@
                     'key':'tv episode id',
                     'index':[
                         'tv show id',
+                        'tvdb tv show id',
+                        'imdb tv show id',
+                        'itunes tv show id',                        
                         'tv season id',
+                        'tvdb tv season id',
+                        'itunes tv season id',                        
                         'tv episode id',
+                        'tvdb tv episode id',
+                        'imdb tv episode id',
+                        'itunes tv episode id',
+                        'tv show handle',
                         'disc number',
                         'track number',
-                        'tvdb tv show id',
-                        'tvdb tv season id',
-                        'tvdb tv episode id',
-                        'imdb tv show id',
-                        'imdb tv episode id',
-                        'itunes tv show id',
-                        'itunes tv season id',
-                        'itunes tv episode id',
                         'tv show name',
-                        'tv episode name',
                         'simple tv show name',
+                        'tv episode name',
                         'simple tv episode name',
                     ],
                 },
@@ -347,9 +353,9 @@
                     'index':[
                         'album id',
                         'itunes music album id',
+                        'album handle'
                         'music album name',
                         'simple music album name',
-                        'album handle'
                     ],
                 },
                 'service.home.music.track':{
@@ -359,6 +365,7 @@
                         },
                         {
                             'filter':ur'^/h/music/track/(?P<album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'depend':ur'/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}',
                         },
                         {
                             'filter':ur'^/h/music/track/itunes/(?P<itunes_music_track_id>[0-9]+)$',
@@ -371,6 +378,10 @@
                         {
                             'filter':ur'^/h/music/track/~/(?P<album_handle>[^/]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
                         },
+                    ],
+                    'collect':[
+                        ur'/h/music/album/{album id}',
+                        ur'/h/music/album/itunes/{itunes music album id}',
                     ],
                     'resolvable':[
                         {
@@ -403,16 +414,16 @@
                     'key':'track id',
                     'index':[
                         'album id',
+                        'itunes music album id',
                         'track id',
+                        'itunes music track id',
+                        'album handle',
                         'disc number',
                         'track number',
-                        'itunes music track id',
-                        'itunes music album id',
                         'music album name',
-                        'music track name',
                         'simple music album name',
+                        'music track name',
                         'simple music track name',
-                        'album handle',
                     ],
                 },
                 'service.home.person':{
