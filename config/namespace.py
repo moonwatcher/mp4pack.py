@@ -64,6 +64,9 @@
                 },
                 'configuration path':None,
                 'action':None,
+                'query parameters':{
+                    'plural format':'eval',
+                },
             },
         },
         'ns.system.job':{
@@ -109,6 +112,7 @@
                 'debug':{
                     'auto cast':False,
                 },
+                'query parameters':None,
             },
         },
         'ns.system.task':{
@@ -143,6 +147,7 @@
                 'debug':{
                     'auto cast':False,
                 },
+                'query parameters':None,
             },
             'rule':[
                 'rule.task.default.preset'
@@ -206,7 +211,7 @@
                 'itunes genre id':None,
                 'itunes music album id':None,
                 'itunes music track id':None,
-                
+
                 'person name':None,
                 'character name':None,
                 'company name':None,
@@ -218,16 +223,19 @@
                 'music album name':None,
                 'track name':None,
                 'album name':None,
-                
-                'simple company name':None, 
+
+                'release year':None,
+                'release date':None,
+
+                'simple company name':None,
                 'simple person name':None,
                 'simple genre name':None,
-                'simple character name':None, 
-                'simple tv show name':None, 
-                'simple tv episode name':None, 
-                'simple movie title':None, 
-                'simple music album name':None, 
-                'simple music track name':None, 
+                'simple character name':None,
+                'simple tv show name':None,
+                'simple tv episode name':None,
+                'simple movie title':None,
+                'simple music album name':None,
+                'simple music track name':None,
             },
             'rule':[
                 'rule.system.volume.location',
@@ -252,6 +260,7 @@
                 'rule.knowledge.simple.name.movie',
                 'rule.knowledge.simple.name.music.album',
                 'rule.knowledge.simple.name.music.track',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.medium.resource.location':{
@@ -303,7 +312,7 @@
                 'resource uri':None,
                 'asset uri':None,
                 'home uri':None,
-                
+
                 'person name':None,
                 'character name':None,
                 'company name':None,
@@ -315,16 +324,16 @@
                 'music album name':None,
                 'track name':None,
                 'album name':None,
-                
-                'simple company name':None, 
-                'simple person name':None, 
+
+                'simple company name':None,
+                'simple person name':None,
                 'simple genre name':None,
-                'simple character name':None, 
-                'simple tv show name':None, 
-                'simple tv episode name':None, 
-                'simple movie title':None, 
-                'simple music album name':None, 
-                'simple music track name':None, 
+                'simple character name':None,
+                'simple tv show name':None,
+                'simple tv episode name':None,
+                'simple movie title':None,
+                'simple music album name':None,
+                'simple music track name':None,
             },
             'rule':[
                 'rule.system.volume.location',
@@ -387,7 +396,7 @@
                 'simple name':None,
                 'asset uri':None,
                 'home uri':None,
-                
+
                 'person name':None,
                 'character name':None,
                 'tv show name':None,
@@ -437,7 +446,7 @@
                 'itunes tv show id':None,
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
-                
+
                 'person name':None,
                 'character name':None,
                 'tv show name':None,
@@ -1357,7 +1366,7 @@
         },
 
         # Knowledge
-        
+
         # Canonical
         'ns.knowledge.movie.canonical':{
             'synonym':['keyword',],
@@ -1375,6 +1384,7 @@
                 'vote average':None,
                 'vote count':None,
                 'release date':None,
+                'release year':None,
                 'description':None,
                 'long description':None,
                 'genres':None,
@@ -1400,6 +1410,7 @@
             },
             'rule':[
                 'rule.knowledge.simple.name.movie',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.show.canonical':{
@@ -1409,6 +1420,7 @@
                 'tv show name':None,
                 'modified date':None,
                 'release date':None,
+                'release year':None,
                 'content advisory rating':None,
                 'language':None,
                 'description':None,
@@ -1431,6 +1443,7 @@
             },
             'rule':[
                 'rule.knowledge.simple.name.tv.show',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.episode.canonical':{
@@ -1449,6 +1462,7 @@
                 'modified date':None,
                 'language':None,
                 'release date':None,
+                'release year':None,
                 'description':None,
                 'long description':None,
                 'tv episode production code':None,
@@ -1466,9 +1480,10 @@
             'rule':[
                 'rule.knowledge.simple.name.tv.show',
                 'rule.knowledge.simple.name.tv.episode',
+                'rule.knowledge.release.year',
             ],
         },
-        
+
         # Reference
         'ns.knowledge.movie.reference':{
             'synonym':['keyword',],
@@ -1480,9 +1495,12 @@
                 'rottentomatoes movie id':None,
                 'movie title':None,
                 'simple movie title':None,
+                'release date':None,
+                'release year':None,
             },
             'rule':[
                 'rule.knowledge.simple.name.movie',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.show.reference':{
@@ -1495,9 +1513,12 @@
                 'zap2it tv show id':None,
                 'tv show name':None,
                 'simple tv show name':None,
+                'release date':None,
+                'release year':None,
             },
             'rule':[
                 'rule.knowledge.simple.name.tv.show',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.season.reference':{
@@ -1516,9 +1537,12 @@
                 'track count':None,
                 'tv show name':None,
                 'simple tv show name':None,
+                'release date':None,
+                'release year':None,
             },
             'rule':[
                 'rule.knowledge.simple.name.tv.show',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.episode.reference':{
@@ -1545,10 +1569,13 @@
                 'tv show name':None,
                 'simple tv show name':None,
                 'simple tv episode name':None,
+                'release date':None,
+                'release year':None,
             },
             'rule':[
                 'rule.knowledge.simple.name.tv.show',
                 'rule.knowledge.simple.name.tv.episode',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.music.album.reference':{
@@ -1558,9 +1585,12 @@
                 'album name':None,
                 'itunes music album id':None,
                 'simple music album name':None,
+                'release date':None,
+                'release year':None,
             },
             'rule':[
                 'rule.knowledge.simple.name.music.album',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.music.track.reference':{
@@ -1578,10 +1608,13 @@
                 'track number':None,
                 'simple music album name':None,
                 'simple music track name':None,
+                'release date':None,
+                'release year':None,
             },
             'rule':[
                 'rule.knowledge.simple.name.music.album',
                 'rule.knowledge.simple.name.music.track',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.person.reference':{
@@ -1653,7 +1686,7 @@
                 'tvdb image id':None,
             },
         },
-        
+
         'ns.knowledge.movie':{
             'synonym':['keyword','tmdb', 'rottentomatoes', 'itunes'],
             'element':{
@@ -1711,6 +1744,7 @@
                     'rottentomatoes':u'release_date',
                     'itunes':'releaseDate',
                 },
+                'release year':None,
                 'description':{
                     'tmdb':'overview',
                     'rottentomatoes':'synopsis',
@@ -1782,12 +1816,13 @@
                     'tmdb':'popularity',
                 },
                 'artist name':{
-                    'itunes':'artistName',  
+                    'itunes':'artistName',
                 },
                 'simple movie title':None,
             },
             'rule':[
                 'rule.knowledge.simple.name.movie',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.show':{
@@ -1814,6 +1849,7 @@
                     'tvdb':'lastupdated',
                     'format':'unix time',
                 },
+                'release year':None,
                 'release date':{
                     'tvdb':'FirstAired',
                 },
@@ -1882,6 +1918,7 @@
             },
             'rule':[
                 'rule.knowledge.simple.name.tv.show',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.season':{
@@ -1917,13 +1954,14 @@
                     'itunes':'contentAdvisoryRating',
                 },
                 'copyright':{
-                    'itunes':'copyright',    
+                    'itunes':'copyright',
                 },
+                'release year':None,
                 'release date':{
                     'itunes':'releaseDate',
                 },
                 'long description':{
-                    'itunes':'longDescription',    
+                    'itunes':'longDescription',
                 },
                 'language':{
                     'tvdb':'Language',
@@ -1939,6 +1977,7 @@
             'rule':[
                 'rule.itunes.tv.season.parse',
                 'rule.knowledge.simple.name.tv.show',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.tv.episode':{
@@ -2000,6 +2039,7 @@
                 'language':{
                     'tvdb':'Language',
                 },
+                'release year':None,
                 'release date':{
                     'tvdb':'FirstAired',
                     'itunes':'releaseDate',
@@ -2010,7 +2050,7 @@
                     'itunes':'shortDescription',
                 },
                 'long description':{
-                    'itunes':'longDescription',    
+                    'itunes':'longDescription',
                 },
                 'tv episode production code':{
                     'tvdb':'ProductionCode',
@@ -2052,6 +2092,7 @@
                 'rule.itunes.tv.season.parse',
                 'rule.knowledge.simple.name.tv.show',
                 'rule.knowledge.simple.name.tv.episode',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.music.album':{
@@ -2069,14 +2110,15 @@
                     'itunes':'artistId',
                 },
                 'artist name':{
-                    'itunes':'artistName',  
+                    'itunes':'artistName',
                 },
                 'copyright':{
-                    'itunes':'copyright',    
+                    'itunes':'copyright',
                 },
                 'release date':{
                     'itunes':'releaseDate',
-                },                
+                },
+                'release year':None,
                 'track count':{
                     'itunes':'trackCount',
                 },
@@ -2087,6 +2129,7 @@
             },
             'rule':[
                 'rule.knowledge.simple.name.music.album',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.music.track':{
@@ -2124,11 +2167,12 @@
                     'itunes':'artistId',
                 },
                 'artist name':{
-                    'itunes':'artistName',  
+                    'itunes':'artistName',
                 },
                 'release date':{
                     'itunes':'releaseDate',
                 },
+                'release year':None,
                 'simple music album name':None,
                 'simple music track name':None,
                 'country code':{
@@ -2138,6 +2182,7 @@
             'rule':[
                 'rule.knowledge.simple.name.music.album',
                 'rule.knowledge.simple.name.music.track',
+                'rule.knowledge.release.year',
             ],
         },
         'ns.knowledge.person':{
@@ -2270,7 +2315,7 @@
                 'native language name':None,
             },
         },
-        
+
         'ns.knowledge.cast':{
             'synonym':['keyword', 'tmdb', 'tvdb'],
             'element':{
@@ -2471,7 +2516,7 @@
                 },
             },
         },
-        
+
         'ns.search.query':{
             'synonym':['keyword','tmdb', 'rottentomatoes', 'itunes'],
             'element':{
@@ -2525,7 +2570,7 @@
                     'tvdb':'imdbid',
                 },
                 'tv show name':{
-                    'tvdb':'seriesname',  
+                    'tvdb':'seriesname',
                 },
             },
         },

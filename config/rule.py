@@ -1361,6 +1361,19 @@
                 },
             ],
         },        
+        'rule.knowledge.release.year':{
+            'name':'Release year from date',
+            'provide':set(('release year',)),
+            'branch':[
+                {
+                    'requires':set(('release date',)),
+                    'apply':[
+                        {'property':'release year', 'datetime format':u'%Y', 'reference':'release date', },
+                    ],
+                },
+            ],
+        },
+
         
         'rule.knowledge.simple.name.movie':{
             'name':'Simple movie title',

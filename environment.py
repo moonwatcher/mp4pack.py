@@ -187,16 +187,22 @@ class Environment(object):
     def load_config(self, path):
         if path and os.path.isfile(path):
             try:
-                node = eval(open(path, 'r').read())
-                self.log.debug(u'Loading configuration dictionary %s', path)
+                content = open(path, 'r').read()
             except IOError, e:
                 self.log.warning(u'Failed to load configuration file %s', path)
                 self.log.debug(u'Exception raised: %s', unicode(e))
             else:
-                if isinstance(node, dict):
-                    self._load_config_node(node)
+                try:
+                    node = eval(content)
+                    self.log.debug(u'Loading configuration dictionary %s', path)
+                except SyntaxError, e:
+                    self.log.warning(u'Failed to evaluate configuration file syntax %s', path)
+                    self.log.debug(u'Exception raised: %s', unicode(e))
                 else:
-                    self.log.warning(u'Configuration file %s does not contain a valid dictionary', path)
+                    if isinstance(node, dict):
+                        self._load_config_node(node)
+                    else:
+                        self.log.warning(u'Configuration file %s does not contain a valid dictionary', path)
     
     
     def load_interactive(self, ontology):

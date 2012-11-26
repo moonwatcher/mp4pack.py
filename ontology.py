@@ -151,7 +151,10 @@ class Ontology(dict):
                                         if 'digest' in x:
                                             dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']].encode('utf-8')).hexdigest())
                                         if 'reference' in x:
-                                            dict.__setitem__(self, x['property'], self[x['reference']])
+                                            if 'datetime format' in x:
+                                                dict.__setitem__(self, x['property'], self[x['reference']].strftime(x['datetime format']))
+                                            else:
+                                                dict.__setitem__(self, x['property'], self[x['reference']])
                                         if 'format' in x:
                                             dict.__setitem__(self, x['property'], x['format'].format(**self))
                                         elif 'value' in x:
@@ -678,6 +681,16 @@ class Prototype(Element):
                 else:
                     self.log.error(u'Could not parse dictionary %s', value)
                     result = None
+            elif self.node['plural format'] == 'eval':
+                try:
+                    result = Ontology(self.env, self.node['namespace'])
+                    result.decode_all(eval(value))
+                    # self.log.debug(u'Evaluating dictionary %s', result)
+                except SyntaxError, e:
+                    self.log.warning(u'Failed to evaluate dictionary %s', value)
+                    self.log.debug(u'Exception raised: %s', unicode(e))
+                    result = None
+                    
         if not result:
             result = None
         return result

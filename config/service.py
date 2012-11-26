@@ -38,6 +38,10 @@
                             'filter':ur'^/h/movie/rottentomatoes/(?P<rottentomatoes_movie_id>[0-9]+)$',
                             'depend':ur'/c/rottentomatoes/movie/{rottentomatoes movie id}',
                         },
+                        {
+                            'filter':ur'^/h/movie/search$',
+                            'query parameter':set(('movie title', 'simple movie title', 'release date', 'release year')),
+                        },
                     ],
                     'resolvable':[
                         {
@@ -81,6 +85,8 @@
                         'movie handle',
                         'movie title',
                         'simple movie title',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.home.tv.show':{
@@ -132,6 +138,8 @@
                         'tv show handle',
                         'tv show name',
                         'simple tv show name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.home.tv.season':{
@@ -202,6 +210,8 @@
                         'disc number',
                         'tv show name',
                         'simple tv show name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.home.tv.episode':{
@@ -314,6 +324,8 @@
                         'simple tv show name',
                         'tv episode name',
                         'simple tv episode name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.home.music.album':{
@@ -356,6 +368,8 @@
                         'album handle'
                         'music album name',
                         'simple music album name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.home.music.track':{
@@ -424,6 +438,8 @@
                         'simple music album name',
                         'music track name',
                         'simple music track name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.home.person':{
@@ -1514,10 +1530,12 @@
                     'parse type':'document',
                     'index':[
                         'tmdb movie id',
-                        'language',
                         'imdb movie id',
                         'movie title',
                         'simple movie title',
+                        'language',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.tmdb.movie.cast':{
@@ -1722,6 +1740,7 @@
                     'collection':'tmdb_person_image',
                     'namespace':'ns.knowledge.person',
                     'parse type':'document',
+                    'index':['tmdb person id',],
                 },
                 'service.document.tmdb.person.credit':{
                     'match':[
@@ -1741,6 +1760,7 @@
                     'collection':'tmdb_person_credit',
                     'namespace':'ns.knowledge.person',
                     'parse type':'document',
+                    'index':['tmdb person id',],
                 },
                 'service.document.tmdb.company':{
                     'match':[
@@ -1784,6 +1804,7 @@
                     'collection':'tmdb_company_credit',
                     'namespace':'ns.knowledge.company',
                     'parse type':'document',
+                    'index':['tmdb company id',],
                 },
             },
         },
@@ -1851,6 +1872,8 @@
                         'imdb tv show id',
                         'tv show name',
                         'simple tv show name',
+                        'release date',
+                        'release year',
                     ],
                     'collection':'tvdb_tv_show',
                     'namespace':'ns.knowledge.tv.show',
@@ -1878,6 +1901,7 @@
                             'coalesce':True,
                         },
                     ],
+                    'index':['tvdb tv show id',],
                     'collection':'tvdb_tv_show_cast',
                     'namespace':'ns.knowledge.tv.show',
                     'parse type':'document',
@@ -1904,6 +1928,7 @@
                             'coalesce':True,
                         },
                     ],
+                    'index':['tvdb tv show id',],
                     'collection':'tvdb_tv_show_image',
                     'namespace':'ns.knowledge.tv.show',
                     'parse type':'document',
@@ -1943,6 +1968,8 @@
                         'disc number',
                         'tv show name',
                         'simple tv show name',
+                        'release date',
+                        'release year',
                     ],
                     'collection':'tvdb_tv_season',
                     'namespace':'ns.knowledge.tv.season',
@@ -2004,17 +2031,19 @@
                     ],
                     'index':[
                         'tvdb tv show id',
+                        'imdb tv show id',
                         'tvdb tv season id',
                         'tvdb tv episode id',
-                        'imdb tv show id',
                         'imdb tv episode id',
                         'disc number',
                         'track number',
                         'tv show name',
-                        'tv episode name',
                         'simple tv show name',
+                        'tv episode name',
                         'simple tv episode name',
                         'tv episode production code',
+                        'release date',
+                        'release year',
                     ],
                     'collection':'tvdb_tv_episode',
                     'namespace':'ns.knowledge.tv.episode',
@@ -2117,6 +2146,110 @@
             'remote base':u'http://itunes.apple.com',
             'match':ur'^/c(?:/[a-z]{2})?/itunes/.*$',
             'branch':{
+                'service.search.itunes.person':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/person/search$',
+                            'query parameter':set(('term',)),
+                            'remote':ur'search?entity=movieArtist&attribute=artistTerm',
+                        },
+                    ],
+                    'trigger':[
+                        {
+                            'condition':{'wrapperType':'artist', 'artistType':'Movie Artist'},
+                            'namespace':'ns.knowledge.person',
+                            'format':ur'/c/itunes/person/{itunes person id}',
+                        },
+                        {
+                            'condition':{'wrapperType':'artist', 'artistType':'Artist'},
+                            'namespace':'ns.knowledge.person',
+                            'format':ur'/c/itunes/person/{itunes person id}',
+                        },
+                    ],
+                    'type':'json',
+                    'parse type':'search',
+                    'index':[
+                        'itunes person id',
+                        'person name',
+                        'simple person name',
+                    ],
+                },
+                'service.search.itunes.movie':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/movie/search$',
+                            'query parameter':set(('term',)),
+                            'remote':ur'search?entity=movie&attribute=movieTerm',
+                        },
+                    ],
+                    'trigger':[
+                        {
+                            'condition':{'wrapperType':'track', 'kind': 'feature-movie'},
+                            'namespace':'ns.knowledge.movie',
+                            'format':ur'/c/itunes/movie/{itunes movie id}',
+                        },
+                    ],
+                    'type':'json',
+                    'parse type':'search',
+                    'index':[
+                        'itunes movie id',
+                        'movie title',
+                        'simple movie title',
+                        'release date',
+                        'release year',
+                    ],
+                },
+                'service.search.itunes.tv.show':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/tv/show/search$',
+                            'query parameter':set(('term',)),
+                            'remote':ur'search?entity=tvShow&attribute=showTerm',
+                        },
+                    ],
+                    'trigger':[
+                        {
+                            'condition':{'wrapperType':'artist', 'artistType':'TV Show'},
+                            'namespace':'ns.knowledge.tv.show',
+                            'format':ur'/c/itunes/tv/show/{itunes tv show id}',
+                        },
+                    ],
+                    'type':'json',
+                    'parse type':'search',
+                    'index':[
+                        'itunes tv show id',
+                        'tv show name',
+                        'simple tv show name',
+                        'release date',
+                        'release year',
+                    ],
+                },
+                'service.search.itunes.music.album':{
+                    'match':[
+                        {
+                            'filter':ur'^/c/itunes/music/album/search$',
+                            'query parameter':set(('term',)),
+                            'remote':ur'search?entity=album&attribute=albumTerm',
+                        },
+                    ],
+                    'trigger':[
+                        {
+                            'condition':{'wrapperType':'collection', 'collectionType':'Album'},
+                            'namespace':'ns.knowledge.music.album',
+                            'format':ur'/c/itunes/music/album/{itunes music album id}',
+                        },
+                    ],
+                    'type':'json',
+                    'parse type':'search',
+                    'index':[
+                        'itunes music album id',
+                        'music album name',
+                        'simple music album name',
+                        'release date',
+                        'release year',
+                    ],
+                },
+                
                 'service.document.itunes.genre':{
                     'match':[
                         {
@@ -2142,6 +2275,7 @@
                     'collection':'itunes_genre',
                     'namespace':'ns.knowledge.genre',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes genre id',
                         'genre name',
@@ -2154,11 +2288,6 @@
                             'filter':ur'^/c/itunes/person/(?P<itunes_person_id>[0-9]+)$',
                             'query parameter':set(('itunes person id',)),
                             'remote':ur'lookup',
-                        },
-                        {
-                            'filter':ur'^/c/itunes/person/search$',
-                            'query parameter':set(('term',)),
-                            'remote':ur'search?entity=movieArtist&attribute=artistTerm',
                         },
                     ],
                     'produce':[
@@ -2181,6 +2310,7 @@
                     'collection':'itunes_person',
                     'namespace':'ns.knowledge.person',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes person id',
                         'person name',
@@ -2193,11 +2323,6 @@
                             'filter':ur'^/c/itunes/movie/(?P<itunes_movie_id>[0-9]+)$',
                             'query parameter':set(('itunes movie id',)),
                             'remote':ur'lookup?entity=movie',
-                        },
-                        {
-                            'filter':ur'^/c/itunes/movie/search$',
-                            'query parameter':set(('term',)),
-                            'remote':ur'search?entity=movie&attribute=movieTerm',
                         },
                     ],
                     'produce':[
@@ -2216,10 +2341,13 @@
                     'collection':'itunes_movie',
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes movie id',
                         'movie title',
                         'simple movie title',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.itunes.tv.show':{
@@ -2251,10 +2379,13 @@
                     'collection':'itunes_tv_show',
                     'namespace':'ns.knowledge.tv.show',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes tv show id',
                         'tv show name',
                         'simple tv show name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.itunes.tv.season':{
@@ -2294,12 +2425,15 @@
                     'collection':'itunes_tv_season',
                     'namespace':'ns.knowledge.tv.season',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes tv show id',
                         'itunes tv season id',
                         'disc number',
                         'tv show name',
                         'simple tv show name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.itunes.tv.episode':{
@@ -2352,6 +2486,7 @@
                     'collection':'itunes_tv_episode',
                     'namespace':'ns.knowledge.tv.episode',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes tv show id',
                         'itunes tv season id',
@@ -2359,9 +2494,11 @@
                         'disc number',
                         'track number',
                         'tv show name',
-                        'tv episode name',
                         'simple tv show name',
+                        'tv episode name',
                         'simple tv episode name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.itunes.music.album':{
@@ -2370,11 +2507,6 @@
                             'filter':ur'^/c/itunes/music/album/(?P<itunes_music_album_id>[0-9]+)$',
                             'query parameter':set(('itunes music album id',)),
                             'remote':ur'lookup?entity=album',
-                        },
-                        {
-                            'filter':ur'^/c/itunes/music/album/search$',
-                            'query parameter':set(('term',)),
-                            'remote':ur'search?entity=album&attribute=albumTerm',
                         },
                     ],
                     'produce':[
@@ -2393,10 +2525,13 @@
                     'collection':'itunes_music_album',
                     'namespace':'ns.knowledge.music.album',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes music album id',
                         'music album name',
                         'simple music album name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.itunes.music.track':{
@@ -2436,15 +2571,18 @@
                     'collection':'itunes_music_track',
                     'namespace':'ns.knowledge.music.track',
                     'type':'json',
+                    'parse type':'document',
                     'index':[
                         'itunes music track id',
                         'itunes music album id',
                         'disc number',
                         'track number',
                         'music album name',
-                        'music track name',
                         'simple music album name',
+                        'music track name',
                         'simple music track name',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.itunes.genre.complete':{
@@ -2463,6 +2601,7 @@
                     ],
                     'namespace':'ns.knowledge.genre',
                     'type':'json',
+                    'parse type':'document',
                     'index':['itunes genre id'],
                 },
             },
@@ -2504,6 +2643,8 @@
                         'imdb movie id',
                         'movie title',
                         'simple movie title',
+                        'release date',
+                        'release year',
                     ],
                 },
                 'service.document.rottentomatoes.movie.review':{

@@ -1381,7 +1381,7 @@
             'type':'int',
         },
         'release year':{
-            'name':u'Year',
+            'name':u'Release year',
             'keyword':u'release_year',
             'type':'int',
         },
@@ -1498,7 +1498,14 @@
             'type':'unicode',
             'plural':'dict',
         },
-        
+        'query parameters':{
+            'name':u'Query parameters',
+            'keyword':u'query_parameters',
+            'type':'unicode',
+            'plural':'dict',
+            'namespace':'ns.search.query',
+            'plural format':'eval',
+        },
         'database':{
             'name':u'Database',
             'keyword':u'database',

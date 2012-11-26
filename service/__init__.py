@@ -164,11 +164,10 @@ class ResourceHandler(object):
                         
                         # If record does not exists try to produce it and lookup again
                         if result is None:
-                            self.produce(uri, repository, location)
-                            result = collection.find_one({u'head.alternate':uri})
+                            result = self.produce(uri, repository, location)
+                            # result = collection.find_one({u'head.alternate':uri})
                     else:
-                        self.produce(uri, repository, location)
-                        
+                        result = self.produce(uri, repository, location)
                     break
             if taken: break
         return result
@@ -220,6 +219,7 @@ class ResourceHandler(object):
     
     
     def produce(self, uri, repository, location):
+        result = None
         taken = False
         for branch in self.branch.values():
             for match in branch['match']:
@@ -235,6 +235,7 @@ class ResourceHandler(object):
                         'parameter':Ontology(self.env, 'ns.service.genealogy'),
                         'source':[],
                         'result':[],
+                        'return':None,
                     }
                     
                     # decode parameters from the uri
@@ -246,8 +247,11 @@ class ResourceHandler(object):
                     self.fetch(query)
                     self.parse(query)
                     self.store(query)
+                    result = query['return']
                     break
             if taken: break
+        return result
+        
     
     
     def prepare(self, query):
@@ -331,54 +335,59 @@ class ResourceHandler(object):
     
     def store(self, query):
         for entry in query['result']:
-            record = None
-            collection = query['repository'].database[entry['branch']['collection']]
-            entry['record'][u'head'][u'modified'] = datetime.utcnow()
-            self._compute_resolvables(entry)
-            
-            # Make a pseudo empty body for bodyless records
-            if u'body' not in entry['record']: entry['record'][u'body'] = None
-            
-            # Try to locate an existing record
-            for uri in entry['record'][u'head'][u'alternate']:
-                record = collection.find_one({u'head.alternate':uri})
-                if record is not None: break
-                    
-            # This is an update, we already have an existing record
-            if record is not None:
-                # Compute the union of the two uri lists
-                record[u'head'][u'alternate'] = list(set(record[u'head'][u'alternate']).union(entry['record'][u'head'][u'alternate']))
+            if entry['branch']['persistent']:
+                record = None
+                collection = query['repository'].database[entry['branch']['collection']]
+                entry['record'][u'head'][u'modified'] = datetime.utcnow()
+                self._compute_resolvables(entry)
                 
-                # Compute the union of the two genealogy dictionaries, new overrides existing
-                record[u'head'][u'genealogy'] = dict(record[u'head'][u'genealogy'].items() + entry['record'][u'head'][u'genealogy'].items())
+                # Make a pseudo empty body for bodyless records
+                if u'body' not in entry['record']: entry['record'][u'body'] = None
                 
-                # New body overrides the existing
-                record[u'body'] = entry['record'][u'body']
-                
-            # This is an insert, no previous existing record was found
-            else:
-                entry['record'][u'head'][u'created'] = entry['record'][u'head'][u'modified']
-                
-                # In case we need to issue keys
-                if 'key generator' in self.node:
-                    # Issue a new id
-                    entry['record'][u'head'][u'genealogy'][self.node['key generator']['element']] = self.resolver.issue(query['repository'].host, self.node['key generator']['space'])
-                    if 'key' in entry['branch']:
-                        entry['record'][u'head'][u'genealogy'][entry['branch']['key']] = entry['record'][u'head'][u'genealogy'][self.node['key generator']['element']]
+                # Try to locate an existing record
+                for uri in entry['record'][u'head'][u'alternate']:
+                    record = collection.find_one({u'head.alternate':uri})
+                    if record is not None: break
                         
-                    # Rebuild all the resolvable URIs from the genealogy again to account for the assigned id
-                    self._compute_resolvables(entry)
+                # This is an update, we already have an existing record
+                if record is not None:
+                    # Compute the union of the two uri lists
+                    record[u'head'][u'alternate'] = list(set(record[u'head'][u'alternate']).union(entry['record'][u'head'][u'alternate']))
                     
-                # The new record is the one to save
-                record = entry['record']
-                
-            # Check that canonical and alternate are set
-            if 'canonical' in record[u'head'] and record[u'head']['canonical'] and 'alternate' in record[u'head'] and record[u'head']['alternate']:
-                self.log.debug(u'Persisting %s', unicode(record[u'head']['canonical']))
-                collection.save(record)
-            else:
-                self.log.error(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
-                
+                    # Compute the union of the two genealogy dictionaries, new overrides existing
+                    record[u'head'][u'genealogy'] = dict(record[u'head'][u'genealogy'].items() + entry['record'][u'head'][u'genealogy'].items())
+                    
+                    # New body overrides the existing
+                    record[u'body'] = entry['record'][u'body']
+                    
+                # This is an insert, no previous existing record was found
+                else:
+                    entry['record'][u'head'][u'created'] = entry['record'][u'head'][u'modified']
+                    
+                    # In case we need to issue keys
+                    if 'key generator' in self.node:
+                        # Issue a new id
+                        entry['record'][u'head'][u'genealogy'][self.node['key generator']['element']] = self.resolver.issue(query['repository'].host, self.node['key generator']['space'])
+                        if 'key' in entry['branch']:
+                            entry['record'][u'head'][u'genealogy'][entry['branch']['key']] = entry['record'][u'head'][u'genealogy'][self.node['key generator']['element']]
+                            
+                        # Rebuild all the resolvable URIs from the genealogy again to account for the assigned id
+                        self._compute_resolvables(entry)
+                        
+                    # The new record is the one to save
+                    record = entry['record']
+                    
+                # Check that canonical and alternate are set
+                if 'canonical' in record[u'head'] and record[u'head']['canonical'] and 'alternate' in record[u'head'] and record[u'head']['alternate']:
+                    self.log.debug(u'Persisting %s', unicode(record[u'head']['canonical']))
+                    collection.save(record)
+                else:
+                    self.log.error(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
+                    
+        if query['branch']['persistent']:
+            collection = query['repository'].database[query['branch']['collection']]
+            query['return'] = collection.find_one({u'head.alternate':query['uri']})
+
     def _compute_resolvables(self, entry):
         entry['record'][u'head'][u'alternate'] = []
         entry['record'][u'head']['canonical'] = None

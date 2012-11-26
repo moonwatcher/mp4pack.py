@@ -10,8 +10,8 @@ from ontology import Ontology
 class TMDbHandler(ResourceHandler):
     def __init__(self, resolver, node):
         ResourceHandler.__init__(self, resolver, node)
-
-
+    
+    
     def parse(self, query):
         for source in query['source']:
             try:
@@ -28,7 +28,7 @@ class TMDbHandler(ResourceHandler):
                             u'body':{ u'original':document },
                         }
                     }
-    
+
                     if 'namespace' in query['branch']:
                         # make a caonical node
                         entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
@@ -39,24 +39,25 @@ class TMDbHandler(ResourceHandler):
                             for index in entry['branch']['index']:
                                 if index in entry['record']['body']['canonical']:
                                     entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
-                                    
-                    # Append the entry to the query result    
+
+                    # Append the entry to the query result
                     query['result'].append(entry)
-                    
+
                 elif query['branch']['parse type'] == 'search':
-                    if 'results' in document:
-                        for result in document['results']:
-                            for trigger in query['branch']['trigger']:
-                                # Decode a reference
-                                o = Ontology(self.env, trigger['namespace'])
-                                o.decode_all(result, self.name)
-                                
-                                # Make a URI and trigger a resolution
-                                ref = o.project('ns.service.genealogy')
-                                ref['language']
-                                uri = trigger['format'].format(**ref)
-                                self.log.debug(u'Trigger %s resolution', uri)
-                                self.resolver.resolve(uri)
+                    query['return'] = { u'resultCount':0, u'results':[], }
+                    for result in document['results']:
+                        for trigger in query['branch']['trigger']:
+                            # Decode a reference
+                            o = Ontology(self.env, trigger['namespace'])
+                            o.decode_all(result, self.name)
+
+                            # Make a URI and trigger a resolution
+                            ref = o.project('ns.service.genealogy')
+                            ref['language']
+                            uri = trigger['format'].format(**ref)
+                            self.log.debug(u'Trigger %s resolution', uri)
+                            query['return']['results'].append(self.resolver.resolve(uri))
+                    query['return']['resultCount'] = len(query['return']['results'])
     
 
 

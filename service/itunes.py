@@ -41,33 +41,53 @@ class iTunesHandler(ResourceHandler):
                 if not document['resultCount'] > 0:
                     self.log.warning(u'No results found for query %s', query['remote url'])
                 else:
-                    for element in document['results']:
-                        for product in query['branch']['produce']:
-                            if satisfies(element, product['condition']):
-                                
-                                entry = {
-                                    'branch':product['branch'],
-                                    'record':{
-                                        u'head':{ u'genealogy':Ontology(self.env, 'ns.service.genealogy'), },
-                                        u'body':{ u'original':element },
+                    if query['branch']['parse type'] == 'document':
+                        for element in document['results']:
+                            for product in query['branch']['produce']:
+                                if satisfies(element, product['condition']):
+                                    
+                                    entry = {
+                                        'branch':product['branch'],
+                                        'record':{
+                                            u'head':{ u'genealogy':Ontology(self.env, 'ns.service.genealogy'), },
+                                            u'body':{ u'original':element },
+                                        }
                                     }
-                                }
-                                
-                                # make a caonical node
-                                entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
-                                entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
-
-                                # Copy indexed values from the canonical node to the genealogy
-                                if 'index' in entry['branch']:
-                                    for index in entry['branch']['index']:
-                                        if index in entry['record']['body']['canonical']:
-                                            entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
-                                            
-                                # Only produce once for each element
-                                query['result'].append(entry)
-                                break
+                                    
+                                    # make a caonical node
+                                    entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
+                                    entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
     
-        
+                                    # Copy indexed values from the canonical node to the genealogy
+                                    if 'index' in entry['branch']:
+                                        for index in entry['branch']['index']:
+                                            if index in entry['record']['body']['canonical']:
+                                                entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
+                                                
+                                    # Only produce once for each element
+                                    query['result'].append(entry)
+                                    break
+                    
+                    
+                    elif query['branch']['parse type'] == 'search':
+                        query['return'] = { u'resultCount':0, u'results':[], }
+                        for trigger in query['branch']['trigger']:
+                            for element in document['results']:
+                                if satisfies(element, trigger['condition']):
+                            
+                                    # Decode concepts from the element and populate the ontology
+                                    o = Ontology(self.env, trigger['namespace'])
+                                    o.decode_all(element, self.name)
+                                        
+                                    # Make a URI and trigger a resolution
+                                    ref = o.project('ns.service.genealogy')
+                                    ref['language']
+                                    uri = trigger['format'].format(**ref)
+                                    self.log.debug(u'Trigger %s resolution', uri)
+                                    query['return']['results'].append(self.resolver.resolve(uri))
+                        query['return']['resultCount'] = len(query['return']['results'])
+    
+    
     def parse_itunes_genres(self, document, parent=None):
         result = []
         if document:

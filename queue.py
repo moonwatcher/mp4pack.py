@@ -373,7 +373,7 @@ class ServiceTask(Task):
     
     def load(self):
         Task.load(self)
-        self.document = self.env.resolver.resolve(self.uri)
+        self.document = self.env.resolver.resolve(self.uri, self.ontology['query parameters'])
     
     
     def run(self):

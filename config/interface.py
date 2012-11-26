@@ -24,6 +24,7 @@
                         'uris',
                         'sync',
                         'download',
+                        'query parameters',
                     ]
                 },
                 {
@@ -363,6 +364,14 @@
                         'help':'List of URIs',
                         'nargs':'*',
                         'metavar':'URI',
+                    },
+                },
+                'query parameters':{
+                    'flag':['-q', '--query-parameters'],
+                    'parameter':{ 
+                        'help':'Query parameters for lookup',
+                        'dest':'query parameters',
+                        'metavar':'DICT',
                     },
                 },
                 'quantizer':{
