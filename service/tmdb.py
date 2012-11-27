@@ -20,7 +20,7 @@ class TMDbHandler(ResourceHandler):
                 self.log.warning(u'Failed to decode JSON document %s', query['remote url'])
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
-                if query['branch']['parse type'] == 'document':
+                if query['branch']['query type'] == 'lookup':
                     entry = {
                         'branch':query['branch'],
                         'record':{
@@ -43,8 +43,8 @@ class TMDbHandler(ResourceHandler):
                     # Append the entry to the query result
                     query['result'].append(entry)
 
-                elif query['branch']['parse type'] == 'search':
-                    query['return'] = { u'resultCount':0, u'results':[], }
+                elif query['branch']['query type'] == 'search':
+                    query['return'] = { u'result count':0, u'results':[], }
                     for result in document['results']:
                         for trigger in query['branch']['trigger']:
                             # Decode a reference
@@ -57,7 +57,7 @@ class TMDbHandler(ResourceHandler):
                             uri = trigger['format'].format(**ref)
                             self.log.debug(u'Trigger %s resolution', uri)
                             query['return']['results'].append(self.resolver.resolve(uri))
-                    query['return']['resultCount'] = len(query['return']['results'])
+                    query['return']['result count'] = len(query['return']['results'])
     
 
 

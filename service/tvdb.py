@@ -88,7 +88,7 @@ class TVDbHandler(ResourceHandler):
                 self.log.warning(u'Failed to decode xml document %s', query['remote url'])
                 self.log.warning(u'Exception raised %s', unicode(e))
             else:
-                if query['branch']['parse type'] == 'document':
+                if query['branch']['query type'] == 'lookup':
                     for product in query['branch']['produce']:
                         if product['tag'] in document:
                             if product['coalesce']:
@@ -155,8 +155,8 @@ class TVDbHandler(ResourceHandler):
                                 # Add the entries in the batch to the query results
                                 query['result'].extend(batch)
                 
-                elif query['branch']['parse type'] == 'search':
-                    query['return'] = { u'resultCount':0, u'results':[], }
+                elif query['branch']['query type'] == 'search':
+                    query['return'] = { u'result count':0, u'results':[], }
                     for trigger in query['branch']['trigger']:
                         if trigger['tag'] in document:
                             for element in document[trigger['tag']]:
@@ -170,5 +170,5 @@ class TVDbHandler(ResourceHandler):
                                 uri = trigger['format'].format(**ref)
                                 self.log.debug(u'Trigger %s resolution', uri)
                                 query['return']['results'].append(self.resolver.resolve(uri))
-                    query['return']['resultCount'] = len(query['return']['results'])
+                    query['return']['result count'] = len(query['return']['results'])
 

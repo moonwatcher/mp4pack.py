@@ -29,19 +29,18 @@ class iTunesHandler(ResourceHandler):
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
                 if 'process' in query['branch']:
-                
-                    # locate a method that implements the action
+                    # Preprocessing the entry.
+                    # Method should return a document similar to normal itunes api calls
                     action = getattr(self, query['branch']['process'], None)
                     if action is not None:
-                        document = { 'results':action(document) }
-                        document['resultCount'] = len(document['results'])
+                        document = action(document)
                     else:
                         self.log.warning(u'Ignoring unknown process function %s', query['branch']['process'])
                         
                 if not document['resultCount'] > 0:
-                    self.log.warning(u'No results found for query %s', query['remote url'])
+                    self.log.debug(u'No results found for query %s', query['remote url'])
                 else:
-                    if query['branch']['parse type'] == 'document':
+                    if query['branch']['query type'] == 'lookup':
                         for element in document['results']:
                             for product in query['branch']['produce']:
                                 if satisfies(element, product['condition']):
@@ -69,8 +68,8 @@ class iTunesHandler(ResourceHandler):
                                     break
                     
                     
-                    elif query['branch']['parse type'] == 'search':
-                        query['return'] = { u'resultCount':0, u'results':[], }
+                    elif query['branch']['query type'] == 'search':
+                        query['return'] = { u'result count':0, u'results':[], }
                         for trigger in query['branch']['trigger']:
                             for element in document['results']:
                                 if satisfies(element, trigger['condition']):
@@ -85,28 +84,30 @@ class iTunesHandler(ResourceHandler):
                                     uri = trigger['format'].format(**ref)
                                     self.log.debug(u'Trigger %s resolution', uri)
                                     query['return']['results'].append(self.resolver.resolve(uri))
-                        query['return']['resultCount'] = len(query['return']['results'])
+                        query['return']['result count'] = len(query['return']['results'])
     
     
-    def parse_itunes_genres(self, document, parent=None):
-        result = []
-        if document:
-            for key,element in document.iteritems():
-                try:
-                    geID = int(key)
-                except ValueError, e:
-                    self.log.warning(u'Invalid genre id %s', key)
-                else:
-                    record = dict([(k,v) for k,v in element.iteritems() if not k == 'subgenres'])
-                    record['kind']= 'genre'
-                    if parent:
-                        record['parentGenreId'] = parent
-                    result.append(record)
-                    
-                    if 'subgenres' in element and element['subgenres']:
-                        result.extend(self.parse_itunes_genres(element['subgenres'], geID))
+    def parse_itunes_genres(self, document):
+        def _recursive_parse_itunes_genres(node, parent=None):
+            result = []
+            if node:
+                for key,element in node.iteritems():
+                    try:
+                        geID = int(key)
+                    except ValueError, e:
+                        self.log.warning(u'Invalid genre id %s', key)
+                    else:
+                        record = dict([(k,v) for k,v in element.iteritems() if not k == 'subgenres'])
+                        record['kind']= 'genre'
+                        if parent:
+                            record['parentGenreId'] = parent
+                        result.append(record)
+                        
+                        if 'subgenres' in element and element['subgenres']:
+                            result.extend(_recursive_parse_itunes_genres(element['subgenres'], geID))
+            return result
+        
+        
+        result = { 'results':_recursive_parse_itunes_genres(document) }
+        result['resultCount'] = len(result['results'])
         return result
-                            
-    
-
-

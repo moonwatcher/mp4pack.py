@@ -158,17 +158,20 @@ class ResourceHandler(object):
                 m = match['pattern'].search(uri)
                 if m is not None:
                     taken = True
-                    if branch['persistent']:
-                        collection = repository.database[branch['collection']]
-                        result = collection.find_one({u'head.alternate':uri})
-                        
-                        # If record does not exists try to produce it and lookup again
-                        if result is None:
+                    if branch['query type'] == 'lookup':
+                        if branch['persistent']:
+                            collection = repository.database[branch['collection']]
+                            result = collection.find_one({u'head.alternate':uri})
+                            
+                            # If record does not exists try to produce it and lookup again
+                            if result is None: result = self.produce(uri, repository, location)
+                        else:
                             result = self.produce(uri, repository, location)
-                            # result = collection.find_one({u'head.alternate':uri})
-                    else:
+                            
+                    elif branch['query type'] == 'search':
                         result = self.produce(uri, repository, location)
                     break
+                    
             if taken: break
         return result
     
@@ -180,10 +183,11 @@ class ResourceHandler(object):
                 m = match['pattern'].search(uri)
                 if m is not None:
                     taken = True
-                    if branch['persistent']:
-                        self.log.debug(u'Dropping %s', uri)
-                        collection = repository.database[branch['collection']]
-                        collection.remove({u'head.alternate':uri})
+                    if branch['query type'] == 'lookup':
+                        if branch['persistent']:
+                            self.log.debug(u'Dropping %s', uri)
+                            collection = repository.database[branch['collection']]
+                            collection.remove({u'head.alternate':uri})
                     break
             if taken: break
     
@@ -197,23 +201,24 @@ class ResourceHandler(object):
                 m = match['pattern'].search(uri)
                 if m is not None:
                     taken = True
-                    query = {
-                        'repository':repository,
-                        'location':None,
-                        'branch':branch,
-                        'match':match,
-                        'uri':uri,
-                        'parameter':None,
-                        'source':None,
-                        'result':[
-                            {
-                                'branch':branch,
-                                'record':node,
-                            },
-                        ],
-                    }
-                    self.log.debug(u'Saving %s', query['uri'])
-                    self.store(query)
+                    if branch['query type'] == 'lookup':
+                        query = {
+                            'repository':repository,
+                            'location':None,
+                            'branch':branch,
+                            'match':match,
+                            'uri':uri,
+                            'parameter':None,
+                            'source':None,
+                            'result':[
+                                {
+                                    'branch':branch,
+                                    'record':node,
+                                },
+                            ],
+                        }
+                        self.log.debug(u'Saving %s', query['uri'])
+                        self.store(query)
                     break
             if taken: break
     
@@ -270,29 +275,29 @@ class ResourceHandler(object):
                     p = Ontology(self.env, 'ns.search.query')
                     
                     # Collect matching parameters from the query parameter
-                    for k,v in query['parameter'].iteritems():
-                        if k in query['match']['query parameter']:
-                            p[k] = v
-    
+                    for k in query['match']['query parameter']:
+                        if k in query['parameter']:
+                            p[k] = query['parameter'][k]
+                            
                     # Collect matching parameters from the location
                     if query['location']:
-                        for k,v in query['location'].iteritems():
-                            if k in query['match']['query parameter']:
-                                p[k] = v
-    
+                        for k in query['match']['query parameter']:
+                            if k in query['location']:
+                                p[k] = query['location'][k]
+                                
                     # Rename the parameters to the resolver's syntax and utf8 encode them 
-                    parameter = {}
+                    parameters = {}
                     for k,v in p.iteritems():
                         prototype = p.namespace.find(k)
-                        if prototype and self.name in prototype.node:
-                            parameter[prototype.node[self.name]] = unicode(v).encode('utf8')
+                        if prototype and prototype.node[self.name]:
+                            parameters[prototype.node[self.name]] = unicode(v).encode('utf8')
     
-                    if parameter:
+                    if parameters:
                         # Break up the URL
                         parsed = list(urlparse.urlparse(query['remote url']))
                         
                         # URL escape the parameters, encode as a query string and convert back to unicode
-                        extra = unicode(urllib.urlencode(parameter), 'utf8')
+                        extra = unicode(urllib.urlencode(parameters), 'utf8')
                         
                         # Append the parameters to the existing query fragment
                         if parsed[4]: parsed[4] = u'{}&{}'.format(parsed[4], extra)
@@ -300,6 +305,35 @@ class ResourceHandler(object):
                             
                         # Reassemble the URL
                         query['remote url'] = urlparse.urlunparse(parsed)
+    
+    def locate(self, query):
+        result = None
+        if query['branch']['persistent']:
+            collection = query['repository'].database[query['branch']['collection']]
+            if query['branch']['query type'] == 'lookup':
+                query['return'] = collection.find_one({u'head.alternate':uri})
+                
+            elif query['branch']['query type'] == 'search':
+                query['return'] = { u'result count':0, u'results':[], }
+                select = {}
+                for k,v in query['query parameter']:
+                    q[u'head.genealogy.' + unicode(k)] = v
+                query['return']['results'] = collection.find(select)
+                query['return']['result count'] = len(query['return']['results'])
+                
+        return result
+    def collect(self, query):
+        if 'collect' in query['branch']:
+            for pattern in query['branch']['collect']:
+                try:
+                    related = self.resolver.resolve(pattern.format(**query['parameter']))
+                except KeyError, e:
+                    self.log.debug(u'Could not create related uri for pattern %s because parameter %s was missing', pattern, e)
+                else:
+                    if related is not None:
+                        for index in query['branch']['index']:
+                            if index in related[u'head'][u'genealogy']:
+                                query['parameter'][index] = related[u'head'][u'genealogy'][index]
     
     def fetch(self, query):
         if 'remote url' in query:
@@ -315,19 +349,6 @@ class ResourceHandler(object):
             else:
                 query['source'].append(StringIO(response.read()))
     
-    
-    def collect(self, query):
-        if 'collect' in query['branch']:
-            for pattern in query['branch']['collect']:
-                try:
-                    related = self.resolver.resolve(pattern.format(**query['parameter']))
-                except KeyError, e:
-                    self.log.debug(u'Could not create related uri for pattern %s because parameter %s was missing', pattern, e)
-                else:
-                    if related is not None:
-                        for index in query['branch']['index']:
-                            if index in related[u'head'][u'genealogy']:
-                                query['parameter'][index] = related[u'head'][u'genealogy'][index]
     
     def parse(self, query):
         pass

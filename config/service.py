@@ -1414,7 +1414,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/search$',
-                            'query parameter':set(('api key', 'term', 'release year', 'language', 'page')),
+                            'query parameter':set(('api key', 'movie title', 'simple movie title', 'release year', 'language', 'page')),
                             'remote':ur'search/movie',
                         },
                     ],
@@ -1424,13 +1424,13 @@
                             'format':ur'/c/{language}/tmdb/movie/{tmdb movie id}',
                         },
                     ],
-                    'parse type':'search',
+                    'query type':'search',
                 },
                 'service.search.tmdb.person':{
                     'match':[
                         {
                             'filter':ur'^/c/tmdb/person/search$',
-                            'query parameter':set(('api key', 'term', 'page')),
+                            'query parameter':set(('api key', 'person name', 'simple person name', 'page')),
                             'remote':'search/person',
                         },
                     ],
@@ -1440,13 +1440,13 @@
                             'format':ur'/c/tmdb/person/{tmdb person id}',
                         },
                     ],
-                    'parse type':'search',
+                    'query type':'search',
                 },
                 'service.search.tmdb.company':{
                     'match':[
                         {
                             'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/search$',
-                            'query parameter':set(('api key', 'term', 'page')),
+                            'query parameter':set(('api key', 'company name', 'simple company name', 'page')),
                             'remote':'search/company',
                         },
                     ],
@@ -1456,7 +1456,7 @@
                             'format':ur'/c/tmdb/company/{tmdb company id}',
                         },
                     ],
-                    'parse type':'search',
+                    'query type':'search',
                 },
                 'service.document.tmdb.configuration':{
                     'match':[
@@ -1474,7 +1474,7 @@
                         },
                     ],
                     'collection':'tmdb_configuration',
-                    'parse type':'document',
+                    'query type':'lookup',
                 },
                 'service.document.tmdb.genre':{
                     'match':[
@@ -1493,7 +1493,7 @@
                     ],
                     'collection':'tmdb_genre',
                     'namespace':'ns.knowledge.genre',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'tmdb genre id',
                         'genre name',
@@ -1527,7 +1527,7 @@
                     ],
                     'collection':'tmdb_movie',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'tmdb movie id',
                         'imdb movie id',
@@ -1555,7 +1555,7 @@
                     ],
                     'collection':'tmdb_movie_cast',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb movie id'],
                 },
                 'service.document.tmdb.movie.image':{
@@ -1575,7 +1575,7 @@
                     ],
                     'collection':'tmdb_movie_image',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb movie id'],
                 },
                 'service.document.tmdb.movie.keyword':{
@@ -1595,7 +1595,7 @@
                     ],
                     'collection':'tmdb_movie_keyword',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb movie id'],
                 },
                 'service.document.tmdb.movie.rating':{
@@ -1615,7 +1615,7 @@
                     ],
                     'collection':'tmdb_movie_rating',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb movie id'],
                 },
                 'service.document.tmdb.movie.clip':{
@@ -1635,7 +1635,7 @@
                     ],
                     'collection':'tmdb_movie_clip',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb movie id'],
                 },
                 'service.document.tmdb.movie.translation':{
@@ -1655,7 +1655,7 @@
                     ],
                     'collection':'tmdb_movie_translation',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb movie id'],
                 },
                 'service.document.tmdb.movie.alternative':{
@@ -1675,7 +1675,7 @@
                     ],
                     'collection':'tmdb_movie_alternative',
                     'namespace':'ns.knowledge.movie',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb movie id'],
                 },
                 'service.document.tmdb.collection':{
@@ -1695,7 +1695,7 @@
                     ],
                     'collection':'tmdb_collection',
                     'namespace':'ns.knowledge.collection',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb collection id', 'language'],
                 },
                 'service.document.tmdb.person':{
@@ -1715,7 +1715,7 @@
                     ],
                     'collection':'tmdb_person',
                     'namespace':'ns.knowledge.person',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'tmdb person id',
                         'person name',
@@ -1739,7 +1739,7 @@
                     ],
                     'collection':'tmdb_person_image',
                     'namespace':'ns.knowledge.person',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb person id',],
                 },
                 'service.document.tmdb.person.credit':{
@@ -1759,7 +1759,7 @@
                     ],
                     'collection':'tmdb_person_credit',
                     'namespace':'ns.knowledge.person',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb person id',],
                 },
                 'service.document.tmdb.company':{
@@ -1779,7 +1779,7 @@
                     ],
                     'collection':'tmdb_company',
                     'namespace':'ns.knowledge.company',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'tmdb company id',
                         'company name',
@@ -1803,7 +1803,7 @@
                     ],
                     'collection':'tmdb_company_credit',
                     'namespace':'ns.knowledge.company',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['tmdb company id',],
                 },
             },
@@ -1833,7 +1833,7 @@
                             'format':ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                         },
                     ],
-                    'parse type':'search',
+                    'query type':'search',
                     'type':'xml',
                 },
                 'service.document.tvdb.tv.show':{
@@ -1877,7 +1877,7 @@
                     ],
                     'collection':'tvdb_tv_show',
                     'namespace':'ns.knowledge.tv.show',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'type':'xml',
                 },
                 'service.document.tvdb.tv.show.cast':{
@@ -1904,7 +1904,7 @@
                     'index':['tvdb tv show id',],
                     'collection':'tvdb_tv_show_cast',
                     'namespace':'ns.knowledge.tv.show',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'type':'xml',
                 },
                 'service.document.tvdb.tv.show.image':{
@@ -1931,7 +1931,7 @@
                     'index':['tvdb tv show id',],
                     'collection':'tvdb_tv_show_image',
                     'namespace':'ns.knowledge.tv.show',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'type':'xml',
                 },
                 'service.document.tvdb.tv.season':{
@@ -1973,7 +1973,7 @@
                     ],
                     'collection':'tvdb_tv_season',
                     'namespace':'ns.knowledge.tv.season',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'type':'xml',
                 },
                 'service.document.tvdb.tv.episode':{
@@ -2047,7 +2047,7 @@
                     ],
                     'collection':'tvdb_tv_episode',
                     'namespace':'ns.knowledge.tv.episode',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'type':'xml',
                 },
                 'service.document.tvdb.tv.show.complete':{
@@ -2086,7 +2086,7 @@
                         'tvdb tv show id',
                         'imdb tv show id',
                     ],
-                    'parse type':'document',
+                    'query type':'lookup',
                     'type':'zip',
                 },
                 'service.document.tvdb.update.daily':{
@@ -2103,7 +2103,7 @@
                             'canonical':True,
                         },
                     ],
-                    'parse type':'update',
+                    'query type':'update',
                     'type':'zip',
                 },
                 'service.document.tvdb.update.weekly':{
@@ -2120,7 +2120,7 @@
                             'canonical':True,
                         },
                     ],
-                    'parse type':'update',
+                    'query type':'update',
                     'type':'zip',
                 },
                 'service.document.tvdb.update.monthly':{
@@ -2137,7 +2137,7 @@
                             'canonical':True,
                         },
                     ],
-                    'parse type':'update',
+                    'query type':'update',
                     'type':'zip',
                 },
             },
@@ -2150,7 +2150,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/person/search$',
-                            'query parameter':set(('term',)),
+                            'query parameter':set(('person name', 'simple person name',)),
                             'remote':ur'search?entity=movieArtist&attribute=artistTerm',
                         },
                     ],
@@ -2167,7 +2167,7 @@
                         },
                     ],
                     'type':'json',
-                    'parse type':'search',
+                    'query type':'search',
                     'index':[
                         'itunes person id',
                         'person name',
@@ -2178,7 +2178,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/movie/search$',
-                            'query parameter':set(('term',)),
+                            'query parameter':set(('movie title', 'release year', 'simple movie title', )),
                             'remote':ur'search?entity=movie&attribute=movieTerm',
                         },
                     ],
@@ -2190,7 +2190,7 @@
                         },
                     ],
                     'type':'json',
-                    'parse type':'search',
+                    'query type':'search',
                     'index':[
                         'itunes movie id',
                         'movie title',
@@ -2203,7 +2203,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/tv/show/search$',
-                            'query parameter':set(('term',)),
+                            'query parameter':set(('tv show name', 'release year', 'release date', 'simple tv show name', )),
                             'remote':ur'search?entity=tvShow&attribute=showTerm',
                         },
                     ],
@@ -2215,7 +2215,7 @@
                         },
                     ],
                     'type':'json',
-                    'parse type':'search',
+                    'query type':'search',
                     'index':[
                         'itunes tv show id',
                         'tv show name',
@@ -2228,7 +2228,7 @@
                     'match':[
                         {
                             'filter':ur'^/c/itunes/music/album/search$',
-                            'query parameter':set(('term',)),
+                            'query parameter':set(('music album name', 'release year', 'release date', 'simple music album name', )),
                             'remote':ur'search?entity=album&attribute=albumTerm',
                         },
                     ],
@@ -2240,7 +2240,7 @@
                         },
                     ],
                     'type':'json',
-                    'parse type':'search',
+                    'query type':'search',
                     'index':[
                         'itunes music album id',
                         'music album name',
@@ -2275,7 +2275,7 @@
                     'collection':'itunes_genre',
                     'namespace':'ns.knowledge.genre',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes genre id',
                         'genre name',
@@ -2310,7 +2310,7 @@
                     'collection':'itunes_person',
                     'namespace':'ns.knowledge.person',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes person id',
                         'person name',
@@ -2341,7 +2341,7 @@
                     'collection':'itunes_movie',
                     'namespace':'ns.knowledge.movie',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes movie id',
                         'movie title',
@@ -2379,7 +2379,7 @@
                     'collection':'itunes_tv_show',
                     'namespace':'ns.knowledge.tv.show',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes tv show id',
                         'tv show name',
@@ -2425,7 +2425,7 @@
                     'collection':'itunes_tv_season',
                     'namespace':'ns.knowledge.tv.season',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes tv show id',
                         'itunes tv season id',
@@ -2486,7 +2486,7 @@
                     'collection':'itunes_tv_episode',
                     'namespace':'ns.knowledge.tv.episode',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes tv show id',
                         'itunes tv season id',
@@ -2525,7 +2525,7 @@
                     'collection':'itunes_music_album',
                     'namespace':'ns.knowledge.music.album',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes music album id',
                         'music album name',
@@ -2571,7 +2571,7 @@
                     'collection':'itunes_music_track',
                     'namespace':'ns.knowledge.music.track',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':[
                         'itunes music track id',
                         'itunes music album id',
@@ -2601,7 +2601,7 @@
                     ],
                     'namespace':'ns.knowledge.genre',
                     'type':'json',
-                    'parse type':'document',
+                    'query type':'lookup',
                     'index':['itunes genre id'],
                 },
             },

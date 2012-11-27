@@ -2529,6 +2529,44 @@
                     'tmdb':'query',
                     'itunes':'term',
                 },
+                'movie title':{
+                    'tmdb':'query',
+                    'itunes':'term',
+                },
+                'simple movie title':{
+                    'tmdb':'query',
+                    'itunes':'term',
+                },
+                'tv show name':{
+                    'tvdb':'seriesname',
+                    'itunes':'term',
+                },
+                'simple tv show name':{
+                    'tvdb':'seriesname',
+                    'itunes':'term',
+                },
+                'music album name':{
+                    'itunes':'term',
+                },
+                'simple music album name':{
+                    'itunes':'term',
+                },
+                'person name':{
+                    'tmdb':'query',
+                    'itunes':'term',
+                },
+                'simple person name':{
+                    'tmdb':'query',
+                    'itunes':'term',
+                },
+                'company name':{
+                    'tmdb':'query',
+                    'itunes':'term',
+                },
+                'simple company name':{
+                    'tmdb':'query',
+                    'itunes':'term',
+                },
                 'page':{
                     'tmdb':'page',
                 },
@@ -2568,9 +2606,6 @@
                 },
                 'imdb tv show id':{
                     'tvdb':'imdbid',
-                },
-                'tv show name':{
-                    'tvdb':'seriesname',
                 },
             },
         },
