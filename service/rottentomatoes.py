@@ -19,7 +19,7 @@ class RottenTomatoesHandler(ResourceHandler):
         
     
     def parse(self, query):
-        for source in query['source']:
+        for source in query['sources']:
             try:
                 document = json.load(source)
             except ValueError, e:
@@ -68,6 +68,6 @@ class RottenTomatoesHandler(ResourceHandler):
                             if index in entry['record']['body']['canonical']:
                                 entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
     
-                    query['result'].append(entry)
+                    query['entires'].append(entry)
     
 

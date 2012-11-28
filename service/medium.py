@@ -28,7 +28,7 @@ class MediumHandler(ResourceHandler):
                     crawler = Crawler(query['location'])
                     if crawler.valid:
                         self.log.debug(u'Crawling %s', query['location']['path'])
-                        query['source'].append(crawler)
+                        query['sources'].append(crawler)
                     
         elif query['branch']['type'] == 'reference':
             # For assets, query the resource collection to collect the relevent resources
@@ -37,12 +37,12 @@ class MediumHandler(ResourceHandler):
             resources = collection.find({u'head.genealogy.home id':query['parameter']['home id']})
             for resource in resources:
                 node['reference'][resource['head']['canonical']] = resource['head']
-            query['source'].append(node)
+            query['sources'].append(node)
     
     
     def parse(self, query):
         if query['branch']['type'] == 'crawl':
-            for crawler in query['source']:
+            for crawler in query['sources']:
                 entry = {
                     u'branch':query['branch'],
                     'record':{
@@ -50,13 +50,13 @@ class MediumHandler(ResourceHandler):
                         u'body':crawler.node,
                     },
                 }
-                query['result'].append(entry)
+                query['entires'].append(entry)
                 
                 # Hack to force path digest
                 entry['record'][u'head'][u'genealogy']['path digest']
                 
         elif query['branch']['type'] == 'reference':
-            for node in query['source']:
+            for node in query['sources']:
                 entry = {
                     u'branch':query['branch'],
                     'record':{
@@ -64,6 +64,6 @@ class MediumHandler(ResourceHandler):
                         u'body':node,
                     },
                 }
-                query['result'].append(entry)
+                query['entires'].append(entry)
     
 

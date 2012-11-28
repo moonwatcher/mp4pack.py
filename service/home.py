@@ -23,11 +23,11 @@ class HomeHandler(ResourceHandler):
                         if index in dependee[u'head'][u'genealogy']:
                             query['parameter'][index] = dependee[u'head'][u'genealogy'][index]
                             
-                    query['source'].append(dependee)
+                    query['sources'].append(dependee)
     
     
     def parse(self, query):
-        if query['source']:
+        if query['sources']:
             # Only create a new home document if the dependency is satisfied
             entry = {
                 'branch':query['branch'],
@@ -36,6 +36,6 @@ class HomeHandler(ResourceHandler):
                 }
             }
             
-            query['result'].append(entry)
+            query['entires'].append(entry)
     
 

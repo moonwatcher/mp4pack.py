@@ -23,7 +23,7 @@ class KnowledgeBaseHandler(ResourceHandler):
                     self.log.debug(u'Could not create referenced uri for pattern %s because parameter %s was missing', reference['uri'], e)
                 else:
                     if related is not None:
-                        query['source'].append(related)
+                        query['sources'].append(related)
 
     
     
@@ -38,9 +38,9 @@ class KnowledgeBaseHandler(ResourceHandler):
             }
     
             entry['record']['body'] = Ontology(self.env, entry['branch']['namespace'])
-            for source in query['source']:
+            for source in query['sources']:
                 entry['record']['body'].merge_all(source['body']['canonical'])
                 
-            query['result'].append(entry)
+            query['entires'].append(entry)
     
 

@@ -51,9 +51,9 @@ class TVDbHandler(ResourceHandler):
                         # TVDB returns xml that is sometimes gzip encoded
                         if 'content-encoding' in response.info() and response.info()['content-encoding'] == 'gzip':
                             self.log.debug(u'Got gzip encoded response from server when fetching %s', query['remote url'])
-                            query['source'].append(StringIO(gzip.GzipFile(fileobj=BytesIO(response.read())).read()))
+                            query['sources'].append(StringIO(gzip.GzipFile(fileobj=BytesIO(response.read())).read()))
                         else:
-                            query['source'].append(StringIO(response.read()))
+                            query['sources'].append(StringIO(response.read()))
                     except Exception:
                         self.log.warning(u'Failed to load document %s', query['remote url'])
                     
@@ -73,7 +73,7 @@ class TVDbHandler(ResourceHandler):
                         else:
                             for filename in archive.namelist():
                                 try:
-                                    query['source'].append(StringIO(archive.open(filename, 'rU').read()))
+                                    query['sources'].append(StringIO(archive.open(filename, 'rU').read()))
                                 except Exception:
                                     self.log.warning(u'Failed to load document %s from archive %s', filename, query['remote url'])
                             archive.close()
@@ -81,7 +81,7 @@ class TVDbHandler(ResourceHandler):
     
     
     def parse(self, query):
-        for source in query['source']:
+        for source in query['sources']:
             try:
                 document = xml_to_dictionary(ElementTree.parse(source).getroot())
             except SyntaxError, e:
@@ -105,7 +105,7 @@ class TVDbHandler(ResourceHandler):
                                 # make a caonical node
                                 entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
                                 entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
-                                query['result'].append(entry)
+                                query['entires'].append(entry)
                                 
                             else:
                                 batch = []
@@ -145,7 +145,7 @@ class TVDbHandler(ResourceHandler):
                                             
                                     # Make an entry for every season we find
                                     for season in seasons.values():
-                                        query['result'].append(
+                                        query['entires'].append(
                                             {
                                                 'branch':self.branch['service.document.tvdb.tv.season'],
                                                 'record':{ u'head':{ u'genealogy':season }, }
@@ -153,7 +153,7 @@ class TVDbHandler(ResourceHandler):
                                         )
                                         
                                 # Add the entries in the batch to the query results
-                                query['result'].extend(batch)
+                                query['entires'].extend(batch)
                 
                 elif query['branch']['query type'] == 'search':
                     for trigger in query['branch']['trigger']:

@@ -21,7 +21,7 @@ class iTunesHandler(ResourceHandler):
                     product['branch'] = self.branch[product['reference']]    
     
     def parse(self, query):
-        for source in query['source']:
+        for source in query['sources']:
             try:
                 document = json.load(source)
             except ValueError, e:
@@ -64,7 +64,7 @@ class iTunesHandler(ResourceHandler):
                                                 entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
                                                 
                                     # Only produce once for each element
-                                    query['result'].append(entry)
+                                    query['entires'].append(entry)
                                     break
                     
                     

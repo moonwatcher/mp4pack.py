@@ -13,7 +13,7 @@ class TMDbHandler(ResourceHandler):
     
     
     def parse(self, query):
-        for source in query['source']:
+        for source in query['sources']:
             try:
                 document = json.load(source)
             except ValueError, e:
@@ -41,7 +41,7 @@ class TMDbHandler(ResourceHandler):
                                     entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
 
                     # Append the entry to the query result
-                    query['result'].append(entry)
+                    query['entires'].append(entry)
 
                 elif query['branch']['query type'] == 'search':
                     for trigger in query['branch']['trigger']:

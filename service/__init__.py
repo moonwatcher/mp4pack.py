@@ -183,8 +183,8 @@ class ResourceHandler(object):
                             'match':match,
                             'uri':uri,
                             'parameter':None,
-                            'source':None,
-                            'result':[
+                            'sources':None,
+                            'entires':[
                                 {
                                     'branch':branch,
                                     'record':node,
@@ -212,8 +212,8 @@ class ResourceHandler(object):
                         'match':match,
                         'uri':uri,
                         'parameter':Ontology(self.env, 'ns.service.genealogy'),
-                        'source':[],
-                        'result':[],
+                        'sources':[],
+                        'entires':[],
                         'return':None,
                     }
                     
@@ -285,16 +285,18 @@ class ResourceHandler(object):
                         query['remote url'] = urlparse.urlunparse(parsed)
     
     def locate(self, query):
-        result = None
         if query['branch']['persistent']:
             collection = query['repository'].database[query['branch']['collection']]
             if query['branch']['query type'] == 'lookup':
                 query['return'] = collection.find_one({u'head.alternate':query['uri']})
                 
             elif query['branch']['query type'] == 'search':
-                query['return'] = { u'result count':0, u'results':[], }
+                query['return'] = {
+                    u'result count':0,
+                    u'results':[],
+                }
                 
-                # Prepare the query dictionary
+                # prepare the query dictionary
                 select = {}
                 for k,v in query['query parameter'].iteritems():
                     # we only want parameters that have been declared as indexes
@@ -306,11 +308,11 @@ class ResourceHandler(object):
                 cursor = collection.find(select)
                 for r in cursor:
                     query['return']['results'].append(r)
-                    
+                
+                # return None instead of empty result set
                 query['return']['result count'] = len(query['return']['results'])
                 if not query['return']['result count'] > 0:
                     query['return'] = None
-        return result
     
     
     def collect(self, query):
@@ -338,7 +340,7 @@ class ResourceHandler(object):
             except URLError, e:
                 self.log.warning(u'Could not reach server when requesting %s: %s', query['remote url'], e.reason)
             else:
-                query['source'].append(StringIO(response.read()))
+                query['sources'].append(StringIO(response.read()))
     
     
     def parse(self, query):
@@ -346,7 +348,7 @@ class ResourceHandler(object):
     
     
     def store(self, query):
-        for entry in query['result']:
+        for entry in query['entires']:
             if entry['branch']['persistent']:
                 record = None
                 collection = query['repository'].database[entry['branch']['collection']]
