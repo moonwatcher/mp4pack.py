@@ -69,7 +69,6 @@ class iTunesHandler(ResourceHandler):
                     
                     
                     elif query['branch']['query type'] == 'search':
-                        query['return'] = { u'result count':0, u'results':[], }
                         for trigger in query['branch']['trigger']:
                             for element in document['results']:
                                 if satisfies(element, trigger['condition']):
@@ -83,8 +82,7 @@ class iTunesHandler(ResourceHandler):
                                     ref['language']
                                     uri = trigger['format'].format(**ref)
                                     self.log.debug(u'Trigger %s resolution', uri)
-                                    query['return']['results'].append(self.resolver.resolve(uri))
-                        query['return']['result count'] = len(query['return']['results'])
+                                    self.resolver.resolve(uri)
     
     
     def parse_itunes_genres(self, document):

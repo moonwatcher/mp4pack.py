@@ -156,7 +156,6 @@ class TVDbHandler(ResourceHandler):
                                 query['result'].extend(batch)
                 
                 elif query['branch']['query type'] == 'search':
-                    query['return'] = { u'result count':0, u'results':[], }
                     for trigger in query['branch']['trigger']:
                         if trigger['tag'] in document:
                             for element in document[trigger['tag']]:
@@ -169,6 +168,5 @@ class TVDbHandler(ResourceHandler):
                                 ref['language']
                                 uri = trigger['format'].format(**ref)
                                 self.log.debug(u'Trigger %s resolution', uri)
-                                query['return']['results'].append(self.resolver.resolve(uri))
-                    query['return']['result count'] = len(query['return']['results'])
+                                self.resolver.resolve(uri)
 

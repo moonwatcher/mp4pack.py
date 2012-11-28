@@ -1425,6 +1425,16 @@
                         },
                     ],
                     'query type':'search',
+                    'collection':'tmdb_movie',
+                    'index':[
+                        'tmdb movie id',
+                        'imdb movie id',
+                        'movie title',
+                        'simple movie title',
+                        'language',
+                        'release date',
+                        'release year',
+                    ],                    
                 },
                 'service.search.tmdb.person':{
                     'match':[
@@ -1441,11 +1451,17 @@
                         },
                     ],
                     'query type':'search',
+                    'collection':'tmdb_person',
+                    'index':[
+                        'tmdb person id',
+                        'person name',
+                        'simple person name',
+                    ],
                 },
                 'service.search.tmdb.company':{
                     'match':[
                         {
-                            'filter':ur'^/c/(?P<language>[a-z]{2})/tmdb/movie/search$',
+                            'filter':ur'^/c/tmdb/company/search$',
                             'query parameter':set(('api key', 'company name', 'simple company name', 'page')),
                             'remote':'search/company',
                         },
@@ -1457,6 +1473,12 @@
                         },
                     ],
                     'query type':'search',
+                    'collection':'tmdb_company',
+                    'index':[
+                        'tmdb company id',
+                        'company name',
+                        'simple company name',
+                    ],
                 },
                 'service.document.tmdb.configuration':{
                     'match':[
@@ -1833,8 +1855,16 @@
                             'format':ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                         },
                     ],
+                    'collection':'tvdb_tv_show',
                     'query type':'search',
                     'type':'xml',
+                    'index':[
+                        'itunes tv show id',
+                        'tv show name',
+                        'simple tv show name',
+                        'release date',
+                        'release year',
+                    ],
                 },
                 'service.document.tvdb.tv.show':{
                     'match':[
@@ -2166,6 +2196,7 @@
                             'format':ur'/c/itunes/person/{itunes person id}',
                         },
                     ],
+                    'collection':'itunes_person',
                     'type':'json',
                     'query type':'search',
                     'index':[
@@ -2189,6 +2220,7 @@
                             'format':ur'/c/itunes/movie/{itunes movie id}',
                         },
                     ],
+                    'collection':'itunes_movie',
                     'type':'json',
                     'query type':'search',
                     'index':[
@@ -2214,6 +2246,7 @@
                             'format':ur'/c/itunes/tv/show/{itunes tv show id}',
                         },
                     ],
+                    'collection':'itunes_tv_show',
                     'type':'json',
                     'query type':'search',
                     'index':[
@@ -2239,6 +2272,7 @@
                             'format':ur'/c/itunes/music/album/{itunes music album id}',
                         },
                     ],
+                    'collection':'itunes_music_album',
                     'type':'json',
                     'query type':'search',
                     'index':[
@@ -2249,7 +2283,6 @@
                         'release year',
                     ],
                 },
-                
                 'service.document.itunes.genre':{
                     'match':[
                         {

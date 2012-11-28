@@ -150,32 +150,6 @@ class ResourceHandler(object):
         return self.pattern.search(uri)
     
     
-    def resolve(self, uri, repository, location):
-        result = None
-        taken = False
-        for branch in self.branch.values():
-            for match in branch['match']:
-                m = match['pattern'].search(uri)
-                if m is not None:
-                    taken = True
-                    if branch['query type'] == 'lookup':
-                        if branch['persistent']:
-                            collection = repository.database[branch['collection']]
-                            result = collection.find_one({u'head.alternate':uri})
-                            
-                            # If record does not exists try to produce it and lookup again
-                            if result is None: result = self.produce(uri, repository, location)
-                        else:
-                            result = self.produce(uri, repository, location)
-                            
-                    elif branch['query type'] == 'search':
-                        result = self.produce(uri, repository, location)
-                    break
-                    
-            if taken: break
-        return result
-    
-    
     def remove(self, uri, repository):
         taken = False
         for branch in self.branch.values():
@@ -223,7 +197,7 @@ class ResourceHandler(object):
             if taken: break
     
     
-    def produce(self, uri, repository, location):
+    def resolve(self, uri, repository, location):
         result = None
         taken = False
         for branch in self.branch.values():
@@ -248,15 +222,18 @@ class ResourceHandler(object):
                         query['parameter'].decode(k,v)
                         
                     self.prepare(query)
-                    self.collect(query)
-                    self.fetch(query)
-                    self.parse(query)
-                    self.store(query)
+                    self.locate(query)
+                    if not query['return']:
+                        self.collect(query)
+                        self.fetch(query)
+                        self.parse(query)
+                        self.store(query)
+                        self.locate(query)
                     result = query['return']
                     break
             if taken: break
+
         return result
-        
     
     
     def prepare(self, query):
@@ -272,23 +249,24 @@ class ResourceHandler(object):
                 self.log.error(u'Could not compute remote URL for %s because %s was missing from the genealogy', query['uri'], e)
             else:
                 if 'query parameter' in query['match']:
-                    p = Ontology(self.env, 'ns.search.query')
+                    query['query parameter'] = Ontology(self.env, 'ns.search.query')
                     
                     # Collect matching parameters from the query parameter
                     for k in query['match']['query parameter']:
                         if k in query['parameter']:
-                            p[k] = query['parameter'][k]
+                            query['query parameter'][k] = query['parameter'][k]
                             
                     # Collect matching parameters from the location
                     if query['location']:
                         for k in query['match']['query parameter']:
                             if k in query['location']:
-                                p[k] = query['location'][k]
+                                query['query parameter'][k] = query['location'][k]
                                 
-                    # Rename the parameters to the resolver's syntax and utf8 encode them 
+                    # Construct an encoded query URL
+                    # First rename the parameters to the resolver's syntax and utf8 encode them 
                     parameters = {}
-                    for k,v in p.iteritems():
-                        prototype = p.namespace.find(k)
+                    for k,v in query['query parameter'].iteritems():
+                        prototype = query['query parameter'].namespace.find(k)
                         if prototype and prototype.node[self.name]:
                             parameters[prototype.node[self.name]] = unicode(v).encode('utf8')
     
@@ -311,17 +289,30 @@ class ResourceHandler(object):
         if query['branch']['persistent']:
             collection = query['repository'].database[query['branch']['collection']]
             if query['branch']['query type'] == 'lookup':
-                query['return'] = collection.find_one({u'head.alternate':uri})
+                query['return'] = collection.find_one({u'head.alternate':query['uri']})
                 
             elif query['branch']['query type'] == 'search':
                 query['return'] = { u'result count':0, u'results':[], }
-                select = {}
-                for k,v in query['query parameter']:
-                    q[u'head.genealogy.' + unicode(k)] = v
-                query['return']['results'] = collection.find(select)
-                query['return']['result count'] = len(query['return']['results'])
                 
+                # Prepare the query dictionary
+                select = {}
+                for k,v in query['query parameter'].iteritems():
+                    # we only want parameters that have been declared as indexes
+                    # when preforming a lookup on the table
+                    if k in query['branch']['index']:
+                        select[u'head.genealogy.' + unicode(k)] = v
+                        
+                # process the returned results    
+                cursor = collection.find(select)
+                for r in cursor:
+                    query['return']['results'].append(r)
+                    
+                query['return']['result count'] = len(query['return']['results'])
+                if not query['return']['result count'] > 0:
+                    query['return'] = None
         return result
+    
+    
     def collect(self, query):
         if 'collect' in query['branch']:
             for pattern in query['branch']['collect']:
@@ -404,10 +395,6 @@ class ResourceHandler(object):
                     collection.save(record)
                 else:
                     self.log.error(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
-                    
-        if query['branch']['persistent']:
-            collection = query['repository'].database[query['branch']['collection']]
-            query['return'] = collection.find_one({u'head.alternate':query['uri']})
 
     def _compute_resolvables(self, entry):
         entry['record'][u'head'][u'alternate'] = []

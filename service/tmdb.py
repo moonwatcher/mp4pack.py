@@ -44,20 +44,18 @@ class TMDbHandler(ResourceHandler):
                     query['result'].append(entry)
 
                 elif query['branch']['query type'] == 'search':
-                    query['return'] = { u'result count':0, u'results':[], }
-                    for result in document['results']:
-                        for trigger in query['branch']['trigger']:
+                    for trigger in query['branch']['trigger']:
+                        for element in document['results']:
                             # Decode a reference
                             o = Ontology(self.env, trigger['namespace'])
-                            o.decode_all(result, self.name)
+                            o.decode_all(element, self.name)
 
                             # Make a URI and trigger a resolution
                             ref = o.project('ns.service.genealogy')
                             ref['language']
                             uri = trigger['format'].format(**ref)
                             self.log.debug(u'Trigger %s resolution', uri)
-                            query['return']['results'].append(self.resolver.resolve(uri))
-                    query['return']['result count'] = len(query['return']['results'])
+                            self.resolver.resolve(uri)
     
 
 
