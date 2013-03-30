@@ -96,16 +96,16 @@ def main():
     # Initialize a processing queue
     queue = Queue(env)
     
-    if 'uris' in env.ontology:
-        job = ServiceJob(queue, env.ontology.project('ns.system.job'))
-    else:
-        job = ResourceJob(queue, env.ontology.project('ns.system.job'))
-    job.run()
+    # Submit a job
+    queue.submit(env.ontology)
     
-    node['job'].append(job.node)
+    # execute the next job
+    job = queue.next()
+    
+    node['job'].append(job.execution)
     node['end'] = datetime.now()
     node['duration'] = unicode(node['end'] - node['start'])
-    #sys.stderr.write(json.dumps(node, sort_keys=True, indent=4,  default=env.default_json_handler))
+    sys.stderr.write(json.dumps(node, sort_keys=True, indent=4,  default=env.default_json_handler))
 
 
 if __name__ == '__main__':

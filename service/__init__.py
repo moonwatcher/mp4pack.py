@@ -126,13 +126,17 @@ class ResourceHandler(object):
         
         for name, branch in self.node['branch'].iteritems():
             branch['name'] = name
+            
+            # If a collection is defined, Set the presistence flag
             branch['persistent'] = 'collection' in branch
+            
+            # Query type defaults to lookup
+            if 'query type' not in branch: branch['query type'] = 'lookup'
+
+            # Compile match patterns
             for match in branch['match']:
                 match['pattern'] = re.compile(match['filter'])
-                
-                # Default the lookup method to uri lookup
-                if 'method' not in match: match['method'] = 'uri'
-                
+            
             self.branch[name] = branch
     
     

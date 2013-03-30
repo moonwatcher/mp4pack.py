@@ -6,6 +6,98 @@
         # rule.system.default.language
         # rule.system.volume.location
 
+        'rule.job.implementation':{
+            'name':'Job implementation',
+            'provide':set(('implementation',)),
+            'branch':[
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'get'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ServiceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'remove'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ServiceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'report'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'copy'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'move'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'delete'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'explode'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'pack'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'tag'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'optimize'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'transcode'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+                {
+                    'requires':set(('action',)),
+                    'equal':{'action':'update'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                    ),
+                },
+            ]
+        },
+
+
         'rule.task.default.preset':{
             'name':'Default task preset',
             'provide':set(('preset',)),

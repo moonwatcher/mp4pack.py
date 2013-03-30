@@ -33,29 +33,65 @@ class Queue(object):
         pass
     
     
-    def submit(self, job):
-        if job and job.valid:
+    def submit(self, ontology):
+        job = Job.create(self, ontology)
+        if job.valid:
             self.job.append(job)
+        else:
+            self.log.warning(u'Ignoring invalid job %s', unicode(job))
+        return job
     
     
     def next(self):
+        job = None
         if self.length > 0:
             job = self.job.pop()
             job.run()
+        return job
     
 
 
 class Job(object):
-    def __init__(self, queue, ontology):
+    def __init__(self, queue, node):
         self.log = logging.getLogger('Job')
         self.queue = queue
-        self.ontology = ontology
-        self.uuid = uuid.uuid4()
-        self.node = None
+        self.node = node
+        self.ontology = Ontology(self.env, 'ns.system.job', node['ontology'])
+        self.uuid = uuid.UUID(self.node['uuid'])
+        self.execution = None
         self.task = None
         self._inclusion = None
         self._exclusion = None
     
+    @classmethod
+    def instantiate(cls, queue, node):
+        result = None
+        o = Ontology(queue.env, 'ns.system.job', node['ontology'])
+        if 'implementation' in o:
+            if o['implementation'] == 'queue.ServiceJob':
+                result = ServiceJob(queue, node)
+            elif o['implementation'] == 'queue.ResourceJob':
+                result = ResourceJob(queue, node)
+            else:
+                result = Job(queue, o)
+
+        return result
+    
+    
+    @classmethod
+    def create(cls, queue, ontology):
+        result = None
+        if queue and ontology:
+            o = Ontology(queue.env, 'ns.system.job', ontology).project('ns.system.job')
+            node = {
+                'uuid':unicode(uuid.uuid4()),
+                'created':datetime.now(),
+                'ontology':o.node,
+            }
+            result = Job.instantiate(queue, node)
+        return result
+
+
     
     @property
     def valid(self):
@@ -74,17 +110,16 @@ class Job(object):
     
     @property
     def document(self):
-        return json.dumps(self.node, sort_keys=True, indent=4,  default=self.env.default_json_handler)
+        return json.dumps(self.execution, sort_keys=True, indent=4,  default=self.env.default_json_handler)
     
     
     def load(self):
         self.log.debug('Open job %s', unicode(self))
         self.task = []
-        self.node = {
-            'uuid':unicode(self.uuid),
+        self.execution = {
             'start':datetime.now(),
-            'ontology':self.ontology.node,
             'task':[],
+            'ontology':self.ontology.node,
         }
         
         if 'inclusion' in self.ontology:
@@ -111,13 +146,13 @@ class Job(object):
         self.load()
         for task in self.task:
             task.run()
-            self.node['task'].append(task.node)
+            self.execution['task'].append(task.node)
         self.unload()
     
     
     def unload(self):
-        self.node['end'] = datetime.now()
-        self.node['duration'] = unicode(self.node['end'] - self.node['start'])
+        self.execution['end'] = datetime.now()
+        self.execution['duration'] = unicode(self.execution['end'] - self.execution['start'])
         self.log.debug('Close job %s', unicode(self))
     
     
@@ -161,7 +196,7 @@ class Task(object):
     
     
     def load(self):
-        self.log.debug('Opening task %s', unicode(self))
+        self.log.debug('Starting task %s', unicode(self))
         self.node = {
             'uuid':unicode(self.uuid),
             'start':datetime.now(),
@@ -169,20 +204,20 @@ class Task(object):
         }
     
     
+    def run(self):
+        pass
+    
+    
     def unload(self):
         self.node['end'] = datetime.now()
         self.node['duration'] = unicode(self.node['end'] - self.node['start'])
-        self.log.debug('Closing task %s', unicode(self))
-    
-    
-    def run(self):
-        pass
+        self.log.debug('Done with task %s', unicode(self))
     
 
 
 class ResourceJob(Job):
-    def __init__(self, queue, ontology):
-        Job.__init__(self, queue, ontology)
+    def __init__(self, queue, node):
+        Job.__init__(self, queue, node)
     
     
     def load(self):
@@ -346,8 +381,8 @@ class ResourceTask(Task):
 
 
 class ServiceJob(Job):
-    def __init__(self, queue, ontology):
-        Job.__init__(self, queue, ontology)
+    def __init__(self, queue, node):
+        Job.__init__(self, queue, node)
     
     
     def load(self):

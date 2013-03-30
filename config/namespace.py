@@ -113,7 +113,11 @@
                     'auto cast':False,
                 },
                 'query parameters':None,
+                'implementation':None,
             },
+            'rule':[
+                'rule.job.implementation',
+            ],
         },
         'ns.system.task':{
             'synonym':['keyword'],

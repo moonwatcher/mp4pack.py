@@ -1526,7 +1526,11 @@
             'keyword':u'mongodb_url',
             'type':'unicode',
         },
-
+        'implementation':{
+            'name':u'Implementation',
+            'keyword':u'implementation',
+            'type':'unicode',
+        },
         'keywords':{
             'name':u'Keywords',
             'keyword':u'keywords',
