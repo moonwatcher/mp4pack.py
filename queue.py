@@ -423,7 +423,6 @@ class ServiceTask(Task):
         from bson import json_util
         #print json.dumps(self.document, sort_keys=True, indent=4,  default=json_util.default)
         print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-
     def remove(self):
         self.log.debug(u'Dropping %s', self.document['head']['canonical'])
         self.env.resolver.remove(self.uri)

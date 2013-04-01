@@ -65,15 +65,6 @@ class CommandLineParser(object):
 
 
 def main():
-    
-    # A node for collecting runtime statistics
-    import json
-    from datetime import datetime
-    node = {
-        'start':datetime.now(),
-        'job':[],
-    }
-    
     # Initialize logging and set the initial log level
     logging.basicConfig()
     logging.getLogger().setLevel(logging.INFO)
@@ -81,7 +72,7 @@ def main():
     # Initialize an environment
     env = Environment()
     
-    # Parser for the command line
+    # Parse the command line
     cli = CommandLineParser(env, env.interface['default'])
     
     # Load the interactive arguments into the environment
@@ -101,11 +92,7 @@ def main():
     
     # execute the next job
     job = queue.next()
-    
-    node['job'].append(job.execution)
-    node['end'] = datetime.now()
-    node['duration'] = unicode(node['end'] - node['start'])
-    sys.stderr.write(json.dumps(node, sort_keys=True, indent=4,  default=env.default_json_handler))
+    env.log.debug(job.document)
 
 
 if __name__ == '__main__':
