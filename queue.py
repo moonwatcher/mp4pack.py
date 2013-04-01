@@ -374,11 +374,13 @@ class ResourceTask(Task):
                 o['kind'] = override['kind']
             if 'language' in override:
                 o['language'] = override['language']
-        
+                
         # try to produce the resource
         product = self.resource.asset.find(o)
         if product:
             self.product.append(product)
+        else:
+            self.log.warning(u'Could not determine destination path from %s', o)
             
         return product
     

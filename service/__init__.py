@@ -43,6 +43,7 @@ class Resolver(object):
         from knowledge import KnowledgeBaseHandler
         self.handlers['knowledge'] = KnowledgeBaseHandler(self, self.env.service['knowledge'])
         
+        
     
     def find_repository(self, hostname):
         repository = None

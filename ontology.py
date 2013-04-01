@@ -220,6 +220,9 @@ class Space(object):
     
     def extend(self, node):
         for k,v in node.iteritems():
+            if k == 'key':
+                self.node['key'] = node['key']
+                
             if k in ['default', 'element']:
                 if v: self.node[k].update(v)
                 
