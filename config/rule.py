@@ -14,84 +14,84 @@
                     'requires':set(('action',)),
                     'equal':{'action':'get'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ServiceJob',},
+                        {'property':'implementation', 'value':u'ServiceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'remove'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ServiceJob',},
+                        {'property':'implementation', 'value':u'ServiceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'report'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'copy'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'move'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'delete'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'explode'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'pack'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'tag'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'optimize'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'transcode'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
                     'requires':set(('action',)),
                     'equal':{'action':'update'},
                     'apply':(
-                        {'property':'implementation', 'value':u'queue.ResourceJob',},
+                        {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
             ]

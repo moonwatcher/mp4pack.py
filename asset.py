@@ -148,21 +148,15 @@ class Resource(object):
         if location and 'resource uri' in location:
             kind = location.env.enumeration['kind'].find(location['kind'])
             if kind:
-                if kind.node['container'] == 'mp4':
-                    result = MP4(asset, location)
-                elif kind.node['container'] == 'matroska':
-                    result = Matroska(asset, location)
-                elif kind.node['container'] == 'subtitles':
-                    result = Subtitles(asset, location)
-                elif kind.node['container'] == 'chapters':
-                    result = TableOfContent(asset, location)
-                elif kind.node['container'] == 'image':
-                    result = Artwork(asset, location)
-                elif kind.node['container'] == 'raw audio':
-                    result = RawAudio(asset, location)
-                elif kind.node['container'] == 'avi':
-                    result = Avi(asset, location)
-            else:
+                if kind.node['container'] in globals():
+                    try:
+                        # Try to instantiate a specific container
+                        result = globals()[kind.node['container']](asset, location)
+                    except TypeError as err:
+                        asset.log.debug(u'Unknown resource type %s, treating as generic', kind.node['container'])
+                        
+            # If can not handle as a specific container, instantiate as a generic
+            if result is None:
                 result = cls(asset, location)
         return result
     

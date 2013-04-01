@@ -13,6 +13,7 @@ from ontology import Ontology, Enumeration, PrototypeSpace, Rule
 from model import Timestamp
 from model.caption import CaptionFilterCache
 from service import Resolver
+from argparse import ArgumentParser
 
 class Environment(object):
     def __init__(self):
@@ -34,11 +35,9 @@ class Environment(object):
             'interface':{},
             'subtitle filter':{},
         }
-        
         self._resolver = None
         self._caption_filter = None
         self._universal_detector = None
-        
         self.load()
     
     
@@ -179,9 +178,7 @@ class Environment(object):
             if os.path.isdir(home):
                 self.system['home'] = home
         self.system['conf'] = os.path.join(self.home, u'mpk.conf')
-        
         self.load_config(self.system['conf'])
-    
     
     
     def load_config(self, path):
@@ -653,4 +650,57 @@ class Repository(object):
 
     
     
+
+
+
+
+class CommandLineParser(object):
+    def __init__(self, env, node):
+        self.env = env
+        self.node = node
+        self.parser = ArgumentParser()
+        self.load()
+    
+    
+    def load(self):
+        def add_argument(parser, name):
+            node = self.node['prototype'][name]
+            parser.add_argument(*node['flag'], **node['parameter'])
+        
+        
+        # Add the enumeration constrains
+        for argument in self.node['prototype'].values():
+            if 'dest' in argument['parameter']:
+                archetype = self.env.archetype[argument['parameter']['dest']]
+                if archetype['type'] == 'enum':
+                    enumeration = self.env.enumeration[archetype['enumeration']]
+                    argument['parameter']['choices'] = enumeration.synonym.keys()
+                    
+        # Add global arguments
+        for argument in self.node['global']['argument']:
+            add_argument(self.parser, argument)
+            
+        # Add individual command sections
+        s = self.parser.add_subparsers(dest='action')
+        for action in self.node['action']:
+            action_parser = s.add_parser(**action['instruction'])
+            for argument in action['argument']:
+                add_argument(action_parser, argument)
+                
+            # Add groups of arguments, if any.
+            if 'group' in action:
+                for group in action['group']:
+                    group_parser = action_parser.add_argument_group(**group['instruction'])
+                    for argument in group['argument']:
+                        add_argument(group_parser, argument)
+    
+    
+    def parse(self):
+        arguments = vars(self.parser.parse_args())
+        ontology = Ontology(self.env, self.node['namespace'])
+        for k,v in arguments.iteritems():
+            ontology.decode(k, v)
+        return ontology
+    
+
 

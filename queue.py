@@ -68,12 +68,16 @@ class Job(object):
         result = None
         o = Ontology(queue.env, 'ns.system.job', node['ontology'])
         if 'implementation' in o:
-            if o['implementation'] == 'queue.ServiceJob':
-                result = ServiceJob(queue, node)
-            elif o['implementation'] == 'queue.ResourceJob':
-                result = ResourceJob(queue, node)
-            else:
-                result = Job(queue, o)
+            if o['implementation'] in globals():
+                try:
+                    # Try to instantiate a specific Job
+                    result = globals()[o['implementation']](queue, node)
+                except TypeError as err:
+                    asset.log.warning(u'Unknown job implementation %s, treating as generic', o['implementation'])
+                        
+            # If can not handle as a specific container, instantiate as a generic
+            if result is None:
+                result = Job(queue, node)
 
         return result
     
