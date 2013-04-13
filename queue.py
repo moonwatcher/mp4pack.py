@@ -357,6 +357,7 @@ class ResourceTask(Task):
     def produce(self, override=None):
         # copy the location ontology
         o = Ontology.clone(self.location)
+        print o['path digest']
         
         # allow the location to recalculate those concepts 
         del o['volume path']

@@ -383,12 +383,12 @@ class AudioVideoContainer(Container):
     def explode(self, task): 
         for stream in task.transform.single_pivot.stream:
             if stream['enabled'] and stream['stream kind'] == 'menu':
+                stream['enabled'] = False
                 product = task.produce(stream)
                 if product:
                     self.env.varify_directory(product.path)
                     product.menu = Menu.from_node(self.env, stream['content'])
                     product.write()
-                    stream['enabled'] = False
     
     
     def pack(self, task):
@@ -568,7 +568,6 @@ class Matroska(AudioVideoContainer):
         command = self.env.initialize_command('mkvextract', self.log)
         if command:
             command.extend([u'tracks', self.path ])
-            
             taken = False
             for stream in task.transform.single_pivot.stream:
                 if stream['enabled']:
