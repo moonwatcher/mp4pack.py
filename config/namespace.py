@@ -215,6 +215,8 @@
                 'itunes genre id':None,
                 'itunes music album id':None,
                 'itunes music track id':None,
+                'stream id':None,
+                'resource path digest':None,
 
                 'person name':None,
                 'character name':None,
@@ -242,6 +244,10 @@
                 'simple music track name':None,
             },
             'rule':[
+                'rule.medium.resource.filename.fragment',
+                'rule.medium.resource.directory.fragment',
+                'rule.medium.resource.path.fragment',
+                'rule.system.temp.location',
                 'rule.system.volume.location',
                 'rule.medium.resource.track.genealogy',
                 'rule.medium.resource.filename.canonic',
@@ -316,6 +322,8 @@
                 'resource uri':None,
                 'asset uri':None,
                 'home uri':None,
+                'stream id':None,
+                'resource path digest':None,
 
                 'person name':None,
                 'character name':None,
@@ -340,6 +348,10 @@
                 'simple music track name':None,
             },
             'rule':[
+                'rule.medium.resource.filename.fragment',
+                'rule.medium.resource.directory.fragment',
+                'rule.medium.resource.path.fragment',
+                'rule.system.temp.location',
                 'rule.system.volume.location',
                 'rule.medium.resource.track.genealogy',
                 'rule.medium.resource.filename.canonic',

@@ -5,11 +5,12 @@ import re
 import logging
 import copy
 import hashlib
+import json
 from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
 from chardet.universaldetector import UniversalDetector
 
-from ontology import Ontology, Enumeration, PrototypeSpace, Rule
+from ontology import Ontology, Enumeration, PrototypeSpace, Rule, Space
 from model import Timestamp
 from model.caption import CaptionFilterCache
 from service import Resolver
@@ -43,6 +44,11 @@ class Environment(object):
     
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
+    
+    
+    @property
+    def document(self):
+        return json.dumps(self.state, sort_keys=True, indent=4,  default=self.environment_json_handler)
     
     
     # Runtime properties
@@ -177,7 +183,7 @@ class Environment(object):
             home = os.path.expanduser(os.path.expandvars(home))
             if os.path.isdir(home):
                 self.system['home'] = home
-        self.system['conf'] = os.path.join(self.home, u'mpk.conf')
+        self.system['conf'] = os.path.join(self.home, u'settings.py')
         self.load_config(self.system['conf'])
     
     
@@ -356,6 +362,22 @@ class Environment(object):
                     }
                 )
         
+        # Temp location
+        node['rule']['rule.system.temp.location'] = {
+            'name':'Temp location',
+            'provide':set(('temp path', )),
+            'branch':[],
+        }
+        for repository in self.repository.values():
+            node['rule']['rule.system.temp.location']['branch'].append(
+                {
+                    'requires':set(('host', 'domain')),
+                    'equal':{'host':repository.host, 'domain':repository.domain},
+                    'apply':(
+                        {'property':'temp path', 'value':repository.node['temp']['path']},
+                    ),
+                }
+            )
         self._load_config_node(node)
     
     
@@ -484,6 +506,25 @@ class Environment(object):
         return self.universal_detector.result
     
     
+    
+    def environment_json_handler(self, o):
+        result = None
+        from bson.objectid import ObjectId
+        if isinstance(o, datetime):
+            result = o.isoformat()
+        if isinstance(o, ObjectId):
+            result = str(o)
+        if isinstance(o, Rule):
+            result = o.node
+        if isinstance(o, Repository):
+            result = o.node
+        if isinstance(o, Space):
+            result = o.node
+        if isinstance(o, set):
+            result = list(o)
+        return result
+    
+    
     def default_json_handler(self, o):
         result = None
         from bson.objectid import ObjectId
@@ -491,6 +532,8 @@ class Environment(object):
             result = o.isoformat()
         if isinstance(o, ObjectId):
             result = str(o)
+        if isinstance(o, set):
+            result = list(o)
             
         return result
     

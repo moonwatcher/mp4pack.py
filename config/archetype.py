@@ -672,6 +672,12 @@
             'keyword':u'path_digest',
             'type':'unicode',
         },
+        'resource path digest':{
+            'name':u'Resource path digest',
+            'keyword':u'resource_hash',
+            'type':'unicode',
+        },
+        
         'directory':{
             'name':u'Directory',
             'keyword':u'directory',

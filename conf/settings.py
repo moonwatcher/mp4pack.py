@@ -3,13 +3,13 @@
 {
     'system':{
         'domain':u'galanti.no-ip.info',
-        'host':u'yoshi',
+        'host':u'shaft',
     },
     'repository':{
-        'yoshi':{
+        'shaft':{
             'domain':u'galanti.no-ip.info',
-            'cache':{
-                'path':u'/net/shaft/Users/lg/Downloads/mpk/cache',
+            'temp':{
+                'path':u'/Users/lg/Downloads/mpk/temp',
             },
             'mongodb':{
                 'username':u'mp4pack',
@@ -126,9 +126,6 @@
         'multivac':{
             'enable':False,
             'domain':u'galanti.no-ip.info',
-            'cache':{
-                'path':u'/net/multivac/Volumes/alphaville/cache',
-            },
             'mongodb':{
                 'database':u'mp4pack',
                 'username':u'mp4pack',

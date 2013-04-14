@@ -5,6 +5,7 @@
         # rule.system.default.host
         # rule.system.default.language
         # rule.system.volume.location
+        # rule.system.temp.location
 
         'rule.job.implementation':{
             'name':'Job implementation',
@@ -741,6 +742,51 @@
                 },
             ],
         },
+        'rule.medium.resource.filename.fragment':{
+            'name':'Fragment file name',
+            'provide':set(('fragment file name',)),
+            'branch':[
+                {
+                    'requires':set(('stream id', 'language', 'kind', )),
+                    'apply':[
+                        {
+                            'property':'fragment file name',
+                            'format':u'{stream id}.{language}.{kind}',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.directory.fragment':{
+            'name':'Fragment directory',
+            'provide':set(('fragment directory',)),
+            'branch':[
+                {
+                    'requires':set(('temp path', 'resource path digest', )),
+                    'apply':[
+                        {
+                            'property':'fragment directory',
+                            'format':u'{temp path}/{resource path digest}',
+                        },
+                    ],
+                },
+            ],
+        },
+        'rule.medium.resource.path.fragment':{
+            'name':'Fragment path',
+            'provide':set(('fragment path',)),
+            'branch':[
+                {
+                    'requires':set(('fragment directory', 'fragment file name',)),
+                    'apply':[
+                        {
+                            'property':'fragment path',
+                            'format':u'{fragment directory}/{fragment file name}',
+                        },
+                    ],
+                },
+            ],
+        },        
         'rule.medium.resource.kind.language':{
             'name':'Kind language dependency',
             'provide':set(('localized',)),

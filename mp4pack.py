@@ -23,11 +23,7 @@ def main():
     
     # Parse the command line
     cli = CommandLineParser(env, env.interface['default'])
-    
-    # Load the interactive arguments into the environment
     env.load_interactive(cli.parse())
-    
-    # Discard the parser
     cli = None
     
     # Override the initial log level

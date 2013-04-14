@@ -16,7 +16,6 @@ class HomeHandler(ResourceHandler):
             
             if 'index' in query['branch']:
                 # Resolve the dependency document
-                print query['parameter']
                 dependee = self.resolver.resolve(query['match']['depend'].format(**query['parameter']))
                 if dependee is not None:
                     for index in query['branch']['index']:

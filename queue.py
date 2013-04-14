@@ -357,7 +357,6 @@ class ResourceTask(Task):
     def produce(self, override=None):
         # copy the location ontology
         o = Ontology.clone(self.location)
-        print o['path digest']
         
         # allow the location to recalculate those concepts 
         del o['volume path']
@@ -375,14 +374,18 @@ class ResourceTask(Task):
                 o['kind'] = override['kind']
             if 'language' in override:
                 o['language'] = override['language']
-                
+            if 'stream id' in override:
+                o['stream id'] = override['stream id']
+            if 'resource path digest' in override:
+                o['resource path digest'] = override['resource path digest']
+
         # try to produce the resource
         product = self.resource.asset.find(o)
         if product:
             self.product.append(product)
         else:
-            self.log.warning(u'Could not determine destination path from %s', o)
-            
+            self.log.error(u'Could not determine destination path from %s', o)
+        
         return product
     
 
@@ -427,9 +430,9 @@ class ServiceTask(Task):
     
     
     def get(self):
-        from bson import json_util
-        #print json.dumps(self.document, sort_keys=True, indent=4,  default=json_util.default)
         print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
+    
+    
     def remove(self):
         self.log.debug(u'Dropping %s', self.document['head']['canonical'])
         self.env.resolver.remove(self.uri)

@@ -18,7 +18,7 @@ class AssetCache(object):
         self.asset = {}
     
     
-    def find_asset(self, location):
+    def locate_asset(self, location):
         result = None
         if location:
             if 'asset uri' in location and location['asset uri'] in self.asset:
@@ -34,7 +34,7 @@ class AssetCache(object):
     def find(self, location):
         result = None
         if location:
-            asset = self.find_asset(location)
+            asset = self.locate_asset(location)
             if asset:
                 result = asset.find(location)
         return result
@@ -205,6 +205,11 @@ class Resource(object):
     
     
     @property
+    def fragment_path(self):
+        return self.location['fragment path']
+    
+    
+    @property
     def available(self):
         return self.path and os.path.exists(self.path)
     
@@ -289,7 +294,7 @@ class Resource(object):
         pass
     
     
-    def write(self):
+    def write(self, path):
         pass
     
     
@@ -386,9 +391,9 @@ class AudioVideoContainer(Container):
                 stream['enabled'] = False
                 product = task.produce(stream)
                 if product:
-                    self.env.varify_directory(product.path)
+                    self.env.varify_directory(product.fragment_path)
                     product.menu = Menu.from_node(self.env, stream['content'])
-                    product.write()
+                    product.write(product.fragment_path)
     
     
     def pack(self, task):
@@ -508,11 +513,11 @@ class Text(Container):
         Container.__init__(self, asset, location)
     
     
-    def write(self):
+    def write(self, path):
         content = self.encode()
         if content:
             try:
-                writer = open(self.path, 'w')
+                writer = open(path, 'w')
                 writer.write(content.encode('utf-8'))
                 writer.close()
             except IOError as error:
@@ -573,18 +578,19 @@ class Matroska(AudioVideoContainer):
                 if stream['enabled']:
                     product = task.produce(stream)
                     if product:
-                        self.env.varify_directory(product.path)
+                        self.env.varify_directory(product.fragment_path)
                         
                         # Leave a hint about the delay
                         if 'delay' in stream:
                             product.hint['delay'] = stream['delay']
                             
-                        command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
+                        command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.fragment_path))
                         stream['enabled'] = False
                         taken = True
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
-                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
+                print command
+                # self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
 
 
@@ -765,7 +771,7 @@ class Subtitles(Text):
                     
                 product.caption.normalize()
                 self.env.varify_directory(product.path)
-                product.write()
+                product.write(product.path)
     
 
 
@@ -821,6 +827,6 @@ class TableOfContent(Text):
                     
                 product.menu.normalize()
                 self.env.varify_directory(product.path)
-                product.write()
+                product.write(product.path)
     
 

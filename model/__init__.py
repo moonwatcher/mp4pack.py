@@ -249,6 +249,7 @@ class ResourcePivot(object):
                         if stream.match(branch):
                             taken = True
                             s = Ontology.clone(stream)
+                            s['resource path digest'] = self.resource.location['path digest']
                             if 'override' in rule:
                                 for k,v in rule['override'].iteritems(): s[k] = v
                             self.stream.append(s)
