@@ -213,20 +213,20 @@
                     ],
                 },
                 {
-                    'requires':set(('host', 'database', 'port')),
+                    'requires':set(('host', 'port',)),
                     'apply':[
                         {
                             'property':'mongodb url',
-                            'format':u'mongodb://{host}:{port}/{database}',
+                            'format':u'mongodb://{host}:{port}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('host', 'database')),
+                    'requires':set(('host',)),
                     'apply':[
                         {
                             'property':'mongodb url',
-                            'format':u'mongodb://{host}/{database}',
+                            'format':u'mongodb://{host}',
                         },
                     ],
                 },

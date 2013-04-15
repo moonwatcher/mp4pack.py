@@ -589,8 +589,7 @@ class Matroska(AudioVideoContainer):
                         taken = True
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
-                print command
-                # self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
 
 
