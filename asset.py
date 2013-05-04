@@ -93,6 +93,7 @@ class Asset(object):
     
     def find(self, location):
         result = None
+        print location['path digest']
         if location and 'resource uri' in location:
             if location['resource uri'] in self.resource:
                 result = self.resource[location['resource uri']]

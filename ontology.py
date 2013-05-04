@@ -149,9 +149,9 @@ class Ontology(dict):
                                 for x in branch['apply']:
                                     if not dict.__contains__(self, x['property']):
                                         if 'digest' in x and 'algorithm' in x:
-                                            if 'algorithm' == 'sha1':
+                                            if x['algorithm'] == 'sha1':
                                                 dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']].encode('utf-8')).hexdigest())
-                                            elif 'algorithm' == 'umid':
+                                            elif x['algorithm'] == 'umid':
                                                 dict.__setitem__(self, x['property'], Umid(self[x['digest']]).code)
                                         if 'reference' in x:
                                             if 'datetime format' in x:
@@ -858,5 +858,71 @@ class Rule(object):
                 self.log.error(u'Failed to load banch for rule %s', unicode(self))
                 self.log.debug(u'Exception raised: %s', unicode(e))
         return result
+    
+
+
+
+class Umid(object):
+    def __init__(self, ordinal=None):
+        self._ordinal = ordinal
+        self._code = None
+    
+    
+    @classmethod
+    def decode(cls, code):
+        umid = cls()
+        umid.code = code
+        if umid.code is not None:
+            return umid
+        else:
+            return None
+    
+    
+    @classmethod
+    def _checksum(cls, string):
+        digits = map(lambda x: int(x,16), string)
+        return (sum(digits[::-2]) + sum(map(lambda d: sum(divmod(3*d, 16)), digits[-2::-2]))) % 16
+    
+    
+    @classmethod
+    def _generate(cls, string):
+        d = Umid._checksum(string + '0')
+        if d != 0: d = 16 - d
+        return hex(d)[2:]
+    
+    @classmethod
+    def verify(cls, string):
+        return string is not None and Umid._checksum(string) == 0
+    
+    
+    @property
+    def ordinal(self):
+        if self._ordinal is None and self._code is not None:
+            self._ordinal = int(self._code[:-1],16)
+        return self._ordinal
+    
+    
+    @ordinal.setter
+    def ordinal(self, value):
+        self._ordinal = value
+        self._code = None
+    
+    
+    @property
+    def code(self):
+        if self._code is None and self._ordinal is not None:
+            code = hex(self._ordinal)[2:]
+            code += Umid._generate(code)
+            self._code = '{:>013}'.format(code)
+        return self._code
+    
+    
+    @code.setter
+    def code(self, value):
+        self._ordinal = None
+        if Umid.verify(value):
+            self._code = value
+        else:
+            self._code = None
     
 
