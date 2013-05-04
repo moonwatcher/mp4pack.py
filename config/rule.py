@@ -759,7 +759,7 @@
             'provide':set(('fragment file name',)),
             'branch':[
                 {
-                    'requires':set(('resource path digest', 'language', 'stream id', 'home id', 'kind', )),
+                    'requires':set(('resource path digest', 'language', 'stream id', 'umid', 'kind', )),
                     'apply':[
                         {
                             'property':'fragment file name',
@@ -768,7 +768,7 @@
                     ],
                 },
                 {
-                    'requires':set(('resource path digest', 'stream id', 'home id', 'kind', )),
+                    'requires':set(('resource path digest', 'stream id', 'umid', 'kind', )),
                     'apply':[
                         {
                             'property':'fragment file name',
