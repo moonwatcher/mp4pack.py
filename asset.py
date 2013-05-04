@@ -136,6 +136,9 @@ class Resource(object):
         self._meta = None
         self._stream = None
         self._hint = None
+        
+        # hack to trigger home id resolution
+        self.node
     
     
     def __unicode__(self):
