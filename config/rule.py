@@ -759,20 +759,20 @@
             'provide':set(('fragment file name',)),
             'branch':[
                 {
-                    'requires':set(('resource path digest', 'language', 'stream id', 'umid', 'kind', )),
+                    'requires':set(('resource path digest', 'language', 'stream id', 'home id', 'kind', )),
                     'apply':[
                         {
                             'property':'fragment file name',
-                            'format':u'{resource path digest}.{language}.{stream id}.{umid}.{kind}',
+                            'format':u'{resource path digest}.{language}.{stream id}.{home id}.{kind}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('resource path digest', 'stream id', 'umid', 'kind', )),
+                    'requires':set(('resource path digest', 'stream id', 'home id', 'kind', )),
                     'apply':[
                         {
                             'property':'fragment file name',
-                            'format':u'{resource path digest}.{stream id}.{umid}.{kind}',
+                            'format':u'{resource path digest}.{stream id}.{home id}.{kind}',
                         },
                     ],
                 },
