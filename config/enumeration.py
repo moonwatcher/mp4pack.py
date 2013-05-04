@@ -598,7 +598,7 @@
         'media kind':{
             'synonym':['stik'],
             'element':{
-                'oldmovie':{    'name':u'Movie',        'stik':0 },
+                'homevideo':{   'name':u'Home Video',   'stik':0 },
                 'music':{       'name':u'Music',        'stik':1 },
                 'audiobook':{   'name':u'Audio Book',   'stik':2 },
                 'musicvideo':{  'name':u'Music Video',  'stik':6 },
@@ -606,6 +606,8 @@
                 'tvshow':{      'name':u'TV Show',      'stik':10 },
                 'booklet':{     'name':u'Booklet',      'stik':11 },
                 'ringtone':{    'name':u'Ringtone',     'stik':14 },
+                'podcast':{     'name':u'Podcast',      'stik':21 },
+                'itunesu':{     'name':u'iTunes U',     'stik':23 },
             },
         },
         'frame rate':{

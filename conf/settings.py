@@ -12,8 +12,6 @@
                 'path':u'/Users/lg/Downloads/mpk/temp',
             },
             'mongodb':{
-                'username':u'mp4pack',
-                'password':u'poohbear',
                 'database':u'mp4pack',
                 'host':u'localhost',
             },

@@ -1212,7 +1212,7 @@
                     ],
                     'type':'json',
                     'collection':'knowledge_music_album',
-                    'namespace':'ns.knowledge.music.album',
+                    'namespace':'ns.knowledge.music.album.canonical',
                     'index':['music album id', 'language'],
                 },
                 'service.document.knowledge.music.album.image':{
@@ -1229,7 +1229,7 @@
                     ],
                     'type':'json',
                     'collection':'knowledge_music_album_image',
-                    'namespace':'ns.knowledge.music.album',
+                    'namespace':'ns.knowledge.music.album.canonical',
                 },
                 'service.document.knowledge.music.track':{
                     'match':[
@@ -1252,8 +1252,14 @@
                     ],
                     'type':'json',
                     'collection':'knowledge_music_track',
-                    'namespace':'ns.knowledge.music.track',
-                    'index':['music album id', 'track id', 'disc number', 'track number', 'language'],
+                    'namespace':'ns.knowledge.music.track.canonical',
+                    'index':[
+                        'music album id',
+                        'track id',
+                        'disc number',
+                        'track number',
+                        'language'
+                    ],
                 },
 
                 'service.document.knowledge.person':{

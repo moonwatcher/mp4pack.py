@@ -571,6 +571,19 @@
             'simplify':True,
         },
 
+        'track position':{
+            'name':u'Track position',
+            'keyword':u'track_position',
+            'type':'unicode',
+            'atom':'trkn',
+        },
+        'disc position':{
+            'name':u'Disc position',
+            'keyword':u'disc_position',
+            'type':'unicode',
+            'atom':'disk',
+        },
+
         'track number':{
             'name':u'Track number',
             'keyword':u'track_number',
@@ -580,12 +593,6 @@
             'name':u'Track count',
             'keyword':u'track_count',
             'type':'int',
-        },
-        'track position':{
-            'name':u'Track position',
-            'keyword':u'track_position',
-            'type':'unicode',
-            'atom':'trkn',
         },
         'disc number':{
             'name':u'Disc number',
@@ -597,12 +604,24 @@
             'keyword':u'disc_count',
             'type':'int',
         },
-        'disc position':{
-            'name':u'Disc position',
-            'keyword':u'disc_position',
-            'type':'unicode',
-            'atom':'disk',
+
+        'music disc number':{
+            'name':u'Music disc number',
+            'keyword':u'music_disc_number',
+            'type':'int',
         },
+        'music track number':{
+            'name':u'Music track number',
+            'keyword':u'music_track_number',
+            'type':'int',
+            'atom':'tves',
+        },
+        'absolute music track number':{
+            'name':u'Absolute music track number',
+            'keyword':'absolute_music_track_number',
+            'type':'int',
+        },
+
         'tv season number':{
             'name':u'TV season number',
             'keyword':u'tv_season_number',
@@ -674,7 +693,7 @@
         },
         'resource path digest':{
             'name':u'Resource path digest',
-            'keyword':u'resource_hash',
+            'keyword':u'resource_path_digest',
             'type':'unicode',
         },
         

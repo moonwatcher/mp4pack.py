@@ -747,11 +747,20 @@
             'provide':set(('fragment file name',)),
             'branch':[
                 {
-                    'requires':set(('stream id', 'language', 'kind', )),
+                    'requires':set(('resource path digest', 'language', 'stream id', 'home id', 'kind', )),
                     'apply':[
                         {
                             'property':'fragment file name',
-                            'format':u'{stream id}.{language}.{kind}',
+                            'format':u'{resource path digest}.{language}.{stream id}.{home id}.{kind}',
+                        },
+                    ],
+                },
+                {
+                    'requires':set(('resource path digest', 'stream id', 'home id', 'kind', )),
+                    'apply':[
+                        {
+                            'property':'fragment file name',
+                            'format':u'{resource path digest}.{stream id}.{home id}.{kind}',
                         },
                     ],
                 },
@@ -762,11 +771,11 @@
             'provide':set(('fragment directory',)),
             'branch':[
                 {
-                    'requires':set(('temp path', 'resource path digest', )),
+                    'requires':set(('temp path', )),
                     'apply':[
                         {
                             'property':'fragment directory',
-                            'format':u'{temp path}/{resource path digest}',
+                            'format':u'{temp path}',
                         },
                     ],
                 },
@@ -1232,7 +1241,7 @@
                 },
             ],
         },
-        'rule.knowledge.default.episode':{
+        'rule.knowledge.default.tv.episode':{
             'name':'Default TV episode number',
             'provide':set(('tv episode number', 'tv season number')),
             'branch':[
@@ -1246,6 +1255,21 @@
                 },
             ],
         },
+        'rule.knowledge.default.music.track':{
+            'name':'Default music track number',
+            'provide':set(('music track number', 'music disc number')),
+            'branch':[
+                {
+                    'requires':set(('media kind', 'track number', 'disc number')),
+                    'equal':{'media kind':'music', },
+                    'apply':[
+                        { 'property':'music track number', 'reference':'track number', },
+                        { 'property':'music disc number', 'reference':'disc number', },
+                    ],
+                },
+            ],
+        },
+
         'rule.knowledge.sort.name':{
             'name':'sort name',
             'provide':set(('sort name',)),
