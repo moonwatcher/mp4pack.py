@@ -148,8 +148,11 @@ class Ontology(dict):
                             if 'apply' in branch:
                                 for x in branch['apply']:
                                     if not dict.__contains__(self, x['property']):
-                                        if 'digest' in x:
-                                            dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']].encode('utf-8')).hexdigest())
+                                        if 'digest' in x and 'algorithm' in x:
+                                            if 'algorithm' == 'sha1':
+                                                dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']].encode('utf-8')).hexdigest())
+                                            elif 'algorithm' == 'umid':
+                                                dict.__setitem__(self, x['property'], Umid(self[x['digest']]).code)
                                         if 'reference' in x:
                                             if 'datetime format' in x:
                                                 prototype = self.namespace.find(x['property'])
@@ -173,7 +176,7 @@ class Ontology(dict):
                                                 dict.__setitem__(self, k, v)
                                                 
                             # Mark all the atom the rule provieds as depending on the requirements
-                            # This was removing the requirement also removes the dependent atom
+                            # This means removing the requirement also removes the dependent atom
                             if 'requires' in branch:
                                 for req in branch['requires']:
                                     if req not in self.dependency:
@@ -182,9 +185,9 @@ class Ontology(dict):
                                         self.dependency[req] = self.dependency[req].union(rule.provide)
                             break
                             
-                    if dict.__contains__(self, key):
-                        # self.log.debug(u'Resolved %s', unicode({key:self[key]}))
-                        break
+                    # disable the extremely verbose reporting
+                    # if dict.__contains__(self, key):
+                    #    self.log.debug(u'Resolved %s', unicode({key:self[key]}))
     
 
 

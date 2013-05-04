@@ -232,7 +232,19 @@
                 },
             ],
         },
-        
+
+        'rule.medium.home.umid':{
+            'name':'UMID from home id',
+            'provide':set(('umid',)),
+            'branch':[
+                {
+                    'requires':set(('home id',)),
+                    'apply':[
+                        { 'property':'umid', 'digest':'home id', 'algorithm':'umid' },
+                    ],
+                },
+            ],
+        },        
         'rule.medium.home.uri':{
             'name':'Home URI',
             'provide':set(('home uri',)),
@@ -751,7 +763,7 @@
                     'apply':[
                         {
                             'property':'fragment file name',
-                            'format':u'{resource path digest}.{language}.{stream id}.{home id}.{kind}',
+                            'format':u'{resource path digest}.{language}.{stream id}.{umid}.{kind}',
                         },
                     ],
                 },
@@ -760,7 +772,7 @@
                     'apply':[
                         {
                             'property':'fragment file name',
-                            'format':u'{resource path digest}.{stream id}.{home id}.{kind}',
+                            'format':u'{resource path digest}.{stream id}.{umid}.{kind}',
                         },
                     ],
                 },
@@ -919,7 +931,7 @@
                 {
                     'requires':set(('path',)),
                     'apply':[
-                        { 'property':'path digest', 'digest':'path', },
+                        { 'property':'path digest', 'digest':'path', 'algorithm':'sha1' },
                     ],
                 },
             ],

@@ -262,3 +262,60 @@ class ResourcePivot(object):
         return self.taken
     
 
+
+
+class Umid(object):
+    def __init__(self):
+        self._ordinal = None
+        self._code = None
+    
+    
+    @classmethod
+    def _checksum(cls, string):
+        digits = map(lambda x: int(x,16), string)
+        return (sum(digits[::-2]) + sum(map(lambda d: sum(divmod(3*d, 16)), digits[-2::-2]))) % 16
+    
+    
+    @classmethod
+    def _generate(cls, string):
+        d = Umid._checksum(string + '0')
+        if d != 0: d = 16 - d
+        return hex(d)[2:]
+    
+    @classmethod
+    def verify(cls, string):
+        return Umid._checksum(string) == 0
+    
+    
+    @property
+    def ordinal(self):
+        if self._ordinal is None and self._code is not None:
+            self._ordinal = int(self._code[:-1],16)
+        return self._ordinal
+    
+    
+    @ordinal.setter
+    def ordinal(self, value):
+        self._ordinal = value
+        self._code = None
+    
+    
+    @property
+    def code(self):
+        if self._code is None and self._ordinal is not None:
+            code = hex(self._ordinal)[2:]
+            code += Umid._generate(code)
+            self._code = '{:>013}'.format(code)
+        return self._code
+    
+    
+    @code.setter
+    def code(self, value):
+        self._ordinal = None
+        if Umid.verify(value):
+            self._code = value
+        else:
+            self._code = None
+    
+
+

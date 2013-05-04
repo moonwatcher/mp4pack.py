@@ -18,6 +18,11 @@
             'keyword':u'home_id',
             'type':'int',
         },
+        'umid':{
+            'name':u'UMID',
+            'keyword':u'umid',
+            'type':'unicode',
+        },
         
         'music album id':{
             'name':u'Music album ID',
