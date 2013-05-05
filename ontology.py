@@ -419,7 +419,7 @@ class Prototype(Element):
         if 'type' not in self.node:
             self.node['type'] = 'unicode'
             
-        # find the cast and format functions
+        # find the cast, format and merge functions
         c = getattr(self, '_cast_{0}'.format(self.node['type']), None) or (lambda x,y: x)
         f = getattr(self, '_format_{0}'.format(self.node['type']), None) or (lambda x: x)
         o = getattr(self, '_merge_{0}'.format(self.node['type']), None) or (lambda x,y: y)

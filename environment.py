@@ -10,7 +10,7 @@ from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
 from chardet.universaldetector import UniversalDetector
 
-from ontology import Ontology, Enumeration, PrototypeSpace, Rule, Space
+from ontology import Ontology, Enumeration, PrototypeSpace, Rule, Space, Umid
 from model import Timestamp
 from model.caption import CaptionFilterCache
 from service import Resolver
@@ -652,7 +652,6 @@ class Repository(object):
         result = None
         if path:
             decoded = Ontology(self.env, 'ns.medium.resource.url.decode')
-            
             # Set directory and file name
             decoded['directory'], decoded['file name'] = os.path.split(path)
             
@@ -670,6 +669,11 @@ class Repository(object):
                 # Hack to trigger rule.medium.resource.directory.parse
                 decoded['profile']
                 
+                # If a UMID was encoded in the name, infer the home id from it
+                if 'umid' in decoded:
+                    umid = Umid.decode(decoded['umid'])
+                    if umid: decoded['home id'] = umid.ordinal
+                    
                 result = decoded.project('ns.medium.resource.location')
                 for k,v in decoded.iteritems(): result[k] = v
                 

@@ -251,6 +251,14 @@
             'branch':[
                 {
                     'requires':set((
+                        'home id',
+                    )),
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/{home id}', },
+                    ],
+                },
+                {
+                    'requires':set((
                         'media kind',
                         'movie id',
                     )),
@@ -478,8 +486,20 @@
                 'tvdb tv show id',
                 'album handle',
                 'track name',
+                
+                'resource path digest',
+                'language',
+                'stream id',
+                'umid',
             )),
             'branch':[
+                {
+                    'requires':set(('file name',)),
+                    'match':{'property':'file name', 'expression':ur'^[0-9a-f]{40}(?:\.[a-z]{2})?\.[0-9]{2}\.[0-9a-f]{13}\.[^\.]{3,4}$', },
+                    'decode':[
+                        {'property':'file name', 'expression':ur'^(?P<resource_path_digest>[0-9a-f]{40})(?:\.(?P<language>[a-z]{2}))?\.(?P<stream_id>[0-9]{2})\.(?P<umid>[0-9a-f]{13})\.(?P<kind>[^\.]{3,4})$',},
+                    ],
+                },
                 {
                     'requires':set(('file name',)),
                     'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
@@ -763,7 +783,7 @@
                     'apply':[
                         {
                             'property':'fragment file name',
-                            'format':u'{resource path digest}.{language}.{stream id}.{umid}.{kind}',
+                            'format':u'{resource path digest}.{language}.{stream id:>02}.{umid}.{kind}',
                         },
                     ],
                 },
@@ -772,7 +792,7 @@
                     'apply':[
                         {
                             'property':'fragment file name',
-                            'format':u'{resource path digest}.{stream id}.{umid}.{kind}',
+                            'format':u'{resource path digest}.{stream id:>02}.{umid}.{kind}',
                         },
                     ],
                 },
