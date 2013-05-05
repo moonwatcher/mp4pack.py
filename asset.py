@@ -28,6 +28,10 @@ class AssetCache(object):
                 if result.valid:
                     self.asset[result.uri] = result
                 else: result = None
+                
+            # complement the location ontology
+            if result:
+                location.merge_all(result.location)
         return result
     
     
@@ -54,10 +58,11 @@ class Asset(object):
         self.volatile = False
         self._node = None
         
-        if 'asset uri' not in self.location and 'home uri' in self.location:
+        # If we can identify a home, load it and use it to complement the location ontology
+        if 'home uri' in self.location:
             home = self.env.resolver.resolve(self.location['home uri'])
             if home is not None:
-                self.location['home id'] = home['head']['genealogy']['home id']
+                self.location.merge_all(home['head']['genealogy'])
             
     
     
@@ -129,7 +134,7 @@ class Resource(object):
     def __init__(self, asset, location):
         self.log = logging.getLogger('resource')
         self.asset = asset
-        self.location = location
+        self.location = location.project('ns.medium.resource.location')
         self.volatile = False
         
         self._node = None
@@ -137,8 +142,8 @@ class Resource(object):
         self._stream = None
         self._hint = None
         
-        # hack to trigger home id resolution
-        self.node
+        self.location.merge_all(self.asset.location)
+
     
     
     def __unicode__(self):
@@ -700,19 +705,20 @@ class RawAudio(Container):
                 product.hint = Ontology.clone(self.hint)
                 
                 command = self.env.initialize_command('ffmpeg', self.log)
-                command.append(u'-threads')
-                command.append(unicode(self.env.system['threads']))
-                command.append(u'-i')
-                command.append(self.path)
-                
-                for k,v in stream['ffmpeg parameters'].iteritems():
-                    command.append(k)
-                    command.append(unicode(v))
+                if command:
+                    command.append(u'-threads')
+                    command.append(unicode(self.env.system['threads']))
+                    command.append(u'-i')
+                    command.append(self.path)
                     
-                command.append(product.path)
-                message = u'Transcode {0} --> {1}'.format(self.path, product.path)
-                self.env.varify_directory(product.path)
-                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                    for k,v in stream['ffmpeg parameters'].iteritems():
+                        command.append(k)
+                        command.append(unicode(v))
+                        
+                    command.append(product.path)
+                    message = u'Transcode {0} --> {1}'.format(self.path, product.path)
+                    self.env.varify_directory(product.path)
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
 
 
@@ -816,7 +822,7 @@ class TableOfContent(Text):
         product = task.produce(task.ontology)
         if product:
             product.menu = self.menu
-            stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'menu' ]
+            stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'menu' ]
             if stream: stream = stream[0]
             else: stream = None
             if stream:

@@ -648,15 +648,15 @@ class Repository(object):
             routing.add_branch(branch)
     
     
-    def parse_path(self, path):
+    def decode_resource_path(self, path):
         result = None
         if path:
             decoded = Ontology(self.env, 'ns.medium.resource.url.decode')
-            # Set directory and file name
             decoded['directory'], decoded['file name'] = os.path.split(path)
-            
             if 'file name' in decoded and 'directory' in decoded:
+            
                 # Normalize the directory
+                # This will replace path framents with canonic values
                 decoded['directory'] = self.normalize(decoded['directory'])
             
                 # Check if the directory resides in a volume
@@ -664,16 +664,15 @@ class Repository(object):
                     if os.path.commonprefix((volume.node['real'], decoded['directory'])) == volume.node['real']:
                         decoded['volume'] = volume.key
             
-                # Hack to trigger rule.medium.resource.filename.parse
-                decoded['kind']
-                # Hack to trigger rule.medium.resource.directory.parse
-                decoded['profile']
-                
-                # If a UMID was encoded in the name, infer the home id from it
+                # If a UMID was encoded in the name, infer the home id and media kind
+                # This will also trigger rule.medium.resource.filename.parse
                 if 'umid' in decoded:
                     umid = Umid.decode(decoded['umid'])
-                    if umid: decoded['home id'] = umid.ordinal
-                    
+                    if umid:
+                        decoded['media kind'] = umid.media_kind
+                        decoded['home id'] = umid.home_id
+                
+                # Make the elements of the decoded onlology kernel elements of the result
                 result = decoded.project('ns.medium.resource.location')
                 for k,v in decoded.iteritems(): result[k] = v
                 
@@ -691,7 +690,6 @@ class Repository(object):
             for alt, real in self.mapping.iteritems():
                 if os.path.commonprefix((alt, path)) == alt:
                     result = path.replace(alt, real)
-                    # result = os.path.join(real, os.path.relpath(path, alt))
                     break
         return result
 

@@ -13,17 +13,16 @@
             'type':'int',
         },
 
-        'home id':{
-            'name':u'Home ID',
-            'keyword':u'home_id',
-            'type':'int',
-        },
         'umid':{
             'name':u'UMID',
             'keyword':u'umid',
             'type':'unicode',
         },
-        
+        'home id':{
+            'name':u'Home ID',
+            'keyword':u'home_id',
+            'type':'int',
+        },
         'music album id':{
             'name':u'Music album ID',
             'keyword':u'music_album_id',
@@ -34,7 +33,6 @@
             'keyword':u'track_id',
             'type':'int',
         },
-        
         'tv show id':{
             'name':u'TV show ID',
             'keyword':u'tv_show_id',
@@ -50,13 +48,11 @@
             'keyword':u'tv_episode_id',
             'type':'int',
         },
-        
         'movie id':{
             'name':u'Movie ID',
             'keyword':u'movie_id',
             'type':'int',
         },
-        
         'collection id':{
             'name':u'Collection ID',
             'keyword':u'collection_id',
@@ -396,7 +392,6 @@
             'keyword':u'music_track_name',
             'type':'unicode',
         },
-        
         'critic name':{
             'name':u'Critic name',
             'keyword':u'critic_name',
@@ -507,13 +502,6 @@
             'simplify':True,
         },
         
-        'simple name':{
-            'name':u'Simple name',
-            'keyword':u'simple_name',
-            'type':'unicode',
-            'simplify':True,
-        },
-        
         'sort name':{
             'name':u'Sort name',
             'keyword':u'sort_name',
@@ -550,7 +538,6 @@
             'type':'unicode',
             'atom':'sosn',
         },
-
         'simple name':{
             'name':u'Simple name',
             'keyword':u'simple_name',
@@ -588,7 +575,11 @@
             'type':'unicode',
             'atom':'disk',
         },
-
+        'track genealogy':{
+            'name':u'Track genealogy',
+            'keyword':u'track_genealogy',
+            'type':'unicode',
+        },
         'track number':{
             'name':u'Track number',
             'keyword':u'track_number',
@@ -609,7 +600,6 @@
             'keyword':u'disc_count',
             'type':'int',
         },
-
         'music disc number':{
             'name':u'Music disc number',
             'keyword':u'music_disc_number',
@@ -626,7 +616,6 @@
             'keyword':'absolute_music_track_number',
             'type':'int',
         },
-
         'tv season number':{
             'name':u'TV season number',
             'keyword':u'tv_season_number',
@@ -649,11 +638,6 @@
             'keyword':u'tv_episode_production_code',
             'type':'unicode',
             'atom':'tven',
-        },
-        'track genealogy':{
-            'name':u'Track genealogy',
-            'keyword':u'track_genealogy',
-            'type':'unicode',
         },
         
         'character encoding':{

@@ -483,7 +483,6 @@
                 'album name':None,
             },
             'rule':[
-                'rule.medium.resource.directory.parse',
                 'rule.medium.resource.filename.parse',
             ],
         },

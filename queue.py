@@ -269,7 +269,7 @@ class ResourceJob(Job):
 class ResourceTask(Task):
     def __init__(self, job, ontology, path):
         Task.__init__(self, job, ontology)
-        self.location = self.env.repository[self.env.host].parse_path(path)
+        self.location = self.env.repository[self.env.host].decode_resource_path(path)
         self.resource = None
         self.transform = None
         self.product = None
@@ -298,7 +298,6 @@ class ResourceTask(Task):
             self.node['origin'] = self.location.node
             
             self.resource = self.cache.find(self.location)
-            
             if self.resource:
                 # if the action is defined in the preset, the preset supports the action
                 if self.ontology['action'] in self.preset['action']:

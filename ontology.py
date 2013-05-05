@@ -152,7 +152,7 @@ class Ontology(dict):
                                             if x['algorithm'] == 'sha1':
                                                 dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']].encode('utf-8')).hexdigest())
                                             elif x['algorithm'] == 'umid':
-                                                dict.__setitem__(self, x['property'], Umid(self[x['digest']]).code)
+                                                dict.__setitem__(self, x['property'], Umid(*[self[i] for i in x['digest']]).code)
                                         if 'reference' in x:
                                             if 'datetime format' in x:
                                                 prototype = self.namespace.find(x['property'])
@@ -422,12 +422,12 @@ class Prototype(Element):
         # find the cast, format and merge functions
         c = getattr(self, '_cast_{0}'.format(self.node['type']), None) or (lambda x,y: x)
         f = getattr(self, '_format_{0}'.format(self.node['type']), None) or (lambda x: x)
-        o = getattr(self, '_merge_{0}'.format(self.node['type']), None) or (lambda x,y: y)
+        m = getattr(self, '_merge_{0}'.format(self.node['type']), None) or (lambda x,y: y)
         
         if not self.node['plural']:
             self._cast = c
             self._format = f
-            self._merge = o
+            self._merge = m
         else:
             if self.node['plural'] == 'list':
                 self._format = lambda x: self._format_list(x, f)
@@ -863,8 +863,9 @@ class Rule(object):
 
 
 class Umid(object):
-    def __init__(self, ordinal=None):
-        self._ordinal = ordinal
+    def __init__(self, home_id=None, media_kind=None):
+        self._home_id = home_id
+        self._media_kind = media_kind
         self._code = None
     
     
@@ -872,10 +873,8 @@ class Umid(object):
     def decode(cls, code):
         umid = cls()
         umid.code = code
-        if umid.code is not None:
-            return umid
-        else:
-            return None
+        if umid.code is not None: return umid
+        else: return None
     
     
     @classmethod
@@ -888,41 +887,61 @@ class Umid(object):
     def _generate(cls, string):
         d = Umid._checksum(string + '0')
         if d != 0: d = 16 - d
-        return hex(d)[2:]
+        return '{:x}'.format(d)
+    
     
     @classmethod
     def verify(cls, string):
         return string is not None and Umid._checksum(string) == 0
     
     
+    def _parse(self):
+        self._media_kind = int(self._code[0:2], 16)
+        self._home_id = int(self._code[3:12], 16)
+    
+    
     @property
-    def ordinal(self):
-        if self._ordinal is None and self._code is not None:
-            self._ordinal = int(self._code[:-1],16)
-        return self._ordinal
+    def media_kind(self):
+        if self._media_kind is None and self._code is not None:
+            self._parse()
+        return self._media_kind
     
     
-    @ordinal.setter
-    def ordinal(self, value):
-        self._ordinal = value
+    @media_kind.setter
+    def media_kind(self, value):
+        self._media_kind = value
+        self._code = None
+    
+    
+    @property
+    def home_id(self):
+        if self._home_id is None and self._code is not None:
+            self._parse()
+        return self._home_id
+    
+    
+    @home_id.setter
+    def home_id(self, value):
+        self._home_id = value
         self._code = None
     
     
     @property
     def code(self):
-        if self._code is None and self._ordinal is not None:
-            code = hex(self._ordinal)[2:]
-            code += Umid._generate(code)
-            self._code = '{:>013}'.format(code)
+        if self._code is None and self._media_kind is not None and self._home_id is not None:
+            code = '{:>02x}{:>010x}'.format(self._media_kind, self._home_id)
+            self._code = '{}{}'.format(code, Umid._generate(code))
         return self._code
     
     
     @code.setter
     def code(self, value):
-        self._ordinal = None
+        self._home_id = None
+        self._media_kind = None
         if Umid.verify(value):
             self._code = value
         else:
             self._code = None
     
+
 
