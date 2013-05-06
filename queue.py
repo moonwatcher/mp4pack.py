@@ -379,7 +379,7 @@ class ResourceTask(Task):
                 o['resource path digest'] = override['resource path digest']
 
         # try to produce the resource
-        product = self.resource.asset.find(o)
+        product = self.resource.asset.locate_resource(o)
         if product:
             self.product.append(product)
         else:

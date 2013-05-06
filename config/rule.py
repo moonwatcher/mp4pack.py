@@ -97,8 +97,6 @@
                 },
             ]
         },
-
-
         'rule.task.default.preset':{
             'name':'Default task preset',
             'provide':set(('preset',)),

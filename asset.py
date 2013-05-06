@@ -40,7 +40,9 @@ class AssetCache(object):
         if location:
             asset = self.locate_asset(location)
             if asset:
-                result = asset.find(location)
+                result = asset.locate_resource(location)
+            else:
+                self.log.debug(u'Could not locate asset for %s', location)
         return result
     
     
@@ -51,7 +53,7 @@ class AssetCache(object):
 
 class Asset(object):
     def __init__(self, cache, location):
-        self.log = logging.getLogger('asset')
+        self.log = logging.getLogger('Asset')
         self.cache = cache
         self.location = location.project('ns.medium.asset.location')
         self.resource = {}
@@ -68,6 +70,20 @@ class Asset(object):
     
     def __unicode__(self):
         return unicode(self.uri)
+    
+    
+    def locate_resource(self, location):
+        result = None
+        if location and 'resource uri' in location:
+            if location['resource uri'] in self.resource:
+                result = self.resource[location['resource uri']]
+            else:
+                result = Resource.create(self, location)
+                if result and result.valid:
+                    self.volatile = True
+                    self.resource[result.uri] = result
+                else: result = None
+        return result
     
     
     @property
@@ -96,20 +112,6 @@ class Asset(object):
         pass
     
     
-    def find(self, location):
-        result = None
-        if location and 'resource uri' in location:
-            if location['resource uri'] in self.resource:
-                result = self.resource[location['resource uri']]
-            else:
-                result = Resource.create(self, location)
-                if result and result.valid:
-                    self.volatile = True
-                    self.resource[result.uri] = result
-                else: result = None
-        return result
-    
-    
     def commit(self):
         if self.volatile:
             for resource in self.resource.values():
@@ -124,7 +126,7 @@ class Asset(object):
     def touch(self):
         for ref in self.node['body']['reference'].values():
             location = Ontology(self.env, 'ns.medium.resource.location', ref['genealogy'])
-            self.find(location)
+            self.locate_resource(location)
 
 
     
@@ -132,7 +134,7 @@ class Asset(object):
 
 class Resource(object):
     def __init__(self, asset, location):
-        self.log = logging.getLogger('resource')
+        self.log = logging.getLogger('Resource')
         self.asset = asset
         self.location = location.project('ns.medium.resource.location')
         self.volatile = False
@@ -213,11 +215,6 @@ class Resource(object):
     
     
     @property
-    def fragment_path(self):
-        return self.location['fragment path']
-    
-    
-    @property
     def available(self):
         return self.path and os.path.exists(self.path)
     
@@ -232,16 +229,18 @@ class Resource(object):
     @property
     def meta(self):
         if self._meta is None:
-            if self.node:
+            if self.node is not None and 'body' in self.node and 'meta' in self.node['body']:
                 self._meta = Ontology(self.env, 'ns.medium.resource.meta', self.node['body']['meta'])
+            else:
+                self._meta = Ontology(self.env, 'ns.medium.resource.meta')
         return self._meta
     
     
     @property
     def stream(self):
         if self._stream is None:
-            if self.node and 'stream' in self.node['body']:
-                self._stream = []
+            self._stream = []
+            if self.node is not None and 'body' in self.node and 'stream' in self.node['body']:
                 for stream in self.node['body']['stream']:
                     mtype = self.env.enumeration['stream kind'].find(stream['stream kind'])
                     self._stream.append(Ontology(self.env, mtype.node['namespace'], stream))
@@ -251,7 +250,7 @@ class Resource(object):
     @property
     def hint(self):
         if self._hint is None:
-            if self.node and 'hint' in self.node:
+            if self.node is not None and 'body' in self.node and 'hint' in self.node['body']:
                 self._hint = Ontology(self.env, 'ns.medium.resource.hint', self.node['body']['hint'])
             else:
                 self._hint = Ontology(self.env, 'ns.medium.resource.hint')
@@ -265,22 +264,23 @@ class Resource(object):
     
     
     def flush(self):
-        # Flush meta to node
-        if self._meta is not None:
-            self.node['body']['meta'] = self._meta.node
-            self._meta = None
-            
-        # Flush streams to node
-        if self._stream is not None:
-            self.node['body']['stream'] = []
-            for stream in self._stream:
-                self.node['body']['stream'].append(stream.node)
-            self._stream = None
-            
-        # Flush hint to node
-        #if self._hint is not None:
-        #    self.node['body']['hint'] = self._hint.node
-        #    self._hint = None
+        if self.node:
+            # Flush meta to node
+            if self._meta is not None:
+                self.node['body']['meta'] = self._meta.node
+                self._meta = None
+                
+            # Flush streams to node
+            if self._stream is not None:
+                self.node['body']['stream'] = []
+                for stream in self._stream:
+                    self.node['body']['stream'].append(stream.node)
+                self._stream = None
+                
+            # Flush hint to node
+            if self._hint is not None:
+                self.node['body']['hint'] = self._hint.node
+                self._hint = None
     
     
     def commit(self):
@@ -399,9 +399,12 @@ class AudioVideoContainer(Container):
                 stream['enabled'] = False
                 product = task.produce(stream)
                 if product:
-                    self.env.varify_directory(product.fragment_path)
+                    product.location['file name'] = product.location['fragment file name']
+                    product.location['directory'] = product.location['fragment directory']
+                    self.env.varify_directory(product.path)
+                    
                     product.menu = Menu.from_node(self.env, stream['content'])
-                    product.write(product.fragment_path)
+                    product.write(product.path)
     
     
     def pack(self, task):
@@ -586,13 +589,15 @@ class Matroska(AudioVideoContainer):
                 if stream['enabled']:
                     product = task.produce(stream)
                     if product:
-                        self.env.varify_directory(product.fragment_path)
+                        product.location['file name'] = product.location['fragment file name']
+                        product.location['directory'] = product.location['fragment directory']
+                        self.env.varify_directory(product.path)
                         
                         # Leave a hint about the delay
                         if 'delay' in stream:
                             product.hint['delay'] = stream['delay']
                             
-                        command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.fragment_path))
+                        command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
                         stream['enabled'] = False
                         taken = True
             if taken:

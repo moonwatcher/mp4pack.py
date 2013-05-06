@@ -522,7 +522,6 @@
                         'simple company name',                        
                     ],
                 },
-                
                 'service.home.genre':{
                     'match':[
                         {
@@ -611,7 +610,7 @@
         'knowledge':{
             'match':ur'^/k/.*$',
             'branch':{
-                'service.knowledge.configuration':{
+                'service.document.knowledge.configuration':{
                     'match':[
                         {
                             'filter':ur'^/k/configuration$',
@@ -626,7 +625,7 @@
                     'type':'json',
                     'collection':'knowledge_configuration',
                 },
-                'service.knowledge.playlist':{
+                'service.document.knowledge.playlist':{
                     'match':[
                         {
                             'filter':ur'^/k/playlist/(?P<playlist_id>[0-9]+)$',
@@ -642,7 +641,6 @@
                     'collection':'knowledge_playlist',
                     'namespace':'ns.knowledge.playlist',
                 },
-
                 'service.document.knowledge.movie':{
                     'match':[
                         {
@@ -902,7 +900,6 @@
                         'itunes movie id',
                     ],
                 },
-
                 'service.document.knowledge.tv.show':{
                     'match':[
                         {
@@ -1197,7 +1194,6 @@
                         'language',
                     ],
                 },
-
                 'service.document.knowledge.music.album':{
                     'match':[
                         {
@@ -1261,7 +1257,6 @@
                         'language'
                     ],
                 },
-
                 'service.document.knowledge.person':{
                     'match':[
                         {
@@ -1310,7 +1305,6 @@
                     'collection':'knowledge_person_image',
                     'namespace':'ns.knowledge.person',
                 },
-                
                 'service.document.knowledge.company':{
                     'match':[
                         {
@@ -1359,7 +1353,6 @@
                     'collection':'knowledge_company_image',
                     'namespace':'ns.knowledge.company',
                 },
-                
                 'service.document.knowledge.genre':{
                     'match':[
                         {
