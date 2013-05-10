@@ -170,7 +170,7 @@ class Crawler(object):
                 formation = None
                 for line in content:
                     if line == u'[Events]':
-                        match = self.env.expression['ass formation line'].search(lines[index + 1])
+                        match = self.env.expression['ass formation line'].search(content[index + 1])
                         if match is not None:
                             formation = match.group(1).strip().replace(u' ',u'').split(u',')
                         break
@@ -180,7 +180,7 @@ class Crawler(object):
                     start = formation.index('Start')
                     stop = formation.index('End')
                     text = formation.index('Text')
-                    for line in lines:
+                    for line in content:
                         match = self.env.expression['ass subtitle line'].search(line)
                         if match is not None:
                             line = match.group(1).strip().split(',')
