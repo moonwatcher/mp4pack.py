@@ -184,7 +184,7 @@ class Crawler(object):
                         match = self.env.expression['ass subtitle line'].search(line)
                         if match is not None:
                             line = match.group(1).strip().split(',')
-                            slide = Slide(self)
+                            slide = Slide()
                             slide.begin.timecode = line[start]
                             slide.end.timecode = line[stop]
                             subtitle_text = u','.join(line[text:])
