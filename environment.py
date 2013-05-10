@@ -417,11 +417,7 @@ class Environment(object):
     def varify_directory(self, path):
         result = False
         try:
-            if os.path.isfile(path):
-                directory = os.path.dirname(path)
-            else:
-                directory = path
-                
+            directory = os.path.dirname(path)
             if not os.path.exists(directory):
                 self.log.debug(u'Creating directory %s', directory)
                 os.makedirs(directory)
