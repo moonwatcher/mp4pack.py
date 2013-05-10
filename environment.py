@@ -417,7 +417,7 @@ class Environment(object):
     def varify_directory(self, path):
         result = False
         try:
-            if os.path.isfile():
+            if os.path.isfile(path):
                 directory = os.path.dirname(path)
             else:
                 directory = path
