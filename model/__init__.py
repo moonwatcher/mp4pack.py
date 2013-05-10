@@ -17,10 +17,10 @@ class Timestamp(object):
     @property
     def millisecond(self):
         if self._millisecond is None and self._timecode is not None:
-            hour = 0
-            minute = 0
-            second = 0
-            millisecond = 0
+            hour = None
+            minute = None
+            second = None
+            millisecond = None
             
             match = self.codec['decode'].search(self._timecode)
             if match is not None:

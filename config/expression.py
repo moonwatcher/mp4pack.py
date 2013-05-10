@@ -8,6 +8,11 @@
             'flags':re.UNICODE,
         },
         {
+            'name':'ass timecode', 
+            'definition':ur'([0-9]):([0-9]{2}):([0-9]{2}).([0-9]{2})', 
+            'flags':re.UNICODE,
+        },
+        {
             'name':'ass subtitle line', 
             'definition':ur'^Dialogue\s*:\s*(.*)$', 
             'flags':re.UNICODE,

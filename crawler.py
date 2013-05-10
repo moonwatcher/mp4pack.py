@@ -185,8 +185,14 @@ class Crawler(object):
                         if match is not None:
                             line = match.group(1).strip().split(',')
                             slide = Slide()
-                            slide.begin.timecode = line[start]
-                            slide.end.timecode = line[stop]
+                            
+                            match = self.env.expression['ass timecode'].search(line[start])
+                            if match:
+                                slide.begin.timecode = '{0:02d}:{1:02d}:{2:02d},{3:03d}'.format(*[int(i) for i in match.groups()])    
+                            match = self.env.expression['ass timecode'].search(line[stop])
+                            if match:
+                                slide.end.timecode = '{0:02d}:{1:02d}:{2:02d},{3:03d}'.format(*[int(i) for i in match.groups()])    
+                                
                             subtitle_text = u','.join(line[text:])
                             subtitle_text = self.env.expression['ass event command'].sub(u'', subtitle_text)
                             subtitle_text = subtitle_text.replace(u'\n', ur'\N')
