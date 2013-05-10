@@ -107,7 +107,7 @@ class Timestamp(object):
     format = {
         1:{
             'encode':u'{0:02d}:{1:02d}:{2:02d},{3:03d}',
-            'decode':re.compile(u'([0-9]{,2}):([0-9]{,2}):([0-9]{,2}),([0-9]+)', re.UNICODE)
+            'decode':re.compile(u'([0-9]{,2}):([0-9]{,2}):([0-9]{,2})(?:[,.])([0-9]+)', re.UNICODE)
         },
         2:{
             'encode':u'{0:02d}:{1:02d}:{2:02d}.{3:03d}',
