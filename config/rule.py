@@ -500,6 +500,13 @@
                 },
                 {
                     'requires':set(('file name',)),
+                    'match':{'property':'file name', 'expression':ur'^[^\.]*(?:\.[a-z]{2})?\.[0-9a-f]{13}\.[^\.]{3,4}$', },
+                    'decode':[
+                        {'property':'file name', 'expression':ur'^[^\.]*(?:\.(?P<language>[a-z]{2}))?\.(?P<umid>[0-9a-f]{13})\.(?P<kind>[^\.]{3,4})$',},
+                    ],
+                },
+                {
+                    'requires':set(('file name',)),
                     'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
