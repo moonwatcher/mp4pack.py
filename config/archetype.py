@@ -1921,7 +1921,7 @@
         'motion estimation method':{
             'name':u'Motion estimation method',
             'keyword':u'motion_estimation_method',
-            'type':'int',
+            'type':'unicode',
         },
         'motion estimation range':{
             'name':u'Motion estimation range',
