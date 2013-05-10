@@ -38,6 +38,12 @@
                                     ),
                                 },
                                 {
+                                    'mode':'select',
+                                    'branch':(
+                                        {'stream kind':'audio', 'kind':'flac'},
+                                    ),
+                                },
+                                {
                                     'mode':'choose',
                                     'branch':(
                                         {'stream kind':'menu'},
