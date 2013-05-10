@@ -131,14 +131,14 @@ class Job(object):
                 self._inclusion = re.compile(self.ontology['inclusion'], re.UNICODE)
                 self.log.info(u'Inclusion filter set to \'%s\'', self.ontology['inclusion'])
             except re.error as err:
-                self.log.info(u'Failed to compile inclusion filter \'%s\' because of %s', self.ontology['inclusion'], err)
+                self.log.warning(u'Failed to compile inclusion filter \'%s\' because of %s', self.ontology['inclusion'], err)
                 
         if 'exclusion' in self.ontology:
             try:
                 self._exclusion = re.compile(self.ontology['exclusion'], re.UNICODE)
                 self.log.info(u'Exclusion filter set to \'%s\'', self.ontology['exclusion'])
             except re.error as err:
-                self.log.info(u'Failed to compile exclusion filter \'%s\' because of %s', self.ontology['exclusion'], err)
+                self.log.warning(u'Failed to compile exclusion filter \'%s\' because of %s', self.ontology['exclusion'], err)
     
     
     def enqueue(self, task):
@@ -239,7 +239,7 @@ class ResourceJob(Job):
                     self.log.error(u'Path %s does not exist', path)
         if targets:
             targets = sorted(set(targets))
-            self.log.debug(u'Found %d files to process', len(targets))
+            self.log.info(u'Found %d files to process', len(targets))
             for path in targets:
                 self.enqueue(ResourceTask(self, self.ontology.project('ns.system.task'), path))
     
@@ -432,8 +432,7 @@ class ServiceTask(Task):
         print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
     
-    def remove(self):
-        self.log.debug(u'Dropping %s', self.document['head']['canonical'])
+    def drop(self):
         self.env.resolver.remove(self.uri)
     
 

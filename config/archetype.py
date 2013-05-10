@@ -1156,11 +1156,16 @@
             'keyword':u'encoder',
             'type':'unicode',
         },
+        'encoder settings string':{
+            'name':u'Encoder settings string',
+            'keyword':u'encoder_settings_string',
+            'type':'unicode',
+        },
         'encoder settings':{
             'name':u'Encoder settings',
             'keyword':u'encoder_settings',
-            'type':'unicode',
-            'plural':'dict',
+            'type':'embed',
+            'namespace':'ns.medium.resource.x264',
         },
         'sort order':{
             'name':u'Sort order',
@@ -1770,5 +1775,274 @@
             'keyword':u'fan_art_url',
             'type':'unicode',
         },
+
+
+
+        '8x8 dct':{
+            'name':u'Adaptive 8x8 DCT',
+            'keyword':u'8x8_dct',
+            'type':'int',
+        },
+        'adaptive bi directional':{
+            'name':u'Adaptive bi directional',
+            'keyword':u'adaptive_bi_directional',
+            'type':'int',
+        },
+        'bi directional bias':{
+            'name':u'Bi directional bias',
+            'keyword':u'bi_directionl_bias',
+            'type':'int',
+        },
+        'bi directional pyramid':{
+            'name':u'Bi directional pyramid',
+            'keyword':u'bi_directional_pyramid',
+            'type':'int',
+        },
+        'bi directional frames':{
+            'name':u'Bi directional frames',
+            'keyword':u'bi_directional_frames',
+            'type':'int',
+        },
+        'cabac':{
+            'name':u'CABAC',
+            'keyword':u'cabac',
+            'type':'int',
+        }, 
+        'chroma motion estimation':{
+            'name':u'Chroma motion estimation',
+            'keyword':u'chroma_motion_estimation',
+            'type':'int',
+        },
+        'chroma planes quantizer offset':{
+            'name':u'Chroma planes quantizer offset',
+            'keyword':u'chroma_planes_quantizer_offset',
+            'type':'int',
+        },
+        'constrained intra prediction':{
+            'name':u'Constrained intra prediction',
+            'keyword':u'constrained_intra_prediction',
+            'type':'int',
+        },
+        'dct decimation':{
+            'name':u'DCT decimation',
+            'keyword':u'dct_decimation',
+            'type':'int',
+        },
+        'direct motion vectors prediction mode':{
+            'name':u'Direct motion vectors prediction mode',
+            'keyword':u'direct_motion_vectors_prediction_mode',
+            'type':'int',
+        },
+        'predicted frames early skip detection':{
+            'name':u'Predicted frames early skip detection',
+            'keyword':u'predicted_frames_early_skip_detection',
+            'type':'int',
+        },
+        'intra frames refresh':{
+            'name':u'Intra frames refresh',
+            'keyword':u'intra_frames_refresh',
+            'type':'int',
+        },
+        'rate control lookahead':{
+            'name':u'Rate control lookahead',
+            'keyword':u'rate_control_lookahead',
+            'type':'int',
+        },
+        'decoded picture buffer size':{
+            'name':u'Decoded picture buffer size',
+            'keyword':u'decoded_picture_buffer_size',
+            'type':'int',
+        },
+        'scene cut':{
+            'name':u'Scene cut',
+            'keyword':u'scene_cut',
+            'type':'int',
+        },
+        'sliced based threading':{
+            'name':u'Sliced based threading',
+            'keyword':u'sliced_based_threading',
+            'type':'int',
+        },
+        'subpixel motion estimation':{
+            'name':u'Subpixel motion estimation',
+            'keyword':u'subpixel_motion_estimation',
+            'type':'int',
+        },
+        'threads':{
+            'name':u'Threads',
+            'keyword':u'threads',
+            'type':'int',
+        },
+        'trellis quantization':{
+            'name':u'Trellis quantization',
+            'keyword':u'trellis_quantization',
+            'type':'int',
+        },
+        'video buffer verifier size':{
+            'name':u'Video buffer verifier size',
+            'keyword':u'video_buffer_verifier_size',
+            'type':'int',
+        },
+        'video buffer verifier maximum rate':{
+            'name':u'Video buffer verifier maximum rate',
+            'keyword':u'video_buffer_verifier_maximum_rate',
+            'type':'int',
+        },
+        'weighted predicted frames':{
+            'name':u'Weighted predicted frames',
+            'keyword':u'weighted_predicted_frames',
+            'type':'int',
+        },
+        'weighted bi directional frames':{
+            'name':u'Weighted bi directional frames',
+            'keyword':u'weighted_bi_directional_frames',
+            'type':'int',
+        },
+        'maximum keyframe interval':{
+            'name':u'Maximum keyframe interval',
+            'keyword':u'maximum_keyframe_interval',
+            'type':'int',
+        },
+        'minimum keyframe interval':{
+            'name':u'Minimum keyframe interval',
+            'keyword':u'minimum_keyframe_interval',
+            'type':'int',
+        },
+        'macroblock adaptive frame field':{
+            'name':u'macroblock adaptive frame field',
+            'keyword':u'macroblock adaptive frame field',
+            'type':'int',
+        },
+        'macroblock tree rate control':{
+            'name':u'Macroblock tree rate control',
+            'keyword':u'macroblock_tree_rate_control',
+            'type':'int',
+        },
+        'motion estimation method':{
+            'name':u'Motion estimation method',
+            'keyword':u'motion_estimation_method',
+            'type':'int',
+        },
+        'motion estimation range':{
+            'name':u'Motion estimation range',
+            'keyword':u'motion_estimation_range',
+            'type':'int',
+        },
+        'mixed references':{
+            'name':u'Mixed references',
+            'keyword':u'mixed_references',
+            'type':'int',
+        },
+        'noise reduction':{
+            'name':u'Noise reduction',
+            'keyword':u'noise_reduction',
+            'type':'int',
+        },
+        'minimum quantizer':{
+            'name':u'Minimum quantizer',
+            'keyword':u'minimum_quantizer',
+            'type':'int',
+        },
+        'maximum quantizer':{
+            'name':u'Maximum quantizer',
+            'keyword':u'maximum_quantizer',
+            'type':'int',
+        },
+        'quantizer step':{
+            'name':u'Quantizer step',
+            'keyword':u'quantizer_step',
+            'type':'int',
+        },
+        'custom quantization matrices':{
+            'name':u'Custom quantization matrices',
+            'keyword':u'custom_quantization_matrices',
+            'type':'int',
+        },
+        'psychovisual optimization':{
+            'name':u'Psychovisual optimization',
+            'keyword':u'psychovisual_optimization',
+            'type':'int',
+        },
+        'psychovisual strength':{
+            'name':u'Psychovisual strength',
+            'keyword':u'psychovisual_strength',
+            'type':'unicode',
+        },
+        'quantizer curve compression factor':{
+            'name':u'Quantizer curve compression factor',
+            'keyword':u'quantizer_curve_compression_factor',
+            'type':'float',
+        },
+        'quantizer curve blur':{
+            'name':u'Quantizer curve blur',
+            'keyword':u'quantizer_curve_blur',
+            'type':'float',
+        },
+        'post compression quantizer curve blur':{
+            'name':u'Post compression quantizer curve blur',
+            'keyword':u'post_compression_quantizer_curve_blur',
+            'type':'float',
+        },
+        'rate tolerance':{
+            'name':u'Rate tolerance',
+            'keyword':u'rate_tolerance',
+            'type':'float',
+        },
+        'intra predicted ratio':{
+            'name':u'Intra predicted ratio',
+            'keyword':u'intra_predicted_ratio',
+            'type':'float',
+        },
+        'bi directional predicted ratio':{
+            'name':u'Bi directional predicted ratio',
+            'keyword':u'bi_directional_predicted_ratio',
+            'type':'float',
+        },
+        'macroblock partitions':{
+            'name':u'Macroblock partitions',
+            'keyword':u'macroblock_partitions',
+            'type':'unicode',
+        },
+        'adaptive quantization':{
+            'name':u'Adaptive quantization',
+            'keyword':u'adaptive_quantization',
+            'type':'unicode',
+        },
+        'deadzone':{
+            'name':u'Deadzone',
+            'keyword':u'deadzone',
+            'type':'unicode',
+        },
+        'loop filter deblocker':{
+            'name':u'Loop filter deblocker',
+            'keyword':u'loop_filter_deblocker',
+            'type':'unicode',
+        },
+        'rate control method':{
+            'name':u'Rate control method',
+            'keyword':u'rate_control_method',
+            'type':'unicode',
+        },
+        'hypothetical reference decoder':{
+            'name':u'Hypothetical reference decoder',
+            'keyword':u'hypothetical_reference_decoder',
+            'type':'unicode',
+        },
+        'open group of pictures':{
+            'name':u'Open group of pictures',
+            'keyword':u'open group_of_pictures',
+            'type':'int',
+        },
+        'interlaced':{
+            'name':u'Interlaced',
+            'keyword':u'interlaced',
+            'type':'int',
+        },
+        'bluray compatible':{
+            'name':u'Bluray compatible',
+            'keyword':u'bluray_compatible',
+            'type':'int',
+        },
+
     },
 }

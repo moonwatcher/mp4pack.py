@@ -164,7 +164,7 @@ class ResourceHandler(object):
                     taken = True
                     if branch['query type'] == 'lookup':
                         if branch['persistent']:
-                            self.log.debug(u'Dropping %s', uri)
+                            self.log.info(u'Dropping %s', uri)
                             collection = repository.database[branch['collection']]
                             collection.remove({u'head.alternate':uri})
                     break

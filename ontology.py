@@ -213,6 +213,7 @@ class Space(object):
                 'tvdb':None,
                 'mediainfo':None,
                 'subler':None,
+                'x264':None,
             },
             'synonym':[],
             'element':{},
@@ -678,18 +679,7 @@ class Prototype(Element):
     def _cast_dict(self, value, caster, axis=None):
         result = None
         if 'plural format' in self.node:
-            if self.node['plural format'] == 'mediainfo key value list':
-                if self.env.expression['mediainfo value list'].match(value):
-                    literals = value.split(u'/')
-                    result = {}
-                    for literal in literals:
-                        pair = literal.split(u'=')
-                        if len(pair) == 2:
-                            result[pair[0].strip()] = caster(pair[1], axis)
-                else:
-                    self.log.error(u'Could not parse dictionary %s', value)
-                    result = None
-            elif self.node['plural format'] == 'eval':
+            if self.node['plural format'] == 'eval':
                 try:
                     result = Ontology(self.env, self.node['namespace'], eval(value))
                     # self.log.debug(u'Evaluating dictionary %s %s', result, eval(value))

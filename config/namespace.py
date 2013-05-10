@@ -1232,9 +1232,11 @@
                 'encoder':{
                     'mediainfo':'Encoded_Library',
                 },
-                'encoder settings':{
+                'encoder settings string':{
                     'mediainfo':'Encoded_Library_Settings',
-                    'plural format':'mediainfo key value list',
+                },
+                'encoder settings':{
+                    'mediainfo':'Parsed_Encoded_Library_Settings',
                 },
                 'encoded date':{
                     'mediainfo':'Encoded_Date',
@@ -1388,6 +1390,174 @@
                 'rule.medium.stream.default.primary',
                 'rule.system.default.enabled',
             ],
+        },
+        'ns.medium.resource.x264':{
+            'synonym':['x264'],
+            'element':{
+                'bit rate':{
+                    'x264':'bitrate',
+                },
+                '8x8 dct':{
+                    'x264':u'8x8dct',
+                },
+                'adaptive bi directional':{
+                    'x264':u'b_adapt',
+                },
+                'bi directional bias':{
+                    'x264':u'b_bias',
+                },
+                'bi directional pyramid':{
+                    'x264':u'b_pyramid',
+                },
+                'bi directional frames':{
+                    'x264':u'bframes',
+                },
+                'cabac':{
+                    'x264':u'cabac',
+                },
+                'chroma motion estimation':{
+                    'x264':u'chroma_me',
+                },
+                'chroma planes quantizer offset':{
+                    'x264':u'chroma_qp_offset',
+                },
+                'constrained intra prediction':{
+                    'x264':u'constrained_intra',
+                },
+                'dct decimation':{
+                    'x264':'decimate',
+                },
+                'direct motion vectors prediction mode':{
+                    'x264':'direct',
+                },
+                'predicted frames early skip detection':{
+                    'x264':'fast_pskip',
+                },
+                'intra frames refresh':{
+                    'x264':'intra_refresh',
+                },
+                'rate control lookahead':{
+                    'x264':'rc_lookahead',
+                },
+                'decoded picture buffer size':{
+                    'x264':'ref',
+                },
+                'scene cut':{
+                    'x264':u'scenecut',
+                },
+                'sliced based threading':{
+                    'x264':'sliced_threads',
+                },
+                'subpixel motion estimation':{
+                    'x264':'subme',
+                },
+                'threads':{
+                    'x264':u'threads',
+                },
+                'trellis quantization':{
+                    'x264':'trellis',
+                },
+                'video buffer verifier size':{
+                    'x264':'vbv_bufsize',
+                },
+                'video buffer verifier maximum rate':{
+                    'x264':'vbv_maxrate',
+                },
+                'weighted predicted frames':{
+                    'x264':'wpredp',
+                },
+                'weighted bi directional frames':{
+                    'x264':'wpredb',
+                },
+                'maximum keyframe interval':{
+                    'x264':'keyint',
+                },
+                'minimum keyframe interval':{
+                    'x264':'keyint_min',
+                },
+                'macroblock adaptive frame field':{
+                    'x264':'mbaff',
+                },
+                'macroblock tree rate control':{
+                    'x264':'mbtree',
+                },
+                'motion estimation method':{
+                    'x264':'me',
+                },
+                'motion estimation range':{
+                    'x264':'me_range',
+                },
+                'mixed references':{
+                    'x264':'mixed_ref',
+                },
+                'noise reduction':{
+                    'x264':'nr',
+                },
+                'minimum quantizer':{
+                    'x264':'qpmin',
+                },
+                'maximum quantizer':{
+                    'x264':'qpmax',
+                },
+                'quantizer step':{
+                    'x264':'qpstep',
+                },
+                'custom quantization matrices':{
+                    'x264':'cqm',
+                },
+                'psychovisual optimization':{
+                    'x264':'psy',
+                },
+                'psychovisual strength':{
+                    'x264':'psy_rd',
+                },
+                'quantizer curve compression factor':{
+                    'x264':'qcomp',
+                },
+                'quantizer curve blur':{
+                    'x264':'cplxblur',
+                },
+                'post compression quantizer curve blur':{
+                    'x264':'qblur',
+                },
+                'rate tolerance':{
+                    'x264':'ratetol',
+                },
+                'intra predicted ratio':{
+                    'x264':'ip_ratio',
+                },
+                'bi directional predicted ratio':{
+                    'x264':'pb_ratio',
+                },
+                'macroblock partitions':{
+                    'x264':'analyse',
+                },
+                'adaptive quantization':{
+                    'x264':'aq',
+                },
+                'deadzone':{
+                    'x264':'deadzone',
+                },
+                'loop filter deblocker':{
+                    'x264':'deblock',
+                },
+                'rate control method':{
+                    'x264':'rc',
+                },
+                'hypothetical reference decoder':{
+                    'x264':'nal_hrd',
+                },
+                'open group of pictures':{
+                    'type':'open_gop',
+                },
+                'interlaced':{
+                    'x264':u'interlaced',
+                },
+                'bluray compatible':{
+                    'x264':'bluray_compat',
+                },
+            },
+            'rule':[],
         },
 
         # Knowledge

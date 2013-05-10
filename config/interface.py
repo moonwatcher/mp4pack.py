@@ -18,7 +18,7 @@
                 {
                     'instruction':{
                         'name':'get',
-                        'help':'Get a JSON formated document by URI',
+                        'help':'Get documents',
                     },
                     'argument':[
                         'uris',
@@ -29,8 +29,8 @@
                 },
                 {
                     'instruction':{
-                        'name':'remove',
-                        'help':'Remove a document by URI',
+                        'name':'drop',
+                        'help':'Drop documents',
                     },
                     'argument':[
                         'uris',

@@ -20,7 +20,7 @@
                 },
                 {
                     'requires':set(('action',)),
-                    'equal':{'action':'remove'},
+                    'equal':{'action':'drop'},
                     'apply':(
                         {'property':'implementation', 'value':u'ServiceJob',},
                     ),

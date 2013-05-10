@@ -143,6 +143,7 @@ class Environment(object):
         return self.state['subtitle filter']
     
     
+    
     # Lazy loaders for processors
     @property
     def resolver(self):
@@ -165,6 +166,8 @@ class Environment(object):
         return self._universal_detector
 
     
+    
+    # Loading
     def load(self):
         relative = os.path.dirname(__file__)
         self.load_config(os.path.join(relative,'config/system.py'))
@@ -382,27 +385,22 @@ class Environment(object):
     
     
     
-    def varify_directory(self, path):
-        result = False
-        try:
-            dirname = os.path.dirname(path)
-            if not os.path.exists(dirname):
-                self.log.debug(u'Creating directory %s', dirname)
-                os.makedirs(dirname)
-                result = True
-        except OSError as err:
-            self.log.error(unicode(err))
-            result = False
-        return result
     
-    
-    def purge_path(self, path):
+    # Direcotry and file
+    def cleanup_path(self, path):
         if path and os.path.isfile(path):
             os.remove(path)
             try:
                 os.removedirs(os.path.dirname(path))
             except OSError:
                 pass
+    
+    
+    def check_path_availability(self, path, overwrite=False):
+        result = self.is_path_available(path, overwrite)
+        if result:
+            self.varify_directory(path)
+        return result
     
     
     def is_path_available(self, path, overwrite=False):
@@ -416,9 +414,24 @@ class Environment(object):
         return result
     
     
-    def varify_path_is_available(self, path, overwrite=False):
-        result = self.is_path_available(path, overwrite)
-        if result: self.varify_directory(path)
+    def varify_directory(self, path):
+        result = False
+        try:
+            if os.path.isfile():
+                directory = os.path.dirname(path)
+            else:
+                directory = path
+                
+            if not os.path.exists(dirname):
+                self.log.debug(u'Creating directory %s', directory)
+                os.makedirs(directory)
+                result = True
+                
+        except OSError as err:
+            self.log.error(u'Failed to create directory %s', directory)
+            self.log.debug(unicode(err))
+            result = False
+            
         return result
     
     
@@ -434,6 +447,7 @@ class Environment(object):
         else:
             result = False
         return result
+    
     
     
     
@@ -458,7 +472,9 @@ class Environment(object):
         report = None
         if command:
             if not debug:
-                if log == None: log = self.log
+                if log == None:
+                    log = self.log
+                
                 log.debug(u'Execute: %s', encode_command(command))
                 if message: log.info(message)
                 
@@ -473,7 +489,7 @@ class Environment(object):
                     
                 report = proc.communicate()
             else:
-                log.info(message)
+                if message: log.info(message)
                 print encode_command(command)
         return report
     

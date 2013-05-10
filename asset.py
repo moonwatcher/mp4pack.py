@@ -313,7 +313,7 @@ class Resource(object):
     def copy(self, task):
         product = task.produce()
         if product:
-            if self.env.varify_path_is_available(product.path, task.ontology['overwrite']):
+            if self.env.check_path_availability(product.path, task.ontology['overwrite']):
                 command = self.env.initialize_command('rsync', self.log)
                 if command:
                     # Resolving the real path means the semantic 
@@ -330,7 +330,7 @@ class Resource(object):
             if os.path.exists(product.path) and os.path.samefile(self.path, product.path):
                 self.log.debug(u'No move necessary for %s', unicode(self))
             else:
-                if self.env.varify_path_is_available(product.path, False):
+                if self.env.check_path_availability(product.path, False):
                     command = self.env.initialize_command('mv', self.log)
                     if command:
                         command.extend([self.path, product.path])
@@ -399,12 +399,13 @@ class AudioVideoContainer(Container):
                 stream['enabled'] = False
                 product = task.produce(stream)
                 if product:
+                    # assemble a temp file name for the exploded stream
                     product.location['file name'] = product.location['fragment file name']
                     product.location['directory'] = product.location['fragment directory']
-                    self.env.varify_directory(product.path)
                     
-                    product.menu = Menu.from_node(self.env, stream['content'])
-                    product.write(product.path)
+                    if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                        product.menu = Menu.from_node(self.env, stream['content'])
+                        product.write(product.path)
     
     
     def pack(self, task):
@@ -446,8 +447,8 @@ class AudioVideoContainer(Container):
                     
                 command.extend([u'--input', self.path, u'--output', product.path])
                 message = u'Transcode {0} --> {1}'.format(self.path, product.path)
-                self.env.varify_directory(product.path)
-                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
+                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
     def _pack_mkv(self, task):
@@ -589,17 +590,19 @@ class Matroska(AudioVideoContainer):
                 if stream['enabled']:
                     product = task.produce(stream)
                     if product:
+                        stream['enabled'] = False
+
+                        # assemble a temp file name for the exploded stream
                         product.location['file name'] = product.location['fragment file name']
                         product.location['directory'] = product.location['fragment directory']
-                        self.env.varify_directory(product.path)
-                        
-                        # Leave a hint about the delay
-                        if 'delay' in stream:
-                            product.hint['delay'] = stream['delay']
+
+                        if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                            # Leave a hint about the delay
+                            if 'delay' in stream:
+                                product.hint['delay'] = stream['delay']
                             
-                        command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
-                        stream['enabled'] = False
-                        taken = True
+                            command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
+                            taken = True
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
                 self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
@@ -722,8 +725,8 @@ class RawAudio(Container):
                         
                     command.append(product.path)
                     message = u'Transcode {0} --> {1}'.format(self.path, product.path)
-                    self.env.varify_directory(product.path)
-                    self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                    if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                        self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
 
 
@@ -773,18 +776,23 @@ class Subtitles(Text):
             else: stream = None
             if stream:
                 
+                # Apply filters
                 for name in stream['subtitle filters']:
                     product.caption.filter(name)
                     
+                # Apply time shift
                 if 'time shift' in task.ontology:
                     product.caption.shift(task.ontology['time shift'])
                     
+                # Apply time scale
                 if 'time scale' in task.ontology:
                     product.caption.scale(task.ontology['time scale'])
                     
+                # Normalize the stream
                 product.caption.normalize()
-                self.env.varify_directory(product.path)
-                product.write(product.path)
+                
+                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                    product.write(product.path)
     
 
 
@@ -832,14 +840,18 @@ class TableOfContent(Text):
             else: stream = None
             if stream:
                 
+                # Apply time shift
                 if 'time shift' in task.ontology:
                     product.menu.shift(task.ontology['time shift'])
                     
+                # Apply time scale
                 if 'time scale' in task.ontology:
                     product.menu.scale(task.ontology['time scale'])
                     
+                # Normalize the stream
                 product.menu.normalize()
-                self.env.varify_directory(product.path)
-                product.write(product.path)
+                
+                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                    product.write(product.path)
     
 

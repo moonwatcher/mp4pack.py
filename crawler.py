@@ -81,6 +81,8 @@ class Crawler(object):
                                 o = Ontology(self.env, mtype.node['namespace'])
                                 for item in list(node):
                                     o.decode(item.tag, item.text)
+                                if mtype.key == 'video':
+                                    self._fix_encoder_settings(o)
                                 self._stream.append(o)
                             elif mtype.key == 'menu':
                                 m = Menu(self.env)
@@ -305,6 +307,20 @@ class Crawler(object):
             self.log.debug(u'%s encoding detected for %s with confidence %s', result['encoding'], unicode(self), result['confidence'])
             self.ontology['encoding'] = result['encoding']
     
+    
+    def _fix_encoder_settings(self, ontology):
+        if 'encoder settings string' in ontology:
+            if self.env.expression['mediainfo value list'].match(ontology['encoder settings string']):
+                literals = ontology['encoder settings string'].split(u'/')
+                value = {}
+                for literal in literals:
+                    pair = literal.split(u'=')
+                    if len(pair) == 2:
+                        value[pair[0].strip()] = pair[1].strip()
+                ontology.decode('Parsed_Encoded_Library_Settings', value)
+            else:
+                self.log.error(u'Could not parse encoder settings %s', ontology['encoder settings string'])
+            del ontology['encoder settings string']
     
     def _fix(self, ontology):
         if ontology:
