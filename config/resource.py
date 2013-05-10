@@ -173,6 +173,7 @@
                                         {'stream kind':'audio', 'kind':'ac3'},
                                         {'stream kind':'audio', 'kind':'aac'},
                                         {'stream kind':'audio', 'kind':'dts'},
+                                        {'stream kind':'audio', 'kind':'flac'},
                                         {'stream kind':'audio', 'kind':'mp3'},
                                     ],
                                 },

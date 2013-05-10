@@ -119,6 +119,14 @@
                         {'property':'profile', 'value':u'original',},
                     ),
                 },
+                {
+                    'requires':set(('kind', 'host',)),
+                    'equal':{'host':'shaft', 'kind':'flac',},
+                    'apply':(
+                        {'property':'volume', 'value':u'epsilon',},
+                        {'property':'profile', 'value':u'original',},
+                    ),
+                },
             ],
         },
         'multivac':{
