@@ -322,6 +322,7 @@ class Crawler(object):
                 self.log.error(u'Could not parse encoder settings %s', ontology['encoder settings string'])
             del ontology['encoder settings string']
     
+    
     def _fix(self, ontology):
         if ontology:
             
@@ -346,4 +347,5 @@ class Crawler(object):
                         if items:
                             ontology[key] = items
     
+
 
