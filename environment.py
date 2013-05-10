@@ -422,7 +422,7 @@ class Environment(object):
             else:
                 directory = path
                 
-            if not os.path.exists(dirname):
+            if not os.path.exists(directory):
                 self.log.debug(u'Creating directory %s', directory)
                 os.makedirs(directory)
                 result = True
