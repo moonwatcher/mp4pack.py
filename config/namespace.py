@@ -272,6 +272,7 @@
                 'rule.knowledge.simple.name.music.album',
                 'rule.knowledge.simple.name.music.track',
                 'rule.knowledge.release.year',
+                'rule.medium.home.umid',
             ],
         },
         'ns.medium.resource.location':{
