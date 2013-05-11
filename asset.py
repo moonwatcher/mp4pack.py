@@ -504,7 +504,8 @@ class AudioVideoContainer(Container):
                     command.append(pivot.resource.path)
                     
                 message = u'Pack {0} --> {1}'.format(self.path, product.path)
-                self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
+                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                    self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
     def _pack_m4v(self, task):
