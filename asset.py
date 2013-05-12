@@ -600,9 +600,9 @@ class Matroska(AudioVideoContainer):
 
                         if self.env.check_path_availability(product.path, task.ontology['overwrite']):
                             # Leave a hint about the delay
-                            if 'delay' in stream:
-                                product.hint['delay'] = stream['delay']
+                            if 'delay' in stream: product.hint['delay'] = stream['delay']
                             
+                            # extract th stream
                             command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
                             taken = True
             if taken:
