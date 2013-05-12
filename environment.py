@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 
 class Environment(object):
     def __init__(self):
-        self.log = logging.getLogger('environment')
+        self.log = logging.getLogger('Environment')
         self.ontology = None
         self.state = {
             'system':{},
