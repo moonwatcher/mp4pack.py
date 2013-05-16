@@ -13,6 +13,7 @@ from bson import json_util
 from bson.objectid import ObjectId
 from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
+from httplib import BadStatusLine
 
 class Resolver(object):
     def __init__(self, env):
@@ -340,6 +341,8 @@ class ResourceHandler(object):
 
             try:
                 response = urlopen(request)
+            except BadStatusLine, e:
+                self.log.warning(u'Bad HTTP status error when requesting %s', query['remote url'])
             except HTTPError, e:
                 self.log.warning(u'Server returned an error when requesting %s: %s', query['remote url'], e.code)
             except URLError, e:
