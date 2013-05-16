@@ -367,7 +367,7 @@
                     },
                 },
                 'query parameters':{
-                    'flag':['-q', '--query-parameters'],
+                    'flag':['-q', '--query'],
                     'parameter':{ 
                         'help':'Query parameters for lookup',
                         'dest':'query parameters',

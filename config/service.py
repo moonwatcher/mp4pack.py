@@ -2820,6 +2820,22 @@
                     'type':'crawl',
                     'collection':'medium_resource',
                 },
+                'service.medium.resource.fragment':{
+                    'match':[
+                        {
+                            'filter':ur'^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})/fragment$',
+                        },
+                    ],
+                    'resolvable':[
+                        {
+                            'name':u'resource',
+                            'format':ur'/m/resource/sha1/{path digest}/fragment',
+                            'canonical':True,
+                        },
+                    ],
+                    'type':'reference',
+                    'collection':'medium_resource_fragment',
+                },
             }
         },
     },

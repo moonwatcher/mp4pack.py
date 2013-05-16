@@ -402,7 +402,8 @@ class ResourceHandler(object):
                     collection.save(record)
                 else:
                     self.log.error(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
-
+    
+    
     def _compute_resolvables(self, entry):
         entry['record'][u'head'][u'alternate'] = []
         entry['record'][u'head']['canonical'] = None

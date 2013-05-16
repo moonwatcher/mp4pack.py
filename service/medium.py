@@ -31,10 +31,15 @@ class MediumHandler(ResourceHandler):
                         query['sources'].append(crawler)
                     
         elif query['branch']['type'] == 'reference':
-            # For assets, query the resource collection to collect the relevent resources
             node = {'reference':{},}
             collection = query['repository'].database['medium_resource']
-            resources = collection.find({u'head.genealogy.home id':query['parameter']['home id']})
+            
+            if query['branch']['name'] == 'service.medium.asset':
+                resources = collection.find({u'head.genealogy.home id':query['parameter']['home id']})
+                
+            elif query['branch']['name'] == 'service.medium.resource.fragment':
+                resources = collection.find({u'head.genealogy.resource path digest':query['parameter']['path digest']})
+            
             for resource in resources:
                 node['reference'][resource['head']['canonical']] = resource['head']
             query['sources'].append(node)
