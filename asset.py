@@ -393,7 +393,7 @@ class AudioVideoContainer(Container):
         return self.meta['width'] >= self.env.constant['hd threshold']
     
     
-    def explode(self, task): 
+    def explode(self, task):
         for stream in task.transform.single_pivot.stream:
             if stream['enabled'] and stream['stream kind'] == 'menu':
                 stream['enabled'] = False
@@ -413,6 +413,8 @@ class AudioVideoContainer(Container):
             self._pack_mkv(task)
         elif task.ontology['kind'] == 'm4v':
             self._pack_m4v(task)
+        else:
+            self.log.error(u'Unknown target container to pack %s', unicode(self))
     
     
     def transcode(self, task):
@@ -704,6 +706,12 @@ class RawAudio(Container):
     
     
     def transcode(self, task):
+        if task.ontology['kind'] == 'ac3':
+            self._transcode_ac3(task)
+        else:
+            self.log.error(u'Unknown target format to transcode %s', unicode(self))
+    
+    def _transcode_ac3(self, task):
         product = task.produce(task.ontology)
         if product:
             stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'audio' ]

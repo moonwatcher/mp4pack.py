@@ -179,6 +179,7 @@ class Environment(object):
         self.load_config(os.path.join(relative,'config/namespace.py'))
         self.load_config(os.path.join(relative,'config/service.py'))
         self.load_config(os.path.join(relative,'config/resource.py'))
+        self.load_config(os.path.join(relative,'config/subtitle.py'))
         
         # Override the default home folder from env if specified and valid
         home = os.getenv('MPK_HOME')

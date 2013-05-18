@@ -483,6 +483,7 @@
                 'itunes movie id',
                 'tv show handle',
                 'tvdb tv show id',
+                'itunes tv show id',
                 'album handle',
                 'track name',
                 'resource path digest',
@@ -517,9 +518,19 @@
                 },
                 {
                     'requires':set(('file name',)),
+                    'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'decode':[
+                        {'property':'file name', 'expression':ur'^iTMF(?P<itunes_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                    ],
+                    'apply':[
+                        {'property':'media kind', 'value':10,},
+                    ],
+                },
+                {
+                    'requires':set(('file name',)),
                     'match':{'property':'file name', 'expression':ur'^.{2,} d[0-9]+t[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
-                        {'property':'file name', 'expression':ur'^(?P<album_handle>.{2,}) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                        {'property':'file name', 'expression':ur'^iTMF(?P<itunes_music_album_id>.{2,}) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
                     'apply':[
                         {'property':'media kind', 'value':1,},
@@ -1484,7 +1495,6 @@
                 },
             ],
         },
-
         
         'rule.knowledge.simple.name.movie':{
             'name':'Simple movie title',

@@ -369,15 +369,10 @@ class ResourceTask(Task):
         
         # if an override was given set some concepts from it 
         if override:
-            if 'kind' in override:
-                o['kind'] = override['kind']
-            if 'language' in override:
-                o['language'] = override['language']
-            if 'stream id' in override:
-                o['stream id'] = override['stream id']
-            if 'resource path digest' in override:
-                o['resource path digest'] = override['resource path digest']
-
+            for i in ['kind', 'language', 'stream id', 'resource path digest']:
+                if i in override:
+                    o[i] = override[i]
+                    
         # try to produce the resource
         product = self.resource.asset.locate_resource(o)
         if product:
