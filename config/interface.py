@@ -24,7 +24,7 @@
                         'uris',
                         'sync',
                         'download',
-                        'query parameters',
+                        'query',
                     ]
                 },
                 {
@@ -366,11 +366,11 @@
                         'metavar':'URI',
                     },
                 },
-                'query parameters':{
+                'query':{
                     'flag':['-q', '--query'],
                     'parameter':{ 
                         'help':'Query parameters for lookup',
-                        'dest':'query parameters',
+                        'dest':'query',
                         'metavar':'DICT',
                     },
                 },

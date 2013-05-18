@@ -1517,9 +1517,9 @@
             'type':'unicode',
             'plural':'dict',
         },
-        'query parameters':{
-            'name':u'Query parameters',
-            'keyword':u'query_parameters',
+        'query':{
+            'name':u'Query',
+            'keyword':u'query',
             'type':'unicode',
             'plural':'dict',
             'namespace':'ns.search.query',

@@ -64,7 +64,7 @@
                 },
                 'configuration path':None,
                 'action':None,
-                'query parameters':{
+                'query':{
                     'plural format':'eval',
                 },
             },
@@ -112,7 +112,7 @@
                 'debug':{
                     'auto cast':False,
                 },
-                'query parameters':None,
+                'query':None,
                 'implementation':None,
             },
             'rule':[
@@ -151,7 +151,7 @@
                 'debug':{
                     'auto cast':False,
                 },
-                'query parameters':None,
+                'query':None,
             },
             'rule':[
                 'rule.task.default.preset'
