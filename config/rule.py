@@ -27,7 +27,7 @@
                 },
                 {
                     'requires':set(('action',)),
-                    'equal':{'action':'report'},
+                    'equal':{'action':'info'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
@@ -103,7 +103,7 @@
             'branch':[
                 {
                     'requires':set(('action',)),
-                    'equal':{'action':'report'},
+                    'equal':{'action':'info'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),

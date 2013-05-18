@@ -4,7 +4,7 @@
         'normal':{
         	'description':u'Base empty profile to mirror the default profile',
             'action':{
-                'report':{},
+                'info':{},
                 'copy':{},
                 'move':{},
                 'delete':{},

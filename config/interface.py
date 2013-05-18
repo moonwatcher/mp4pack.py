@@ -40,7 +40,7 @@
                 },
                 {
                     'instruction':{
-                        'name':'report',
+                        'name':'info',
                         'help':'Report information about resource',
                     },
                     'argument':[

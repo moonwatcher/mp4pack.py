@@ -306,7 +306,7 @@ class Resource(object):
         pass
     
     
-    def report(self, task):
+    def info(self, task):
     	print json.dumps(self.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
     
