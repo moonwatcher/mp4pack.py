@@ -941,6 +941,9 @@
                             'filter':ur'^/k/tv/show/(?P<tv_show_id>[0-9]+)/cast$',
                         },
                     ],
+                    'collect':[
+                        ur'/h/tv/show/{tv show id}',
+                    ],
                     'resolvable':[
                         {
                             'name':u'tv show cast',
@@ -951,12 +954,16 @@
                     'type':'json',
                     'collection':'knowledge_tv_show_cast',
                     'namespace':'ns.knowledge.tv.show.canonical',
+                    'index':['tv show id', ],
                 },
                 'service.document.knowledge.tv.show.image':{
                     'match':[
                         {
                             'filter':ur'^/k/tv/show/(?P<tv_show_id>[0-9]+)/image$',
                         },
+                    ],
+                    'collect':[
+                        ur'/h/tv/show/{tv show id}',
                     ],
                     'resolvable':[
                         {
@@ -968,6 +975,7 @@
                     'type':'json',
                     'collection':'knowledge_tv_show_image',
                     'namespace':'ns.knowledge.tv.show.canonical',
+                    'index':['tv show id', ],
                 },
                 'service.document.knowledge.tv.season':{
                     'match':[
@@ -1200,16 +1208,29 @@
                             'filter':ur'^/k/(?P<language>[a-z]{2})/music/album/(?P<music_album_id>[0-9]+)$',
                         },
                     ],
+                    'aggregate':[
+                        {
+                            'uri':ur'/c/itunes/music/album/{itunes music album id}',
+                        },
+                    ],
+                    'collect':[
+                        ur'/h/music/album/{music album id}',
+                    ],
                     'resolvable':[
                         {
                             'name':u'music album',
                             'format':ur'/k/{language}/music/album/{music album id}',
+                            'canonical':True,
                         },
                     ],
                     'type':'json',
                     'collection':'knowledge_music_album',
                     'namespace':'ns.knowledge.music.album.canonical',
-                    'index':['music album id', 'language'],
+                    'index':[
+                        'music album id', 
+                        'itunes music album id',
+                        'language',
+                    ],
                 },
                 'service.document.knowledge.music.album.image':{
                     'match':[
@@ -1217,15 +1238,22 @@
                             'filter':ur'^/k/music/album/(?P<music_album_id>[0-9]+)/image$',
                         },
                     ],
+                    'collect':[
+                        ur'/h/music/album/{music album id}',
+                    ],
                     'resolvable':[
                         {
                             'name':u'music album image',
                             'format':ur'/k/music/album/{music album id}/image',
+                            'canonical':True,
                         },
                     ],
                     'type':'json',
                     'collection':'knowledge_music_album_image',
                     'namespace':'ns.knowledge.music.album.canonical',
+                    'index':[
+                        'music album id', 
+                    ],
                 },
                 'service.document.knowledge.music.track':{
                     'match':[
@@ -1236,10 +1264,20 @@
                             'filter':ur'^/k/(?P<language>[a-z]{2})/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
                         },
                     ],
+                    'aggregate':[
+                        {
+                            'uri':ur'/c/itunes/music/track/{itunes music track id}',
+                        },
+                    ],
+                    'collect':[
+                        ur'/h/music/track/{track id}',
+                        ur'/h/music/track/{music album id}/{disc number}/{track number}',
+                    ],
                     'resolvable':[
                         {
                             'name':u'music track by track id',
                             'format':ur'/k/{language}/music/track/{track id}',
+                            'canonical':True,
                         },
                         {
                             'name':u'music track by album id',
@@ -1254,7 +1292,9 @@
                         'track id',
                         'disc number',
                         'track number',
-                        'language'
+                        'itunes music album id',
+                        'itunes music track id',
+                        'language',
                     ],
                 },
                 'service.document.knowledge.person':{
@@ -1403,7 +1443,6 @@
                 },
             },
         },
-        
         'tmdb':{
             'api key':u'a8b9f96dde091408a03cb4c78477bd14',
             'remote base':u'http://api.themoviedb.org/3',
@@ -2783,7 +2822,6 @@
                 },
             },
         },
-
         'medium':{
             'match':ur'^/m/.*$',
             'branch':{

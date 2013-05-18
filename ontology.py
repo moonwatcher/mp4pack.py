@@ -833,6 +833,9 @@ class Rule(object):
         result = False
         if branch is not None:
             try:
+                if 'requires' in branch:
+                    branch['requires'] = set(branch['requires'])
+                    
                 if 'match' in branch:
                     if 'flags' not in branch['match']:
                         branch['match']['flags'] = re.UNICODE

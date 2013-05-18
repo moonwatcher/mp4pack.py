@@ -170,16 +170,16 @@ class Environment(object):
     # Loading
     def load(self):
         relative = os.path.dirname(__file__)
-        self.load_config(os.path.join(relative,'config/system.py'))
-        self.load_config(os.path.join(relative,'config/expression.py'))
-        self.load_config(os.path.join(relative,'config/interface.py'))
-        self.load_config(os.path.join(relative,'config/enumeration.py'))
-        self.load_config(os.path.join(relative,'config/archetype.py'))
-        self.load_config(os.path.join(relative,'config/rule.py'))
-        self.load_config(os.path.join(relative,'config/namespace.py'))
-        self.load_config(os.path.join(relative,'config/service.py'))
-        self.load_config(os.path.join(relative,'config/resource.py'))
-        self.load_config(os.path.join(relative,'config/subtitle.py'))
+        self.load_configuration_file(os.path.join(relative,'config/system.py'))
+        self.load_configuration_file(os.path.join(relative,'config/expression.py'))
+        self.load_configuration_file(os.path.join(relative,'config/interface.py'))
+        self.load_configuration_file(os.path.join(relative,'config/enumeration.py'))
+        self.load_configuration_file(os.path.join(relative,'config/archetype.py'))
+        self.load_configuration_file(os.path.join(relative,'config/rule.py'))
+        self.load_configuration_file(os.path.join(relative,'config/namespace.py'))
+        self.load_configuration_file(os.path.join(relative,'config/service.py'))
+        self.load_configuration_file(os.path.join(relative,'config/material.py'))
+        self.load_configuration_file(os.path.join(relative,'config/subtitle.py'))
         
         # Override the default home folder from env if specified and valid
         home = os.getenv('MPK_HOME')
@@ -187,27 +187,35 @@ class Environment(object):
             home = os.path.expanduser(os.path.expandvars(home))
             if os.path.isdir(home):
                 self.system['home'] = home
-        self.system['conf'] = os.path.join(self.home, u'settings.py')
-        self.load_config(self.system['conf'])
+        self.system['conf'] = os.path.join(self.home, u'settings.json')
+        self.load_configuration_file(self.system['conf'])
     
     
-    def load_config(self, path):
+    def load_configuration_file(self, path):
         if path and os.path.isfile(path):
             try:
-                content = open(path, 'r').read()
+                content = open(path, 'r')
+
             except IOError, e:
                 self.log.warning(u'Failed to load configuration file %s', path)
                 self.log.debug(u'Exception raised: %s', unicode(e))
+                
             else:
+                extention = os.path.splitext(path)[1]
                 try:
-                    node = eval(content)
-                    self.log.debug(u'Loading configuration dictionary %s', path)
+                    if extention == '.py':
+                        node = eval(content.read())
+                    elif extention == '.json':
+                        node = json.load(content)
+                    self.log.debug(u'Loaded configuration dictionary %s', path)
+                    
                 except SyntaxError, e:
                     self.log.warning(u'Failed to evaluate configuration file syntax %s', path)
                     self.log.debug(u'Exception raised: %s', unicode(e))
+                    
                 else:
                     if isinstance(node, dict):
-                        self._load_config_node(node)
+                        self.load_configuration_node(node)
                     else:
                         self.log.warning(u'Configuration file %s does not contain a valid dictionary', path)
     
@@ -218,7 +226,7 @@ class Environment(object):
         # Load conf file from command line argument
         if 'configuration path' in self.ontology:
             self.ontology['configuration path'] = os.path.expanduser(os.path.expandvars(self.ontology['configuration path']))
-            self.load_config(self.ontology['configuration path'])
+            self.load_configuration_file(self.ontology['configuration path'])
             
         # Override some value from command line
         for e in ('domain', 'host', 'language'):
@@ -228,7 +236,7 @@ class Environment(object):
         self._load_dynamic_rules()
     
     
-    def _load_config_node(self, node):
+    def load_configuration_node(self, node):
         def check(node):
             if node and ('enable' not in node or node['enable']):
                 return True
@@ -358,7 +366,7 @@ class Environment(object):
             for volume in repository.volume.element.values():
                 node['rule']['rule.system.volume.location']['branch'].append(
                     {
-                        'requires':set(('volume', 'host', 'domain')),
+                        'requires':['volume', 'host', 'domain'],
                         'equal':{'volume':volume.key, 'host':repository.host, 'domain':repository.domain},
                         'apply':(
                             {'property':'volume path', 'value':volume.node['real']},
@@ -375,14 +383,14 @@ class Environment(object):
         for repository in self.repository.values():
             node['rule']['rule.system.temp.location']['branch'].append(
                 {
-                    'requires':set(('host', 'domain')),
+                    'requires':['host', 'domain'],
                     'equal':{'host':repository.host, 'domain':repository.domain},
                     'apply':(
                         {'property':'temp path', 'value':repository.node['temp']['path']},
                     ),
                 }
             )
-        self._load_config_node(node)
+        self.load_configuration_node(node)
     
     
     

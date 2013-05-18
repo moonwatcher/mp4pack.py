@@ -414,6 +414,7 @@
                 'itunes tv show id':None,
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
+                'itunes music album id':None,
                 'simple name':None,
                 'asset uri':None,
                 'home uri':None,
@@ -472,6 +473,7 @@
                 'itunes tv show id':None,
                 'itunes tv season id':None,
                 'itunes tv episode id':None,
+                'itunes music album id':None,
 
                 'person name':None,
                 'character name':None,

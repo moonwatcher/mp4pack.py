@@ -1,0 +1,139 @@
+{
+    "system":{
+        "domain":"galanti.no-ip.info",
+        "host":"shaft"
+    },
+    "repository":{
+        "shaft":{
+            "domain":"galanti.no-ip.info",
+            "temp":{
+                "path":"/Users/lg/Downloads/mpk/temp"
+            },
+            "mongodb":{
+                "database":"mp4pack",
+                "host":"localhost"
+            },
+            "remote":{
+                "download port":"22040",
+                "priority port":"22010",
+                "tunneled mongodb port":"27018"
+            },
+            "volume":{
+                "default":{
+                    "index":true,
+                    "scan":true
+                },
+                "synonym":["path"],
+                "element":{
+                    "alpha":{
+                        "name":"Alpha",
+                        "path":"/Users/lg/Downloads/mpk/pool/alpha"
+                    },
+                    "epsilon":{
+                        "name":"Epsilon",
+                        "path":"/Users/lg/Downloads/mpk/pool/epsilon"
+                    }
+                }
+            },
+            "mapping":[
+                {
+                    "enable":false,
+                    "path":"/Users",
+                    "alternate":[
+                        "/net/shaft/Users"
+                    ]
+                }
+            ],
+            "routing":[
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"srt"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"clean"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"png"},
+                    "apply":[
+                        {"property":"volume", "value":"alpha"},
+                        {"property":"profile", "value":"normal"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"chpl"},
+                    "apply":[
+                        {"property":"volume", "value":"alpha"},
+                        {"property":"profile", "value":"normal"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"m4v"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"iA4"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"m4a"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"normal"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"mkv"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"720"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"avi"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"SD"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"ac3"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"normal"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"ass"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"original"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"dts"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"original"}
+                    ]
+                },
+                {
+                    "requires":["kind", "host"],
+                    "equal":{"host":"shaft", "kind":"flac"},
+                    "apply":[
+                        {"property":"volume", "value":"epsilon"},
+                        {"property":"profile", "value":"original"}
+                    ]
+                }
+            ]
+        }
+    }
+}

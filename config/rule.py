@@ -12,84 +12,84 @@
             'provide':set(('implementation',)),
             'branch':[
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'get'},
                     'apply':(
                         {'property':'implementation', 'value':u'ServiceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'drop'},
                     'apply':(
                         {'property':'implementation', 'value':u'ServiceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'info'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'copy'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'move'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'delete'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'explode'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'pack'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'tag'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'optimize'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'transcode'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'update'},
                     'apply':(
                         {'property':'implementation', 'value':u'ResourceJob',},
@@ -102,70 +102,70 @@
             'provide':set(('preset',)),
             'branch':[
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'info'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'copy'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'move'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'delete'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'explode'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'pack'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'tag'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'optimize'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'transcode'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
                     ),
                 },
                 {
-                    'requires':set(('action',)),
+                    'requires':['action',],
                     'equal':{'action':'update'},
                     'apply':(
                         {'property':'preset', 'value':u'normal',},
@@ -193,7 +193,7 @@
             'provide':set(('mongodb url',)),
             'branch':[
                 {
-                    'requires':set(('host', 'database', 'port', 'username', 'password')),
+                    'requires':['host', 'database', 'port', 'username', 'password'],
                     'apply':[
                         {
                             'property':'mongodb url',
@@ -202,7 +202,7 @@
                     ],
                 },
                 {
-                    'requires':set(('host', 'database', 'username', 'password')),
+                    'requires':['host', 'database', 'username', 'password'],
                     'apply':[
                         {
                             'property':'mongodb url',
@@ -211,7 +211,7 @@
                     ],
                 },
                 {
-                    'requires':set(('host', 'port',)),
+                    'requires':['host', 'port',],
                     'apply':[
                         {
                             'property':'mongodb url',
@@ -220,7 +220,7 @@
                     ],
                 },
                 {
-                    'requires':set(('host',)),
+                    'requires':['host',],
                     'apply':[
                         {
                             'property':'mongodb url',
@@ -236,7 +236,7 @@
             'provide':set(('umid',)),
             'branch':[
                 {
-                    'requires':set(('home id',)),
+                    'requires':['home id',],
                     'apply':[
                         { 'property':'umid', 'digest':['home id', 'media kind'], 'algorithm':'umid' },
                     ],
@@ -248,195 +248,207 @@
             'provide':set(('home uri',)),
             'branch':[
                 {
-                    'requires':set((
+                    'requires':[
                         'home id',
-                    )),
+                    ],
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/{home id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'movie id',
-                    )),
+                    ],
                     'equal':{'media kind':9, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/movie/{movie id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'movie handle',
-                    )),
+                    ],
                     'equal':{'media kind':9, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/movie/~/{movie handle}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tmdb movie id',
-                    )),
+                    ],
                     'equal':{'media kind':9, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/movie/tmdb/{tmdb movie id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'imdb movie id',
-                    )),
+                    ],
                     'equal':{'media kind':9, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/movie/imdb/{imdb movie id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'rottentomatoes movie id',
-                    )),
+                    ],
                     'equal':{'media kind':9, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/movie/rottentomatoes/{rottentomatoes movie id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tv episode id',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/{tv episode id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tv season id',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/{tv season id}/{track number}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tv show id',
                         'disc number',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/{tv show id}/{disc number}/{track number}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tv show handle',
                         'disc number',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/~/{tv show handle}/{disc number}/{track number}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tvdb tv episode id',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv episode id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tvdb tv season id',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv season id}/{track number}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'tvdb tv show id',
                         'disc number',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'imdb tv episode id',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/imdb/{imdb tv episode id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'imdb tv show id',
                         'disc number',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'track id',
-                    )),
+                    ],
                     'equal':{'media kind':1, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/music/track/{track id}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'music album id',
                         'disc number',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':1, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/music/track/{music album id}/{disc number}/{track number}', },
                     ],
                 },
                 {
-                    'requires':set((
+                    'requires':[
                         'media kind',
                         'album handle',
                         'disc number',
                         'track number',
-                    )),
+                    ],
                     'equal':{'media kind':1, },
                     'apply':[
                         { 'property':'home uri', 'format':u'/h/music/track/~/{album handle}/{disc number}/{track number}', },
+                    ],
+                },
+                {
+                    'requires':[
+                        'media kind',
+                        'itunes music album id',
+                        'disc number',
+                        'track number',
+                    ],
+                    'equal':{'media kind':1, },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/music/track/itunes/{itunes music album id}/{disc number}/{track number}', },
                     ],
                 },
             ],
@@ -446,7 +458,7 @@
             'provide':set(('asset uri',)),
             'branch':[
                 {
-                    'requires':set(('home id',)),
+                    'requires':['home id',],
                     'apply':[
                         {
                             'property':'asset uri',
@@ -461,7 +473,7 @@
             'provide':set(('resource uri',)),
             'branch':[
                 {
-                    'requires':set(('path digest',)),
+                    'requires':['path digest',],
                     'apply':[
                         {
                             'property':'resource uri',
@@ -484,6 +496,7 @@
                 'tv show handle',
                 'tvdb tv show id',
                 'itunes tv show id',
+                'itunes music album id',
                 'album handle',
                 'track name',
                 'resource path digest',
@@ -493,21 +506,21 @@
             )),
             'branch':[
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^[0-9a-f]{40}(?:\.[a-z]{2})?\.[0-9]{2}\.[0-9a-f]{13}\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^(?P<resource_path_digest>[0-9a-f]{40})(?:\.(?P<language>[a-z]{2}))?\.(?P<stream_id>[0-9]{2})\.(?P<umid>[0-9a-f]{13})\.(?P<kind>[^\.]{3,4})$',},
                     ],
                 },
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^[^\.]*(?:\.[a-z]{2})?\.[0-9a-f]{13}\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^[^\.]*(?:\.(?P<language>[a-z]{2}))?\.(?P<umid>[0-9a-f]{13})\.(?P<kind>[^\.]{3,4})$',},
                     ],
                 },
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
@@ -517,7 +530,7 @@
                     ],
                 },
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^iTMF(?P<itunes_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
@@ -527,17 +540,17 @@
                     ],
                 },
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^.{2,} d[0-9]+t[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
-                        {'property':'file name', 'expression':ur'^iTMF(?P<itunes_music_album_id>.{2,}) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
+                        {'property':'file name', 'expression':ur'^iTMF(?P<itunes_music_album_id>[0-9]+) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
                     'apply':[
                         {'property':'media kind', 'value':1,},
                     ],
                 },
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^IMDbtt[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^IMDb(?P<imdb_movie_id>tt[0-9]+)(?: (?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
@@ -547,7 +560,7 @@
                     ],
                 },
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^TMDb[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^TMDb(?P<tmdb_movie_id>[0-9]+)(?: (?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
@@ -557,7 +570,7 @@
                     ],
                 },
                 {
-                    'requires':set(('file name',)),
+                    'requires':['file name',],
                     'match':{'property':'file name', 'expression':ur'^iTMF[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^iTMF(?P<itunes_movie_id>[0-9]+)(?: (?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
@@ -573,7 +586,7 @@
             'provide':set(('canonic file name',)),
             'branch':[
                 {
-                    'requires':set(( 'media kind', 'simple tv show name', 'track genealogy', 'simple tv episode name', 'umid', 'kind', 'localized', )),
+                    'requires':[ 'media kind', 'simple tv show name', 'track genealogy', 'simple tv episode name', 'umid', 'kind', 'localized', ],
                     'equal':{'media kind':10, 'localized':False, },
                     'apply':[
                         {
@@ -583,7 +596,7 @@
                     ],
                 },                
                 {
-                    'requires':set(( 'media kind', 'simple tv show name', 'track genealogy', 'simple tv episode name', 'umid', 'kind', 'language', 'localized', )),
+                    'requires':[ 'media kind', 'simple tv show name', 'track genealogy', 'simple tv episode name', 'umid', 'kind', 'language', 'localized', ],
                     'equal':{'media kind':10, 'localized':True, },
                     'apply':[
                         {
@@ -593,7 +606,27 @@
                     ],
                 },
                 {
-                    'requires':set(( 'media kind', 'simple movie title', 'umid', 'kind', 'localized', )),
+                    'requires':[ 'media kind', 'simple music album name', 'track genealogy', 'simple music track name', 'umid', 'kind', 'localized', ],
+                    'equal':{'media kind':1, 'localized':False, },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'{simple music album name} {track genealogy} {simple music track name}.{umid}.{kind}',
+                        },
+                    ],
+                },                
+                {
+                    'requires':[ 'media kind', 'simple music album name', 'track genealogy', 'simple music track name', 'umid', 'kind', 'language', 'localized', ],
+                    'equal':{'media kind':1, 'localized':True, },
+                    'apply':[
+                        {
+                            'property':'canonic file name',
+                            'format':u'{simple music album name} {track genealogy} {simple music track name}.{language}.{umid}.{kind}',
+                        },
+                    ],
+                },
+                {
+                    'requires':[ 'media kind', 'simple movie title', 'umid', 'kind', 'localized', ],
                     'equal':{'media kind':9, 'localized':False, },
                     'apply':[
                         {
@@ -603,7 +636,7 @@
                     ],
                 },
                 {
-                    'requires':set(( 'media kind', 'simple movie title', 'umid', 'kind', 'language', 'localized', )),
+                    'requires':[ 'media kind', 'simple movie title', 'umid', 'kind', 'language', 'localized', ],
                     'equal':{'media kind':9, 'localized':True, },
                     'apply':[
                         {
@@ -619,22 +652,32 @@
             'provide':set(('canonic directory',)),
             'branch':[
                 {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', 'tv show id', 'disc number', )),
+                    'requires':['volume path', 'media kind', 'kind', 'profile', 'tv show id', 'disc number', ],
                     'equal':{'media kind':10, },
                     'apply':[
                         {
                             'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}/{tv show id}/{disc number}',
+                            'format':u'{volume path}/tv show/{kind}/{profile}/{tv show id}/{disc number}',
                         },
                     ],
                 },
                 {
-                    'requires':set(('volume path', 'media kind', 'kind', 'profile', )),
+                    'requires':['volume path', 'media kind', 'kind', 'profile', 'music album id', 'disc number', ],
+                    'equal':{'media kind':1, },
+                    'apply':[
+                        {
+                            'property':'canonic directory',
+                            'format':u'{volume path}/music/{kind}/{profile}/{music album id}/{disc number}',
+                        },
+                    ],
+                },
+                {
+                    'requires':['volume path', 'media kind', 'kind', 'profile', ],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
                             'property':'canonic directory',
-                            'format':u'{volume path}/{media kind}/{kind}/{profile}',
+                            'format':u'{volume path}/movie/{kind}/{profile}',
                         },
                     ],
                 },
@@ -645,7 +688,7 @@
             'provide':set(('canonic path',)),
             'branch':[
                 {
-                    'requires':set(('canonic directory', 'canonic file name')),
+                    'requires':['canonic directory', 'canonic file name'],
                     'apply':[
                         {
                             'property':'canonic path',
@@ -660,7 +703,7 @@
             'provide':set(('file name',)),
             'branch':[
                 {
-                    'requires':set(('canonic file name',)),
+                    'requires':['canonic file name',],
                     'apply':[
                         {
                             'property':'file name',
@@ -675,7 +718,7 @@
             'provide':set(('directory',)),
             'branch':[
                 {
-                    'requires':set(('canonic directory',)),
+                    'requires':['canonic directory',],
                     'apply':[
                         {
                             'property':'directory',
@@ -690,7 +733,7 @@
             'provide':set(('path',)),
             'branch':[
                 {
-                    'requires':set(('directory', 'file name',)),
+                    'requires':['directory', 'file name',],
                     'apply':[
                         {
                             'property':'path',
@@ -705,7 +748,7 @@
             'provide':set(('fragment file name',)),
             'branch':[
                 {
-                    'requires':set(('resource path digest', 'language', 'stream id', 'umid', 'kind', 'localized', )),
+                    'requires':['resource path digest', 'language', 'stream id', 'umid', 'kind', 'localized', ],
                     'equal':{'localized':True, },
                     'apply':[
                         {
@@ -715,7 +758,7 @@
                     ],
                 },
                 {
-                    'requires':set(('resource path digest', 'stream id', 'umid', 'kind', 'localized', )),
+                    'requires':['resource path digest', 'stream id', 'umid', 'kind', 'localized', ],
                     'equal':{'localized':False, },
                     'apply':[
                         {
@@ -731,7 +774,7 @@
             'provide':set(('fragment directory',)),
             'branch':[
                 {
-                    'requires':set(('temp path', )),
+                    'requires':['temp path', ],
                     'apply':[
                         {
                             'property':'fragment directory',
@@ -746,7 +789,7 @@
             'provide':set(('fragment path',)),
             'branch':[
                 {
-                    'requires':set(('fragment directory', 'fragment file name',)),
+                    'requires':['fragment directory', 'fragment file name',],
                     'apply':[
                         {
                             'property':'fragment path',
@@ -761,84 +804,84 @@
             'provide':set(('localized',)),
             'branch':[
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'m4v', },
                     'apply':[
                         { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'m4a', },
                     'apply':[
                         { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'mkv', },
                     'apply':[
                         { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'avi', },
                     'apply':[
                         { 'property':'localized', 'value':False, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'srt', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'ass', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'chpl', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'ac3', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'dts', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'flac', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'png', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
                     ],
                 },
                 {
-                    'requires':set(('kind',)),
+                    'requires':['kind',],
                     'equal':{'kind':'jpg', },
                     'apply':[
                         { 'property':'localized', 'value':True, },
@@ -851,7 +894,7 @@
             'provide':set(('track genealogy',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'disc number', 'track number')),
+                    'requires':['media kind', 'disc number', 'track number'],
                     'equal':{'media kind':10, },
                     'apply':[
                         {
@@ -861,7 +904,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'disc number', 'track number')),
+                    'requires':['media kind', 'disc number', 'track number'],
                     'equal':{'media kind':1, },
                     'apply':[
                         {
@@ -877,7 +920,7 @@
             'provide':set(('path digest',)),
             'branch':[
                 {
-                    'requires':set(('path',)),
+                    'requires':['path',],
                     'apply':[
                         { 'property':'path digest', 'digest':'path', 'algorithm':'sha1' },
                     ],
@@ -889,56 +932,56 @@
             'provide':set(('stream name',)),
             'branch':[
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':1 },
                     'apply':[
                         { 'property':'stream name', 'value':'Mono' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':2 },
                     'apply':[
                         { 'property':'stream name', 'value':'Stereo' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':3 },
                     'apply':[
                         { 'property':'stream name', 'value':'Stereo' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':4 },
                     'apply':[
                         { 'property':'stream name', 'value':'Quadraphonic' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':5 },
                     'apply':[
                         { 'property':'stream name', 'value':'Surround' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':6 },
                     'apply':[
                         { 'property':'stream name', 'value':'Surround' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':7 },
                     'apply':[
                         { 'property':'stream name', 'value':'Surround' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'channels')),
+                    'requires':['stream kind', 'channels'],
                     'equal':{'stream kind':'audio', 'channels':8 },
                     'apply':[
                         { 'property':'stream name', 'value':'Surround' },
@@ -984,49 +1027,49 @@
             'provide':set(('kind',)),
             'branch':[
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'stream kind':'audio', 'format':'AC-3'},
                     'apply':[
                         { 'property':'kind', 'value':'ac3' },
                     ],
                 },
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'DTS'},
                     'apply':[
                         { 'property':'kind', 'value':'dts' },
                     ],
                 },
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'MPEG Audio'},
                     'apply':[
                         { 'property':'kind', 'value':'mp3' },
                     ],
                 },
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'AAC'},
                     'apply':[
                         { 'property':'kind', 'value':'aac' },
                     ],
                 },
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'PCM'},
                     'apply':[
                         { 'property':'kind', 'value':'pcm' },
                     ],
                 },
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'FLAC'},
                     'apply':[
                         { 'property':'kind', 'value':'flac' },
                     ],
                 },
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'Vorbis'},
                     'apply':[
                         { 'property':'kind', 'value':'ogg' },
@@ -1039,14 +1082,14 @@
             'provide':set(('kind',)),
             'branch':[
                 {
-                    'requires':set(('stream kind', 'format')),
+                    'requires':['stream kind', 'format'],
                     'equal':{'stream kind':'video', 'format':'AVC'},
                     'apply':[
                         { 'property':'kind', 'value':'h264' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'format')),
+                    'requires':['stream kind', 'format'],
                     'equal':{'stream kind':'video', 'format':'MPEG-4 Visual'},
                     'apply':[
                         { 'property':'kind', 'value':'h263' },
@@ -1059,14 +1102,14 @@
             'provide':set(('kind',)),
             'branch':[
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'LZ77'},
                     'apply':[
                         { 'property':'kind', 'value':'png' },
                     ],
                 },
                 {
-                    'requires':set(('format',)),
+                    'requires':['format',],
                     'equal':{'format':'JPEG'},
                     'apply':[
                         { 'property':'kind', 'value':'jpg' },
@@ -1079,28 +1122,28 @@
             'provide':set(('kind',)),
             'branch':[
                 {
-                    'requires':set(('stream kind', 'format')),
+                    'requires':['stream kind', 'format'],
                     'equal':{'stream kind':'caption', 'format':'Timed text'},
                     'apply':[
                         { 'property':'kind', 'value':'tx3g' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'format')),
+                    'requires':['stream kind', 'format'],
                     'equal':{'stream kind':'caption', 'format':'UTF-8'},
                     'apply':[
                         { 'property':'kind', 'value':'srt' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind', 'format')),
+                    'requires':['stream kind', 'format'],
                     'equal':{'stream kind':'caption', 'format':'ASS'},
                     'apply':[
                         { 'property':'kind', 'value':'ass' },
                     ],
                 },
                 {
-                    'requires':set(('stream kind',)),
+                    'requires':['stream kind',],
                     'equal':{'stream kind':'menu'},
                     'apply':[
                         { 'property':'kind', 'value':'chpl' },
@@ -1114,7 +1157,7 @@
             'provide':set(('trimmed imdb movie id',)),
             'branch':[
                 {
-                    'requires':set(('imdb movie id',)),
+                    'requires':['imdb movie id',],
                     'decode':[
                         {'property':'imdb movie id', 'expression':ur'^tt(?P<trimmed_imdb_movie_id>[0-9]+)$'},
                     ],
@@ -1126,14 +1169,14 @@
             'provide':set(('track position',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'track number', 'track count')),
+                    'requires':['media kind', 'track number', 'track count'],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'track position', 'format':u'{track number} / {track count}', },
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'track number', 'track count')),
+                    'requires':['media kind', 'track number', 'track count'],
                     'equal':{'media kind':1, },
                     'apply':[
                         { 'property':'track position', 'format':u'{track number} / {track count}', },
@@ -1146,14 +1189,14 @@
             'provide':set(('disc position',)),
             'branch':[
                 {
-                    'requires':set(('disc number', 'disc count')),
+                    'requires':['disc number', 'disc count'],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'disc position', 'format':u'{disc number} / {disc count}', },
                     ],
                 },
                 {
-                    'requires':set(('disc number', 'disc count')),
+                    'requires':['disc number', 'disc count'],
                     'equal':{'media kind':1, },
                     'apply':[
                         { 'property':'disc position', 'format':u'{disc number} / {disc count}', },
@@ -1166,14 +1209,14 @@
             'provide':set(('track count',)),
             'branch':[
                 {
-                    'requires':set(('media kind',)),
+                    'requires':['media kind',],
                     'equal':{'media kind':10, },
                     'apply':[
                         {'property':'track count', 'value':0},
                     ],
                 },
                 {
-                    'requires':set(('media kind',)),
+                    'requires':['media kind',],
                     'equal':{'media kind':1, },
                     'apply':[
                         {'property':'track count', 'value':0},
@@ -1186,14 +1229,14 @@
             'provide':set(('disc count',)),
             'branch':[
                 {
-                    'requires':set(('media kind',)),
+                    'requires':['media kind',],
                     'equal':{'media kind':10, },
                     'apply':[
                         {'property':'disc count', 'value':0},
                     ],
                 },
                 {
-                    'requires':set(('media kind',)),
+                    'requires':['media kind',],
                     'equal':{'media kind':1, },
                     'apply':[
                         {'property':'disc count', 'value':0},
@@ -1206,7 +1249,7 @@
             'provide':set(('tv episode number', 'tv season number')),
             'branch':[
                 {
-                    'requires':set(('media kind', 'track number', 'disc number')),
+                    'requires':['media kind', 'track number', 'disc number'],
                     'equal':{'media kind':10, },
                     'apply':[
                         { 'property':'tv episode number', 'reference':'track number', },
@@ -1220,7 +1263,7 @@
             'provide':set(('music track number', 'music disc number')),
             'branch':[
                 {
-                    'requires':set(('media kind', 'track number', 'disc number')),
+                    'requires':['media kind', 'track number', 'disc number'],
                     'equal':{'media kind':1, },
                     'apply':[
                         { 'property':'music track number', 'reference':'track number', },
@@ -1235,7 +1278,7 @@
             'provide':set(('sort name',)),
             'branch':[
                 {
-                    'requires':set(('track name',)),
+                    'requires':['track name',],
                     'decode':[
                         {'property':'track name', 'expression':ur'^(the |a |an )?(?P<sort_name>.+)$', 'flags':re.IGNORECASE},
                     ],
@@ -1247,7 +1290,7 @@
             'provide':set(('sort artist',)),
             'branch':[
                 {
-                    'requires':set(('artist name',)),
+                    'requires':['artist name',],
                     'decode':[
                         {'property':'artist name', 'expression':ur'^(the |a |an )?(?P<sort_artist>.+)$', 'flags':re.IGNORECASE},
                     ],
@@ -1259,7 +1302,7 @@
             'provide':set(('sort album artist',)),
             'branch':[
                 {
-                    'requires':set(('album artist name',)),
+                    'requires':['album artist name',],
                     'decode':[
                         {'property':'album artist name', 'expression':ur'^(the |a |an )?(?P<sort_album_artist>.+)$', 'flags':re.IGNORECASE},
                     ],
@@ -1271,7 +1314,7 @@
             'provide':set(('sort album',)),
             'branch':[
                 {
-                    'requires':set(('album name',)),
+                    'requires':['album name',],
                     'decode':[
                         {'property':'album name', 'expression':ur'^(the |a |an )?(?P<sort_album>.+)$', 'flags':re.IGNORECASE},
                     ],
@@ -1283,7 +1326,7 @@
             'provide':set(('sort composer',)),
             'branch':[
                 {
-                    'requires':set(('composer name',)),
+                    'requires':['composer name',],
                     'decode':[
                         {'property':'composer name', 'expression':ur'^(the |a |an )?(?P<sort_composer>.+)$', 'flags':re.IGNORECASE},
                     ],
@@ -1295,7 +1338,7 @@
             'provide':set(('sort tv show',)),
             'branch':[
                 {
-                    'requires':set(('tv show name',)),
+                    'requires':['tv show name',],
                     'decode':[
                         {'property':'tv show name', 'expression':ur'^(the |a |an )?(?P<sort_tv_show>.+)$', 'flags':re.IGNORECASE},
                     ],
@@ -1307,7 +1350,7 @@
             'provide':set(('artist name', 'album artist name')),
             'branch':[
                 {
-                    'requires':set(('media kind', 'tv show name')),
+                    'requires':['media kind', 'tv show name'],
                     'equal':{'media kind':10, },
                     'apply':[
                         {
@@ -1321,7 +1364,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'directors')),
+                    'requires':['media kind', 'directors'],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
@@ -1335,7 +1378,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'producers')),
+                    'requires':['media kind', 'producers'],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
@@ -1349,7 +1392,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'screenwriters')),
+                    'requires':['media kind', 'screenwriters'],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
@@ -1363,7 +1406,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'codirectors')),
+                    'requires':['media kind', 'codirectors'],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
@@ -1377,7 +1420,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'actors')),
+                    'requires':['media kind', 'actors'],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
@@ -1397,7 +1440,7 @@
             'provide':set(('full name',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'tv show name', 'tv episode production code', 'track name')),
+                    'requires':['media kind', 'tv show name', 'tv episode production code', 'track name'],
                     'equal':{'media kind':10, },
                     'apply':[
                         {
@@ -1407,7 +1450,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'tv show name', 'tv episode production code')),
+                    'requires':['media kind', 'tv show name', 'tv episode production code'],
                     'equal':{'media kind':10, },
                     'apply':[
                         {
@@ -1417,7 +1460,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'imdb movie id', 'track name')),
+                    'requires':['media kind', 'imdb movie id', 'track name'],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
@@ -1427,7 +1470,7 @@
                     ],
                 },
                 {
-                    'requires':set(('media kind', 'imdb movie id')),
+                    'requires':['media kind', 'imdb movie id'],
                     'equal':{'media kind':9, },
                     'apply':[
                         {
@@ -1448,7 +1491,7 @@
             )),
             'branch':[
                 {
-                    'requires':set(('itunextc',)),
+                    'requires':['itunextc',],
                     'decode':[
                         {'property':'itunextc', 'expression':ur'(?P<content_advisory_standard>[^|]+)\|(?P<content_advisory_rating>[^|]+)\|(?P<content_advisory_score>[^|]+)\|(?P<content_advisory_annotation>[^|]+)?',},
                     ],
@@ -1460,7 +1503,7 @@
             'provide':set(('album name',)),
             'branch':[
                 {
-                    'requires':set(('media kind', 'tv show name', 'tv season number')),
+                    'requires':['media kind', 'tv show name', 'tv season number'],
                     'equal':{'media kind':10, },
                     'apply':[
                         {
@@ -1476,7 +1519,7 @@
             'provide':set(('disc number',)),
             'branch':[
                 {
-                    'requires':set(('album name',)),
+                    'requires':['album name',],
                     'decode':[
                         {'property':'album name', 'expression':ur', Season (?P<disc_number>[0-9]+)$',},
                     ],
@@ -1488,7 +1531,7 @@
             'provide':set(('release year',)),
             'branch':[
                 {
-                    'requires':set(('release date',)),
+                    'requires':['release date',],
                     'apply':[
                         {'property':'release year', 'datetime format':u'%Y', 'reference':'release date', },
                     ],
@@ -1501,7 +1544,7 @@
             'provide':set(('simple movie title',)),
             'branch':[
                 {
-                    'requires':set(('movie title',)),
+                    'requires':['movie title',],
                     'decode':[
                         {'property':'movie title', 'expression':ur'^(?P<simple_movie_title>.+)$'},
                     ],
@@ -1513,7 +1556,7 @@
             'provide':set(('simple tv show name',)),
             'branch':[
                 {
-                    'requires':set(('tv show name',)),
+                    'requires':['tv show name',],
                     'decode':[
                         {'property':'tv show name', 'expression':ur'^(?P<simple_tv_show_name>.+)$'},
                     ],
@@ -1525,7 +1568,7 @@
             'provide':set(('simple tv episode name',)),
             'branch':[
                 {
-                    'requires':set(('tv episode name',)),
+                    'requires':['tv episode name',],
                     'decode':[
                         {'property':'tv episode name', 'expression':ur'^(?P<simple_tv_episode_name>.+)$'},
                     ],
@@ -1537,7 +1580,7 @@
             'provide':set(('simple music album name',)),
             'branch':[
                 {
-                    'requires':set(('music album name',)),
+                    'requires':['music album name',],
                     'decode':[
                         {'property':'music album name', 'expression':ur'^(?P<simple_music_album_name>.+)$'},
                     ],
@@ -1549,7 +1592,7 @@
             'provide':set(('simple music track name',)),
             'branch':[
                 {
-                    'requires':set(('music track name',)),
+                    'requires':['music track name',],
                     'decode':[
                         {'property':'music track name', 'expression':ur'^(?P<simple_music_track_name>.+)$'},
                     ],
@@ -1561,7 +1604,7 @@
             'provide':set(('simple person name',)),
             'branch':[
                 {
-                    'requires':set(('person name',)),
+                    'requires':['person name',],
                     'decode':[
                         {'property':'person name', 'expression':ur'^(?P<simple_person_name>.+)$'},
                     ],
@@ -1573,7 +1616,7 @@
             'provide':set(('simple company name',)),
             'branch':[
                 {
-                    'requires':set(('company name',)),
+                    'requires':['company name',],
                     'decode':[
                         {'property':'company name', 'expression':ur'^(?P<simple_company_name>.+)$'},
                     ],
@@ -1585,7 +1628,7 @@
             'provide':set(('simple collection name',)),
             'branch':[
                 {
-                    'requires':set(('collection name',)),
+                    'requires':['collection name',],
                     'decode':[
                         {'property':'collection name', 'expression':ur'^(?P<simple_collection_name>.+)$'},
                     ],
@@ -1597,7 +1640,7 @@
             'provide':set(('simple keyword name',)),
             'branch':[
                 {
-                    'requires':set(('keyword name',)),
+                    'requires':['keyword name',],
                     'decode':[
                         {'property':'keyword name', 'expression':ur'^(?P<simple_keyword_name>.+)$'},
                     ],
@@ -1609,7 +1652,7 @@
             'provide':set(('simple genre name',)),
             'branch':[
                 {
-                    'requires':set(('genre name',)),
+                    'requires':['genre name',],
                     'decode':[
                         {'property':'genre name', 'expression':ur'^(?P<simple_genre_name>.+)$'},
                     ],
@@ -1621,7 +1664,7 @@
             'provide':set(('simple character name',)),
             'branch':[
                 {
-                    'requires':set(('character name',)),
+                    'requires':['character name',],
                     'decode':[
                         {'property':'character name', 'expression':ur'^(?P<simple_character_name>.+)$'},
                     ],

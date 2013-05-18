@@ -11,7 +11,7 @@ import json
 import hashlib 
 
 from ontology import Ontology
-from asset import AssetCache
+from material import AssetCache
 from datetime import datetime
 from model import ResourceTransform
 
