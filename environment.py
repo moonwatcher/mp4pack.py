@@ -177,15 +177,16 @@ class Environment(object):
     # Loading
     def load(self):
         relative = os.path.dirname(__file__)
-        self.load_configuration_file(os.path.join(relative,'config/system.py'))
+        self.load_configuration_file(os.path.join(relative,'config/system.json'))
         self.load_configuration_file(os.path.join(relative,'config/expression.py'))
-        self.load_configuration_file(os.path.join(relative,'config/interface.py'))
+        self.load_configuration_file(os.path.join(relative,'config/interface.json'))
         self.load_configuration_file(os.path.join(relative,'config/enumeration.py'))
         self.load_configuration_file(os.path.join(relative,'config/archetype.json'))
         self.load_configuration_file(os.path.join(relative,'config/rule.py'))
         self.load_configuration_file(os.path.join(relative,'config/namespace.json'))
         self.load_configuration_file(os.path.join(relative,'config/service.py'))
-        self.load_configuration_file(os.path.join(relative,'config/material.py'))
+        self.load_configuration_file(os.path.join(relative,'config/table.json'))
+        self.load_configuration_file(os.path.join(relative,'config/material.json'))
         self.load_configuration_file(os.path.join(relative,'config/subtitle.py'))
         
         # Override the default home folder from env if specified and valid
@@ -772,10 +773,15 @@ class CommandLineParser(object):
             parser.add_argument(*node['flag'], **node['parameter'])
         
         
-        # Add the enumeration constrains
         for argument in self.node['prototype'].values():
+            if 'type' in argument['parameter']:
+                # eval the type
+                argument['parameter']['type'] = eval(argument['parameter']['type'])
+                
             if 'dest' in argument['parameter']:
                 archetype = self.env.archetype[argument['parameter']['dest']]
+                
+                # Add the enumeration constrains
                 if archetype['type'] == 'enum':
                     enumeration = self.env.enumeration[archetype['enumeration']]
                     argument['parameter']['choices'] = enumeration.synonym.keys()
