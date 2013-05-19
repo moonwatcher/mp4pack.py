@@ -144,11 +144,9 @@ class Environment(object):
         return self.state['subtitle filter']
     
     
-    
     @property
     def table(self):
         return self.state['table']
-    
     
     
     # Lazy loaders for processors
@@ -171,7 +169,6 @@ class Environment(object):
         if self._universal_detector is None:
             self._universal_detector = UniversalDetector()
         return self._universal_detector
-
     
     
     # Loading
@@ -203,7 +200,7 @@ class Environment(object):
         if path and os.path.isfile(path):
             try:
                 content = open(path, 'r')
-
+                
             except IOError, e:
                 self.log.warning(u'Failed to load configuration file %s', path)
                 self.log.debug(u'Exception raised: %s', unicode(e))
@@ -261,13 +258,13 @@ class Environment(object):
                     if check(e):
                         e['key'] = k
                         self.archetype[k] = e
-                    
+                        
             if 'enumeration' in node:
                 for k,e in node['enumeration'].iteritems():
                     if check(e):
                         e['key'] = k
                         self.enumeration[k] = Enumeration(self, e)
-                    
+                        
             if 'namespace' in node:
                 for k,e in node['namespace'].iteritems():
                     e['key'] = k
@@ -278,7 +275,7 @@ class Environment(object):
                     if check(e):
                         e['key'] = k
                         self.rule[k] = Rule(self, e)
-                    
+                        
             if 'service' in node:
                 for k,e in node['service'].iteritems():
                     if check(e):
@@ -297,7 +294,7 @@ class Environment(object):
                         if 'flags' not in e:
                             e['flags'] = 0
                         self.expression[e['name']] = re.compile(e['definition'], e['flags'])
-                    
+                        
             if 'constant' in node:
                 for k,e in node['constant'].iteritems():
                     self.constant[k] = e
@@ -307,38 +304,36 @@ class Environment(object):
                     if check(e):
                         self.command[e['name']] = e
                         self.which(e)
-                    
+                        
             if 'profile' in node:
                 for k,e in node['profile'].iteritems():
                     if check(e):
                         e['name'] = k
                         self.profile[k] = e
-                            
+                        
             if 'preset' in node:
                 for k,e in node['preset'].iteritems():
                     if check(e):
                         e['name'] = k
                         self.preset[k] = e
-                            
+                        
             if 'repository' in node:
                 for k,e in node['repository'].iteritems():
                     if check(e):
                         e['host'] = k
                         self.repository[k] = Repository(self, e)
-                    
+                        
             if 'subtitle filter' in node:
                 for k,e in node['subtitle filter'].iteritems():
                     if check(e):
                         e['name'] = k
                         self.subtitle_filter[k] = e
-                    
+                        
             if 'interface' in node:
                 for k,e in node['interface'].iteritems():
                     if check(e):
                         e['key'] = k
                         self.interface[k] = e
-    
-    
     
     
     def _load_dynamic_rules(self):
@@ -387,7 +382,7 @@ class Environment(object):
                         ),
                     }
                 )
-        
+                
         # Temp location
         node['rule']['rule.system.temp.location'] = {
             'name':'Temp location',
@@ -405,8 +400,6 @@ class Environment(object):
                 }
             )
         self.load_configuration_node(node)
-    
-    
     
     
     # Direcotry and file
@@ -466,8 +459,6 @@ class Environment(object):
         else:
             result = False
         return result
-    
-    
     
     
     # Command execution
@@ -541,7 +532,6 @@ class Environment(object):
         return self.universal_detector.result
     
     
-    
     def environment_json_handler(self, o):
         result = None
         from bson.objectid import ObjectId
@@ -587,11 +577,11 @@ class Repository(object):
             self.node['routing'] = []
         if 'mapping' not in self.node:
             self.node['mapping'] = []
-        
     
     
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
+    
     
     @property
     def valid(self):
@@ -670,7 +660,7 @@ class Repository(object):
                         self._mapping[alternate] = mapping['real']
                     else:
                         self.log.warning(u'Path %s on %s already mapped to %s', alternate, self.host, self._mapping[alternate])
-                    
+                        
         # Load the volume enumeration
         for key, volume in self.node['volume']['element'].iteritems():
             self.log.debug(u'Expanding path %s', volume['path'])
@@ -689,16 +679,16 @@ class Repository(object):
             decoded = Ontology(self.env, 'ns.medium.resource.url.decode')
             decoded['directory'], decoded['file name'] = os.path.split(path)
             if 'file name' in decoded and 'directory' in decoded:
-            
+                
                 # Normalize the directory
                 # This will replace path framents with canonic values
                 decoded['directory'] = self.normalize(decoded['directory'])
-            
+                
                 # Check if the directory resides in a volume
                 for volume in self.volume.element.values():
                     if os.path.commonprefix((volume.node['real'], decoded['directory'])) == volume.node['real']:
                         decoded['volume'] = volume.key
-            
+                        
                 # If a UMID was encoded in the name, infer the home id and media kind
                 # This will also trigger rule.medium.resource.filename.parse
                 if 'umid' in decoded:
@@ -706,7 +696,7 @@ class Repository(object):
                     if umid:
                         decoded['media kind'] = umid.media_kind
                         decoded['home id'] = umid.home_id
-                
+                        
                 # Make the elements of the decoded onlology kernel elements of the result
                 result = decoded.project('ns.medium.resource.location')
                 for k,v in decoded.iteritems(): result[k] = v
@@ -727,12 +717,8 @@ class Repository(object):
                     result = path.replace(alt, real)
                     break
         return result
-
     
     
-
-
-
     def rebuild_index(self, collection, definition):
         if collection is not None and collection in self.env.table:
             if 'name' in definition:
@@ -744,7 +730,7 @@ class Repository(object):
                 if definition['name'] in existing:
                     self.log.info(u'Dropping index %s on collection %s', definition['name'], collection)
                     table.drop_index(definition['name'])
-    
+                    
                 self.log.info(u'Rebuilding index %s on collection %s', definition['name'], collection)
                 table.create_index(
                     definition['key'],
