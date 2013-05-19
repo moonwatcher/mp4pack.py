@@ -1,0 +1,2897 @@
+{
+    "namespace":{
+        "ns.system.mongodb":{
+            "synonym":["keyword"],
+            "element":{
+                "host":null,
+                "database":null,
+                "port":null,
+                "username":null,
+                "password":null,
+                "mongodb url":null
+            },
+            "rule":[
+                "rule.system.mongodb.url"
+            ]
+        },
+        "ns.system.command.default":{
+            "synonym":["key"],
+            "element":{
+                "domain":null,
+                "host":null,
+                "volume":null,
+                "profile":null,
+                "preset":null,
+                "recursive":{
+                    "auto cast":false
+                },
+                "sync":{
+                    "auto cast":false
+                },
+                "crawl":{
+                    "auto cast":false
+                },
+                "download":{
+                    "auto cast":false
+                },
+                "overwrite":{
+                    "auto cast":false
+                },
+                "kind":null,
+                "inclusion":null,
+                "exclusion":null,
+                "language":null,
+                "scan path":{
+                    "auto cast":false
+                },
+                "uris":{
+                    "auto cast":false
+                },
+                "quantizer":null,
+                "width":null,
+                "crop":null,
+                "time shift":null,
+                "source frame rate":null,
+                "target frame rate":null,
+                "verbosity":null,
+                "debug":{
+                    "auto cast":false
+                },
+                "configuration path":null,
+                "action":null,
+                "query":{
+                    "plural format":"eval"
+                },
+                "tables":null,
+                "all":{
+                    "auto cast":false
+                }
+            }
+        },
+        "ns.system.job":{
+            "synonym":["keyword"],
+            "element":{
+                "action":null,
+                "preset":null,
+                "domain":null,
+                "host":null,
+                "volume":null,
+                "profile":null,
+                "recursive":{
+                    "auto cast":false
+                },
+                "sync":{
+                    "auto cast":false
+                },
+                "crawl":{
+                    "auto cast":false
+                },
+                "download":{
+                    "auto cast":false
+                },
+                "overwrite":{
+                    "auto cast":false
+                },
+                "kind":null,
+                "inclusion":null,
+                "exclusion":null,
+                "language":null,
+                "scan path":{
+                    "auto cast":false
+                },
+                "uris":{
+                    "auto cast":false
+                },
+                "quantizer":null,
+                "width":null,
+                "crop":null,
+                "time shift":null,
+                "source frame rate":null,
+                "target frame rate":null,
+                "debug":{
+                    "auto cast":false
+                },
+                "query":null,
+                "implementation":null,
+                "tables":null,
+                "all":{
+                    "auto cast":false
+                }
+            },
+            "rule":[
+                "rule.job.implementation"
+            ]
+        },
+        "ns.system.task":{
+            "synonym":["keyword"],
+            "element":{
+                "action":null,
+                "preset":null,
+                "domain":null,
+                "host":null,
+                "volume":null,
+                "profile":null,
+                "sync":{
+                    "auto cast":false
+                },
+                "crawl":{
+                    "auto cast":false
+                },
+                "download":{
+                    "auto cast":false
+                },
+                "overwrite":{
+                    "auto cast":false
+                },
+                "kind":null,
+                "language":null,
+                "quantizer":null,
+                "width":null,
+                "crop":null,
+                "time shift":null,
+                "source frame rate":null,
+                "target frame rate":null,
+                "debug":{
+                    "auto cast":false
+                },
+                "query":null,
+                "tables":null,
+                "all":{
+                    "auto cast":false
+                }
+            },
+            "rule":[
+                "rule.task.default.preset"
+            ]
+        },
+        "ns.service.genealogy":{
+            "synonym":["keyword"],
+            "element":{
+                "domain":null,
+                "url":null,
+                "path":null,
+                "path digest":null,
+                "file name":null,
+                "directory":null,
+                "scheme":null,
+                "host":null,
+                "media kind":null,
+                "kind":null,
+                "language":null,
+                "profile":null,
+                "volume":null,
+                "home id":null,
+                "umid":null,
+                "movie id":null,
+                "music album id":null,
+                "tv show id":null,
+                "tv season id":null,
+                "tv episode id":null,
+                "track id":null,
+                "person id":null,
+                "company id":null,
+                "genre id":null,
+                "job id":null,
+                "department id":null,
+                "track number":null,
+                "disc number":null,
+                "movie handle":null,
+                "album handle":null,
+                "tv show handle":null,
+                "imdb person id":null,
+                "imdb character id":null,
+                "imdb movie id":null,
+                "imdb tv show id":null,
+                "imdb tv episode id":null,
+                "trimmed imdb movie id":null,
+                "tmdb movie id":null,
+                "tmdb person id":null,
+                "tmdb company id":null,
+                "tmdb collection id":null,
+                "tmdb genre id":null,
+                "tvdb tv show id":null,
+                "tvdb tv season id":null,
+                "tvdb tv episode id":null,
+                "rottentomatoes movie id":null,
+                "itunes person id":null,
+                "itunes movie id":null,
+                "itunes tv show id":null,
+                "itunes tv season id":null,
+                "itunes tv episode id":null,
+                "itunes genre id":null,
+                "itunes music album id":null,
+                "itunes music track id":null,
+                "stream id":null,
+                "resource path digest":null,
+                "person name":null,
+                "character name":null,
+                "company name":null,
+                "genre name":null,
+                "tv show name":null,
+                "tv episode name":null,
+                "movie title":null,
+                "music track name":null,
+                "music album name":null,
+                "track name":null,
+                "album name":null,
+                "release year":null,
+                "release date":null,
+                "simple company name":null,
+                "simple person name":null,
+                "simple genre name":null,
+                "simple character name":null,
+                "simple tv show name":null,
+                "simple tv episode name":null,
+                "simple movie title":null,
+                "simple music album name":null,
+                "simple music track name":null
+            },
+            "rule":[
+                "rule.medium.resource.filename.fragment",
+                "rule.medium.resource.directory.fragment",
+                "rule.medium.resource.path.fragment",
+                "rule.system.temp.location",
+                "rule.system.volume.location",
+                "rule.medium.resource.track.genealogy",
+                "rule.medium.resource.filename.canonic",
+                "rule.medium.resource.directory.canonic",
+                "rule.medium.resource.path.canonic",
+                "rule.medium.resource.filename.implicit",
+                "rule.medium.resource.directory.implicit",
+                "rule.medium.resource.path.implicit",
+                "rule.medium.resource.path.digest",
+                "rule.medium.resource.kind.language",
+                "rule.system.default.routing",
+                "rule.system.default.language",
+                "rule.knowledge.movie.imdb.trimmed",
+                "rule.knowledge.simple.name.company",
+                "rule.knowledge.simple.name.person",
+                "rule.knowledge.simple.name.genre",
+                "rule.knowledge.simple.name.character",
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.simple.name.movie",
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.simple.name.music.track",
+                "rule.knowledge.release.year",
+                "rule.medium.home.umid"
+            ]
+        },
+        "ns.medium.resource.location":{
+            "synonym":["keyword"],
+            "element":{
+                "domain":null,
+                "url":null,
+                "scheme":null,
+                "host":null,
+                "path":null,
+                "path digest":null,
+                "media kind":null,
+                "directory":null,
+                "file name":null,
+                "kind":null,
+                "language":null,
+                "profile":null,
+                "volume":null,
+                "home id":null,
+                "umid":null,
+                "movie id":null,
+                "music album id":null,
+                "tv show id":null,
+                "tv season id":null,
+                "tv episode id":null,
+                "track id":null,
+                "track number":null,
+                "disc number":null,
+                "movie handle":null,
+                "album handle":null,
+                "tv show handle":null,
+                "imdb movie id":null,
+                "imdb tv show id":null,
+                "imdb tv episode id":null,
+                "tmdb movie id":null,
+                "tvdb tv show id":null,
+                "tvdb tv season id":null,
+                "tvdb tv episode id":null,
+                "rottentomatoes movie id":null,
+                "itunes person id":null,
+                "itunes movie id":null,
+                "itunes tv show id":null,
+                "itunes tv season id":null,
+                "itunes tv episode id":null,
+                "itunes genre id":null,
+                "itunes music album id":null,
+                "itunes music track id":null,
+                "simple name":null,
+                "track genealogy":null,
+                "resource uri":null,
+                "asset uri":null,
+                "home uri":null,
+                "stream id":null,
+                "resource path digest":null,
+                "person name":null,
+                "character name":null,
+                "company name":null,
+                "genre name":null,
+                "tv show name":null,
+                "tv episode name":null,
+                "movie title":null,
+                "music track name":null,
+                "music album name":null,
+                "track name":null,
+                "album name":null,
+                "simple company name":null,
+                "simple person name":null,
+                "simple genre name":null,
+                "simple character name":null,
+                "simple tv show name":null,
+                "simple tv episode name":null,
+                "simple movie title":null,
+                "simple music album name":null,
+                "simple music track name":null
+            },
+            "rule":[
+                "rule.medium.resource.filename.fragment",
+                "rule.medium.resource.directory.fragment",
+                "rule.medium.resource.path.fragment",
+                "rule.system.temp.location",
+                "rule.system.volume.location",
+                "rule.medium.resource.track.genealogy",
+                "rule.medium.resource.filename.canonic",
+                "rule.medium.resource.directory.canonic",
+                "rule.medium.resource.path.canonic",
+                "rule.medium.resource.filename.implicit",
+                "rule.medium.resource.directory.implicit",
+                "rule.medium.resource.path.implicit",
+                "rule.medium.resource.path.digest",
+                "rule.medium.resource.kind.language",
+                "rule.system.default.routing",
+                "rule.medium.resource.uri",
+                "rule.medium.asset.uri",
+                "rule.medium.home.uri",
+                "rule.medium.home.umid",
+                "rule.knowledge.simple.name.company",
+                "rule.knowledge.simple.name.person",
+                "rule.knowledge.simple.name.genre",
+                "rule.knowledge.simple.name.character",
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.simple.name.movie",
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.simple.name.music.track"
+            ]
+        },
+        "ns.medium.asset.location":{
+            "synonym":["keyword"],
+            "element":{
+                "url":null,
+                "scheme":null,
+                "host":null,
+                "media kind":null,
+                "home id":null,
+                "umid":null,
+                "movie id":null,
+                "music album id":null,
+                "tv show id":null,
+                "tv season id":null,
+                "tv episode id":null,
+                "track id":null,
+                "track number":null,
+                "disc number":null,
+                "movie handle":null,
+                "album handle":null,
+                "tv show handle":null,
+                "imdb movie id":null,
+                "imdb tv show id":null,
+                "imdb tv episode id":null,
+                "tmdb movie id":null,
+                "tvdb tv show id":null,
+                "tvdb tv season id":null,
+                "tvdb tv episode id":null,
+                "rottentomatoes movie id":null,
+                "itunes person id":null,
+                "itunes movie id":null,
+                "itunes tv show id":null,
+                "itunes tv season id":null,
+                "itunes tv episode id":null,
+                "itunes music album id":null,
+                "simple name":null,
+                "asset uri":null,
+                "home uri":null,
+                "person name":null,
+                "character name":null,
+                "tv show name":null,
+                "tv episode name":null,
+                "movie title":null,
+                "music track name":null,
+                "music album name":null,
+                "track name":null,
+                "album name":null
+            },
+            "rule":[
+                "rule.medium.asset.uri",
+                "rule.medium.home.uri",
+                "rule.medium.home.umid"
+            ]
+        },
+        "ns.medium.resource.url.decode":{
+            "synonym":["keyword"],
+            "element":{
+                "directory":null,
+                "file name":null,
+                "profile":null,
+                "language":null,
+                "volume path":null,
+                "kind":null,
+                "umid":null,
+                "home id":null,
+                "resource path digest":null,
+                "stream id":null,
+                "media kind":null,
+                "movie id":null,
+                "music album id":null,
+                "tv show id":null,
+                "tv season id":null,
+                "tv episode id":null,
+                "track id":null,
+                "track number":null,
+                "disc number":null,
+                "movie handle":null,
+                "album handle":null,
+                "tv show handle":null,
+                "imdb movie id":null,
+                "imdb tv show id":null,
+                "imdb tv episode id":null,
+                "tmdb movie id":null,
+                "tvdb tv show id":null,
+                "tvdb tv season id":null,
+                "tvdb tv episode id":null,
+                "rottentomatoes movie id":null,
+                "itunes person id":null,
+                "itunes movie id":null,
+                "itunes tv show id":null,
+                "itunes tv season id":null,
+                "itunes tv episode id":null,
+                "itunes music album id":null,
+                "person name":null,
+                "character name":null,
+                "tv show name":null,
+                "tv episode name":null,
+                "movie title":null,
+                "music track name":null,
+                "music album name":null,
+                "track name":null,
+                "album name":null
+            },
+            "rule":[
+                "rule.medium.resource.filename.parse"
+            ]
+        },
+        "ns.medium.resource.hint":{
+            "synonym":["keyword"],
+            "element":{
+            }
+        },
+        "ns.medium.resource.meta.tag":{
+            "synonym":["mediainfo", "keyword"],
+            "description":"Generating valid tag sets for tagger",
+            "element":{
+                "kind":null,
+                "profile":null,
+                "volume":null,
+                "language":null,
+                "simple name":null,
+                "imdb movie id":null,
+                "tmdb movie id":null,
+                "stream type":{
+                    "mediainfo":"StreamKind"
+                },
+                "file size":{
+                    "mediainfo":"FileSize"
+                },
+                "format":{
+                    "mediainfo":"Format"
+                },
+                "modified date":{
+                    "mediainfo":"File_Modified_Date"
+                },
+                "tag date":{
+                    "mediainfo":"Tagged_Date"
+                },
+                "bit rate":{
+                    "mediainfo":"OverallBitRate"
+                },
+                "duration":{
+                    "mediainfo":"Duration"
+                },
+                "width":{
+                    "mediainfo":"Width",
+                    "format":"pixel"
+                },
+                "height":{
+                    "mediainfo":"Height",
+                    "format":"pixel"
+                },
+                "media kind":{
+                    "mediainfo":"stik",
+                    "subler":"Media Kind"
+                },
+                "track number":{
+                    "mediainfo":"Track_Position"
+                },
+                "track count":{
+                    "mediainfo":"Track_Position_Total"
+                },
+                "disc number":{
+                    "mediainfo":"Part_Position"
+                },
+                "disc count":{
+                    "mediainfo":"Part_Position_Total"
+                },
+                "track position":{
+                    "subler":"Track #"
+                },
+                "disc position":{
+                    "subler":"Disk #"
+                },
+                "tv season number":{
+                    "mediainfo":"tvsn",
+                    "subler":"TV Season"
+                },
+                "tv episode number":{
+                    "mediainfo":"tves",
+                    "subler":"TV Episode #"
+                },
+                "sort name":{
+                    "mediainfo":"sonm",
+                    "subler":"Sort Name"
+                },
+                "sort artist":{
+                    "mediainfo":"soar",
+                    "subler":"Sort Artist"
+                },
+                "sort album artist":{
+                    "mediainfo":"soaa",
+                    "subler":"Sort Album Artist"
+                },
+                "sort album":{
+                    "mediainfo":"soal",
+                    "subler":"Sort Album"
+                },
+                "sort composer":{
+                    "mediainfo":"soco",
+                    "subler":"Sort Composer"
+                },
+                "sort tv show":{
+                    "mediainfo":"sosn",
+                    "subler":"Sort TV Show"
+                },
+                "track name":{
+                    "mediainfo":"Title",
+                    "subler":"Name"
+                },
+                "artist name":{
+                    "mediainfo":"Performer",
+                    "subler":"Artist"
+                },
+                "album artist name":{
+                    "mediainfo":"Album_Performer",
+                    "subler":"Album Artist"
+                },
+                "album name":{
+                    "mediainfo":"Album",
+                    "subler":"Album"
+                },
+                "tv show name":{
+                    "mediainfo":"tvsh",
+                    "subler":"TV Show"
+                },
+                "tv episode production code":{
+                    "mediainfo":"tven",
+                    "subler":"TV Episode ID"
+                },
+                "tv network name":{
+                    "mediainfo":"tvnn",
+                    "subler":"TV Network"
+                },
+                "grouping":{
+                    "mediainfo":"Grouping",
+                    "subler":"Grouping"
+                },
+                "composer name":{
+                    "mediainfo":"ScreenplayBy",
+                    "subler":"Composer"
+                },
+                "comment":{
+                    "mediainfo":"Comment",
+                    "subler":"Comments"
+                },
+                "description":{
+                    "mediainfo":"desc",
+                    "subler":"Description",
+                    "unescape xml":true
+                },
+                "long description":{
+                    "mediainfo":"ldes",
+                    "subler":"Long Description",
+                    "unescape xml":true
+                },
+                "lyrics":{
+                    "mediainfo":"lyr",
+                    "subler":"Lyrics",
+                    "unescape xml":true
+                },
+                "copyright":{
+                    "mediainfo":"Copyright",
+                    "subler":"Copyright"
+                },
+                "encoding tool":{
+                    "subler":"Encoding Tool"
+                },
+                "encoded by":{
+                    "subler":"Encoded by"
+                },
+                "compilation":{
+                    "mediainfo":"Compilation"
+                },
+                "tempo":{
+                    "mediainfo":"BPM",
+                    "subler":"Tempo"
+                },
+                "genre type":null,
+                "genre name":{
+                    "mediainfo":"Genre",
+                    "subler":"Genre"
+                },
+                "hd video":{
+                    "mediainfo":"hdvd",
+                    "subler":"HD Video"
+                },
+                "gapless":{
+                    "subler":"Gapless"
+                },
+                "podcast":{
+                    "mediainfo":"pcst"
+                },
+                "podcast url":null,
+                "itunes keywords":{
+                    "mediainfo":"keyw"
+                },
+                "itunes category":{
+                    "mediainfo":"catg"
+                },
+                "xid":{
+                    "mediainfo":"xid",
+                    "subler":"XID"
+                },
+                "itunes content id":{
+                    "mediainfo":"cnID",
+                    "subler":"contentID"
+                },
+                "itunes account":{
+                    "mediainfo":"apID",
+                    "subler":"iTunes Account"
+                },
+                "itunes person id":{
+                    "mediainfo":"atID"
+                },
+                "itunes composer id":{
+                    "mediainfo":"cmID"
+                },
+                "itunes playlist id":{
+                    "mediainfo":"plID"
+                },
+                "itunes genre id":{
+                    "mediainfo":"geID"
+                },
+                "itunes country id":{
+                    "mediainfo":"sfID"
+                },
+                "itunes account type":{
+                    "mediainfo":"akID"
+                },
+                "itunes episode global id":null,
+                "content advisory standard":null,
+                "content advisory rating":{
+                    "subler":"Rating"
+                },
+                "content advisory score":null,
+                "content advisory annotation":{
+                    "subler":"Rating Annotation"
+                },
+                "purchase date":{
+                    "mediainfo":"purd",
+                    "subler":"Purchase Date"
+                },
+                "release date":{
+                    "mediainfo":"Recorded_Date",
+                    "subler":"Release Date"
+                },
+                "content rating":{
+                    "mediainfo":"rtng",
+                    "subler":"Content Rating"
+                },
+                "itunextc":{
+                    "mediainfo":"iTunEXTC"
+                },
+                "itunmovi":{
+                    "mediainfo":"iTunMOVI"
+                },
+                "actors":{
+                    "subler":"Cast"
+                },
+                "directors":{
+                    "subler":"Director"
+                },
+                "codirectors":{
+                    "subler":"Codirectors"
+                },
+                "producers":{
+                    "subler":"Producers"
+                },
+                "screenwriters":{
+                    "subler":"Screenwriters"
+                },
+                "studio":{
+                    "subler":"Studio"
+                },
+                "cover":{
+                    "mediainfo":"Cover",
+                    "auto cast":false
+                }
+            },
+            "rule":[
+                "rule.knowledge.disc.position",
+                "rule.knowledge.track.position",
+                "rule.knowledge.default.track.count",
+                "rule.knowledge.default.disc.count",
+                "rule.knowledge.default.tv.episode",
+                "rule.knowledge.default.music.track",
+                "rule.knowledge.sort.name",
+                "rule.knowledge.sort.artist",
+                "rule.knowledge.sort.albumartist",
+                "rule.knowledge.sort.album",
+                "rule.knowledge.sort.composer",
+                "rule.knowledge.sort.show",
+                "rule.knowledge.artist.info",
+                "rule.itunes.itunextc.parse",
+                "rule.itunes.album.name"
+            ]
+        },
+        "ns.medium.resource.meta":{
+            "synonym":["mediainfo", "keyword"],
+            "element":{
+                "kind":null,
+                "profile":null,
+                "volume":null,
+                "language":null,
+                "simple name":null,
+                "imdb movie id":null,
+                "tmdb movie id":null,
+                "stream type":{
+                    "mediainfo":"StreamKind"
+                },
+                "file size":{
+                    "mediainfo":"FileSize"
+                },
+                "format":{
+                    "mediainfo":"Format"
+                },
+                "modified date":{
+                    "mediainfo":"File_Modified_Date"
+                },
+                "tag date":{
+                    "mediainfo":"Tagged_Date"
+                },
+                "bit rate":{
+                    "mediainfo":"OverallBitRate"
+                },
+                "duration":{
+                    "mediainfo":"Duration"
+                },
+                "width":{
+                    "mediainfo":"Width",
+                    "format":"pixel"
+                },
+                "height":{
+                    "mediainfo":"Height",
+                    "format":"pixel"
+                },
+                "media kind":{
+                    "mediainfo":"stik",
+                    "subler":"Media Kind"
+                },
+                "track number":{
+                    "mediainfo":"Track_Position"
+                },
+                "track count":{
+                    "mediainfo":"Track_Position_Total"
+                },
+                "disc number":{
+                    "mediainfo":"Part_Position"
+                },
+                "disc count":{
+                    "mediainfo":"Part_Position_Total"
+                },
+                "track position":{
+                    "subler":"Track #"
+                },
+                "disc position":{
+                    "subler":"Disk #"
+                },
+                "tv season number":{
+                    "mediainfo":"tvsn",
+                    "subler":"TV Season"
+                },
+                "tv episode number":{
+                    "mediainfo":"tves",
+                    "subler":"TV Episode #"
+                },
+                "sort name":{
+                    "mediainfo":"sonm",
+                    "subler":"Sort Name"
+                },
+                "sort artist":{
+                    "mediainfo":"soar",
+                    "subler":"Sort Artist"
+                },
+                "sort album artist":{
+                    "mediainfo":"soaa",
+                    "subler":"Sort Album Artist"
+                },
+                "sort album":{
+                    "mediainfo":"soal",
+                    "subler":"Sort Album"
+                },
+                "sort composer":{
+                    "mediainfo":"soco",
+                    "subler":"Sort Composer"
+                },
+                "sort tv show":{
+                    "mediainfo":"sosn",
+                    "subler":"Sort TV Show"
+                },
+                "track name":{
+                    "mediainfo":"Title",
+                    "subler":"Name"
+                },
+                "artist name":{
+                    "mediainfo":"Performer",
+                    "subler":"Artist"
+                },
+                "album artist name":{
+                    "mediainfo":"Album_Performer",
+                    "subler":"Album Artist"
+                },
+                "album name":{
+                    "mediainfo":"Album",
+                    "subler":"Album"
+                },
+                "tv show name":{
+                    "mediainfo":"tvsh",
+                    "subler":"TV Show"
+                },
+                "tv episode production code":{
+                    "mediainfo":"tven",
+                    "subler":"TV Episode ID"
+                },
+                "tv network name":{
+                    "mediainfo":"tvnn",
+                    "subler":"TV Network"
+                },
+                "grouping":{
+                    "mediainfo":"Grouping",
+                    "subler":"Grouping"
+                },
+                "composer name":{
+                    "mediainfo":"ScreenplayBy",
+                    "subler":"Composer"
+                },
+                "comment":{
+                    "mediainfo":"Comment",
+                    "subler":"Comments"
+                },
+                "description":{
+                    "mediainfo":"desc",
+                    "subler":"Description",
+                    "unescape xml":true
+                },
+                "long description":{
+                    "mediainfo":"ldes",
+                    "subler":"Long Description",
+                    "unescape xml":true
+                },
+                "lyrics":{
+                    "mediainfo":"lyr",
+                    "subler":"Lyrics",
+                    "unescape xml":true
+                },
+                "copyright":{
+                    "mediainfo":"Copyright",
+                    "subler":"Copyright"
+                },
+                "encoding tool":{
+                    "subler":"Encoding Tool"
+                },
+                "encoded by":{
+                    "subler":"Encoded by"
+                },
+                "compilation":{
+                    "mediainfo":"Compilation"
+                },
+                "tempo":{
+                    "mediainfo":"BPM",
+                    "subler":"Tempo"
+                },
+                "genre type":null,
+                "genre name":{
+                    "mediainfo":"Genre",
+                    "subler":"Genre"
+                },
+                "hd video":{
+                    "mediainfo":"hdvd",
+                    "subler":"HD Video"
+                },
+                "gapless":{
+                    "subler":"Gapless"
+                },
+                "podcast":{
+                    "mediainfo":"pcst"
+                },
+                "podcast url":null,
+                "itunes keywords":{
+                    "mediainfo":"keyw"
+                },
+                "itunes category":{
+                    "mediainfo":"catg"
+                },
+                "xid":{
+                    "mediainfo":"xid",
+                    "subler":"XID"
+                },
+                "itunes content id":{
+                    "mediainfo":"cnID",
+                    "subler":"contentID"
+                },
+                "itunes account":{
+                    "mediainfo":"apID",
+                    "subler":"iTunes Account"
+                },
+                "itunes person id":{
+                    "mediainfo":"atID"
+                },
+                "itunes composer id":{
+                    "mediainfo":"cmID"
+                },
+                "itunes playlist id":{
+                    "mediainfo":"plID"
+                },
+                "itunes genre id":{
+                    "mediainfo":"geID"
+                },
+                "itunes country id":{
+                    "mediainfo":"sfID"
+                },
+                "itunes account type":{
+                    "mediainfo":"akID"
+                },
+                "itunes episode global id":null,
+                "purchase date":{
+                    "mediainfo":"purd",
+                    "subler":"Purchase Date"
+                },
+                "release date":{
+                    "mediainfo":"Recorded_Date",
+                    "subler":"Release Date"
+                },
+                "content rating":{
+                    "mediainfo":"rtng",
+                    "subler":"Content Rating"
+                },
+                "itunextc":{
+                    "mediainfo":"iTunEXTC"
+                },
+                "content advisory standard":null,
+                "content advisory rating":{
+                    "subler":"Rating"
+                },
+                "content advisory score":null,
+                "content advisory annotation":{
+                    "subler":"Rating Annotation"
+                },
+                "itunmovi":{
+                    "mediainfo":"iTunMOVI"
+                },
+                "actors":{
+                    "subler":"Cast"
+                },
+                "directors":{
+                    "subler":"Director"
+                },
+                "codirectors":{
+                    "subler":"Codirectors"
+                },
+                "producers":{
+                    "subler":"Producers"
+                },
+                "screenwriters":{
+                    "subler":"Screenwriters"
+                },
+                "studio":{
+                    "subler":"Studio"
+                },
+                "cover":{
+                    "mediainfo":"Cover",
+                    "auto cast":false
+                }
+            },
+            "rule":[
+                "rule.knowledge.disc.position",
+                "rule.knowledge.track.position",
+                "rule.itunes.itunextc.parse"
+            ]
+        },
+        "ns.medium.resource.stream.audio":{
+            "synonym":["mediainfo"],
+            "element":{
+                "stream id":{
+                    "mediainfo":"ID"
+                },
+                "stream kind position":{
+                    "mediainfo":"StreamKindPos"
+                },
+                "stream type":{
+                    "mediainfo":"StreamKind"
+                },
+                "stream kind":null,
+                "kind":null,
+                "stream name":{
+                    "mediainfo":"Title"
+                },
+                "language":{
+                    "mediainfo":"Language_String3"
+                },
+                "default":{
+                    "mediainfo":"Default"
+                },
+                "format":{
+                    "mediainfo":"Format"
+                },
+                "format profile":{
+                    "mediainfo":"Format_Profile",
+                    "plural format":"mediainfo value list"
+                },
+                "channels":null,
+                "channel count":{
+                    "mediainfo":"Channel_s_",
+                    "plural format":"mediainfo value list"
+                },
+                "channel position":{
+                    "mediainfo":"ChannelPositions",
+                    "plural format":"mediainfo value list"
+                },
+                "delay":{
+                    "mediainfo":"Delay"
+                },
+                "duration":{
+                    "mediainfo":"Duration"
+                },
+                "bit rate":{
+                    "mediainfo":"BitRate",
+                    "format":"bitrate"
+                },
+                "bit rate mode":{
+                    "mediainfo":"BitRate_Mode"
+                },
+                "bit depth":{
+                    "mediainfo":"BitDepth",
+                    "format":"bit"
+                },
+                "stream size":{
+                    "mediainfo":"StreamSize",
+                    "format":"byte"
+                },
+                "stream portion":{
+                    "mediainfo":"StreamSize_Proportion"
+                },
+                "sample rate":{
+                    "mediainfo":"SamplingRate",
+                    "format":"frequency"
+                },
+                "sample count":{
+                    "mediainfo":"SamplingCount"
+                },
+                "dialnorm":{
+                    "mediainfo":"dialnorm"
+                },
+                "encoded date":{
+                    "mediainfo":"Encoded_Date"
+                },
+                "primary":null,
+                "handbrake audio encoder settings":null
+            },
+            "rule":[
+                "rule.medium.stream.default.position",
+                "rule.medium.stream.default.id",
+                "rule.medium.stream.audio.kind",
+                "rule.system.default.enabled",
+                "rule.medium.stream.audio.name"
+            ]
+        },
+        "ns.medium.resource.stream.video":{
+            "synonym":["mediainfo"],
+            "element":{
+                "stream id":{
+                    "mediainfo":"ID"
+                },
+                "stream kind position":{
+                    "mediainfo":"StreamKindPos"
+                },
+                "stream type":{
+                    "mediainfo":"StreamKind"
+                },
+                "stream kind":null,
+                "stream name":{
+                    "mediainfo":"Title"
+                },
+                "language":{
+                    "mediainfo":"Language_String3"
+                },
+                "default":{
+                    "mediainfo":"Default"
+                },
+                "format":{
+                    "mediainfo":"Format"
+                },
+                "format profile":{
+                    "mediainfo":"Format_Profile",
+                    "plural format":"mediainfo value list"
+                },
+                "delay":{
+                    "mediainfo":"Delay"
+                },
+                "duration":{
+                    "mediainfo":"Duration"
+                },
+                "bit rate":{
+                    "mediainfo":"BitRate",
+                    "format":"bitrate"
+                },
+                "bit rate mode":{
+                    "mediainfo":"BitRate_Mode"
+                },
+                "bit depth":{
+                    "mediainfo":"BitDepth",
+                    "format":"bit"
+                },
+                "stream size":{
+                    "mediainfo":"StreamSize",
+                    "format":"byte"
+                },
+                "stream portion":{
+                    "mediainfo":"StreamSize_Proportion"
+                },
+                "width":{
+                    "mediainfo":"Width",
+                    "format":"pixel"
+                },
+                "height":{
+                    "mediainfo":"Height",
+                    "format":"pixel"
+                },
+                "pixel aspect ratio":{
+                    "mediainfo":"PixelAspectRatio"
+                },
+                "display aspect ratio":{
+                    "mediainfo":"DisplayAspectRatio"
+                },
+                "frame rate mode":{
+                    "mediainfo":"FrameRate_Mode"
+                },
+                "frame rate":{
+                    "mediainfo":"FrameRate"
+                },
+                "frame rate minimum":{
+                    "mediainfo":"FrameRate_Minimum"
+                },
+                "frame rate maximum":{
+                    "mediainfo":"FrameRate_Maximum"
+                },
+                "frame count":{
+                    "mediainfo":"FrameCount"
+                },
+                "color space":{
+                    "mediainfo":"ColorSpace"
+                },
+                "bpf":{
+                    "mediainfo":"Bits-_Pixel_Frame_"
+                },
+                "encoder":{
+                    "mediainfo":"Encoded_Library"
+                },
+                "encoder settings string":{
+                    "mediainfo":"Encoded_Library_Settings"
+                },
+                "encoder settings":{
+                    "mediainfo":"Parsed_Encoded_Library_Settings"
+                },
+                "encoded date":{
+                    "mediainfo":"Encoded_Date"
+                },
+                "primary":null,
+                "handbrake parameters":null,
+                "handbrake x264 settings":null
+            },
+            "rule":[
+                "rule.medium.stream.default.position",
+                "rule.medium.stream.default.id",
+                "rule.medium.stream.video.kind",
+                "rule.medium.stream.default.primary",
+                "rule.system.default.enabled"
+            ]
+        },
+        "ns.medium.resource.stream.text":{
+            "synonym":["mediainfo"],
+            "element":{
+                "stream id":{
+                    "mediainfo":"ID"
+                },
+                "stream kind position":{
+                    "mediainfo":"StreamKindPos"
+                },
+                "stream type":{
+                    "mediainfo":"StreamKind"
+                },
+                "stream kind":null,
+                "stream name":{
+                    "mediainfo":"Title"
+                },
+                "language":{
+                    "mediainfo":"Language_String3"
+                },
+                "default":{
+                    "mediainfo":"Default"
+                },
+                "format":{
+                    "mediainfo":"Format"
+                },
+                "format profile":{
+                    "mediainfo":"Format_Profile",
+                    "plural format":"mediainfo value list"
+                },
+                "delay":{
+                    "mediainfo":"Delay"
+                },
+                "duration":{
+                    "mediainfo":"Duration"
+                },
+                "bit rate":{
+                    "mediainfo":"BitRate",
+                    "format":"bitrate"
+                },
+                "bit rate mode":{
+                    "mediainfo":"BitRate_Mode"
+                },
+                "bit depth":{
+                    "mediainfo":"BitDepth",
+                    "format":"bit"
+                },
+                "stream size":{
+                    "mediainfo":"StreamSize",
+                    "format":"byte"
+                },
+                "stream portion":{
+                    "mediainfo":"StreamSize_Proportion"
+                },
+                "encoded date":{
+                    "mediainfo":"Encoded_Date"
+                },
+                "primary":null
+            },
+            "rule":[
+                "rule.medium.stream.default.position",
+                "rule.medium.stream.default.id",
+                "rule.medium.stream.text.kind",
+                "rule.medium.stream.default.primary",
+                "rule.system.default.enabled",
+                "rule.system.default.language"
+            ]
+        },
+        "ns.medium.resource.stream.image":{
+            "synonym":["mediainfo"],
+            "element":{
+                "stream id":{
+                    "mediainfo":"ID"
+                },
+                "stream kind position":{
+                    "mediainfo":"StreamKindPos"
+                },
+                "stream type":{
+                    "mediainfo":"StreamKind"
+                },
+                "stream kind":null,
+                "stream name":{
+                    "mediainfo":"Title"
+                },
+                "language":{
+                    "mediainfo":"Language_String3"
+                },
+                "format":{
+                    "mediainfo":"Format"
+                },
+                "format profile":{
+                    "mediainfo":"Format_Profile",
+                    "plural format":"mediainfo value list"
+                },
+                "delay":{
+                    "mediainfo":"Delay"
+                },
+                "duration":{
+                    "mediainfo":"Duration"
+                },
+                "bit rate":{
+                    "mediainfo":"BitRate",
+                    "format":"bitrate"
+                },
+                "bit rate mode":{
+                    "mediainfo":"BitRate_Mode"
+                },
+                "bit depth":{
+                    "mediainfo":"BitDepth",
+                    "format":"bit"
+                },
+                "stream size":{
+                    "mediainfo":"StreamSize",
+                    "format":"byte"
+                },
+                "stream portion":{
+                    "mediainfo":"StreamSize_Proportion"
+                },
+                "width":{
+                    "mediainfo":"Width",
+                    "format":"pixel"
+                },
+                "height":{
+                    "mediainfo":"Height",
+                    "format":"pixel"
+                },
+                "encoded date":{
+                    "mediainfo":"Encoded_Date"
+                },
+                "primary":null
+            },
+            "rule":[
+                "rule.medium.stream.default.position",
+                "rule.medium.stream.default.id",
+                "rule.medium.stream.image.kind",
+                "rule.medium.stream.default.primary",
+                "rule.system.default.enabled"
+            ]
+        },
+        "ns.medium.resource.x264":{
+            "synonym":["x264"],
+            "element":{
+                "bit rate":{
+                    "x264":"bitrate"
+                },
+                "8x8 dct":{
+                    "x264":"8x8dct"
+                },
+                "adaptive bi directional":{
+                    "x264":"b_adapt"
+                },
+                "bi directional bias":{
+                    "x264":"b_bias"
+                },
+                "bi directional pyramid":{
+                    "x264":"b_pyramid"
+                },
+                "bi directional frames":{
+                    "x264":"bframes"
+                },
+                "cabac":{
+                    "x264":"cabac"
+                },
+                "chroma motion estimation":{
+                    "x264":"chroma_me"
+                },
+                "chroma planes quantizer offset":{
+                    "x264":"chroma_qp_offset"
+                },
+                "constrained intra prediction":{
+                    "x264":"constrained_intra"
+                },
+                "dct decimation":{
+                    "x264":"decimate"
+                },
+                "direct motion vectors prediction mode":{
+                    "x264":"direct"
+                },
+                "predicted frames early skip detection":{
+                    "x264":"fast_pskip"
+                },
+                "intra frames refresh":{
+                    "x264":"intra_refresh"
+                },
+                "rate control lookahead":{
+                    "x264":"rc_lookahead"
+                },
+                "decoded picture buffer size":{
+                    "x264":"ref"
+                },
+                "scene cut":{
+                    "x264":"scenecut"
+                },
+                "sliced based threading":{
+                    "x264":"sliced_threads"
+                },
+                "subpixel motion estimation":{
+                    "x264":"subme"
+                },
+                "threads":{
+                    "x264":"threads"
+                },
+                "trellis quantization":{
+                    "x264":"trellis"
+                },
+                "video buffer verifier size":{
+                    "x264":"vbv_bufsize"
+                },
+                "video buffer verifier maximum rate":{
+                    "x264":"vbv_maxrate"
+                },
+                "weighted predicted frames":{
+                    "x264":"wpredp"
+                },
+                "weighted bi directional frames":{
+                    "x264":"wpredb"
+                },
+                "maximum keyframe interval":{
+                    "x264":"keyint"
+                },
+                "minimum keyframe interval":{
+                    "x264":"keyint_min"
+                },
+                "macroblock adaptive frame field":{
+                    "x264":"mbaff"
+                },
+                "macroblock tree rate control":{
+                    "x264":"mbtree"
+                },
+                "motion estimation method":{
+                    "x264":"me"
+                },
+                "motion estimation range":{
+                    "x264":"me_range"
+                },
+                "mixed references":{
+                    "x264":"mixed_ref"
+                },
+                "noise reduction":{
+                    "x264":"nr"
+                },
+                "minimum quantizer":{
+                    "x264":"qpmin"
+                },
+                "maximum quantizer":{
+                    "x264":"qpmax"
+                },
+                "quantizer step":{
+                    "x264":"qpstep"
+                },
+                "custom quantization matrices":{
+                    "x264":"cqm"
+                },
+                "psychovisual optimization":{
+                    "x264":"psy"
+                },
+                "psychovisual strength":{
+                    "x264":"psy_rd"
+                },
+                "quantizer curve compression factor":{
+                    "x264":"qcomp"
+                },
+                "quantizer curve blur":{
+                    "x264":"cplxblur"
+                },
+                "post compression quantizer curve blur":{
+                    "x264":"qblur"
+                },
+                "rate tolerance":{
+                    "x264":"ratetol"
+                },
+                "intra predicted ratio":{
+                    "x264":"ip_ratio"
+                },
+                "bi directional predicted ratio":{
+                    "x264":"pb_ratio"
+                },
+                "macroblock partitions":{
+                    "x264":"analyse"
+                },
+                "adaptive quantization":{
+                    "x264":"aq"
+                },
+                "deadzone":{
+                    "x264":"deadzone"
+                },
+                "loop filter deblocker":{
+                    "x264":"deblock"
+                },
+                "rate control method":{
+                    "x264":"rc"
+                },
+                "hypothetical reference decoder":{
+                    "x264":"nal_hrd"
+                },
+                "open group of pictures":{
+                    "type":"open_gop"
+                },
+                "interlaced":{
+                    "x264":"interlaced"
+                },
+                "bluray compatible":{
+                    "x264":"bluray_compat"
+                }
+            },
+            "rule":[]
+        },
+        "ns.knowledge.movie.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "movie id":null,
+                "language":null,
+                "homepage":null,
+                "movie title":null,
+                "original movie title":null,
+                "tagline":null,
+                "country code":null,
+                "budget":null,
+                "runtime":null,
+                "revenue":null,
+                "vote average":null,
+                "vote count":null,
+                "release date":null,
+                "release year":null,
+                "description":null,
+                "long description":null,
+                "genres":null,
+                "keywords":null,
+                "production companies":null,
+                "backdrops":null,
+                "posters":null,
+                "part of a collection":null,
+                "cast":null,
+                "crew":null,
+                "certifications":null,
+                "titles":null,
+                "reviews":null,
+                "critics consensus":null,
+                "audience rating":null,
+                "critics rating":null,
+                "audience score":null,
+                "critics score":null,
+                "content advisory rating":null,
+                "tmdb popularity":null,
+                "artist name":null,
+                "simple movie title":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.movie",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.show.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "tv show id":null,
+                "tv show name":null,
+                "modified date":null,
+                "release date":null,
+                "release year":null,
+                "content advisory rating":null,
+                "language":null,
+                "description":null,
+                "vote average":null,
+                "vote count":null,
+                "tv network name":null,
+                "runtime":null,
+                "tv show status":null,
+                "genres":null,
+                "actors":null,
+                "image url":null,
+                "banner url":null,
+                "fan art url":null,
+                "tv show air day":null,
+                "tv show air time":null,
+                "cast":null,
+                "posters":null,
+                "simple tv show name":null,
+                "country code":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.season.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "tv show id":null,
+                "tv season id":null,
+                "tv season number":null,
+                "itunes tv show id":null,
+                "itunes tv season id":null,
+                "tvdb tv show id":null,
+                "tvdb tv season id":null,
+                "imdb tv show id":null,
+                "disc count":null,
+                "disc number":null,
+                "track count":null,
+                "tv show name":null,
+                "content advisory rating":null,
+                "copyright":null,
+                "release year":null,
+                "release date":null,
+                "long description":null,
+                "language":null,
+                "album name":null,
+                "simple tv show name":null,
+                "country code":null
+            },
+            "rule":[
+                "rule.itunes.tv.season.parse",
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.episode.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "tv show id":null,
+                "tv season id":null,
+                "tv season number":null,
+                "tv episode number":null,
+                "disc number":null,
+                "track number":null,
+                "track count":null,
+                "tv episode name":null,
+                "tv show name":null,
+                "absolute tv episode number":null,
+                "modified date":null,
+                "language":null,
+                "release date":null,
+                "release year":null,
+                "description":null,
+                "long description":null,
+                "tv episode production code":null,
+                "vote average":null,
+                "vote count":null,
+                "backdrop url":null,
+                "actors":null,
+                "directors":null,
+                "screenwriters":null,
+                "content advisory rating":null,
+                "simple tv show name":null,
+                "simple tv episode name":null,
+                "country code":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.music.album.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "music album id":null,
+                "album name":null,
+                "music album name":null,
+                "itunes music album id":null,
+                "itunes person id":null,
+                "artist name":null,
+                "copyright":null,
+                "release date":null,
+                "release year":null,
+                "track count":null,
+                "simple music album name":null,
+                "country code":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.music.track.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "music album id":null,
+                "track id":null,
+                "music disc number":null,
+                "music track number":null,
+                "album name":null,
+                "track name":null,
+                "music album name":null,
+                "music track name":null,
+                "itunes music album id":null,
+                "itunes music track id":null,
+                "disc number":null,
+                "disc count":null,
+                "track number":null,
+                "track count":null,
+                "itunes person id":null,
+                "artist name":null,
+                "release date":null,
+                "release year":null,
+                "simple music album name":null,
+                "simple music track name":null,
+                "country code":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.simple.name.music.track",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.movie.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "movie id":null,
+                "itunes movie id":null,
+                "tmdb movie id":null,
+                "imdb movie id":null,
+                "rottentomatoes movie id":null,
+                "movie title":null,
+                "simple movie title":null,
+                "release date":null,
+                "release year":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.movie",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.show.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "tv show id":null,
+                "itunes tv show id":null,
+                "tvdb tv show id":null,
+                "imdb tv show id":null,
+                "zap2it tv show id":null,
+                "tv show name":null,
+                "simple tv show name":null,
+                "release date":null,
+                "release year":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.season.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "tv show id":null,
+                "imdb tv show id":null,
+                "itunes tv show id":null,
+                "tvdb tv show id":null,
+                "tv season id":null,
+                "itunes tv season id":null,
+                "tvdb tv season id":null,
+                "tv season number":null,
+                "disc count":null,
+                "disc number":null,
+                "track count":null,
+                "tv show name":null,
+                "simple tv show name":null,
+                "release date":null,
+                "release year":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.episode.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "tv show id":null,
+                "imdb tv show id":null,
+                "itunes tv show id":null,
+                "tvdb tv show id":null,
+                "tv season id":null,
+                "itunes tv season id":null,
+                "tvdb tv season id":null,
+                "imdb tv episode id":null,
+                "itunes tv episode id":null,
+                "tvdb tv episode id":null,
+                "tv season number":null,
+                "tv episode number":null,
+                "disc count":null,
+                "disc number":null,
+                "track count":null,
+                "track number":null,
+                "tv episode name":null,
+                "absolute tv episode number":null,
+                "tv show name":null,
+                "simple tv show name":null,
+                "simple tv episode name":null,
+                "release date":null,
+                "release year":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.music.album.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "music album id":null,
+                "album name":null,
+                "itunes music album id":null,
+                "simple music album name":null,
+                "release date":null,
+                "release year":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.music.track.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "music album id":null,
+                "itunes music album id":null,
+                "track id":null,
+                "itunes music track id":null,
+                "album name":null,
+                "disc count":null,
+                "disc number":null,
+                "track count":null,
+                "track name":null,
+                "track number":null,
+                "simple music album name":null,
+                "simple music track name":null,
+                "release date":null,
+                "release year":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.simple.name.music.track",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.person.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "person id":null,
+                "itunes person id":null,
+                "tmdb person id":null,
+                "person name":null,
+                "simple person name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.person"
+            ]
+        },
+        "ns.knowledge.company.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "company id":null,
+                "tmdb company id":null,
+                "company name":null,
+                "simple company name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.company"
+            ]
+        },
+        "ns.knowledge.genre.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "genre id":null,
+                "tmdb genre id":null,
+                "itunes genre id":null,
+                "genre name":null,
+                "simple genre name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.genre"
+            ]
+        },
+        "ns.knowledge.collection.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "collection id":null,
+                "tmdb collection id":null,
+                "collection name":null,
+                "simple collection name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.collection"
+            ]
+        },
+        "ns.knowledge.keyword.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "keyword id":null,
+                "tmdb keyword id":null,
+                "keyword name":null,
+                "simple keyword name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.keyword"
+            ]
+        },
+        "ns.knowledge.image.reference":{
+            "synonym":["keyword"],
+            "element":{
+                "image url":null,
+                "tvdb image id":null
+            }
+        },
+
+        "ns.knowledge.movie":{
+            "synonym":["keyword","tmdb", "rottentomatoes", "itunes"],
+            "element":{
+                "movie id":null,
+                "itunes movie id":{
+                    "itunes":"trackId"
+                },
+                "tmdb movie id":{
+                    "tmdb":"id"
+                },
+                "imdb movie id":{
+                    "tmdb":"imdb_id",
+                    "rottentomatoes":"imdb_id"
+                },
+                "rottentomatoes movie id":{
+                    "rottentomatoes":"id"
+                },
+                "language":null,
+                "homepage":{
+                    "tmdb":"homepage"
+                },
+                "movie title":{
+                    "itunes":"trackName",
+                    "tmdb":"title",
+                    "rottentomatoes":"title"
+                },
+                "original movie title":{
+                    "tmdb":"original_title"
+                },
+                "tagline":{
+                    "tmdb":"tagline"
+                },
+                "country code":{
+                    "tmdb":"iso_3166_1",
+                    "itunes":"country"
+                },
+                "budget":{
+                    "tmdb":"budget"
+                },
+                "runtime":{
+                    "tmdb":"runtime",
+                    "rottentomatoes":"runtime"
+                },
+                "revenue":{
+                    "tmdb":"revenue"
+                },
+                "vote average":{
+                    "tmdb":"vote_average"
+                },
+                "vote count":{
+                    "tmdb":"vote_count"
+                },
+                "release date":{
+                    "tmdb":"release_date",
+                    "rottentomatoes":"release_date",
+                    "itunes":"releaseDate"
+                },
+                "release year":null,
+                "description":{
+                    "tmdb":"overview",
+                    "rottentomatoes":"synopsis"
+                },
+                "long description":{
+                    "itunes":"longDescription"
+                },
+                "backdrop url":{
+                    "tmdb":"backdrop_path"
+                },
+                "poster url":{
+                    "tmdb":"poster_path"
+                },
+                "genres":{
+                    "tmdb":"genres"
+                },
+                "keywords":{
+                    "tmdb":"keywords",
+                    "namespace":"ns.knowledge.keyword",
+                    "type":"embed"
+                },
+                "production companies":{
+                    "tmdb":"production_companies"
+                },
+                "backdrops":{
+                    "tmdb":"backdrops"
+                },
+                "posters":{
+                    "tmdb":"posters"
+                },
+                "part of a collection":{
+                    "tmdb":"belongs_to_collection"
+                },
+                "cast":{
+                    "tmdb":"cast"
+                },
+                "crew":{
+                    "tmdb":"crew"
+                },
+                "certifications":{
+                    "tmdb":"countries"
+                },
+                "titles":{
+                    "tmdb":"titles"
+                },
+                "critics consensus":{
+                    "rottentomatoes":"critics_consensus"
+                },
+                "audience rating":{
+                    "rottentomatoes":"audience_rating"
+                },
+                "critics rating":{
+                    "rottentomatoes":"critics_rating"
+                },
+                "audience score":{
+                    "rottentomatoes":"audience_score"
+                },
+                "critics score":{
+                    "rottentomatoes":"critics_score"
+                },
+                "reviews":{
+                    "rottentomatoes":"reviews"
+                },
+                "content advisory rating":{
+                    "rottentomatoes":"mpaa_rating",
+                    "itunes":"contentAdvisoryRating"
+                },
+                "tmdb popularity":{
+                    "tmdb":"popularity"
+                },
+                "artist name":{
+                    "itunes":"artistName"
+                },
+                "simple movie title":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.movie",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.show":{
+            "synonym":["tvdb", "keyword", "itunes"],
+            "element":{
+                "tv show id":null,
+                "itunes tv show id":{
+                    "itunes":"artistId"
+                },
+                "tvdb tv show id":{
+                    "tvdb":"id"
+                },
+                "imdb tv show id":{
+                    "tvdb":"IMDB_ID"
+                },
+                "zap2it tv show id":{
+                    "tvdb":"zap2it_id"
+                },
+                "tv show name":{
+                    "tvdb":"SeriesName",
+                    "itunes":"artistName"
+                },
+                "modified date":{
+                    "tvdb":"lastupdated",
+                    "format":"unix time"
+                },
+                "release year":null,
+                "release date":{
+                    "tvdb":"FirstAired"
+                },
+                "content advisory rating":{
+                    "tvdb":"ContentRating"
+                },
+                "language":{
+                    "tvdb":"Language"
+                },
+                "description":{
+                    "tvdb":"Overview",
+                    "unescape xml":true
+                },
+                "vote average":{
+                    "tvdb":"Rating"
+                },
+                "vote count":{
+                    "tvdb":"RatingCount"
+                },
+                "tv network name":{
+                    "tvdb":"Network"
+                },
+                "runtime":{
+                    "tvdb":"Runtime"
+                },
+                "tv show status":{
+                    "tvdb":"Status"
+                },
+                "genres":{
+                    "tvdb":"Genre",
+                    "type":"unicode",
+                    "plural format":"tvdb list",
+                    "single element name":"genre name"
+                },
+                "actors":{
+                    "tvdb":"Actors",
+                    "type":"unicode",
+                    "plural format":"tvdb list",
+                    "single element name":"person name"
+                },
+                "image url":{
+                    "tvdb":"poster"
+                },
+                "banner url":{
+                    "tvdb":"banner"
+                },
+                "fan art url":{
+                    "tvdb":"fanart"
+                },
+                "tv show air day":{
+                    "tvdb":"Airs_DayOfWeek"
+                },
+                "tv show air time":{
+                    "tvdb":"Airs_Time"
+                },
+                "cast":{
+                    "tvdb":"Actor"
+                },
+                "posters":{
+                    "tvdb":"Banner"
+                },
+                "simple tv show name":null,
+                "country code":{
+                    "itunes":"country"
+                }
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.season":{
+            "synonym":["keyword", "tvdb", "itunes"],
+            "element":{
+                "tv show id":null,
+                "tv season id":null,
+                "tv season number":null,
+                "itunes tv show id":{
+                    "itunes":"artistId"
+                },
+                "itunes tv season id":{
+                    "itunes":"collectionId"
+                },
+                "tvdb tv show id":{
+                    "tvdb":"seriesid"
+                },
+                "tvdb tv season id":{
+                    "tvdb":"seasonid"
+                },
+                "imdb tv show id":null,
+                "disc count":null,
+                "disc number":{
+                    "tvdb":"SeasonNumber"
+                },
+                "track count":{
+                    "itunes":"trackCount"
+                },
+                "tv show name":{
+                    "itunes":"artistName"
+                },
+                "content advisory rating":{
+                    "itunes":"contentAdvisoryRating"
+                },
+                "copyright":{
+                    "itunes":"copyright"
+                },
+                "release year":null,
+                "release date":{
+                    "itunes":"releaseDate"
+                },
+                "long description":{
+                    "itunes":"longDescription"
+                },
+                "language":{
+                    "tvdb":"Language"
+                },
+                "album name":{
+                    "itunes":"collectionName"
+                },
+                "simple tv show name":null,
+                "country code":{
+                    "itunes":"country"
+                }
+            },
+            "rule":[
+                "rule.itunes.tv.season.parse",
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.episode":{
+            "synonym":["keyword", "tvdb", "itunes"],
+            "element":{
+                "tv show id":null,
+                "tv season id":null,
+                "tv season number":null,
+                "tv episode number":null,
+                "album name":{
+                    "itunes":"collectionName"
+                },
+                "track name":null,
+                "imdb tv episode id":{
+                    "tvdb":"IMDB_ID"
+                },
+                "itunes tv show id":{
+                    "itunes":"artistId"
+                },
+                "itunes tv season id":{
+                    "itunes":"collectionId"
+                },
+                "itunes tv episode id":{
+                    "itunes":"trackId"
+                },
+                "tvdb tv show id":{
+                    "tvdb":"seriesid"
+                },
+                "tvdb tv season id":{
+                    "tvdb":"seasonid"
+                },
+                "tvdb tv episode id":{
+                    "tvdb":"id"
+                },
+                "disc number":{
+                    "tvdb":"SeasonNumber"
+                },
+                "track number":{
+                    "tvdb":"EpisodeNumber",
+                    "itunes":"trackNumber"
+                },
+                "track count":{
+                    "itunes":"trackCount"
+                },
+                "tv episode name":{
+                    "tvdb":"EpisodeName",
+                    "itunes":"trackName"
+                },
+                "tv show name":{
+                    "itunes":"artistName"
+                },
+                "absolute tv episode number":{
+                    "tvdb":"absolute_number"
+                },
+                "modified date":{
+                    "tvdb":"lastupdated",
+                    "format":"unix time"
+                },
+                "language":{
+                    "tvdb":"Language"
+                },
+                "release year":null,
+                "release date":{
+                    "tvdb":"FirstAired",
+                    "itunes":"releaseDate"
+                },
+                "description":{
+                    "tvdb":"Overview",
+                    "unescape xml":true,
+                    "itunes":"shortDescription"
+                },
+                "long description":{
+                    "itunes":"longDescription"
+                },
+                "tv episode production code":{
+                    "tvdb":"ProductionCode"
+                },
+                "vote average":{
+                    "tvdb":"Rating"
+                },
+                "vote count":{
+                    "tvdb":"RatingCount"
+                },
+                "backdrop url":{
+                    "tvdb":"filename"
+                },
+                "actors":{
+                    "tvdb":"GuestStars",
+                    "plural format":"tvdb list",
+                    "single element name":"person name"
+                },
+                "directors":{
+                    "tvdb":"Director",
+                    "plural format":"tvdb list",
+                    "single element name":"person name"
+                },
+                "screenwriters":{
+                    "tvdb":"Writer",
+                    "plural format":"tvdb list",
+                    "single element name":"person name"
+                },
+                "content advisory rating":{
+                    "itunes":"contentAdvisoryRating"
+                },
+                "simple tv show name":null,
+                "simple tv episode name":null,
+                "country code":{
+                    "itunes":"country"
+                }
+            },
+            "rule":[
+                "rule.itunes.tv.season.parse",
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.music.album":{
+            "synonym":["keyword", "itunes"],
+            "element":{
+                "music album id":null,
+                "album name":null,
+                "music album name":{
+                    "itunes":"collectionName"
+                },
+                "itunes music album id":{
+                    "itunes":"collectionId"
+                },
+                "itunes person id":{
+                    "itunes":"artistId"
+                },
+                "artist name":{
+                    "itunes":"artistName"
+                },
+                "copyright":{
+                    "itunes":"copyright"
+                },
+                "release date":{
+                    "itunes":"releaseDate"
+                },
+                "release year":null,
+                "track count":{
+                    "itunes":"trackCount"
+                },
+                "simple music album name":null,
+                "country code":{
+                    "itunes":"country"
+                }
+            },
+            "rule":[
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.music.track":{
+            "synonym":["keyword", "itunes"],
+            "element":{
+                "music album id":null,
+                "track id":null,
+                "music disc number":null,
+                "music track number":null,
+                "album name":null,
+                "track name":null,
+                "music album name":{
+                    "itunes":"collectionName"
+                },
+                "music track name":{
+                    "itunes":"trackName"
+                },
+                "itunes music album id":{
+                    "itunes":"collectionId"
+                },
+                "itunes music track id":{
+                    "itunes":"trackId"
+                },
+                "disc number":{
+                    "itunes":"discNumber"
+                },
+                "disc count":{
+                    "itunes":"discCount"
+                },
+                "track number":{
+                    "itunes":"trackNumber"
+                },
+                "track count":{
+                    "itunes":"trackCount"
+                },
+                "itunes person id":{
+                    "itunes":"artistId"
+                },
+                "artist name":{
+                    "itunes":"artistName"
+                },
+                "release date":{
+                    "itunes":"releaseDate"
+                },
+                "release year":null,
+                "simple music album name":null,
+                "simple music track name":null,
+                "country code":{
+                    "itunes":"country"
+                }
+            },
+            "rule":[
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.simple.name.music.track",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.person":{
+            "synonym":["keyword", "tmdb", "itunes"],
+            "element":{
+                "person id":null,
+                "itunes person id":{
+                    "itunes":"artistId"
+                },
+                "tmdb person id":{
+                    "tmdb":"id"
+                },
+                "birthday":{
+                    "tmdb":"birthday"
+                },
+                "deathday":{
+                    "tmdb":"deathday"
+                },
+                "homepage":{
+                    "tmdb":"homepage"
+                },
+                "person name":{
+                    "tmdb":"name",
+                    "itunes":"artistName"
+                },
+                "biography":{
+                    "tmdb":"biography"
+                },
+                "place of birth":{
+                    "tmdb":"place_of_birth"
+                },
+                "profile url":{
+                    "tmdb":"profile_path"
+                },
+                "profiles":{
+                    "tmdb":"profiles"
+                },
+                "cast":{
+                    "tmdb":"cast",
+                    "namespace":"ns.knowledge.person.credit"
+                },
+                "crew":{
+                    "tmdb":"crew",
+                    "namespace":"ns.knowledge.person.credit"
+                },
+                "simple person name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.person"
+            ]
+        },
+        "ns.knowledge.company":{
+            "synonym":["keyword", "tmdb"],
+            "element":{
+                "company id":null,
+                "tmdb company id":{
+                    "tmdb":"id"
+                },
+                "description":{
+                    "tmdb":"description"
+                },
+                "homepage":{
+                    "tmdb":"homepage"
+                },
+                "company name":{
+                    "tmdb":"name"
+                },
+                "simple company name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.company"
+            ]
+        },
+        "ns.knowledge.genre":{
+            "synonym":["keyword", "tmdb", "itunes"],
+            "element":{
+                "genre id":null,
+                "tmdb genre id":{
+                    "tmdb":"id"
+                },
+                "itunes genre id":{
+                    "itunes":"id"
+                },
+                "genre name":{
+                    "tmdb":"name",
+                    "itunes":"name"
+                },
+                "simple genre name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.genre"
+            ]
+        },
+        "ns.knowledge.collection":{
+            "synonym":["keyword", "tmdb"],
+            "element":{
+                "collection id":null,
+                "tmdb collection id":{
+                    "tmdb":"id"
+                },
+                "language":null,
+                "collection name":{
+                    "tmdb":"name"
+                },
+                "backdrop url":{
+                    "tmdb":"backdrop_path"
+                },
+                "poster url":{
+                    "tmdb":"poster_path"
+                },
+                "movies":{
+                    "tmdb":"parts"
+                }
+            }
+        },
+        "ns.knowledge.country":{
+            "synonym":["keyword"],
+            "element":{
+                "country code":null,
+                "itunes country id":null,
+                "country name":null,
+                "native language name":null
+            }
+        },
+        "ns.knowledge.language":{
+            "synonym":["keyword"],
+            "element":{
+                "language code":null,
+                "language name":null,
+                "native language name":null
+            }
+        },
+
+        "ns.knowledge.cast":{
+            "synonym":["keyword", "tmdb", "tvdb"],
+            "element":{
+                "tvdb person id":{
+                    "tvdb":"id"
+                },
+                "tmdb person id":{
+                    "tmdb":"id"
+                },
+                "profile url":{
+                    "tvdb":"Image",
+                    "tmdb":"profile_path"
+                },
+                "person name":{
+                    "tvdb":"Name",
+                    "tmdb":"name"
+                },
+                "character name":{
+                    "tvdb":"Role",
+                    "tmdb":"character"
+                },
+                "sort order":{
+                    "tvdb":"SortOrder",
+                    "tmdb":"order"
+                },
+                "job":{
+                    "tmdb":"job"
+                },
+                "department":{
+                    "tmdb":"department"
+                }
+            },
+            "rule":[
+                "rule.knowledge.simple.name.person",
+                "rule.knowledge.simple.name.character"
+            ]
+        },
+        "ns.knowledge.review":{
+            "synonym":["keyword", "rottentomatoes"],
+            "element":{
+                "critic name":{
+                    "rottentomatoes":"critic"
+                },
+                "freshness":{
+                    "rottentomatoes":"freshness"
+                },
+                "original critic score":{
+                    "rottentomatoes":"original_score"
+                },
+                "review publication":{
+                    "rottentomatoes":"publication"
+                },
+                "review quote":{
+                    "rottentomatoes":"quote"
+                },
+                "review url":{
+                    "rottentomatoes":"review_link"
+                }
+            }
+        },
+        "ns.knowledge.company.credit":{
+            "synonym":["keyword", "tmdb"],
+            "element":{
+                "tmdb movie id":{
+                    "tmdb":"id"
+                },
+                "poster url":{
+                    "tmdb":"poster_path"
+                },
+                "backdrop url":{
+                    "tmdb":"backdrop_path"
+                },
+                "original movie title":{
+                    "tmdb":"original_title"
+                },
+                "movie title":{
+                    "tmdb":"title"
+                },
+                "release date":{
+                    "tmdb":"release_date"
+                },
+                "vote average":{
+                    "tmdb":"vote_average"
+                },
+                "vote count":{
+                    "tmdb":"vote_count"
+                }
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.simple.name.movie",
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.simple.name.music.track"
+            ]
+        },
+        "ns.knowledge.person.credit":{
+            "synonym":["keyword", "tmdb"],
+            "element":{
+                "tmdb movie id":{
+                    "tmdb":"id"
+                },
+                "poster url":{
+                    "tmdb":"poster_path"
+                },
+                "original movie title":{
+                    "tmdb":"original_title"
+                },
+                "movie title":{
+                    "tmdb":"title"
+                },
+                "character name":{
+                    "tmdb":"character name"
+                },
+                "job":{
+                    "tmdb":"job"
+                },
+                "department":{
+                    "tmdb":"department"
+                },
+                "release date":{
+                    "tmdb":"release_date"
+                }
+            },
+            "rule":[
+                "rule.knowledge.simple.name.character",
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.simple.name.movie",
+                "rule.knowledge.simple.name.music.album",
+                "rule.knowledge.simple.name.music.track"
+            ]
+        },
+        "ns.knowledge.certification":{
+            "synonym":["keyword", "tmdb", "tvdb"],
+            "element":{
+                "content advisory rating":{
+                    "tvdb":"ContentRating",
+                    "tmdb":"certification"
+                },
+                "country code":{
+                    "tmdb":"iso_3166_1"
+                },
+                "release date":{
+                    "tvdb":"FirstAired",
+                    "tmdb":"release_date"
+                }
+            }
+        },
+        "ns.knowledge.image":{
+            "synonym":["keyword", "tmdb", "tvdb"],
+            "element":{
+                "height":{
+                    "tmdb":"height"
+                },
+                "width":{
+                    "tmdb":"width"
+                },
+                "pixel aspect ratio":{
+                    "tmdb":"aspect_ratio"
+                },
+                "vote average":{
+                    "tmdb":"vote_average",
+                    "tvdb":"Rating"
+                },
+                "vote count":{
+                    "tmdb":"vote_count",
+                    "tvdb":"RatingCount"
+                },
+                "language":{
+                    "tmdb":"iso_639_1",
+                    "tvdb":"Language"
+                },
+                "image url":{
+                    "tmdb":"file_path",
+                    "tvdb":"BannerPath"
+                },
+                "thumbnail url":{
+                    "tvdb":"ThumbnailPath"
+                },
+                "tvdb image id":{
+                    "tvdb":"id"
+                },
+                "disc number":{
+                    "tvdb":"Season"
+                }
+            }
+        },
+        "ns.knowledge.keyword":{
+            "synonym":["keyword", "tmdb"],
+            "element":{
+                "keyword id":null,
+                "tmdb keyword id":{
+                    "tmdb":"id"
+                },
+                "keyword name":{
+                    "tmdb":"name"
+                }
+            }
+        },
+
+        "ns.search.query":{
+            "synonym":["keyword","tmdb", "rottentomatoes", "itunes"],
+            "element":{
+                "api key":{
+                    "tmdb":"api_key",
+                    "rottentomatoes":"apikey",
+                    "tvdb":"api key"
+                },
+                "term":{
+                    "tmdb":"query",
+                    "itunes":"term"
+                },
+                "movie title":{
+                    "tmdb":"query",
+                    "itunes":"term"
+                },
+                "simple movie title":{
+                    "tmdb":"query",
+                    "itunes":"term"
+                },
+                "tv show name":{
+                    "tvdb":"seriesname",
+                    "itunes":"term"
+                },
+                "simple tv show name":{
+                    "tvdb":"seriesname",
+                    "itunes":"term"
+                },
+                "music album name":{
+                    "itunes":"term"
+                },
+                "simple music album name":{
+                    "itunes":"term"
+                },
+                "person name":{
+                    "tmdb":"query",
+                    "itunes":"term"
+                },
+                "simple person name":{
+                    "tmdb":"query",
+                    "itunes":"term"
+                },
+                "company name":{
+                    "tmdb":"query",
+                    "itunes":"term"
+                },
+                "simple company name":{
+                    "tmdb":"query",
+                    "itunes":"term"
+                },
+                "page":{
+                    "tmdb":"page"
+                },
+                "language":{
+                    "tmdb":"language",
+                    "tvdb":"language"
+                },
+                "release year":{
+                    "tmdb":"year"
+                },
+                "itunes genre id":{
+                    "itunes":"id"
+                },
+                "itunes person id":{
+                    "itunes":"id"
+                },
+                "itunes movie id":{
+                    "itunes":"id"
+                },
+                "itunes tv show id":{
+                    "itunes":"id"
+                },
+                "itunes tv season id":{
+                    "itunes":"id"
+                },
+                "itunes tv episode id":{
+                    "itunes":"id"
+                },
+                "itunes music album id":{
+                    "itunes":"id"
+                },
+                "itunes music track id":{
+                    "itunes":"id"
+                },
+                "trimmed imdb movie id":{
+                    "rottentomatoes":"id"
+                },
+                "imdb tv show id":{
+                    "tvdb":"imdbid"
+                }
+            }
+        },
+
+        "ns.knowledge.job":{
+            "synonym":["keyword"],
+            "element":{
+                "job id":null
+            }
+        },
+        "ns.knowledge.department":{
+            "synonym":["keyword"],
+            "element":{
+                "department id":null
+            }
+        }
+    }
+}

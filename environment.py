@@ -183,7 +183,7 @@ class Environment(object):
         self.load_configuration_file(os.path.join(relative,'config/enumeration.py'))
         self.load_configuration_file(os.path.join(relative,'config/archetype.json'))
         self.load_configuration_file(os.path.join(relative,'config/rule.py'))
-        self.load_configuration_file(os.path.join(relative,'config/namespace.py'))
+        self.load_configuration_file(os.path.join(relative,'config/namespace.json'))
         self.load_configuration_file(os.path.join(relative,'config/service.py'))
         self.load_configuration_file(os.path.join(relative,'config/material.py'))
         self.load_configuration_file(os.path.join(relative,'config/subtitle.py'))
