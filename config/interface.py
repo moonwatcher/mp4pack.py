@@ -471,7 +471,7 @@
                     'flag':['--version'],
                     'parameter':{ 
                         'action':'version',
-                        'version':'%(prog)s 0.5'
+                        'version':'%(prog)s 4.0'
                     },
                 },
                 'tables':{

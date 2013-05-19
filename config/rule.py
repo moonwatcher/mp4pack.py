@@ -9,7 +9,7 @@
 
         'rule.job.implementation':{
             'name':'Job implementation',
-            'provide':set(('implementation',)),
+            'provide':('implementation',),
             'branch':[
                 {
                     'requires':['action',],
@@ -106,7 +106,7 @@
         },
         'rule.task.default.preset':{
             'name':'Default task preset',
-            'provide':set(('preset',)),
+            'provide':('preset',),
             'branch':[
                 {
                     'requires':['action',],
@@ -182,11 +182,11 @@
         },
         'rule.system.default.routing':{
             'name':'Default volume and profile',
-            'provide':set(('volume', 'profile',)),
+            'provide':('volume', 'profile',),
         },
         'rule.system.default.enabled':{
             'name':'Default enabled bit',
-            'provide':set(('enabled',)),
+            'provide':('enabled',),
             'branch':[
                 {
                     'apply':[
@@ -197,7 +197,7 @@
         },
         'rule.system.mongodb.url':{
             'name':'MongoDB connection URL',
-            'provide':set(('mongodb url',)),
+            'provide':('mongodb url',),
             'branch':[
                 {
                     'requires':['host', 'database', 'port', 'username', 'password'],
@@ -240,7 +240,7 @@
 
         'rule.medium.home.umid':{
             'name':'UMID from home id',
-            'provide':set(('umid',)),
+            'provide':('umid',),
             'branch':[
                 {
                     'requires':['home id',],
@@ -252,7 +252,7 @@
         },        
         'rule.medium.home.uri':{
             'name':'Home URI',
-            'provide':set(('home uri',)),
+            'provide':('home uri',),
             'branch':[
                 {
                     'requires':[
@@ -462,7 +462,7 @@
         },
         'rule.medium.asset.uri':{
             'name':'Asset URI',
-            'provide':set(('asset uri',)),
+            'provide':('asset uri',),
             'branch':[
                 {
                     'requires':['home id',],
@@ -477,7 +477,7 @@
         },
         'rule.medium.resource.uri':{
             'name':'Resource URI',
-            'provide':set(('resource uri',)),
+            'provide':('resource uri',),
             'branch':[
                 {
                     'requires':['path digest',],
@@ -492,7 +492,7 @@
         },
         'rule.medium.resource.filename.parse':{
             'name':'Parse file name',
-            'provide':set((
+            'provide':(
                 'kind',
                 'media kind',
                 'disc number',
@@ -510,7 +510,7 @@
                 'language',
                 'stream id',
                 'umid',
-            )),
+            ),
             'branch':[
                 {
                     'requires':['file name',],
@@ -590,7 +590,7 @@
         },
         'rule.medium.resource.filename.canonic':{
             'name':'Canonic file name',
-            'provide':set(('canonic file name',)),
+            'provide':('canonic file name',),
             'branch':[
                 {
                     'requires':[ 'media kind', 'simple tv show name', 'track genealogy', 'simple tv episode name', 'umid', 'kind', 'localized', ],
@@ -656,7 +656,7 @@
         },
         'rule.medium.resource.directory.canonic':{
             'name':'Canonic directory',
-            'provide':set(('canonic directory',)),
+            'provide':('canonic directory',),
             'branch':[
                 {
                     'requires':['volume path', 'media kind', 'kind', 'profile', 'tv show id', 'disc number', ],
@@ -692,7 +692,7 @@
         },
         'rule.medium.resource.path.canonic':{
             'name':'canonic path',
-            'provide':set(('canonic path',)),
+            'provide':('canonic path',),
             'branch':[
                 {
                     'requires':['canonic directory', 'canonic file name'],
@@ -707,7 +707,7 @@
         },
         'rule.medium.resource.filename.implicit':{
             'name':'implicit filename',
-            'provide':set(('file name',)),
+            'provide':('file name',),
             'branch':[
                 {
                     'requires':['canonic file name',],
@@ -722,7 +722,7 @@
         },
         'rule.medium.resource.directory.implicit':{
             'name':'implicit directory',
-            'provide':set(('directory',)),
+            'provide':('directory',),
             'branch':[
                 {
                     'requires':['canonic directory',],
@@ -737,7 +737,7 @@
         },
         'rule.medium.resource.path.implicit':{
             'name':'implicit path',
-            'provide':set(('path',)),
+            'provide':('path',),
             'branch':[
                 {
                     'requires':['directory', 'file name',],
@@ -752,7 +752,7 @@
         },
         'rule.medium.resource.filename.fragment':{
             'name':'Fragment file name',
-            'provide':set(('fragment file name',)),
+            'provide':('fragment file name',),
             'branch':[
                 {
                     'requires':['resource path digest', 'language', 'stream id', 'umid', 'kind', 'localized', ],
@@ -778,7 +778,7 @@
         },
         'rule.medium.resource.directory.fragment':{
             'name':'Fragment directory',
-            'provide':set(('fragment directory',)),
+            'provide':('fragment directory',),
             'branch':[
                 {
                     'requires':['temp path', ],
@@ -793,7 +793,7 @@
         },
         'rule.medium.resource.path.fragment':{
             'name':'Fragment path',
-            'provide':set(('fragment path',)),
+            'provide':('fragment path',),
             'branch':[
                 {
                     'requires':['fragment directory', 'fragment file name',],
@@ -808,7 +808,7 @@
         },        
         'rule.medium.resource.kind.language':{
             'name':'Kind language dependency',
-            'provide':set(('localized',)),
+            'provide':('localized',),
             'branch':[
                 {
                     'requires':['kind',],
@@ -898,7 +898,7 @@
         },
         'rule.medium.resource.track.genealogy':{
             'name':'Compose the track genealogy',
-            'provide':set(('track genealogy',)),
+            'provide':('track genealogy',),
             'branch':[
                 {
                     'requires':['media kind', 'disc number', 'track number'],
@@ -924,7 +924,7 @@
         },
         'rule.medium.resource.path.digest':{
             'name':'Path digest',
-            'provide':set(('path digest',)),
+            'provide':('path digest',),
             'branch':[
                 {
                     'requires':['path',],
@@ -936,7 +936,7 @@
         },
         'rule.medium.stream.audio.name':{
             'name':'audio track name',
-            'provide':set(('stream name',)),
+            'provide':('stream name',),
             'branch':[
                 {
                     'requires':['stream kind', 'channels'],
@@ -998,7 +998,7 @@
         },
         'rule.medium.stream.default.position':{
             'name':'Default stream kind position',
-            'provide':set(('stream kind position',)),
+            'provide':('stream kind position',),
             'branch':[
                 {
                     'apply':[
@@ -1009,7 +1009,7 @@
         },
         'rule.medium.stream.default.primary':{
             'name':'Default primary stream',
-            'provide':set(('primary',)),
+            'provide':('primary',),
             'branch':[
                 {
                     'apply':[
@@ -1020,7 +1020,7 @@
         },
         'rule.medium.stream.default.id':{
             'name':'Default stream id',
-            'provide':set(('stream id',)),
+            'provide':('stream id',),
             'branch':[
                 {
                     'apply':[
@@ -1031,7 +1031,7 @@
         },
         'rule.medium.stream.audio.kind':{
             'name':'Kind for audio stream',
-            'provide':set(('kind',)),
+            'provide':('kind',),
             'branch':[
                 {
                     'requires':['format',],
@@ -1086,7 +1086,7 @@
         },
         'rule.medium.stream.video.kind':{
             'name':'Kind for video stream',
-            'provide':set(('kind',)),
+            'provide':('kind',),
             'branch':[
                 {
                     'requires':['stream kind', 'format'],
@@ -1106,7 +1106,7 @@
         },
         'rule.medium.stream.image.kind':{
             'name':'Kind for image stream',
-            'provide':set(('kind',)),
+            'provide':('kind',),
             'branch':[
                 {
                     'requires':['format',],
@@ -1126,7 +1126,7 @@
         },
         'rule.medium.stream.text.kind':{
             'name':'Kind for text stream',
-            'provide':set(('kind',)),
+            'provide':('kind',),
             'branch':[
                 {
                     'requires':['stream kind', 'format'],
@@ -1161,7 +1161,7 @@
         
         'rule.knowledge.movie.imdb.trimmed':{
             'name':'trimmed imdb movie id',
-            'provide':set(('trimmed imdb movie id',)),
+            'provide':('trimmed imdb movie id',),
             'branch':[
                 {
                     'requires':['imdb movie id',],
@@ -1173,7 +1173,7 @@
         },        
         'rule.knowledge.track.position':{
             'name':'Compute the composite track position',
-            'provide':set(('track position',)),
+            'provide':('track position',),
             'branch':[
                 {
                     'requires':['media kind', 'track number', 'track count'],
@@ -1193,7 +1193,7 @@
         },
         'rule.knowledge.disc.position':{
             'name':'Compute the composite disc position',
-            'provide':set(('disc position',)),
+            'provide':('disc position',),
             'branch':[
                 {
                     'requires':['disc number', 'disc count'],
@@ -1213,7 +1213,7 @@
         },
         'rule.knowledge.default.track.count':{
             'name':'Default track count',
-            'provide':set(('track count',)),
+            'provide':('track count',),
             'branch':[
                 {
                     'requires':['media kind',],
@@ -1233,7 +1233,7 @@
         },
         'rule.knowledge.default.disc.count':{
             'name':'Default disc count',
-            'provide':set(('disc count',)),
+            'provide':('disc count',),
             'branch':[
                 {
                     'requires':['media kind',],
@@ -1253,7 +1253,7 @@
         },
         'rule.knowledge.default.tv.episode':{
             'name':'Default TV episode number',
-            'provide':set(('tv episode number', 'tv season number')),
+            'provide':('tv episode number', 'tv season number'),
             'branch':[
                 {
                     'requires':['media kind', 'track number', 'disc number'],
@@ -1267,7 +1267,7 @@
         },
         'rule.knowledge.default.music.track':{
             'name':'Default music track number',
-            'provide':set(('music track number', 'music disc number')),
+            'provide':('music track number', 'music disc number'),
             'branch':[
                 {
                     'requires':['media kind', 'track number', 'disc number'],
@@ -1282,7 +1282,7 @@
 
         'rule.knowledge.sort.name':{
             'name':'sort name',
-            'provide':set(('sort name',)),
+            'provide':('sort name',),
             'branch':[
                 {
                     'requires':['track name',],
@@ -1294,7 +1294,7 @@
         },
         'rule.knowledge.sort.artist':{
             'name':'sort artist',
-            'provide':set(('sort artist',)),
+            'provide':('sort artist',),
             'branch':[
                 {
                     'requires':['artist name',],
@@ -1306,7 +1306,7 @@
         },
         'rule.knowledge.sort.albumartist':{
             'name':'sort album artist',
-            'provide':set(('sort album artist',)),
+            'provide':('sort album artist',),
             'branch':[
                 {
                     'requires':['album artist name',],
@@ -1318,7 +1318,7 @@
         },
         'rule.knowledge.sort.album':{
             'name':'sort album',
-            'provide':set(('sort album',)),
+            'provide':('sort album',),
             'branch':[
                 {
                     'requires':['album name',],
@@ -1330,7 +1330,7 @@
         },
         'rule.knowledge.sort.composer':{
             'name':'sort composer',
-            'provide':set(('sort composer',)),
+            'provide':('sort composer',),
             'branch':[
                 {
                     'requires':['composer name',],
@@ -1342,7 +1342,7 @@
         },
         'rule.knowledge.sort.show':{
             'name':'sort tv show',
-            'provide':set(('sort tv show',)),
+            'provide':('sort tv show',),
             'branch':[
                 {
                     'requires':['tv show name',],
@@ -1354,7 +1354,7 @@
         },
         'rule.knowledge.artist.info':{
             'name':'artist information',
-            'provide':set(('artist name', 'album artist name')),
+            'provide':('artist name', 'album artist name'),
             'branch':[
                 {
                     'requires':['media kind', 'tv show name'],
@@ -1444,7 +1444,7 @@
         },
         'rule.knowledge.asset.name':{
             'name':'full name',
-            'provide':set(('full name',)),
+            'provide':('full name',),
             'branch':[
                 {
                     'requires':['media kind', 'tv show name', 'tv episode production code', 'track name'],
@@ -1490,12 +1490,12 @@
         },
         'rule.itunes.itunextc.parse':{
             'name':'Parse itunextc atom',
-            'provide':set((
+            'provide':(
                 'content advisory standard',
                 'content advisory rating',
                 'content advisory score',
                 'content advisory annotation',
-            )),
+            ),
             'branch':[
                 {
                     'requires':['itunextc',],
@@ -1507,7 +1507,7 @@
         },
         'rule.itunes.album.name':{
             'name':'Album name for iTunes',
-            'provide':set(('album name',)),
+            'provide':('album name',),
             'branch':[
                 {
                     'requires':['media kind', 'tv show name', 'tv season number'],
@@ -1523,7 +1523,7 @@
         },
         'rule.itunes.tv.season.parse':{
             'name':'Parse itunes tv season',
-            'provide':set(('disc number',)),
+            'provide':('disc number',),
             'branch':[
                 {
                     'requires':['album name',],
@@ -1535,7 +1535,7 @@
         },        
         'rule.knowledge.release.year':{
             'name':'Release year from date',
-            'provide':set(('release year',)),
+            'provide':('release year',),
             'branch':[
                 {
                     'requires':['release date',],
@@ -1548,7 +1548,7 @@
         
         'rule.knowledge.simple.name.movie':{
             'name':'Simple movie title',
-            'provide':set(('simple movie title',)),
+            'provide':('simple movie title',),
             'branch':[
                 {
                     'requires':['movie title',],
@@ -1560,7 +1560,7 @@
         },
         'rule.knowledge.simple.name.tv.show':{
             'name':'Simple tv show name',
-            'provide':set(('simple tv show name',)),
+            'provide':('simple tv show name',),
             'branch':[
                 {
                     'requires':['tv show name',],
@@ -1572,7 +1572,7 @@
         },
         'rule.knowledge.simple.name.tv.episode':{
             'name':'Simple tv episode name',
-            'provide':set(('simple tv episode name',)),
+            'provide':('simple tv episode name',),
             'branch':[
                 {
                     'requires':['tv episode name',],
@@ -1584,7 +1584,7 @@
         },
         'rule.knowledge.simple.name.music.album':{
             'name':'Simple music album name',
-            'provide':set(('simple music album name',)),
+            'provide':('simple music album name',),
             'branch':[
                 {
                     'requires':['music album name',],
@@ -1596,7 +1596,7 @@
         },
         'rule.knowledge.simple.name.music.track':{
             'name':'Simple music track name',
-            'provide':set(('simple music track name',)),
+            'provide':('simple music track name',),
             'branch':[
                 {
                     'requires':['music track name',],
@@ -1608,7 +1608,7 @@
         },
         'rule.knowledge.simple.name.person':{
             'name':'Simple person name',
-            'provide':set(('simple person name',)),
+            'provide':('simple person name',),
             'branch':[
                 {
                     'requires':['person name',],
@@ -1620,7 +1620,7 @@
         },
         'rule.knowledge.simple.name.company':{
             'name':'Simple company name',
-            'provide':set(('simple company name',)),
+            'provide':('simple company name',),
             'branch':[
                 {
                     'requires':['company name',],
@@ -1632,7 +1632,7 @@
         },
         'rule.knowledge.simple.name.collection':{
             'name':'Simple collection name',
-            'provide':set(('simple collection name',)),
+            'provide':('simple collection name',),
             'branch':[
                 {
                     'requires':['collection name',],
@@ -1644,7 +1644,7 @@
         },
         'rule.knowledge.simple.name.keyword':{
             'name':'Simple keyword name',
-            'provide':set(('simple keyword name',)),
+            'provide':('simple keyword name',),
             'branch':[
                 {
                     'requires':['keyword name',],
@@ -1656,7 +1656,7 @@
         },
         'rule.knowledge.simple.name.genre':{
             'name':'Simple genre name',
-            'provide':set(('simple genre name',)),
+            'provide':('simple genre name',),
             'branch':[
                 {
                     'requires':['genre name',],
@@ -1668,7 +1668,7 @@
         },
         'rule.knowledge.simple.name.character':{
             'name':'Simple character name',
-            'provide':set(('simple character name',)),
+            'provide':('simple character name',),
             'branch':[
                 {
                     'requires':['character name',],

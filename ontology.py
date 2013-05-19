@@ -336,6 +336,7 @@ class Space(object):
     
 
 
+
 class Element(object):
     def __init__(self, space, node):
         self.log = logging.getLogger('Element')
@@ -801,6 +802,9 @@ class Rule(object):
         self.env = env
         self.node = node
         
+        if 'provide' in self.node:
+            self.node['provide'] = set(self.node['provide'])
+
         if 'branch' not in self.node:
             self.node['branch'] = []
             
