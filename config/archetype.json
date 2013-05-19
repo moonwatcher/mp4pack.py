@@ -1,0 +1,2034 @@
+{
+    "archetype":{
+        "umid":{
+            "name":"UMID",
+            "keyword":"umid",
+            "type":"unicode"
+        },
+        "home id":{
+            "name":"Home ID",
+            "keyword":"home_id",
+            "type":"int"
+        },
+        "music album id":{
+            "name":"Music album ID",
+            "keyword":"music_album_id",
+            "type":"int"
+        },
+        "track id":{
+            "name":"Track ID",
+            "keyword":"track_id",
+            "type":"int"
+        },
+        "tv show id":{
+            "name":"TV show ID",
+            "keyword":"tv_show_id",
+            "type":"int"
+        },
+        "tv season id":{
+            "name":"TV season ID",
+            "keyword":"tv_season_id",
+            "type":"int"
+        },
+        "tv episode id":{
+            "name":"TV episode ID",
+            "keyword":"tv_episode_id",
+            "type":"int"
+        },
+        "movie id":{
+            "name":"Movie ID",
+            "keyword":"movie_id",
+            "type":"int"
+        },
+        "collection id":{
+            "name":"Collection ID",
+            "keyword":"collection_id",
+            "type":"int"
+        },
+        "person id":{
+            "name":"Person ID",
+            "keyword":"person_id",
+            "type":"int"
+        },
+        "character id":{
+            "name":"Character ID",
+            "keyword":"character_id",
+            "type":"int"
+        },
+        "company id":{
+            "name":"Company ID",
+            "keyword":"company_id",
+            "type":"int"
+        },
+        "keyword id":{
+            "name":"Keyword ID",
+            "keyword":"keyword_id",
+            "type":"int"
+        },
+        "genre id":{
+            "name":"Genre ID",
+            "keyword":"genre_id",
+            "type":"int"
+        },
+        "job id":{
+            "name":"Job ID",
+            "keyword":"job_id",
+            "type":"int"
+        },
+        "department id":{
+            "name":"Department ID",
+            "keyword":"department_id",
+            "type":"int"
+        },
+        "home uri":{
+            "name":"Home URI",
+            "keyword":"home_uri",
+            "type":"unicode"
+        },
+        "asset uri":{
+            "name":"Asset URI",
+            "keyword":"asset_uri",
+            "type":"unicode"
+        },
+        "resource uri":{
+            "name":"Resource URI",
+            "keyword":"resource_uri",
+            "type":"unicode"
+        },
+        "itunes person id":{
+            "name":"iTunes person ID",
+            "keyword":"itunes_person_id",
+            "type":"int",
+            "atom":"atID"
+        },
+        "itunes movie id":{
+            "name":"iTunes movie ID",
+            "keyword":"itunes_movie_id",
+            "type":"int"
+        },
+        "itunes tv show id":{
+            "name":"iTunes TV show ID",
+            "keyword":"itunes_tv_show_id",
+            "type":"int"
+        },
+        "itunes tv season id":{
+            "name":"iTunes TV season ID",
+            "keyword":"itunes_tv_season_id",
+            "type":"int"
+        },
+        "itunes tv episode id":{
+            "name":"iTunes TV episode ID",
+            "keyword":"itunes_tv_episode_id",
+            "type":"int"
+        },
+        "itunes music album id":{
+            "name":"iTunes album ID",
+            "keyword":"itunes_music_album_id",
+            "type":"int"
+        }, 
+        "itunes music track id":{
+            "name":"iTunes music track ID",
+            "keyword":"itunes_music_track_id",
+            "type":"int"
+        }, 
+        "itunes content id":{
+            "name":"iTunes content ID",
+            "keyword":"itunes_content_id",
+            "type":"int",
+            "atom":"cnID"
+        },
+        "itunes composer id":{
+            "name":"iTunes composer ID",
+            "keyword":"itunes_composer_id",
+            "type":"int",
+            "atom":"cmID"
+        },
+        "itunes playlist id":{
+            "name":"iTunes playlist ID",
+            "keyword":"itunes_playlist_id",
+            "type":"int",
+            "atom":"plID"
+        },
+        "itunes genre id":{
+            "name":"iTunes genre ID",
+            "keyword":"itunes_genre_id",
+            "type":"int",
+            "atom":"geID"
+        },
+        "itunes country id":{
+            "name":"iTunes country ID",
+            "keyword":"itunes_country_id",
+            "type":"enum",
+            "atom":"sfID",
+            "enumeration":"country"
+        },
+        "itunes account":{
+            "name":"iTunes account ID",
+            "keyword":"itunes_account_id",
+            "type":"unicode",
+            "atom":"apID"
+        },
+        "itunes account type":{
+            "name":"iTunes account type",
+            "keyword":"itunes_account_type",
+            "type":"enum",
+            "atom":"akID",
+            "enumeration":"itunes account type"
+        },
+        "itunes episode global id":{
+            "name":"Episode global ID",
+            "keyword":"episode_global_id",
+            "type":"int",
+            "atom":"egid"
+        },
+        "xid":{
+            "name":"iTunes extra ID",
+            "keyword":"xid",
+            "type":"unicode",
+            "atom":"xid"
+        },
+        "tvdb person id":{
+            "name":"TVDb person ID",
+            "keyword":"tvdb_person_id",
+            "type":"int"
+        },
+        "tvdb tv show id":{
+            "name":"TVDb TV show ID",
+            "keyword":"tvdb_tv_show_id",
+            "type":"int"
+        },
+        "tvdb tv season id":{
+            "name":"TVDb TV season ID",
+            "keyword":"tvdb_tv_season_id",
+            "type":"int"
+        },
+        "tvdb tv episode id":{
+            "name":"TVDb TV episode ID",
+            "keyword":"tvdb_tv_episode_id",
+            "type":"int"
+        },
+        "tvdb image id":{
+            "name":"TVDb image ID",
+            "keyword":"tvdb_image_id",
+            "type":"int"
+        },
+        "imdb person id":{
+            "name":"IMDb person ID",
+            "keyword":"imdb_person_id",
+            "type":"unicode"
+        },
+        "imdb character id":{
+            "name":"IMDb character ID",
+            "keyword":"imdb_character_id",
+            "type":"unicode"
+        },
+        "imdb movie id":{
+            "name":"IMDb movie ID",
+            "keyword":"imdb_movie_id",
+            "type":"unicode"
+        },
+        "imdb tv show id":{
+            "name":"IMDb TV show ID",
+            "keyword":"imdb_tv_show_id",
+            "type":"unicode"
+        },
+        "imdb tv episode id":{
+            "name":"IMDb TV episode ID",
+            "keyword":"imdb_tv_episode_id",
+            "type":"unicode"
+        },
+        "trimmed imdb movie id":{
+            "name":"Trimmed IMDb movie ID",
+            "keyword":"trimmed_imdb_movie_id",
+            "type":"unicode"
+        },
+        "tmdb movie id":{
+            "name":"TMDb movie ID",
+            "keyword":"tmdb_movie_id",
+            "type":"int"
+        },
+        "tmdb collection id":{
+            "name":"TMDb collection ID",
+            "keyword":"tmdb_collection_id",
+            "type":"int"
+        },
+        "tmdb person id":{
+            "name":"TMDb person ID",
+            "keyword":"tmdb_person_id",
+            "type":"int"
+        },
+        "tmdb company id":{
+            "name":"TMDb company ID",
+            "keyword":"tmdb_company_id",
+            "type":"int"
+        },
+        "tmdb genre id":{
+            "name":"TMDb genre ID",
+            "keyword":"tmdb_genre_id",
+            "type":"int"
+        },
+        "tmdb keyword id":{
+            "name":"TMDb keyword ID",
+            "keyword":"tmdb_keyword_id",
+            "type":"int"
+        },
+        "tmdb popularity":{
+            "name":"TMDb popularity score",
+            "keyword":"tmdb_popularity",
+            "type":"float"
+        },
+        "rottentomatoes movie id":{
+            "name":"Rotten tomatoes movie ID",
+            "keyword":"rottentomatoes_movie_id",
+            "type":"int"
+        },
+        "zap2it tv show id":{
+            "name":"Zap2It TV show ID",
+            "keyword":"zap2it_tv_show_id",
+            "type":"unicode"
+        },
+        "country code":{
+            "name":"ISO 3166-1 alpha-2 country code",
+            "keyword":"country_code",
+            "type":"enum",
+            "enumeration":"country"
+        },        
+        "language code":{
+            "name":"ISO 639-1 language code",
+            "keyword":"language_code",
+            "type":"enum",
+            "enumeration":"language"
+        },        
+        "country name":{
+            "name":"Country name",
+            "keyword":"country_name",
+            "type":"unicode"
+        },        
+        "native country name":{
+            "name":"Native country name",
+            "keyword":"native_country_name",
+            "type":"unicode"
+        },        
+        "language name":{
+            "name":"Language name",
+            "keyword":"language_name",
+            "type":"unicode"
+        },        
+        "native language name":{
+            "name":"Native language name",
+            "keyword":"native_language_name",
+            "type":"unicode"
+        },
+        "genre name":{
+            "name":"Genre name",
+            "keyword":"genre_name",
+            "type":"unicode",
+            "atom":"©gen"
+        },        
+        "keyword name":{
+            "name":"Keyword name",
+            "keyword":"keyword_name",
+            "type":"unicode"
+        },
+        "collection name":{
+            "name":"Collection name",
+            "keyword":"collection_name",
+            "type":"unicode"
+        },
+        "company name":{
+            "name":"Company name",
+            "keyword":"company_name",
+            "type":"unicode"
+        },
+        "person name":{
+            "name":"Person name",
+            "keyword":"person_name",
+            "type":"unicode"
+        },
+        "character name":{
+            "name":"Character name",
+            "keyword":"character_name",
+            "type":"unicode"
+        },
+        "tv show name":{
+            "name":"TV show name",
+            "keyword":"tv_show_name",
+            "type":"unicode",
+            "atom":"tvsh"
+        },
+        "tv episode name":{
+            "name":"TV episode name",
+            "keyword":"tv_episode_name",
+            "type":"unicode"
+        },
+        "movie title":{
+            "name":"Movie title",
+            "keyword":"movie title",
+            "type":"unicode"
+        },
+        "original movie title":{
+            "name":"Original movie title",
+            "keyword":"original_movie_title",
+            "type":"unicode"
+        },
+        "music album name":{
+            "name":"Music album name",
+            "keyword":"music_album_name",
+            "type":"unicode"
+        },
+        "music track name":{
+            "name":"Music track name",
+            "keyword":"music_track_name",
+            "type":"unicode"
+        },
+        "critic name":{
+            "name":"Critic name",
+            "keyword":"critic_name",
+            "type":"unicode"
+        },
+        "album name":{
+            "name":"Album name",
+            "keyword":"album_name",
+            "type":"unicode",
+            "atom":"©alb"
+        },
+        "track name":{
+            "name":"Track name",
+            "keyword":"track_name",
+            "type":"unicode",
+            "atom":"©nam"
+        },
+        "artist name":{
+            "name":"Artist",
+            "keyword":"artist_name",
+            "type":"unicode",
+            "atom":"@ART"
+        },
+        "composer name":{
+            "name":"Composer",
+            "keyword":"composer_name",
+            "type":"unicode",
+            "atom":"©wrt"
+        },
+        "album artist name":{
+            "name":"Album artist",
+            "description":"Artist for the whole album, if different than the individual tracks.",
+            "keyword":"album_artist_name",
+            "type":"unicode",
+            "atom":"aART"
+        },
+        "tv network name":{
+            "name":"TV network",
+            "keyword":"tv_network",
+            "type":"unicode",
+            "atom":"tvnn"
+        },
+        "simple keyword name":{
+            "name":"Simple keyword name",
+            "keyword":"simple_keyword_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple collection name":{
+            "name":"Simple collection name",
+            "keyword":"simple_collection_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple company name":{
+            "name":"Simple company name",
+            "keyword":"simple_company_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple person name":{
+            "name":"Simple person name",
+            "keyword":"simple_person_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple genre name":{
+            "name":"Simple genre name",
+            "keyword":"simple_genre_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple character name":{
+            "name":"Simple character name",
+            "keyword":"simple_character_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple tv show name":{
+            "name":"Simple tv show name",
+            "keyword":"simple_tv_show_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple tv episode name":{
+            "name":"Simple tv episode name",
+            "keyword":"simple_tv_episode_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple movie title":{
+            "name":"Simple movie title",
+            "keyword":"simple_movie_title",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple music album name":{
+            "name":"Simple music album name",
+            "keyword":"simple_music_album_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple music track name":{
+            "name":"Simple music track name",
+            "keyword":"simple_music_track_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "sort name":{
+            "name":"Sort name",
+            "keyword":"sort_name",
+            "type":"unicode",
+            "atom":"sonm"
+        },
+        "sort artist":{
+            "name":"Sort artist",
+            "keyword":"sort_artist",
+            "type":"unicode",
+            "atom":"soar"
+        },
+        "sort composer":{
+            "name":"Sort composer",
+            "keyword":"sort_composer",
+            "type":"unicode",
+            "atom":"soco"
+        },
+        "sort album artist":{
+            "name":"Sort album artist",
+            "keyword":"sort_album_artist",
+            "type":"unicode",
+            "atom":"soaa"
+        },
+        "sort album":{
+            "name":"Sort album",
+            "keyword":"sort_album",
+            "type":"unicode",
+            "atom":"soal"
+        },
+        "sort tv show":{
+            "name":"Sort TV show",
+            "keyword":"sort_tv_show",
+            "type":"unicode",
+            "atom":"sosn"
+        },
+        "simple name":{
+            "name":"Simple name",
+            "keyword":"simple_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "movie handle":{
+            "name":"Movie handle",
+            "keyword":"movie_handle",
+            "type":"unicode",
+            "simplify":true
+        },
+        "album handle":{
+            "name":"Album handle",
+            "keyword":"album_handle",
+            "type":"unicode",
+            "simplify":true
+        },
+        "tv show handle":{
+            "name":"TV show handle",
+            "keyword":"tv_show_handle",
+            "type":"unicode",
+            "simplify":true
+        },
+        "track position":{
+            "name":"Track position",
+            "keyword":"track_position",
+            "type":"unicode",
+            "atom":"trkn"
+        },
+        "disc position":{
+            "name":"Disc position",
+            "keyword":"disc_position",
+            "type":"unicode",
+            "atom":"disk"
+        },
+        "track genealogy":{
+            "name":"Track genealogy",
+            "keyword":"track_genealogy",
+            "type":"unicode"
+        },
+        "track number":{
+            "name":"Track number",
+            "keyword":"track_number",
+            "type":"int"
+        },
+        "track count":{
+            "name":"Track count",
+            "keyword":"track_count",
+            "type":"int"
+        },
+        "disc number":{
+            "name":"Disc number",
+            "keyword":"disc_number",
+            "type":"int"
+        },
+        "disc count":{
+            "name":"Disc count",
+            "keyword":"disc_count",
+            "type":"int"
+        },
+        "music disc number":{
+            "name":"Music disc number",
+            "keyword":"music_disc_number",
+            "type":"int"
+        },
+        "music track number":{
+            "name":"Music track number",
+            "keyword":"music_track_number",
+            "type":"int",
+            "atom":"tves"
+        },
+        "absolute music track number":{
+            "name":"Absolute music track number",
+            "keyword":"absolute_music_track_number",
+            "type":"int"
+        },
+        "tv season number":{
+            "name":"TV season number",
+            "keyword":"tv_season_number",
+            "type":"int",
+            "atom":"tvsn"
+        },
+        "tv episode number":{
+            "name":"TV episode number",
+            "keyword":"tv_episode_number",
+            "type":"int",
+            "atom":"tves"
+        },
+        "absolute tv episode number":{
+            "name":"Absolute TV episode",
+            "keyword":"absolute_tv_episode",
+            "type":"int"
+        },
+        "tv episode production code":{
+            "name":"TV episode production code",
+            "keyword":"tv_episode_production_code",
+            "type":"unicode",
+            "atom":"tven"
+        },
+        "character encoding":{
+            "name":"Character encoding",
+            "keyword":"character_encoding",
+            "type":"unicode"
+        },
+        "url":{
+            "name":"URL",
+            "keyword":"url",
+            "type":"unicode"
+        },
+        "scheme":{
+            "name":"Scheme",
+            "keyword":"scheme",
+            "type":"unicode"
+        },
+        "domain":{
+            "name":"Domain",
+            "keyword":"domain",
+            "type":"unicode"
+        },
+        "host":{
+            "name":"Host",
+            "keyword":"host",
+            "type":"unicode"
+        },
+        "port":{
+            "name":"Port",
+            "keyword":"port",
+            "type":"int"
+        },
+        "path":{
+            "name":"Path",
+            "keyword":"path",
+            "type":"unicode"
+        },
+        "path digest":{
+            "name":"Path SHA1",
+            "keyword":"path_digest",
+            "type":"unicode"
+        },
+        "resource path digest":{
+            "name":"Resource path digest",
+            "keyword":"resource_path_digest",
+            "type":"unicode"
+        },
+        "directory":{
+            "name":"Directory",
+            "keyword":"directory",
+            "type":"unicode"
+        },
+        "file name":{
+            "name":"File name",
+            "keyword":"file_name",
+            "type":"unicode"
+        },
+        "exploded path":{
+            "name":"Exploded path",
+            "keyword":"exploded_path",
+            "type":"unicode"
+        },
+        "file size":{
+            "name":"File size",
+            "keyword":"file_size",
+            "type":"int",
+            "format":"byte"
+        },
+        "preset":{
+            "name":"Preset",
+            "keyword":"Preset",
+            "type":"unicode"
+        },
+        "profile":{
+            "name":"Profile",
+            "keyword":"profile",
+            "type":"unicode"
+        },
+        "volume":{
+            "name":"Volume",
+            "keyword":"volume",
+            "type":"unicode"
+        },
+        "volume path":{
+            "name":"Volume path",
+            "keyword":"volume_path",
+            "type":"unicode"
+        },
+        "kind":{
+            "name":"Kind",
+            "keyword":"kind",
+            "type":"unicode"
+        },
+        "tv show status":{
+            "name":"TV show status",
+            "keyword":"tv_show_status",
+            "type":"unicode"
+        },
+        "vote average":{
+            "name":"Vote average",
+            "keyword":"vote_average",
+            "type":"float"
+        },
+        "vote count":{
+            "name":"Vote count",
+            "keyword":"vote_count",
+            "type":"int"
+        },
+        "language":{
+            "name":"Language",
+            "keyword":"language",
+            "type":"enum",
+            "enumeration":"language"
+        },
+        "media kind":{
+            "name":"Media kind",
+            "keyword":"media_kind",
+            "type":"enum",
+            "atom":"stik",
+            "enumeration":"media kind"
+        },
+        "grouping":{
+            "name":"Grouping",
+            "description":"Overall work, like TIT1 in ID3",
+            "keyword":"grouping",
+            "type":"unicode",
+            "atom":"grup"
+        },
+        "comment":{
+            "name":"User comment",
+            "keyword":"comment",
+            "type":"unicode",
+            "atom":"©cmt"
+        },
+        "description":{
+            "name":"Description",
+            "keyword":"description",
+            "type":"unicode",
+            "atom":"desc"
+        },
+        "long description":{
+            "name":"Long description",
+            "keyword":"long_description",
+            "type":"unicode",
+            "atom":"ldes"
+        },
+        "biography":{
+            "name":"Biography",
+            "keyword":"biography",
+            "type":"unicode"
+        },
+        "place of birth":{
+            "name":"Place of birth",
+            "keyword":"place_of_birth",
+            "type":"unicode"
+        },
+        "lyrics":{
+            "name":"Lyrics",
+            "keyword":"lyrics",
+            "type":"unicode",
+            "atom":"©lyr"
+        },
+        "compilation":{
+            "name":"Compilation",
+            "description":"Is disc part of a compilation?",
+            "keyword":"compilation",
+            "type":"bool",
+            "atom":"cpil"
+        },
+        "copyright":{
+            "name":"Copyright",
+            "keyword":"copyright",
+            "type":"unicode",
+            "atom":"cprt"
+        },
+        "tempo":{
+            "name":"Beats per minute",
+            "keyword":"tempo",
+            "type":"int",
+            "atom":"tmpo"
+        },
+        "genre type":{
+            "name":"Pre-defined genre",
+            "description":"Enumerated value from ID3 tag set, plus 1",
+            "keyword":"genre_type",
+            "type":"enum",
+            "atom":"gnre",
+            "enumeration":"genre"
+        },
+        "gapless":{
+            "name":"Gapless",
+            "keyword":"gapless",
+            "type":"bool",
+            "atom":"pgap"
+        },
+        "itunes keywords":{
+            "name":"iTunes keywords",
+            "keyword":"itunes_keywords",
+            "type":"unicode",
+            "atom":"keyw"
+        },
+        "itunes category":{
+            "name":"iTunes category",
+            "keyword":"itunes_category",
+            "type":"unicode",
+            "atom":"catg"
+        },
+        "hd video":{
+            "name":"HD video",
+            "keyword":"hd_video",
+            "type":"int",
+            "atom":"hdvd"
+        },
+        "encoding tool":{
+            "name":"Encoding tool",
+            "description":"Software which encoded the recording",
+            "keyword":"encoding_tool",
+            "type":"unicode",
+            "atom":"©too"
+        },
+        "encoded by":{
+            "name":"Encoded by",
+            "description":"Person or company that encoded the recording",
+            "keyword":"encoded_by",
+            "type":"unicode",
+            "atom":"@enc"
+        },
+        "modified date":{
+            "name":"Modified date",
+            "keyword":"modified_date",
+            "type":"date"
+        },
+        "tag date":{
+            "name":"Tag date",
+            "keyword":"tag_date",
+            "type":"date"
+        },
+        "birthday":{
+            "name":"Birthday",
+            "keyword":"birthday",
+            "type":"date"
+        },
+        "deathday":{
+            "name":"Deathday",
+            "keyword":"deathday",
+            "type":"date"
+        },
+        "release date":{
+            "name":"Release date",
+            "keyword":"release_date",
+            "type":"date",
+            "atom":"©day"
+        },
+        "purchase date":{
+            "name":"Purchase date",
+            "keyword":"purchase_date",
+            "type":"date",
+            "atom":"purd"
+        },
+        "encoded date":{
+            "name":"Encoded date",
+            "keyword":"encoded_date",
+            "type":"date"
+        },
+        "podcast":{
+            "name":"Podcast",
+            "keyword":"podcast",
+            "type":"bool",
+            "atom":"pcst"
+        },
+        "podcast url":{
+            "name":"Podcast URL",
+            "keyword":"podcast_url",
+            "type":"unicode",
+            "atom":"purl"
+        },
+        "content rating":{
+            "name":"Content rating",
+            "description":"Does song have explicit content?",
+            "keyword":"content_rating",
+            "type":"enum",
+            "atom":"rtng",
+            "enumeration":"content rating"
+        },
+        "itunnorm":{
+            "name":"iTunNORM",
+            "description":"Sound Check analysis info",
+            "keyword":"itunnorm",
+            "type":"unicode",
+            "atom":"iTunNORM"
+        },
+        "itunextc":{
+            "name":"iTunEXTC",
+            "keyword":"itunextc",
+            "type":"unicode",
+            "atom":"iTunEXTC"
+        },
+        "itunmovi":{
+            "name":"iTunMOVI",
+            "keyword":"itunmovi",
+            "type":"plist",
+            "atom":"iTunMOVI"
+        },
+        "content advisory standard":{
+            "name":"Rating standard",
+            "keyword":"content_advisory_standard",
+            "type":"unicode"
+        },
+        "content advisory rating":{
+            "name":"Rating",
+            "keyword":"content_advisory_rating",
+            "type":"unicode"
+        },
+        "content advisory score":{
+            "name":"Rating score",
+            "keyword":"content_advisory_score",
+            "type":"int"
+        },
+        "content advisory annotation":{
+            "name":"Rating annotation",
+            "keyword":"content_advisory_ annotation",
+            "type":"unicode"
+        },
+        "cover":{
+            "name":"Cover art",
+            "description":"One or more cover art images",
+            "keyword":"cover_pieces",
+            "type":"int",
+            "atom":"covr",
+            "auto cast":false
+        },
+        "stream name":{
+            "name":"Stream name",
+            "keyword":"stream_name",
+            "type":"unicode"
+        },
+        "stream type":{
+            "name":"Stream type",
+            "keyword":"stream_type",
+            "type":"enum",
+            "enumeration":"mediainfo stream type"
+        },
+        "stream kind":{
+            "name":"Stream kind",
+            "keyword":"stream_kind",
+            "type":"enum",
+            "enumeration":"stream kind"
+        },
+        "format":{
+            "name":"Format",
+            "keyword":"format",
+            "type":"unicode"
+        },
+        "format profile":{
+            "name":"Format profile",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "channel count":{
+            "name":"Channel count",
+            "keyword":"channel_count",
+            "type":"int",
+            "plural":"list"
+        },
+        "channel position":{
+            "name":"Channel position",
+            "keyword":"channel_position",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "stream id":{
+            "name":"Stream ID",
+            "keyword":"stream_id",
+            "type":"int"
+        },
+        "stream kind position":{
+            "name":"Stream position",
+            "keyword":"stream_kind_position",
+            "type":"int"
+        },
+        "stream size":{
+            "name":"Stream size",
+            "keyword":"stream_size",
+            "type":"int",
+            "format":"byte"
+        },
+        "stream portion":{
+            "name":"Stream portion",
+            "keyword":"stream_portion",
+            "type":"float"
+        },
+        "default":{
+            "name":"Default",
+            "keyword":"default",
+            "type":"bool"
+        },
+        "primary":{
+            "name":"Primary",
+            "keyword":"primary",
+            "type":"bool"
+        },
+        "delay":{
+            "name":"Delay",
+            "keyword":"delay",
+            "type":"int"
+        },
+        "bit rate":{
+            "name":"Bit rate",
+            "keyword":"bit_rate",
+            "type":"int",
+            "format":"bitrate"
+        },
+        "bit rate mode":{
+            "name":"Bit rate mode",
+            "keyword":"bit_rate_mode",
+            "type":"unicode"
+        },
+        "bit depth":{
+            "name":"Bit depth",
+            "keyword":"bit_depth",
+            "type":"int",
+            "format":"bit"
+        },
+        "sample rate":{
+            "name":"Sample rate",
+            "keyword":"sample_rate",
+            "type":"int",
+            "format":"frequency"
+        },
+        "sample count":{
+            "name":"Sample count",
+            "keyword":"sample_count",
+            "type":"int"
+        },
+        "frame rate":{
+            "name":"Frame rate",
+            "keyword":"frame_rate",
+            "type":"float",
+            "format":"framerate"
+        },
+        "frame rate mode":{
+            "name":"Frame rate mode",
+            "keyword":"frame_rate_mode",
+            "type":"unicode"
+        },
+        "frame rate minimum":{
+            "name":"Frame rate minimum",
+            "keyword":"frame_rate_minimum",
+            "type":"float",
+            "format":"framerate"
+        },
+        "frame rate maximum":{
+            "name":"Frame rate maximum",
+            "keyword":"frame_rate_maximum",
+            "type":"float",
+            "format":"framerate"
+        },
+        "frame count":{
+            "name":"Frame count",
+            "keyword":"frame_count",
+            "type":"int"
+        },
+        "duration":{
+            "name":"Duration",
+            "keyword":"duration",
+            "type":"int",
+            "format":"millisecond"
+        },
+        "width":{
+            "name":"Width",
+            "keyword":"width",
+            "type":"int",
+            "format":"pixel"
+        },
+        "height":{
+            "name":"Height",
+            "keyword":"height",
+            "type":"int",
+            "format":"pixel"
+        },
+        "pixel aspect ratio":{
+            "name":"Pixel aspect ratio",
+            "keyword":"pixel_aspect_ratio",
+            "type":"float"
+        },
+        "display aspect ratio":{
+            "name":"Display aspect ratio",
+            "keyword":"display_aspect_ratio",
+            "type":"float"
+        },
+        "color space":{
+            "name":"Color space",
+            "keyword":"color_space",
+            "type":"unicode"
+        },
+        "channels":{
+            "name":"Channels",
+            "keyword":"channels",
+            "type":"int"
+        },
+        "dialnorm":{
+            "name":"Dialnorm",
+            "keyword":"dialnorm",
+            "type":"int"
+        },
+        "bpf":{
+            "name":"Bits / Pixel * Frame",
+            "keyword":"bpf",
+            "type":"float"
+        },
+        "encoder":{
+            "name":"Encoder",
+            "keyword":"encoder",
+            "type":"unicode"
+        },
+        "encoder settings string":{
+            "name":"Encoder settings string",
+            "keyword":"encoder_settings_string",
+            "type":"unicode"
+        },
+        "encoder settings":{
+            "name":"Encoder settings",
+            "keyword":"encoder_settings",
+            "type":"embed",
+            "namespace":"ns.medium.resource.x264"
+        },
+        "sort order":{
+            "name":"Sort order",
+            "keyword":"sort_order",
+            "type":"int"
+        },
+        "tv show air day":{
+            "name":"TV show air day",
+            "keyword":"tv_show_air_day",
+            "type":"unicode"
+        },
+        "tv show air time":{
+            "name":"TV show air time",
+            "keyword":"tv_show_air_time",
+            "type":"unicode"
+        },
+        "track subtitle":{
+            "name":"Track subtitle",
+            "keyword":"track_subtitle",
+            "type":"unicode",
+            "atom":"@st3",
+            "enable":false
+        },
+        "art director":{
+            "name":"Art director",
+            "description":"Person responsible for non-photographic artwork used with content",
+            "keyword":"art_director",
+            "type":"unicode",
+            "atom":"@ard",
+            "enable":false
+        },
+        "arranger":{
+            "name":"Arranger",
+            "description":"Person responsible for particular adaptation of composition",
+            "keyword":"arranger",
+            "type":"unicode",
+            "atom":"@arg",
+            "enable":false
+        },
+        "lyricist":{
+            "name":"Lyricist",
+            "description":"Writer of the song lyrics",
+            "keyword":"lyricist",
+            "type":"unicode",
+            "atom":"©aut",
+            "enable":false
+        },
+        "copyright acknowledgement":{
+            "name":"Copyright acknowledgement",
+            "description":"Ackowledgements of those granting permission to use copyrighted material",
+            "keyword":"copyright_acknowledgement",
+            "type":"unicode",
+            "atom":"©cak",
+            "enable":false
+        },
+        "conductor":{
+            "name":"Conductor",
+            "description":"Name of the person who directed the orchestra",
+            "keyword":"conductor",
+            "type":"unicode",
+            "atom":"©con",
+            "enable":false
+        },
+        "song description":{
+            "name":"Song description",
+            "description":"Explanation of the song",
+            "keyword":"song_description",
+            "type":"unicode",
+            "atom":"©des",
+            "enable":false
+        },
+        "equalization preset name":{
+            "name":"Equalization preset name",
+            "description":"Setting for equalization of content",
+            "keyword":"equalization_preset_name",
+            "type":"unicode",
+            "atom":"©equ",
+            "enable":false
+        },
+        "liner notes":{
+            "name":"Liner notes",
+            "description":"Explanatory notes about a record album, included on the jacket or in the packaging",
+            "keyword":"liner_notes",
+            "type":"unicode",
+            "atom":"©lnt",
+            "enable":false
+        },
+        "record company":{
+            "name":"Record company",
+            "description":"Company releasing the song",
+            "keyword":"record_company",
+            "type":"unicode",
+            "atom":"©mak",
+            "enable":false
+        },
+        "original artist":{
+            "name":"Original artist",
+            "description":"Name of artist originally attributed with content",
+            "keyword":"original_artist",
+            "type":"unicode",
+            "atom":"©ope",
+            "enable":false
+        },
+        "phonogram rights":{
+            "name":"Phonogram rights",
+            "description":"Like a copyright, but using the circled P symbol, for audio rights",
+            "keyword":"phonogram_rights",
+            "type":"unicode",
+            "atom":"©phg",
+            "enable":false
+        },
+        "performer":{
+            "name":"Performer",
+            "description":"Name or URL of the individual primary members of the band or group",
+            "keyword":"Performer",
+            "type":"unicode",
+            "atom":"©prf",
+            "enable":false
+        },
+        "publisher":{
+            "name":"Publisher",
+            "description":"Company publishing the song",
+            "keyword":"publisher",
+            "type":"unicode",
+            "atom":"©pub",
+            "enable":false
+        },
+        "sound engineer":{
+            "name":"Sound engineer",
+            "description":"The name of the person doing soundengineering",
+            "keyword":"sound_engineer",
+            "type":"unicode",
+            "atom":"©sne",
+            "enable":false
+        },
+        "soloist":{
+            "name":"Soloist",
+            "description":"Name of the musician who performs the solo",
+            "keyword":"soloist",
+            "type":"unicode",
+            "atom":"©sol",
+            "enable":false
+        },
+        "credits":{
+            "name":"Credits",
+            "description":"Credits for those who provided source content",
+            "keyword":"credits",
+            "type":"unicode",
+            "atom":"©src",
+            "enable":false
+        },
+        "thanks":{
+            "name":"Thanks and dedications",
+            "description":"Notes of acknowledgement or recognition from the artist",
+            "keyword":"thanks",
+            "type":"unicode",
+            "atom":"©thx",
+            "enable":false
+        },
+        "online extras":{
+            "name":"Online extras",
+            "description":"Links to content that can only be accessed when connected to the internet",
+            "keyword":"online_extras",
+            "type":"unicode",
+            "atom":"©url",
+            "enable":false
+        },
+        "executive producer":{
+            "name":"Executive producer",
+            "description":"Person responsible for creating or supervising the song",
+            "keyword":"executive_producer",
+            "type":"unicode",
+            "atom":"©xpd",
+            "enable":false
+        },
+        "producer":{
+            "name":"Producer",
+            "description":"Person responsible for creating or supervising the song",
+            "keyword":"producer",
+            "type":"unicode",
+            "atom":"©prd",
+            "enable":false
+        },
+        "director":{
+            "name":"Director",
+            "description":"Name of director for movie",
+            "keyword":"director",
+            "type":"unicode",
+            "atom":"©dir",
+            "enable":false
+        },
+        "homepage":{
+            "name":"Homepage",
+            "keyword":"homepage",
+            "type":"unicode"
+        },
+        "tagline":{
+            "name":"Tagline",
+            "keyword":"tagline",
+            "type":"unicode"
+        },
+        "budget":{
+            "name":"Budget",
+            "keyword":"budget",
+            "type":"int"
+        },
+        "runtime":{
+            "name":"Runtime",
+            "keyword":"runtime",
+            "type":"int"
+        },
+        "revenue":{
+            "name":"Revenue",
+            "keyword":"revenue",
+            "type":"int"
+        },
+        "api key":{
+            "name":"API Key",
+            "keyword":"api_key",
+            "type":"unicode"
+        },
+        "term":{
+            "name":"Term",
+            "keyword":"term",
+            "type":"unicode"
+        },
+        "page":{
+            "name":"Page",
+            "keyword":"page",
+            "type":"int"
+        },
+        "release year":{
+            "name":"Release year",
+            "keyword":"release_year",
+            "type":"int"
+        },
+        "all":{
+            "name":"All",
+            "keyword":"all",
+            "type":"bool"
+        },
+        "recursive":{
+            "name":"Recursive",
+            "keyword":"recursive",
+            "type":"bool"
+        },
+        "sync":{
+            "name":"Synchronize",
+            "keyword":"sync",
+            "type":"bool"
+        },
+        "crawl":{
+            "name":"Crawl",
+            "keyword":"crawl",
+            "type":"bool"
+        },
+        "download":{
+            "name":"Download",
+            "keyword":"download",
+            "type":"bool"
+        },
+        "overwrite":{
+            "name":"Overwrite",
+            "keyword":"overwrite",
+            "type":"bool"
+        },
+        "debug":{
+            "name":"Debug",
+            "keyword":"debug",
+            "type":"bool"
+        },
+        "verbosity":{
+            "name":"Verbosity",
+            "keyword":"verbosity",
+            "type":"enum",
+            "enumeration":"verbosity"
+        },
+        "configuration path":{
+            "name":"Configuration path",
+            "keyword":"configuration_path",
+            "type":"unicode"
+        },
+        "inclusion":{
+            "name":"Inclusion filter",
+            "keyword":"inclusion",
+            "type":"unicode"
+        },
+        "exclusion":{
+            "name":"Exclusion filter",
+            "keyword":"exclusion",
+            "type":"unicode"
+        },
+        "scan path":{
+            "name":"Scan path",
+            "keyword":"scan_path",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "uris":{
+            "name":"URIs",
+            "keyword":"uris",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "quantizer":{
+            "name":"Quantizer",
+            "keyword":"quantizer",
+            "type":"float"
+        },
+        "crop":{
+            "name":"Crop",
+            "keyword":"crop",
+            "type":"unicode"
+        },
+        "time shift":{
+            "name":"Time shift",
+            "keyword":"shift",
+            "type":"int"
+        },
+        "source frame rate":{
+            "name":"Source frame rate",
+            "keyword":"source_frame_rate",
+            "type":"enum",
+            "enumeration":"frame rate"
+        },
+        "target frame rate":{
+            "name":"Target frame rate",
+            "keyword":"target_frame_rate",
+            "type":"enum",
+            "enumeration":"frame rate"
+        },
+        "action":{
+            "name":"Action",
+            "keyword":"action",
+            "type":"unicode"
+        },
+        "handbrake parameters":{
+            "name":"HandBrake parameters",
+            "keyword":"handbrake_parameters",
+            "type":"unicode",
+            "plural":"dict"
+        },
+        "handbrake x264 settings":{
+            "name":"HandBrake x264 settings",
+            "keyword":"handbrake_x264_settings",
+            "type":"unicode",
+            "plural":"dict"
+        },
+        "handbrake audio encoder settings":{
+            "name":"HandBrake audio encoder settings",
+            "keyword":"handbrake_audio_encoder_settings",
+            "type":"unicode",
+            "plural":"dict"
+        },
+        "query":{
+            "name":"Query",
+            "keyword":"query",
+            "type":"unicode",
+            "plural":"dict",
+            "namespace":"ns.search.query",
+            "plural format":"eval"
+        },
+        "tables":{
+            "name":"Tables",
+            "keyword":"tables",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "database":{
+            "name":"Database",
+            "keyword":"database",
+            "type":"unicode"
+        },
+        "username":{
+            "name":"Username",
+            "keyword":"username",
+            "type":"unicode"
+        },
+        "password":{
+            "name":"Password",
+            "keyword":"password",
+            "type":"unicode"
+        },
+        "mongodb url":{
+            "name":"MongoDB URL",
+            "keyword":"mongodb_url",
+            "type":"unicode"
+        },
+        "implementation":{
+            "name":"Implementation",
+            "keyword":"implementation",
+            "type":"unicode"
+        },
+        "keywords":{
+            "name":"Keywords",
+            "keyword":"keywords",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "actors":{
+            "name":"Actors",
+            "type":"unicode",
+            "keyword":"actors",
+            "plural":"list"
+        },
+        "directors":{
+            "name":"Directors",
+            "keyword":"directors",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "codirectors":{
+            "name":"Codirectors",
+            "keyword":"codirectors",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "producers":{
+            "name":"Producers",
+            "keyword":"producers",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "screenwriters":{
+            "name":"Screenwriters",
+            "keyword":"screenwriters",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "studio":{
+            "name":"Studio",
+            "keyword":"studio",
+            "type":"unicode",
+            "plural":"list"
+        },
+        "genres":{
+            "name":"Genres",
+            "keyword":"genres",
+            "type":"embed",
+            "namespace":"ns.knowledge.genre",
+            "plural":"list"
+        },
+        "production companies":{
+            "name":"Production companies",
+            "keyword":"production_companies",
+            "type":"embed",
+            "namespace":"ns.knowledge.company",
+            "plural":"list"
+        },
+        "production countries":{
+            "name":"Production countries",
+            "keyword":"production_countries",
+            "type":"embed",
+            "namespace":"ns.knowledge.country",
+            "plural":"list"
+        },
+        "spoken languages":{
+            "name":"Spoken languages",
+            "keyword":"spoken_languages",
+            "type":"embed",
+            "namespace":"ns.knowledge.languages",
+            "plural":"list"
+        },
+        "backdrops":{
+            "name":"Backdrops",
+            "keyword":"backdrops",
+            "type":"embed",
+            "namespace":"ns.knowledge.image",
+            "plural":"list"
+        },
+        "posters":{
+            "name":"Posters",
+            "keyword":"posters",
+            "type":"embed",
+            "namespace":"ns.knowledge.image",
+            "plural":"list"
+        },
+        "profiles":{
+            "name":"Profiles",
+            "keyword":"profiles",
+            "type":"embed",
+            "namespace":"ns.knowledge.image",
+            "plural":"list"
+        },
+        "part of a collection":{
+            "name":"part of a collection",
+            "keyword":"part_of_a_collection",
+            "type":"embed",
+            "namespace":"ns.knowledge.collection"
+        },
+        "cast":{
+            "name":"Cast",
+            "keyword":"cast",
+            "type":"embed",
+            "namespace":"ns.knowledge.cast",
+            "plural":"list"
+        },
+        "crew":{
+            "name":"Crew",
+            "keyword":"crew",
+            "type":"embed",
+            "namespace":"ns.knowledge.cast",
+            "plural":"list"
+        },
+        "movies":{
+            "name":"Movies",
+            "keyword":"movies",
+            "type":"embed",
+            "namespace":"ns.knowledge.movie",
+            "plural":"list"
+        },
+        "certifications":{
+            "name":"Certification",
+            "keyword":"certification",
+            "type":"embed",
+            "namespace":"ns.knowledge.certification",
+            "plural":"list"
+        },
+        "titles":{
+            "name":"Titles",
+            "keyword":"titles",
+            "type":"embed",
+            "namespace":"ns.knowledge.movie",
+            "plural":"list"
+        },
+        "reviews":{
+            "name":"Reviews",
+            "keyword":"reviews",
+            "type":"embed",
+            "namespace":"ns.knowledge.review",
+            "plural":"list"
+        },
+        "critics consensus":{
+            "name":"Critics consensus",
+            "keyword":"critics_consensus",
+            "type":"unicode"
+        },
+        "audience rating":{
+            "name":"Audience rating",
+            "keyword":"audience_rating",
+            "type":"unicode"
+        },
+        "critics rating":{
+            "name":"Critics rating",
+            "keyword":"critics_rating",
+            "type":"unicode"
+        },
+        "audience score":{
+            "name":"Audience score",
+            "keyword":"audience_score",
+            "type":"int"
+        },
+        "critics score":{
+            "name":"Critics score",
+            "keyword":"critics_score",
+            "type":"int"
+        },
+        "freshness":{
+            "name":"Freshness",
+            "keyword":"freshness",
+            "type":"unicode"
+        },
+        "original critic score":{
+            "name":"Original critic score",
+            "keyword":"original critic score",
+            "type":"unicode"
+        },
+        "review publication":{
+            "name":"Review publication",
+            "keyword":"review_publication",
+            "type":"unicode"
+        },
+        "review quote":{
+            "name":"Review quote",
+            "keyword":"review_quote",
+            "type":"unicode"
+        },
+        "review url":{
+            "name":"Review url",
+            "keyword":"review_url",
+            "type":"unicode"
+        },
+        "image url":{
+            "name":"Image URL",
+            "keyword":"image_url",
+            "type":"unicode"
+        },
+        "thumbnail url":{
+            "name":"Thumbnail URL",
+            "keyword":"thumbnail_url",
+            "type":"unicode"
+        },
+        "poster url":{
+            "name":"Poster URL",
+            "keyword":"poster_url",
+            "type":"unicode"
+        },
+        "backdrop url":{
+            "name":"Backdrop URL",
+            "keyword":"backdrop_url",
+            "type":"unicode"
+        },
+        "profile url":{
+            "name":"Profile URL",
+            "keyword":"profile_url",
+            "type":"unicode"
+        },
+        "banner url":{
+            "name":"Banner URL",
+            "keyword":"banner_url",
+            "type":"unicode"
+        },
+        "fan art url":{
+            "name":"Fan Art URL",
+            "keyword":"fan_art_url",
+            "type":"unicode"
+        },
+        "8x8 dct":{
+            "name":"Adaptive 8x8 DCT",
+            "keyword":"8x8_dct",
+            "type":"int"
+        },
+        "adaptive bi directional":{
+            "name":"Adaptive bi directional",
+            "keyword":"adaptive_bi_directional",
+            "type":"int"
+        },
+        "bi directional bias":{
+            "name":"Bi directional bias",
+            "keyword":"bi_directionl_bias",
+            "type":"int"
+        },
+        "bi directional pyramid":{
+            "name":"Bi directional pyramid",
+            "keyword":"bi_directional_pyramid",
+            "type":"int"
+        },
+        "bi directional frames":{
+            "name":"Bi directional frames",
+            "keyword":"bi_directional_frames",
+            "type":"int"
+        },
+        "cabac":{
+            "name":"CABAC",
+            "keyword":"cabac",
+            "type":"int"
+        }, 
+        "chroma motion estimation":{
+            "name":"Chroma motion estimation",
+            "keyword":"chroma_motion_estimation",
+            "type":"int"
+        },
+        "chroma planes quantizer offset":{
+            "name":"Chroma planes quantizer offset",
+            "keyword":"chroma_planes_quantizer_offset",
+            "type":"int"
+        },
+        "constrained intra prediction":{
+            "name":"Constrained intra prediction",
+            "keyword":"constrained_intra_prediction",
+            "type":"int"
+        },
+        "dct decimation":{
+            "name":"DCT decimation",
+            "keyword":"dct_decimation",
+            "type":"int"
+        },
+        "direct motion vectors prediction mode":{
+            "name":"Direct motion vectors prediction mode",
+            "keyword":"direct_motion_vectors_prediction_mode",
+            "type":"int"
+        },
+        "predicted frames early skip detection":{
+            "name":"Predicted frames early skip detection",
+            "keyword":"predicted_frames_early_skip_detection",
+            "type":"int"
+        },
+        "intra frames refresh":{
+            "name":"Intra frames refresh",
+            "keyword":"intra_frames_refresh",
+            "type":"int"
+        },
+        "rate control lookahead":{
+            "name":"Rate control lookahead",
+            "keyword":"rate_control_lookahead",
+            "type":"int"
+        },
+        "decoded picture buffer size":{
+            "name":"Decoded picture buffer size",
+            "keyword":"decoded_picture_buffer_size",
+            "type":"int"
+        },
+        "scene cut":{
+            "name":"Scene cut",
+            "keyword":"scene_cut",
+            "type":"int"
+        },
+        "sliced based threading":{
+            "name":"Sliced based threading",
+            "keyword":"sliced_based_threading",
+            "type":"int"
+        },
+        "subpixel motion estimation":{
+            "name":"Subpixel motion estimation",
+            "keyword":"subpixel_motion_estimation",
+            "type":"int"
+        },
+        "threads":{
+            "name":"Threads",
+            "keyword":"threads",
+            "type":"int"
+        },
+        "trellis quantization":{
+            "name":"Trellis quantization",
+            "keyword":"trellis_quantization",
+            "type":"int"
+        },
+        "video buffer verifier size":{
+            "name":"Video buffer verifier size",
+            "keyword":"video_buffer_verifier_size",
+            "type":"int"
+        },
+        "video buffer verifier maximum rate":{
+            "name":"Video buffer verifier maximum rate",
+            "keyword":"video_buffer_verifier_maximum_rate",
+            "type":"int"
+        },
+        "weighted predicted frames":{
+            "name":"Weighted predicted frames",
+            "keyword":"weighted_predicted_frames",
+            "type":"int"
+        },
+        "weighted bi directional frames":{
+            "name":"Weighted bi directional frames",
+            "keyword":"weighted_bi_directional_frames",
+            "type":"int"
+        },
+        "maximum keyframe interval":{
+            "name":"Maximum keyframe interval",
+            "keyword":"maximum_keyframe_interval",
+            "type":"int"
+        },
+        "minimum keyframe interval":{
+            "name":"Minimum keyframe interval",
+            "keyword":"minimum_keyframe_interval",
+            "type":"int"
+        },
+        "macroblock adaptive frame field":{
+            "name":"macroblock adaptive frame field",
+            "keyword":"macroblock adaptive frame field",
+            "type":"int"
+        },
+        "macroblock tree rate control":{
+            "name":"Macroblock tree rate control",
+            "keyword":"macroblock_tree_rate_control",
+            "type":"int"
+        },
+        "motion estimation method":{
+            "name":"Motion estimation method",
+            "keyword":"motion_estimation_method",
+            "type":"unicode"
+        },
+        "motion estimation range":{
+            "name":"Motion estimation range",
+            "keyword":"motion_estimation_range",
+            "type":"int"
+        },
+        "mixed references":{
+            "name":"Mixed references",
+            "keyword":"mixed_references",
+            "type":"int"
+        },
+        "noise reduction":{
+            "name":"Noise reduction",
+            "keyword":"noise_reduction",
+            "type":"int"
+        },
+        "minimum quantizer":{
+            "name":"Minimum quantizer",
+            "keyword":"minimum_quantizer",
+            "type":"int"
+        },
+        "maximum quantizer":{
+            "name":"Maximum quantizer",
+            "keyword":"maximum_quantizer",
+            "type":"int"
+        },
+        "quantizer step":{
+            "name":"Quantizer step",
+            "keyword":"quantizer_step",
+            "type":"int"
+        },
+        "custom quantization matrices":{
+            "name":"Custom quantization matrices",
+            "keyword":"custom_quantization_matrices",
+            "type":"int"
+        },
+        "psychovisual optimization":{
+            "name":"Psychovisual optimization",
+            "keyword":"psychovisual_optimization",
+            "type":"int"
+        },
+        "psychovisual strength":{
+            "name":"Psychovisual strength",
+            "keyword":"psychovisual_strength",
+            "type":"unicode"
+        },
+        "quantizer curve compression factor":{
+            "name":"Quantizer curve compression factor",
+            "keyword":"quantizer_curve_compression_factor",
+            "type":"float"
+        },
+        "quantizer curve blur":{
+            "name":"Quantizer curve blur",
+            "keyword":"quantizer_curve_blur",
+            "type":"float"
+        },
+        "post compression quantizer curve blur":{
+            "name":"Post compression quantizer curve blur",
+            "keyword":"post_compression_quantizer_curve_blur",
+            "type":"float"
+        },
+        "rate tolerance":{
+            "name":"Rate tolerance",
+            "keyword":"rate_tolerance",
+            "type":"float"
+        },
+        "intra predicted ratio":{
+            "name":"Intra predicted ratio",
+            "keyword":"intra_predicted_ratio",
+            "type":"float"
+        },
+        "bi directional predicted ratio":{
+            "name":"Bi directional predicted ratio",
+            "keyword":"bi_directional_predicted_ratio",
+            "type":"float"
+        },
+        "macroblock partitions":{
+            "name":"Macroblock partitions",
+            "keyword":"macroblock_partitions",
+            "type":"unicode"
+        },
+        "adaptive quantization":{
+            "name":"Adaptive quantization",
+            "keyword":"adaptive_quantization",
+            "type":"unicode"
+        },
+        "deadzone":{
+            "name":"Deadzone",
+            "keyword":"deadzone",
+            "type":"unicode"
+        },
+        "loop filter deblocker":{
+            "name":"Loop filter deblocker",
+            "keyword":"loop_filter_deblocker",
+            "type":"unicode"
+        },
+        "rate control method":{
+            "name":"Rate control method",
+            "keyword":"rate_control_method",
+            "type":"unicode"
+        },
+        "hypothetical reference decoder":{
+            "name":"Hypothetical reference decoder",
+            "keyword":"hypothetical_reference_decoder",
+            "type":"unicode"
+        },
+        "open group of pictures":{
+            "name":"Open group of pictures",
+            "keyword":"open group_of_pictures",
+            "type":"int"
+        },
+        "interlaced":{
+            "name":"Interlaced",
+            "keyword":"interlaced",
+            "type":"int"
+        },
+        "bluray compatible":{
+            "name":"Bluray compatible",
+            "keyword":"bluray_compatible",
+            "type":"int"
+        }       
+    }
+}

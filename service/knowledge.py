@@ -39,7 +39,8 @@ class KnowledgeBaseHandler(ResourceHandler):
     
             entry['record']['body'] = Ontology(self.env, entry['branch']['namespace'])
             for source in query['sources']:
-                entry['record']['body'].merge_all(source['body']['canonical'])
+                if 'body' in source and source['body']:
+                    entry['record']['body'].merge_all(source['body']['canonical'])
                 
             query['entires'].append(entry)
     

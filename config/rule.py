@@ -237,7 +237,6 @@
                 },
             ],
         },
-
         'rule.medium.home.umid':{
             'name':'UMID from home id',
             'provide':('umid',),
@@ -393,6 +392,39 @@
                 {
                     'requires':[
                         'media kind',
+                        'itunes tv episode id',
+                    ],
+                    'equal':{'media kind':10, },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/itunes/{itunes tv episode id}', },
+                    ],
+                },
+                {
+                    'requires':[
+                        'media kind',
+                        'itunes tv season id',
+                        'track number',
+                    ],
+                    'equal':{'media kind':10, },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/itunes/{itunes tv season id}/{track number}', },
+                    ],
+                },
+                {
+                    'requires':[
+                        'media kind',
+                        'itunes tv show id',
+                        'disc number',
+                        'track number',
+                    ],
+                    'equal':{'media kind':10, },
+                    'apply':[
+                        { 'property':'home uri', 'format':u'/h/tv/episode/itunes/{itunes tv show id}/{disc number}/{track number}', },
+                    ],
+                },
+                {
+                    'requires':[
+                        'media kind',
                         'imdb tv episode id',
                     ],
                     'equal':{'media kind':10, },
@@ -528,7 +560,7 @@
                 },
                 {
                     'requires':['file name',],
-                    'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'match':{'property':'file name', 'expression':ur'^TVDb[0-9]+ s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
@@ -538,7 +570,7 @@
                 },
                 {
                     'requires':['file name',],
-                    'match':{'property':'file name', 'expression':ur'^.{2,} s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'match':{'property':'file name', 'expression':ur'^iTMF[0-9]+ s[0-9]+e[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^iTMF(?P<itunes_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
@@ -548,7 +580,7 @@
                 },
                 {
                     'requires':['file name',],
-                    'match':{'property':'file name', 'expression':ur'^.{2,} d[0-9]+t[0-9]+(?: .*)?\.[^\.]{3,4}$', },
+                    'match':{'property':'file name', 'expression':ur'^iTMF[0-9]+ d[0-9]+t[0-9]+(?: .*)?\.[^\.]{3,4}$', },
                     'decode':[
                         {'property':'file name', 'expression':ur'^iTMF(?P<itunes_music_album_id>[0-9]+) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\s*(?P<track_name>.*))?\.(?P<kind>[^\.]{3,4})$',},
                     ],
@@ -1158,7 +1190,6 @@
                 },
             ],
         },
-        
         'rule.knowledge.movie.imdb.trimmed':{
             'name':'trimmed imdb movie id',
             'provide':('trimmed imdb movie id',),
@@ -1279,7 +1310,6 @@
                 },
             ],
         },
-
         'rule.knowledge.sort.name':{
             'name':'sort name',
             'provide':('sort name',),
@@ -1545,7 +1575,6 @@
                 },
             ],
         },
-        
         'rule.knowledge.simple.name.movie':{
             'name':'Simple movie title',
             'provide':('simple movie title',),

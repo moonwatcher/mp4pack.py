@@ -102,6 +102,10 @@
                             'depend':ur'/c/{language}/tvdb/tv/show/{tvdb tv show id}',
                         },
                         {
+                            'filter':ur'^/h/tv/show/itunes/(?P<itunes_tv_show_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/tv/show/{itunes tv show id}',
+                        },
+                        {
                             'filter':ur'^/h/tv/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$',
                         },
                     ],
@@ -122,6 +126,10 @@
                         {
                             'name':u'show home by tvdb tv show id',
                             'format':ur'/h/tv/show/tvdb/{tvdb tv show id}',
+                        },
+                        {
+                            'name':u'show home by itunes tv show id',
+                            'format':ur'/h/tv/show/itunes/{itunes tv show id}',
                         },
                         {
                             'name':u'show home by imdb tv show id',
@@ -163,10 +171,19 @@
                             'filter':ur'^/h/tv/season/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)$',
                             'depend':ur'/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}',
                         },
+                        {
+                            'filter':ur'^/h/tv/season/itunes/(?P<itunes_tv_season_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/tv/season/{itunes tv season id}',
+                        },
+                        {
+                            'filter':ur'^/h/tv/season/itunes/(?P<itunes_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$',
+                            'depend':ur'/c/itunes/tv/season/{itunes tv show id}/{disc number}',
+                        },
                     ],
                     'collect':[
                         ur'/h/tv/show/{tv show id}',
                         ur'/h/tv/show/tvdb/{tvdb tv show id}',
+                        ur'/h/tv/show/itunes/{itunes tv show id}',
                         ur'/h/tv/show/imdb/{imdb tv show id}',
                     ],
                     'resolvable':[
@@ -190,6 +207,14 @@
                         {
                             'name':u'season home by tvdb tv show id',
                             'format':ur'/h/tv/season/tvdb/{tvdb tv show id}/{disc number}',
+                        },
+                        {
+                            'name':u'season home by itunes tv season id',
+                            'format':ur'/h/tv/season/itunes/{itunes tv season id}',
+                        },
+                        {
+                            'name':u'season home by itunes tv show id',
+                            'format':ur'/h/tv/season/itunes/{itunes tv show id}/{disc number}',
                         },
                         {
                             'name':u'season home by imdb tv show id',
@@ -243,6 +268,18 @@
                             'depend':ur'/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}',
                         },
                         {
+                            'filter':ur'^/h/tv/episode/itunes/(?P<itunes_tv_episode_id>[0-9]+)$',
+                            'depend':ur'/c/itunes/tv/episode/{itunes tv episode id}',
+                        },
+                        {
+                            'filter':ur'^/h/tv/episode/itunes/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'depend':ur'/c/itunes/tv/episode/{itunes tv season id}/{track number}',
+                        },
+                        {
+                            'filter':ur'^/h/tv/episode/itunes/(?P<itunes_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$',
+                            'depend':ur'/c/itunes/tv/episode/{itunes tv show id}/{disc number}/{track number}',
+                        },
+                        {
                             'filter':ur'^/h/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$',
                         },
                         {
@@ -253,11 +290,14 @@
                     'collect':[
                         ur'/h/tv/show/{tv show id}',
                         ur'/h/tv/show/tvdb/{tvdb tv show id}',
+                        ur'/h/tv/show/itunes/{itunes tv show id}',
                         ur'/h/tv/show/imdb/{imdb tv show id}',
                         ur'/h/tv/season/{tv season id}',
                         ur'/h/tv/season/{tv show id}/{disc number}',
                         ur'/h/tv/season/tvdb/{tvdb tv show id}/{disc number}',
                         ur'/h/tv/season/tvdb/{tvdb tv season id}',
+                        ur'/h/tv/season/itunes/{itunes tv show id}/{disc number}',
+                        ur'/h/tv/season/itunes/{itunes tv season id}',
                         ur'/h/tv/season/imdb/{imdb tv show id}/{disc number}',
                     ],
                     'resolvable':[
@@ -293,6 +333,18 @@
                         {
                             'name':u'episode home by tvdb tv show id',
                             'format':ur'/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}',
+                        },
+                        {
+                            'name':u'episode home by itunes tv episode id',
+                            'format':ur'/h/tv/episode/itunes/{itunes tv episode id}',
+                        },
+                        {
+                            'name':u'episode home by itunes tv season id',
+                            'format':ur'/h/tv/episode/itunes/{itunes tv season id}/{track number}',
+                        },
+                        {
+                            'name':u'episode home by itunes tv show id',
+                            'format':ur'/h/tv/episode/itunes/{itunes tv show id}/{disc number}/{track number}',
                         },
                         {
                             'name':u'episode home by imdb tv episode id',
@@ -1016,6 +1068,7 @@
                         'tv show id',
                         'tvdb tv show id',
                         'imdb tv show id',
+                        'itunes tv show id',
                         'tv season id',
                         'disc number',
                         'tvdb tv season id',
@@ -1129,10 +1182,13 @@
                         'tv season id',
                         'tv episode id',
                         'tvdb tv show id',
+                        'itunes tv show id',
                         'imdb tv show id',
                         'disc number',
                         'track number',
                         'imdb tv episode id',
+                        'tvdb tv season id',
+                        'itunes tv season id',
                         'tvdb tv episode id',
                         'itunes tv episode id',
                         'language',

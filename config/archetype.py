@@ -2,17 +2,6 @@
 
 {
     'archetype':{
-        'job id':{
-            'name':u'Job ID',
-            'keyword':u'job_id',
-            'type':'int',
-        },
-        'department id':{
-            'name':u'Department ID',
-            'keyword':u'department_id',
-            'type':'int',
-        },
-
         'umid':{
             'name':u'UMID',
             'keyword':u'umid',
@@ -83,7 +72,16 @@
             'keyword':u'genre_id',
             'type':'int',
         },
-
+        'job id':{
+            'name':u'Job ID',
+            'keyword':u'job_id',
+            'type':'int',
+        },
+        'department id':{
+            'name':u'Department ID',
+            'keyword':u'department_id',
+            'type':'int',
+        },
         'home uri':{
             'name':u'Home URI',
             'keyword':'home_uri',
@@ -99,7 +97,6 @@
             'keyword':'resource_uri',
             'type':'unicode',
         },
-    
         'itunes person id':{
             'name':u'iTunes person ID',
             'keyword':u'itunes_person_id',
@@ -192,7 +189,6 @@
             'type':'unicode',
             'atom':'xid',
         },
-        
         'tvdb person id':{
             'name':u'TVDb person ID',
             'keyword':u'tvdb_person_id',
@@ -218,7 +214,6 @@
             'keyword':u'tvdb_image_id',
             'type':'int',
         },
-        
         'imdb person id':{
             'name':u'IMDb person ID',
             'keyword':u'imdb_person_id',
@@ -249,7 +244,6 @@
             'keyword':u'trimmed_imdb_movie_id',
             'type':'unicode'
         },
-
         'tmdb movie id':{
             'name':u'TMDb movie ID',
             'keyword':u'tmdb_movie_id',
@@ -285,7 +279,6 @@
             'keyword':u'tmdb_popularity',
             'type':'float',
         },
-
         'rottentomatoes movie id':{
             'name':u'Rotten tomatoes movie ID',
             'keyword':u'rottentomatoes_movie_id',
@@ -296,7 +289,6 @@
             'keyword':u'zap2it_tv_show_id',
             'type':'unicode',
         },
-
         'country code':{
             'name':u'ISO 3166-1 alpha-2 country code',
             'keyword':u'country_code',
@@ -309,7 +301,6 @@
             'type':'enum',
             'enumeration':'language',
         },        
-
         'country name':{
             'name':u'Country name',
             'keyword':u'country_name',
@@ -434,7 +425,6 @@
             'type':'unicode',
             'atom':'tvnn',
         },
-        
         'simple keyword name':{
             'name':u'Simple keyword name',
             'keyword':u'simple_keyword_name',
@@ -501,7 +491,6 @@
             'type':'unicode',
             'simplify':True,
         },
-        
         'sort name':{
             'name':u'Sort name',
             'keyword':u'sort_name',
@@ -562,7 +551,6 @@
             'type':'unicode',
             'simplify':True,
         },
-
         'track position':{
             'name':u'Track position',
             'keyword':u'track_position',
@@ -639,7 +627,6 @@
             'type':'unicode',
             'atom':'tven',
         },
-        
         'character encoding':{
             'name':u'Character encoding',
             'keyword':u'character_encoding',
@@ -685,7 +672,6 @@
             'keyword':u'resource_path_digest',
             'type':'unicode',
         },
-        
         'directory':{
             'name':u'Directory',
             'keyword':u'directory',
@@ -1357,7 +1343,6 @@
             'atom':'©dir',
             'enable':False,
         },
-        
         'homepage':{
             'name':u'Homepage',
             'keyword':u'homepage',
@@ -1383,7 +1368,6 @@
             'keyword':u'revenue',
             'type':'int',
         },
-        
         'api key':{
             'name':u'API Key',
             'keyword':u'api_key',
@@ -1750,7 +1734,6 @@
             'keyword':u'review_url',
             'type':'unicode',
         },
-        
         'image url':{
             'name':u'Image URL',
             'keyword':u'image_url',
@@ -1786,9 +1769,6 @@
             'keyword':u'fan_art_url',
             'type':'unicode',
         },
-
-
-
         '8x8 dct':{
             'name':u'Adaptive 8x8 DCT',
             'keyword':u'8x8_dct',
@@ -2054,6 +2034,5 @@
             'keyword':u'bluray_compatible',
             'type':'int',
         },
-
     },
 }
