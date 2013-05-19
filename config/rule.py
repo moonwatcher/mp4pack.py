@@ -95,6 +95,13 @@
                         {'property':'implementation', 'value':u'ResourceJob',},
                     ),
                 },
+                {
+                    'requires':['action',],
+                    'equal':{'action':'rebuild'},
+                    'apply':(
+                        {'property':'implementation', 'value':u'SystemJob',},
+                    ),
+                },
             ]
         },
         'rule.task.default.preset':{

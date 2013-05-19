@@ -11,7 +11,7 @@ import json
 import hashlib 
 
 from ontology import Ontology
-from material import AssetCache
+from material import MaterialCache
 from datetime import datetime
 from model import ResourceTransform
 
@@ -19,7 +19,7 @@ class Queue(object):
     def __init__(self, env):
         self.log = logging.getLogger('queue')
         self.env = env
-        self.cache = AssetCache(env)
+        self.cache = MaterialCache(env)
         self.job = []
         self.load()
     
@@ -70,12 +70,12 @@ class Job(object):
         if 'implementation' in o:
             if o['implementation'] in globals():
                 try:
-                    # Try to instantiate a specific Job
                     result = globals()[o['implementation']](queue, node)
                 except TypeError as err:
-                    asset.log.warning(u'Unknown job implementation %s, treating as generic', o['implementation'])
+                    queue.log.error(u'Job implementation mismatch %s, treating as a generic job', o['implementation'])
+            else:
+                queue.log.warning(u'Unknown job implementation %s, treating as a generic job', o['implementation'])
                         
-            # If can not handle as a specific container, instantiate as a generic
             if result is None:
                 result = Job(queue, node)
 
@@ -403,6 +403,7 @@ class ServiceTask(Task):
         Task.__init__(self, job, ontology)
         self.uri = uri
         self.document = None
+        self.action = None
     
     
     @property
@@ -413,13 +414,18 @@ class ServiceTask(Task):
     def load(self):
         Task.load(self)
         self.document = self.env.resolver.resolve(self.uri, self.ontology['query'])
+        
+        # locate a method that implements the action
+        self.action = getattr(self, self.ontology['action'], None)
+        
+        if self.action is None:
+            self.log.warning(u'Unknown action %s, aborting task %s', self.ontology['action'], unicode(self))
     
     
     def run(self):
         self.load()
-        if self.document is not None:
-            action = getattr(self, self.ontology['action'], None)
-            if action: action()
+        if self.document is not None and self.action:
+            self.action()
         self.unload()
     
     
@@ -430,4 +436,67 @@ class ServiceTask(Task):
     def drop(self):
         self.env.resolver.remove(self.uri)
     
+
+
+
+
+class SystemJob(Job):
+    def __init__(self, queue, node):
+        Job.__init__(self, queue, node)
+    
+    
+    def load(self):
+        Job.load(self)
+        
+        if self.ontology['all']:
+            for table in self.env.table.keys():
+                self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))
+                
+        elif self.ontology['tables']:
+            for table in self.ontology['tables']:
+                self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))
+    
+
+
+class SystemTask(Task):
+    def __init__(self, job, ontology, name):
+        Task.__init__(self, job, ontology)
+        self.action = None
+        self.name = name
+        self._table = None
+    
+    
+    @property
+    def valid(self):
+        return Task.valid.fget(self) and self.table is not None
+    
+    
+    @property
+    def table(self):
+        if self._table is None and self.name in self.env.table:
+            self._table = self.env.table[self.name]
+        return self._table
+    
+    
+    def load(self):
+        Task.load(self)
+        
+        # locate a method that implements the action
+        self.action = getattr(self, self.ontology['action'], None)
+        
+        if self.action is None:
+            self.log.warning(u'Unknown action %s, aborting task %s', self.ontology['action'], unicode(self))
+    
+    
+    def run(self):
+        self.load()
+        if self.action: self.action()
+        self.unload()
+    
+    
+    def rebuild(self):
+        for index in self.table['index']:
+            self.env.repository[self.ontology['host']].rebuild_index(self.table['name'], index)
+    
+
 

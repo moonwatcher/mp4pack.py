@@ -67,6 +67,10 @@
                 'query':{
                     'plural format':'eval',
                 },
+                'tables':None,
+                'all':{
+                    'auto cast':False,
+                },
             },
         },
         'ns.system.job':{
@@ -114,6 +118,10 @@
                 },
                 'query':None,
                 'implementation':None,
+                'tables':None,
+                'all':{
+                    'auto cast':False,
+                },
             },
             'rule':[
                 'rule.job.implementation',
@@ -152,6 +160,10 @@
                     'auto cast':False,
                 },
                 'query':None,
+                'tables':None,
+                'all':{
+                    'auto cast':False,
+                },
             },
             'rule':[
                 'rule.task.default.preset'

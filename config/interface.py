@@ -231,6 +231,16 @@
                         'language',
                     ]
                 },
+                {
+                    'instruction':{
+                        'name':'rebuild',
+                        'help':'Rebuild database',
+                    },
+                    'argument':[
+                        'all',
+                        'tables',
+                    ]
+                },
             ],
             'prototype':{
                 'domain':{
@@ -271,6 +281,15 @@
                         'help':'Select preset',
                         'metavar':'PRESET',
                         'dest':'preset',
+                    },
+                },
+                'all':{
+                    'flag':['-a', '--all'],
+                    'parameter':{ 
+                        'action':'store_true',
+                        'default':False,
+                        'help':'All',
+                        'dest':'all',
                     },
                 },
                 'recursive':{
@@ -453,6 +472,14 @@
                     'parameter':{ 
                         'action':'version',
                         'version':'%(prog)s 0.5'
+                    },
+                },
+                'tables':{
+                    'flag':['tables'],
+                    'parameter':{ 
+                        'help':'List of tables',
+                        'nargs':'*',
+                        'metavar':'NAME',
                     },
                 },
             }

@@ -1404,6 +1404,11 @@
             'keyword':u'release_year',
             'type':'int',
         },
+        'all':{
+            'name':u'All',
+            'keyword':u'all',
+            'type':'bool',
+        },
         'recursive':{
             'name':u'Recursive',
             'keyword':u'recursive',
@@ -1524,6 +1529,12 @@
             'plural':'dict',
             'namespace':'ns.search.query',
             'plural format':'eval',
+        },
+        'tables':{
+            'name':u'Tables',
+            'keyword':u'tables',
+            'type':'unicode',
+            'plural':'list',
         },
         'database':{
             'name':u'Database',

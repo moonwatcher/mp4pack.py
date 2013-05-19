@@ -35,6 +35,7 @@ class Environment(object):
             'repository':{},
             'interface':{},
             'subtitle filter':{},
+            'table':{},
         }
         self._resolver = None
         self._caption_filter = None
@@ -141,6 +142,12 @@ class Environment(object):
     @property
     def subtitle_filter(self):
         return self.state['subtitle filter']
+    
+    
+    
+    @property
+    def table(self):
+        return self.state['table']
     
     
     
@@ -276,6 +283,12 @@ class Environment(object):
                     if check(e):
                         e['name'] = k
                         self.service[k] = e
+                        
+            if 'table' in node:
+                for k,e in node['table'].iteritems():
+                    if check(e):
+                        e['name'] = k
+                        self.table[k] = e
                         
             if 'expression' in node:
                 for e in node['expression']:
@@ -718,6 +731,31 @@ class Repository(object):
     
 
 
+
+    def rebuild_index(self, collection, definition):
+        if collection is not None and collection in self.env.table:
+            if 'name' in definition:
+                table = self.database[collection]
+                if 'unique' not in definition: definition['unique'] = False
+                if 'dropDups' not in definition: definition['dropDups'] = False
+                
+                existing = table.index_information()
+                if definition['name'] in existing:
+                    self.log.info(u'Dropping index %s on collection %s', definition['name'], collection)
+                    table.drop_index(definition['name'])
+    
+                self.log.info(u'Rebuilding index %s on collection %s', definition['name'], collection)
+                table.create_index(
+                    definition['key'],
+                    name=definition['name'],
+                    unique=definition['unique'],
+                    dropDups=definition['dropDups']
+                )
+            else:
+                self.log.error(u'Refusing to handle unnamed index for collection %s', collection)
+        else:
+            self.log.error(u'Unknown collection %s', collection)
+    
 
 
 class CommandLineParser(object):

@@ -16,7 +16,7 @@ def main():
 
     # Initialize logging and set the initial log level
     logging.basicConfig()
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     
     # Initialize an environment
     env = Environment()
@@ -38,7 +38,6 @@ def main():
     # execute the next job
     job = queue.next()
     env.log.debug(job.document)
-
 
 if __name__ == '__main__':
     main()

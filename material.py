@@ -11,7 +11,7 @@ from model.menu import Chapter, Menu
 from model.caption import Caption
 from crawler import Crawler
 
-class AssetCache(object):
+class MaterialCache(object):
     def __init__(self, env):
         self.log = logging.getLogger('cache')
         self.env = env
