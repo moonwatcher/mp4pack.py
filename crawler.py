@@ -187,7 +187,7 @@ class Crawler(object):
                             slide.begin.timecode = line[start]
                             slide.end.timecode = line[stop]
                             subtitle_text = u','.join(line[text:])
-                            subtitle_text = self.env.expression['ass event command'].sub(u'', subtitle_text)
+                            subtitle_text = self.env.expression['ass event command'].sub(self.env.contant['empty string'], subtitle_text)
                             subtitle_text = subtitle_text.replace(u'\n', ur'\N')
                             subtitle_text = self.env.expression['ass condense line breaks'].sub(ur'\N', subtitle_text)
                             subtitle_text = subtitle_text.split(ur'\N')
