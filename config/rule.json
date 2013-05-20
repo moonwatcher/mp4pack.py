@@ -241,7 +241,7 @@
                     ]
                 }
             ]
-        },        
+        },
         "rule.medium.home.uri":{
             "name":"Home URI",
             "provide":["home uri"],
@@ -481,6 +481,83 @@
                     "equal":{"media kind":1 },
                     "apply":[
                         { "property":"home uri", "format":"/h/music/track/itunes/{itunes music album id}/{disc number}/{track number}" }
+                    ]
+                }
+            ]
+        },
+        "rule.medium.knowledge.uri":{
+            "name":"Knowledge URI",
+            "provide":["knowledge uri"],
+            "branch":[
+                {
+                    "requires":[
+                        "media kind",
+                        "tv episode id",
+                        "language"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/tv/episode/{tv episode id}" }
+                    ]
+                }
+                {
+                    "requires":[
+                        "media kind",
+                        "tv season id",
+                        "track number",
+                        "language"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/tv/episode/{tv season id}/{track number}" }
+                    ]
+                }
+                {
+                    "requires":[
+                        "media kind",
+                        "tv show id",
+                        "disc number",
+                        "track number",
+                        "language"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}" }
+                    ]
+                }
+                {
+                    "requires":[
+                        "media kind",
+                        "tv episode id",
+                        "language"
+                    ],
+                    "equal":{ "media kind":9 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/movie/{movie id}" }
+                    ]
+                }
+                {
+                    "requires":[
+                        "media kind",
+                        "track id",
+                        "language"
+                    ],
+                    "equal":{ "media kind":1 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/music/track/{track id}" }
+                    ]
+                }
+                {
+                    "requires":[
+                        "media kind",
+                        "music album id",
+                        "disc number",
+                        "track number",
+                        "language"
+                    ],
+                    "equal":{ "media kind":1 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/music/track/{music album id}/{disc number}/{track number}" }
                     ]
                 }
             ]

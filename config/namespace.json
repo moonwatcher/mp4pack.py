@@ -369,6 +369,7 @@
                 "rule.medium.resource.uri",
                 "rule.medium.asset.uri",
                 "rule.medium.home.uri",
+                "rule.medium.knowledge.uri",
                 "rule.medium.home.umid",
                 "rule.knowledge.simple.name.company",
                 "rule.knowledge.simple.name.person",
@@ -431,6 +432,7 @@
             "rule":[
                 "rule.medium.asset.uri",
                 "rule.medium.home.uri",
+                "rule.medium.knowledge.uri",
                 "rule.medium.home.umid"
             ]
         },
@@ -1955,7 +1957,6 @@
                 "tvdb image id":null
             }
         },
-
         "ns.knowledge.movie":{
             "synonym":["keyword","tmdb", "rottentomatoes", "itunes"],
             "element":{
@@ -2586,7 +2587,6 @@
                 "native language name":null
             }
         },
-
         "ns.knowledge.cast":{
             "synonym":["keyword", "tmdb", "tvdb"],
             "element":{
@@ -2787,7 +2787,6 @@
                 }
             }
         },
-
         "ns.search.query":{
             "synonym":["keyword","tmdb", "rottentomatoes", "itunes"],
             "element":{
@@ -2880,7 +2879,6 @@
                 }
             }
         },
-
         "ns.knowledge.job":{
             "synonym":["keyword"],
             "element":{
