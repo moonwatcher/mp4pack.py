@@ -22,7 +22,7 @@
         },
         {
             "name":"ass condense line breaks",
-            "definition":"(\\N)+",
+            "definition":"(\\\\N)+",
             "flags":32
         },
         {
