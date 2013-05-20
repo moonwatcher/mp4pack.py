@@ -1,0 +1,2936 @@
+{
+    "service":{
+        "home":{
+            "match":"^/h/.*$",
+            "key generator":{"space":"knowledge", "element":"home id" },
+            "branch":{
+                "service.home":{
+                    "match":[
+                        {
+                            "filter":"^/h/(?P<home_id>[0-9]+)$"
+                        }
+                    ],
+                    "collection":"home"
+                },
+                "service.home.movie":{
+                    "match":[
+                        {
+                            "filter":"^/h/movie/(?P<movie_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/movie/~/(?P<movie_handle>[^/]+)$"
+                        },
+                        {
+                            "filter":"^/h/movie/itunes/(?P<itunes_movie_id>[0-9]+)$",
+                            "depend":"/c/itunes/movie/{itunes movie id}"
+                        },
+                        {
+                            "filter":"^/h/movie/tmdb/(?P<tmdb_movie_id>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/movie/{tmdb movie id}"
+                        },
+                        {
+                            "filter":"^/h/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/movie/imdb/{imdb movie id}"
+                        },
+                        {
+                            "filter":"^/h/movie/rottentomatoes/(?P<rottentomatoes_movie_id>[0-9]+)$",
+                            "depend":"/c/rottentomatoes/movie/{rottentomatoes movie id}"
+                        },
+                        {
+                            "filter":"^/h/movie/search$",
+                            "query parameter":["movie title", "simple movie title", "release date", "release year"]
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"movie home by id",
+                            "format":"/h/movie/{movie id}"
+                        },
+                        {
+                            "name":"movie home by handle",
+                            "format":"/h/movie/~/{movie handle}"
+                        },
+                        {
+                            "name":"movie home by tmdb id",
+                            "format":"/h/movie/tmdb/{tmdb movie id}"
+                        },
+                        {
+                            "name":"movie home by imdb id",
+                            "format":"/h/movie/imdb/{imdb movie id}"
+                        },
+                        {
+                            "name":"movie home by itunes id",
+                            "format":"/h/movie/itunes/{itunes movie id}"
+                        },
+                        {
+                            "name":"movie home by rottentomatoes movie id",
+                            "format":"/h/movie/rottentomatoes/{rottentomatoes movie id}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"movie id",
+                    "index":[
+                        "movie id",
+                        "tmdb movie id",
+                        "imdb movie id",
+                        "itunes movie id",
+                        "rottentomatoes movie id",
+                        "movie handle",
+                        "movie title",
+                        "simple movie title",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.home.tv.show":{
+                    "match":[
+                        {
+                            "filter":"^/h/tv/show/(?P<tv_show_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/tv/show/~/(?P<tv_show_handle>[^/]+)$"
+                        },
+                        {
+                            "filter":"^/h/tv/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                        },
+                        {
+                            "filter":"^/h/tv/show/itunes/(?P<itunes_tv_show_id>[0-9]+)$",
+                            "depend":"/c/itunes/tv/show/{itunes tv show id}"
+                        },
+                        {
+                            "filter":"^/h/tv/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"show home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"show home by tv show id",
+                            "format":"/h/tv/show/{tv show id}"
+                        },
+                        {
+                            "name":"show home by tv show handle",
+                            "format":"/h/tv/show/~/{tv show handle}"
+                        },
+                        {
+                            "name":"show home by tvdb tv show id",
+                            "format":"/h/tv/show/tvdb/{tvdb tv show id}"
+                        },
+                        {
+                            "name":"show home by itunes tv show id",
+                            "format":"/h/tv/show/itunes/{itunes tv show id}"
+                        },
+                        {
+                            "name":"show home by imdb tv show id",
+                            "format":"/h/tv/show/imdb/{imdb tv show id}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"tv show id",
+                    "index":[
+                        "tv show id",
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
+                        "tv show handle",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.home.tv.season":{
+                    "match":[
+                        {
+                            "filter":"^/h/tv/season/(?P<tv_season_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}"
+                        },
+                        {
+                            "filter":"^/h/tv/season/tvdb/(?P<tvdb_tv_season_id>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/season/{tvdb tv season id}"
+                        },
+                        {
+                            "filter":"^/h/tv/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}"
+                        },
+                        {
+                            "filter":"^/h/tv/season/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}"
+                        },
+                        {
+                            "filter":"^/h/tv/season/itunes/(?P<itunes_tv_season_id>[0-9]+)$",
+                            "depend":"/c/itunes/tv/season/{itunes tv season id}"
+                        },
+                        {
+                            "filter":"^/h/tv/season/itunes/(?P<itunes_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "depend":"/c/itunes/tv/season/{itunes tv show id}/{disc number}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/show/{tv show id}",
+                        "/h/tv/show/tvdb/{tvdb tv show id}",
+                        "/h/tv/show/itunes/{itunes tv show id}",
+                        "/h/tv/show/imdb/{imdb tv show id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"season home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"season home by tv season id",
+                            "format":"/h/tv/season/{tv season id}"
+                        },
+                        {
+                            "name":"season home by tv show id",
+                            "format":"/h/tv/season/{tv show id}/{disc number}"
+                        },
+                        {
+                            "name":"season home by tvdb tv season id",
+                            "format":"/h/tv/season/tvdb/{tvdb tv season id}"
+                        },
+                        {
+                            "name":"season home by tvdb tv show id",
+                            "format":"/h/tv/season/tvdb/{tvdb tv show id}/{disc number}"
+                        },
+                        {
+                            "name":"season home by itunes tv season id",
+                            "format":"/h/tv/season/itunes/{itunes tv season id}"
+                        },
+                        {
+                            "name":"season home by itunes tv show id",
+                            "format":"/h/tv/season/itunes/{itunes tv show id}/{disc number}"
+                        },
+                        {
+                            "name":"season home by imdb tv show id",
+                            "format":"/h/tv/season/imdb/{imdb tv show id}/{disc number}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"tv season id",
+                    "index":[
+                        "tv show id",
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
+                        "tv season id",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "tv show handle",
+                        "disc number",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.home.tv.episode":{
+                    "match":[
+                        {
+                            "filter":"^/h/tv/episode/(?P<tv_episode_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/~/(?P<tv_show_handle>[^/]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/tvdb/(?P<tvdb_tv_episode_id>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv episode id}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/tvdb/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv season id}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/itunes/(?P<itunes_tv_episode_id>[0-9]+)$",
+                            "depend":"/c/itunes/tv/episode/{itunes tv episode id}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/itunes/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/itunes/tv/episode/{itunes tv season id}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/itunes/(?P<itunes_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/itunes/tv/episode/{itunes tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/show/{tv show id}",
+                        "/h/tv/show/tvdb/{tvdb tv show id}",
+                        "/h/tv/show/itunes/{itunes tv show id}",
+                        "/h/tv/show/imdb/{imdb tv show id}",
+                        "/h/tv/season/{tv season id}",
+                        "/h/tv/season/{tv show id}/{disc number}",
+                        "/h/tv/season/tvdb/{tvdb tv show id}/{disc number}",
+                        "/h/tv/season/tvdb/{tvdb tv season id}",
+                        "/h/tv/season/itunes/{itunes tv show id}/{disc number}",
+                        "/h/tv/season/itunes/{itunes tv season id}",
+                        "/h/tv/season/imdb/{imdb tv show id}/{disc number}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"episode home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"episode home by tv episode id",
+                            "format":"/h/tv/episode/{tv episode id}"
+                        },
+                        {
+                            "name":"episode home by tv season id",
+                            "format":"/h/tv/episode/{tv season id}/{track number}"
+                        },
+                        {
+                            "name":"episode home by tv show id",
+                            "format":"/h/tv/episode/{tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"episode home by tv show handle",
+                            "format":"/h/tv/episode/~/{tv show handle}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"episode home by tvdb tv episode id",
+                            "format":"/h/tv/episode/tvdb/{tvdb tv episode id}"
+                        },
+                        {
+                            "name":"episode home by tvdb tv season id",
+                            "format":"/h/tv/episode/tvdb/{tvdb tv season id}/{track number}"
+                        },
+                        {
+                            "name":"episode home by tvdb tv show id",
+                            "format":"/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"episode home by itunes tv episode id",
+                            "format":"/h/tv/episode/itunes/{itunes tv episode id}"
+                        },
+                        {
+                            "name":"episode home by itunes tv season id",
+                            "format":"/h/tv/episode/itunes/{itunes tv season id}/{track number}"
+                        },
+                        {
+                            "name":"episode home by itunes tv show id",
+                            "format":"/h/tv/episode/itunes/{itunes tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"episode home by imdb tv episode id",
+                            "format":"/h/tv/episode/imdb/{imdb tv episode id}"
+                        },
+                        {
+                            "name":"episode home by imdb tv show id",
+                            "format":"/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"tv episode id",
+                    "index":[
+                        "tv show id",
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
+                        "tv season id",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "tv episode id",
+                        "tvdb tv episode id",
+                        "imdb tv episode id",
+                        "itunes tv episode id",
+                        "tv show handle",
+                        "disc number",
+                        "track number",
+                        "tv show name",
+                        "simple tv show name",
+                        "tv episode name",
+                        "simple tv episode name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.home.music.album":{
+                    "match":[
+                        {
+                            "filter":"^/h/music/album/(?P<music_album_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/music/album/itunes/(?P<itunes_music_album_id>[0-9]+)$",
+                            "depend":"/c/itunes/music/album/{itunes music album id}"
+                        },
+                        {
+                            "filter":"^/h/music/album/~/(?P<album_handle>[^/]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"music album home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"music album home by music album id",
+                            "format":"/h/music/album/{music album id}"
+                        },
+                        {
+                            "name":"music album home by itunes music album id",
+                            "format":"/h/music/album/itunes/{itunes music album id}"
+                        },
+                        {
+                            "name":"music album home by album handle",
+                            "format":"/h/music/album/~/{album handle}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"music album id",
+                    "index":[
+                        "music album id",
+                        "itunes music album id",
+                        "album handle",
+                        "music album name",
+                        "simple music album name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.home.music.track":{
+                    "match":[
+                        {
+                            "filter":"^/h/music/track/(?P<track_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/music/track/itunes/(?P<itunes_music_track_id>[0-9]+)$",
+                            "depend":"/c/itunes/music/track/{itunes music track id}"
+                        },
+                        {
+                            "filter":"^/h/music/track/itunes/(?P<itunes_music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/music/track/~/(?P<album_handle>[^/]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        }
+                    ],
+                    "collect":[
+                        "/h/music/album/{music album id}",
+                        "/h/music/album/itunes/{itunes music album id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"music track home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"music track home by track id",
+                            "format":"/h/music/track/{track id}"
+                        },
+                        {
+                            "name":"music track home by music album id",
+                            "format":"/h/music/track/{music album id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"music track home by itunes music track id",
+                            "format":"/h/music/track/itunes/{itunes music track id}"
+                        },
+                        {
+                            "name":"music track home by itunes music album id",
+                            "format":"/h/music/track/itunes/{itunes music album id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"music track home by album handle",
+                            "format":"/h/music/track/~/{album handle}/{disc number}/{track number}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"track id",
+                    "index":[
+                        "music album id",
+                        "itunes music album id",
+                        "track id",
+                        "itunes music track id",
+                        "album handle",
+                        "disc number",
+                        "track number",
+                        "music album name",
+                        "simple music album name",
+                        "music track name",
+                        "simple music track name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.home.person":{
+                    "match":[
+                        {
+                            "filter":"^/h/person/(?P<person_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/person/tmdb/(?P<tmdb_person_id>[0-9]+)$",
+                            "depend":"/c/tmdb/person/{tmdb person id}"
+                        },
+                        {
+                            "filter":"^/h/person/itunes/(?P<itunes_person_id>[0-9]+)$",
+                            "depend":"/c/itunes/person/{itunes person id}"
+                        },
+                        {
+                            "filter":"^/h/person/imdb/(?P<imdb_person_id>nm[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"person home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"person home by person id",
+                            "format":"/h/person/{person id}"
+                        },
+                        {
+                            "name":"person home by tmdb person id",
+                            "format":"/h/person/tmdb/{tmdb person id}"
+                        },
+                        {
+                            "name":"person home by itunes person id",
+                            "format":"/h/person/itunes/{itunes person id}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"person id",
+                    "index":[
+                        "person id",
+                        "tmdb person id",
+                        "itunes person id",
+                        "person name",
+                        "simple person name"
+                    ]
+                },
+                "service.home.company":{
+                    "match":[
+                        {
+                            "filter":"^/h/company/(?P<company_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/company/tmdb/(?P<tmdb_company_id>[0-9]+)$",
+                            "depend":"/c/tmdb/company/{tmdb company id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"company home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"company home by company id",
+                            "format":"/h/company/{company id}"
+                        },
+                        {
+                            "name":"company home by tmdb company id",
+                            "format":"/h/company/tmdb/{tmdb company id}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"company id",
+                    "index":[
+                        "company id",
+                        "tmdb company id",
+                        "company name",
+                        "simple company name"                        
+                    ]
+                },
+                "service.home.genre":{
+                    "match":[
+                        {
+                            "filter":"^/h/genre/(?P<genre_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/h/genre/tmdb/(?P<tmdb_genre_id>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/genre/{tmdb genre id}"
+                        },
+                        {
+                            "filter":"^/h/genre/itunes/(?P<itunes_genre_id>[0-9]+)$",
+                            "depend":"/c/itunes/genre/{itunes genre id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"genre home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"genre home by genre id",
+                            "format":"/h/genre/{genre id}"
+                        },
+                        {
+                            "name":"genre home by tmdb genre id",
+                            "format":"/h/genre/tmdb/{tmdb genre id}"
+                        },
+                        {
+                            "name":"genre home by itunes genre id",
+                            "format":"/h/genre/itunes/{itunes genre id}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"genre id",
+                    "index":[
+                        "genre id",
+                        "tmdb genre id",
+                        "itunes genre id",
+                        "genre name",
+                        "simple genre name"
+                    ]
+                },
+                "service.home.job":{
+                    "match":[
+                        {
+                            "filter":"^/h/job/(?P<job_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"job home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"job home by job id",
+                            "format":"/h/job/{job id}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"job id"
+                },
+                "service.home.department":{
+                    "match":[
+                        {
+                            "filter":"^/h/department/(?P<department_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"department home by home id",
+                            "format":"/h/{home id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"department home by department id",
+                            "format":"/h/department/{department id}"
+                        }
+                    ],
+                    "collection":"home",
+                    "key":"department id"
+                }
+            }
+        },
+        "knowledge":{
+            "match":"^/k/.*$",
+            "branch":{
+                "service.document.knowledge.configuration":{
+                    "match":[
+                        {
+                            "filter":"^/k/configuration$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"knowledge configuration",
+                            "format":"/k/configuration"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_configuration"
+                },
+                "service.document.knowledge.playlist":{
+                    "match":[
+                        {
+                            "filter":"^/k/playlist/(?P<playlist_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"playlist knowledge",
+                            "format":"/k/{language}/playlist/{playlist id}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_playlist",
+                    "namespace":"ns.knowledge.playlist"
+                },
+                "service.document.knowledge.movie":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/rottentomatoes/movie/{rottentomatoes movie id}"
+                        },
+                        {
+                            "uri":"/c/{language}/tmdb/movie/{tmdb movie id}"
+                        },
+                        {
+                            "uri":"/c/itunes/movie/{itunes movie id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie knowledge by id",
+                            "format":"/k/{language}/movie/{movie id}",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },
+                "service.document.knowledge.movie.cast":{
+                    "match":[
+                        {
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/cast$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/cast"
+                        }
+                    ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie cast knowledge",
+                            "format":"/k/movie/{movie id}/cast",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie_cast",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },
+                "service.document.knowledge.movie.image":{
+                    "match":[
+                        {
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/image$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/image"
+                        }
+                    ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie image knowledge",
+                            "format":"/k/movie/{movie id}/image",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie_image",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },
+                "service.document.knowledge.movie.clip":{
+                    "match":[
+                        {
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/clip$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/clip"
+                        }
+                    ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie clip knowledge",
+                            "format":"/k/movie/{movie id}/clip",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie_clip",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },                
+                "service.document.knowledge.movie.keyword":{
+                    "match":[
+                        {
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/keyword$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/keyword"
+                        }
+                    ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie keyword knowledge",
+                            "format":"/k/movie/{movie id}/keyword",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie_keyword",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },
+                "service.document.knowledge.movie.rating":{
+                    "match":[
+                        {
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/rating$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/rating"
+                        }
+                    ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie rating knowledge",
+                            "format":"/k/movie/{movie id}/rating",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie_rating",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },
+                "service.document.knowledge.movie.translation":{
+                    "match":[
+                        {
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/translation$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/translation"
+                        }
+                    ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie translation knowledge",
+                            "format":"/k/movie/{movie id}/translation",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie_translation",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },
+                "service.document.knowledge.movie.alternative":{
+                    "match":[
+                        {
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/alternative$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/alternative"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"movie alternative knowledge",
+                            "format":"/k/movie/{movie id}/alternative",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_movie_alternative",
+                    "namespace":"ns.knowledge.movie.canonical",
+                    "index":[
+                        "movie id",
+                        "language",
+                        "tmdb movie id",
+                        "rottentomatoes movie id",
+                        "itunes movie id"
+                    ]
+                },
+                "service.document.knowledge.tv.show":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/show/(?P<tv_show_id>[0-9]+)$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                        },
+                        {
+                            "uri":"/c/itunes/tv/show/{itunes tv show id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/show/{tv show id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"show knowledge by tv show id",
+                            "format":"/k/{language}/tv/show/{tv show id}",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_show",
+                    "namespace":"ns.knowledge.tv.show.canonical",
+                    "index":[
+                        "tv show id",
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
+                        "language"
+                    ]
+                },
+                "service.document.knowledge.tv.show.cast":{
+                    "match":[
+                        {
+                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/cast$"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/show/{tv show id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tv show cast",
+                            "format":"/k/tv/show/{tv show id}/cast",
+                            "canonical":true
+                       }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_show_cast",
+                    "namespace":"ns.knowledge.tv.show.canonical",
+                    "index":["tv show id" ]
+                },
+                "service.document.knowledge.tv.show.image":{
+                    "match":[
+                        {
+                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/image$"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/show/{tv show id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tv show image",
+                            "format":"/k/tv/show/{tv show id}/image",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_show_image",
+                    "namespace":"ns.knowledge.tv.show.canonical",
+                    "index":["tv show id" ]
+                },
+                "service.document.knowledge.tv.season":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_season_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/{language}/tvdb/tv/season/{tvdb tv season id}"
+                        },
+                        {
+                            "uri":"/c/itunes/tv/season/{itunes tv season id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/season/{tv season id}",
+                        "/h/tv/season/{tv show id}/{disc number}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"season knowledge by tv season id",
+                            "format":"/k/{language}/tv/season/{tv season id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"season knowledge by tv show id and position",
+                            "format":"/k/{language}/tv/season/{tv show id}/{disc number}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_season",
+                    "namespace":"ns.knowledge.tv.season.canonical",
+                    "index":[
+                        "tv show id",
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
+                        "tv season id",
+                        "disc number",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "language"
+                    ]
+                },
+                "service.document.knowledge.tv.season.cast":{
+                    "match":[
+                        {
+                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/cast$"
+                        },
+                        {
+                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/cast$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tv show season cast",
+                            "format":"/k/tv/season/{tv season id}/cast",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tv show season cast",
+                            "format":"/k/tv/season/{tv show id}/{disc number}/cast"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_season_credit",
+                    "namespace":"ns.knowledge.tv.season.canonical",
+                    "index":[
+                        "tv show id",
+                        "tv season id",
+                        "disc number"
+                    ]
+                },
+                "service.document.knowledge.tv.season.image":{
+                    "match":[
+                        {
+                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/image$"
+                        },
+                        {
+                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/image$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tv show season image",
+                            "format":"/k/tv/season/{tv season id}/image",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tv show season image",
+                            "format":"/k/tv/season/{tv show id}/{disc number}/image"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_season_image",
+                    "namespace":"ns.knowledge.tv.season.canonical",
+                    "index":[
+                        "tv show id",
+                        "tv season id",
+                        "disc number"
+                    ]
+                },
+                "service.document.knowledge.tv.episode":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_episode_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/{language}/tvdb/tv/episode/{tvdb tv episode id}"
+                        },
+                        {
+                            "uri":"/c/itunes/tv/episode/{itunes tv episode id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/episode/{tv episode id}",
+                        "/h/tv/episode/{tv season id}/{track number}",
+                        "/h/tv/episode/{tv show id}/{disc number}/{track number}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"episode knowledge by tv episode id",
+                            "format":"/k/{language}/tv/episode/{tv episode id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"episode knowledge by tv season id",
+                            "format":"/k/{language}/tv/episode/{tv season id}/{track number}"
+                        },
+                        {
+                            "name":"episode knowledge by tv show id",
+                            "format":"/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_episode",
+                    "namespace":"ns.knowledge.tv.episode.canonical",
+                    "index":[
+                        "tv show id",
+                        "tv season id",
+                        "tv episode id",
+                        "tvdb tv show id",
+                        "itunes tv show id",
+                        "imdb tv show id",
+                        "disc number",
+                        "track number",
+                        "imdb tv episode id",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "tvdb tv episode id",
+                        "itunes tv episode id",
+                        "language"
+                    ]
+                },
+                "service.document.knowledge.tv.episode.cast":{
+                    "match":[
+                        {
+                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/cast$"
+                        },
+                        {
+                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/cast$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tv show episode cast",
+                            "format":"/k/tv/episode/{tv episode id}/cast",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tv show episode cast",
+                            "format":"/k/tv/episode/{tv show id}/{disc number}/{track number}/cast"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_episode_cast",
+                    "namespace":"ns.knowledge.tv.episode.canonical",
+                    "index":[
+                        "tv show id",
+                        "tv season id",
+                        "tv episode id",
+                        "disc number",
+                        "track number",
+                        "language"
+                    ]
+                },
+                "service.document.knowledge.tv.episode.image":{
+                    "match":[
+                        {
+                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/image$"
+                        },
+                        {
+                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/image$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tv show episode image",
+                            "format":"/k/tv/episode/{tv episode id}/image",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tv show episode image",
+                            "format":"/k/tv/episode/{tv show id}/{disc number}/{track number}/image"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_tv_episode_image",
+                    "namespace":"ns.knowledge.tv.episode.canonical",
+                    "index":[
+                        "tv show id",
+                        "tv season id",
+                        "tv episode id",
+                        "disc number",
+                        "track number",
+                        "language"
+                    ]
+                },
+                "service.document.knowledge.music.album":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/music/album/(?P<music_album_id>[0-9]+)$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/itunes/music/album/{itunes music album id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/music/album/{music album id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"music album",
+                            "format":"/k/{language}/music/album/{music album id}",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_music_album",
+                    "namespace":"ns.knowledge.music.album.canonical",
+                    "index":[
+                        "music album id", 
+                        "itunes music album id",
+                        "language"
+                    ]
+                },
+                "service.document.knowledge.music.album.image":{
+                    "match":[
+                        {
+                            "filter":"^/k/music/album/(?P<music_album_id>[0-9]+)/image$"
+                        }
+                    ],
+                    "collect":[
+                        "/h/music/album/{music album id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"music album image",
+                            "format":"/k/music/album/{music album id}/image",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_music_album_image",
+                    "namespace":"ns.knowledge.music.album.canonical",
+                    "index":[
+                        "music album id" 
+                    ]
+                },
+                "service.document.knowledge.music.track":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/music/track/(?P<track_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/itunes/music/track/{itunes music track id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/music/track/{track id}",
+                        "/h/music/track/{music album id}/{disc number}/{track number}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"music track by track id",
+                            "format":"/k/{language}/music/track/{track id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"music track by album id",
+                            "format":"/k/{language}/music/track/{music album id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_music_track",
+                    "namespace":"ns.knowledge.music.track.canonical",
+                    "index":[
+                        "music album id",
+                        "track id",
+                        "disc number",
+                        "track number",
+                        "itunes music album id",
+                        "itunes music track id",
+                        "language"
+                    ]
+                },
+                "service.document.knowledge.person":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"person by knowledge id",
+                            "format":"/k/{language}/person/{person id}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_person",
+                    "namespace":"ns.knowledge.person"
+                },
+                "service.document.knowledge.person.credit":{
+                    "match":[
+                        {
+                            "filter":"^/k/person/(?P<person_id>[0-9]+)/credit$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"person credit",
+                            "format":"/k/person/{person id}/credit"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_person_credit",
+                    "namespace":"ns.knowledge.person"
+                },
+                "service.document.knowledge.person.image":{
+                    "match":[
+                        {
+                            "filter":"^/k/person/(?P<person_id>[0-9]+)/image$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"person image",
+                            "format":"/k/person/{person id}/image"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_person_image",
+                    "namespace":"ns.knowledge.person"
+                },
+                "service.document.knowledge.company":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/company/(?P<company_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"company by knowledge id",
+                            "format":"/k/{language}/company/{company id}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_company",
+                    "namespace":"ns.knowledge.company"
+                },
+                "service.document.knowledge.company.credit":{
+                    "match":[
+                        {
+                            "filter":"^/k/company/(?P<company_id>[0-9]+)/credit$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"company credit",
+                            "format":"/k/company/{company id}/credit"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_company_credit",
+                    "namespace":"ns.knowledge.company"
+                },
+                "service.document.knowledge.company.image":{
+                    "match":[
+                        {
+                            "filter":"^/k/company/(?P<company_id>[0-9]+)/image$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"company image",
+                            "format":"/k/company/{company id}/image"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_company_image",
+                    "namespace":"ns.knowledge.company"
+                },
+                "service.document.knowledge.genre":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/genre/(?P<genre_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"genre by genre id",
+                            "format":"/k/{language}/genre/{genre id}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_genre",
+                    "namespace":"ns.knowledge.genre"
+                },
+                "service.document.knowledge.job":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/job/(?P<job_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"job",
+                            "format":"/k/{language}/job/{job id}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_job",
+                    "namespace":"ns.knowledge.job"
+                },
+                "service.document.knowledge.department":{
+                    "match":[
+                        {
+                            "filter":"^/k/(?P<language>[a-z]{2})/department/(?P<department_id>[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"department",
+                            "format":"/k/{language}/department/{department id}"
+                        }
+                    ],
+                    "type":"json",
+                    "collection":"knowledge_department",
+                    "namespace":"ns.knowledge.department"
+                }
+            }
+        },
+        "tmdb":{
+            "api key":"a8b9f96dde091408a03cb4c78477bd14",
+            "remote base":"http://api.themoviedb.org/3",
+            "match":"^/c(?:/[a-z]{2})?/tmdb/.*$",
+            "branch":{
+                "service.search.tmdb.movie":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/movie/search$",
+                            "query parameter":["api key", "movie title", "simple movie title", "release year", "language", "page"],
+                            "remote":"search/movie"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "namespace":"ns.knowledge.movie",
+                            "format":"/c/{language}/tmdb/movie/{tmdb movie id}"
+                        }
+                    ],
+                    "query type":"search",
+                    "collection":"tmdb_movie",
+                    "index":[
+                        "tmdb movie id",
+                        "imdb movie id",
+                        "movie title",
+                        "simple movie title",
+                        "language",
+                        "release date",
+                        "release year"
+                    ]                    
+                },
+                "service.search.tmdb.person":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/person/search$",
+                            "query parameter":["api key", "person name", "simple person name", "page"],
+                            "remote":"search/person"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "namespace":"ns.knowledge.person",
+                            "format":"/c/tmdb/person/{tmdb person id}"
+                        }
+                    ],
+                    "query type":"search",
+                    "collection":"tmdb_person",
+                    "index":[
+                        "tmdb person id",
+                        "person name",
+                        "simple person name"
+                    ]
+                },
+                "service.search.tmdb.company":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/company/search$",
+                            "query parameter":["api key", "company name", "simple company name", "page"],
+                            "remote":"search/company"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "namespace":"ns.knowledge.company",
+                            "format":"/c/tmdb/company/{tmdb company id}"
+                        }
+                    ],
+                    "query type":"search",
+                    "collection":"tmdb_company",
+                    "index":[
+                        "tmdb company id",
+                        "company name",
+                        "simple company name"
+                    ]
+                },
+                "service.document.tmdb.configuration":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/configuration$",
+                            "query parameter":["api key"],
+                            "remote":"configuration"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb configuration",
+                            "format":"/c/tmdb/configuration",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_configuration"
+                },
+                "service.document.tmdb.genre":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/genre/(?P<tmdb_genre_id>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"genre/{tmdb genre id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb genre by tmdb id",
+                            "format":"/c/{language}/tmdb/genre/{tmdb genre id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_genre",
+                    "namespace":"ns.knowledge.genre",
+                    "index":[
+                        "tmdb genre id",
+                        "genre name",
+                        "simple genre name",
+                        "language"
+                    ]
+                },
+                "service.document.tmdb.movie":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"movie/{tmdb movie id}"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"movie/{imdb movie id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie by tmdb id",
+                            "format":"/c/{language}/tmdb/movie/{tmdb movie id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tmdb movie by imdb id",
+                            "format":"/c/{language}/tmdb/movie/imdb/{imdb movie id}"
+                        }
+                    ],
+                    "collection":"tmdb_movie",
+                    "namespace":"ns.knowledge.movie",
+                    "index":[
+                        "tmdb movie id",
+                        "imdb movie id",
+                        "movie title",
+                        "simple movie title",
+                        "language",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.tmdb.movie.cast":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast$",
+                            "query parameter":["api key"],
+                            "remote":"movie/{tmdb movie id}/casts"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie cast by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/cast",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_movie_cast",
+                    "namespace":"ns.knowledge.movie",
+                    "index":["tmdb movie id"]
+                },
+                "service.document.tmdb.movie.image":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/image$",
+                            "query parameter":["api key"],
+                            "remote":"movie/{tmdb movie id}/images"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie image by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/image",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_movie_image",
+                    "namespace":"ns.knowledge.movie",
+                    "index":["tmdb movie id"]
+                },
+                "service.document.tmdb.movie.keyword":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/keyword$",
+                            "query parameter":["api key"],
+                            "remote":"movie/{tmdb movie id}/keywords"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie keyword by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/keyword",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_movie_keyword",
+                    "namespace":"ns.knowledge.movie",
+                    "index":["tmdb movie id"]
+                },
+                "service.document.tmdb.movie.rating":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/rating$",
+                            "query parameter":["api key"],
+                            "remote":"movie/{tmdb movie id}/releases"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie release by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/rating",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_movie_rating",
+                    "namespace":"ns.knowledge.movie",
+                    "index":["tmdb movie id"]
+                },
+                "service.document.tmdb.movie.clip":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/clip$",
+                            "query parameter":["api key"],
+                            "remote":"movie/{tmdb movie id}/trailers"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie clip by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/clip",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_movie_clip",
+                    "namespace":"ns.knowledge.movie",
+                    "index":["tmdb movie id"]
+                },
+                "service.document.tmdb.movie.translation":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/translation$",
+                            "query parameter":["api key"],
+                            "remote":"movie/{tmdb movie id}/translations"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie translation by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/translation",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_movie_translation",
+                    "namespace":"ns.knowledge.movie",
+                    "index":["tmdb movie id"]
+                },
+                "service.document.tmdb.movie.alternative":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/alternative$",
+                            "query parameter":["api key"],
+                            "remote":"movie/{tmdb movie id}/alternative_titles"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb movie alternative by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/alternative",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_movie_alternative",
+                    "namespace":"ns.knowledge.movie",
+                    "index":["tmdb movie id"]
+                },
+                "service.document.tmdb.collection":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/collection/(?P<tmdb_collection_id>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"collection/{tmdb collection id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb collection by tmdb id",
+                            "format":"/c/{language}/tmdb/collection/{tmdb collection id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_collection",
+                    "namespace":"ns.knowledge.collection",
+                    "index":["tmdb collection id", "language"]
+                },
+                "service.document.tmdb.person":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)$",
+                            "query parameter":["api key"],
+                            "remote":"person/{tmdb person id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb person by tmdb id",
+                            "format":"/c/tmdb/person/{tmdb person id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_person",
+                    "namespace":"ns.knowledge.person",
+                    "index":[
+                        "tmdb person id",
+                        "person name",
+                        "simple person name"
+                    ]
+                },
+                "service.document.tmdb.person.image":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/image$",
+                            "query parameter":["api key"],
+                            "remote":"person/{tmdb person id}/images"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb person image by tmdb id",
+                            "format":"/c/tmdb/person/{tmdb person id}/image",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_person_image",
+                    "namespace":"ns.knowledge.person",
+                    "index":["tmdb person id"]
+                },
+                "service.document.tmdb.person.credit":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/person/(?P<tmdb_person_id>[0-9]+)/credit$",
+                            "query parameter":["api key"],
+                            "remote":"person/{tmdb person id}/credits"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb person credit by tmdb id",
+                            "format":"/c/tmdb/person/{tmdb person id}/credit",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_person_credit",
+                    "namespace":"ns.knowledge.person",
+                    "index":["tmdb person id"]
+                },
+                "service.document.tmdb.company":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)$",
+                            "query parameter":["api key"],
+                            "remote":"company/{tmdb company id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb company by tmdb id",
+                            "format":"/c/tmdb/company/{tmdb company id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_company",
+                    "namespace":"ns.knowledge.company",
+                    "index":[
+                        "tmdb company id",
+                        "company name",
+                        "simple company name"
+                    ]
+                },
+                "service.document.tmdb.company.credit":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/company/(?P<tmdb_company_id>[0-9]+)/credit$",
+                            "query parameter":["api key"],
+                            "remote":"company/{tmdb company id}/movies"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb company credit by tmdb id",
+                            "format":"/c/tmdb/company/{tmdb company id}/credit",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_company_credit",
+                    "namespace":"ns.knowledge.company",
+                    "index":["tmdb company id"]
+                }
+            }
+        },
+        "tvdb":{
+            "api key":"7B3B400B0146EA83",
+            "remote base":"http://www.thetvdb.com/api",
+            "match":"^/c(?:/[a-z]{2})?/tvdb/.*$",
+            "branch":{
+                "service.search.tvdb.tv.show":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/show/search$",
+                            "query parameter":["tv show name", "language"],
+                            "remote":"GetSeries.php"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/show/search/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$",
+                            "query parameter":["imdb tv show id", "language"],
+                            "remote":"GetSeriesByRemoteID.php"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "tag":"Series",
+                            "namespace":"ns.knowledge.tv.show",
+                            "format":"/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                        }
+                    ],
+                    "collection":"tvdb_tv_show",
+                    "query type":"search",
+                    "type":"xml",
+                    "index":[
+                        "itunes tv show id",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.tvdb.tv.show":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)$",
+                            "remote":"{api key}/series/{tvdb tv show id}/{language}.xml"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb show by tvdb show id",
+                            "format":"/c/{language}/tvdb/tv/show/{tvdb tv show id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tvdb show by imdb show id",
+                            "format":"/c/{language}/tvdb/tv/show/imdb/{imdb tv show id}"
+                        }
+                    ],
+                    "collect":[
+                        "/c/{language}/tvdb/tv/show/search/imdb/{imdb tv show id}"
+                    ],
+                    "produce":[
+                        {
+                            "tag":"Series",
+                            "reference":"service.document.tvdb.tv.show",
+                            "coalesce":false
+                        }
+                    ],
+                    "index":[
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ],
+                    "collection":"tvdb_tv_show",
+                    "namespace":"ns.knowledge.tv.show",
+                    "type":"xml"
+                },
+                "service.document.tvdb.tv.show.cast":{
+                    "match":[
+                        {
+                            "filter":"^/c/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$",
+                            "remote":"{api key}/series/{tvdb tv show id}/actors.xml"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb show cast by tvdb show id",
+                            "format":"/c/tvdb/tv/show/{tvdb tv show id}/cast",
+                            "canonical":true
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "tag":"Actor",
+                            "reference":"service.document.tvdb.tv.show.cast",
+                            "coalesce":true
+                        }
+                    ],
+                    "index":["tvdb tv show id"],
+                    "collection":"tvdb_tv_show_cast",
+                    "namespace":"ns.knowledge.tv.show",
+                    "type":"xml"
+                },
+                "service.document.tvdb.tv.show.image":{
+                    "match":[
+                        {
+                            "filter":"^/c/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/image$",
+                            "remote":"{api key}/series/{tvdb tv show id}/banners.xml"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb show image by tvdb show id",
+                            "format":"/c/tvdb/tv/show/{tvdb tv show id}/image",
+                            "canonical":true
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "tag":"Banner",
+                            "reference":"service.document.tvdb.tv.show.image",
+                            "coalesce":true
+                        }
+                    ],
+                    "index":["tvdb tv show id"],
+                    "collection":"tvdb_tv_show_image",
+                    "namespace":"ns.knowledge.tv.show",
+                    "type":"xml"
+                },
+                "service.document.tvdb.tv.season":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/season/(?P<tvdb_tv_season_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/season/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$"
+                        }
+                    ],
+                    "collect":[
+                        "/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb season by tvdb season id",
+                            "format":"/c/{language}/tvdb/tv/season/{tvdb tv season id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tvdb season by tvdb show id",
+                            "format":"/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}"
+                        },
+                        {
+                            "name":"tvdb season by imdb show id",
+                            "format":"/c/{language}/tvdb/tv/season/imdb/{imdb tv show id}/{disc number}"
+                        }
+                    ],
+                    "index":[
+                        "tvdb tv show id",
+                        "tvdb tv season id",
+                        "imdb tv show id",
+                        "disc number",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ],
+                    "collection":"tvdb_tv_season",
+                    "namespace":"ns.knowledge.tv.season",
+                    "type":"xml"
+                },
+                "service.document.tvdb.tv.episode":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/(?P<tvdb_tv_episode_id>[0-9]+)$",
+                            "remote":"{api key}/episodes/{tvdb tv episode id}/{language}.xml"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "remote":"{api key}/series/{tvdb tv show id}/default/{disc number}/{track number}/{language}.xml"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        }
+                    ],
+                    "collect":[
+                        "/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb episode by tvdb episode id",
+                            "format":"/c/{language}/tvdb/tv/episode/{tvdb tv episode id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tvdb episode by tvdb season id",
+                            "format":"/c/{language}/tvdb/tv/episode/{tvdb tv season id}/{track number}"
+                        },
+                        {
+                            "name":"tvdb episode by tvdb show id",
+                            "format":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"tvdb episode by imdb episode id",
+                            "format":"/c/{language}/tvdb/tv/episode/imdb/{imdb tv episode id}"
+                        },
+                        {
+                            "name":"tvdb episode by imdb show id",
+                            "format":"/c/{language}/tvdb/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "tag":"Episode",
+                            "reference":"service.document.tvdb.tv.episode",
+                            "coalesce":false
+                        }
+                    ],
+                    "index":[
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "tvdb tv season id",
+                        "tvdb tv episode id",
+                        "imdb tv episode id",
+                        "disc number",
+                        "track number",
+                        "tv show name",
+                        "simple tv show name",
+                        "tv episode name",
+                        "simple tv episode name",
+                        "tv episode production code",
+                        "release date",
+                        "release year"
+                    ],
+                    "collection":"tvdb_tv_episode",
+                    "namespace":"ns.knowledge.tv.episode",
+                    "type":"xml"
+                },
+                "service.document.tvdb.tv.show.complete":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/complete$",
+                            "remote":"{api key}/series/{tvdb tv show id}/all/{language}.zip"
+                        }
+                    ],
+                    "collect":[
+                        "/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                    ],
+                    "produce":[
+                        {
+                            "tag":"Series",
+                            "reference":"service.document.tvdb.tv.show",
+                            "coalesce":false
+                        },
+                        {
+                            "tag":"Episode",
+                            "reference":"service.document.tvdb.tv.episode",
+                            "coalesce":false
+                        },
+                        {
+                            "tag":"Banner",
+                            "reference":"service.document.tvdb.tv.show.image",
+                            "coalesce":true
+                        },
+                        {
+                            "tag":"Actor",
+                            "reference":"service.document.tvdb.tv.show.cast",
+                            "coalesce":true
+                        }
+                    ],
+                    "index":[
+                        "tvdb tv show id",
+                        "imdb tv show id"
+                    ],
+                    "type":"zip"
+                },
+                "service.document.tvdb.update.daily":{
+                    "match":[
+                        {
+                            "filter":"^/c/tvdb/update/day$",
+                            "remote":"{api key}/updates/updates_day.zip"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb daily update",
+                            "format":"/c/tvdb/update/day",
+                            "canonical":true
+                        }
+                    ],
+                    "query type":"update",
+                    "type":"zip"
+                },
+                "service.document.tvdb.update.weekly":{
+                    "match":[
+                        {
+                            "filter":"^/c/tvdb/update/week$",
+                            "remote":"{api key}/updates/updates_week.zip"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb weekly update",
+                            "format":"/c/tvdb/update/week",
+                            "canonical":true
+                        }
+                    ],
+                    "query type":"update",
+                    "type":"zip"
+                },
+                "service.document.tvdb.update.monthly":{
+                    "match":[
+                        {
+                            "filter":"^/c/tvdb/update/month$",
+                            "remote":"{api key}/updates/updates_month.zip"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tvdb monthly update",
+                            "format":"/c/tvdb/update/month",
+                            "canonical":true
+                        }
+                    ],
+                    "query type":"update",
+                    "type":"zip"
+                }
+            }
+        },
+        "itunes":{
+            "remote base":"http://itunes.apple.com",
+            "match":"^/c(?:/[a-z]{2})?/itunes/.*$",
+            "branch":{
+                "service.search.itunes.person":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/person/search$",
+                            "query parameter":[
+                                "person name", "simple person name"
+                            ],
+                            "remote":"search?entity=movieArtist&attribute=artistTerm"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "condition":{"wrapperType":"artist", "artistType":"Movie Artist"},
+                            "namespace":"ns.knowledge.person",
+                            "format":"/c/itunes/person/{itunes person id}"
+                        },
+                        {
+                            "condition":{"wrapperType":"artist", "artistType":"Artist"},
+                            "namespace":"ns.knowledge.person",
+                            "format":"/c/itunes/person/{itunes person id}"
+                        }
+                    ],
+                    "collection":"itunes_person",
+                    "type":"json",
+                    "query type":"search",
+                    "index":[
+                        "itunes person id",
+                        "person name",
+                        "simple person name"
+                    ]
+                },
+                "service.search.itunes.movie":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/movie/search$",
+                            "query parameter":["movie title", "release year", "simple movie title" ],
+                            "remote":"search?entity=movie&attribute=movieTerm"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "condition":{"wrapperType":"track", "kind": "feature-movie"},
+                            "namespace":"ns.knowledge.movie",
+                            "format":"/c/itunes/movie/{itunes movie id}"
+                        }
+                    ],
+                    "collection":"itunes_movie",
+                    "type":"json",
+                    "query type":"search",
+                    "index":[
+                        "itunes movie id",
+                        "movie title",
+                        "simple movie title",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.search.itunes.tv.show":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/tv/show/search$",
+                            "query parameter":["tv show name", "release year", "release date", "simple tv show name" ],
+                            "remote":"search?entity=tvShow&attribute=showTerm"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "condition":{"wrapperType":"artist", "artistType":"TV Show"},
+                            "namespace":"ns.knowledge.tv.show",
+                            "format":"/c/itunes/tv/show/{itunes tv show id}"
+                        }
+                    ],
+                    "collection":"itunes_tv_show",
+                    "type":"json",
+                    "query type":"search",
+                    "index":[
+                        "itunes tv show id",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.search.itunes.music.album":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/music/album/search$",
+                            "query parameter":["music album name", "release year", "release date", "simple music album name" ],
+                            "remote":"search?entity=album&attribute=albumTerm"
+                        }
+                    ],
+                    "trigger":[
+                        {
+                            "condition":{"wrapperType":"collection", "collectionType":"Album"},
+                            "namespace":"ns.knowledge.music.album",
+                            "format":"/c/itunes/music/album/{itunes music album id}"
+                        }
+                    ],
+                    "collection":"itunes_music_album",
+                    "type":"json",
+                    "query type":"search",
+                    "index":[
+                        "itunes music album id",
+                        "music album name",
+                        "simple music album name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.itunes.genre":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/genre/(?P<itunes_genre_id>[0-9]+)$",
+                            "query parameter":["itunes genre id"],
+                            "remote":"WebObjects/MZStoreServices.woa/ws/genres"
+                        }
+                    ],
+                    "process":"parse_itunes_genres",
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.genre",
+                            "condition":{"kind": "genre"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes genre by itunes id",
+                            "format":"/c/itunes/genre/{itunes genre id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"itunes_genre",
+                    "namespace":"ns.knowledge.genre",
+                    "type":"json",
+                    "index":[
+                        "itunes genre id",
+                        "genre name",
+                        "simple genre name"
+                    ]
+                },
+                "service.document.itunes.person":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/person/(?P<itunes_person_id>[0-9]+)$",
+                            "query parameter":["itunes person id"],
+                            "remote":"lookup"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.person",
+                            "condition":{"wrapperType":"artist", "artistType":"Movie Artist"}
+                        },
+                        {
+                            "reference":"service.document.itunes.person",
+                            "condition":{"wrapperType":"artist", "artistType":"Artist"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes person by itunes id",
+                            "format":"/c/itunes/person/{itunes person id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"itunes_person",
+                    "namespace":"ns.knowledge.person",
+                    "type":"json",
+                    "index":[
+                        "itunes person id",
+                        "person name",
+                        "simple person name"
+                    ]
+                },
+                "service.document.itunes.movie":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/movie/(?P<itunes_movie_id>[0-9]+)$",
+                            "query parameter":["itunes movie id"],
+                            "remote":"lookup?entity=movie"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.movie",
+                            "condition":{"wrapperType":"track", "kind": "feature-movie"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes movie by itunes id",
+                            "format":"/c/itunes/movie/{itunes movie id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"itunes_movie",
+                    "namespace":"ns.knowledge.movie",
+                    "type":"json",
+                    "index":[
+                        "itunes movie id",
+                        "movie title",
+                        "simple movie title",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.itunes.tv.show":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/tv/show/(?P<itunes_tv_show_id>[0-9]+)$",
+                            "query parameter":["itunes tv show id"],
+                            "remote":"lookup?entity=tvShow"
+                        },
+                        {
+                            "filter":"^/c/itunes/tv/show/search$",
+                            "query parameter":["term"],
+                            "remote":"search?entity=tvShow&attribute=showTerm"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.tv.show",
+                            "condition":{"wrapperType":"artist", "artistType":"TV Show"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes tv show by itunes id",
+                            "format":"/c/itunes/tv/show/{itunes tv show id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"itunes_tv_show",
+                    "namespace":"ns.knowledge.tv.show",
+                    "type":"json",
+                    "index":[
+                        "itunes tv show id",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.itunes.tv.season":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/tv/season/(?P<itunes_tv_season_id>[0-9]+)$",
+                            "query parameter":["itunes tv season id"],
+                            "remote":"lookup?entity=tvSeason"
+                        },
+                        {
+                            "filter":"^/c/itunes/tv/season/(?P<itunes_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "query parameter":["itunes tv show id"],
+                            "remote":"lookup?entity=tvSeason&limit=500"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.tv.show",
+                            "condition":{"wrapperType":"artist", "artistType":"TV Show"}
+                        },
+                        {
+                            "reference":"service.document.itunes.tv.season",
+                            "condition":{"wrapperType":"collection", "collectionType":"TV Season"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes tv season by itunes id",
+                            "format":"/c/itunes/tv/season/{itunes tv season id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"itunes tv season by itunes show id",
+                            "format":"/c/itunes/tv/season/{itunes tv show id}/{disc number}"
+                        }
+                    ],
+                    "collection":"itunes_tv_season",
+                    "namespace":"ns.knowledge.tv.season",
+                    "type":"json",
+                    "index":[
+                        "itunes tv show id",
+                        "itunes tv season id",
+                        "disc number",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.itunes.tv.episode":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/tv/episode/(?P<itunes_tv_episode_id>[0-9]+)$",
+                            "query parameter":["itunes tv episode id"],
+                            "remote":"lookup?entity=tvEpisode"
+                        },
+                        {
+                            "filter":"^/c/itunes/tv/episode/(?P<itunes_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "query parameter":["itunes tv season id"],
+                            "remote":"lookup?entity=tvEpisode&limit=500"
+                        },
+                        {
+                            "filter":"^/c/itunes/tv/episode/(?P<itunes_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "query parameter":["itunes tv show id"],
+                            "remote":"lookup?entity=tvEpisode&limit=500"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.tv.show",
+                            "condition":{"wrapperType":"artist", "artistType":"TV Show"}
+                        },
+                        {
+                            "reference":"service.document.itunes.tv.season",
+                            "condition":{"wrapperType":"collection", "collectionType":"TV Season"}
+                        },
+                        {
+                            "reference":"service.document.itunes.tv.episode",
+                            "condition":{"wrapperType":"track", "kind":"tv-episode"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes tv episode by itunes id",
+                            "format":"/c/itunes/tv/episode/{itunes tv episode id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"itunes tv episode by itunes season id",
+                            "format":"/c/itunes/tv/episode/{itunes tv season id}/{track number}"
+                        },
+                        {
+                            "name":"itunes tv episode by itunes show id",
+                            "format":"/c/itunes/tv/episode/{itunes tv show id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "collection":"itunes_tv_episode",
+                    "namespace":"ns.knowledge.tv.episode",
+                    "type":"json",
+                    "index":[
+                        "itunes tv show id",
+                        "itunes tv season id",
+                        "itunes tv episode id",
+                        "disc number",
+                        "track number",
+                        "tv show name",
+                        "simple tv show name",
+                        "tv episode name",
+                        "simple tv episode name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.itunes.music.album":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/music/album/(?P<itunes_music_album_id>[0-9]+)$",
+                            "query parameter":["itunes music album id"],
+                            "remote":"lookup?entity=album"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.music.album",
+                            "condition":{"wrapperType":"collection", "collectionType":"Album"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes album by itunes id",
+                            "format":"/c/itunes/music/album/{itunes music album id}",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"itunes_music_album",
+                    "namespace":"ns.knowledge.music.album",
+                    "type":"json",
+                    "index":[
+                        "itunes music album id",
+                        "music album name",
+                        "simple music album name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.itunes.music.track":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/music/track/(?P<itunes_music_track_id>[0-9]+)$",
+                            "query parameter":["itunes music track id"],
+                            "remote":"lookup?entity=song"
+                        },
+                        {
+                            "filter":"^/c/itunes/music/track/(?P<itunes_music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "query parameter":["itunes music album id"],
+                            "remote":"lookup?entity=song&limit=500"
+                        }
+                    ],
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.music.track",
+                            "condition":{"wrapperType":"track", "kind":"song"}
+                        },
+                        {
+                            "reference":"service.document.itunes.music.album",
+                            "condition":{"wrapperType":"collection", "collectionType":"Album"}
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"itunes music track by itunes id",
+                            "format":"/c/itunes/music/track/{itunes music track id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"itunes music track by itunes album id",
+                            "format":"/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "collection":"itunes_music_track",
+                    "namespace":"ns.knowledge.music.track",
+                    "type":"json",
+                    "index":[
+                        "itunes music track id",
+                        "itunes music album id",
+                        "disc number",
+                        "track number",
+                        "music album name",
+                        "simple music album name",
+                        "music track name",
+                        "simple music track name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.itunes.genre.complete":{
+                    "match":[
+                        {
+                            "filter":"^/c/itunes/genre/complete",
+                            "remote":"WebObjects/MZStoreServices.woa/ws/genres"
+                        }
+                    ],
+                    "process":"parse_itunes_genres",
+                    "produce":[
+                        {
+                            "reference":"service.document.itunes.genre",
+                            "condition":{"kind": "genre"}
+                        }
+                    ],
+                    "namespace":"ns.knowledge.genre",
+                    "type":"json",
+                    "index":["itunes genre id"]
+                }
+            }
+        },
+        "rottentomatoes":{
+            "api key":"wyeeuz4yjjqvyjgtju68c6p3",
+            "remote base":"http://api.rottentomatoes.com/api/public/v1.0",
+            "match":"^/c(?:/[a-z]{2})?/rottentomatoes/.*$",
+            "branch":{
+                "service.document.rottentomatoes.movie":{
+                    "match":[
+                        {
+                            "filter":"^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)$",
+                            "query parameter":["api key"],
+                            "remote":"movies/{rottentomatoes movie id}.json"
+                        },
+                        {
+                            "filter":"^/c/rottentomatoes/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$",
+                            "query parameter":["api key", "trimmed imdb movie id"],
+                            "remote":"movie_alias.json?type=imdb"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"rotten tomatoes movie by rottentomatoes movie id",
+                            "format":"/c/rottentomatoes/movie/{rottentomatoes movie id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"rotten tomatoes movie by imdb id",
+                            "format":"/c/rottentomatoes/movie/imdb/{imdb movie id}"
+                        }
+                    ],
+                    "collection":"rottentomatoes_movie",
+                    "namespace":"ns.knowledge.movie",
+                    "type":"json",
+                    "index":[
+                        "rottentomatoes movie id",
+                        "imdb movie id",
+                        "movie title",
+                        "simple movie title",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.rottentomatoes.movie.review":{
+                    "match":[
+                        {
+                            "filter":"^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/review$",
+                            "query parameter":["api key"],
+                            "remote":"movies/{rottentomatoes movie id}/reviews.json?review_type=top_critic"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"rotten tomatoes movie review by rottentomatoes movie id",
+                            "format":"/c/rottentomatoes/movie/{rottentomatoes movie id}/review",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"rottentomatoes_movie_review",
+                    "namespace":"ns.knowledge.movie",
+                    "type":"json",
+                    "index":["rottentomatoes movie id"]
+                },
+                "service.document.rottentomatoes.movie.cast":{
+                    "match":[
+                        {
+                            "filter":"^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/cast$",
+                            "query parameter":["api key"],
+                            "remote":"movies/{rottentomatoes movie id}/cast.json"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"rotten tomatoes movie cast by rottentomatoes movie id",
+                            "format":"/c/rottentomatoes/movie/{rottentomatoes movie id}/cast",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"rottentomatoes_movie_cast",
+                    "namespace":"ns.knowledge.movie",
+                    "type":"json",
+                    "index":["rottentomatoes movie id"]
+                },
+                "service.document.rottentomatoes.movie.similar":{
+                    "match":[
+                        {
+                            "filter":"^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/similar$",
+                            "query parameter":["api key"],
+                            "remote":"movies/{rottentomatoes movie id}/similar.json"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"rotten tomatoes similar movies by rottentomatoes movie id",
+                            "format":"/c/rottentomatoes/movie/{rottentomatoes movie id}/similar",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"rottentomatoes_movie_similar",
+                    "namespace":"ns.knowledge.movie",
+                    "type":"json",
+                    "index":["rottentomatoes movie id"]
+                },
+                "service.document.rottentomatoes.movie.clip":{
+                    "match":[
+                        {
+                            "filter":"^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/clip$",
+                            "query parameter":["api key"],
+                            "remote":"movies/{rottentomatoes movie id}/clips.json"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"rotten tomatoes movie clip by rottentomatoes movie id",
+                            "format":"/c/rottentomatoes/movie/{rottentomatoes movie id}/clip",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"rottentomatoes_movie_clip",
+                    "namespace":"ns.knowledge.movie",
+                    "type":"json",
+                    "index":["rottentomatoes movie id"]
+                }
+            }
+        },
+        "facebook":{
+            "match":"^/c/facebook/.*$",
+            "remote base":"http://graph.facebook.com",
+            "branch":{
+                "facebook.movie":{
+                    "match":[
+                        {
+                            "filter":"^/c/facebook/movie/(?P<facebook_movie_id>[0-9]+)$",
+                            "remote":"{facebook movie id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"facebook movie by facebook id",
+                            "format":"/c/facebook/movie/{facebook movie id}"
+                        }
+                    ],
+                    "collection":"facebook_movie",
+                    "namespace":"ns.facebook.movie",
+                    "type":"json",
+                    "index":["facebook movie id"]
+                }
+            }
+        },
+        "wikipedia":{
+            "match":"^/c(?:/[a-z]{2})?/wikipedia/.*$",
+            "branch":{
+                "wikipedia.movie":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/wikipedia/movie/(?P<wikipedia_movie_id>[0-9]+)$",
+                            "remote":""
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"wikipedia movie by wikipedia id",
+                            "format":"/c/wikipedia/movie/{wikipedia movie id}"
+                        }
+                    ],
+                    "collection":"wikipedia_movie",
+                    "namespace":"ns.wikipedia.movie",
+                    "type":"json",
+                    "index":["wikipedia movie id"]
+                },
+                "wikipedia.person":{
+                },
+                "wikipedia.company":{
+                },
+                "wikipedia.tvshow.show":{
+                }
+            }
+        },
+        "medium":{
+            "match":"^/m/.*$",
+            "branch":{
+                "service.medium.asset":{
+                    "match":[
+                        {
+                            "filter":"^/m/asset/(?P<home_id>[0-9]+)$",
+                            "depend":"/h/{home id}"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"asset by home id",
+                            "format":"/m/asset/{home id}",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"reference",
+                    "collection":"medium_asset"
+                },
+                "service.medium.resource":{
+                    "match":[
+                        {
+                            "filter":"^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"resource",
+                            "format":"/m/resource/sha1/{path digest}",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"crawl",
+                    "collection":"medium_resource"
+                },
+                "service.medium.resource.fragment":{
+                    "match":[
+                        {
+                            "filter":"^/m/resource/sha1/(?P<path_digest>[0-9a-f]{40})/fragment$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"resource",
+                            "format":"/m/resource/sha1/{path digest}/fragment",
+                            "canonical":true
+                        }
+                    ],
+                    "type":"reference",
+                    "collection":"medium_resource_fragment"
+                }
+            }
+        }
+    }
+}

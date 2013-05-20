@@ -135,9 +135,13 @@ class ResourceHandler(object):
             # Query type defaults to lookup
             if 'query type' not in branch: branch['query type'] = 'lookup'
 
-            # Compile match patterns
             for match in branch['match']:
+                # Compile match patterns
                 match['pattern'] = re.compile(match['filter'])
+                
+                # Convert query parameters to a set
+                if 'query parameter' in match:
+                    match['query parameter'] = set(match['query parameter'])
             
             self.branch[name] = branch
     
