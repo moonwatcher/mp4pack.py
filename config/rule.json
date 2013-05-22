@@ -499,7 +499,7 @@
                     "apply":[
                         { "property":"knowledge uri", "format":"/k/{language}/tv/episode/{tv episode id}" }
                     ]
-                }
+                },
                 {
                     "requires":[
                         "media kind",
@@ -511,7 +511,7 @@
                     "apply":[
                         { "property":"knowledge uri", "format":"/k/{language}/tv/episode/{tv season id}/{track number}" }
                     ]
-                }
+                },
                 {
                     "requires":[
                         "media kind",
@@ -524,18 +524,18 @@
                     "apply":[
                         { "property":"knowledge uri", "format":"/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}" }
                     ]
-                }
+                },
                 {
                     "requires":[
                         "media kind",
-                        "tv episode id",
+                        "movie id",
                         "language"
                     ],
                     "equal":{ "media kind":9 },
                     "apply":[
                         { "property":"knowledge uri", "format":"/k/{language}/movie/{movie id}" }
                     ]
-                }
+                },
                 {
                     "requires":[
                         "media kind",
@@ -546,7 +546,7 @@
                     "apply":[
                         { "property":"knowledge uri", "format":"/k/{language}/music/track/{track id}" }
                     ]
-                }
+                },
                 {
                     "requires":[
                         "media kind",

@@ -139,6 +139,7 @@ class Resource(object):
         self.location = location.project('ns.medium.resource.location')
         self.volatile = False
         
+        self._knowledge = None
         self._node = None
         self._meta = None
         self._stream = None
@@ -227,6 +228,13 @@ class Resource(object):
     
     
     @property
+    def knowledge(self):
+        if self._knowledge is None:
+            self._knowledge = self.env.resolver.resolve(self.location['knowledge uri'], self.location)
+        return self._knowledge
+    
+    
+    @property
     def meta(self):
         if self._meta is None:
             if self.node is not None and 'body' in self.node and 'meta' in self.node['body']:
@@ -308,6 +316,7 @@ class Resource(object):
     
     def info(self, task):
     	print json.dumps(self.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
+    	print json.dumps(self.knowledge, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
     
     def copy(self, task):

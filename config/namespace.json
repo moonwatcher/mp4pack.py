@@ -370,6 +370,7 @@
                 "rule.medium.asset.uri",
                 "rule.medium.home.uri",
                 "rule.medium.knowledge.uri",
+                "rule.system.default.language",
                 "rule.medium.home.umid",
                 "rule.knowledge.simple.name.company",
                 "rule.knowledge.simple.name.person",
