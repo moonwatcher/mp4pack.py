@@ -35,7 +35,7 @@
                     }
                 }
             },
-            "mapping":[
+                "mapping":[
                 {
                     "enable":false,
                     "path":"/Users",

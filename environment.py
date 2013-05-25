@@ -342,7 +342,7 @@ class Environment(object):
         # Default host
         node['rule']['rule.system.default.host'] = {
             'name':'Default host',
-            'provide':set(('host',)),
+            'provide':['host'],
             'branch':[
                 {
                     'apply':(
@@ -355,7 +355,7 @@ class Environment(object):
         # Default language
         node['rule']['rule.system.default.language'] = {
             'name':'Default language',
-            'provide':set(('language',)),
+            'provide':['language'],
             'branch':[
                 {
                     'apply':(
@@ -368,7 +368,7 @@ class Environment(object):
         # Volume location
         node['rule']['rule.system.volume.location'] = {
             'name':'Volume location',
-            'provide':set(('volume path', )),
+            'provide':['volume path'],
             'branch':[],
         }
         for repository in self.repository.values():
@@ -386,7 +386,7 @@ class Environment(object):
         # Temp location
         node['rule']['rule.system.temp.location'] = {
             'name':'Temp location',
-            'provide':set(('temp path', )),
+            'provide':['temp path'],
             'branch':[],
         }
         for repository in self.repository.values():
@@ -474,11 +474,11 @@ class Environment(object):
         def encode_command(command):
             c = []
             for e in command:
-                if u' ' in e: c.append(u'"{0}"'.format(e))
+                if self.constant['space'] in e: c.append(u'"{0}"'.format(e))
                 else: c.append(e)
-            return u' '.join(c)
-        
-        
+            return self.constant['space'].join(c)
+            
+            
         report = None
         if command:
             if not debug:
@@ -507,8 +507,8 @@ class Environment(object):
     def which(self, command):
         def is_executable(fpath):
             return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-        
-        
+            
+            
         command['path'] = None
         fpath, fname = os.path.split(command['binary'])
         if fpath:
@@ -562,6 +562,8 @@ class Environment(object):
             
         return result
     
+
+
 
 
 class Repository(object):

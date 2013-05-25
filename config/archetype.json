@@ -1168,56 +1168,49 @@
             "name":"Track subtitle",
             "keyword":"track_subtitle",
             "type":"unicode",
-            "atom":"@st3",
-            "enable":false
+            "atom":"@st3"
         },
         "art director":{
             "name":"Art director",
             "description":"Person responsible for non-photographic artwork used with content",
             "keyword":"art_director",
             "type":"unicode",
-            "atom":"@ard",
-            "enable":false
+            "atom":"@ard"
         },
         "arranger":{
             "name":"Arranger",
             "description":"Person responsible for particular adaptation of composition",
             "keyword":"arranger",
             "type":"unicode",
-            "atom":"@arg",
-            "enable":false
+            "atom":"@arg"
         },
         "lyricist":{
             "name":"Lyricist",
             "description":"Writer of the song lyrics",
             "keyword":"lyricist",
             "type":"unicode",
-            "atom":"©aut",
-            "enable":false
+            "atom":"©aut"
         },
         "copyright acknowledgement":{
             "name":"Copyright acknowledgement",
             "description":"Ackowledgements of those granting permission to use copyrighted material",
             "keyword":"copyright_acknowledgement",
             "type":"unicode",
-            "atom":"©cak",
-            "enable":false
+            "atom":"©cak"
         },
         "conductor":{
             "name":"Conductor",
             "description":"Name of the person who directed the orchestra",
             "keyword":"conductor",
             "type":"unicode",
-            "atom":"©con",
-            "enable":false
+            "atom":"©con"
         },
         "song description":{
             "name":"Song description",
             "description":"Explanation of the song",
             "keyword":"song_description",
             "type":"unicode",
-            "atom":"©des",
-            "enable":false
+            "atom":"©des"
         },
         "equalization preset name":{
             "name":"Equalization preset name",
@@ -1232,104 +1225,91 @@
             "description":"Explanatory notes about a record album, included on the jacket or in the packaging",
             "keyword":"liner_notes",
             "type":"unicode",
-            "atom":"©lnt",
-            "enable":false
+            "atom":"©lnt"
         },
         "record company":{
             "name":"Record company",
             "description":"Company releasing the song",
             "keyword":"record_company",
             "type":"unicode",
-            "atom":"©mak",
-            "enable":false
+            "atom":"©mak"
         },
         "original artist":{
             "name":"Original artist",
             "description":"Name of artist originally attributed with content",
             "keyword":"original_artist",
             "type":"unicode",
-            "atom":"©ope",
-            "enable":false
+            "atom":"©ope"
         },
         "phonogram rights":{
             "name":"Phonogram rights",
             "description":"Like a copyright, but using the circled P symbol, for audio rights",
             "keyword":"phonogram_rights",
             "type":"unicode",
-            "atom":"©phg",
-            "enable":false
+            "atom":"©phg"
         },
         "performer":{
             "name":"Performer",
             "description":"Name or URL of the individual primary members of the band or group",
             "keyword":"Performer",
             "type":"unicode",
-            "atom":"©prf",
-            "enable":false
+            "atom":"©prf"
         },
         "publisher":{
             "name":"Publisher",
             "description":"Company publishing the song",
             "keyword":"publisher",
             "type":"unicode",
-            "atom":"©pub",
-            "enable":false
+            "atom":"©pub"
         },
         "sound engineer":{
             "name":"Sound engineer",
             "description":"The name of the person doing soundengineering",
             "keyword":"sound_engineer",
             "type":"unicode",
-            "atom":"©sne",
-            "enable":false
+            "atom":"©sne"
         },
         "soloist":{
             "name":"Soloist",
             "description":"Name of the musician who performs the solo",
             "keyword":"soloist",
             "type":"unicode",
-            "atom":"©sol",
-            "enable":false
+            "atom":"©sol"
         },
         "credits":{
             "name":"Credits",
             "description":"Credits for those who provided source content",
             "keyword":"credits",
             "type":"unicode",
-            "atom":"©src",
-            "enable":false
+            "atom":"©src"
         },
         "thanks":{
             "name":"Thanks and dedications",
             "description":"Notes of acknowledgement or recognition from the artist",
             "keyword":"thanks",
             "type":"unicode",
-            "atom":"©thx",
-            "enable":false
+            "atom":"©thx"
         },
         "online extras":{
             "name":"Online extras",
             "description":"Links to content that can only be accessed when connected to the internet",
             "keyword":"online_extras",
             "type":"unicode",
-            "atom":"©url",
-            "enable":false
+            "atom":"©url"
         },
         "executive producer":{
             "name":"Executive producer",
             "description":"Person responsible for creating or supervising the song",
             "keyword":"executive_producer",
             "type":"unicode",
-            "atom":"©xpd",
-            "enable":false
+            "atom":"©xpd"
         },
         "producer":{
             "name":"Producer",
             "description":"Person responsible for creating or supervising the song",
             "keyword":"producer",
             "type":"unicode",
-            "atom":"©prd",
-            "enable":false
+            "atom":"©prd"
         },
         "director":{
             "name":"Director",

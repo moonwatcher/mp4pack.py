@@ -226,10 +226,10 @@ class Space(object):
         for k,v in node.iteritems():
             if k == 'key':
                 self.node['key'] = node['key']
-                
+            
             if k in ['default', 'element']:
                 if v: self.node[k].update(v)
-                
+            
             elif k in ['synonym', 'rule']:
                 if v: self.node[k].extend(v)
     
@@ -334,7 +334,6 @@ class Space(object):
                     if e.node[synonym] is not None and e.node[synonym] not in self._synonym:
                         self._synonym[e.node[synonym]] = e
     
-
 
 
 class Element(object):
@@ -667,13 +666,20 @@ class Prototype(Element):
         else:
             result = [ caster(v, axis) for v in value ]
             
+        # strip None elements
         if result:
             result = [ v for v in result if v is not None ]
+            
         if not result:
             result = None
         else:
             if 'single element name' in self.node:
                 result = [ { self.node['single element name']:v } for v in result ]
+                if 'append to element' in self.node:
+                    for i in result:
+                        for k,v in self.node['append to element'].iteritems():
+                            i[k] = v
+                    
         return result
     
     
