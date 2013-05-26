@@ -1581,8 +1581,7 @@
                 "backdrops":null,
                 "posters":null,
                 "part of a collection":null,
-                "cast":null,
-                "crew":null,
+                "people":null,
                 "certifications":null,
                 "titles":null,
                 "reviews":null,
@@ -1618,13 +1617,12 @@
                 "runtime":null,
                 "tv show status":null,
                 "genres":null,
-                "actors":null,
                 "image url":null,
                 "banner url":null,
                 "fan art url":null,
                 "tv show air day":null,
                 "tv show air time":null,
-                "cast":null,
+                "people":null,
                 "posters":null,
                 "simple tv show name":null,
                 "country code":null
@@ -1688,13 +1686,25 @@
                 "vote average":null,
                 "vote count":null,
                 "backdrop url":null,
-                "actors":null,
-                "directors":null,
-                "screenwriters":null,
                 "content advisory rating":null,
                 "simple tv show name":null,
                 "simple tv episode name":null,
                 "country code":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.tv.show",
+                "rule.knowledge.simple.name.tv.episode",
+                "rule.knowledge.release.year"
+            ]
+        },
+        "ns.knowledge.tv.episode.cast.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "tv show id":null,
+                "tv season id":null,
+                "tv season number":null,
+                "tv episode number":null,
+                "people":null
             },
             "rule":[
                 "rule.knowledge.simple.name.tv.show",
@@ -1959,6 +1969,21 @@
         
         "ns.knowledge.movie":{
             "synonym":["keyword","tmdb", "rottentomatoes", "itunes"],
+            "normalize":[
+                {
+                    "action":"complement",
+                    "element":"cast",
+                    "extention":{
+                        "department":"Acting",
+                        "job":"Actor"
+                    }
+                },
+                {
+                    "action":"coalesce",
+                    "source":[ "cast", "crew" ],
+                    "target":"people"
+                }
+            ],
             "element":{
                 "movie id":null,
                 "itunes movie id":{
@@ -2048,6 +2073,7 @@
                 "part of a collection":{
                     "tmdb":"belongs_to_collection"
                 },
+                "people":null,
                 "cast":{
                     "tmdb":"cast"
                 },
@@ -2097,6 +2123,21 @@
         },
         "ns.knowledge.tv.show":{
             "synonym":["tvdb", "keyword", "itunes"],
+            "normalize":[
+                {
+                    "action":"complement",
+                    "element":"cast",
+                    "extention":{
+                        "department":"Acting",
+                        "job":"Actor"
+                    }
+                },
+                {
+                    "action":"coalesce",
+                    "source":[ "cast" ],
+                    "target":"people"
+                }
+            ],
             "element":{
                 "tv show id":null,
                 "itunes tv show id":{
@@ -2182,6 +2223,7 @@
                 "cast":{
                     "tvdb":"Actor"
                 },
+                "people":null,
                 "posters":{
                     "tvdb":"Banner"
                 },
@@ -2256,6 +2298,13 @@
         },
         "ns.knowledge.tv.episode":{
             "synonym":["keyword", "tvdb", "itunes"],
+            "normalize":[
+                {
+                    "action":"coalesce",
+                    "source":[ "actors", "directors", "screenwriters" ],
+                    "target":"people"
+                }
+            ],
             "element":{
                 "tv show id":null,
                 "tv season id":null,
@@ -2335,6 +2384,7 @@
                 "vote count":{
                     "tvdb":"RatingCount"
                 },
+                "people":null,
                 "backdrop url":{
                     "tvdb":"filename"
                 },

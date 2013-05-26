@@ -1618,6 +1618,13 @@
             "type":"embed",
             "namespace":"ns.knowledge.collection"
         },
+        "people":{
+            "name":"People",
+            "keyword":"people",
+            "type":"embed",
+            "namespace":"ns.knowledge.cast",
+            "plural":"list"
+        },
         "cast":{
             "name":"Cast",
             "keyword":"cast",

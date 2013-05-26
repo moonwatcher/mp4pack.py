@@ -461,6 +461,48 @@ class Environment(object):
         return result
     
     
+    def detect_encoding(self, content):
+        # This will not survive a multi threaded environment
+        self.universal_detector.reset()
+        for line in content:
+            self.universal_detector.feed(line)
+            if self.universal_detector.done:
+                break
+        self.universal_detector.close()
+        return self.universal_detector.result
+    
+    
+    def environment_json_handler(self, o):
+        result = None
+        from bson.objectid import ObjectId
+        if isinstance(o, datetime):
+            result = o.isoformat()
+        if isinstance(o, ObjectId):
+            result = str(o)
+        if isinstance(o, Rule):
+            result = o.node
+        if isinstance(o, Repository):
+            result = o.node
+        if isinstance(o, Space):
+            result = o.node
+        if isinstance(o, set):
+            result = list(o)
+        return result
+    
+    
+    def default_json_handler(self, o):
+        result = None
+        from bson.objectid import ObjectId
+        if isinstance(o, datetime):
+            result = o.isoformat()
+        if isinstance(o, ObjectId):
+            result = str(o)
+        if isinstance(o, set):
+            result = list(o)
+            
+        return result
+    
+    
     # Command execution
     def initialize_command(self, command, log):
         if command in self.command and self.command[command]['path']:
@@ -477,8 +519,8 @@ class Environment(object):
                 if self.constant['space'] in e: c.append(u'"{0}"'.format(e))
                 else: c.append(e)
             return self.constant['space'].join(c)
-            
-            
+        
+        
         report = None
         if command:
             if not debug:
@@ -521,49 +563,7 @@ class Environment(object):
                     command['path'] = bpath
     
     
-    def detect_encoding(self, content):
-        # This will not survive a multi threaded environment
-        self.universal_detector.reset()
-        for line in content:
-            self.universal_detector.feed(line)
-            if self.universal_detector.done:
-                break
-        self.universal_detector.close()
-        return self.universal_detector.result
     
-    
-    def environment_json_handler(self, o):
-        result = None
-        from bson.objectid import ObjectId
-        if isinstance(o, datetime):
-            result = o.isoformat()
-        if isinstance(o, ObjectId):
-            result = str(o)
-        if isinstance(o, Rule):
-            result = o.node
-        if isinstance(o, Repository):
-            result = o.node
-        if isinstance(o, Space):
-            result = o.node
-        if isinstance(o, set):
-            result = list(o)
-        return result
-    
-    
-    def default_json_handler(self, o):
-        result = None
-        from bson.objectid import ObjectId
-        if isinstance(o, datetime):
-            result = o.isoformat()
-        if isinstance(o, ObjectId):
-            result = str(o)
-        if isinstance(o, set):
-            result = list(o)
-            
-        return result
-    
-
-
 
 
 class Repository(object):

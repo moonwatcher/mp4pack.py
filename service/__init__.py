@@ -362,6 +362,12 @@ class ResourceHandler(object):
     def store(self, query):
         for entry in query['entires']:
             if entry['branch']['persistent']:
+            
+                # normalize the canonical ontology on the record
+                if 'body' in entry['record'] and 'canonical' in entry['record']['body']:
+                    entry['record']['body']['canonical'].normalize()
+
+                
                 record = None
                 collection = query['repository'].database[entry['branch']['collection']]
                 entry['record'][u'head'][u'modified'] = datetime.utcnow()

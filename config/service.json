@@ -991,6 +991,11 @@
                             "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/cast$"
                         }
                     ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tvdb/tv/show/{tvdb tv show id}/cast"
+                        }
+                    ],
                     "collect":[
                         "/h/tv/show/{tv show id}"
                     ],
@@ -1004,7 +1009,10 @@
                     "type":"json",
                     "collection":"knowledge_tv_show_cast",
                     "namespace":"ns.knowledge.tv.show.canonical",
-                    "index":["tv show id" ]
+                    "index":[
+                        "tv show id",
+                        "tvdb tv show id"
+                    ]
                 },
                 "service.document.knowledge.tv.show.image":{
                     "match":[
@@ -1201,6 +1209,19 @@
                             "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/cast$"
                         }
                     ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/{language}/tvdb/tv/episode/{tvdb tv episode id}"
+                        },
+                        {
+                            "uri":"/c/itunes/tv/episode/{itunes tv episode id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/tv/episode/{tv episode id}",
+                        "/h/tv/episode/{tv season id}/{track number}",
+                        "/h/tv/episode/{tv show id}/{disc number}/{track number}"
+                    ],
                     "resolvable":[
                         {
                             "name":"tv show episode cast",
@@ -1214,13 +1235,21 @@
                     ],
                     "type":"json",
                     "collection":"knowledge_tv_episode_cast",
-                    "namespace":"ns.knowledge.tv.episode.canonical",
+                    "namespace":"ns.knowledge.tv.episode.cast.canonical",
                     "index":[
                         "tv show id",
                         "tv season id",
                         "tv episode id",
+                        "tvdb tv show id",
+                        "itunes tv show id",
+                        "imdb tv show id",
                         "disc number",
                         "track number",
+                        "imdb tv episode id",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "tvdb tv episode id",
+                        "itunes tv episode id",
                         "language"
                     ]
                 },

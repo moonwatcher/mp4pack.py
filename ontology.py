@@ -101,6 +101,11 @@ class Ontology(dict):
         dict.clear(self)
     
     
+    def coalesce(self, source, target):
+        k,v = self.namespace.merge(target, self[target], self[source])
+        self.__setitem__(k, v)
+    
+    
     def merge(self, key, value):
         if key:
             k,v = self.namespace.merge(key, self[key], value)
@@ -189,6 +194,33 @@ class Ontology(dict):
                     # if dict.__contains__(self, key):
                     #    self.log.debug(u'Resolved %s', unicode({key:self[key]}))
     
+    def normalize(self):
+        for action in self.namespace.node['normalize']:
+            # coalescing several elements into one        
+            if action['action'] == 'coalesce':
+                target = action['target']
+                for source in action['source']:
+                    if source in self:
+                        self.coalesce(source, target)
+                        if not source == target:
+                            self.__delitem__(source)
+                            
+            # complementing embed elements 
+            elif action['action'] == 'complement':
+                if action['element'] in self:
+                    prototype = self.namespace.find(action['element'])
+                    if prototype:
+                        if prototype.type == 'embed':
+                            if prototype.plural:
+                                if prototype.plural == 'list':
+                                    for e in self[action['element']]:
+                                        for k,v in action['extention'].iteritems():
+                                            e[k] = v
+                            else:
+                                for k,v in action['extention'].iteritems():
+                                    self[action['element']][k] = v
+    
+
 
 
 class Space(object):
@@ -218,6 +250,7 @@ class Space(object):
             'synonym':[],
             'element':{},
             'rule':[],
+            'normalize':[],
         }
         self.extend(node)
     
@@ -230,7 +263,7 @@ class Space(object):
             if k in ['default', 'element']:
                 if v: self.node[k].update(v)
             
-            elif k in ['synonym', 'rule']:
+            elif k in ['synonym', 'rule', 'normalize']:
                 if v: self.node[k].extend(v)
     
     
@@ -421,9 +454,9 @@ class Prototype(Element):
             self.node['type'] = 'unicode'
             
         # find the cast, format and merge functions
-        c = getattr(self, '_cast_{0}'.format(self.node['type']), None) or (lambda x,y: x)
-        f = getattr(self, '_format_{0}'.format(self.node['type']), None) or (lambda x: x)
-        m = getattr(self, '_merge_{0}'.format(self.node['type']), None) or (lambda x,y: y)
+        c = getattr(self, '_cast_{0}'.format(self.type), None) or (lambda x,y: x)
+        f = getattr(self, '_format_{0}'.format(self.type), None) or (lambda x: x)
+        m = getattr(self, '_merge_{0}'.format(self.type), None) or (lambda x,y: y)
         
         if not self.node['plural']:
             self._cast = c
@@ -433,12 +466,23 @@ class Prototype(Element):
             if self.node['plural'] == 'list':
                 self._format = lambda x: self._format_list(x, f)
                 self._cast = lambda x,y: self._cast_list(x, c, y)
+                self._merge = self._merge_list
             elif self.node['plural'] == 'dict':
                 self._format = lambda x: self._format_dict(x, f)
                 self._cast = lambda x,y: self._cast_dict(x, c, y)
                 
         if not self.node['auto cast']:
             self._cast = lambda x,y: x
+    
+    
+    @property
+    def type(self):
+        return self.node['type']
+    
+    
+    @property
+    def plural(self):
+        return self.node['plural']
     
     
     @property
@@ -703,6 +747,13 @@ class Prototype(Element):
     def _cast_embed(self, value, axis=None):
         result = Ontology(self.env, self.node['namespace'])
         result.decode_all(value, axis)
+        return result
+    
+    
+    def _merge_list(self, first, second):
+        result = []
+        result.extend(first)
+        result.extend(second)
         return result
     
     
