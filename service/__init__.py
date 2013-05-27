@@ -99,7 +99,7 @@ class Resolver(object):
                             handler.save(node, repository)
                             break
             else:
-                self.log.error(u'URIs are missing, refusing to save record %s', unicode(node[u'head']))        
+                self.log.debug(u'URIs are missing, refusing to save record %s', unicode(node[u'head']))        
     
     
     def issue(self, hostname, name):
@@ -119,7 +119,7 @@ class Resolver(object):
 
 class ResourceHandler(object):
     def __init__(self, resolver, node):
-        self.log = logging.getLogger('Resolver')
+        self.log = logging.getLogger('Handler')
         self.resolver = resolver
         self.node = node
         self.pattern = re.compile(self.node['match'])
@@ -414,7 +414,7 @@ class ResourceHandler(object):
                     self.log.debug(u'Persisting %s', unicode(record[u'head']['canonical']))
                     collection.save(record)
                 else:
-                    self.log.error(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
+                    self.log.debug(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
     
     
     def _compute_resolvables(self, entry):

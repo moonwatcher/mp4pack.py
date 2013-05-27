@@ -1618,25 +1618,32 @@
             "type":"embed",
             "namespace":"ns.knowledge.collection"
         },
+        "credit":{
+            "name":"Credit",
+            "keyword":"credit",
+            "type":"embed",
+            "namespace":"ns.knowledge.person.credit",
+            "plural":"list"
+        },
         "people":{
             "name":"People",
             "keyword":"people",
             "type":"embed",
-            "namespace":"ns.knowledge.cast",
+            "namespace":"ns.knowledge.people",
             "plural":"list"
         },
         "cast":{
             "name":"Cast",
             "keyword":"cast",
             "type":"embed",
-            "namespace":"ns.knowledge.cast",
+            "namespace":"ns.knowledge.people",
             "plural":"list"
         },
         "crew":{
             "name":"Crew",
             "keyword":"crew",
             "type":"embed",
-            "namespace":"ns.knowledge.cast",
+            "namespace":"ns.knowledge.people",
             "plural":"list"
         },
         "movies":{

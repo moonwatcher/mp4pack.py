@@ -38,7 +38,7 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
-        "knowledge_movie_cast":{
+        "knowledge_movie_people":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -134,7 +134,7 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
-        "knowledge_tv_show_cast":{
+        "knowledge_tv_show_people":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -176,7 +176,7 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
-        "knowledge_tv_episode_cast":{
+        "knowledge_tv_episode_people":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -284,7 +284,7 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
-        "tmdb_movie_cast":{
+        "tmdb_movie_people":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -368,7 +368,7 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
-        "rottentomatoes_movie_cast":{
+        "rottentomatoes_movie_people":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -392,7 +392,7 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
-        "tvdb_tv_show_cast":{
+        "tvdb_tv_show_people":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }

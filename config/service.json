@@ -729,15 +729,15 @@
                         "itunes movie id"
                     ]
                 },
-                "service.document.knowledge.movie.cast":{
+                "service.document.knowledge.movie.people":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/cast$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/people$"
                         }
                     ],
                     "aggregate":[
                         {
-                            "uri":"/c/tmdb/movie/{tmdb movie id}/cast"
+                            "uri":"/c/tmdb/movie/{tmdb movie id}/people"
                         }
                     ],
                     "collect":[
@@ -745,13 +745,13 @@
                     ],
                     "resolvable":[
                         {
-                            "name":"movie cast knowledge",
-                            "format":"/k/movie/{movie id}/cast",
+                            "name":"movie people knowledge",
+                            "format":"/k/movie/{movie id}/people",
                             "canonical":true
                         }
                     ],
                     "type":"json",
-                    "collection":"knowledge_movie_cast",
+                    "collection":"knowledge_movie_people",
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
@@ -985,15 +985,15 @@
                         "language"
                     ]
                 },
-                "service.document.knowledge.tv.show.cast":{
+                "service.document.knowledge.tv.show.people":{
                     "match":[
                         {
-                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/cast$"
+                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/people$"
                         }
                     ],
                     "aggregate":[
                         {
-                            "uri":"/c/tvdb/tv/show/{tvdb tv show id}/cast"
+                            "uri":"/c/tvdb/tv/show/{tvdb tv show id}/people"
                         }
                     ],
                     "collect":[
@@ -1001,13 +1001,13 @@
                     ],
                     "resolvable":[
                         {
-                            "name":"tv show cast",
-                            "format":"/k/tv/show/{tv show id}/cast",
+                            "name":"tv show people",
+                            "format":"/k/tv/show/{tv show id}/people",
                             "canonical":true
                        }
                     ],
                     "type":"json",
-                    "collection":"knowledge_tv_show_cast",
+                    "collection":"knowledge_tv_show_people",
                     "namespace":"ns.knowledge.tv.show.canonical",
                     "index":[
                         "tv show id",
@@ -1018,6 +1018,11 @@
                     "match":[
                         {
                             "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/image$"
+                        }
+                    ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tvdb/tv/show/{tvdb tv show id}/image"
                         }
                     ],
                     "collect":[
@@ -1033,7 +1038,10 @@
                     "type":"json",
                     "collection":"knowledge_tv_show_image",
                     "namespace":"ns.knowledge.tv.show.canonical",
-                    "index":["tv show id" ]
+                    "index":[
+                        "tv show id",
+                        "tvdb tv show id"
+                    ]
                 },
                 "service.document.knowledge.tv.season":{
                     "match":[
@@ -1082,24 +1090,24 @@
                         "language"
                     ]
                 },
-                "service.document.knowledge.tv.season.cast":{
+                "service.document.knowledge.tv.season.people":{
                     "match":[
                         {
-                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/cast$"
+                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/people$"
                         },
                         {
-                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/cast$"
+                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/people$"
                         }
                     ],
                     "resolvable":[
                         {
-                            "name":"tv show season cast",
-                            "format":"/k/tv/season/{tv season id}/cast",
+                            "name":"tv show season people",
+                            "format":"/k/tv/season/{tv season id}/people",
                             "canonical":true
                         },
                         {
-                            "name":"tv show season cast",
-                            "format":"/k/tv/season/{tv show id}/{disc number}/cast"
+                            "name":"tv show season people",
+                            "format":"/k/tv/season/{tv show id}/{disc number}/people"
                         }
                     ],
                     "type":"json",
@@ -1200,13 +1208,13 @@
                         "language"
                     ]
                 },
-                "service.document.knowledge.tv.episode.cast":{
+                "service.document.knowledge.tv.episode.people":{
                     "match":[
                         {
-                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/cast$"
+                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/people$"
                         },
                         {
-                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/cast$"
+                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/people$"
                         }
                     ],
                     "aggregate":[
@@ -1224,18 +1232,18 @@
                     ],
                     "resolvable":[
                         {
-                            "name":"tv show episode cast",
-                            "format":"/k/tv/episode/{tv episode id}/cast",
+                            "name":"tv show episode people",
+                            "format":"/k/tv/episode/{tv episode id}/people",
                             "canonical":true
                         },
                         {
-                            "name":"tv show episode cast",
-                            "format":"/k/tv/episode/{tv show id}/{disc number}/{track number}/cast"
+                            "name":"tv show episode people",
+                            "format":"/k/tv/episode/{tv show id}/{disc number}/{track number}/people"
                         }
                     ],
                     "type":"json",
-                    "collection":"knowledge_tv_episode_cast",
-                    "namespace":"ns.knowledge.tv.episode.cast.canonical",
+                    "collection":"knowledge_tv_episode_people",
+                    "namespace":"ns.knowledge.tv.episode.people.canonical",
                     "index":[
                         "tv show id",
                         "tv season id",
@@ -1386,15 +1394,34 @@
                             "filter":"^/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)$"
                         }
                     ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/person/{tmdb person id}"
+                        },
+                        {
+                            "uri":"/c/itunes/person/{itunes person id}"
+                        }
+                    ],
+                    "collect":[
+                        "/h/person/{person id}"
+                    ],
                     "resolvable":[
                         {
                             "name":"person by knowledge id",
-                            "format":"/k/{language}/person/{person id}"
+                            "format":"/k/{language}/person/{person id}",
+                            "canonical":true
                         }
                     ],
                     "type":"json",
                     "collection":"knowledge_person",
-                    "namespace":"ns.knowledge.person"
+                    "namespace":"ns.knowledge.person.canonical",
+                    "index":[
+                        "person id",
+                        "tmdb person id",
+                        "tvdb person id",
+                        "itunes person id",
+                        "imdb person id"
+                    ]
                 },
                 "service.document.knowledge.person.credit":{
                     "match":[
@@ -1402,15 +1429,28 @@
                             "filter":"^/k/person/(?P<person_id>[0-9]+)/credit$"
                         }
                     ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/person/{tmdb person id}/credit"
+                        }
+                    ],
+                    "collect":[
+                        "/h/person/{person id}"
+                    ],
                     "resolvable":[
                         {
                             "name":"person credit",
-                            "format":"/k/person/{person id}/credit"
+                            "format":"/k/person/{person id}/credit",
+                            "canonical":true
                         }
                     ],
                     "type":"json",
                     "collection":"knowledge_person_credit",
-                    "namespace":"ns.knowledge.person"
+                    "namespace":"ns.knowledge.person.canonical",
+                    "index":[
+                        "person id",
+                        "tmdb person id"
+                    ]
                 },
                 "service.document.knowledge.person.image":{
                     "match":[
@@ -1418,15 +1458,28 @@
                             "filter":"^/k/person/(?P<person_id>[0-9]+)/image$"
                         }
                     ],
+                    "aggregate":[
+                        {
+                            "uri":"/c/tmdb/person/{tmdb person id}/image"
+                        }
+                    ],
+                    "collect":[
+                        "/h/person/{person id}"
+                    ],
                     "resolvable":[
                         {
                             "name":"person image",
-                            "format":"/k/person/{person id}/image"
+                            "format":"/k/person/{person id}/image",
+                            "canonical":true
                         }
                     ],
                     "type":"json",
                     "collection":"knowledge_person_image",
-                    "namespace":"ns.knowledge.person"
+                    "namespace":"ns.knowledge.person.canonical",
+                    "index":[
+                        "person id",
+                        "tmdb person id"
+                    ]
                 },
                 "service.document.knowledge.company":{
                     "match":[
@@ -1678,22 +1731,22 @@
                         "release year"
                     ]
                 },
-                "service.document.tmdb.movie.cast":{
+                "service.document.tmdb.movie.people":{
                     "match":[
                         {
-                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/cast$",
+                            "filter":"^/c/tmdb/movie/(?P<tmdb_movie_id>[0-9]+)/people$",
                             "query parameter":["api key"],
                             "remote":"movie/{tmdb movie id}/casts"
                         }
                     ],
                     "resolvable":[
                         {
-                            "name":"tmdb movie cast by tmdb id",
-                            "format":"/c/tmdb/movie/{tmdb movie id}/cast",
+                            "name":"tmdb movie people by tmdb id",
+                            "format":"/c/tmdb/movie/{tmdb movie id}/people",
                             "canonical":true
                         }
                     ],
-                    "collection":"tmdb_movie_cast",
+                    "collection":"tmdb_movie_people",
                     "namespace":"ns.knowledge.movie",
                     "index":["tmdb movie id"]
                 },
@@ -2014,29 +2067,29 @@
                     "namespace":"ns.knowledge.tv.show",
                     "type":"xml"
                 },
-                "service.document.tvdb.tv.show.cast":{
+                "service.document.tvdb.tv.show.people":{
                     "match":[
                         {
-                            "filter":"^/c/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/cast$",
+                            "filter":"^/c/tvdb/tv/show/(?P<tvdb_tv_show_id>[0-9]+)/people$",
                             "remote":"{api key}/series/{tvdb tv show id}/actors.xml"
                         }
                     ],
                     "resolvable":[
                         {
-                            "name":"tvdb show cast by tvdb show id",
-                            "format":"/c/tvdb/tv/show/{tvdb tv show id}/cast",
+                            "name":"tvdb show people by tvdb show id",
+                            "format":"/c/tvdb/tv/show/{tvdb tv show id}/people",
                             "canonical":true
                         }
                     ],
                     "produce":[
                         {
                             "tag":"Actor",
-                            "reference":"service.document.tvdb.tv.show.cast",
+                            "reference":"service.document.tvdb.tv.show.people",
                             "coalesce":true
                         }
                     ],
                     "index":["tvdb tv show id"],
-                    "collection":"tvdb_tv_show_cast",
+                    "collection":"tvdb_tv_show_people",
                     "namespace":"ns.knowledge.tv.show",
                     "type":"xml"
                 },
@@ -2208,7 +2261,7 @@
                         },
                         {
                             "tag":"Actor",
-                            "reference":"service.document.tvdb.tv.show.cast",
+                            "reference":"service.document.tvdb.tv.show.people",
                             "coalesce":true
                         }
                     ],
@@ -2792,22 +2845,22 @@
                     "type":"json",
                     "index":["rottentomatoes movie id"]
                 },
-                "service.document.rottentomatoes.movie.cast":{
+                "service.document.rottentomatoes.movie.people":{
                     "match":[
                         {
-                            "filter":"^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/cast$",
+                            "filter":"^/c/rottentomatoes/movie/(?P<rottentomatoes_movie_id>[0-9]+)/people$",
                             "query parameter":["api key"],
                             "remote":"movies/{rottentomatoes movie id}/cast.json"
                         }
                     ],
                     "resolvable":[
                         {
-                            "name":"rotten tomatoes movie cast by rottentomatoes movie id",
-                            "format":"/c/rottentomatoes/movie/{rottentomatoes movie id}/cast",
+                            "name":"rotten tomatoes movie people by rottentomatoes movie id",
+                            "format":"/c/rottentomatoes/movie/{rottentomatoes movie id}/people",
                             "canonical":true
                         }
                     ],
-                    "collection":"rottentomatoes_movie_cast",
+                    "collection":"rottentomatoes_movie_people",
                     "namespace":"ns.knowledge.movie",
                     "type":"json",
                     "index":["rottentomatoes movie id"]

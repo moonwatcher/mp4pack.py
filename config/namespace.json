@@ -1556,6 +1556,25 @@
             "rule":[]
         },
         
+        "ns.knowledge.person.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "person id":null,
+                "birthday":null,
+                "deathday":null,
+                "homepage":null,
+                "person name":null,
+                "biography":null,
+                "place of birth":null,
+                "profile url":null,
+                "profiles":null,
+                "credit":null,
+                "simple person name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.person"
+            ]
+        },
         "ns.knowledge.movie.canonical":{
             "synonym":["keyword"],
             "element":{
@@ -1676,7 +1695,6 @@
                 "tv episode name":null,
                 "tv show name":null,
                 "absolute tv episode number":null,
-                "modified date":null,
                 "language":null,
                 "release date":null,
                 "release year":null,
@@ -1697,7 +1715,7 @@
                 "rule.knowledge.release.year"
             ]
         },
-        "ns.knowledge.tv.episode.cast.canonical":{
+        "ns.knowledge.tv.episode.people.canonical":{
             "synonym":["keyword"],
             "element":{
                 "tv show id":null,
@@ -2525,6 +2543,21 @@
         },
         "ns.knowledge.person":{
             "synonym":["keyword", "tmdb", "itunes"],
+            "normalize":[
+                {
+                    "action":"complement",
+                    "element":"cast",
+                    "extention":{
+                        "department":"Acting",
+                        "job":"Actor"
+                    }
+                },
+                {
+                    "action":"coalesce",
+                    "source":[ "cast", "crew" ],
+                    "target":"credit"
+                }
+            ],
             "element":{
                 "person id":null,
                 "itunes person id":{
@@ -2566,6 +2599,7 @@
                     "tmdb":"crew",
                     "namespace":"ns.knowledge.person.credit"
                 },
+                "credit":null,
                 "simple person name":null
             },
             "rule":[
@@ -2653,7 +2687,7 @@
                 "native language name":null
             }
         },
-        "ns.knowledge.cast":{
+        "ns.knowledge.people":{
             "synonym":["keyword", "tmdb", "tvdb"],
             "element":{
                 "tvdb person id":{
