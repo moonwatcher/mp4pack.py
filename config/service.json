@@ -44,12 +44,12 @@
                     "resolvable":[
                         {
                             "name":"movie home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"movie home by id",
-                            "format":"/h/movie/{movie id}"
+                            "format":"/h/movie/{movie id}",
+                            "canonical":true
                         },
                         {
                             "name":"movie home by handle",
@@ -110,12 +110,12 @@
                     "resolvable":[
                         {
                             "name":"show home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"show home by tv show id",
-                            "format":"/h/tv/show/{tv show id}"
+                            "format":"/h/tv/show/{tv show id}",
+                            "canonical":true
                         },
                         {
                             "name":"show home by tv show handle",
@@ -187,12 +187,12 @@
                     "resolvable":[
                         {
                             "name":"season home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"season home by tv season id",
-                            "format":"/h/tv/season/{tv season id}"
+                            "format":"/h/tv/season/{tv season id}",
+                            "canonical":true
                         },
                         {
                             "name":"season home by tv show id",
@@ -301,12 +301,13 @@
                     "resolvable":[
                         {
                             "name":"episode home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"episode home by tv episode id",
-                            "format":"/h/tv/episode/{tv episode id}"
+                            "format":"/h/tv/episode/{tv episode id}",
+                            "canonical":true
+                            
                         },
                         {
                             "name":"episode home by tv season id",
@@ -394,12 +395,13 @@
                     "resolvable":[
                         {
                             "name":"music album home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"music album home by music album id",
-                            "format":"/h/music/album/{music album id}"
+                            "format":"/h/music/album/{music album id}",
+                            "canonical":true
+                            
                         },
                         {
                             "name":"music album home by itunes music album id",
@@ -450,12 +452,12 @@
                     "resolvable":[
                         {
                             "name":"music track home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"music track home by track id",
-                            "format":"/h/music/track/{track id}"
+                            "format":"/h/music/track/{track id}",
+                            "canonical":true
                         },
                         {
                             "name":"music track home by music album id",
@@ -512,12 +514,12 @@
                     "resolvable":[
                         {
                             "name":"person home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"person home by person id",
-                            "format":"/h/person/{person id}"
+                            "format":"/h/person/{person id}",
+                            "canonical":true
                         },
                         {
                             "name":"person home by tmdb person id",
@@ -551,12 +553,12 @@
                     "resolvable":[
                         {
                             "name":"company home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"company home by company id",
-                            "format":"/h/company/{company id}"
+                            "format":"/h/company/{company id}",
+                            "canonical":true
                         },
                         {
                             "name":"company home by tmdb company id",
@@ -589,12 +591,12 @@
                     "resolvable":[
                         {
                             "name":"genre home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"genre home by genre id",
-                            "format":"/h/genre/{genre id}"
+                            "format":"/h/genre/{genre id}",
+                            "canonical":true
                         },
                         {
                             "name":"genre home by tmdb genre id",
@@ -624,12 +626,12 @@
                     "resolvable":[
                         {
                             "name":"job home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"job home by job id",
-                            "format":"/h/job/{job id}"
+                            "format":"/h/job/{job id}",
+                            "canonical":true
                         }
                     ],
                     "collection":"home",
@@ -644,12 +646,12 @@
                     "resolvable":[
                         {
                             "name":"department home by home id",
-                            "format":"/h/{home id}",
-                            "canonical":true
+                            "format":"/h/{home id}"
                         },
                         {
                             "name":"department home by department id",
-                            "format":"/h/department/{department id}"
+                            "format":"/h/department/{department id}",
+                            "canonical":true
                         }
                     ],
                     "collection":"home",
@@ -851,7 +853,6 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
-                        "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
                         "itunes movie id"
@@ -932,6 +933,9 @@
                             "uri":"/c/tmdb/movie/{tmdb movie id}/alternative"
                         }
                     ],
+                    "collect":[
+                        "/h/movie/{movie id}"
+                    ],
                     "resolvable":[
                         {
                             "name":"movie alternative knowledge",
@@ -944,7 +948,6 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
-                        "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
                         "itunes movie id"

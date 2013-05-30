@@ -62,6 +62,9 @@
                 "query":{
                     "plural format":"eval"
                 },
+                "genealogy":{
+                    "plural format":"eval"
+                },
                 "tables":null,
                 "all":{
                     "auto cast":false
@@ -112,6 +115,7 @@
                     "auto cast":false
                 },
                 "query":null,
+                "genealogy":null,
                 "implementation":null,
                 "tables":null,
                 "all":{
@@ -155,6 +159,7 @@
                     "auto cast":false
                 },
                 "query":null,
+                "genealogy":null,
                 "tables":null,
                 "all":{
                     "auto cast":false
@@ -1595,7 +1600,9 @@
                 "description":null,
                 "long description":null,
                 "genres":null,
+                "titles":null,
                 "keywords":null,
+                "languages":null,
                 "production companies":null,
                 "backdrops":null,
                 "posters":null,
@@ -2065,19 +2072,14 @@
                 "long description":{
                     "itunes":"longDescription"
                 },
-                "backdrop url":{
-                    "tmdb":"backdrop_path"
-                },
-                "poster url":{
-                    "tmdb":"poster_path"
-                },
                 "genres":{
                     "tmdb":"genres"
                 },
                 "keywords":{
-                    "tmdb":"keywords",
-                    "namespace":"ns.knowledge.keyword",
-                    "type":"embed"
+                    "tmdb":"keywords"
+                },
+                "languages":{
+                    "tmdb":"translations"
                 },
                 "production companies":{
                     "tmdb":"production_companies"
@@ -2833,6 +2835,14 @@
                 "release date":{
                     "tvdb":"FirstAired",
                     "tmdb":"release_date"
+                }
+            }
+        },
+        "ns.knowledge.language":{
+            "synonym":["keyword", "tmdb"],
+            "element":{
+                "language":{
+                    "tmdb":"iso_639_1"
                 }
             }
         },

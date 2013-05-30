@@ -27,6 +27,18 @@
                 },
                 {
                     "instruction":{
+                        "name":"set",
+                        "help":"Set values on documents"
+                    },
+                    "argument":[
+                        "uris",
+                        "sync",
+                        "download",
+                        "genealogy"
+                    ]
+                },
+                {
+                    "instruction":{
                         "name":"drop",
                         "help":"Drop documents"
                     },
@@ -381,6 +393,14 @@
                         "help":"List of URIs",
                         "nargs":"*",
                         "metavar":"URI"
+                    }
+                },
+                "genealogy":{
+                    "flag":["-g", "--genealogy"],
+                    "parameter":{ 
+                        "help":"Dictionary of Genealogy elements",
+                        "dest":"genealogy",
+                        "metavar":"DICT"
                     }
                 },
                 "query":{

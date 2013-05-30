@@ -432,6 +432,18 @@ class ServiceTask(Task):
         print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
     
+    def set(self):
+        genealogy = Ontology(self.env, 'ns.service.genealogy', self.document['head']['genealogy'])
+        genealogy.merge_all(self.ontology['genealogy'])
+        self.document['head']['genealogy'] = genealogy.node
+        
+        # persist document
+        self.env.resolver.save(self.document)
+        
+        # refetch the document
+        self.document = self.env.resolver.resolve(self.uri, self.ontology['query'])
+    
+    
     def drop(self):
         self.env.resolver.remove(self.uri)
     

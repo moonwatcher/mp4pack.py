@@ -13,6 +13,13 @@
                 },
                 {
                     "requires":["action"],
+                    "equal":{"action":"set"},
+                    "apply":[
+                        {"property":"implementation", "value":"ServiceJob"}
+                    ]
+                },
+                {
+                    "requires":["action"],
                     "equal":{"action":"drop"},
                     "apply":[
                         {"property":"implementation", "value":"ServiceJob"}

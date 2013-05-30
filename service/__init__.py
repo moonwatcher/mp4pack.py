@@ -362,9 +362,9 @@ class ResourceHandler(object):
     def store(self, query):
         for entry in query['entires']:
             if entry['branch']['persistent']:
-            
+                
                 # normalize the canonical ontology on the record
-                if 'body' in entry['record'] and 'canonical' in entry['record']['body']:
+                if 'body' in entry['record'] and entry['record']['body'] and 'canonical' in entry['record']['body']:
                     entry['record']['body']['canonical'].normalize()
 
                 

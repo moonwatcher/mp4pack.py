@@ -10,6 +10,14 @@
             "keyword":"home_id",
             "type":"int"
         },
+        "genealogy":{
+            "name":"Genealogy",
+            "keyword":"genealogy",
+            "type":"unicode",
+            "plural":"dict",
+            "namespace":"ns.service.genealogy",
+            "plural format":"eval"
+        },
         "music album id":{
             "name":"Music album ID",
             "keyword":"music_album_id",
@@ -1524,8 +1532,9 @@
         "keywords":{
             "name":"Keywords",
             "keyword":"keywords",
-            "type":"unicode",
-            "plural":"list"
+            "type":"embed",
+            "plural":"list",
+            "namespace":"ns.knowledge.keyword"
         },
         "actors":{
             "name":"Actors",
@@ -1658,6 +1667,13 @@
             "keyword":"certification",
             "type":"embed",
             "namespace":"ns.knowledge.certification",
+            "plural":"list"
+        },
+        "languages":{
+            "name":"Languages",
+            "keyword":"languages",
+            "type":"embed",
+            "namespace":"ns.knowledge.language",
             "plural":"list"
         },
         "titles":{
