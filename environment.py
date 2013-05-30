@@ -772,7 +772,7 @@ class CommandLineParser(object):
                 # Add the enumeration constrains
                 if archetype['type'] == 'enum':
                     enumeration = self.env.enumeration[archetype['enumeration']]
-                    argument['parameter']['choices'] = enumeration.synonym.keys()
+                    argument['parameter']['choices'] = enumeration.synonym[argument['axis']].keys()
                     
         # Add global arguments
         for argument in self.node['global']['argument']:

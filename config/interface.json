@@ -4,11 +4,11 @@
             "namespace":"ns.system.command.default",
             "global":{
                 "argument":[
-                    "verbosity",
                     "domain",
                     "host",
                     "configuration path",
                     "debug",
+                    "verbosity",
                     "version"
                 ]
             },
@@ -377,7 +377,8 @@
                         "help":"Select language by ISO 639-1 2 letter code",
                         "metavar":"CODE",
                         "dest":"language"
-                    }
+                    },
+                    "axis":"ISO 639-1"
                 },
                 "scan path":{
                     "flag":["scan path"],
@@ -451,22 +452,26 @@
                     "parameter":{
                         "help":"Source frame rate",
                         "dest":"source frame rate"
-                    }
+                    },
+                    "axis":"long"
                 },
                 "target frame rate":{
                     "flag":["--to"],
                     "parameter":{
                         "help":"Target frame rate",
                         "dest":"target frame rate"
-                    }
+                    },
+                    "axis":"long"
                 },
                 "verbosity":{
                     "flag":["-v", "--verbosity"],
                     "parameter":{ 
                         "default":"info",
                         "help":"logging verbosity level",
-                        "dest":"verbosity"
-                    }
+                        "dest":"verbosity",
+                        "metavar":"LEVEL"
+                    },
+                    "axis":"code"
                 },
                 "debug":{
                     "flag":["-d", "--debug"],
