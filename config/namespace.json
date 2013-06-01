@@ -249,7 +249,8 @@
                 "simple tv episode name":null,
                 "simple movie title":null,
                 "simple music album name":null,
-                "simple music track name":null
+                "simple music track name":null,
+                "routing type":null
             },
             "rule":[
                 "rule.medium.resource.filename.fragment",
