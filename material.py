@@ -735,14 +735,20 @@ class RawAudio(Container):
                 
                 command = self.env.initialize_command('ffmpeg', self.log)
                 if command:
+                    # make ffmpeg not check for overwrite, we already do this check
+                    command.append(u'-y')
+                    
+                    # set the number of processing threads
                     command.append(u'-threads')
                     command.append(unicode(self.env.system['threads']))
+                    
+                    # set the input file
                     command.append(u'-i')
                     command.append(self.path)
                     
                     for k,v in stream['ffmpeg parameters'].iteritems():
                         command.append(k)
-                        command.append(unicode(v))
+                        if v is not None: command.append(unicode(v))
                         
                     command.append(product.path)
                     message = u'Transcode {0} --> {1}'.format(self.path, product.path)
