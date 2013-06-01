@@ -279,7 +279,8 @@
                 "rule.knowledge.simple.name.music.album",
                 "rule.knowledge.simple.name.music.track",
                 "rule.knowledge.release.year",
-                "rule.medium.home.umid"
+                "rule.medium.home.umid",
+                "rule.system.default.routing.type"
             ]
         },
         "ns.medium.resource.location":{
