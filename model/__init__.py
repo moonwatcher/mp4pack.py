@@ -162,7 +162,7 @@ class ResourceTransform(object):
                     for branch in template['branch']:
                         taken = False
                         for pivot in self.pivot.values():
-                            if pivot.location.match(branch['equal']):
+                            if pivot.location.match(branch):
                                 taken = pivot.transform(template)
                                 if template['mode'] == 'choose':
                                     break
@@ -245,7 +245,7 @@ class ResourcePivot(object):
                 for branch in rule['branch']:
                     taken = False
                     for stream in self.resource.stream:
-                        if stream.match(branch['equal']):
+                        if stream.match(branch):
                             taken = True
                             s = Ontology.clone(stream)
                             s['resource path digest'] = self.resource.location['path digest']
