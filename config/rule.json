@@ -830,7 +830,7 @@
             "provide":["file name"],
             "branch":[
                 {
-                    "requires":["canonic file name"],
+                    "requires":["canonic file name", "routing type"],
                     "equal":{"routing type":"repository"},
                     "apply":[
                         {
@@ -840,7 +840,7 @@
                     ]
                 },
                 {
-                    "requires":["fragment file name"],
+                    "requires":["fragment file name", "routing type"],
                     "equal":{"routing type":"fragment"},
                     "apply":[
                         {
@@ -856,7 +856,7 @@
             "provide":["directory"],
             "branch":[
                 {
-                    "requires":["canonic directory"],
+                    "requires":["canonic directory", "routing type"],
                     "equal":{"routing type":"repository"},
                     "apply":[
                         {
@@ -866,7 +866,7 @@
                     ]
                 },
                 {
-                    "requires":["fragment directory"],
+                    "requires":["fragment directory", "routing type"],
                     "equal":{"routing type":"fragment"},
                     "apply":[
                         {

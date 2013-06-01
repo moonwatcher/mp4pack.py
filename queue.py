@@ -376,7 +376,7 @@ class ResourceTask(Task):
                 'routing type'
             ]:
                 if i in override: o[i] = override[i]
-                    
+                
         # try to produce the resource
         product = self.resource.asset.locate_resource(o)
         if product:
