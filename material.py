@@ -613,8 +613,8 @@ class Matroska(AudioVideoContainer):
                                 taken = True
                                 
                                 # enqueue a task for transcoding
-                                if 'task' in stream:
-                                    for t in stream['task']:
+                                if 'tasks' in stream:
+                                    for t in stream['tasks']:
                                         o = task.job.ontology.project('ns.system.task')
                                         for i in t: o[i] = t[i]
                                         task.job.enqueue(queue.ResourceTask(task.job, o, product.path))

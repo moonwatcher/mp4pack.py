@@ -663,6 +663,13 @@
             "keyword":"port",
             "type":"int"
         },
+        "tasks":{
+            "name":"Tasks",
+            "keyword":"tasks",
+            "type":"embed",
+            "namespace":"ns.system.task",
+            "plural":"list"
+        },
         "routing type":{
             "name":"Routing type",
             "keyword":"routing_type",

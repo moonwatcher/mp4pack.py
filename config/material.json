@@ -23,14 +23,30 @@
                                     "branch":[
                                         {"stream kind":"caption", "language":"he"}
                                     ],
-                                    "override":{"routing type":"fragment"}
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt"
+                                            }
+                                        ]
+                                    }
                                 },
                                 {
                                     "mode":"choose",
                                     "branch":[
                                         {"stream kind":"caption", "language":"en"}
                                     ],
-                                    "override":{"routing type":"fragment"}
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt"
+                                            }
+                                        ]
+                                    }
                                 },
                                 {
                                     "mode":"select",
@@ -39,7 +55,7 @@
                                     ],
                                     "override":{
                                         "routing type":"fragment",
-                                        "task":[
+                                        "tasks":[
                                             {
                                                 "action":"transcode",
                                                 "routing type":"fragment",
