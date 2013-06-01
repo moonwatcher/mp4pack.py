@@ -10,6 +10,7 @@ from ontology import Ontology
 from model.menu import Chapter, Menu
 from model.caption import Caption
 from crawler import Crawler
+import queue
 
 class MaterialCache(object):
     def __init__(self, env):
@@ -408,10 +409,6 @@ class AudioVideoContainer(Container):
                 stream['enabled'] = False
                 product = task.produce(stream)
                 if product:
-                    # assemble a temp file name for the exploded stream
-                    product.location['file name'] = product.location['fragment file name']
-                    product.location['directory'] = product.location['fragment directory']
-                    
                     if self.env.check_path_availability(product.path, task.ontology['overwrite']):
                         product.menu = Menu.from_node(self.env, stream['content'])
                         product.write(product.path)
@@ -599,23 +596,28 @@ class Matroska(AudioVideoContainer):
         if command:
             command.extend([u'tracks', self.path ])
             taken = False
-            for stream in task.transform.single_pivot.stream:
-                if stream['enabled']:
-                    product = task.produce(stream)
-                    if product:
-                        stream['enabled'] = False
-
-                        # assemble a temp file name for the exploded stream
-                        product.location['file name'] = product.location['fragment file name']
-                        product.location['directory'] = product.location['fragment directory']
-
-                        if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                            # Leave a hint about the delay
-                            if 'delay' in stream: product.hint['delay'] = stream['delay']
-                            
-                            # extract th stream
-                            command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
-                            taken = True
+            
+            for pivot in task.transform.pivot.values():
+                for stream in pivot.stream:
+                    if stream['enabled']:
+                        product = task.produce(stream)
+                        if product:
+                            stream['enabled'] = False
+    
+                            if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                                # Leave a hint about the delay
+                                if 'delay' in stream: product.hint['delay'] = stream['delay']
+                                
+                                # extract th stream
+                                command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
+                                taken = True
+                                
+                                # enqueue a task for transcoding
+                                if 'task' in stream:
+                                    for t in stream['task']:
+                                        o = task.job.ontology.project('ns.system.task')
+                                        for i in t: o[i] = t[i]
+                                        task.job.enqueue(queue.ResourceTask(task.job, o, product.path))
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
                 self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)

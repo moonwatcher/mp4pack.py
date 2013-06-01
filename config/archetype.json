@@ -663,13 +663,18 @@
             "keyword":"port",
             "type":"int"
         },
+        "routing type":{
+            "name":"Routing type",
+            "keyword":"routing_type",
+            "type":"unicode"
+        },
         "path":{
             "name":"Path",
             "keyword":"path",
             "type":"unicode"
         },
         "path digest":{
-            "name":"Path SHA1",
+            "name":"Path digest",
             "keyword":"path_digest",
             "type":"unicode"
         },

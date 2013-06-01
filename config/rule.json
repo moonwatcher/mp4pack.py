@@ -195,6 +195,17 @@
                 }
             ]
         },
+        "rule.system.default.routing.type":{
+            "name":"Default routing type",
+            "provide":["routing type"],
+            "branch":[
+                {
+                    "apply":[
+                        {"property":"routing type", "value":"repository"}
+                    ]
+                }
+            ]
+        },
         "rule.system.mongodb.url":{
             "name":"MongoDB connection URL",
             "provide":["mongodb url"],
@@ -820,10 +831,21 @@
             "branch":[
                 {
                     "requires":["canonic file name"],
+                    "equal":{"routing type":"repository"},
                     "apply":[
                         {
                             "property":"file name",
                             "reference":"canonic file name"
+                        }
+                    ]
+                },
+                {
+                    "requires":["fragment file name"],
+                    "equal":{"routing type":"fragment"},
+                    "apply":[
+                        {
+                            "property":"file name",
+                            "reference":"fragment file name"
                         }
                     ]
                 }
@@ -835,25 +857,21 @@
             "branch":[
                 {
                     "requires":["canonic directory"],
+                    "equal":{"routing type":"repository"},
                     "apply":[
                         {
                             "property":"directory",
                             "reference":"canonic directory"
                         }
                     ]
-                }
-            ]
-        },
-        "rule.medium.resource.path.implicit":{
-            "name":"implicit path",
-            "provide":["path"],
-            "branch":[
+                },
                 {
-                    "requires":["directory", "file name"],
+                    "requires":["fragment directory"],
+                    "equal":{"routing type":"fragment"},
                     "apply":[
                         {
-                            "property":"path",
-                            "format":"{directory}/{file name}"
+                            "property":"directory",
+                            "reference":"fragment directory"
                         }
                     ]
                 }
@@ -900,21 +918,21 @@
                 }
             ]
         },
-        "rule.medium.resource.path.fragment":{
-            "name":"Fragment path",
-            "provide":["fragment path"],
+        "rule.medium.resource.path.implicit":{
+            "name":"implicit path",
+            "provide":["path"],
             "branch":[
                 {
-                    "requires":["fragment directory", "fragment file name"],
+                    "requires":["directory", "file name"],
                     "apply":[
                         {
-                            "property":"fragment path",
-                            "format":"{fragment directory}/{fragment file name}"
+                            "property":"path",
+                            "format":"{directory}/{file name}"
                         }
                     ]
                 }
             ]
-        },        
+        },
         "rule.medium.resource.kind.language":{
             "name":"Kind language dependency",
             "provide":["localized"],

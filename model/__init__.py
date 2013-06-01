@@ -149,13 +149,12 @@ class ResourceTransform(object):
             # First use the pivot section to select resources to pivot
             if 'pivot' in preset['action'][action]:
                 for branch in preset['action'][action]['pivot']:
-                    if 'operator' in branch:
-                        operator = getattr(self, branch['operator'], None)
-                        if operator:
-                            if 'constraint' in branch:
-                                operator(branch['constraint'])
-                            else:
-                                operator()
+                    operator = getattr(self, branch['operator'], None)
+                    if operator:
+                        if 'constraint' in branch:
+                            operator(branch['constraint'])
+                        else:
+                            operator()
                                 
             # Than use the transform to resolve the pivots on the selected resources
             if 'transform' in preset['action'][action] and self.pivot:
@@ -163,7 +162,7 @@ class ResourceTransform(object):
                     for branch in template['branch']:
                         taken = False
                         for pivot in self.pivot.values():
-                            if pivot.location.match(branch):
+                            if pivot.location.match(branch['equal']):
                                 taken = pivot.transform(template)
                                 if template['mode'] == 'choose':
                                     break
@@ -246,7 +245,7 @@ class ResourcePivot(object):
                 for branch in rule['branch']:
                     taken = False
                     for stream in self.resource.stream:
-                        if stream.match(branch):
+                        if stream.match(branch['equal']):
                             taken = True
                             s = Ontology.clone(stream)
                             s['resource path digest'] = self.resource.location['path digest']
