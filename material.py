@@ -416,7 +416,7 @@ class AudioVideoContainer(Container):
                         if 'tasks' in stream:
                             for o in stream['tasks']:
                                 t = task.job.ontology.project('ns.system.task')
-                                for i in t: t[i] = o[i]
+                                for i in o: t[i] = o[i]
                                 task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
     
     
@@ -622,7 +622,7 @@ class Matroska(AudioVideoContainer):
                                 if 'tasks' in stream:
                                     for o in stream['tasks']:
                                         t = task.job.ontology.project('ns.system.task')
-                                        for i in t: t[i] = o[i]
+                                        for i in o: t[i] = o[i]
                                         task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
