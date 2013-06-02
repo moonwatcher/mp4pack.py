@@ -201,7 +201,6 @@ class ResourceHandler(object):
                                 },
                             ],
                         }
-                        self.log.debug(u'Saving %s', query['uri'])
                         self.store(query)
                     break
             if taken: break
