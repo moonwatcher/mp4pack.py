@@ -297,7 +297,6 @@ class Resource(object):
         if self.available:
             if self.volatile:
                 self.env.resolver.save(self.node)
-                self.log.debug(u'Saved resource document %s', unicode(self))
                 self._node = None
                 self.volatile = False
         else:
@@ -412,6 +411,13 @@ class AudioVideoContainer(Container):
                     if self.env.check_path_availability(product.path, task.ontology['overwrite']):
                         product.menu = Menu.from_node(self.env, stream['content'])
                         product.write(product.path)
+
+                        # enqueue a task for transcoding
+                        if 'tasks' in stream:
+                            for o in stream['tasks']:
+                                t = task.job.ontology.project('ns.system.task')
+                                for i in t: t[i] = o[i]
+                                task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
     
     
     def pack(self, task):
@@ -608,16 +614,16 @@ class Matroska(AudioVideoContainer):
                                 # Leave a hint about the delay
                                 if 'delay' in stream: product.hint['delay'] = stream['delay']
                                 
-                                # extract th stream
+                                # add a clause to the command to extract the stream
                                 command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
                                 taken = True
                                 
                                 # enqueue a task for transcoding
                                 if 'tasks' in stream:
-                                    for t in stream['tasks']:
-                                        o = task.job.ontology.project('ns.system.task')
-                                        for i in t: o[i] = t[i]
-                                        task.job.enqueue(queue.ResourceTask(task.job, o, product.path))
+                                    for o in stream['tasks']:
+                                        t = task.job.ontology.project('ns.system.task')
+                                        for i in t: t[i] = o[i]
+                                        task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
             if taken:
                 message = u'Extract tracks from {}'.format(unicode(self))
                 self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
