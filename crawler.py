@@ -100,7 +100,7 @@ class Crawler(object):
     
     
     def _load_ogg_chapters(self):
-        if self.ontology['kind'] == 'chpl':
+        if self.ontology['kind'] == 'chp':
             content = self._read()
             if content:
                 content = content.splitlines()

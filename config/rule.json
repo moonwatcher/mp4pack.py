@@ -981,7 +981,7 @@
                 },
                 {
                     "requires":["kind"],
-                    "equal":{"kind":"chpl" },
+                    "equal":{"kind":"chp" },
                     "apply":[
                         { "property":"localized", "value":true }
                     ]
@@ -1280,7 +1280,7 @@
                     "requires":["stream kind"],
                     "equal":{"stream kind":"menu"},
                     "apply":[
-                        { "property":"kind", "value":"chpl" }
+                        { "property":"kind", "value":"chp" }
                     ]
                 }
             ]

@@ -63,7 +63,7 @@
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"chpl"},
+                    "equal":{"host":"shaft", "kind":"chp"},
                     "apply":[
                         {"property":"volume", "value":"alpha"},
                         {"property":"profile", "value":"normal"}

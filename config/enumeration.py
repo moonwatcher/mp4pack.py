@@ -96,7 +96,7 @@
                 'avi':{ 'container':'avi',           'localized':False,  'name':u'AVI video file',  },
                 'srt':{ 'container':'Subtitles',     'localized':True,   'name':u'SRT subtitles file',  },
                 'ass':{ 'container':'Subtitles',     'localized':True,   'name':u'ASS subtitle file',  },
-                'chpl':{'container':'TableOfContent','localized':True,   'name':u'OGG chapter file',  },
+                'chp':{'container':'TableOfContent','localized':True,   'name':u'OGG chapter file',  },
                 'jpg':{ 'container':'Artwork',       'localized':True,   'name':u'JPEG image file',  },
                 'png':{ 'container':'Artwork',       'localized':True,   'name':u'PNG image file',  },
                 'ac3':{ 'container':'RawAudio',      'localized':True,   'name':u'AC-3 raw audio',  },

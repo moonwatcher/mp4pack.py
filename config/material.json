@@ -69,14 +69,31 @@
                                     "branch":[
                                         {"stream kind":"audio", "kind":"flac"}
                                     ],
-                                    "override":{"routing type":"fragment"}
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "routing type":"fragment",
+                                                "kind":"ac3"
+                                            }
+                                        ]
+                                    }
                                 },
                                 {
                                     "mode":"choose",
                                     "branch":[
                                         {"stream kind":"menu"}
                                     ],
-                                    "override":{"routing type":"fragment"}
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "kind":"chp"
+                                            }
+                                        ]
+                                    }
                                 }
                             ]
                         },
@@ -90,7 +107,16 @@
                                     "mode":"choose",
                                     "branch":[
                                         {"stream kind":"menu"}
-                                    ]
+                                    ],
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "kind":"chp"
+                                            }
+                                        ]
+                                    }
                                 }
                             ]
                         }
@@ -100,7 +126,7 @@
                     "pivot":[
                         { "operator":"this" },
                         { "operator":"select", "constraint":{"kind":"srt"} },
-                        { "operator":"select", "constraint":{"kind":"chpl"} },
+                        { "operator":"select", "constraint":{"kind":"chp"} },
                         { "operator":"select", "constraint":{"kind":"ac3"} }
                     ],
                     "transform":[
@@ -148,9 +174,9 @@
                             "description":"First of hebrew or english or other chapter track",
                             "mode":"choose",
                             "branch":[
-                                {"kind":"chpl", "language":"he"},
-                                {"kind":"chpl", "language":"en"},
-                                {"kind":"chpl"}
+                                {"kind":"chp", "language":"he"},
+                                {"kind":"chp", "language":"en"},
+                                {"kind":"chp"}
                             ],
                             "track":[
                                 {
@@ -415,7 +441,7 @@
                             "description":"menu",
                             "mode":"select",
                             "branch":[
-                                {"kind":"chpl"}
+                                {"kind":"chp"}
                             ],
                             "track":[
                                 {
@@ -432,7 +458,7 @@
                 "update":{
                     "pivot":[
                         { "operator":"select", "constraint":{"kind":"srt"} },
-                        { "operator":"select", "constraint":{"kind":"chpl"} },
+                        { "operator":"select", "constraint":{"kind":"chp"} },
                         { "operator":"select", "constraint":{"kind":"png"} }
                     ],
                     "transform":[
@@ -496,8 +522,8 @@
                             "description":"First of hebrew or english chapter track",
                             "mode":"choose",
                             "branch":[
-                                {"kind":"chpl", "language":"he"},
-                                {"kind":"chpl", "language":"en"}
+                                {"kind":"chp", "language":"he"},
+                                {"kind":"chp", "language":"en"}
                             ],
                             "track":[
                                 {

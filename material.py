@@ -697,7 +697,7 @@ class MP4(AudioVideoContainer):
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                     
-            elif pivot.location['kind'] == 'chpl':
+            elif pivot.location['kind'] == 'chp':
                 message = u'Update chapters {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
