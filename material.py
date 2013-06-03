@@ -864,7 +864,7 @@ class TableOfContent(Text):
         return result
     
     
-    def transcode(self, task):did i 
+    def transcode(self, task):
         product = task.produce(task.ontology)
         if product:
             product.menu = self.menu
