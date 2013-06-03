@@ -316,7 +316,7 @@ class Resource(object):
     
     def info(self, task):
     	print json.dumps(self.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-    	print json.dumps(self.knowledge, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
+    	# print json.dumps(self.knowledge, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
     
     def copy(self, task):
@@ -349,6 +349,7 @@ class Resource(object):
                 else:
                     self.log.warning(u'Refuse to overwrite destination %s with %s', product.path, self.path)
     
+    
     def delete(self, task):
         command = self.env.initialize_command('rm', self.log)
         if command:
@@ -356,9 +357,6 @@ class Resource(object):
             message = u'Remove {0}'.format(self.path)
             self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
             self.env.purge_if_not_exist(self.path)
-    
-    
-    
     
 
 
@@ -409,8 +407,9 @@ class AudioVideoContainer(Container):
                 product = task.produce(stream)
                 if product:
                     if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                        product.menu = Menu.from_node(self.env, stream['content'])
-                        product.write(product.path)
+                        if not task.ontology['debug']:
+                            product.menu = Menu.from_node(self.env, stream['content'])
+                            product.write(product.path)
 
                         # enqueue a task for transcoding
                         if 'tasks' in stream:
@@ -489,33 +488,35 @@ class AudioVideoContainer(Container):
                         command.append(u'--video-tracks')
                         command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'video']))
                         
-                    # Iterate the tracks
-                    for stream in pivot.stream:
-                        if stream['stream kind'] != 'menu':
-                            if 'language' in stream:
-                                command.append(u'--language')
-                                command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
+                    # Only if at least one stream was chosen
+                    if pivot.stream:
+                        # Iterate the tracks
+                        for stream in pivot.stream:
+                            if stream['stream kind'] != 'menu':
+                                if 'language' in stream:
+                                    command.append(u'--language')
+                                    command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
+                                    
+                                if 'stream name' in stream:
+                                    command.append(u'--track-name')
+                                    command.append(u'{0}:{1}'.format(stream['stream id'], stream['stream name']))
+                                    
+                                if 'delay' in pivot.resource.hint:
+                                    command.append(u'--sync')
+                                    command.append(u'{0}:{1}'.format(stream['stream id'], pivot.resource.hint['delay']))
+                                    
+                                if stream['kind'] == 'srt':
+                                    command.append(u'--sub-charset')
+                                    command.append(u'{0}:{1}'.format(stream['stream id'], u'UTF-8'))
+                                    
+                            else:
+                                command.append(u'--chapter-language')
+                                command.append(self.env.enumeration['language'].find(stream['language']).node['ISO 639-1'])
+                                command.append(u'--chapter-charset')
+                                command.append(u'UTF-8')
+                                command.append(u'--chapters')
                                 
-                            if 'stream name' in stream:
-                                command.append(u'--track-name')
-                                command.append(u'{0}:{1}'.format(stream['stream id'], stream['stream name']))
-                                
-                            if 'delay' in pivot.resource.hint:
-                                command.append(u'--sync')
-                                command.append(u'{0}:{1}'.format(stream['stream id'], pivot.resource.hint['delay']))
-                                
-                            if stream['kind'] == 'srt':
-                                command.append(u'--sub-charset')
-                                command.append(u'{0}:{1}'.format(stream['stream id'], u'UTF-8'))
-                                
-                        else:
-                            command.append(u'--chapter-language')
-                            command.append(self.env.enumeration['language'].find(stream['language']).node['ISO 639-1'])
-                            command.append(u'--chapter-charset')
-                            command.append(u'UTF-8')
-                            command.append(u'--chapters')
-                            
-                    command.append(pivot.resource.path)
+                        command.append(pivot.resource.path)
                     
                 message = u'Pack {0} --> {1}'.format(self.path, product.path)
                 if self.env.check_path_availability(product.path, task.ontology['overwrite']):
@@ -566,28 +567,27 @@ class Artwork(Container):
         from PIL import Image
         product = task.produce(task.ontology)
         if product:
-            stream = [ t for t in transform.single_result.stream if t['stream kind'] == 'image' ]
-            if stream: stream = stream[0]
-            else: stream = None
-            if stream:
-                image = Image.open(source.resource.path)
-                factor = None
-                if 'max length' in stream and max(image.size) > stream['max length']:
-                    factor = float(stream['max length']) / float(max(image.size))
-                    
-                elif 'min length' in stream and min(image.size) > stream['min length']:
-                    factor = float(stream['min length']) / float(min(image.size))
-                    
-                if factor is not None:
-                    resize = (int(round(image.size[0] * factor)), int(round(image.size[1] * factor)))
-                    self.log.debug(u'Resize artwork: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
-                    image = image.resize(resize, Image.ANTIALIAS)
-                    
-                try:
-                    image.save(product.path)
-                except IOError as err:
-                    self.log.error(u'Failed to transcode artwork %s', unicode(self))
-                    self.log.debug(u'Exception raised: %s', err)
+            for pivot in task.transform.pivot.values():
+                for stream in pivot.stream:
+                    if stream['stream kind'] == 'image':
+                        image = Image.open(source.resource.path)
+                        factor = None
+                        if 'max length' in stream and max(image.size) > stream['max length']:
+                            factor = float(stream['max length']) / float(max(image.size))
+                            
+                        elif 'min length' in stream and min(image.size) > stream['min length']:
+                            factor = float(stream['min length']) / float(min(image.size))
+                            
+                        if factor is not None:
+                            resize = (int(round(image.size[0] * factor)), int(round(image.size[1] * factor)))
+                            self.log.debug(u'Resize artwork: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
+                            image = image.resize(resize, Image.ANTIALIAS)
+                            
+                        try:
+                            image.save(product.path)
+                        except IOError as err:
+                            self.log.error(u'Failed to transcode artwork %s', unicode(self))
+                            self.log.debug(u'Exception raised: %s', err)
     
 
 
@@ -864,7 +864,7 @@ class TableOfContent(Text):
         return result
     
     
-    def transcode(self, task):
+    def transcode(self, task):did i 
         product = task.produce(task.ontology)
         if product:
             product.menu = self.menu

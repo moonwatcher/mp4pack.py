@@ -512,15 +512,15 @@ class Environment(object):
             return None
     
     
+    def encode_command(self, command):
+        c = []
+        for e in command:
+            if self.constant['space'] in e: c.append(u'"{0}"'.format(e))
+            else: c.append(e)
+        return self.constant['space'].join(c)
+    
+    
     def execute(self, command, message=None, debug=False, pipeout=True, pipeerr=True, log=None):
-        def encode_command(command):
-            c = []
-            for e in command:
-                if self.constant['space'] in e: c.append(u'"{0}"'.format(e))
-                else: c.append(e)
-            return self.constant['space'].join(c)
-        
-        
         report = None
         if command:
             if not debug:
@@ -542,7 +542,7 @@ class Environment(object):
                 report = proc.communicate()
             else:
                 if message: log.info(message)
-                print encode_command(command)
+                print self.encode_command(command)
         return report
     
     
