@@ -537,6 +537,106 @@
                     ]
                 }
             }
+        },
+        "fragment":{
+            "description":"fragment management preset",
+            "action":{
+                "info":{},
+                "copy":{},
+                "move":{},
+                "delete":{},
+                "explode":{},
+                "pack":{
+                    "pivot":[
+                        { "operator":"this" },
+                        { "operator":"fragment" }
+                    ],
+                    "transform":[
+                        {
+                            "description":"Subtitles",
+                            "mode":"select",
+                            "branch":[
+                                {"kind":"srt"}
+                            ],
+                            "track":[
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"caption"}
+                                    ],
+                                    "override":{"stream name":"Normal"}
+                                }
+                            ]
+                        },
+                        {
+                            "description":"Chapters",
+                            "mode":"choose",
+                            "branch":[
+                                {"kind":"chp"}
+                            ],
+                            "track":[
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"menu"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "description":"Raw ac3",
+                            "mode":"select",
+                            "branch":[
+                                {"kind":"ac3"}
+                            ],
+                            "track":[
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"ac3"}
+                                    ],
+                                    "override":{"stream name":"Normal"}
+                                }
+                            ]
+                        },
+                        {
+                            "description":"Audio and video streams from the main file",
+                            "mode":"choose",
+                            "branch":[
+                                {"kind":"mkv"},
+                                {"kind":"m4v"},
+                                {"kind":"avi"}
+                            ],
+                            "override":{
+                                "mkvmerge flags":[
+                                    "--no-global-tags",
+                                    "--no-track-tags",
+                                    "--no-chapters",
+                                    "--no-attachments",
+                                    "--no-subtitles"
+                                ]
+                            },
+                            "track":[
+                                {
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"video"},
+                                        {"stream kind":"audio", "kind":"ac3"},
+                                        {"stream kind":"audio", "kind":"aac"},
+                                        {"stream kind":"audio", "kind":"dts"},
+                                        {"stream kind":"audio", "kind":"flac"},
+                                        {"stream kind":"audio", "kind":"mp3"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "tag":{},
+                "optimize":{},
+                "transcode":{},
+                "update":{}
+            }
         }
     },
     "profile":{
