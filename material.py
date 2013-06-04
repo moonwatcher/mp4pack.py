@@ -140,8 +140,9 @@ class Resource(object):
         self.location = location.project('ns.medium.resource.location')
         self.volatile = False
         
-        self._knowledge = None
         self._node = None
+        self._fragment = None
+        self._knowledge = None
         self._meta = None
         self._stream = None
         self._hint = None
@@ -226,6 +227,13 @@ class Resource(object):
         if self._node is None:
             self._node = self.env.resolver.resolve(self.location['resource uri'], self.location)
         return self._node
+    
+    
+    @property
+    def fragment(self):
+        if self._fragment is None:
+            self._fragment = self.env.resolver.resolve(self.location['resource fragment uri'], self.location)
+        return self._fragment
     
     
     @property

@@ -610,6 +610,21 @@
                 }
             ]
         },
+        "rule.medium.resource.fragment.uri":{
+            "name":"Resource URI",
+            "provide":["resource fragment uri"],
+            "branch":[
+                {
+                    "requires":["path digest"],
+                    "apply":[
+                        {
+                            "property":"resource fragment uri",
+                            "format":"/m/resource/sha1/{path digest}/fragment"
+                        }
+                    ]
+                }
+            ]
+        },
         "rule.medium.resource.filename.parse":{
             "name":"Parse file name",
             "provide":[
