@@ -527,7 +527,7 @@ class Environment(object):
                 if log == None:
                     log = self.log
                 
-                log.debug(u'Execute: %s', encode_command(command))
+                log.debug(u'Execute: %s', self.encode_command(command))
                 if message: log.info(message)
                 
                 if pipeout and pipeerr:
