@@ -186,7 +186,7 @@ class ResourceTransform(object):
     
     
     def fragments(self):
-        constraint = {'resource path digest':self.resource.location['path digest']}
+        constraint = {'resource path digest':self.resource.location['path digest'], 'routing type':'fragment'}
         for resource in self.space:
             if resource.location.match(constraint):
                 self.add(resource)
