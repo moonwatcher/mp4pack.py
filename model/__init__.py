@@ -164,10 +164,10 @@ class ResourceTransform(object):
                         for pivot in self.pivot.values():
                             if pivot.location.match(branch):
                                 taken = pivot.transform(template)
-                                if template['mode'] == 'choose':
+                                if taken and template['mode'] == 'choose':
                                     break
                                     
-                        if template['mode'] == 'choose' and taken:
+                        if taken and template['mode'] == 'choose':
                             break
     
     
@@ -256,8 +256,9 @@ class ResourcePivot(object):
                             if rule['mode'] == 'choose':
                                 break
                                 
-                    if rule['mode'] == 'choose' and taken:
+                    if taken and rule['mode'] == 'choose':
                         break
+                        
         return self.taken
     
 
