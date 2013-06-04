@@ -185,6 +185,13 @@ class ResourceTransform(object):
         self.add(self.resource)
     
     
+    def fragments(self):
+        constraint = {'resource path digest':self.resource.location['path digest']}
+        for resource in self.space:
+            if resource.location.match(constraint):
+                self.add(resource)
+    
+    
     def select(self, constraint):
         for resource in self.space:
             if resource.location.match(constraint):
