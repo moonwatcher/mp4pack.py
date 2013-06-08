@@ -409,22 +409,23 @@ class AudioVideoContainer(Container):
     
     
     def explode(self, task):
-        for stream in task.transform.single_pivot.stream:
-            if stream['enabled'] and stream['stream kind'] == 'menu':
-                stream['enabled'] = False
-                product = task.produce(stream)
-                if product:
-                    if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                        if not task.ontology['debug']:
-                            product.menu = Menu.from_node(self.env, stream['content'])
-                            product.write(product.path)
-
-                        # enqueue a task for transcoding
-                        if 'tasks' in stream:
-                            for o in stream['tasks']:
-                                t = task.job.ontology.project('ns.system.task')
-                                for i in o: t[i] = o[i]
-                                task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
+        for pivot in task.transform.pivot.values():
+            for stream in pivot.stream:
+                if stream['enabled'] and stream['stream kind'] == 'menu':
+                    stream['enabled'] = False
+                    product = task.produce(stream)
+                    if product:
+                        if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                            if not task.ontology['debug']:
+                                product.menu = Menu.from_node(self.env, stream['content'])
+                                product.write(product.path)
+    
+                                # enqueue a task for transcoding
+                                if 'tasks' in stream:
+                                    for o in stream['tasks']:
+                                        t = task.job.ontology.project('ns.system.task')
+                                        for i in o: t[i] = o[i]
+                                        task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
     
     
     def pack(self, task):
@@ -440,35 +441,37 @@ class AudioVideoContainer(Container):
         product = task.produce(task.ontology)
         if product:
             command = self.env.initialize_command('handbrake', self.log)
+            taken = False
             if command:
                 audio_options = {'--audio':[]}
+                for pivot in task.transform.pivot.values():
+                    for stream in pivot.stream:
+                        if stream['stream kind'] == 'video':
+                            taken = True
+                            for k,v in stream['handbrake parameters'].iteritems():
+                                command.append(k)
+                                if v is not None: command.append(unicode(v))
+                                
+                            x264_config = []
+                            for k,v in stream['handbrake x264 settings'].iteritems():
+                                x264_config.append(u'{0}={1}'.format(k, unicode(v)))
+                            x264_config = u':'.join(x264_config)
+                            command.append(u'--encopts')
+                            command.append(x264_config)
+                            
+                        elif stream['stream kind'] == 'audio':
+                            audio_options['--audio'].append(unicode(stream['stream kind position']))
+                            for k,v in stream['handbrake audio encoder settings'].iteritems():
+                                if k not in audio_options: audio_options[k] = []
+                                audio_options[k].append(unicode(v))
+                                
+                    for k,v in audio_options.iteritems():
+                        command.append(k)
+                        command.append(u','.join(v))
                 
-                for stream in task.transform.single_pivot.stream:
-                    if stream['stream kind'] == 'video':
-                        for k,v in stream['handbrake parameters'].iteritems():
-                            command.append(k)
-                            if v is not None: command.append(unicode(v))
-                            
-                        x264_config = []
-                        for k,v in stream['handbrake x264 settings'].iteritems():
-                            x264_config.append(u'{0}={1}'.format(k, unicode(v)))
-                        x264_config = u':'.join(x264_config)
-                        command.append(u'--encopts')
-                        command.append(x264_config)
-                        
-                    elif stream['stream kind'] == 'audio':
-                        audio_options['--audio'].append(unicode(stream['stream kind position']))
-                        for k,v in stream['handbrake audio encoder settings'].iteritems():
-                            if k not in audio_options: audio_options[k] = []
-                            audio_options[k].append(unicode(v))
-                            
-                for k,v in audio_options.iteritems():
-                    command.append(k)
-                    command.append(u','.join(v))
-                    
-                command.extend([u'--input', self.path, u'--output', product.path])
-                message = u'Transcode {0} --> {1}'.format(self.path, product.path)
-                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                    message = u'Transcode {0} --> {1}'.format(self.path, product.path)
+                    command.extend([u'--input', self.path, u'--output', product.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
@@ -526,8 +529,8 @@ class AudioVideoContainer(Container):
                                 
                         command.append(pivot.resource.path)
                     
-                message = u'Pack {0} --> {1}'.format(self.path, product.path)
                 if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                    message = u'Pack {0} --> {1}'.format(self.path, product.path)
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
@@ -536,37 +539,16 @@ class AudioVideoContainer(Container):
         if product:
             command = self.env.initialize_command('subler', self.log)
             if command:
-                command.extend([u'-o', product.path, u'-i', self.path])
-                message = u'Pack {0} --> {1}'.format(unicode(self), unicode(product))
                 if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                    message = u'Pack {0} --> {1}'.format(unicode(self), unicode(product))
+                    command.extend([u'-o', product.path, u'-i', self.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
     
     
 
 
-class Text(Container):
-    def __init__(self, asset, location):
-        Container.__init__(self, asset, location)
-    
-    
-    def write(self, path):
-        content = self.encode()
-        if content:
-            try:
-                writer = open(path, 'w')
-                writer.write(content.encode('utf-8'))
-                writer.close()
-            except IOError as error:
-                self.log.error(str(error))
-    
-    
-    def encode(self):
-        return None
-    
-
-
-class Artwork(Container):
+class Image(Container):
     def __init__(self, asset, location):
         Container.__init__(self, asset, location)
     
@@ -593,6 +575,8 @@ class Artwork(Container):
                             
                         try:
                             image.save(product.path)
+                            self.log.info(u'Transcode %s --> %s', self.path, product.path)
+                            
                         except IOError as err:
                             self.log.error(u'Failed to transcode artwork %s', unicode(self))
                             self.log.debug(u'Exception raised: %s', err)
@@ -633,7 +617,7 @@ class Matroska(AudioVideoContainer):
                                         for i in o: t[i] = o[i]
                                         task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
             if taken:
-                message = u'Extract tracks from {}'.format(unicode(self))
+                message = u'Explode {}'.format(unicode(self))
                 self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
     
 
@@ -739,35 +723,59 @@ class RawAudio(Container):
     def _transcode_ac3(self, task):
         product = task.produce(task.ontology)
         if product:
-            stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'audio' ]
-            if stream: stream = stream[0]
-            else: stream = None
-            if stream:
-                
-                # Clone the hint ontology
-                product.hint = Ontology.clone(self.hint)
-                
-                command = self.env.initialize_command('ffmpeg', self.log)
-                if command:
-                    # make ffmpeg not check for overwrite, we already do this check
-                    command.append(u'-y')
-                    
-                    # set the number of processing threads
-                    command.append(u'-threads')
-                    command.append(unicode(self.env.system['threads']))
-                    
-                    # set the input file
-                    command.append(u'-i')
-                    command.append(self.path)
-                    
-                    for k,v in stream['ffmpeg parameters'].iteritems():
-                        command.append(k)
-                        if v is not None: command.append(unicode(v))
+            taken = False
+            
+            for pivot in task.transform.pivot.values():
+                for stream in pivot.stream:
+                    if not taken and stream['stream kind'] == 'audio':
+                        taken = True
                         
-                    command.append(product.path)
-                    message = u'Transcode {0} --> {1}'.format(self.path, product.path)
-                    if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                        self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+                        # Clone the hint ontology
+                        product.hint = Ontology.clone(self.hint)
+                        
+                        command = self.env.initialize_command('ffmpeg', self.log)
+                        if command:
+                            # make ffmpeg not check for overwrite, we already do this check
+                            command.append(u'-y')
+                            
+                            # set the number of processing threads
+                            command.append(u'-threads')
+                            command.append(unicode(self.env.system['threads']))
+                            
+                            # set the input file
+                            command.append(u'-i')
+                            command.append(self.path)
+                            
+                            for k,v in stream['ffmpeg parameters'].iteritems():
+                                command.append(k)
+                                if v is not None: command.append(unicode(v))
+                                
+                if taken: break
+            if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                command.append(product.path)
+                message = u'Transcode {0} --> {1}'.format(self.path, product.path)
+                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+    
+
+
+class Text(Container):
+    def __init__(self, asset, location):
+        Container.__init__(self, asset, location)
+    
+    
+    def write(self, path):
+        content = self.encode()
+        if content:
+            try:
+                writer = open(path, 'w')
+                writer.write(content.encode('utf-8'))
+                writer.close()
+            except IOError as error:
+                self.log.error(str(error))
+    
+    
+    def encode(self):
+        return None
     
 
 
@@ -811,30 +819,34 @@ class Subtitles(Text):
     def transcode(self, task):
         product = task.produce(task.ontology)
         if product:
+            taken = False
             product.caption = self.caption
-            stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'caption' ]
-            if stream: stream = stream[0]
-            else: stream = None
-            if stream:
-                
-                # Apply filters
-                for name in stream['subtitle filters']:
-                    product.caption.filter(name)
-                    
-                # Apply time shift
-                if 'time shift' in task.ontology:
-                    product.caption.shift(task.ontology['time shift'])
-                    
-                # Apply time scale
-                if 'time scale' in task.ontology:
-                    product.caption.scale(task.ontology['time scale'])
-                    
-                # Normalize the stream
-                product.caption.normalize()
-                
-                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                    product.write(product.path)
-    
+            
+            for pivot in task.transform.pivot.values():
+                for stream in pivot.stream:
+                    if not taken and stream['stream kind'] == 'caption':
+                        taken = True
+                        
+                        # Apply filters
+                        for name in stream['subtitle filters']:
+                            product.caption.filter(name)
+                            
+                        # Apply time shift
+                        if 'time shift' in task.ontology:
+                            product.caption.shift(task.ontology['time shift'])
+                            
+                        # Apply time scale
+                        if 'time scale' in task.ontology:
+                            product.caption.scale(task.ontology['time scale'])
+                            
+                        # Normalize the stream
+                        product.caption.normalize()
+                        
+                if taken: break
+            if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                self.log.info(u'Transcode %s --> %s', self.path, product.path)
+                product.write(product.path)
+
 
 
 class TableOfContent(Text):
@@ -875,24 +887,27 @@ class TableOfContent(Text):
     def transcode(self, task):
         product = task.produce(task.ontology)
         if product:
+            taken = False
             product.menu = self.menu
-            stream = [ t for t in task.transform.single_pivot.stream if t['stream kind'] == 'menu' ]
-            if stream: stream = stream[0]
-            else: stream = None
-            if stream:
-                
-                # Apply time shift
-                if 'time shift' in task.ontology:
-                    product.menu.shift(task.ontology['time shift'])
-                    
-                # Apply time scale
-                if 'time scale' in task.ontology:
-                    product.menu.scale(task.ontology['time scale'])
-                    
-                # Normalize the stream
-                product.menu.normalize()
-                
-                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                    product.write(product.path)
+            
+            for pivot in task.transform.pivot.values():
+                for stream in pivot.stream:
+                    if not taken and stream['stream kind'] == 'caption':
+                        taken = True
+                        # Apply time shift
+                        if 'time shift' in task.ontology:
+                            product.menu.shift(task.ontology['time shift'])
+                            
+                        # Apply time scale
+                        if 'time scale' in task.ontology:
+                            product.menu.scale(task.ontology['time scale'])
+                            
+                        # Normalize the stream
+                        product.menu.normalize()
+                        
+                if taken: break
+            if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                self.log.info(u'Transcode %s --> %s', self.path, product.path)
+                product.write(product.path)
     
 

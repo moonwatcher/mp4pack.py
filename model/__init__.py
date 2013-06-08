@@ -137,13 +137,6 @@ class ResourceTransform(object):
     
     
     @property
-    def single_pivot(self):
-        if len(self.pivot) > 0:
-            return self.pivot.values()[0]
-        else:
-            return None
-    
-    
     def transform(self, preset, action):
         if action in preset['action']:
             # First use the pivot section to select resources to pivot
