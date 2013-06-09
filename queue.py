@@ -214,6 +214,7 @@ class Task(object):
         self.log.debug('Starting task %s', unicode(self))
         self.node = {
             'uuid':unicode(self.uuid),
+            'group':[unicode(self.uuid)],
             'start':None,
             'end':None,
             'ontology':self.ontology.node,
