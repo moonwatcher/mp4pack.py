@@ -136,7 +136,6 @@ class ResourceTransform(object):
         return self.resource.asset.resource.values()
     
     
-    @property
     def transform(self, preset, action):
         if action in preset['action']:
             # First use the pivot section to select resources to pivot
