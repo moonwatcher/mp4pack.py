@@ -148,7 +148,9 @@ class Job(object):
     def run(self):
         self.load()
         for task in self.task:
+            task.load()
             task.run()
+            task.unload()
             self.execution['task'].append(task.node)
         self.unload()
     
@@ -198,17 +200,28 @@ class Task(object):
         return self.job.cache
     
     
+    @property
+    def started(self):
+        return self.node and self.node['start'] is not None
+    
+    
+    @property
+    def ended(self):
+        return self.node and self.node['end'] is not None
+    
+    
     def load(self):
         self.log.debug('Starting task %s', unicode(self))
         self.node = {
             'uuid':unicode(self.uuid),
-            'start':datetime.now(),
+            'start':None,
+            'end':None,
             'ontology':self.ontology.node,
         }
     
     
     def run(self):
-        pass
+        self.node['start'] = datetime.now()
     
     
     def unload(self):
@@ -330,7 +343,7 @@ class ResourceTask(Task):
     
     
     def run(self):
-        self.load()
+        Task.run(self)
         if self.action:
             # prepare a task product
             self.product = []
@@ -348,8 +361,6 @@ class ResourceTask(Task):
                 
             # invoke the action
             self.action()
-        self.unload()
-    
     
     
     def produce(self, override=None):
@@ -407,13 +418,15 @@ class ResourceTask(Task):
         # enqueue a task to explode the resource
         o = self.job.ontology.project('ns.system.task')
         o['action'] = 'explode'
-        self.job.enqueue(ResourceTask(self.job, o, self.location['path']))
+        explode = ResourceTask(self.job, o, self.location['path'])
+        self.job.enqueue(explode)
 
         # enqueue a task to repack the resource fragments
         o = self.job.ontology.project('ns.system.task')
         o['action'] = 'pack'
         o['preset'] = 'fragment'
-        self.job.enqueue(ResourceTask(self.job, o, self.location['path']))
+        pack = ResourceTask(self.job, o, self.location['path'])
+        self.job.enqueue(pack)
     
     
     def explode(self):
@@ -480,10 +493,9 @@ class ServiceTask(Task):
     
     
     def run(self):
-        self.load()
-        if self.document is not None and self.action:
+        Task.run(self)
+        if self.action and self.document is not None:
             self.action()
-        self.unload()
     
     
     def get(self):
@@ -558,9 +570,9 @@ class SystemTask(Task):
     
     
     def run(self):
-        self.load()
-        if self.action: self.action()
-        self.unload()
+        Task.run(self)
+        if self.action:
+            self.action()
     
     
     def rebuild(self):
