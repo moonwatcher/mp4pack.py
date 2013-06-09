@@ -302,7 +302,7 @@ class ResourceTask(Task):
                 if self.ontology['action'] in self.preset['action']:
                     
                     # locate a method that implements the action
-                    self.action = getattr(self.resource, self.ontology['action'], None)
+                    self.action = getattr(self, self.ontology['action'], None)
                     
                     if self.action is None:
                         self.log.warning(u'Unknown action %s, aborting task %s', self.ontology['action'], unicode(self))
@@ -347,7 +347,7 @@ class ResourceTask(Task):
                 self.node['transform'] = self.transform.node
                 
             # invoke the action
-            self.action(self)
+            self.action()
         self.unload()
     
     
@@ -385,6 +385,59 @@ class ResourceTask(Task):
             self.log.error(u'Could not determine destination path from %s', o)
         
         return product
+    
+    
+    def info(self):
+        self.resource.info(self)
+    
+    
+    def copy(self):
+        self.resource.copy(self)
+    
+    
+    def move(self):
+        self.resource.move(self)
+    
+    
+    def delete(self):
+        self.resource.delete(self)
+    
+    
+    def prepare(self):
+        # enqueue a task to explode the resource
+        o = self.job.ontology.project('ns.system.task')
+        o['action'] = 'explode'
+        self.job.enqueue(ResourceTask(self.job, o, self.location['path']))
+
+        # enqueue a task to repack the resource fragments
+        o = self.job.ontology.project('ns.system.task')
+        o['action'] = 'pack'
+        o['preset'] = 'fragment'
+        self.job.enqueue(ResourceTask(self.job, o, self.location['path']))
+    
+    
+    def explode(self):
+        self.resource.explode(self)
+    
+    
+    def pack(self):
+        self.resource.pack(self)
+    
+    
+    def tag(self):
+        self.resource.tag(self)
+    
+    
+    def optimize(self):
+        self.resource.optimize(self)
+    
+    
+    def transcode(self):
+        self.resource.transcode(self)
+    
+    
+    def update(self):
+        self.resource.update(self)
     
 
 

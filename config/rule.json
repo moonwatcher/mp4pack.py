@@ -55,6 +55,13 @@
                 },
                 {
                     "requires":["action"],
+                    "equal":{"action":"prepare"},
+                    "apply":[
+                        {"property":"implementation", "value":"ResourceJob"}
+                    ]
+                },
+                {
+                    "requires":["action"],
                     "equal":{"action":"explode"},
                     "apply":[
                         {"property":"implementation", "value":"ResourceJob"}

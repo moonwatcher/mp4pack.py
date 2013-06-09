@@ -114,6 +114,26 @@
                 },
                 {
                     "instruction":{
+                        "name":"prepare",
+                        "help":"Explode streams and repack for transcoding"
+                    },
+                    "argument":[
+                        "scan path",
+                        "kind",
+                        "volume",
+                        "profile",
+                        "preset",
+                        "inclusion",
+                        "exclusion",
+                        "recursive",
+                        "overwrite",
+                        "sync",
+                        "crawl",
+                        "language"
+                    ]
+                },
+                {
+                    "instruction":{
                         "name":"explode",
                         "help":"Explode streams from container"
                     },
