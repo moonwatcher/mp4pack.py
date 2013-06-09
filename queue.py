@@ -45,7 +45,9 @@ class Queue(object):
         job = None
         if self.length > 0:
             job = self.job.pop()
+            job.load()
             job.run()
+            job.unload()
         return job
     
 
@@ -146,13 +148,11 @@ class Job(object):
     
     
     def run(self):
-        self.load()
         for task in self.task:
             task.load()
             task.run()
             task.unload()
             self.execution['task'].append(task.node)
-        self.unload()
     
     
     def unload(self):
