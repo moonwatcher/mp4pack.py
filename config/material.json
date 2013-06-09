@@ -7,6 +7,7 @@
                 "copy":{},
                 "move":{},
                 "delete":{},
+                "prepare":{},
                 "explode":{
                     "pivot":[
                         { "operator":"this" }
@@ -545,6 +546,7 @@
                 "copy":{},
                 "move":{},
                 "delete":{},
+                "prepare":{},
                 "explode":{},
                 "pack":{
                     "pivot":[
