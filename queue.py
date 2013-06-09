@@ -299,6 +299,8 @@ class ResourceTask(Task):
             self.resource = self.cache.find(self.location)
             if self.resource:
                 # if the action is defined in the preset, the preset supports the action
+                print self.ontology
+                print self.preset
                 if self.ontology['action'] in self.preset['action']:
                     
                     # locate a method that implements the action
