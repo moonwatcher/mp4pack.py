@@ -145,6 +145,13 @@
                 },
                 {
                     "requires":["action"],
+                    "equal":{"action":"prepare"},
+                    "apply":[
+                        {"property":"preset", "value":"normal"}
+                    ]
+                },
+                {
+                    "requires":["action"],
                     "equal":{"action":"explode"},
                     "apply":[
                         {"property":"preset", "value":"normal"}
