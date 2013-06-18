@@ -427,6 +427,7 @@ class AudioVideoContainer(Container):
                                         for i in template: o[i] = template[i]
                                         t = queue.ResourceTask(task.job, o, product.path)
                                         t.group = task.key
+                                        t.constrain({'scope':'task', 'reference':task.key, 'status':'completed'})
                                         task.job.enqueue(t)
     
     
@@ -619,6 +620,7 @@ class Matroska(AudioVideoContainer):
                                         for i in template: o[i] = template[i]
                                         t = queue.ResourceTask(task.job, o, product.path)
                                         t.group = task.key
+                                        t.constrain({'scope':'task', 'reference':task.key, 'status':'completed'})
                                         task.job.enqueue(t)
                                         
             if taken:
