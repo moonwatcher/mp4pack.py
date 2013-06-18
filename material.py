@@ -422,10 +422,12 @@ class AudioVideoContainer(Container):
     
                                 # enqueue a task for transcoding
                                 if 'tasks' in stream:
-                                    for o in stream['tasks']:
-                                        t = task.job.ontology.project('ns.system.task')
-                                        for i in o: t[i] = o[i]
-                                        task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
+                                    for template in stream['tasks']:
+                                        o = task.job.ontology.project('ns.system.task')
+                                        for i in template: o[i] = template[i]
+                                        t = queue.ResourceTask(task.job, o, product.path)
+                                        t.group = task.key
+                                        task.job.enqueue(t)
     
     
     def pack(self, task):
@@ -612,10 +614,13 @@ class Matroska(AudioVideoContainer):
                                 
                                 # enqueue a task for transcoding
                                 if 'tasks' in stream:
-                                    for o in stream['tasks']:
-                                        t = task.job.ontology.project('ns.system.task')
-                                        for i in o: t[i] = o[i]
-                                        task.job.enqueue(queue.ResourceTask(task.job, t, product.path))
+                                    for template in stream['tasks']:
+                                        o = task.job.ontology.project('ns.system.task')
+                                        for i in template: o[i] = template[i]
+                                        t = queue.ResourceTask(task.job, o, product.path)
+                                        t.group = task.key
+                                        task.job.enqueue(t)
+                                        
             if taken:
                 message = u'Explode {}'.format(unicode(self))
                 self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)

@@ -729,6 +729,7 @@ class Repository(object):
                 if 'dropDups' not in definition: definition['dropDups'] = False
                 
                 existing = table.index_information()
+                
                 if definition['name'] in existing:
                     self.log.info(u'Dropping index %s on collection %s', definition['name'], collection)
                     table.drop_index(definition['name'])

@@ -16,7 +16,7 @@ from model import ResourceTransform
 
 class Queue(object):
     def __init__(self, env):
-        self.log = logging.getLogger('queue')
+        self.log = logging.getLogger('Queue')
         self.env = env
         self.cache = MaterialCache(env)
         self.job = []
@@ -52,15 +52,50 @@ class Queue(object):
     
 
 
+class Condition(object):
+    def __init__(self, task, node):
+        self.log = logging.getLogger('Queue')
+        self.task = task
+        self.node = node
+    
+    @property
+    def env(self):
+        return self.queue.env
+    
+    
+    @property
+    def job(self):
+        return self.task.job
+    
+    
+    @property
+    def satisfied(self):
+        result = False
+        if self.node['scope'] == 'task':
+            if self.node['reference'] in self.job.journal['task'] and \
+            self.job.journal['task'][self.node['reference']].status == self.node['status']:
+                result = True
+                
+        elif self.node['scope'] == 'group':
+            if self.node['reference'] in self.job.journal['group']:
+                result = True
+                for reference, task in self.job.journal['group'][self.node['reference']].iteritems():
+                    if task.status != self.node['status']:
+                        result = False
+        return result
+
+
 class Job(object):
     def __init__(self, queue, node):
-        self.log = logging.getLogger('Job')
+        self.log = logging.getLogger('Queue')
         self.queue = queue
         self.node = node
         self.ontology = Ontology(self.env, 'ns.system.job', node['ontology'])
         self.uuid = uuid.UUID(self.node['uuid'])
-        self.execution = None
+        self.journal = None
         self.task = None
+        
+        self.execution = None
         self._inclusion = None
         self._exclusion = None
     
@@ -120,7 +155,9 @@ class Job(object):
     
     def load(self):
         self.log.debug('Open job %s', unicode(self))
+        self.journal = {'task':{}, 'group':{}}
         self.task = []
+        
         self.execution = {
             'start':datetime.now(),
             'task':[],
@@ -143,15 +180,32 @@ class Job(object):
     
     
     def enqueue(self, task):
-        if task and task.valid:
-            self.task.append(task)
+        if task:
+            self.journal['task'][task.key] = task
+            if task.group not in self.journal['group']:
+                self.journal['group'][task.group] = {}
+            self.journal['group'][task.group][task.group] = task
+            
+            if task.valid:
+                self.task.append(task)
+    
+    
+    def dequeue(self):
+        result = None
+        for i,task in enumerate(self.task):
+            if task.ready:
+                del self.task[i]
+                task.load()
+                task.run()
+                task.unload()
+                result = task
+                break
+        return result
     
     
     def run(self):
-        for task in self.task:
-            task.load()
-            task.run()
-            task.unload()
+        while self.task:
+            task = self.dequeue()
             self.execution['task'].append(task.node)
     
     
@@ -174,15 +228,26 @@ class Job(object):
 
 class Task(object):
     def __init__(self, job, ontology):
-        self.log = logging.getLogger('task')
+        self.log = logging.getLogger('Queue')
         self.job = job
+        self.condition = None
         self.ontology = ontology
-        self.uuid = uuid.uuid4()
-        self.node = None
+        self.node = {
+            'uuid':unicode(uuid.uuid4()),
+            'ontology':self.ontology.node,
+            'status':'queued',
+            'start':None,
+            'end':None,
+            'condition':None,
+        }
+        self.node['group'] = self.node['uuid']
+        
+        if self.ontology is None:
+            self.node['status'] = 'invalid'
     
     
     def __unicode__(self):
-        return unicode(self.uuid)
+        return self.key
     
     
     @property
@@ -191,44 +256,73 @@ class Task(object):
     
     
     @property
-    def valid(self):
-        return self.ontology is not None
-    
-    
-    @property
     def cache(self):
         return self.job.cache
     
     
     @property
-    def started(self):
-        return self.node and self.node['start'] is not None
+    def valid(self):
+        return self.status != 'invalid'
     
     
     @property
-    def ended(self):
-        return self.node and self.node['end'] is not None
+    def key(self):
+        return self.node['uuid']
     
+    
+    @property
+    def group(self):
+        return self.node['group']
+    
+    
+    @group.setter
+    def group(self, value):
+        self.node['group'] = value
+    
+    
+    @property
+    def ready(self):
+        result = False
+        if self.node['status'] == 'queued':
+            result = True
+            if self.condition:
+                for condition in self.condition:
+                    if not condition.satisfied:
+                        result = False
+                        break
+        return result
+    
+    
+    @property
+    def status(self):
+        return self.node['status']
+    
+    
+    def constrain(self, node):
+        if self.condition is None:
+            self.condition = []
+            self.node['condition'] = []
+             
+        condition = Condition(self, node)
+        self.node['condition'].append(condition.node)
+        self.condition.append(condition)
     
     def load(self):
-        self.log.debug('Starting task %s', unicode(self))
-        self.node = {
-            'uuid':unicode(self.uuid),
-            'group':[unicode(self.uuid)],
-            'start':None,
-            'end':None,
-            'ontology':self.ontology.node,
-        }
+        self.node['status'] = 'loaded'
+        pass
     
     
     def run(self):
+        self.log.debug('Starting task %s', unicode(self))
         self.node['start'] = datetime.now()
+        self.node['status'] = 'running'
     
     
     def unload(self):
         self.node['end'] = datetime.now()
         self.node['duration'] = unicode(self.node['end'] - self.node['start'])
-        self.log.debug('Done with task %s', unicode(self))
+        self.node['status'] = 'completed'
+        self.log.debug('Finished task %s', unicode(self))
     
 
 
@@ -275,7 +369,6 @@ class ResourceJob(Job):
                 dnext = os.path.abspath(os.path.join(path,dnext))
                 result.extend(self._scan_path(dnext, recursive, depth - 1))
         return result
-    
     
 
 
@@ -427,6 +520,7 @@ class ResourceTask(Task):
         o['action'] = 'pack'
         o['preset'] = 'fragment'
         pack = ResourceTask(self.job, o, self.location['path'])
+        pack.constrain({'scope':'group', 'reference':explode.key, 'status':'completed'})
         self.job.enqueue(pack)
     
     
@@ -562,6 +656,7 @@ class SystemTask(Task):
     
     def load(self):
         Task.load(self)
+        self.node['table'] = self.table['name']
         
         # locate a method that implements the action
         self.action = getattr(self, self.ontology['action'], None)
