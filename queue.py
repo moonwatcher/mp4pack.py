@@ -508,24 +508,6 @@ class ResourceTask(Task):
         self.resource.delete(self)
     
     
-    def prepare(self):
-        # enqueue a task to explode the resource
-        o = self.job.ontology.project('ns.system.task')
-        o['action'] = 'explode'
-        explode = ResourceTask(self.job, o, self.location['path'])
-        explode.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
-        self.job.enqueue(explode)
-
-        # enqueue a task to repack the resource fragments
-        o = self.job.ontology.project('ns.system.task')
-        o['action'] = 'pack'
-        o['preset'] = 'fragment'
-        pack = ResourceTask(self.job, o, self.location['path'])
-        pack.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
-        pack.constrain({'scope':'group', 'reference':explode.key, 'status':'completed'})
-        self.job.enqueue(pack)
-    
-    
     def explode(self):
         self.resource.explode(self)
     
@@ -548,6 +530,24 @@ class ResourceTask(Task):
     
     def update(self):
         self.resource.update(self)
+    
+    
+    def prepare(self):
+        # enqueue a task to explode the resource
+        o = self.job.ontology.project('ns.system.task')
+        o['action'] = 'explode'
+        explode = ResourceTask(self.job, o, self.location['path'])
+        explode.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
+        self.job.enqueue(explode)
+
+        # enqueue a task to repack the resource fragments
+        o = self.job.ontology.project('ns.system.task')
+        o['action'] = 'pack'
+        o['preset'] = 'fragment'
+        pack = ResourceTask(self.job, o, self.location['path'])
+        pack.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
+        pack.constrain({'scope':'group', 'reference':explode.key, 'status':'completed'})
+        self.job.enqueue(pack)
     
 
 
