@@ -663,23 +663,23 @@
             "branch":[
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^[0-9a-f]{40}(?:\\.[a-z]{2})?\\.[0-9]{2}\\.[0-9a-f]{13}\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^[0-9a-f]{40}(?:\\.[a-z]{2})?\\.[0-9]{2}\\.[0-9a-f]{13}\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^(?P<resource_path_digest>[0-9a-f]{40})(?:\\.(?P<language>[a-z]{2}))?\\.(?P<stream_id>[0-9]{2})\\.(?P<umid>[0-9a-f]{13})\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^(?P<resource_path_digest>[0-9a-f]{40})(?:\\.(?P<language>[a-z]{2}))?\\.(?P<stream_id>[0-9]{2})\\.(?P<umid>[0-9a-f]{13})\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ]
                 },
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^[^\\.]*(?:\\.[a-z]{2})?\\.[0-9a-f]{13}\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^[^\\.]*(?:\\.[a-z]{2})?\\.[0-9a-f]{13}\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^[^\\.]*(?:\\.(?P<language>[a-z]{2}))?\\.(?P<umid>[0-9a-f]{13})\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^[^\\.]*(?:\\.(?P<language>[a-z]{2}))?\\.(?P<umid>[0-9a-f]{13})\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ]
                 },
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^TVDb[0-9]+ s[0-9]+e[0-9]+(?: .*)?\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^TVDb[0-9]+ s[0-9]+e[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\\s*(?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^TVDb(?P<tvdb_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\\s*(?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$", "flags":34}
                     ],
                     "apply":[
                         {"property":"media kind", "value":10}
@@ -687,9 +687,9 @@
                 },
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^iTMF[0-9]+ s[0-9]+e[0-9]+(?: .*)?\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^iTMF[0-9]+ s[0-9]+e[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^iTMF(?P<itunes_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\\s*(?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^iTMF(?P<itunes_tv_show_id>[0-9]+) s(?P<disc_number>[0-9]+)e(?P<track_number>[0-9]+)(?:\\s*(?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":10}
@@ -697,9 +697,9 @@
                 },
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^iTMF[0-9]+ d[0-9]+t[0-9]+(?: .*)?\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^iTMF[0-9]+ d[0-9]+t[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^iTMF(?P<itunes_music_album_id>[0-9]+) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\\s*(?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^iTMF(?P<itunes_music_album_id>[0-9]+) d(?P<disc_number>[0-9]+)t(?P<track_number>[0-9]+)(?:\\s*(?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":1}
@@ -707,9 +707,9 @@
                 },
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^IMDbtt[0-9]+(?: .*)?\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^IMDbtt[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^IMDb(?P<imdb_movie_id>tt[0-9]+)(?: (?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^IMDb(?P<imdb_movie_id>tt[0-9]+)(?: (?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":9}
@@ -717,9 +717,9 @@
                 },
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^TMDb[0-9]+(?: .*)?\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^TMDb[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^TMDb(?P<tmdb_movie_id>[0-9]+)(?: (?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^TMDb(?P<tmdb_movie_id>[0-9]+)(?: (?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":9}
@@ -727,9 +727,9 @@
                 },
                 {
                     "requires":["file name"],
-                    "match":{"property":"file name", "expression":"^iTMF[0-9]+(?: .*)?\\.[^\\.]{3}$" },
+                    "match":{"property":"file name", "expression":"^iTMF[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^iTMF(?P<itunes_movie_id>[0-9]+)(?: (?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$"}
+                        {"property":"file name", "expression":"^iTMF(?P<itunes_movie_id>[0-9]+)(?: (?P<track_name>.*))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":9}
