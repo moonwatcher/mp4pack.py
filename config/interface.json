@@ -15,101 +15,18 @@
             "action":[
                 {
                     "instruction":{
-                        "name":"get",
-                        "help":"Get documents"
-                    },
-                    "argument":[
-                        "uris",
-                        "sync",
-                        "download",
-                        "query"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"set",
-                        "help":"Set values on documents"
-                    },
-                    "argument":[
-                        "uris",
-                        "sync",
-                        "download",
-                        "genealogy"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"drop",
-                        "help":"Drop documents"
-                    },
-                    "argument":[
-                        "uris",
-                        "sync",
-                        "download"
-                    ]
-                },
-                {
-                    "instruction":{
                         "name":"info",
                         "help":"Report information about resource"
                     },
                     "argument":[
                         "scan path",
-                        "inclusion",
-                        "exclusion",
                         "recursive",
                         "overwrite",
                         "sync",
                         "crawl",
-                        "download"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"copy",
-                        "help":"Copy resource into location"
-                    },
-                    "argument":[
-                        "scan path",
-                        "volume",
-                        "profile",
+                        "download",
                         "inclusion",
-                        "exclusion",
-                        "recursive",
-                        "overwrite",
-                        "sync",
-                        "crawl",
-                        "download"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"move",
-                        "help":"Move resource into location"
-                    },
-                    "argument":[
-                        "scan path",
-                        "volume",
-                        "profile",
-                        "inclusion",
-                        "exclusion",
-                        "recursive",
-                        "overwrite",
-                        "sync",
-                        "crawl",
-                        "download"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"delete",
-                        "help":"Delete resource"
-                    },
-                    "argument":[
-                        "scan path",
-                        "inclusion",
-                        "exclusion",
-                        "recursive"
+                        "exclusion"
                     ]
                 },
                 {
@@ -123,79 +40,13 @@
                         "volume",
                         "profile",
                         "preset",
-                        "inclusion",
-                        "exclusion",
                         "recursive",
                         "overwrite",
                         "sync",
                         "crawl",
-                        "language"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"explode",
-                        "help":"Explode streams from container"
-                    },
-                    "argument":[
-                        "scan path",
-                        "preset",
+                        "language",
                         "inclusion",
-                        "exclusion",
-                        "recursive",
-                        "overwrite",
-                        "sync",
-                        "crawl"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"pack",
-                        "help":"Pack streams into a container"
-                    },
-                    "argument":[
-                        "scan path",
-                        "kind",
-                        "volume",
-                        "profile",
-                        "preset",
-                        "inclusion",
-                        "exclusion",
-                        "recursive",
-                        "overwrite",
-                        "sync",
-                        "crawl",
-                        "language"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"tag",
-                        "help":"Update meta tags"
-                    },
-                    "argument":[
-                        "scan path",
-                        "preset",
-                        "inclusion",
-                        "exclusion",
-                        "recursive",
-                        "sync",
-                        "crawl",
-                        "language"
-                    ]
-                },
-                {
-                    "instruction":{
-                        "name":"optimize",
-                        "help":"Optimize file structure"
-                    },
-                    "argument":[
-                        "scan path",
-                        "inclusion",
-                        "exclusion",
-                        "recursive",
-                        "sync",
-                        "crawl"
+                        "exclusion"
                     ]
                 },
                 {
@@ -209,13 +60,13 @@
                         "volume",
                         "profile",
                         "preset",
-                        "inclusion",
-                        "exclusion",
                         "recursive",
                         "overwrite",
                         "sync",
                         "crawl",
-                        "download"
+                        "download",
+                        "inclusion",
+                        "exclusion"
                     ],
                     "group":[
                         {
@@ -252,13 +103,162 @@
                         "volume",
                         "preset",
                         "profile",
-                        "inclusion",
-                        "exclusion",
                         "recursive",
                         "sync",
                         "crawl",
                         "download",
-                        "language"
+                        "language",
+                        "inclusion",
+                        "exclusion"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"tag",
+                        "help":"Update meta tags"
+                    },
+                    "argument":[
+                        "scan path",
+                        "preset",
+                        "recursive",
+                        "sync",
+                        "crawl",
+                        "language",
+                        "inclusion",
+                        "exclusion"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"copy",
+                        "help":"Copy resource into location"
+                    },
+                    "argument":[
+                        "scan path",
+                        "volume",
+                        "profile",
+                        "recursive",
+                        "overwrite",
+                        "sync",
+                        "crawl",
+                        "download",
+                        "inclusion",
+                        "exclusion"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"move",
+                        "help":"Move resource into location"
+                    },
+                    "argument":[
+                        "scan path",
+                        "volume",
+                        "profile",
+                        "recursive",
+                        "overwrite",
+                        "sync",
+                        "crawl",
+                        "download",
+                        "inclusion",
+                        "exclusion"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"delete",
+                        "help":"Delete resource"
+                    },
+                    "argument":[
+                        "scan path",
+                        "recursive",
+                        "inclusion",
+                        "exclusion"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"explode",
+                        "help":"Explode streams from container"
+                    },
+                    "argument":[
+                        "scan path",
+                        "preset",
+                        "recursive",
+                        "overwrite",
+                        "sync",
+                        "crawl",
+                        "inclusion",
+                        "exclusion"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"pack",
+                        "help":"Pack streams into a container"
+                    },
+                    "argument":[
+                        "scan path",
+                        "kind",
+                        "volume",
+                        "profile",
+                        "preset",
+                        "recursive",
+                        "overwrite",
+                        "sync",
+                        "crawl",
+                        "language",
+                        "inclusion",
+                        "exclusion"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"get",
+                        "help":"Get documents"
+                    },
+                    "argument":[
+                        "uris",
+                        "sync",
+                        "download",
+                        "query"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"set",
+                        "help":"Set values on documents"
+                    },
+                    "argument":[
+                        "uris",
+                        "sync",
+                        "download",
+                        "genealogy"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"drop",
+                        "help":"Drop documents"
+                    },
+                    "argument":[
+                        "uris",
+                        "sync",
+                        "download"
+                    ]
+                },
+                {
+                    "instruction":{
+                        "name":"optimize",
+                        "help":"Optimize file structure"
+                    },
+                    "argument":[
+                        "scan path",
+                        "inclusion",
+                        "sync",
+                        "crawl",
+                        "exclusion",
+                        "recursive"
                     ]
                 },
                 {
@@ -341,7 +341,7 @@
                     }
                 },
                 "crawl":{
-                    "flag":["-U", "--crawl"],
+                    "flag":["-C", "--crawl"],
                     "parameter":{ 
                         "action":"store_true",
                         "default":false,
@@ -376,18 +376,18 @@
                     }
                 },
                 "inclusion":{
-                    "flag":["-f", "--include"],
+                    "flag":["--include"],
                     "parameter":{
-                        "help":"Inclusion regex filter",
-                        "metavar":"EXP",
+                        "help":"Don't exclude files matching PATTERN",
+                        "metavar":"PATTERN",
                         "dest":"inclusion"
                     }
                 },
                 "exclusion":{
                     "flag":["--exclude"],
                     "parameter":{
-                        "help":"Exclusion regex filter",
-                        "metavar":"EXP",
+                        "help":"Exclude files matching PATTERN",
+                        "metavar":"PATTERN",
                         "dest":"exclusion"
                     }
                 },

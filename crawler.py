@@ -12,7 +12,7 @@ from model.caption import Caption, Slide
 
 class Crawler(object):
     def __init__(self, ontology):
-        self.log = logging.getLogger('crawler')
+        self.log = logging.getLogger('Crawler')
         self.ontology = ontology
         self.meta = None
         self.stream = None

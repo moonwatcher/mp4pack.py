@@ -309,13 +309,12 @@ class Task(object):
     
     def load(self):
         self.node['status'] = 'loaded'
-        pass
     
     
     def run(self):
         self.log.debug('Starting task %s', unicode(self))
-        self.node['start'] = datetime.now()
         self.node['status'] = 'running'
+        self.node['start'] = datetime.now()
     
     
     def unload(self):
@@ -458,6 +457,7 @@ class ResourceTask(Task):
     
     
     def produce(self, override=None):
+    
         # copy the location ontology
         o = Ontology.clone(self.location)
         
@@ -626,10 +626,12 @@ class SystemJob(Job):
     def load(self):
         Job.load(self)
         
+        # if the --all flag was specificed rebuild indexes on all known tables
         if self.ontology['all']:
             for table in self.env.table.keys():
                 self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))
                 
+        # otherwise, if a table list was specificed, use the list to create the tasks
         elif self.ontology['tables']:
             for table in self.ontology['tables']:
                 self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))

@@ -14,7 +14,7 @@ import queue
 
 class MaterialCache(object):
     def __init__(self, env):
-        self.log = logging.getLogger('cache')
+        self.log = logging.getLogger('Material')
         self.env = env
         self.asset = {}
     
@@ -54,7 +54,7 @@ class MaterialCache(object):
 
 class Asset(object):
     def __init__(self, cache, location):
-        self.log = logging.getLogger('Asset')
+        self.log = logging.getLogger('Material')
         self.cache = cache
         self.location = location.project('ns.medium.asset.location')
         self.resource = {}
@@ -135,7 +135,7 @@ class Asset(object):
 
 class Resource(object):
     def __init__(self, asset, location):
-        self.log = logging.getLogger('Resource')
+        self.log = logging.getLogger('Material')
         self.asset = asset
         self.location = location.project('ns.medium.resource.location')
         self.volatile = False

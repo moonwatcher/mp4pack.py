@@ -568,7 +568,7 @@ class Environment(object):
 
 class Repository(object):
     def __init__(self, env, node):
-        self.log = logging.getLogger('repository')
+        self.log = logging.getLogger('Repository')
         self.env = env
         self.node = node
         self.mongodb = Ontology(self.env, 'ns.system.mongodb', self.node['mongodb'])
