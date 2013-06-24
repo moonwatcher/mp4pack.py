@@ -498,9 +498,9 @@ class AudioVideoContainer(Container):
                         #command.append(self.asset.meta['full name'])
                         
                         command.append(u'--audio-tracks')
-                        command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'audio']))
+                        command.append(u','.join([ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'audio']))
                         command.append(u'--video-tracks')
-                        command.append(u','.join([ unicode(stream['stream id']) for stream in pivot.stream if stream['stream kind'] == 'video']))
+                        command.append(u','.join([ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'video']))
                         
                     # Only if at least one stream was chosen
                     if pivot.stream:
@@ -509,19 +509,19 @@ class AudioVideoContainer(Container):
                             if stream['stream kind'] != 'menu':
                                 if 'language' in stream:
                                     command.append(u'--language')
-                                    command.append(u'{0}:{1}'.format(stream['stream id'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
+                                    command.append(u'{0}:{1}'.format(stream['stream order'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
                                     
                                 if 'stream name' in stream:
                                     command.append(u'--track-name')
-                                    command.append(u'{0}:{1}'.format(stream['stream id'], stream['stream name']))
+                                    command.append(u'{0}:{1}'.format(stream['stream order'], stream['stream name']))
                                     
                                 if 'delay' in pivot.resource.hint:
                                     command.append(u'--sync')
-                                    command.append(u'{0}:{1}'.format(stream['stream id'], pivot.resource.hint['delay']))
+                                    command.append(u'{0}:{1}'.format(stream['stream order'], pivot.resource.hint['delay']))
                                     
                                 if stream['kind'] == 'srt':
                                     command.append(u'--sub-charset')
-                                    command.append(u'{0}:{1}'.format(stream['stream id'], u'UTF-8'))
+                                    command.append(u'{0}:{1}'.format(stream['stream order'], u'UTF-8'))
                                     
                             else:
                                 command.append(u'--chapter-language')
@@ -610,7 +610,7 @@ class Matroska(AudioVideoContainer):
                                 if 'delay' in stream: product.hint['delay'] = stream['delay']
                                 
                                 # add a clause to the command to extract the stream
-                                command.append(u'{0}:{1}'.format(unicode(stream['stream id']), product.path))
+                                command.append(u'{0}:{1}'.format(unicode(stream['stream order']), product.path))
                                 taken = True
                                 
                                 # enqueue a task for transcoding
@@ -835,8 +835,9 @@ class Subtitles(Text):
                         taken = True
                         
                         # Apply filters
-                        for name in stream['subtitle filters']:
-                            product.caption.filter(name)
+                        if 'subtitle filters' in stream:
+                            for name in stream['subtitle filters']:
+                                product.caption.filter(name)
                             
                         # Apply time shift
                         if 'time shift' in task.ontology:
@@ -899,7 +900,7 @@ class TableOfContent(Text):
             
             for pivot in task.transform.pivot.values():
                 for stream in pivot.stream:
-                    if not taken and stream['stream kind'] == 'caption':
+                    if not taken and stream['stream kind'] == 'menu':
                         taken = True
                         # Apply time shift
                         if 'time shift' in task.ontology:

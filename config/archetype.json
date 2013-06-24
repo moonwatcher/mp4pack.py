@@ -1018,6 +1018,11 @@
             "keyword":"stream_id",
             "type":"int"
         },
+        "stream order":{
+            "name":"Stream Order",
+            "keyword":"stream_order",
+            "type":"int"
+        },
         "stream kind position":{
             "name":"Stream position",
             "keyword":"stream_kind_position",

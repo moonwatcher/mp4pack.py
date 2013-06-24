@@ -476,7 +476,7 @@ class ResourceTask(Task):
             for i in [
                 'kind', 
                 'language',
-                'stream id',
+                'stream order',
                 'resource path digest',
                 'routing type'
             ]:

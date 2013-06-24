@@ -1,7 +1,7 @@
 {
     "preset":{
         "normal":{
-            "description":"Base empty profile to mirror the default profile",
+            "description":"Base preset",
             "action":{
                 "info":{},
                 "copy":{},
@@ -29,7 +29,15 @@
                                         "tasks":[
                                             {
                                                 "action":"transcode",
-                                                "kind":"srt"
+                                                "kind":"srt",
+                                                "preset":"normal",
+                                                "profile":"original"
+                                            },
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt",
+                                                "preset":"clean",
+                                                "profile":"clean"
                                             }
                                         ]
                                     }
@@ -44,7 +52,15 @@
                                         "tasks":[
                                             {
                                                 "action":"transcode",
-                                                "kind":"srt"
+                                                "kind":"srt",
+                                                "preset":"normal",
+                                                "profile":"original"
+                                            },
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt",
+                                                "preset":"clean",
+                                                "profile":"clean"
                                             }
                                         ]
                                     }
@@ -420,21 +436,8 @@
                                     "description":"Hebrew subtitles",
                                     "mode":"choose",
                                     "branch":[
-                                        {"stream kind":"caption", "language":"he"}
-                                    ],
-                                    "override":{
-                                        "subtitle filters":["noise", "hebrew noise", "typo", "punctuation", "leftover"]
-                                    }
-                                },
-                                {
-                                    "description":"English subtitles",
-                                    "mode":"choose",
-                                    "branch":[
-                                        {"stream kind":"caption", "language":"en"}
-                                    ],
-                                    "override":{
-                                        "subtitle filters":["noise", "typo", "english typo", "leftover"]
-                                    }
+                                        {"stream kind":"caption"}
+                                    ]
                                 }
                             ]
                         },
@@ -542,12 +545,6 @@
         "fragment":{
             "description":"fragment management preset",
             "action":{
-                "info":{},
-                "copy":{},
-                "move":{},
-                "delete":{},
-                "prepare":{},
-                "explode":{},
                 "pack":{
                     "pivot":[
                         { "operator":"this" },
@@ -633,11 +630,49 @@
                             ]
                         }
                     ]
-                },
-                "tag":{},
-                "optimize":{},
-                "transcode":{},
-                "update":{}
+                }
+            }
+        },
+        "clean":{
+            "description":"clean preset",
+            "action":{
+                "transcode":{
+                    "pivot":[
+                        { "operator":"this" }
+                    ],
+                    "transform":[
+                        {
+                            "description":"subtitles",
+                            "mode":"select",
+                            "branch":[
+                                {"kind":"srt"},
+                                {"kind":"ass"}
+                            ],
+                            "track":[
+                                {
+                                    "description":"Hebrew subtitles",
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"caption", "language":"he"}
+                                    ],
+                                    "override":{
+                                        "subtitle filters":["noise", "hebrew noise", "typo", "punctuation", "leftover"]
+                                    }
+                                },
+                                {
+                                    "description":"English subtitles",
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"caption", "language":"en"}
+                                    ],
+                                    "override":{
+                                        "subtitle filters":["noise", "typo", "english typo", "leftover"]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
             }
         }
     },

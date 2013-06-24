@@ -77,12 +77,20 @@ class Crawler(object):
                         mtype = self.env.enumeration['mediainfo stream type'].search(node.attrib['type'])
                         if mtype is not None:
                             if mtype.node['namespace']:
+                                # initialize an ontology with the correct namespace
                                 o = Ontology(self.env, mtype.node['namespace'])
+                                
+                                # iterate over the properties and populate the ontology
                                 for item in list(node):
                                     o.decode(item.tag, item.text)
+                                
+                                # fix the video encoder settings on video tracks
                                 if mtype.key == 'video':
                                     self._fix_encoder_settings(o)
+                                
+                                # add the ontology to the stream stack
                                 self._stream.append(o)
+                                
                             elif mtype.key == 'menu':
                                 m = Menu(self.env)
                                 for item in list(node):
@@ -219,7 +227,7 @@ class Crawler(object):
                 'preview':[],
             }
             
-            # There should always be exactly one info stream
+            # There should always be exactly one meta stream
             if normal['meta']:
                 self.meta = normal['meta'][0]
                 self._fix(self.meta)
@@ -271,12 +279,29 @@ class Crawler(object):
                 normal['menu'] = [o]
             else: normal['menu'] = []
             
-            # Finally, assign the stream kind by the aggregation
-            # and append to self.stream
-            for k,v in normal.iteritems():
-                for o in v:
-                    o['stream kind'] = k
-                    self.stream.append(o)
+            # Finally, assign the stream kind by the aggregation and append to self.stream
+            order = {'last':0, 'missing':[]}
+            for kind, streams in normal.iteritems():
+                for stream in streams:
+                
+                    # assign the stream kind
+                    stream['stream kind'] = kind
+                    
+                    # remove the mediainfo specific stream type 
+                    del stream['stream type']
+                    
+                    # check the if an order is missing and account for the last
+                    if 'stream order' in stream:
+                        order['last'] = max(order['last'], stream['stream order'])
+                    else:
+                        order['missing'].append(stream)
+                    self.stream.append(stream)
+            
+            # fix the streams with missing order
+            if order['missing']:
+                for stream in order['missing']:
+                    order['last'] += 1
+                    stream['stream order'] = order['last']
                     
             # Clean up
             self._stream = None

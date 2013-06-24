@@ -1,6 +1,6 @@
 {
     "system":{
-        "home":"/Users/lg/code/mp4pack.py/conf",
+        "home":"/etc/mpk",
         "domain":null,
         "host":null,
         "threads":2,

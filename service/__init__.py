@@ -112,7 +112,7 @@ class Resolver(object):
                 issued = repository.database.counters.find_and_modify(query={u'_id':name}, update={u'$inc':{u'next':1}, u'$set':{u'modified':datetime.now()}}, new=True, upsert=True)
                 if issued is not None:
                     self.log.debug(u'New key %d issued for key pool %s', issued[u'next'], issued[u'_id'])
-                    result = issued[u'next']
+                    result = int(issued[u'next'])
         return result
     
 

@@ -227,6 +227,7 @@
                 "itunes music album id":null,
                 "itunes music track id":null,
                 "stream id":null,
+                "stream order":null,
                 "resource path digest":null,
                 "person name":null,
                 "character name":null,
@@ -335,6 +336,7 @@
                 "asset uri":null,
                 "home uri":null,
                 "stream id":null,
+                "stream order":null,
                 "resource path digest":null,
                 "person name":null,
                 "character name":null,
@@ -459,6 +461,7 @@
                 "home id":null,
                 "resource path digest":null,
                 "stream id":null,
+                "stream order":null,
                 "media kind":null,
                 "movie id":null,
                 "music album id":null,
@@ -1062,8 +1065,8 @@
         "ns.medium.resource.stream.audio":{
             "synonym":["mediainfo"],
             "element":{
-                "stream id":{
-                    "mediainfo":"ID"
+                "stream order":{
+                    "mediainfo":"StreamOrder"
                 },
                 "stream kind position":{
                     "mediainfo":"StreamKindPos"
@@ -1141,7 +1144,6 @@
             },
             "rule":[
                 "rule.medium.stream.default.position",
-                "rule.medium.stream.default.id",
                 "rule.medium.stream.audio.kind",
                 "rule.system.default.enabled",
                 "rule.medium.stream.audio.name",
@@ -1151,8 +1153,8 @@
         "ns.medium.resource.stream.video":{
             "synonym":["mediainfo"],
             "element":{
-                "stream id":{
-                    "mediainfo":"ID"
+                "stream order":{
+                    "mediainfo":"StreamOrder"
                 },
                 "stream kind position":{
                     "mediainfo":"StreamKindPos"
@@ -1256,7 +1258,6 @@
             },
             "rule":[
                 "rule.medium.stream.default.position",
-                "rule.medium.stream.default.id",
                 "rule.medium.stream.video.kind",
                 "rule.medium.stream.default.primary",
                 "rule.system.default.enabled",
@@ -1266,8 +1267,8 @@
         "ns.medium.resource.stream.text":{
             "synonym":["mediainfo"],
             "element":{
-                "stream id":{
-                    "mediainfo":"ID"
+                "stream order":{
+                    "mediainfo":"StreamOrder"
                 },
                 "stream kind position":{
                     "mediainfo":"StreamKindPos"
@@ -1324,7 +1325,6 @@
             },
             "rule":[
                 "rule.medium.stream.default.position",
-                "rule.medium.stream.default.id",
                 "rule.medium.stream.text.kind",
                 "rule.medium.stream.default.primary",
                 "rule.system.default.enabled",
@@ -1335,8 +1335,8 @@
         "ns.medium.resource.stream.image":{
             "synonym":["mediainfo"],
             "element":{
-                "stream id":{
-                    "mediainfo":"ID"
+                "stream order":{
+                    "mediainfo":"StreamOrder"
                 },
                 "stream kind position":{
                     "mediainfo":"StreamKindPos"
@@ -1398,7 +1398,6 @@
             },
             "rule":[
                 "rule.medium.stream.default.position",
-                "rule.medium.stream.default.id",
                 "rule.medium.stream.image.kind",
                 "rule.medium.stream.default.primary",
                 "rule.system.default.enabled",

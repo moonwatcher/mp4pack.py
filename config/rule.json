@@ -657,7 +657,7 @@
                 "track name",
                 "resource path digest",
                 "language",
-                "stream id",
+                "stream order",
                 "umid"
             ],
             "branch":[
@@ -665,7 +665,7 @@
                     "requires":["file name"],
                     "match":{"property":"file name", "expression":"^[0-9a-f]{40}(?:\\.[a-z]{2})?\\.[0-9]{2}\\.[0-9a-f]{13}\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^(?P<resource_path_digest>[0-9a-f]{40})(?:\\.(?P<language>[a-z]{2}))?\\.(?P<stream_id>[0-9]{2})\\.(?P<umid>[0-9a-f]{13})\\.(?P<kind>[^\\.]{3})$", "flags":34 }
+                        {"property":"file name", "expression":"^(?P<resource_path_digest>[0-9a-f]{40})(?:\\.(?P<language>[a-z]{2}))?\\.(?P<stream_order>[0-9]{2})\\.(?P<umid>[0-9a-f]{13})\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ]
                 },
                 {
@@ -911,22 +911,22 @@
             "provide":["fragment file name"],
             "branch":[
                 {
-                    "requires":["resource path digest", "language", "stream id", "umid", "kind", "localized" ],
+                    "requires":["resource path digest", "language", "stream order", "umid", "kind", "localized" ],
                     "equal":{"localized":true },
                     "apply":[
                         {
                             "property":"fragment file name",
-                            "format":"{resource path digest}.{language}.{stream id:>02}.{umid}.{kind}"
+                            "format":"{resource path digest}.{language}.{stream order:>02}.{umid}.{kind}"
                         }
                     ]
                 },
                 {
-                    "requires":["resource path digest", "stream id", "umid", "kind", "localized" ],
+                    "requires":["resource path digest", "stream order", "umid", "kind", "localized" ],
                     "equal":{"localized":false },
                     "apply":[
                         {
                             "property":"fragment file name",
-                            "format":"{resource path digest}.{stream id:>02}.{umid}.{kind}"
+                            "format":"{resource path digest}.{stream order:>02}.{umid}.{kind}"
                         }
                     ]
                 }
@@ -1170,17 +1170,6 @@
                 {
                     "apply":[
                         {"property":"primary", "value":false }
-                    ]
-                }
-            ]
-        },
-        "rule.medium.stream.default.id":{
-            "name":"Default stream id",
-            "provide":["stream id"],
-            "branch":[
-                {
-                    "apply":[
-                        {"property":"stream id", "value":0}
                     ]
                 }
             ]
