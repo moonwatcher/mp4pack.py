@@ -280,7 +280,7 @@ class Crawler(object):
             else: normal['menu'] = []
             
             # Finally, assign the stream kind by the aggregation and append to self.stream
-            order = {'last':0, 'missing':[]}
+            order = {'last':-1, 'missing':[]}
             for kind, streams in normal.iteritems():
                 for stream in streams:
                 
