@@ -1413,91 +1413,91 @@
                 "8x8 dct":{
                     "x264":"8x8dct"
                 },
-                "adaptive bi directional":{
+                "b adapt":{
                     "x264":"b_adapt"
                 },
-                "bi directional bias":{
+                "b bias":{
                     "x264":"b_bias"
                 },
-                "bi directional pyramid":{
+                "b pyramid":{
                     "x264":"b_pyramid"
                 },
-                "bi directional frames":{
+                "b frames":{
                     "x264":"bframes"
                 },
                 "cabac":{
                     "x264":"cabac"
                 },
-                "chroma motion estimation":{
+                "chroma me":{
                     "x264":"chroma_me"
                 },
-                "chroma planes quantizer offset":{
+                "chroma qo":{
                     "x264":"chroma_qp_offset"
                 },
-                "constrained intra prediction":{
+                "i constrained":{
                     "x264":"constrained_intra"
                 },
-                "dct decimation":{
+                "decimate":{
                     "x264":"decimate"
                 },
-                "direct motion vectors prediction mode":{
+                "direct mv":{
                     "x264":"direct"
                 },
-                "predicted frames early skip detection":{
+                "p skip":{
                     "x264":"fast_pskip"
                 },
-                "intra frames refresh":{
+                "i refresh":{
                     "x264":"intra_refresh"
                 },
-                "rate control lookahead":{
+                "rc lookahead":{
                     "x264":"rc_lookahead"
                 },
-                "decoded picture buffer size":{
+                "dpb size":{
                     "x264":"ref"
                 },
                 "scene cut":{
                     "x264":"scenecut"
                 },
-                "sliced based threading":{
+                "sliced threads":{
                     "x264":"sliced_threads"
                 },
-                "subpixel motion estimation":{
+                "sub me":{
                     "x264":"subme"
                 },
                 "threads":{
                     "x264":"threads"
                 },
-                "trellis quantization":{
+                "trellis":{
                     "x264":"trellis"
                 },
-                "video buffer verifier size":{
+                "vbv size":{
                     "x264":"vbv_bufsize"
                 },
-                "video buffer verifier maximum rate":{
+                "vbv max":{
                     "x264":"vbv_maxrate"
                 },
-                "weighted predicted frames":{
+                "p weight":{
                     "x264":"wpredp"
                 },
-                "weighted bi directional frames":{
+                "b weight":{
                     "x264":"wpredb"
                 },
-                "maximum keyframe interval":{
+                "keyframe max":{
                     "x264":"keyint"
                 },
-                "minimum keyframe interval":{
+                "keyframe min":{
                     "x264":"keyint_min"
                 },
-                "macroblock adaptive frame field":{
+                "macroblock aff":{
                     "x264":"mbaff"
                 },
-                "macroblock tree rate control":{
+                "macroblock tree":{
                     "x264":"mbtree"
                 },
-                "motion estimation method":{
+                "me method":{
                     "x264":"me"
                 },
-                "motion estimation range":{
+                "me range":{
                     "x264":"me_range"
                 },
                 "mixed references":{
@@ -1515,7 +1515,7 @@
                 "quantizer step":{
                     "x264":"qpstep"
                 },
-                "custom quantization matrices":{
+                "custom quantization":{
                     "x264":"cqm"
                 },
                 "psychovisual optimization":{
@@ -1524,22 +1524,22 @@
                 "psychovisual strength":{
                     "x264":"psy_rd"
                 },
-                "quantizer curve compression factor":{
+                "quantizer curve compression":{
                     "x264":"qcomp"
                 },
                 "quantizer curve blur":{
                     "x264":"cplxblur"
                 },
-                "post compression quantizer curve blur":{
+                "post quantizer curve blur":{
                     "x264":"qblur"
                 },
                 "rate tolerance":{
                     "x264":"ratetol"
                 },
-                "intra predicted ratio":{
+                "i predicted ratio":{
                     "x264":"ip_ratio"
                 },
-                "bi directional predicted ratio":{
+                "b predicted ratio":{
                     "x264":"pb_ratio"
                 },
                 "macroblock partitions":{
@@ -1548,19 +1548,19 @@
                 "adaptive quantization":{
                     "x264":"aq"
                 },
-                "deadzone":{
+                "dead zone":{
                     "x264":"deadzone"
                 },
-                "loop filter deblocker":{
+                "deblock_filter":{
                     "x264":"deblock"
                 },
-                "rate control method":{
+                "rc method":{
                     "x264":"rc"
                 },
-                "hypothetical reference decoder":{
+                "hypothetical reference":{
                     "x264":"nal_hrd"
                 },
-                "open group of pictures":{
+                "open gop":{
                     "type":"open_gop"
                 },
                 "interlaced":{

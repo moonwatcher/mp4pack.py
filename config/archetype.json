@@ -1793,28 +1793,28 @@
             "type":"unicode"
         },
         "8x8 dct":{
-            "name":"Adaptive 8x8 DCT",
+            "name":"Adaptive 8x8 discrete cosine transform",
             "keyword":"8x8_dct",
             "type":"int"
         },
-        "adaptive bi directional":{
+        "b adapt":{
             "name":"Adaptive bi directional",
-            "keyword":"adaptive_bi_directional",
+            "keyword":"b_adapt",
             "type":"int"
         },
-        "bi directional bias":{
+        "b bias":{
             "name":"Bi directional bias",
-            "keyword":"bi_directionl_bias",
+            "keyword":"b_bias",
             "type":"int"
         },
-        "bi directional pyramid":{
+        "b pyramid":{
             "name":"Bi directional pyramid",
-            "keyword":"bi_directional_pyramid",
+            "keyword":"b_pyramid",
             "type":"int"
         },
-        "bi directional frames":{
+        "b frames":{
             "name":"Bi directional frames",
-            "keyword":"bi_directional_frames",
+            "keyword":"b_frames",
             "type":"int"
         },
         "cabac":{
@@ -1822,49 +1822,49 @@
             "keyword":"cabac",
             "type":"int"
         }, 
-        "chroma motion estimation":{
+        "chroma me":{
             "name":"Chroma motion estimation",
-            "keyword":"chroma_motion_estimation",
+            "keyword":"chroma_me",
             "type":"int"
         },
-        "chroma planes quantizer offset":{
+        "chroma qo":{
             "name":"Chroma planes quantizer offset",
-            "keyword":"chroma_planes_quantizer_offset",
+            "keyword":"chroma_qo",
             "type":"int"
         },
-        "constrained intra prediction":{
+        "i constrained":{
             "name":"Constrained intra prediction",
-            "keyword":"constrained_intra_prediction",
+            "keyword":"i_constrained",
             "type":"int"
         },
-        "dct decimation":{
-            "name":"DCT decimation",
-            "keyword":"dct_decimation",
+        "decimate":{
+            "name":"Discrete cosine transform decimation",
+            "keyword":"decimate",
             "type":"int"
         },
-        "direct motion vectors prediction mode":{
+        "direct mv":{
             "name":"Direct motion vectors prediction mode",
-            "keyword":"direct_motion_vectors_prediction_mode",
+            "keyword":"direct_mv",
             "type":"int"
         },
-        "predicted frames early skip detection":{
+        "p skip":{
             "name":"Predicted frames early skip detection",
-            "keyword":"predicted_frames_early_skip_detection",
+            "keyword":"p_skip",
             "type":"int"
         },
-        "intra frames refresh":{
+        "i refresh":{
             "name":"Intra frames refresh",
-            "keyword":"intra_frames_refresh",
+            "keyword":"i_refresh",
             "type":"int"
         },
-        "rate control lookahead":{
+        "rc lookahead":{
             "name":"Rate control lookahead",
-            "keyword":"rate_control_lookahead",
+            "keyword":"rc_lookahead",
             "type":"int"
         },
-        "decoded picture buffer size":{
+        "dpb size":{
             "name":"Decoded picture buffer size",
-            "keyword":"decoded_picture_buffer_size",
+            "keyword":"dpb_size",
             "type":"int"
         },
         "scene cut":{
@@ -1872,14 +1872,14 @@
             "keyword":"scene_cut",
             "type":"int"
         },
-        "sliced based threading":{
+        "sliced threads":{
             "name":"Sliced based threading",
-            "keyword":"sliced_based_threading",
+            "keyword":"sliced_threads",
             "type":"int"
         },
-        "subpixel motion estimation":{
+        "sub me":{
             "name":"Subpixel motion estimation",
-            "keyword":"subpixel_motion_estimation",
+            "keyword":"sub_me",
             "type":"int"
         },
         "threads":{
@@ -1887,59 +1887,59 @@
             "keyword":"threads",
             "type":"int"
         },
-        "trellis quantization":{
+        "trellis":{
             "name":"Trellis quantization",
-            "keyword":"trellis_quantization",
+            "keyword":"trellis",
             "type":"int"
         },
-        "video buffer verifier size":{
+        "vbv size":{
             "name":"Video buffer verifier size",
-            "keyword":"video_buffer_verifier_size",
+            "keyword":"vbv_size",
             "type":"int"
         },
-        "video buffer verifier maximum rate":{
+        "vbv max":{
             "name":"Video buffer verifier maximum rate",
-            "keyword":"video_buffer_verifier_maximum_rate",
+            "keyword":"vbv_max",
             "type":"int"
         },
-        "weighted predicted frames":{
+        "p weight":{
             "name":"Weighted predicted frames",
-            "keyword":"weighted_predicted_frames",
+            "keyword":"p_weight",
             "type":"int"
         },
-        "weighted bi directional frames":{
+        "b weight":{
             "name":"Weighted bi directional frames",
-            "keyword":"weighted_bi_directional_frames",
+            "keyword":"b_weight",
             "type":"int"
         },
-        "maximum keyframe interval":{
+        "keyframe max":{
             "name":"Maximum keyframe interval",
-            "keyword":"maximum_keyframe_interval",
+            "keyword":"keyframe_max",
             "type":"int"
         },
-        "minimum keyframe interval":{
+        "keyframe min":{
             "name":"Minimum keyframe interval",
-            "keyword":"minimum_keyframe_interval",
+            "keyword":"keyframe_min",
             "type":"int"
         },
-        "macroblock adaptive frame field":{
+        "macroblock aff":{
             "name":"macroblock adaptive frame field",
-            "keyword":"macroblock adaptive frame field",
+            "keyword":"macroblock_aff",
             "type":"int"
         },
-        "macroblock tree rate control":{
+        "macroblock tree":{
             "name":"Macroblock tree rate control",
-            "keyword":"macroblock_tree_rate_control",
+            "keyword":"macroblock_tree",
             "type":"int"
         },
-        "motion estimation method":{
+        "me method":{
             "name":"Motion estimation method",
-            "keyword":"motion_estimation_method",
+            "keyword":"me_method",
             "type":"unicode"
         },
-        "motion estimation range":{
+        "me range":{
             "name":"Motion estimation range",
-            "keyword":"motion_estimation_range",
+            "keyword":"me_range",
             "type":"int"
         },
         "mixed references":{
@@ -1967,9 +1967,9 @@
             "keyword":"quantizer_step",
             "type":"int"
         },
-        "custom quantization matrices":{
+        "custom quantization":{
             "name":"Custom quantization matrices",
-            "keyword":"custom_quantization_matrices",
+            "keyword":"custom_quantization",
             "type":"int"
         },
         "psychovisual optimization":{
@@ -1982,9 +1982,9 @@
             "keyword":"psychovisual_strength",
             "type":"unicode"
         },
-        "quantizer curve compression factor":{
+        "quantizer curve compression":{
             "name":"Quantizer curve compression factor",
-            "keyword":"quantizer_curve_compression_factor",
+            "keyword":"quantizer_curve_compression",
             "type":"float"
         },
         "quantizer curve blur":{
@@ -1992,9 +1992,9 @@
             "keyword":"quantizer_curve_blur",
             "type":"float"
         },
-        "post compression quantizer curve blur":{
+        "post quantizer curve blur":{
             "name":"Post compression quantizer curve blur",
-            "keyword":"post_compression_quantizer_curve_blur",
+            "keyword":"post_quantizer_curve_blur",
             "type":"float"
         },
         "rate tolerance":{
@@ -2002,14 +2002,14 @@
             "keyword":"rate_tolerance",
             "type":"float"
         },
-        "intra predicted ratio":{
+        "i predicted ratio":{
             "name":"Intra predicted ratio",
-            "keyword":"intra_predicted_ratio",
+            "keyword":"i_predicted_ratio",
             "type":"float"
         },
-        "bi directional predicted ratio":{
+        "b predicted ratio":{
             "name":"Bi directional predicted ratio",
-            "keyword":"bi_directional_predicted_ratio",
+            "keyword":"b_predicted_ratio",
             "type":"float"
         },
         "macroblock partitions":{
@@ -2022,29 +2022,29 @@
             "keyword":"adaptive_quantization",
             "type":"unicode"
         },
-        "deadzone":{
+        "dead zone":{
             "name":"Deadzone",
-            "keyword":"deadzone",
+            "keyword":"dead_zone",
             "type":"unicode"
         },
-        "loop filter deblocker":{
+        "deblock_filter":{
             "name":"Loop filter deblocker",
-            "keyword":"loop_filter_deblocker",
+            "keyword":"deblock_filter",
             "type":"unicode"
         },
-        "rate control method":{
+        "rc method":{
             "name":"Rate control method",
-            "keyword":"rate_control_method",
+            "keyword":"rc_method",
             "type":"unicode"
         },
-        "hypothetical reference decoder":{
+        "hypothetical reference":{
             "name":"Hypothetical reference decoder",
-            "keyword":"hypothetical_reference_decoder",
+            "keyword":"hypothetical_reference",
             "type":"unicode"
         },
-        "open group of pictures":{
+        "open gop":{
             "name":"Open group of pictures",
-            "keyword":"open group_of_pictures",
+            "keyword":"open_gop",
             "type":"int"
         },
         "interlaced":{
