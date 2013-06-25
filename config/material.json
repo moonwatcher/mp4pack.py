@@ -369,7 +369,7 @@
                                         {"stream kind":"audio", "kind":"dts", "channels":6}
                                     ],
                                     "override":{
-                                        "ffmpeg parameters":{"-ab":"640k", "-acodec":"ac3", "-ac":6 }
+                                        "ffmpeg parameters":{"-ab":"448k", "-acodec":"ac3", "-ac":6 }
                                     }
                                 },
                                 {
@@ -379,7 +379,7 @@
                                         {"stream kind":"audio", "kind":"dts", "channels":5}
                                     ],
                                     "override":{
-                                        "ffmpeg parameters":{"-ab":"640k", "-acodec":"ac3", "-ac":5 }
+                                        "ffmpeg parameters":{"-ab":"448k", "-acodec":"ac3", "-ac":5 }
                                     }
                                 },
                                 {
