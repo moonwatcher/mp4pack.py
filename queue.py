@@ -150,7 +150,7 @@ class Job(object):
     
     @property
     def document(self):
-        return json.dumps(self.execution, sort_keys=True, indent=4,  default=self.env.default_json_handler)
+        return json.dumps(self.execution, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
     
     
     def load(self):
