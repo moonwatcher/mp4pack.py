@@ -991,6 +991,11 @@
             "type":"enum",
             "enumeration":"stream kind"
         },
+        "video profile":{
+            "name":"Video profile",
+            "keyword":"video_profile",
+            "type":"unicode"
+        },
         "format":{
             "name":"Format",
             "keyword":"format",

@@ -1175,6 +1175,7 @@
                 "format":{
                     "mediainfo":"Format"
                 },
+                "video profile":null,
                 "format profile":{
                     "mediainfo":"Format_Profile",
                     "plural format":"mediainfo value list"

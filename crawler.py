@@ -231,6 +231,9 @@ class Crawler(object):
             if normal['meta']:
                 self.meta = normal['meta'][0]
                 self._fix(self.meta)
+                
+                # remove the mediainfo specific stream type 
+                del self.meta['stream type']
             else:
                 self.meta = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('general').node['namespace'])
             del normal['meta']
@@ -262,7 +265,16 @@ class Crawler(object):
                         
             # If a primary video stream is found set the dimensions on the info node
             if primary:
+                # set the primary flag
                 primary['primary'] = True
+                
+                # set the video profile
+                if 'format profile' in primary:
+                    primary['video profile'] = primary['format profile'][0]
+                else:
+                    primary['video profile'] = 'unknown'
+                
+                # set dimentions on the meta element
                 self.meta['width'] = float(primary['width'])
                 if primary['display aspect ratio'] >= self.env.constant['playback aspect ration']:
                     self.meta['height'] = self.meta['width'] / self.env.constant['playback aspect ration']

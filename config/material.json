@@ -601,7 +601,7 @@
             }
         },
         "atv3":{
-            "description":"Base preset",
+            "description":"Apple TV 3 presets",
             "action":{
                 "transcode":{
                     "pivot":[
@@ -745,7 +745,7 @@
             }
         },
         "atv2":{
-            "description":"Base preset",
+            "description":"Apple TV 2 presets",
             "action":{
                 "transcode":{
                     "pivot":[
@@ -889,7 +889,7 @@
             }
         },
         "iphone":{
-            "description":"Base preset",
+            "description":"iPhone presets",
             "action":{
                 "transcode":{
                     "pivot":[
@@ -997,12 +997,11 @@
         "normal":{},
         "clean":{},
         "original":{},
-        "sd":{},
-        "720":{},
-        "1080":{},
-        "iA4":{},
-        "universal":{},
-        "appletv":{},
-        "high":{}
+        "Simple@L3":{},
+        "Advanced Simple@L5":{},
+        "High@L4.0":{},
+        "High@L4.1":{},
+        "High@L3.1":{},
+        "High@L3.0":{}
     }
 }
