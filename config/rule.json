@@ -1340,6 +1340,13 @@
                 },
                 {
                     "requires":["format"],
+                    "equal":{"format":"ALAC"},
+                    "apply":[
+                        { "property":"kind", "value":"alac" }
+                    ]
+                },
+                {
+                    "requires":["format"],
                     "equal":{"format":"PCM"},
                     "apply":[
                         { "property":"kind", "value":"pcm" }

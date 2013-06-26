@@ -58,7 +58,7 @@ class Crawler(object):
             self._load_srt()
             self._load_ass()
             self._normalize()
-            self._implicit_profile()
+            self._infer_profile()
     
     
     
@@ -248,10 +248,8 @@ class Crawler(object):
             # If the text stream format is 'Apple text' it is a chapter track in mp4,
             # otherwise its a caption stream
             for o in [ o for o in self._stream if o['stream type'] == u'text' ]:
-                if o['format'] == u'Apple text':
-                    normal['menu'].append(o)
-                else:
-                    normal['caption'].append(o)
+                if o['format'] == u'Apple text': normal['menu'].append(o)
+                else: normal['caption'].append(o)
                     
             # Break the video streams into normal video and chapter preview images
             # by relative portion of the stream and locate the primary video stream
@@ -261,27 +259,7 @@ class Crawler(object):
                     normal['preview'].append(o)
                 else:
                     normal['video'].append(o)
-                    if primary is None or o['stream portion'] > primary['stream portion']:
-                        primary = o
                         
-            # If a primary video stream is found set the dimensions on the info node
-            if primary:
-                # set the primary flag
-                primary['primary'] = True
-                
-                # set the video profile
-                if 'format profile' in primary:
-                    self.meta['video profile'] = primary['format profile'][0]
-                else:
-                    self.meta['video profile'] = 'unknown'
-                
-                # set dimentions on the meta element
-                self.meta['width'] = float(primary['width'])
-                if primary['display aspect ratio'] >= self.env.constant['playback aspect ration']:
-                    self.meta['height'] = self.meta['width'] / self.env.constant['playback aspect ration']
-                else:
-                    self.meta['height'] = float(primary['height'])
-                    
             # There should only be one menu stream with one menu in it or none at all
             if self._menu:
                 if normal['menu']: o = normal['menu'][0]
@@ -316,13 +294,6 @@ class Crawler(object):
                     order['last'] += 1
                     stream['stream order'] = order['last']
 
-            # locate the absolute primary stream
-            primary = None
-            for stream in self.stream:
-                if primary is None or stream['stream portion'] > primary['stream portion']:
-                    primary = stream
-            primary['primary'] = True
-            
             # Clean up
             self._stream = None
             self._menu = None
@@ -394,14 +365,48 @@ class Crawler(object):
 
 
 
-    def _implicit_profile(self):
-        if self.ontology['essence'] == 'video':
-            self.meta['profile'] = self.meta['video profile']
-        elif self.ontology['essence'] == 'audio':
-            self.meta['profile'] = 'normal'
-        elif self.ontology['essence'] == 'text':
-            self.meta['profile'] = 'normal'
-        elif self.ontology['essence'] == 'image':
-            self.meta['profile'] = 'normal'
+    def _infer_profile(self):
+        # locate the primary stream
+        primary = None
+        for stream in self.stream:
+            if primary is None or stream['stream portion'] > primary['stream portion']:
+                primary = stream
+
+        if primary:
+            primary['primary'] = True
+            
+            if self.ontology['essence'] == 'video':
+                if primary['stream kind'] == 'video':
+                
+                    # set the video profile
+                    if 'format profile' in primary:
+                        self.meta['profile'] = primary['format profile'][0]
+                    else:
+                        self.meta['video'] = 'unknown'
+                    
+                    # set dimentions on the meta element
+                    self.meta['width'] = float(primary['width'])
+                    
+                    if primary['display aspect ratio'] >= self.env.constant['playback aspect ration']:
+                        self.meta['height'] = self.meta['width'] / self.env.constant['playback aspect ration']
+                    else:
+                        self.meta['height'] = float(primary['height'])
+                        
+            elif self.ontology['essence'] == 'audio':
+                if primary['stream kind'] == 'audio':
+                    if primary['kind'] in set(('alac', 'flac', 'pcm')):
+                        self.meta['profile'] = 'lossless'
+                        
+                    elif primary['kind'] in set(('dts', 'ac3')):
+                        self.meta['profile'] = 'surround'
+                        
+                    elif primary['kind'] in set(('aac', 'mp3', 'ogg')):
+                        self.meta['profile'] = 'lossy'
+                        
+            elif self.ontology['essence'] == 'text':
+                pass
+                
+            elif self.ontology['essence'] == 'image':
+                pass
     
 
