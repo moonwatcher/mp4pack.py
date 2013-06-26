@@ -323,7 +323,7 @@
                     "apply":[
                         {"property":"essence", "value":"image"}
                     ]
-                },
+                }
             ]
         },
         "rule.system.default.routing":{
