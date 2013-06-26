@@ -254,7 +254,7 @@ class Crawler(object):
                     normal['caption'].append(o)
                     
             # Break the video streams into normal video and chapter preview images
-            # by relative portion of the stream and locate the primary
+            # by relative portion of the stream and locate the primary video stream
             primary = None
             for o in [ o for o in self._stream if o['stream type'] == u'video' ]:
                 if o['format'] == u'JPEG' and o['stream portion'] < 0.01:
@@ -315,7 +315,14 @@ class Crawler(object):
                 for stream in order['missing']:
                     order['last'] += 1
                     stream['stream order'] = order['last']
-                    
+
+            # locate the absolute primary stream
+            primary = None
+            for stream in self.stream:
+                if primary is None or stream['stream portion'] > primary['stream portion']:
+                    primary = stream
+            primary['primary'] = True
+            
             # Clean up
             self._stream = None
             self._menu = None
