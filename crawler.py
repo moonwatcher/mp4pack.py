@@ -58,6 +58,7 @@ class Crawler(object):
             self._load_srt()
             self._load_ass()
             self._normalize()
+            self._implicit_profile()
     
     
     
@@ -270,9 +271,9 @@ class Crawler(object):
                 
                 # set the video profile
                 if 'format profile' in primary:
-                    primary['video profile'] = primary['format profile'][0]
+                    self.meta['video profile'] = primary['format profile'][0]
                 else:
-                    primary['video profile'] = 'unknown'
+                    self.meta['video profile'] = 'unknown'
                 
                 # set dimentions on the meta element
                 self.meta['width'] = float(primary['width'])
@@ -384,4 +385,16 @@ class Crawler(object):
                             ontology[key] = items
     
 
+
+
+    def _implicit_profile(self):
+        if self.ontology['essence'] == 'video':
+            self.meta['profile'] = self.meta['video profile']
+        elif self.ontology['essence'] == 'audio':
+            self.meta['profile'] = 'normal'
+        elif self.ontology['essence'] == 'text':
+            self.meta['profile'] = 'normal'
+        elif self.ontology['essence'] == 'image':
+            self.meta['profile'] = 'normal'
+    
 

@@ -182,6 +182,7 @@
                 "host":null,
                 "media kind":null,
                 "kind":null,
+                "essence",null,
                 "language":null,
                 "profile":null,
                 "volume":null,
@@ -254,6 +255,7 @@
                 "routing type":null
             },
             "rule":[
+                "rule.system.essence",
                 "rule.medium.resource.filename.fragment",
                 "rule.medium.resource.directory.fragment",
                 "rule.system.temp.location",
@@ -296,6 +298,7 @@
                 "media kind":null,
                 "directory":null,
                 "file name":null,
+                "essence":null,
                 "kind":null,
                 "language":null,
                 "profile":null,
@@ -361,6 +364,7 @@
                 "routing type":null
             },
             "rule":[
+                "rule.system.essence",
                 "rule.medium.resource.filename.fragment",
                 "rule.medium.resource.directory.fragment",
                 "rule.system.temp.location",

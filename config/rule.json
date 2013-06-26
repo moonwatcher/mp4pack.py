@@ -194,6 +194,138 @@
                 }
             ]
         },
+        "rule.system.essence":{
+            "name":"Essence from kind",
+            "provide":["essence"],
+            "branch":[
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"mkv"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"m4v"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"avi"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"mov"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"m4a"},
+                    "apply":[
+                        {"property":"essence", "value":"audio"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"aac"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"ac3"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"dts"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"flac"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"alac"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"mp3"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"ogg"},
+                    "apply":[
+                        {"property":"essence", "value":"video"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"json"},
+                    "apply":[
+                        {"property":"essence", "value":"text"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"srt"},
+                    "apply":[
+                        {"property":"essence", "value":"text"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"ass"},
+                    "apply":[
+                        {"property":"essence", "value":"text"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"chp"},
+                    "apply":[
+                        {"property":"essence", "value":"text"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"jpg"},
+                    "apply":[
+                        {"property":"essence", "value":"image"}
+                    ]
+                },
+                {
+                    "requires":["kind"],
+                    "equal":{"kind":"png"},
+                    "apply":[
+                        {"property":"essence", "value":"image"}
+                    ]
+                },
+            ]
+        },
         "rule.system.default.routing":{
             "name":"Default volume and profile",
             "provide":["volume", "profile"]
