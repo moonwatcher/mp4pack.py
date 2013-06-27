@@ -237,77 +237,77 @@
                     "requires":["kind"],
                     "equal":{"kind":"aac"},
                     "apply":[
-                        {"property":"essence", "value":"video"}
+                        {"property":"essence", "value":"audio"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"ac3"},
                     "apply":[
-                        {"property":"essence", "value":"video"}
+                        {"property":"essence", "value":"audio"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"dts"},
                     "apply":[
-                        {"property":"essence", "value":"video"}
+                        {"property":"essence", "value":"audio"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"flac"},
                     "apply":[
-                        {"property":"essence", "value":"video"}
+                        {"property":"essence", "value":"audio"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"alac"},
                     "apply":[
-                        {"property":"essence", "value":"video"}
+                        {"property":"essence", "value":"audio"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"mp3"},
                     "apply":[
-                        {"property":"essence", "value":"video"}
+                        {"property":"essence", "value":"audio"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"ogg"},
                     "apply":[
-                        {"property":"essence", "value":"video"}
+                        {"property":"essence", "value":"audio"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"json"},
                     "apply":[
-                        {"property":"essence", "value":"text"}
+                        {"property":"essence", "value":"json"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"srt"},
                     "apply":[
-                        {"property":"essence", "value":"text"}
+                        {"property":"essence", "value":"caption"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"ass"},
                     "apply":[
-                        {"property":"essence", "value":"text"}
+                        {"property":"essence", "value":"caption"}
                     ]
                 },
                 {
                     "requires":["kind"],
                     "equal":{"kind":"chp"},
                     "apply":[
-                        {"property":"essence", "value":"text"}
+                        {"property":"essence", "value":"menu"}
                     ]
                 },
                 {

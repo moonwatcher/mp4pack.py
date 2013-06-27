@@ -14,11 +14,9 @@ class Crawler(object):
     def __init__(self, ontology):
         self.log = logging.getLogger('Crawler')
         self.ontology = ontology
-        self.meta = None
-        self.stream = None
+        self._node = None
         self._execution = None
         self.reload()
-    
     
     def __unicode__(self):
         return unicode(self.ontology['resource uri'])
@@ -38,19 +36,17 @@ class Crawler(object):
     
     @property
     def node(self):
-        return {
-            'meta':self.meta.node,
-            'stream':[ o.node for o in self.stream ],
-        }
+        return self._node
     
     
     def reload(self):
         if self.valid:
-            self.meta = None
-            self.stream = None
+            self._node = None
             self._execution = {
-                'stream':[],
-                'menu':[],
+                'crawl':{
+                    'stream':[],
+                    'menu':[],
+                }
             }
             
             self._load_mediainfo()
@@ -59,6 +55,11 @@ class Crawler(object):
             self._load_ass()
             self._normalize()
             self._infer_profile()
+
+            self._node = {
+                'meta':self._execution['result']['meta'].node,
+                'stream':[ o.node for o in self._execution['result']['stream'] ],
+            }
             
             # Clean up
             self._execution = None
@@ -74,7 +75,6 @@ class Crawler(object):
             report = proc_grep.communicate()
             element = ElementTree.fromstring(report[0])
             if element is not None:
-                menu = None
                 for node in element.findall(u'File/track'):
                     if 'type' in node.attrib:
                         mtype = self.env.enumeration['mediainfo stream type'].search(node.attrib['type'])
@@ -92,22 +92,18 @@ class Crawler(object):
                                     self._fix_mediainfo_encoder_settings(o)
                                 
                                 # add the ontology to the stream stack
-                                self._execution['stream'].append(o)
+                                self._execution['crawl']['stream'].append(o)
                                 
                             elif mtype.key == 'menu':
-                                m = Menu(self.env)
+                                menu = Menu(self.env)
                                 for item in list(node):
-                                    m.add(Chapter.from_raw(item.tag, item.text, Chapter.MEDIAINFO))
-                                self._add_menu(m)
+                                    menu.add(Chapter.from_raw(item.tag, item.text, Chapter.MEDIAINFO))
+                                menu.normalize()
+                                if menu.valid:
+                                    self._execution['crawl']['menu'].append(menu)
                                 
             # Release resources held by the element, we no longer need it
             element.clear()
-    
-    
-    def _add_menu(self, menu):
-        if menu is not None:
-            menu.normalize()
-            if menu.valid: self._execution['menu'].append(menu)
     
     
     def _load_ogg_chapters(self):
@@ -115,10 +111,12 @@ class Crawler(object):
             content = self._read()
             if content:
                 content = content.splitlines()
-                m = Menu(self.env)
+                menu = Menu(self.env)
                 for index in range(len(content) - 1):
-                    m.add(Chapter.from_raw(content[index], content[index + 1], Chapter.OGG))
-                self._add_menu(m)
+                    menu.add(Chapter.from_raw(content[index], content[index + 1], Chapter.OGG))
+                menu.normalize()
+                if menu.valid:
+                    self._execution['crawl']['menu'].append(menu)
     
     
     def _load_srt(self):
@@ -167,7 +165,7 @@ class Crawler(object):
                     o['format'] = u'UTF-8'
                     o['language'] = self.ontology['language']
                     o['content'] = caption.node
-                    self._execution['stream'].append(o)
+                    self._execution['crawl']['stream'].append(o)
     
     
     def _load_ass(self):
@@ -214,85 +212,99 @@ class Crawler(object):
                     o['format'] = u'ASS'
                     o['language'] = self.ontology['language']
                     o['content'] = caption.node
-                    self._execution['stream'].append(o)
+                    self._execution['crawl']['stream'].append(o)
     
     
     def _normalize(self):
-        if self.meta is None:
-            self.stream = []
-            self._execution['normalized'] = {
-                'meta':[ o for o in self._execution['stream'] if o['stream type'] == u'general' ],
-                'image':[ o for o in self._execution['stream'] if o['stream type'] == u'image' ],
-                'audio':[],
-                'video':[],
-                'caption':[],
-                'menu':[],
-                'preview':[],
-            }
+        self._execution['breakdown'] = {
+            'general':[ o for o in self._execution['crawl']['stream'] if o['stream type'] == u'general' ],
+            'image':[ o for o in self._execution['crawl']['stream'] if o['stream type'] == u'image' ],
+            'audio':[ o for o in self._execution['crawl']['stream'] if o['stream type'] == u'audio' ],
+            'video':[ o for o in self._execution['crawl']['stream'] if o['stream type'] == u'video' ],
+            'text':[ o for o in self._execution['crawl']['stream'] if o['stream type'] == u'text' ],
+        }
+        self._execution['normalized'] = {
+            'image':[],
+            'audio':[],
+            'video':[],
+            'caption':[],
+            'menu':[],
+            'preview':[],
+        }
+        self._execution['result'] = {
+            'meta':None,
+            'stream':[],
+        }
+        
+        # There should always be exactly one meta stream
+        if self._execution['breakdown']['general']:
+            del self._execution['breakdown']['general'][0]['stream type']
+            self._execution['result']['meta'] = self._fix_meta(self._execution['breakdown']['general'][0])
             
-            # There should always be exactly one meta stream
-            if self._execution['normalized']['meta']:
-                self.meta = self._execution['normalized']['meta'][0]
-                self._fix_meta(self.meta)
-                
-                # remove the mediainfo specific stream type 
-                del self.meta['stream type']
-            else:
-                self.meta = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('general').node['namespace'])
-            del self._execution['normalized']['meta']
-            
+        # Filter audio streams
+        for o in self._execution['breakdown']['audio']:
             # Choose the minimum channel count for every audio stream
-            for o in [ o for o in self._execution['stream'] if o['stream type'] == u'audio' ]:
-                self._execution['normalized']['audio'].append(o)
-                if 'channel count' in o: o['channels'] = min(o['channel count'])
-                    
-            # If the text stream format is 'Apple text' it is a chapter track in mp4,
-            # otherwise its a caption stream
-            for o in [ o for o in self._execution['stream'] if o['stream type'] == u'text' ]:
-                if o['format'] == u'Apple text': self._execution['normalized']['menu'].append(o)
-                else: self._execution['normalized']['caption'].append(o)
-                    
-            # Break the video streams into normal video and chapter preview images
-            # by relative portion of the stream and locate the primary video stream
-            primary = None
-            for o in [ o for o in self._execution['stream'] if o['stream type'] == u'video' ]:
-                if o['format'] == u'JPEG' and o['stream portion'] < 0.01:
-                    self._execution['normalized']['preview'].append(o)
-                else:
-                    self._execution['normalized']['video'].append(o)
-                        
-            # There should only be one menu stream with one menu in it or none at all
-            if self._execution['menu']:
-                if self._execution['normalized']['menu']: o = self._execution['normalized']['menu'][0]
-                else:
-                    o = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('text').node['namespace'])
-                    o['stream type'] = u'text'
-                o['content'] = self._execution['menu'][0].node
-                self._execution['normalized']['menu'] = [o]
-            else: self._execution['normalized']['menu'] = []
+            if 'channel count' in o:
+                o['channels'] = min(o['channel count'])
+            self._execution['normalized']['audio'].append(o)
             
-            # Finally, assign the stream kind by the aggregation and append to self.stream
-            order = {'last':-1, 'missing':[]}
-            for stream_kind, streams in self._execution['normalized'].iteritems():
-                for stream in streams:
-                    # assign the stream kind
-                    stream['stream kind'] = stream_kind
-                                   
-                    # remove the mediainfo specific stream type 
-                    del stream['stream type']
+        # If the text stream format is 'Apple text' it is a chapter track in mp4,
+        # otherwise its a caption stream
+        for o in self._execution['breakdown']['text']:
+            if o['format'] == u'Apple text':
+                self._execution['normalized']['menu'].append(o)
+            else:
+                self._execution['normalized']['caption'].append(o)
+                
+        # Break the video streams into normal video and chapter preview images
+        # by relative portion of the stream and locate the primary video stream
+        for o in self._execution['breakdown']['video']:
+            if o['format'] == u'JPEG' and o['stream portion'] < 0.01:
+                self._execution['normalized']['preview'].append(o)
+            else:
+                self._execution['normalized']['video'].append(o)
                     
-                    # check the if an order is missing and account for the last
-                    if 'stream order' in stream:
-                        order['last'] = max(order['last'], stream['stream order'])
-                    else:
-                        order['missing'].append(stream)
-                    self.stream.append(stream)
-            
-            # fix the streams with missing order
-            if order['missing']:
-                for stream in order['missing']:
-                    order['last'] += 1
-                    stream['stream order'] = order['last']
+        # There should only be one menu stream with one menu in it or none at all
+        if self._execution['crawl']['menu']:
+            if len(self._execution['normalized']['menu']) == 0:
+                menu = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('text').node['namespace'])
+            elif len(self._execution['normalized']['menu']) == 1:
+                menu = self._execution['normalized']['menu'][0]
+            else:
+                self.log.warning(u'Multiple menu streams found for %s, ignoring all but the first', unicode(self))
+                menu = self._execution['normalized']['menu'][0]
+                
+            menu['content'] = self._execution['crawl']['menu'][0].node
+            self._execution['normalized']['menu'] = [ menu ]
+        else:
+            self._execution['normalized']['menu'] = []
+        
+        # clean up the now redundent stacks
+        del self._execution['crawl']
+        del self._execution['breakdown']
+        
+        # Finally, assign the stream kind by the aggregation and append to self.stream
+        order = {'last':-1, 'missing':[]}
+        for stream_kind, streams in self._execution['normalized'].iteritems():
+            for stream in streams:
+                # remove the mediainfo specific stream type 
+                del stream['stream type']
+                
+                # assign the stream kind
+                stream['stream kind'] = stream_kind
+                
+                # check the if an order is missing and account for the last
+                if 'stream order' in stream:
+                    order['last'] = max(order['last'], stream['stream order'])
+                else:
+                    order['missing'].append(stream)
+                self._execution['result']['stream'].append(stream)
+        
+        # fix the streams with missing order
+        if order['missing']:
+            for stream in order['missing']:
+                order['last'] += 1
+                stream['stream order'] = order['last']
     
     
     def _read(self):
@@ -335,8 +347,9 @@ class Crawler(object):
     
     
     def _fix_meta(self, ontology):
-        if ontology:
-            
+        if ontology is None:
+            ontology = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('general').node['namespace'])
+        else:
             # try to decode the genre as an enumerated genre type
             if 'genre name' in ontology:
                 element = self.env.enumeration['genre'].search(ontology['genre name'])
@@ -357,50 +370,49 @@ class Crawler(object):
                         items = [ unicode(i) for i in items if i ]
                         if items:
                             ontology[key] = items
+        return ontology
     
     
     def _infer_profile(self):
-        # locate the primary stream
         primary = None
-        for stream in self.stream:
-            if primary is None or stream['stream portion'] > primary['stream portion']:
-                primary = stream
-
-        if primary:
-            primary['primary'] = True
-            
-            if self.ontology['essence'] == 'video':
-                if primary['stream kind'] == 'video':
+        print self.ontology['essence'] 
+        if self.ontology['essence'] and self.ontology['essence'] in self._execution['normalized']:
+            for stream in self._execution['normalized'][self.ontology['essence']]:
+                if primary is None or stream['stream portion'] > primary['stream portion']:
+                    primary = stream
+                    
+            if primary:
+                primary['primary'] = True
+                
+                if self.ontology['essence'] == 'video':
                 
                     # set the video profile
                     if 'format profile' in primary:
-                        self.meta['profile'] = primary['format profile'][0]
-                    else:
-                        self.meta['video'] = 'unknown'
+                        self._execution['result']['meta']['profile'] = primary['format profile'][0]
                     
                     # set dimentions on the meta element
-                    self.meta['width'] = float(primary['width'])
+                    self._execution['result']['meta']['width'] = float(primary['width'])
                     
                     if primary['display aspect ratio'] >= self.env.constant['playback aspect ration']:
-                        self.meta['height'] = self.meta['width'] / self.env.constant['playback aspect ration']
+                        self._execution['result']['meta']['height'] = self._execution['result']['meta']['width'] / self.env.constant['playback aspect ration']
                     else:
-                        self.meta['height'] = float(primary['height'])
-                        
-            elif self.ontology['essence'] == 'audio':
-                if primary['stream kind'] == 'audio':
+                        self._execution['result']['meta']['height'] = float(primary['height'])
+                            
+                elif self.ontology['essence'] == 'audio':
                     if primary['kind'] in set(('alac', 'flac', 'pcm')):
-                        self.meta['profile'] = 'lossless'
+                        self._execution['result']['meta']['profile'] = 'lossless'
                         
                     elif primary['kind'] in set(('dts', 'ac3')):
-                        self.meta['profile'] = 'surround'
+                        self._execution['result']['meta']['profile'] = 'surround'
                         
                     elif primary['kind'] in set(('aac', 'mp3', 'ogg')):
-                        self.meta['profile'] = 'lossy'
-                        
-            elif self.ontology['essence'] == 'text':
-                pass
-                
-            elif self.ontology['essence'] == 'image':
-                pass
-    
-
+                        self._execution['result']['meta']['profile'] = 'lossy'
+                            
+                elif self.ontology['essence'] == 'caption':
+                    pass
+                    
+                elif self.ontology['essence'] == 'menu':
+                    pass
+                    
+                elif self.ontology['essence'] == 'image':
+                    pass
