@@ -992,16 +992,5 @@
                 }
             }
         }
-    },
-    "profile":{
-        "normal":{},
-        "clean":{},
-        "original":{},
-        "Simple@L3":{},
-        "Advanced Simple@L5":{},
-        "High@L4.0":{},
-        "High@L4.1":{},
-        "High@L3.1":{},
-        "High@L3.0":{}
     }
 }

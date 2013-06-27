@@ -618,7 +618,7 @@ class Prototype(Element):
         try:
             result = int(value)
         except ValueError:
-            self.log.error(u'Failed to decode: %s as an integer', value)
+            self.log.error(u'Failed to decode %s: %s as an integer', self.key, value)
         return result
     
     
@@ -627,7 +627,7 @@ class Prototype(Element):
         try:
             result = float(value)
         except ValueError:
-            self.log.error(u'Failed to decode: %s as an integer', value)
+            self.log.error(u'Failed to decode %s: %s as an integer', self.key, value)
         return result
     
     

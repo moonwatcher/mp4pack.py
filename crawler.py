@@ -16,9 +16,7 @@ class Crawler(object):
         self.ontology = ontology
         self.meta = None
         self.stream = None
-        
-        self._stream = None
-        self._menu = None
+        self._execution = None
         self.reload()
     
     
@@ -50,8 +48,10 @@ class Crawler(object):
         if self.valid:
             self.meta = None
             self.stream = None
-            self._stream = []
-            self._menu = []
+            self._execution = {
+                'stream':[],
+                'menu':[],
+            }
             
             self._load_mediainfo()
             self._load_ogg_chapters()
@@ -59,11 +59,13 @@ class Crawler(object):
             self._load_ass()
             self._normalize()
             self._infer_profile()
+            
+            # Clean up
+            self._execution = None
     
     
     
     def _load_mediainfo(self):
-        # Propagate self._stream and self._menu from mediainfo
         command = self.env.initialize_command('mediainfo', self.log)
         if command:
             command.extend([u'--Language=raw', u'--Output=XML', u'--Full', u'--SkipBinaryData', self.ontology['path']])
@@ -87,10 +89,10 @@ class Crawler(object):
                                 
                                 # fix the video encoder settings on video tracks
                                 if mtype.key == 'video':
-                                    self._fix_encoder_settings(o)
+                                    self._fix_mediainfo_encoder_settings(o)
                                 
                                 # add the ontology to the stream stack
-                                self._stream.append(o)
+                                self._execution['stream'].append(o)
                                 
                             elif mtype.key == 'menu':
                                 m = Menu(self.env)
@@ -105,7 +107,7 @@ class Crawler(object):
     def _add_menu(self, menu):
         if menu is not None:
             menu.normalize()
-            if menu.valid: self._menu.append(menu)
+            if menu.valid: self._execution['menu'].append(menu)
     
     
     def _load_ogg_chapters(self):
@@ -165,7 +167,7 @@ class Crawler(object):
                     o['format'] = u'UTF-8'
                     o['language'] = self.ontology['language']
                     o['content'] = caption.node
-                    self._stream.append(o)
+                    self._execution['stream'].append(o)
     
     
     def _load_ass(self):
@@ -212,15 +214,15 @@ class Crawler(object):
                     o['format'] = u'ASS'
                     o['language'] = self.ontology['language']
                     o['content'] = caption.node
-                    self._stream.append(o)
+                    self._execution['stream'].append(o)
     
     
     def _normalize(self):
         if self.meta is None:
             self.stream = []
-            normal = {
-                'meta':[ o for o in self._stream if o['stream type'] == u'general' ],
-                'image':[ o for o in self._stream if o['stream type'] == u'image' ],
+            self._execution['normalized'] = {
+                'meta':[ o for o in self._execution['stream'] if o['stream type'] == u'general' ],
+                'image':[ o for o in self._execution['stream'] if o['stream type'] == u'image' ],
                 'audio':[],
                 'video':[],
                 'caption':[],
@@ -229,50 +231,49 @@ class Crawler(object):
             }
             
             # There should always be exactly one meta stream
-            if normal['meta']:
-                self.meta = normal['meta'][0]
-                self._fix(self.meta)
+            if self._execution['normalized']['meta']:
+                self.meta = self._execution['normalized']['meta'][0]
+                self._fix_meta(self.meta)
                 
                 # remove the mediainfo specific stream type 
                 del self.meta['stream type']
             else:
                 self.meta = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('general').node['namespace'])
-            del normal['meta']
+            del self._execution['normalized']['meta']
             
             # Choose the minimum channel count for every audio stream
-            for o in [ o for o in self._stream if o['stream type'] == u'audio' ]:
-                normal['audio'].append(o)
-                if 'channel count' in o:
-                    o['channels'] = min(o['channel count'])
+            for o in [ o for o in self._execution['stream'] if o['stream type'] == u'audio' ]:
+                self._execution['normalized']['audio'].append(o)
+                if 'channel count' in o: o['channels'] = min(o['channel count'])
                     
             # If the text stream format is 'Apple text' it is a chapter track in mp4,
             # otherwise its a caption stream
-            for o in [ o for o in self._stream if o['stream type'] == u'text' ]:
-                if o['format'] == u'Apple text': normal['menu'].append(o)
-                else: normal['caption'].append(o)
+            for o in [ o for o in self._execution['stream'] if o['stream type'] == u'text' ]:
+                if o['format'] == u'Apple text': self._execution['normalized']['menu'].append(o)
+                else: self._execution['normalized']['caption'].append(o)
                     
             # Break the video streams into normal video and chapter preview images
             # by relative portion of the stream and locate the primary video stream
             primary = None
-            for o in [ o for o in self._stream if o['stream type'] == u'video' ]:
+            for o in [ o for o in self._execution['stream'] if o['stream type'] == u'video' ]:
                 if o['format'] == u'JPEG' and o['stream portion'] < 0.01:
-                    normal['preview'].append(o)
+                    self._execution['normalized']['preview'].append(o)
                 else:
-                    normal['video'].append(o)
+                    self._execution['normalized']['video'].append(o)
                         
             # There should only be one menu stream with one menu in it or none at all
-            if self._menu:
-                if normal['menu']: o = normal['menu'][0]
+            if self._execution['menu']:
+                if self._execution['normalized']['menu']: o = self._execution['normalized']['menu'][0]
                 else:
                     o = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('text').node['namespace'])
                     o['stream type'] = u'text'
-                o['content'] = self._menu[0].node
-                normal['menu'] = [o]
-            else: normal['menu'] = []
+                o['content'] = self._execution['menu'][0].node
+                self._execution['normalized']['menu'] = [o]
+            else: self._execution['normalized']['menu'] = []
             
             # Finally, assign the stream kind by the aggregation and append to self.stream
             order = {'last':-1, 'missing':[]}
-            for kind, streams in normal.iteritems():
+            for kind, streams in self._execution['normalized'].iteritems():
                 for stream in streams:
                 
                     # assign the stream kind
@@ -293,10 +294,6 @@ class Crawler(object):
                 for stream in order['missing']:
                     order['last'] += 1
                     stream['stream order'] = order['last']
-
-            # Clean up
-            self._stream = None
-            self._menu = None
     
     
     def _read(self):
@@ -311,19 +308,19 @@ class Crawler(object):
                     self.log.error(str(error))
                     
             if content:
-                self._detect_encoding(content)
+                self._detect_text_encoding(content)
                 content = unicode(content, self.ontology['encoding'], errors='ignore')
         return content
     
     
-    def _detect_encoding(self, content):
+    def _detect_text_encoding(self, content):
         if 'encoding' not in self.ontology:
             result = self.env.detect_encoding(content.splitlines())
             self.log.debug(u'%s encoding detected for %s with confidence %s', result['encoding'], unicode(self), result['confidence'])
             self.ontology['encoding'] = result['encoding']
     
     
-    def _fix_encoder_settings(self, ontology):
+    def _fix_mediainfo_encoder_settings(self, ontology):
         if 'encoder settings string' in ontology:
             if self.env.expression['mediainfo value list'].match(ontology['encoder settings string']):
                 literals = ontology['encoder settings string'].split(u'/')
@@ -338,7 +335,7 @@ class Crawler(object):
             del ontology['encoder settings string']
     
     
-    def _fix(self, ontology):
+    def _fix_meta(self, ontology):
         if ontology:
             
             # try to decode the genre as an enumerated genre type
@@ -362,9 +359,7 @@ class Crawler(object):
                         if items:
                             ontology[key] = items
     
-
-
-
+    
     def _infer_profile(self):
         # locate the primary stream
         primary = None
