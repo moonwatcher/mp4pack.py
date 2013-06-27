@@ -662,9 +662,9 @@ class Prototype(Element):
                 try:
                     result = datetime(**parsed)
                 except TypeError, ValueError:
-                    self.log.debug(u'Failed to decode datetime %s', value)
+                    self.log.debug(u'Failed to decode datetime %s: %s', self.key, value)
             else:
-                self.log.debug(u'Failed to parse datetime %s', value)
+                self.log.debug(u'Failed to parse datetime %s: %s', self.key, value)
         return result
     
     

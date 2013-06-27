@@ -275,7 +275,9 @@ class Crawler(object):
             order = {'last':-1, 'missing':[]}
             for kind, streams in self._execution['normalized'].iteritems():
                 for stream in streams:
-                
+                    stream['kind'] = stream['kind']
+                    del stream['format']
+                    
                     # assign the stream kind
                     stream['stream kind'] = kind
                     
