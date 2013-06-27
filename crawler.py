@@ -273,14 +273,11 @@ class Crawler(object):
             
             # Finally, assign the stream kind by the aggregation and append to self.stream
             order = {'last':-1, 'missing':[]}
-            for kind, streams in self._execution['normalized'].iteritems():
+            for stream_kind, streams in self._execution['normalized'].iteritems():
                 for stream in streams:
-                    stream['kind'] = stream['kind']
-                    del stream['format']
-                    
                     # assign the stream kind
-                    stream['stream kind'] = kind
-                    
+                    stream['stream kind'] = stream_kind
+                                   
                     # remove the mediainfo specific stream type 
                     del stream['stream type']
                     

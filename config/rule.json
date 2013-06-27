@@ -1311,57 +1311,57 @@
             "provide":["kind"],
             "branch":[
                 {
-                    "requires":["format"],
+                    "requires":["format", "stream kind"],
                     "equal":{"stream kind":"audio", "format":"AC-3"},
                     "apply":[
                         { "property":"kind", "value":"ac3" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"DTS"},
+                    "requires":["format", "stream kind"],
+                    "equal":{"stream kind":"audio", "format":"DTS"},
                     "apply":[
                         { "property":"kind", "value":"dts" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"MPEG Audio"},
+                    "requires":["format", "stream kind"],
+                    "equal":{"stream kind":"audio", "format":"MPEG Audio"},
                     "apply":[
                         { "property":"kind", "value":"mp3" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"AAC"},
+                    "requires":["format", "stream kind"],
+                    "equal":{"stream kind":"audio", "format":"AAC"},
                     "apply":[
                         { "property":"kind", "value":"aac" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"ALAC"},
+                    "requires":["format", "stream kind"],
+                    "equal":{"stream kind":"audio", "format":"ALAC"},
                     "apply":[
                         { "property":"kind", "value":"alac" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"PCM"},
+                    "requires":["format", "stream kind"],
+                    "equal":{"stream kind":"audio", "format":"PCM"},
                     "apply":[
                         { "property":"kind", "value":"pcm" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"FLAC"},
+                    "requires":["format", "stream kind"],
+                    "equal":{"stream kind":"audio", "format":"FLAC"},
                     "apply":[
                         { "property":"kind", "value":"flac" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"Vorbis"},
+                    "requires":["format", "stream kind"],
+                    "equal":{"stream kind":"audio", "format":"Vorbis"},
                     "apply":[
                         { "property":"kind", "value":"ogg" }
                     ]
@@ -1393,15 +1393,15 @@
             "provide":["kind"],
             "branch":[
                 {
-                    "requires":["format"],
-                    "equal":{"format":"LZ77"},
+                    "requires":["stream kind", "format"],
+                    "equal":{"stream kind":"image", "format":"LZ77"},
                     "apply":[
                         { "property":"kind", "value":"png" }
                     ]
                 },
                 {
-                    "requires":["format"],
-                    "equal":{"format":"JPEG"},
+                    "requires":["stream kind", "format"],
+                    "equal":{"stream kind":"image", "format":"JPEG"},
                     "apply":[
                         { "property":"kind", "value":"jpg" }
                     ]
