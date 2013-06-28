@@ -550,8 +550,6 @@ class Environment(object):
                 if is_executable(bpath):
                     command['path'] = bpath
     
-    
-    
 
 
 class Repository(object):

@@ -236,6 +236,8 @@ class Crawler(object):
             'stream':[],
         }
         
+        self._execution['normalized']['image'] = self._execution['breakdown']['image']
+
         # There should always be exactly one meta stream
         if self._execution['breakdown']['general']:
             del self._execution['breakdown']['general'][0]['stream type']
@@ -375,7 +377,6 @@ class Crawler(object):
     
     def _infer_profile(self):
         primary = None
-        print self.ontology['essence'] 
         if self.ontology['essence'] and self.ontology['essence'] in self._execution['normalized']:
             for stream in self._execution['normalized'][self.ontology['essence']]:
                 if primary is None or stream['stream portion'] > primary['stream portion']:

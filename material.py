@@ -563,7 +563,7 @@ class Image(Container):
             for pivot in task.transform.pivot.values():
                 for stream in pivot.stream:
                     if stream['stream kind'] == 'image':
-                        image = Image.open(source.resource.path)
+                        image = Image.open(self.path)
                         factor = None
                         if 'max length' in stream and max(image.size) > stream['max length']:
                             factor = float(stream['max length']) / float(max(image.size))
@@ -576,13 +576,14 @@ class Image(Container):
                             self.log.debug(u'Resize artwork: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
                             image = image.resize(resize, Image.ANTIALIAS)
                             
-                        try:
-                            image.save(product.path)
-                            self.log.info(u'Transcode %s --> %s', self.path, product.path)
-                            
-                        except IOError as err:
-                            self.log.error(u'Failed to transcode artwork %s', unicode(self))
-                            self.log.debug(u'Exception raised: %s', err)
+                        if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                            try:
+                                image.save(product.path)
+                                self.log.info(u'Transcode %s --> %s', self.path, product.path)
+                                
+                            except IOError as err:
+                                self.log.error(u'Failed to transcode artwork %s', unicode(self))
+                                self.log.debug(u'Exception raised: %s', err)
     
 
 

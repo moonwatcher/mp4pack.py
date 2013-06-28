@@ -163,6 +163,13 @@
                 },
                 {
                     "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"transcode", "kind":"png"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "host"],
                     "equal":{"host":"vito", "action":"update"},
                     "apply":[
                         {"property":"preset", "value":"default"}
