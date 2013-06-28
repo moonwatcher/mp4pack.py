@@ -185,21 +185,20 @@ class Job(object):
             if task.group not in self.journal['group']:
                 self.journal['group'][task.group] = {}
             self.journal['group'][task.group][task.group] = task
-            
-            if task.valid:
-                self.task.append(task)
+            self.task.append(task)
     
     
     def dequeue(self):
         result = None
         for i,task in enumerate(self.task):
-            if task.ready:
+            if task.ready or not task.valid:
                 del self.task[i]
                 task.load()
                 task.run()
                 task.unload()
                 result = task
                 break
+
         return result
     
     
@@ -243,7 +242,7 @@ class Task(object):
         self.node['group'] = self.node['uuid']
         
         if self.ontology is None:
-            self.node['status'] = 'invalid'
+            self.invalidate(u'Task ontology can not be NULL')
     
     
     def __unicode__(self):
@@ -283,7 +282,7 @@ class Task(object):
     @property
     def ready(self):
         result = False
-        if self.node['status'] == 'queued':
+        if self.status == 'queued':
             result = True
             if self.condition:
                 for condition in self.condition:
@@ -298,6 +297,12 @@ class Task(object):
         return self.node['status']
     
     
+    def invalidate(self, message):
+        self.node['status'] = 'invalid'
+        self.error(message)
+        self.log.error(u'%s. aborting task %s', message, unicode(self))
+    
+    
     def constrain(self, node):
         if self.condition is None:
             self.condition = []
@@ -308,20 +313,24 @@ class Task(object):
         self.condition.append(condition)
     
     def load(self):
-        self.node['status'] = 'loaded'
+        self.log.debug('Starting task %s', unicode(self))
+        self.node['start'] = datetime.now()
+        if self.valid: self.node['status'] = 'loaded'
     
     
     def run(self):
-        self.log.debug('Starting task %s', unicode(self))
-        self.node['status'] = 'running'
-        self.node['start'] = datetime.now()
+        if self.valid: self.node['status'] = 'running'
     
     
     def unload(self):
         self.node['end'] = datetime.now()
         self.node['duration'] = unicode(self.node['end'] - self.node['start'])
-        self.node['status'] = 'completed'
+        if self.valid: self.node['status'] = 'completed'
         self.log.debug('Finished task %s', unicode(self))
+    
+    def error(self, message):
+        if 'error' not in self.node: self.node['error'] = []
+        self.node['error'].append(message)
     
 
 
@@ -380,11 +389,9 @@ class ResourceTask(Task):
         self.product = None
         self.action = None
         self._preset = None
-    
-    
-    @property
-    def valid(self):
-        return Task.valid.fget(self) and self.location is not None
+        
+        if self.location is None:
+            self.invalidate(u'Invalid resource path provided {}'.format(path))
     
     
     @property
@@ -396,30 +403,31 @@ class ResourceTask(Task):
     
     def load(self):
         Task.load(self)
-        
-        if self.location:
-    
-            # Add the resource location and transform to the node 
-            self.node['origin'] = self.location.node
-            
-            self.resource = self.cache.find(self.location)
-            if self.resource:
-                # if the action is defined in the preset, the preset supports the action
-                if self.ontology['action'] in self.preset['action']:
-                    
-                    # locate a method that implements the action
-                    self.action = getattr(self, self.ontology['action'], None)
-                    
-                    if self.action is None:
-                        self.log.warning(u'Unknown action %s, aborting task %s', self.ontology['action'], unicode(self))
-                else:
-                    self.log.warning(u'Action %s is not defined for preset %s, aborting task %s', self.ontology['action'], self.ontology['preset'], unicode(self))
+        if self.valid:
+            if self.preset is None:
+                self.invalidate(u'Could not determine preset')
             else:
-                self.log.debug(u'Invalid resource, aborting task %s', unicode(self))
+                # Add the resource location and transform to the node 
+                self.node['origin'] = self.location.node
+                
+                self.resource = self.cache.find(self.location)
+                if self.resource:
+                    # if the action is defined in the preset, the preset supports the action
+                    if self.ontology['action'] in self.preset['action']:
+                        
+                        # locate a method that implements the action
+                        self.action = getattr(self, self.ontology['action'], None)
+                        
+                        if self.action is None:
+                            self.invalidate(u'Unknown action {}'.format(self.ontology['action']))
+                    else:
+                        self.invalidate(u'Action {} is not defined in preset {}'.format(self.ontology['action'], self.ontology['preset']))
+                else:
+                    self.invalidate(u'Invalid resource location')
     
     
     def unload(self):
-        if self.action:
+        if self.valid:
             
             # Mark products as volatile to make sure they are indexed
             # and add their location to the task node
@@ -437,7 +445,7 @@ class ResourceTask(Task):
     
     def run(self):
         Task.run(self)
-        if self.action:
+        if self.valid:
             # prepare a task product
             self.product = []
             
@@ -452,42 +460,60 @@ class ResourceTask(Task):
                 self.transform.transform(self.preset, self.ontology['action'])
                 self.node['transform'] = self.transform.node
                 
-            # invoke the action
-            self.action()
+                # if the transform yields not viable input there really is nothing much to do...
+                if not any((any(pivot.stream) for pivot in self.transform.pivot.values())):
+                    self.invalidate(u'Task did not yield any viable input')
+            
+            # if we are still go, invoke the action
+            if self.valid: self.action()
     
     
     def produce(self, override=None):
-    
         # copy the location ontology
-        o = Ontology.clone(self.location)
+        p = Ontology.clone(self.location)
         
         # allow the location to recalculate those concepts 
-        del o['volume path']
-        del o['file name']
-        del o['directory']
+        del p['volume path']
+        del p['file name']
+        del p['directory']
         
-        # set some location concepts from the task
-        o['host'] = self.env.host
-        o['volume'] = self.ontology['volume']
-        o['profile'] = self.ontology['profile']
+        # explicitly set the volume and host from the task
+        p['host'] = self.env.host
+        p['volume'] = self.ontology['volume']
+        
+        # for copy and move we try to set a profile from the source
+        if self.ontology['action'] in set(('copy', 'move')):
+            if self.resource.meta['profile']:
+                p['profile'] = self.resource.meta['profile']
+                
+        # for transcode we try to set the profile from the transform
+        elif self.ontology['action'] == 'transcode':
+            for pivot in self.transform.pivot.values():
+                if 'profile' in pivot.location:
+                    p['profile'] = pivot.location['profile']
+                    
+        # whatever happened, if a profile has been explicitly provided by the task
+        # it will override anything we set implicitly
+        if self.ontology['profile']:
+            p['profile'] = self.ontology['profile']
         
         # if an override was given set some concepts from it 
         if override:
-            for i in [
+            for i in set((
                 'kind', 
                 'language',
                 'stream order',
                 'resource path digest',
                 'routing type'
-            ]:
-                if i in override: o[i] = override[i]
+            )):
+                if i in override: p[i] = override[i]
                 
-        # try to produce the resource
-        product = self.resource.asset.locate_resource(o)
+        # try to produce a product
+        product = self.resource.asset.locate_resource(p)
         if product:
             self.product.append(product)
         else:
-            self.log.error(u'Could not determine destination path from %s', o)
+            self.log.error(u'Could not determine destination path from %s', p)
         
         return product
     
@@ -572,27 +598,27 @@ class ServiceTask(Task):
         self.document = None
         self.action = None
     
-    
-    @property
-    def valid(self):
-        return Task.valid.fget(self) and self.uri is not None
+        if self.uri is None:
+            self.invalidate(u'Invalid resource uri provided')
     
     
     def load(self):
         Task.load(self)
-        self.document = self.env.resolver.resolve(self.uri, self.ontology['query'])
-        
-        # locate a method that implements the action
-        self.action = getattr(self, self.ontology['action'], None)
-        
-        if self.action is None:
-            self.log.warning(u'Unknown action %s, aborting task %s', self.ontology['action'], unicode(self))
+        if self.valid:
+            self.document = self.env.resolver.resolve(self.uri, self.ontology['query'])
+            if self.document:
+                # locate a method that implements the action
+                self.action = getattr(self, self.ontology['action'], None)
+                
+                if self.action is None:
+                    self.invalidate(u'Unknown action {}'.format(self.ontology['action']))
+            else:
+                self.invalidate(u'Could not locate document {}'.format(self.uri))
     
     
     def run(self):
         Task.run(self)
-        if self.action and self.document is not None:
-            self.action()
+        if self.valid: self.action()
     
     
     def get(self):
@@ -643,36 +669,33 @@ class SystemTask(Task):
         Task.__init__(self, job, ontology)
         self.action = None
         self.name = name
-        self._table = None
-    
-    
-    @property
-    def valid(self):
-        return Task.valid.fget(self) and self.table is not None
-    
-    
-    @property
-    def table(self):
-        if self._table is None and self.name in self.env.table:
-            self._table = self.env.table[self.name]
-        return self._table
+        self.table = None
+
+        if self.name:
+            # add the table name to the node
+            self.node['table'] = self.name
+            
+            if self.name in self.env.table:
+                self.table = self.env.table[self.name]
+            else:
+                self.invalidate(u'Unknown table {}'.format(self.name))
+        else:
+            self.invalidate(u'Table name can not be NULL')
     
     
     def load(self):
         Task.load(self)
-        self.node['table'] = self.table['name']
-        
-        # locate a method that implements the action
-        self.action = getattr(self, self.ontology['action'], None)
-        
-        if self.action is None:
-            self.log.warning(u'Unknown action %s, aborting task %s', self.ontology['action'], unicode(self))
+        if self.valid:
+            # locate a method that implements the action
+            self.action = getattr(self, self.ontology['action'], None)
+            
+            if self.action is None:
+                self.invalidate(u'Unknown action {}'.format(self.ontology['action']))
     
     
     def run(self):
         Task.run(self)
-        if self.action:
-            self.action()
+        if self.valid: self.action()
     
     
     def rebuild(self):

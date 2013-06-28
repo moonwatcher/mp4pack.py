@@ -116,78 +116,36 @@
             "provide":["preset"],
             "branch":[
                 {
-                    "requires":["action"],
-                    "equal":{"action":"info"},
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"copy"},
                     "apply":[
-                        {"property":"preset", "value":"normal"}
+                        {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action"],
-                    "equal":{"action":"copy"},
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"move"},
                     "apply":[
-                        {"property":"preset", "value":"normal"}
+                        {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action"],
-                    "equal":{"action":"move"},
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"delete"},
                     "apply":[
-                        {"property":"preset", "value":"normal"}
+                        {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action"],
-                    "equal":{"action":"delete"},
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"prepare"},
                     "apply":[
-                        {"property":"preset", "value":"normal"}
+                        {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action"],
-                    "equal":{"action":"prepare"},
-                    "apply":[
-                        {"property":"preset", "value":"normal"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"explode"},
-                    "apply":[
-                        {"property":"preset", "value":"normal"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"pack"},
-                    "apply":[
-                        {"property":"preset", "value":"normal"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"tag"},
-                    "apply":[
-                        {"property":"preset", "value":"normal"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"optimize"},
-                    "apply":[
-                        {"property":"preset", "value":"normal"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"transcode"},
-                    "apply":[
-                        {"property":"preset", "value":"normal"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"update"},
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"optimize"},
                     "apply":[
                         {"property":"preset", "value":"normal"}
                     ]
@@ -328,7 +286,7 @@
         },
         "rule.system.default.routing":{
             "name":"Default volume and profile",
-            "provide":["volume", "profile"]
+            "provide":["volume"]
         },
         "rule.system.default.enabled":{
             "name":"Default enabled bit",

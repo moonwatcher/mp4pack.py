@@ -1,6 +1,6 @@
 {
     "preset":{
-        "normal":{
+        "default":{
             "description":"Base preset",
             "action":{
                 "info":{},
@@ -30,7 +30,7 @@
                                             {
                                                 "action":"transcode",
                                                 "kind":"srt",
-                                                "preset":"normal",
+                                                "preset":"default",
                                                 "profile":"original"
                                             },
                                             {
@@ -53,7 +53,7 @@
                                             {
                                                 "action":"transcode",
                                                 "kind":"srt",
-                                                "preset":"normal",
+                                                "preset":"default",
                                                 "profile":"original"
                                             },
                                             {
@@ -615,6 +615,9 @@
                                 {"kind":"mkv"},
                                 {"kind":"m4v"}
                             ],
+                            "override":{
+                                "profile":"High@L4.0"
+                            },
                             "track":[
                                 {
                                     "description":"Transcode the main video track to H.264",
@@ -759,6 +762,9 @@
                                 {"kind":"mkv"},
                                 {"kind":"m4v"}
                             ],
+                            "override":{
+                                "profile":"High@L3.1"
+                            },                            
                             "track":[
                                 {
                                     "description":"Transcode the main video track to H.264",
@@ -903,6 +909,9 @@
                                 {"kind":"mkv"},
                                 {"kind":"m4v"}
                             ],
+                            "override":{
+                                "profile":"High@L3.1"
+                            },
                             "track":[
                                 {
                                     "description":"Transcode the main video track to H.264",

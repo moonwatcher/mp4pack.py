@@ -30,7 +30,6 @@ class Environment(object):
             'expression':{},
             'constant':{},
             'command':{},
-            'profile':{},
             'preset':{},
             'repository':{},
             'interface':{},
@@ -122,11 +121,6 @@ class Environment(object):
     @property
     def preset(self):
         return self.state['preset']
-    
-    
-    @property
-    def profile(self):
-        return self.state['profile']
     
     
     @property
@@ -304,12 +298,6 @@ class Environment(object):
                     if check(e):
                         self.command[e['name']] = e
                         self.which(e)
-                        
-            if 'profile' in node:
-                for k,e in node['profile'].iteritems():
-                    if check(e):
-                        e['name'] = k
-                        self.profile[k] = e
                         
             if 'preset' in node:
                 for k,e in node['preset'].iteritems():
@@ -577,6 +565,8 @@ class Repository(object):
         self._connection = None
         if 'routing' not in self.node:
             self.node['routing'] = []
+        if 'default' not in self.node:
+            self.node['default'] = []
         if 'mapping' not in self.node:
             self.node['mapping'] = []
     
@@ -673,6 +663,10 @@ class Repository(object):
         routing = self.env.rule['rule.system.default.routing']
         for branch in self.node['routing']:
             routing.add_branch(branch)
+        
+        default = self.env.rule['rule.task.default.preset']
+        for branch in self.node['default']:
+            default.add_branch(branch)
     
     
     def decode_resource_path(self, path):

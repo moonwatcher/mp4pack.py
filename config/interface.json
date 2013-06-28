@@ -25,6 +25,7 @@
                         "sync",
                         "crawl",
                         "download",
+                        "preset",
                         "inclusion",
                         "exclusion"
                     ]

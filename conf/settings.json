@@ -1,22 +1,17 @@
 {
     "system":{
         "domain":"galanti.no-ip.info",
-        "host":"shaft"
+        "host":"vito"
     },
     "repository":{
-        "shaft":{
+        "vito":{
             "domain":"galanti.no-ip.info",
             "temp":{
-                "path":"/Users/lg/Downloads/mpk/temp"
+                "path":"/net/vito/volume/kyoto/temp"
             },
             "mongodb":{
                 "database":"mp4pack",
-                "host":"localhost"
-            },
-            "remote":{
-                "download port":"22040",
-                "priority port":"22010",
-                "tunneled mongodb port":"27018"
+                "host":"vito"
             },
             "volume":{
                 "default":{
@@ -25,112 +20,231 @@
                 },
                 "synonym":["path"],
                 "element":{
-                    "alpha":{
-                        "name":"Alpha",
-                        "path":"/Users/lg/Downloads/mpk/pool/alpha"
+                    "jupiter":{
+                        "name":"Jupiter",
+                        "path":"/net/vito/volume/toronto/jupiter"
                     },
-                    "epsilon":{
-                        "name":"Epsilon",
-                        "path":"/Users/lg/Downloads/mpk/pool/epsilon"
+                    "saturn":{
+                        "name":"Saturn",
+                        "path":"/net/vito/volume/paris/saturn"
+                    },
+                    "neptune":{
+                        "name":"Neptune",
+                        "path":"/net/vito/volume/london/neptune"
+                    },
+                    "titan":{
+                        "name":"Titan",
+                        "path":"/net/multivac/Volumes/hiroshima/titan"
+                    },
+                    "oberon":{
+                        "name":"Oberon",
+                        "path":"/net/multivac/Volumes/valencia/oberon"
+                    },
+                    "eros":{
+                        "name":"Eros",
+                        "path":"/net/multivac/Volumes/nagasaki/eros"
+                    },
+                    "pluto":{
+                        "name":"Pluto",
+                        "path":"/net/vito/volume/kyoto/pluto"
                     }
                 }
             },
-                "mapping":[
+            "mapping":[
                 {
-                    "enable":false,
-                    "path":"/Users",
+                    "path":"/net/vito/volume/toronto",
                     "alternate":[
-                        "/net/shaft/Users"
+                        "/net/vito.lan/volume/toronto",
+                        "/volume/toronto",
+                        "/media/toronto",
+                        "/Volumes/toronto"
+                    ]
+                },
+                {
+                    "path":"/net/vito/volume/paris",
+                    "alternate":[
+                        "/net/vito.lan/volume/paris",
+                        "/volume/paris",
+                        "/media/paris",
+                        "/Volumes/paris"
+                    ]
+                },
+                {
+                    "path":"/net/vito/volume/london",
+                    "alternate":[
+                        "/net/vito.lan/volume/london",
+                        "/volume/london",
+                        "/media/london",
+                        "/Volumes/london"
+                    ]
+                },
+                {
+                    "path":"/net/vito/volume/kyoto",
+                    "alternate":[
+                        "/net/vito.lan/volume/kyoto",
+                        "/volume/kyoto",
+                        "/media/kyoto",
+                        "/Volumes/kyoto"
+                    ]
+                },
+                {
+                    "path":"/net/vito/volume/barcelona",
+                    "alternate":[
+                        "/net/vito.lan/volume/barcelona",
+                        "/volume/barcelona",
+                        "/media/barcelona",
+                        "/Volumes/barcelona"
+                    ]
+                },
+                {
+                    "path":"/net/multivac/Volumes/hiroshima",
+                    "alternate":[
+                        "/net/multivac.lan/Volumes/hiroshima",
+                        "/Volumes/hiroshima"
+                    ]
+                },
+                {
+                    "path":"/net/multivac/Volumes/nagasaki",
+                    "alternate":[
+                        "/net/multivac.lan/Volumes/nagasaki",
+                        "/Volumes/nagasaki"
+                    ]
+                },
+                {
+                    "path":"/net/multivac/Volumes/valencia",
+                    "alternate":[
+                        "/net/multivac.lan/Volumes/valencia",
+                        "/Volumes/valencia"
+                    ]
+                }
+            ],
+            "default":[
+                {
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"info"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"explode"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"pack"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"tag"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"transcode", "kind":"m4v"},
+                    "apply":[
+                        {"property":"preset", "value":"atv3"}
+                    ]
+                },
+                {
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"transcode", "kind":"mkv"},
+                    "apply":[
+                        {"property":"preset", "value":"atv3"}
+                    ]
+                },
+                {
+                    "requires":["action", "host"],
+                    "equal":{"host":"vito", "action":"update"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
                     ]
                 }
             ],
             "routing":[
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"srt"},
+                    "equal":{"host":"vito", "kind":"srt"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"clean"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"png"},
+                    "equal":{"host":"vito", "kind":"png"},
                     "apply":[
-                        {"property":"volume", "value":"alpha"},
-                        {"property":"profile", "value":"normal"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"chp"},
+                    "equal":{"host":"vito", "kind":"chp"},
                     "apply":[
-                        {"property":"volume", "value":"alpha"},
-                        {"property":"profile", "value":"normal"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"m4v"},
+                    "equal":{"host":"vito", "kind":"m4v"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"iA4"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"m4a"},
+                    "equal":{"host":"vito", "kind":"m4a"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"normal"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"mkv"},
+                    "equal":{"host":"vito", "kind":"mkv"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"720"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"avi"},
+                    "equal":{"host":"vito", "kind":"avi"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"SD"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"ac3"},
+                    "equal":{"host":"vito", "kind":"ac3"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"normal"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"ass"},
+                    "equal":{"host":"vito", "kind":"ass"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"original"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"dts"},
+                    "equal":{"host":"vito", "kind":"dts"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"original"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
                     "requires":["kind", "host"],
-                    "equal":{"host":"shaft", "kind":"flac"},
+                    "equal":{"host":"vito", "kind":"flac"},
                     "apply":[
-                        {"property":"volume", "value":"epsilon"},
-                        {"property":"profile", "value":"original"}
+                        {"property":"volume", "value":"titan"}
                     ]
                 }
             ]
