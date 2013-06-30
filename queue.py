@@ -236,8 +236,7 @@ class Task(object):
             'ontology':self.ontology.node,
             'status':'queued',
             'start':None,
-            'end':None,
-            'condition':None,
+            'end':None
         }
         self.node['group'] = self.node['uuid']
         
