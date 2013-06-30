@@ -872,6 +872,26 @@
                     ]
                 },
                 {
+                    "requires":[ "media kind", "simple movie title", "release year", "umid", "kind", "localized" ],
+                    "equal":{"media kind":9, "localized":false },
+                    "apply":[
+                        {
+                            "property":"canonic file name",
+                            "format":"{simple movie title} {release year}.{umid}.{kind}"
+                        }
+                    ]
+                },
+                {
+                    "requires":[ "media kind", "simple movie title", "release year", "umid", "kind", "language", "localized" ],
+                    "equal":{"media kind":9, "localized":true },
+                    "apply":[
+                        {
+                            "property":"canonic file name",
+                            "format":"{simple movie title} {release year}.{language}.{umid}.{kind}"
+                        }
+                    ]
+                },
+                {
                     "requires":[ "media kind", "simple movie title", "umid", "kind", "localized" ],
                     "equal":{"media kind":9, "localized":false },
                     "apply":[
