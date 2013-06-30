@@ -1,7 +1,7 @@
 {
     "preset":{
         "default":{
-            "description":"Base preset",
+            "description":"Default preset",
             "action":{
                 "info":{},
                 "copy":{},
@@ -468,7 +468,7 @@
             }
         },
         "fragment":{
-            "description":"fragment management preset",
+            "description":"Fragment preset for packing only the fragments of a file",
             "action":{
                 "pack":{
                     "pivot":[
@@ -559,7 +559,7 @@
             }
         },
         "clean":{
-            "description":"clean preset",
+            "description":"Clean preset for cleaning subtitles",
             "action":{
                 "transcode":{
                     "pivot":[
@@ -601,7 +601,7 @@
             }
         },
         "atv3":{
-            "description":"Apple TV 3 presets",
+            "description":"Apple TV 3 transcoding presets",
             "action":{
                 "transcode":{
                     "pivot":[
@@ -748,7 +748,7 @@
             }
         },
         "atv2":{
-            "description":"Apple TV 2 presets",
+            "description":"Apple TV 2 transcoding presets",
             "action":{
                 "transcode":{
                     "pivot":[
@@ -895,7 +895,7 @@
             }
         },
         "iphone":{
-            "description":"iPhone presets",
+            "description":"iPhone transcoding presets",
             "action":{
                 "transcode":{
                     "pivot":[

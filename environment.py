@@ -241,7 +241,7 @@ class Environment(object):
                 return True
             else:
                 return False
-                
+            
         if node:
             if 'system' in node:
                 for k,e in node['system'].iteritems():
@@ -552,6 +552,8 @@ class Environment(object):
     
 
 
+
+
 class Repository(object):
     def __init__(self, env, node):
         self.log = logging.getLogger('Repository')
@@ -659,11 +661,17 @@ class Repository(object):
         
         # Load routing rules
         routing = self.env.rule['rule.system.default.routing']
-        for branch in self.node['routing']:
+        for branch in self.node['volume.default']:
+            if 'host' not in branch['requires']:
+                branch['requires'].append('host')
+            branch['equal']['host'] = self.host
             routing.add_branch(branch)
         
         default = self.env.rule['rule.task.default.preset']
-        for branch in self.node['default']:
+        for branch in self.node['preset.default']:
+            if 'host' not in branch['requires']:
+                branch['requires'].append('host')
+            branch['equal']['host'] = self.host
             default.add_branch(branch)
     
     
@@ -737,7 +745,6 @@ class Repository(object):
                 self.log.error(u'Refusing to handle unnamed index for collection %s', collection)
         else:
             self.log.error(u'Unknown collection %s', collection)
-    
 
 
 class CommandLineParser(object):

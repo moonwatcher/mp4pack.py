@@ -118,138 +118,138 @@
                     ]
                 }
             ],
-            "default":[
+            "preset.default":[
                 {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"info"},
+                    "requires":["action"],
+                    "equal":{"action":"info"},
                     "apply":[
                         {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"explode"},
+                    "requires":["action"],
+                    "equal":{"action":"explode"},
                     "apply":[
                         {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"pack"},
+                    "requires":["action"],
+                    "equal":{"action":"pack"},
                     "apply":[
                         {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"tag"},
+                    "requires":["action"],
+                    "equal":{"action":"tag"},
                     "apply":[
                         {"property":"preset", "value":"default"}
                     ]
                 },
                 {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"transcode", "kind":"m4v"},
+                    "requires":["action"],
+                    "equal":{"action":"update"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "kind"],
+                    "equal":{"action":"transcode", "kind":"m4v"},
                     "apply":[
                         {"property":"preset", "value":"atv3"}
                     ]
                 },
                 {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"transcode", "kind":"mkv"},
+                    "requires":["action", "kind"],
+                    "equal":{"action":"transcode", "kind":"mkv"},
                     "apply":[
                         {"property":"preset", "value":"atv3"}
                     ]
                 },
                 {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"transcode", "kind":"png"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "host"],
-                    "equal":{"host":"vito", "action":"update"},
+                    "requires":["action", "kind"],
+                    "equal":{"action":"transcode", "kind":"png"},
                     "apply":[
                         {"property":"preset", "value":"default"}
                     ]
                 }
             ],
-            "routing":[
+            "volume.default":[
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"srt"},
+                    "requires":["kind"],
+                    "equal":{"kind":"srt"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"png"},
+                    "requires":["kind"],
+                    "equal":{"kind":"png"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"chp"},
+                    "requires":["kind"],
+                    "equal":{"kind":"chp"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"m4v"},
+                    "requires":["kind"],
+                    "equal":{"kind":"m4v"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"m4a"},
+                    "requires":["kind"],
+                    "equal":{"kind":"m4a"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"mkv"},
+                    "requires":["kind"],
+                    "equal":{"kind":"mkv"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"avi"},
+                    "requires":["kind"],
+                    "equal":{"kind":"avi"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"ac3"},
+                    "requires":["kind"],
+                    "equal":{"kind":"ac3"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"ass"},
+                    "requires":["kind"],
+                    "equal":{"kind":"ass"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"dts"},
+                    "requires":["kind"],
+                    "equal":{"kind":"dts"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
                 },
                 {
-                    "requires":["kind", "host"],
-                    "equal":{"host":"vito", "kind":"flac"},
+                    "requires":["kind"],
+                    "equal":{"kind":"flac"},
                     "apply":[
                         {"property":"volume", "value":"titan"}
                     ]
