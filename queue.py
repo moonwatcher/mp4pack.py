@@ -205,7 +205,7 @@ class Job(object):
     def run(self):
         while self.task:
             task = self.dequeue()
-            self.execution['task'].append(task.node)
+            if task: self.execution['task'].append(task.node)
     
     
     def unload(self):
