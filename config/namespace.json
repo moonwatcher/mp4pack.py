@@ -352,6 +352,8 @@
                 "music album name":null,
                 "track name":null,
                 "album name":null,
+                "release year":null,
+                "release date":null,
                 "simple company name":null,
                 "simple person name":null,
                 "simple genre name":null,
@@ -386,6 +388,7 @@
                 "rule.medium.knowledge.uri",
                 "rule.system.default.language",
                 "rule.medium.home.umid",
+                "rule.knowledge.release.year",
                 "rule.knowledge.simple.name.company",
                 "rule.knowledge.simple.name.person",
                 "rule.knowledge.simple.name.genre",
@@ -443,12 +446,15 @@
                 "music track name":null,
                 "music album name":null,
                 "track name":null,
-                "album name":null
+                "album name":null,
+                "release year":null,
+                "release date":null
             },
             "rule":[
                 "rule.medium.asset.uri",
                 "rule.medium.home.uri",
                 "rule.medium.knowledge.uri",
+                "rule.knowledge.release.year",
                 "rule.medium.home.umid"
             ]
         },
