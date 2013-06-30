@@ -482,7 +482,7 @@ class ResourceTask(Task):
         p['volume'] = self.ontology['volume']
         
         # for copy and move we try to set a profile from the source
-        if self.ontology['action'] in set(('copy', 'move')):
+        if self.ontology['action'] in set(('copy', 'move', 'pack')):
             if self.resource.meta['profile']:
                 p['profile'] = self.resource.meta['profile']
                 
