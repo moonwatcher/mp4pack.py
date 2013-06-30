@@ -184,6 +184,13 @@
                 },
                 {
                     "requires":["action", "kind"],
+                    "equal":{"action":"transcode", "kind":"ac3"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "kind"],
                     "equal":{"action":"transcode", "kind":"flac"},
                     "apply":[
                         {"property":"preset", "value":"default"}
