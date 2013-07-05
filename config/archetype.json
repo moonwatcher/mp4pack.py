@@ -1627,6 +1627,13 @@
             "namespace":"ns.knowledge.languages",
             "plural":"list"
         },
+        "banners":{
+            "name":"Banners",
+            "keyword":"banners",
+            "type":"embed",
+            "namespace":"ns.knowledge.image",
+            "plural":"list"
+        },
         "backdrops":{
             "name":"Backdrops",
             "keyword":"backdrops",
@@ -1666,6 +1673,13 @@
             "keyword":"people",
             "type":"embed",
             "namespace":"ns.knowledge.people",
+            "plural":"list"
+        },
+        "pictures":{
+            "name":"Pictures",
+            "keyword":"pictures",
+            "type":"embed",
+            "namespace":"ns.knowledge.image",
             "plural":"list"
         },
         "cast":{

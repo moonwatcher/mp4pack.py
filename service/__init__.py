@@ -21,7 +21,8 @@ class Resolver(object):
         self.env = env
         self.handlers = {}
         
-        self.log.debug(u'Starting resolver')
+        
+        self.log.debug(u'Starting JSON service resolver')
         
         from tmdb import TMDbHandler
         self.handlers['tmdb'] = TMDbHandler(self, self.env.service['tmdb'])
@@ -330,7 +331,8 @@ class ResourceHandler(object):
                 try:
                     related = self.resolver.resolve(pattern.format(**query['parameter']))
                 except KeyError, e:
-                    self.log.debug(u'Could not create related uri for pattern %s because parameter %s was missing', pattern, e)
+                    pass
+                    # self.log.debug(u'Could not create related uri for pattern %s because parameter %s was missing', pattern, e)
                 else:
                     if related is not None:
                         for index in query['branch']['index']:
@@ -429,6 +431,7 @@ class ResourceHandler(object):
                     entry['record'][u'head']['canonical'] = link
                     
             except KeyError, e:
-                self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
+                pass
+                # self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
     
 

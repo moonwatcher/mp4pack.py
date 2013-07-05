@@ -636,82 +636,103 @@ class MP4(AudioVideoContainer):
         AudioVideoContainer.__init__(self, asset, location)
     
     
-    def tag(self, task):
-        pass
-    
-    
     def optimize(self, task):
         AudioVideoContainer.optimize(self, task)
         message = u'Optimize {0}'.format(self.path)
         command = self.env.initialize_command('subler', self.log)
         if command:
-            command.extend([u'-O', u'-o', self.path])
+            command.extend([u'-optimize', u'-dest', self.path])
             self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     
+    
+    def tag(self, task):
+        update = Ontology(self.env, 'ns.medium.resource.meta.tag')
+        meta = self.meta.project('ns.medium.resource.meta.tag')
+        knowledge = Ontology(self.env, 'ns.medium.resource.meta.tag', self.knowledge['body'])
+        genealogy = Ontology(self.env, 'ns.service.genealogy', self.knowledge['head']['genealogy'])
+        knowledge.merge_all(genealogy)
+        
+        # Everything that is in meta but doesn't fit knowledge
+        # should be replaced with the value in knowledge 
+        for i in meta.keys():
+            if meta[i] != knowledge[i]:
+                update[i] = knowledge[i]
+
+        # Everything that is in knowledge but not in meta
+        # should be set to the value in knowledge 
+        for i in knowledge.keys():
+            if i not in meta:
+                update[i] = knowledge[i]
+        
+        modify = []
+        for k,v in update.iteritems():
+            prototype = update.namespace.find(k)
+            if prototype and prototype.node['subler']:
+                modify.append(u'{{{}:{}}}'.format(prototype.node['subler'],v))
+                
+        print unicode(modify).encode('utf-8')
+ 
     
     def update(self, task):
         AudioVideoContainer.update(self, task)
         
-        if False:
-            # Drop subtitles
-            message = u'Drop existing subtitle tracks from {0}'.format(self.path)
-            command = self.env.initialize_command('subler', self.log)
-            if command:
-                command.extend([
-                    u'-o',
-                    self.path,
-                    u'-r'
-                ])
-                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-                
-            # Drop chapters
-            message = u'Drop existing chapters in {0}'.format(self.path)
-            command = self.env.initialize_command('subler', self.log)
-            if command:
-                command.extend([
-                    u'-o',
-                    self.path,
-                    u'-r',
-                    u'-c',
-                    u'/dev/null'
-                ])
-                self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-                
+        # Drop subtitles
+        message = u'Drop existing subtitle tracks from {0}'.format(self.path)
+        command = self.env.initialize_command('subler', self.log)
+        if command:
+            command.extend([
+                u'-remove',
+                u'-dest', self.path,
+            ])
+            self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+            
+        # Drop chapters
+        message = u'Drop existing chapters in {0}'.format(self.path)
+        command = self.env.initialize_command('subler', self.log)
+        if command:
+            command.extend([
+                u'-chapters', u'/dev/null',
+                u'-dest', self.path,
+            ])
+            self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
+            
         for pivot in task.transform.pivot.values():
+            # add subtitles
             if pivot.location['kind'] == 'srt':
                 stream = pivot.stream[0]
                 message = u'Update subtitles {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
                     command.extend([
-                        u'-o', self.path,
-                        u'-i', pivot.resource.path,
-                        u'-l', self.env.enumeration['language'].find(stream['language']).name,
-                        u'-n', stream['stream name'],
-                        u'-a', unicode(int(round(self.meta['height'] * stream['height'])))
+                        u'-source', pivot.resource.path,
+                        u'-language', self.env.enumeration['language'].find(stream['language']).name,
+                        u'-height', unicode(int(round(self.meta['height'] * stream['height']))),
+                        u'-itunesfriendly',
+                        u'-dest', self.path,
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-                    
+            
+            # add artwork
             elif pivot.location['kind'] == 'png':
                 message = u'Update artwork {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
                     command.extend([
-                        u'-o', self.path, 
-                        u'-t', 
+                        u'-dest', self.path, 
+                        u'-metadata', 
                         u'{{{0}:{1}}}'.format(u'Artwork', pivot.resource.path)
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-                    
+            
+            # add chapters
             elif pivot.location['kind'] == 'chp':
                 message = u'Update chapters {0} --> {1}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
                     command.extend([
-                        u'-o', self.path,
-                        u'-c',
-                        pivot.resource.path,
-                        u'-p'
+                        u'-chapters', pivot.resource.path,
+                        u'-chapterspreview',
+                        u'-dest', self.path,
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
     

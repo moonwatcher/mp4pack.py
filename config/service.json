@@ -2132,7 +2132,8 @@
                         }
                     ],
                     "collect":[
-                        "/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                        "/c/{language}/tvdb/tv/show/{tvdb tv show id}",
+                        "/c/{language}/tvdb/tv/show/{tvdb tv show id}/complete"
                     ],
                     "resolvable":[
                         {

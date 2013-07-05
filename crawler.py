@@ -2,6 +2,7 @@
 
 import os
 import logging
+import base64
 from datetime import datetime
 from subprocess import Popen, PIPE
 import xml.etree.cElementTree as ElementTree
@@ -69,11 +70,16 @@ class Crawler(object):
     def _load_mediainfo(self):
         command = self.env.initialize_command('mediainfo', self.log)
         if command:
-            command.extend([u'--Language=raw', u'--Output=XML', u'--Full', u'--SkipBinaryData', self.ontology['path']])
+            command.extend([u'--Language=raw', u'--Output=XML', u'--Full', self.ontology['path']])
             proc_mediainfo = Popen(command, stdout=PIPE, stderr=PIPE)
             proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
-            report = proc_grep.communicate()
-            element = ElementTree.fromstring(report[0])
+            raw_xml = proc_grep.communicate()[0]
+            
+            # fix mediainfo's violation of xml standards so that ElementTree won't choke on it
+            raw_xml = raw_xml.replace('dt:dt="binary.base64"', 'datatype="binary.base64"')
+            
+            # parse the DOM
+            element = ElementTree.fromstring(raw_xml)
             if element is not None:
                 for node in element.findall(u'File/track'):
                     if 'type' in node.attrib:
@@ -85,7 +91,14 @@ class Crawler(object):
                                 
                                 # iterate over the properties and populate the ontology
                                 for item in list(node):
-                                    o.decode(item.tag, item.text)
+                                    text = item.text
+                                    
+                                    # decode base64 encoded element
+                                    if 'datatype' in item.attrib and item.attrib['datatype'] == 'binary.base64':
+                                        text = base64.b64decode(text)
+                                        
+                                    # set the concept on the ontology
+                                    o.decode(item.tag, text)
                                 
                                 # fix the video encoder settings on video tracks
                                 if mtype.key == 'video':

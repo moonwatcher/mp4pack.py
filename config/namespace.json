@@ -1631,6 +1631,7 @@
                 "posters":null,
                 "part of a collection":null,
                 "people":null,
+                "pictures":null,
                 "certifications":null,
                 "titles":null,
                 "reviews":null,
@@ -1672,7 +1673,7 @@
                 "tv show air day":null,
                 "tv show air time":null,
                 "people":null,
-                "posters":null,
+                "pictures":null,
                 "simple tv show name":null,
                 "country code":null
             },
@@ -2027,9 +2028,28 @@
                     }
                 },
                 {
+                    "action":"complement",
+                    "element":"backdrops",
+                    "extention":{
+                        "image class":"backdrop"
+                    }
+                },
+                {
+                    "action":"complement",
+                    "element":"posters",
+                    "extention":{
+                        "image class":"poster"
+                    }
+                },
+                {
                     "action":"coalesce",
                     "source":[ "cast", "crew" ],
                     "target":"people"
+                },
+                {
+                    "action":"coalesce",
+                    "source":[ "backdrops", "posters" ],
+                    "target":"pictures"
                 }
             ],
             "element":{
@@ -2117,6 +2137,7 @@
                     "tmdb":"belongs_to_collection"
                 },
                 "people":null,
+                "pictures":null,
                 "cast":{
                     "tmdb":"cast"
                 },
@@ -2176,9 +2197,21 @@
                     }
                 },
                 {
+                    "action":"complement",
+                    "element":"banners",
+                    "extention":{
+                        "image class":"banner"
+                    }
+                },
+                {
                     "action":"coalesce",
                     "source":[ "cast" ],
                     "target":"people"
+                },
+                {
+                    "action":"coalesce",
+                    "source":[ "banners" ],
+                    "target":"pictures"
                 }
             ],
             "element":{
@@ -2267,7 +2300,8 @@
                     "tvdb":"Actor"
                 },
                 "people":null,
-                "posters":{
+                "pictures":null,
+                "banners":{
                     "tvdb":"Banner"
                 },
                 "simple tv show name":null,
