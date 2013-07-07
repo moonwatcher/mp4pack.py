@@ -495,7 +495,7 @@ class AudioVideoContainer(Container):
                             
                     if pivot.location['kind'] in ('mkv', 'm4v', 'avi'):
                         command.append(u'--title')
-                        command.append(self.asset.meta['full name'])
+                        command.append(self.location['full name'])
                         
                         command.append(u'--audio-tracks')
                         command.append(u','.join([ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'audio']))

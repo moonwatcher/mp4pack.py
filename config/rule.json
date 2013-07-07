@@ -1702,27 +1702,27 @@
                 }
             ]
         },
-        "rule.knowledge.asset.name":{
+        "rule.knowledge.resource.name":{
             "name":"full name",
             "provide":["full name"],
             "branch":[
                 {
-                    "requires":["media kind", "tv show name", "tv episode production code", "track name"],
+                    "requires":["media kind", "tv show name", "track genealogy", "track name", "tv episode id"],
                     "equal":{"media kind":10 },
                     "apply":[
                         {
                             "property":"full name",
-                            "format":"{tv show name} {tv episode production code} {track name}"
+                            "format":"{tv show name} {track genealogy} {track name} {tv episode id}"
                         }
                     ]
                 },
                 {
-                    "requires":["media kind", "tv show name", "tv episode production code"],
+                    "requires":["media kind", "tv show name", "track genealogy"],
                     "equal":{"media kind":10 },
                     "apply":[
                         {
                             "property":"full name",
-                            "format":"{tv show name} {tv episode production code}"
+                            "format":"{tv show name} {track genealogy} {tv episode id}"
                         }
                     ]
                 },

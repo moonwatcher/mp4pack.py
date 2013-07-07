@@ -363,7 +363,8 @@
                 "simple movie title":null,
                 "simple music album name":null,
                 "simple music track name":null,
-                "routing type":null
+                "routing type":null,
+                "full name":null
             },
             "rule":[
                 "rule.system.essence",
@@ -398,7 +399,8 @@
                 "rule.knowledge.simple.name.movie",
                 "rule.knowledge.simple.name.music.album",
                 "rule.knowledge.simple.name.music.track",
-                "rule.system.default.routing.type"
+                "rule.system.default.routing.type",
+                "rule.knowledge.resource.name"
             ]
         },
         "ns.medium.asset.location":{
