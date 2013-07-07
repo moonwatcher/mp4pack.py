@@ -1714,12 +1714,12 @@
             "provide":["full name"],
             "branch":[
                 {
-                    "requires":["media kind", "tv show name", "track genealogy", "track name"],
+                    "requires":["media kind", "tv show name", "track genealogy", "tv episode name"],
                     "equal":{"media kind":10 },
                     "apply":[
                         {
                             "property":"full name",
-                            "format":"{tv show name} {track genealogy} {track name}"
+                            "format":"{tv show name} {track genealogy} {tv episode name}"
                         }
                     ]
                 },
