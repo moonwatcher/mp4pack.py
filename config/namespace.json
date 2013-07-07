@@ -363,8 +363,7 @@
                 "simple movie title":null,
                 "simple music album name":null,
                 "simple music track name":null,
-                "routing type":null,
-                "full name":null
+                "routing type":null
             },
             "rule":[
                 "rule.system.essence",
@@ -399,8 +398,7 @@
                 "rule.knowledge.simple.name.movie",
                 "rule.knowledge.simple.name.music.album",
                 "rule.knowledge.simple.name.music.track",
-                "rule.system.default.routing.type",
-                "rule.knowledge.resource.name"
+                "rule.system.default.routing.type"
             ]
         },
         "ns.medium.asset.location":{
@@ -450,14 +448,16 @@
                 "track name":null,
                 "album name":null,
                 "release year":null,
-                "release date":null
+                "release date":null,
+                "full name":null
             },
             "rule":[
                 "rule.medium.asset.uri",
                 "rule.medium.home.uri",
                 "rule.medium.knowledge.uri",
                 "rule.knowledge.release.year",
-                "rule.medium.home.umid"
+                "rule.medium.home.umid",
+                "rule.knowledge.resource.name"
             ]
         },
         "ns.medium.resource.url.decode":{
@@ -2181,10 +2181,11 @@
                     "itunes":"artistName"
                 },
                 "simple movie title":null
+                
             },
             "rule":[
                 "rule.knowledge.simple.name.movie",
-                "rule.knowledge.release.year"
+                "rule.knowledge.release.year"                
             ]
         },
         "ns.knowledge.tv.show":{
@@ -2387,6 +2388,7 @@
             "element":{
                 "tv show id":null,
                 "tv season id":null,
+                "tv episode id":null,
                 "tv season number":null,
                 "tv episode number":null,
                 "album name":{

@@ -495,7 +495,7 @@ class AudioVideoContainer(Container):
                             
                     if pivot.location['kind'] in ('mkv', 'm4v', 'avi'):
                         command.append(u'--title')
-                        command.append(self.location['full name'])
+                        command.append(self.asset.location['full name'])
                         
                         command.append(u'--audio-tracks')
                         command.append(u','.join([ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'audio']))
@@ -506,6 +506,7 @@ class AudioVideoContainer(Container):
                     if pivot.stream:
                         # Iterate the tracks
                         for stream in pivot.stream:
+                            del stream['stream name']
                             if stream['stream kind'] != 'menu':
                                 if 'language' in stream:
                                     command.append(u'--language')
@@ -514,6 +515,7 @@ class AudioVideoContainer(Container):
                                 if 'stream name' in stream:
                                     command.append(u'--track-name')
                                     command.append(u'{0}:{1}'.format(stream['stream order'], stream['stream name']))
+                                    # command.append(u'{0}:{1}'.format(stream['stream order'], self.env.enumeration['language'].find(stream['language']).node['name']))
                                     
                                 if 'delay' in pivot.resource.hint:
                                     command.append(u'--sync')

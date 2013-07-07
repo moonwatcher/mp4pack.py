@@ -1707,42 +1707,22 @@
             "provide":["full name"],
             "branch":[
                 {
-                    "requires":["media kind", "tv show name", "track genealogy", "track name", "tv episode id"],
+                    "requires":["media kind", "tv show name", "track genealogy", "track name"],
                     "equal":{"media kind":10 },
                     "apply":[
                         {
                             "property":"full name",
-                            "format":"{tv show name} {track genealogy} {track name} {tv episode id}"
+                            "format":"{tv show name} {track genealogy} {track name}"
                         }
                     ]
                 },
                 {
-                    "requires":["media kind", "tv show name", "track genealogy"],
-                    "equal":{"media kind":10 },
-                    "apply":[
-                        {
-                            "property":"full name",
-                            "format":"{tv show name} {track genealogy} {tv episode id}"
-                        }
-                    ]
-                },
-                {
-                    "requires":["media kind", "movie id", "track name"],
+                    "requires":["media kind", "movie title", "release year"],
                     "equal":{"media kind":9 },
                     "apply":[
                         {
                             "property":"full name",
-                            "format":"{track name} {movie id}"
-                        }
-                    ]
-                },
-                {
-                    "requires":["media kind", "movie id"],
-                    "equal":{"media kind":9 },
-                    "apply":[
-                        {
-                            "property":"full name",
-                            "format":"{movie id}"
+                            "format":"{movie title} {release year}"
                         }
                     ]
                 }
