@@ -457,7 +457,8 @@
                 "rule.medium.knowledge.uri",
                 "rule.knowledge.release.year",
                 "rule.medium.home.umid",
-                "rule.knowledge.resource.name"
+                "rule.knowledge.resource.name",
+                "rule.medium.resource.track.genealogy"
             ]
         },
         "ns.medium.resource.url.decode":{
