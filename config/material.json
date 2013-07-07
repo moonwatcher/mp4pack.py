@@ -20,9 +20,10 @@
                             ],
                             "track":[
                                 {
-                                    "mode":"choose",
+                                    "mode":"select",
                                     "branch":[
-                                        {"stream kind":"caption", "language":"he"}
+                                        {"stream kind":"caption", "language":"he", "kind":"srt"},
+                                        {"stream kind":"caption", "language":"he", "kind":"ass"}
                                     ],
                                     "override":{
                                         "routing type":"fragment",
@@ -43,9 +44,10 @@
                                     }
                                 },
                                 {
-                                    "mode":"choose",
+                                    "mode":"select",
                                     "branch":[
-                                        {"stream kind":"caption", "language":"en"}
+                                        {"stream kind":"caption", "language":"en", "kind":"srt"},
+                                        {"stream kind":"caption", "language":"en", "kind":"ass"}
                                     ],
                                     "override":{
                                         "routing type":"fragment",

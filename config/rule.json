@@ -1412,6 +1412,13 @@
                     ]
                 },
                 {
+                    "requires":["stream kind", "format"],
+                    "equal":{"stream kind":"caption", "format":"PGS"},
+                    "apply":[
+                        { "property":"kind", "value":"pgs" }
+                    ]
+                },
+                {
                     "requires":["stream kind"],
                     "equal":{"stream kind":"menu"},
                     "apply":[
