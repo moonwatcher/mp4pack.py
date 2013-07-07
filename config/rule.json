@@ -1727,22 +1727,22 @@
                     ]
                 },
                 {
-                    "requires":["media kind", "imdb movie id", "track name"],
+                    "requires":["media kind", "movie id", "track name"],
                     "equal":{"media kind":9 },
                     "apply":[
                         {
                             "property":"full name",
-                            "format":"IMDb{imdb movie id} {track name}"
+                            "format":"{track name} {movie id}"
                         }
                     ]
                 },
                 {
-                    "requires":["media kind", "imdb movie id"],
+                    "requires":["media kind", "movie id"],
                     "equal":{"media kind":9 },
                     "apply":[
                         {
                             "property":"full name",
-                            "format":"IMDb{imdb movie id}"
+                            "format":"{movie id}"
                         }
                     ]
                 }
