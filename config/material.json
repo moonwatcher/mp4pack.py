@@ -66,38 +66,6 @@
                                     }
                                 },
                                 {
-                                    "mode":"select",
-                                    "branch":[
-                                        {"stream kind":"audio", "kind":"dts"}
-                                    ],
-                                    "override":{
-                                        "routing type":"fragment",
-                                        "tasks":[
-                                            {
-                                                "action":"transcode",
-                                                "routing type":"fragment",
-                                                "kind":"ac3"
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    "mode":"select",
-                                    "branch":[
-                                        {"stream kind":"audio", "kind":"flac"}
-                                    ],
-                                    "override":{
-                                        "routing type":"fragment",
-                                        "tasks":[
-                                            {
-                                                "action":"transcode",
-                                                "routing type":"fragment",
-                                                "kind":"ac3"
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
                                     "mode":"choose",
                                     "branch":[
                                         {"stream kind":"menu"}
@@ -201,22 +169,6 @@
                                     "branch":[
                                         {"stream kind":"menu"}
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            "description":"All ac3 raw streams in the normal profile",
-                            "mode":"select",
-                            "branch":[
-                                {"kind":"ac3", "profile":"normal"}
-                            ],
-                            "track":[
-                                {
-                                    "mode":"choose",
-                                    "branch":[
-                                        {"stream kind":"audio", "kind":"ac3"}
-                                    ],
-                                    "override":{"stream name":"Normal"}
                                 }
                             ]
                         },
@@ -467,8 +419,207 @@
                 }
             }
         },
+        "ac3audio":{
+            "description":"A preset for prepare to explode, transcode DTS and FLAC tracks to AC3 and repack the fragments",
+            "action":{
+                "explode":{
+                    "pivot":[
+                        { "operator":"this" }
+                    ],
+                    "transform":[
+                        {
+                            "mode":"select",
+                            "branch":[
+                                {"kind":"mkv"}
+                            ],
+                            "track":[
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"caption", "language":"he"}
+                                    ],
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt",
+                                                "preset":"default",
+                                                "profile":"original"
+                                            },
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt",
+                                                "preset":"clean",
+                                                "profile":"clean"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"caption", "language":"en"}
+                                    ],
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt",
+                                                "preset":"default",
+                                                "profile":"original"
+                                            },
+                                            {
+                                                "action":"transcode",
+                                                "kind":"srt",
+                                                "preset":"clean",
+                                                "profile":"clean"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"dts"}
+                                    ],
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "routing type":"fragment",
+                                                "kind":"ac3"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"flac"}
+                                    ],
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "routing type":"fragment",
+                                                "kind":"ac3"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"menu"}
+                                    ],
+                                    "override":{
+                                        "routing type":"fragment",
+                                        "tasks":[
+                                            {
+                                                "action":"transcode",
+                                                "kind":"chp"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "pack":{
+                    "pivot":[
+                        { "operator":"this" },
+                        { "operator":"fragments" }
+                    ],
+                    "transform":[
+                        {
+                            "description":"Subtitles",
+                            "mode":"select",
+                            "branch":[
+                                {"kind":"srt"}
+                            ],
+                            "track":[
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"caption"}
+                                    ],
+                                    "override":{"stream name":"Normal"}
+                                }
+                            ]
+                        },
+                        {
+                            "description":"Chapters",
+                            "mode":"choose",
+                            "branch":[
+                                {"kind":"chp"}
+                            ],
+                            "track":[
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"menu"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "description":"Raw ac3",
+                            "mode":"select",
+                            "branch":[
+                                {"kind":"ac3"}
+                            ],
+                            "track":[
+                                {
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"ac3"}
+                                    ],
+                                    "override":{"stream name":"Normal"}
+                                }
+                            ]
+                        },
+                        {
+                            "description":"Audio and video streams from the main file",
+                            "mode":"choose",
+                            "branch":[
+                                {"kind":"mkv"},
+                                {"kind":"m4v"},
+                                {"kind":"avi"}
+                            ],
+                            "override":{
+                                "mkvmerge flags":[
+                                    "--no-global-tags",
+                                    "--no-track-tags",
+                                    "--no-chapters",
+                                    "--no-attachments",
+                                    "--no-subtitles"
+                                ]
+                            },
+                            "track":[
+                                {
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"video"},
+                                        {"stream kind":"audio", "kind":"ac3"},
+                                        {"stream kind":"audio", "kind":"aac"},
+                                        {"stream kind":"audio", "kind":"dts"},
+                                        {"stream kind":"audio", "kind":"flac"},
+                                        {"stream kind":"audio", "kind":"mp3"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
         "fragment":{
-            "description":"Fragment preset for packing only the fragments of a file",
+            "description":"Pack only the fragments of a file",
             "action":{
                 "pack":{
                     "pivot":[
