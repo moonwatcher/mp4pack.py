@@ -799,7 +799,7 @@
                     "requires":["file name"],
                     "match":{"property":"file name", "expression":"^IMDbtt[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^IMDb(?P<imdb_movie_id>tt[0-9]+)(?: (?P<track_name>.*))?(?:\\.(?P<language>[a-z]{2}))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
+                        {"property":"file name", "expression":"^IMDb(?P<imdb_movie_id>tt[0-9]+)(?: (?P<track_name>[^\\.]*))?(?:\\.(?P<language>[a-z]{2}))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":9}
@@ -809,7 +809,7 @@
                     "requires":["file name"],
                     "match":{"property":"file name", "expression":"^TMDb[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^TMDb(?P<tmdb_movie_id>[0-9]+)(?: (?P<track_name>.*))?(?:\\.(?P<language>[a-z]{2}))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
+                        {"property":"file name", "expression":"^TMDb(?P<tmdb_movie_id>[0-9]+)(?: (?P<track_name>[^\\.]*))?(?:\\.(?P<language>[a-z]{2}))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":9}
@@ -819,7 +819,7 @@
                     "requires":["file name"],
                     "match":{"property":"file name", "expression":"^iTMF[0-9]+(?: .*)?\\.[^\\.]{3}$", "flags":34 },
                     "decode":[
-                        {"property":"file name", "expression":"^iTMF(?P<itunes_movie_id>[0-9]+)(?: (?P<track_name>.*))?(?:\\.(?P<language>[a-z]{2}))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
+                        {"property":"file name", "expression":"^iTMF(?P<itunes_movie_id>[0-9]+)(?: (?P<track_name>[^\\.]*))?(?:\\.(?P<language>[a-z]{2}))?\\.(?P<kind>[^\\.]{3})$", "flags":34 }
                     ],
                     "apply":[
                         {"property":"media kind", "value":9}
