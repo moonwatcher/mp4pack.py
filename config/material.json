@@ -77,7 +77,8 @@
                                         "tasks":[
                                             {
                                                 "action":"transcode",
-                                                "kind":"chp"
+                                                "kind":"chp",
+                                                "profile":"original"
                                             }
                                         ]
                                     }
@@ -100,7 +101,8 @@
                                         "tasks":[
                                             {
                                                 "action":"transcode",
-                                                "kind":"chp"
+                                                "kind":"chp",
+                                                "profile":"original"
                                             }
                                         ]
                                     }

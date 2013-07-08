@@ -195,6 +195,27 @@
                     "apply":[
                         {"property":"preset", "value":"default"}
                     ]
+                },
+                {
+                    "requires":["action", "kind"],
+                    "equal":{"action":"transcode", "kind":"srt"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "kind"],
+                    "equal":{"action":"transcode", "kind":"chp"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
+                },
+                {
+                    "requires":["action", "kind"],
+                    "equal":{"action":"transcode", "kind":"ass"},
+                    "apply":[
+                        {"property":"preset", "value":"default"}
+                    ]
                 }
             ],
             "volume.default":[
