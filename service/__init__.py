@@ -235,6 +235,7 @@ class ResourceHandler(object):
                     self.locate(query)
                     if not query['return']:
                         self.collect(query)
+                        self.override(query)
                         self.fetch(query)
                         self.parse(query)
                         self.store(query)
@@ -325,14 +326,20 @@ class ResourceHandler(object):
                     query['return'] = None
     
     
+    def override(self, query):
+        if 'override' in query['branch']:
+            for k,v in query['branch']['override'].iteritems():
+                query['parameter'][k] = v
+    
+    
     def collect(self, query):
         if 'collect' in query['branch']:
             for pattern in query['branch']['collect']:
                 try:
                     related = self.resolver.resolve(pattern.format(**query['parameter']))
                 except KeyError, e:
-                    pass
                     # self.log.debug(u'Could not create related uri for pattern %s because parameter %s was missing', pattern, e)
+                    pass
                 else:
                     if related is not None:
                         for index in query['branch']['index']:
@@ -431,7 +438,8 @@ class ResourceHandler(object):
                     entry['record'][u'head']['canonical'] = link
                     
             except KeyError, e:
-                pass
                 # self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
+                pass
     
+
 

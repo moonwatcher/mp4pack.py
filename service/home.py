@@ -26,8 +26,8 @@ class HomeHandler(ResourceHandler):
     
     
     def parse(self, query):
+        # Only create a new home document if the dependency is satisfied
         if query['sources']:
-            # Only create a new home document if the dependency is satisfied
             entry = {
                 'branch':query['branch'],
                 'record':{

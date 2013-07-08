@@ -72,10 +72,14 @@
                             "format":"/h/movie/rottentomatoes/{rottentomatoes movie id}"
                         }
                     ],
+                    "override":{
+                        "media kind":9
+                    },
                     "collection":"home",
                     "key":"movie id",
                     "index":[
                         "movie id",
+                        "media kind",
                         "tmdb movie id",
                         "imdb movie id",
                         "itunes movie id",
@@ -134,10 +138,14 @@
                             "format":"/h/tv/show/imdb/{imdb tv show id}"
                         }
                     ],
+                    "override":{
+                        "media kind":10
+                    },
                     "collection":"home",
                     "key":"tv show id",
                     "index":[
                         "tv show id",
+                        "media kind",
                         "tvdb tv show id",
                         "imdb tv show id",
                         "itunes tv show id",
@@ -219,10 +227,14 @@
                             "format":"/h/tv/season/imdb/{imdb tv show id}/{disc number}"
                         }
                     ],
+                    "override":{
+                        "media kind":10
+                    },
                     "collection":"home",
                     "key":"tv season id",
                     "index":[
                         "tv show id",
+                        "media kind",
                         "tvdb tv show id",
                         "imdb tv show id",
                         "itunes tv show id",
@@ -354,10 +366,14 @@
                             "format":"/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
                         }
                     ],
+                    "override":{
+                        "media kind":10
+                    },
                     "collection":"home",
                     "key":"tv episode id",
                     "index":[
                         "tv show id",
+                        "media kind",
                         "tvdb tv show id",
                         "imdb tv show id",
                         "itunes tv show id",
@@ -412,10 +428,14 @@
                             "format":"/h/music/album/~/{album handle}"
                         }
                     ],
+                    "override":{
+                        "media kind":1
+                    },
                     "collection":"home",
                     "key":"music album id",
                     "index":[
                         "music album id",
+                        "media kind",
                         "itunes music album id",
                         "album handle",
                         "music album name",
@@ -476,10 +496,14 @@
                             "format":"/h/music/track/~/{album handle}/{disc number}/{track number}"
                         }
                     ],
+                    "override":{
+                        "media kind":1
+                    },
                     "collection":"home",
                     "key":"track id",
                     "index":[
                         "music album id",
+                        "media kind",
                         "itunes music album id",
                         "track id",
                         "itunes music track id",
@@ -680,7 +704,8 @@
                 "service.document.knowledge.playlist":{
                     "match":[
                         {
-                            "filter":"^/k/playlist/(?P<playlist_id>[0-9]+)$"
+                            "filter":"^/k/playlist/(?P<playlist_id>[0-9]+)$",
+                            "depend":"/h/playlist/{playlist id}"
                         }
                     ],
                     "resolvable":[
@@ -696,7 +721,8 @@
                 "service.document.knowledge.movie":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -725,6 +751,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
@@ -734,7 +761,8 @@
                 "service.document.knowledge.movie.people":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/people$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/people$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -757,6 +785,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
@@ -766,7 +795,8 @@
                 "service.document.knowledge.movie.image":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/image$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/image$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -789,6 +819,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
@@ -798,7 +829,8 @@
                 "service.document.knowledge.movie.clip":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/clip$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/clip$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -821,6 +853,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
@@ -830,7 +863,8 @@
                 "service.document.knowledge.movie.keyword":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/keyword$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/keyword$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -853,6 +887,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "tmdb movie id",
                         "rottentomatoes movie id",
                         "itunes movie id"
@@ -861,7 +896,8 @@
                 "service.document.knowledge.movie.rating":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/rating$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/rating$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -884,6 +920,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
@@ -893,7 +930,8 @@
                 "service.document.knowledge.movie.translation":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/translation$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/translation$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -916,6 +954,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "language",
                         "tmdb movie id",
                         "rottentomatoes movie id",
@@ -925,7 +964,8 @@
                 "service.document.knowledge.movie.alternative":{
                     "match":[
                         {
-                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/alternative$"
+                            "filter":"^/k/movie/(?P<movie_id>[0-9]+)/alternative$",
+                            "depend":"/h/movie/{movie id}"
                         }
                     ],
                     "aggregate":[
@@ -948,6 +988,7 @@
                     "namespace":"ns.knowledge.movie.canonical",
                     "index":[
                         "movie id",
+                        "media kind",
                         "tmdb movie id",
                         "rottentomatoes movie id",
                         "itunes movie id"
@@ -956,7 +997,8 @@
                 "service.document.knowledge.tv.show":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/tv/show/(?P<tv_show_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/show/(?P<tv_show_id>[0-9]+)$",
+                            "depend":"/h/tv/show/{tv show id}"
                         }
                     ],
                     "aggregate":[
@@ -985,13 +1027,15 @@
                         "tvdb tv show id",
                         "imdb tv show id",
                         "itunes tv show id",
+                        "media kind",
                         "language"
                     ]
                 },
                 "service.document.knowledge.tv.show.people":{
                     "match":[
                         {
-                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/people$"
+                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/people$",
+                            "depend":"/h/tv/show/{tv show id}"
                         }
                     ],
                     "aggregate":[
@@ -1014,13 +1058,17 @@
                     "namespace":"ns.knowledge.tv.show.canonical",
                     "index":[
                         "tv show id",
-                        "tvdb tv show id"
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
+                        "media kind"
                     ]
                 },
                 "service.document.knowledge.tv.show.image":{
                     "match":[
                         {
-                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/image$"
+                            "filter":"^/k/tv/show/(?P<tv_show_id>[0-9]+)/image$",
+                            "depend":"/h/tv/show/{tv show id}"
                         }
                     ],
                     "aggregate":[
@@ -1043,16 +1091,21 @@
                     "namespace":"ns.knowledge.tv.show.canonical",
                     "index":[
                         "tv show id",
-                        "tvdb tv show id"
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
+                        "media kind"
                     ]
                 },
                 "service.document.knowledge.tv.season":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_season_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_season_id>[0-9]+)$",
+                            "depend":"/h/tv/season/{tv season id}"
                         },
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "depend":"/h/tv/season/{tv show id}/{disc number}"
                         }
                     ],
                     "aggregate":[
@@ -1090,16 +1143,19 @@
                         "disc number",
                         "tvdb tv season id",
                         "itunes tv season id",
+                        "media kind",
                         "language"
                     ]
                 },
                 "service.document.knowledge.tv.season.people":{
                     "match":[
                         {
-                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/people$"
+                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/people$",
+                            "depend":"/h/tv/season/{tv season id}"
                         },
                         {
-                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/people$"
+                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/people$",
+                            "depend":"/h/tv/season/{tv show id}/{disc number}"
                         }
                     ],
                     "resolvable":[
@@ -1118,17 +1174,25 @@
                     "namespace":"ns.knowledge.tv.season.canonical",
                     "index":[
                         "tv show id",
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
                         "tv season id",
-                        "disc number"
+                        "disc number",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "media kind"
                     ]
                 },
                 "service.document.knowledge.tv.season.image":{
                     "match":[
                         {
-                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/image$"
+                            "filter":"^/k/tv/season/(?P<tv_season_id>[0-9]+)/image$",
+                            "depend":"/h/tv/season/{tv season id}"
                         },
                         {
-                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/image$"
+                            "filter":"^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/image$",
+                            "depend":"/h/tv/season/{tv show id}/{disc number}"
                         }
                     ],
                     "resolvable":[
@@ -1147,20 +1211,29 @@
                     "namespace":"ns.knowledge.tv.season.canonical",
                     "index":[
                         "tv show id",
+                        "tvdb tv show id",
+                        "imdb tv show id",
+                        "itunes tv show id",
                         "tv season id",
-                        "disc number"
+                        "disc number",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "media kind"
                     ]
                 },
                 "service.document.knowledge.tv.episode":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_episode_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_episode_id>[0-9]+)$",
+                            "depend":"/h/tv/episode/{tv episode id}"
                         },
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/h/tv/episode/{tv season id}/{track number}"
                         },
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/h/tv/episode/{tv show id}/{disc number}/{track number}"
                         }
                     ],
                     "aggregate":[
@@ -1208,16 +1281,23 @@
                         "itunes tv season id",
                         "tvdb tv episode id",
                         "itunes tv episode id",
+                        "media kind",
                         "language"
                     ]
                 },
                 "service.document.knowledge.tv.episode.people":{
                     "match":[
                         {
-                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/people$"
+                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/people$",
+                            "depend":"/h/tv/episode/{tv episode id}"
                         },
                         {
-                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/people$"
+                            "filter":"^/k/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)/people$",
+                            "depend":"/h/tv/episode/{tv season id}/{track number}"
+                        },
+                        {
+                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/people$",
+                            "depend":"/h/tv/episode/{tv show id}/{disc number}/{track number}"
                         }
                     ],
                     "aggregate":[
@@ -1238,6 +1318,10 @@
                             "name":"tv show episode people",
                             "format":"/k/tv/episode/{tv episode id}/people",
                             "canonical":true
+                        },
+                        {
+                            "name":"episode knowledge by tv season id",
+                            "format":"/k/tv/episode/{tv season id}/{track number}/people"
                         },
                         {
                             "name":"tv show episode people",
@@ -1261,16 +1345,22 @@
                         "itunes tv season id",
                         "tvdb tv episode id",
                         "itunes tv episode id",
-                        "language"
+                        "media kind"
                     ]
                 },
                 "service.document.knowledge.tv.episode.image":{
                     "match":[
                         {
-                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/image$"
+                            "filter":"^/k/tv/episode/(?P<tv_episode_id>[0-9]+)/image$",
+                            "depend":"/h/tv/episode/{tv episode id}"
                         },
                         {
-                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/image$"
+                            "filter":"^/k/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)/image$",
+                            "depend":"/h/tv/episode/{tv season id}/{track number}"
+                        },
+                        {
+                            "filter":"^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/image$",
+                            "depend":"/h/tv/episode/{tv show id}/{disc number}/{track number}"
                         }
                     ],
                     "resolvable":[
@@ -1278,6 +1368,10 @@
                             "name":"tv show episode image",
                             "format":"/k/tv/episode/{tv episode id}/image",
                             "canonical":true
+                        },
+                        {
+                            "name":"episode knowledge by tv season id",
+                            "format":"/k/tv/episode/{tv season id}/{track number}/image"
                         },
                         {
                             "name":"tv show episode image",
@@ -1291,15 +1385,24 @@
                         "tv show id",
                         "tv season id",
                         "tv episode id",
+                        "tvdb tv show id",
+                        "itunes tv show id",
+                        "imdb tv show id",
                         "disc number",
                         "track number",
-                        "language"
+                        "imdb tv episode id",
+                        "tvdb tv season id",
+                        "itunes tv season id",
+                        "tvdb tv episode id",
+                        "itunes tv episode id",
+                        "media kind"
                     ]
                 },
                 "service.document.knowledge.music.album":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/music/album/(?P<music_album_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/music/album/(?P<music_album_id>[0-9]+)$",
+                            "depend":"/h/music/album/{music album id}"
                         }
                     ],
                     "aggregate":[
@@ -1323,13 +1426,15 @@
                     "index":[
                         "music album id", 
                         "itunes music album id",
+                        "media kind",
                         "language"
                     ]
                 },
                 "service.document.knowledge.music.album.image":{
                     "match":[
                         {
-                            "filter":"^/k/music/album/(?P<music_album_id>[0-9]+)/image$"
+                            "filter":"^/k/music/album/(?P<music_album_id>[0-9]+)/image$",
+                            "depend":"/h/music/album/{music album id}"
                         }
                     ],
                     "collect":[
@@ -1346,16 +1451,20 @@
                     "collection":"knowledge_music_album_image",
                     "namespace":"ns.knowledge.music.album.canonical",
                     "index":[
-                        "music album id" 
+                        "music album id", 
+                        "itunes music album id",
+                        "media kind"
                     ]
                 },
                 "service.document.knowledge.music.track":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/music/track/(?P<track_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/music/track/(?P<track_id>[0-9]+)$",
+                            "depend":"/h/music/track/{track id}"
                         },
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/h/music/track/{music album id}/{disc number}/{track number}"
                         }
                     ],
                     "aggregate":[
@@ -1388,13 +1497,15 @@
                         "track number",
                         "itunes music album id",
                         "itunes music track id",
+                        "media kind",
                         "language"
                     ]
                 },
                 "service.document.knowledge.person":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)$",
+                            "depend":"/h/person/{person id}"
                         }
                     ],
                     "aggregate":[
@@ -1429,7 +1540,8 @@
                 "service.document.knowledge.person.credit":{
                     "match":[
                         {
-                            "filter":"^/k/person/(?P<person_id>[0-9]+)/credit$"
+                            "filter":"^/k/person/(?P<person_id>[0-9]+)/credit$",
+                            "depend":"/h/person/{person id}"
                         }
                     ],
                     "aggregate":[
@@ -1452,13 +1564,17 @@
                     "namespace":"ns.knowledge.person.canonical",
                     "index":[
                         "person id",
-                        "tmdb person id"
+                        "tmdb person id",
+                        "tvdb person id",
+                        "itunes person id",
+                        "imdb person id"
                     ]
                 },
                 "service.document.knowledge.person.image":{
                     "match":[
                         {
-                            "filter":"^/k/person/(?P<person_id>[0-9]+)/image$"
+                            "filter":"^/k/person/(?P<person_id>[0-9]+)/image$",
+                            "depend":"/h/person/{person id}"
                         }
                     ],
                     "aggregate":[
@@ -1481,14 +1597,21 @@
                     "namespace":"ns.knowledge.person.canonical",
                     "index":[
                         "person id",
-                        "tmdb person id"
+                        "tmdb person id",
+                        "tvdb person id",
+                        "itunes person id",
+                        "imdb person id"
                     ]
                 },
                 "service.document.knowledge.company":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/company/(?P<company_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/company/(?P<company_id>[0-9]+)$",
+                            "depend":"/h/company/{company id}"
                         }
+                    ],
+                    "collect":[
+                        "/h/company/{company id}"
                     ],
                     "resolvable":[
                         {
@@ -1498,13 +1621,21 @@
                     ],
                     "type":"json",
                     "collection":"knowledge_company",
-                    "namespace":"ns.knowledge.company"
+                    "namespace":"ns.knowledge.company.canonical",
+                    "index":[
+                        "company id",
+                        "tmdb company id"
+                    ]
                 },
                 "service.document.knowledge.company.credit":{
                     "match":[
                         {
-                            "filter":"^/k/company/(?P<company_id>[0-9]+)/credit$"
+                            "filter":"^/k/company/(?P<company_id>[0-9]+)/credit$",
+                            "depend":"/h/company/{company id}"
                         }
+                    ],
+                    "collect":[
+                        "/h/company/{company id}"
                     ],
                     "resolvable":[
                         {
@@ -1514,13 +1645,21 @@
                     ],
                     "type":"json",
                     "collection":"knowledge_company_credit",
-                    "namespace":"ns.knowledge.company"
+                    "namespace":"ns.knowledge.company",
+                    "index":[
+                        "company id",
+                        "tmdb company id"
+                    ]
                 },
                 "service.document.knowledge.company.image":{
                     "match":[
                         {
-                            "filter":"^/k/company/(?P<company_id>[0-9]+)/image$"
+                            "filter":"^/k/company/(?P<company_id>[0-9]+)/image$",
+                            "depend":"/h/company/{company id}"
                         }
+                    ],
+                    "collect":[
+                        "/h/company/{company id}"
                     ],
                     "resolvable":[
                         {
@@ -1530,13 +1669,21 @@
                     ],
                     "type":"json",
                     "collection":"knowledge_company_image",
-                    "namespace":"ns.knowledge.company"
+                    "namespace":"ns.knowledge.company",
+                    "index":[
+                        "company id",
+                        "tmdb company id"
+                    ]
                 },
                 "service.document.knowledge.genre":{
                     "match":[
                         {
-                            "filter":"^/k/(?P<language>[a-z]{2})/genre/(?P<genre_id>[0-9]+)$"
+                            "filter":"^/k/(?P<language>[a-z]{2})/genre/(?P<genre_id>[0-9]+)$",
+                            "depend":"/h/genre/{genre id}"
                         }
+                    ],
+                    "collect":[
+                        "/h/genre/{genre id}"
                     ],
                     "resolvable":[
                         {
@@ -1546,7 +1693,11 @@
                     ],
                     "type":"json",
                     "collection":"knowledge_genre",
-                    "namespace":"ns.knowledge.genre"
+                    "namespace":"ns.knowledge.genre",
+                    "index":[
+                        "genre id",
+                        "tmdb genre id"
+                    ]
                 },
                 "service.document.knowledge.job":{
                     "match":[
