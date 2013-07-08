@@ -5,6 +5,16 @@
             "keyword":"umid",
             "type":"unicode"
         },
+        "tv show umid":{
+            "name":"TV show UMID",
+            "keyword":"tv_show_umid",
+            "type":"unicode"
+        },
+        "tv season umid":{
+            "name":"TV season UMID",
+            "keyword":"tv_season_umid",
+            "type":"unicode"
+        },
         "home id":{
             "name":"Home ID",
             "keyword":"home_id",

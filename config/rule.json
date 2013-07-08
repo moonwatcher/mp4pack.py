@@ -364,6 +364,30 @@
                 }
             ]
         },
+        "rule.medium.home.tv.show.umid":{
+            "name":"TV show UMID from tv show id",
+            "provide":["tv show umid"],
+            "branch":[
+                {
+                    "requires":["tv show id"],
+                    "apply":[
+                        { "property":"tv show umid", "digest":["tv show id", "media kind"], "algorithm":"umid" }
+                    ]
+                }
+            ]
+        },
+        "rule.medium.home.tv.season.umid":{
+            "name":"UMID from home id",
+            "provide":["tv season umid"],
+            "branch":[
+                {
+                    "requires":["tv season id"],
+                    "apply":[
+                        { "property":"tv season umid", "digest":["tv season id", "media kind"], "algorithm":"umid" }
+                    ]
+                }
+            ]
+        },
         "rule.medium.home.uri":{
             "name":"Home URI",
             "provide":["home uri"],
@@ -918,12 +942,12 @@
             "provide":["canonic directory"],
             "branch":[
                 {
-                    "requires":["volume path", "media kind", "kind", "profile", "tv show id", "disc number" ],
+                    "requires":["volume path", "media kind", "kind", "profile", "tv show umid", "tv season umid", "simple tv show name", "disc number" ],
                     "equal":{"media kind":10 },
                     "apply":[
                         {
                             "property":"canonic directory",
-                            "format":"{volume path}/tv show/{kind}/{profile}/{tv show id}/{disc number}"
+                            "format":"{volume path}/tv show/{kind}/{profile}/{simple tv show name}.{tv show umid}/{disc number}.{tv season umid}"
                         }
                     ]
                 },

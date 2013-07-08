@@ -188,6 +188,8 @@
                 "volume":null,
                 "home id":null,
                 "umid":null,
+                "tv show umid":null,
+                "tv season umid":null,
                 "movie id":null,
                 "music album id":null,
                 "tv show id":null,
@@ -283,6 +285,8 @@
                 "rule.knowledge.simple.name.music.track",
                 "rule.knowledge.release.year",
                 "rule.medium.home.umid",
+                "rule.medium.home.tv.show.umid",
+                "rule.medium.home.tv.season.umid",
                 "rule.system.default.routing.type"
             ]
         },
@@ -305,6 +309,8 @@
                 "volume":null,
                 "home id":null,
                 "umid":null,
+                "tv show umid":null,
+                "tv season umid":null,
                 "movie id":null,
                 "music album id":null,
                 "tv show id":null,
@@ -388,6 +394,8 @@
                 "rule.medium.knowledge.uri",
                 "rule.system.default.language",
                 "rule.medium.home.umid",
+                "rule.medium.home.tv.show.umid",
+                "rule.medium.home.tv.season.umid",
                 "rule.knowledge.release.year",
                 "rule.knowledge.simple.name.company",
                 "rule.knowledge.simple.name.person",
@@ -410,6 +418,8 @@
                 "media kind":null,
                 "home id":null,
                 "umid":null,
+                "tv show umid":null,
+                "tv season umid":null,
                 "movie id":null,
                 "music album id":null,
                 "tv show id":null,
@@ -457,6 +467,8 @@
                 "rule.medium.knowledge.uri",
                 "rule.knowledge.release.year",
                 "rule.medium.home.umid",
+                "rule.medium.home.tv.show.umid",
+                "rule.medium.home.tv.season.umid",
                 "rule.knowledge.resource.name",
                 "rule.medium.resource.track.genealogy"
             ]

@@ -76,7 +76,8 @@ class Crawler(object):
             raw_xml = proc_grep.communicate()[0]
             
             # fix mediainfo's violation of xml standards so that ElementTree won't choke on it
-            raw_xml = raw_xml.replace('dt:dt="binary.base64"', 'datatype="binary.base64"')
+            # MediaInfoLib - v0.7.63 seems to be fixed already
+            raw_xml = raw_xml.replace('dt:dt="binary.base64"', 'dt="binary.base64"')
             
             # parse the DOM
             element = ElementTree.fromstring(raw_xml)
@@ -94,7 +95,7 @@ class Crawler(object):
                                     text = item.text
                                     
                                     # decode base64 encoded element
-                                    if 'datatype' in item.attrib and item.attrib['datatype'] == 'binary.base64':
+                                    if 'dt' in item.attrib and item.attrib['dt'] == 'binary.base64':
                                         text = base64.b64decode(text)
                                         
                                     # set the concept on the ontology
