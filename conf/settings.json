@@ -47,6 +47,18 @@
                     "pluto":{
                         "name":"Pluto",
                         "path":"/net/vito/volume/kyoto/pluto"
+                    },
+                    "pan":{
+                        "name":"Pan",
+                        "path":"/Volumes/chicago/pan"
+                    },
+                    "atlas":{
+                        "name":"Atlas",
+                        "path":"/Volumes/huston/atlas"
+                    },
+                    "janus":{
+                        "name":"Janus",
+                        "path":"/Volumes/columbia/janus"
                     }
                 }
             },
