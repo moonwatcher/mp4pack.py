@@ -69,18 +69,33 @@ class Condition(object):
     
     
     @property
+    def scope(self):
+        return self.node['scope']
+    
+    
+    @property
+    def status(self):
+        return self.node['status']
+    
+    
+    @property
+    def reference(self):
+        return self.node['reference']
+    
+    
+    @property
     def satisfied(self):
         result = False
-        if self.node['scope'] == 'task':
-            if self.node['reference'] in self.job.journal['task'] and \
-            self.job.journal['task'][self.node['reference']].status == self.node['status']:
+        if self.scope == 'task':
+            if self.reference in self.job.journal['task'] and \
+            self.job.journal['task'][self.reference].status == self.status:
                 result = True
                 
-        elif self.node['scope'] == 'group':
-            if self.node['reference'] in self.job.journal['group']:
+        elif self.scope == 'group':
+            if self.reference in self.job.journal['group']:
                 result = True
-                for reference, task in self.job.journal['group'][self.node['reference']].iteritems():
-                    if task.status != self.node['status']:
+                for reference, task in self.job.journal['group'][self.reference].iteritems():
+                    if task.status != self.status:
                         result = False
         return result
 
