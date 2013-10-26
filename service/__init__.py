@@ -257,7 +257,7 @@ class ResourceHandler(object):
             try:
                 query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
             except KeyError, e:
-                self.log.error(u'Could not compute remote URL for %s because %s was missing from the genealogy', query['uri'], e)
+                self.log.error(u'Could not compute remote URL for %s because parameter %s was not provided.', query['uri'], e)
             else:
                 if 'query parameter' in query['match']:
                     query['query parameter'] = Ontology(self.env, 'ns.search.query')
