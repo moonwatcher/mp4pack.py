@@ -605,7 +605,8 @@ class Prototype(Element):
         
     def _cast_plist(self, value, axis=None):
         # Clean and parse plist into a dictionary
-        result = value.replace(u'&quot;', u'"')
+        result = value
+        # result = value.replace(u'&quot;', u'"')
         result = self.env.expression['clean xml'].sub(u'', result).strip()
         try:
             result = plistlib.readPlistFromString(result.encode('utf-8'))

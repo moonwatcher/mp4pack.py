@@ -2228,6 +2228,200 @@
                     "collection":"tmdb_company_credit",
                     "namespace":"ns.knowledge.company",
                     "index":["tmdb company id"]
+                },
+                
+                
+                "service.document.tmdb.tv.show":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/show/(?P<tmdb_tv_show_id>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"/tv/{tmdb tv show id}"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)$"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb show by tmdb show id",
+                            "format":"/c/{language}/tmdb/tv/show/{tmdb tv show id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tmdb show by imdb show id",
+                            "format":"/c/{language}/tmdb/tv/show/imdb/{imdb tv show id}"
+                        }
+                    ],
+                    "collect":[
+                        "/c/{language}/tmdb/tv/show/search/imdb/{imdb tv show id}"
+                    ],
+                    "collection":"tmdb_tv_show",
+                    "namespace":"ns.knowledge.tv.show",
+                    "index":[
+                        "tmdb tv show id",
+                        "imdb tv show id",
+                        "tvdb tv show id",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.tmdb.tv.show.people":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/tv/show/(?P<tmdb_tv_show_id>[0-9]+)/people$",
+                            "query parameter":["api key"],
+                            "remote":"tv/{tmdb tv show id}/credits"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb show people by tmdb show id",
+                            "format":"/c/tmdb/tv/show/{tmdb tv show id}/people",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_tv_show_people",
+                    "namespace":"ns.knowledge.tv.show",
+                    "index":[
+                        "tmdb tv show id"
+                    ]
+                },
+                "service.document.tmdb.tv.show.image":{
+                    "match":[
+                        {
+                            "filter":"^/c/tmdb/tv/show/(?P<tmdb_tv_show_id>[0-9]+)/image$",
+                            "query parameter":["api key"],
+                            "remote":"tv/{tmdb tv show id}/images"
+                        }
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb show image by tmdb show id",
+                            "format":"/c/tmdb/tv/show/{tmdb tv show id}/image",
+                            "canonical":true
+                        }
+                    ],
+                    "collection":"tmdb_tv_show_image",
+                    "namespace":"ns.knowledge.tv.show",
+                    "index":[
+                        "tmdb tv show id"
+                    ]
+                },
+                "service.document.tmdb.tv.season":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/(?P<tmdb_tv_season_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/(?P<tmdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"/tv/{tmdb tv show id}/season/{disc number}"
+                        }
+                    ],
+                    "collect":[
+                        "/c/{language}/tmdb/tv/show/{tmdb tv show id}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb season by tmdb season id",
+                            "format":"/c/{language}/tmdb/tv/season/{tmdb tv season id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tmdb season by tmdb show id",
+                            "format":"/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}"
+                        },
+                        {
+                            "name":"tmdb season by imdb show id",
+                            "format":"/c/{language}/tvmb/tv/season/imdb/{imdb tv show id}/{disc number}"
+                        }
+                    ],
+                    "collection":"tmdb_tv_season",
+                    "namespace":"ns.knowledge.tv.season",
+                    "index":[
+                        "tmdb tv show id",
+                        "tmdb tv season id",
+                        "tvdb tv show id",
+                        "tvdb tv season id",
+                        "imdb tv show id",
+                        "disc number",
+                        "tv show name",
+                        "simple tv show name",
+                        "release date",
+                        "release year"
+                    ]
+                },
+                "service.document.tmdb.tv.episode":{
+                    "match":[
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/(?P<tmdb_tv_episode_id>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/(?P<tmdb_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/(?P<tmdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"/tv/{tmdb tv show id}/season/{disc number}/episode/{track number}"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                        }
+                    ],
+                    "collect":[
+                        "/c/{language}/tmdb/tv/show/{tmdb tv show id}",
+                        "/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}"
+                    ],
+                    "resolvable":[
+                        {
+                            "name":"tmdb episode by tmdb episode id",
+                            "format":"/c/{language}/tmdb/tv/episode/{tmdb tv episode id}",
+                            "canonical":true
+                        },
+                        {
+                            "name":"tmdb episode by tvdb season id",
+                            "format":"/c/{language}/tmdb/tv/episode/{tmdb tv season id}/{track number}"
+                        },
+                        {
+                            "name":"tmdb episode by tmdb show id",
+                            "format":"/c/{language}/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"tmdb episode by imdb episode id",
+                            "format":"/c/{language}/tmdb/tv/episode/imdb/{imdb tv episode id}"
+                        },
+                        {
+                            "name":"tmdb episode by imdb show id",
+                            "format":"/c/{language}/tmdb/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
+                        }
+                    ],
+                    "collection":"tvdb_tv_episode",
+                    "namespace":"ns.knowledge.tv.episode",
+                    "index":[
+                        "tmdb tv show id",
+                        "tmdb tv season id",
+                        "tmdb tv episode id",
+                        "imdb tv show id",
+                        "tvdb tv show id",
+                        "tvdb tv season id",
+                        "tvdb tv episode id",
+                        "imdb tv episode id",
+                        "disc number",
+                        "track number",
+                        "tv show name",
+                        "simple tv show name",
+                        "tv episode name",
+                        "simple tv episode name",
+                        "tv episode production code",
+                        "release date",
+                        "release year"
+                    ]
                 }
             }
         },

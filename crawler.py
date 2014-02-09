@@ -91,6 +91,7 @@ class Crawler(object):
                                     # decode base64 encoded element
                                     if 'dt' in item.attrib and item.attrib['dt'] == 'binary.base64':
                                         text = base64.b64decode(text)
+                                        text = unicode(text, 'utf8')
                                         
                                     # set the concept on the ontology
                                     o.decode(item.tag, text)
