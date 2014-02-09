@@ -11,8 +11,7 @@ from ontology import Ontology
 class MediumHandler(ResourceHandler):
     def __init__(self, resolver, node):
         ResourceHandler.__init__(self, resolver, node)
-    
-    
+        
     def fetch(self, query):
         if query['branch']['type'] == 'crawl':
             if query['location']:
@@ -29,7 +28,7 @@ class MediumHandler(ResourceHandler):
                     if crawler.valid:
                         self.log.debug(u'Crawling %s', query['location']['path'])
                         query['sources'].append(crawler)
-                    
+                        
         elif query['branch']['type'] == 'reference':
             node = {'reference':{},}
             collection = query['repository'].database['medium_resource']
@@ -46,12 +45,11 @@ class MediumHandler(ResourceHandler):
                         u'head.genealogy.routing type':'fragment',
                     }
                 )
-            
+                
             for resource in resources:
                 node['reference'][resource['head']['canonical']] = resource['head']
             query['sources'].append(node)
-    
-    
+            
     def parse(self, query):
         if query['branch']['type'] == 'crawl':
             for crawler in query['sources']:
@@ -77,5 +75,5 @@ class MediumHandler(ResourceHandler):
                     },
                 }
                 query['entires'].append(entry)
-    
+                
 

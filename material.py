@@ -17,8 +17,7 @@ class MaterialCache(object):
         self.log = logging.getLogger('Material')
         self.env = env
         self.asset = {}
-    
-    
+        
     def locate_asset(self, location):
         result = None
         if location:
@@ -34,8 +33,7 @@ class MaterialCache(object):
             if result:
                 location.merge_all(result.location)
         return result
-    
-    
+        
     def find(self, location):
         result = None
         if location:
@@ -45,11 +43,10 @@ class MaterialCache(object):
             else:
                 self.log.debug(u'Could not locate asset for %s', location)
         return result
-    
-    
+        
     def clean(self, options):
         pass
-    
+        
 
 
 class Asset(object):
@@ -66,13 +63,11 @@ class Asset(object):
             home = self.env.resolver.resolve(self.location['home uri'])
             if home is not None:
                 self.location.merge_all(home['head']['genealogy'])
-            
-    
+                
     
     def __unicode__(self):
         return unicode(self.uri)
-    
-    
+        
     def locate_resource(self, location):
         result = None
         if location and 'resource uri' in location:
@@ -85,34 +80,29 @@ class Asset(object):
                     self.resource[result.uri] = result
                 else: result = None
         return result
-    
-    
+        
     @property
     def env(self):
         return self.cache.env
-    
+        
     @property
     def uri(self):
         return self.location['asset uri']
-    
-    
+        
     @property
     def valid(self):
         return self.uri is not None
-    
-    
+        
     @property
     def node(self):
         if self._node is None:
             self._node = self.env.resolver.resolve(self.uri)
         return self._node
-    
-    
+        
     def clean(self):
         # clean orphans from index
         pass
-    
-    
+        
     def commit(self):
         if self.volatile:
             for resource in self.resource.values():
@@ -123,14 +113,12 @@ class Asset(object):
             self.resource = {}
             self.env.resolver.remove(self.uri)
             self.volatile = False
-    
+            
     def touch(self):
         for ref in self.node['body']['reference'].values():
             location = Ontology(self.env, 'ns.medium.resource.location', ref['genealogy'])
             self.locate_resource(location)
-
-
-    
+            
 
 
 class Resource(object):
@@ -148,13 +136,10 @@ class Resource(object):
         self._hint = None
         
         self.location.merge_all(self.asset.location)
-
-    
-    
+        
     def __unicode__(self):
         return unicode(self.uri)
-    
-    
+        
     @classmethod
     def create(cls, asset, location):
         result = None
@@ -172,77 +157,65 @@ class Resource(object):
             if result is None:
                 result = cls(asset, location)
         return result
-    
-    
+        
     @property
     def env(self):
         return self.asset.env
-    
-    
+        
     @property
     def cache(self):
         return self.asset.cache
-    
+        
     @property
     def uri(self):
         return self.location['resource uri']
-    
-    
+        
     @property
     def valid(self):
         return self.location is not None and \
         'resource uri' in self.location and \
         'home uri' in self.location
-    
-    
+        
     @property
     def indexed(self):
         self.location['host'] in self.env.repository and \
         self.location['volume'] in self.env.repository[self.location['host']]['volume'] and \
         self.env.repository[self.location['host']]['volume'][self.location['volume']]['index']
-    
-    
+        
     @property
     def local(self):
         return self.location['domain'] == self.env.domain
-    
-    
+        
     @property
     def remote(self):
         return not self.local
-    
-    
+        
     @property
     def path(self):
         return self.location['path']
-    
-    
+        
     @property
     def available(self):
         return self.path and os.path.exists(self.path)
-    
-    
+        
     @property
     def node(self):
         if self._node is None:
             self._node = self.env.resolver.resolve(self.location['resource uri'], self.location)
         return self._node
-    
-    
+        
     @property
     def fragment(self):
         if self._fragment is None:
             self._fragment = self.env.resolver.resolve(self.location['resource fragment uri'], self.location)
         return self._fragment
-    
-    
+        
     @property
     def knowledge(self):
         if self._knowledge is None:
             self._knowledge = self.env.resolver.resolve(self.location['knowledge uri'], self.location)
         return self._knowledge
-    
-    
+        
     @property
     def meta(self):
         if self._meta is None:
@@ -251,8 +224,7 @@ class Resource(object):
             else:
                 self._meta = Ontology(self.env, 'ns.medium.resource.meta')
         return self._meta
-    
-    
+        
     @property
     def stream(self):
         if self._stream is None:
@@ -262,8 +234,7 @@ class Resource(object):
                     mtype = self.env.enumeration['stream kind'].find(stream['stream kind'])
                     self._stream.append(Ontology(self.env, mtype.node['namespace'], stream))
         return self._stream
-    
-    
+        
     @property
     def hint(self):
         if self._hint is None:
@@ -272,14 +243,12 @@ class Resource(object):
             else:
                 self._hint = Ontology(self.env, 'ns.medium.resource.hint')
         return self._hint
-    
-    
+        
     @hint.setter
     def hint(self, value):
         self._hint = value
         self.volatile = True
-    
-    
+        
     def flush(self):
         if self.node:
             # Flush meta to node
@@ -298,8 +267,7 @@ class Resource(object):
             if self._hint is not None:
                 self.node['body']['hint'] = self._hint.node
                 self._hint = None
-    
-    
+                
     def commit(self):
         self.flush()
         if self.available:
@@ -310,23 +278,17 @@ class Resource(object):
         else:
             self.env.resolver.remove(self.uri)
             self.log.debug(u'Dropped orphan resource document %s', unicode(self))
-    
-    
-    
-    
+            
     def read(self):
         pass
-    
-    
+        
     def write(self, path):
         pass
-    
-    
+        
     def info(self, task):
-    	print json.dumps(self.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-    	# print json.dumps(self.knowledge, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-    
-    
+        print json.dumps(self.node, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
+        # print json.dumps(self.knowledge, ensure_ascii=False, sort_keys=True, indent=4, default=self.env.default_json_handler).encode('utf-8')
+        
     def copy(self, task):
         product = task.produce()
         if product:
@@ -339,8 +301,7 @@ class Resource(object):
                     command.append(product.path)
                     message = u'Copy ' + self.path + u' --> ' + product.path
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
-    
-    
+                    
     def move(self, task):
         product = task.produce()
         if product:
@@ -356,8 +317,7 @@ class Resource(object):
                         self.env.purge_if_not_exist(self.path)
                 else:
                     self.log.warning(u'Refuse to overwrite destination %s with %s', product.path, self.path)
-    
-    
+                    
     def delete(self, task):
         command = self.env.initialize_command('rm', self.log)
         if command:
@@ -365,49 +325,41 @@ class Resource(object):
             message = u'Remove {0}'.format(self.path)
             self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
             self.env.purge_if_not_exist(self.path)
-    
+            
 
 
 class Container(Resource):
     def __init__(self, asset, location):
         Resource.__init__(self, asset, location)
-    
-    
+        
     def explode(self, task):
         pass
-    
-    
+        
     def pack(self, task):
         pass
-    
-    
+        
     def tag(self, task):
         pass
-    
-    
+        
     def optimize(self, task):
         pass
-    
-    
+        
     def transcode(self, task):
         pass
-    
-    
+        
     def update(self, task):
         pass
-    
+        
 
 
 class AudioVideoContainer(Container):
     def __init__(self, asset, location):
         Container.__init__(self, asset, location)
-    
-    
+        
     @property
     def hd(self):
         return self.meta['width'] >= self.env.constant['hd threshold']
-    
-    
+        
     def explode(self, task):
         for pivot in task.transform.pivot.values():
             for stream in pivot.stream:
@@ -419,7 +371,7 @@ class AudioVideoContainer(Container):
                             if not task.ontology['debug']:
                                 product.menu = Menu.from_node(self.env, stream['content'])
                                 product.write(product.path)
-    
+                                
                                 # enqueue a task for transcoding
                                 if 'tasks' in stream:
                                     for template in stream['tasks']:
@@ -429,8 +381,7 @@ class AudioVideoContainer(Container):
                                         t.group = task.key
                                         t.constrain({'scope':'task', 'reference':task.key, 'status':'completed'})
                                         task.job.enqueue(t)
-    
-    
+                                        
     def pack(self, task):
         if task.ontology['kind'] == 'mkv':
             self._pack_mkv(task)
@@ -438,8 +389,7 @@ class AudioVideoContainer(Container):
             self._pack_m4v(task)
         else:
             self.log.error(u'Unknown target container to pack %s', unicode(self))
-    
-    
+            
     def transcode(self, task):
         product = task.produce(task.ontology)
         if product:
@@ -471,13 +421,12 @@ class AudioVideoContainer(Container):
                     for k,v in audio_options.iteritems():
                         command.append(k)
                         command.append(u','.join(v))
-                
+                        
                 if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
                     message = u'Transcode {0} --> {1}'.format(self.path, product.path)
                     command.extend([u'--input', self.path, u'--output', product.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
-    
-    
+                    
     def _pack_mkv(self, task):
         product = task.produce(task.ontology)
         if product:
@@ -510,12 +459,18 @@ class AudioVideoContainer(Container):
                             if stream['stream kind'] != 'menu':
                                 if 'language' in stream:
                                     command.append(u'--language')
-                                    command.append(u'{0}:{1}'.format(stream['stream order'], self.env.enumeration['language'].find(stream['language']).node['ISO 639-1']))
+                                    command.append(u'{0}:{1}'.format(
+                                        stream['stream order'],
+                                        self.env.enumeration['language'].find(stream['language']).node['ISO 639-1'])
+                                    )
                                     
                                 if 'stream name' in stream:
                                     command.append(u'--track-name')
                                     command.append(u'{0}:{1}'.format(stream['stream order'], stream['stream name']))
-                                    # command.append(u'{0}:{1}'.format(stream['stream order'], self.env.enumeration['language'].find(stream['language']).node['name']))
+                                    # command.append(u'{0}:{1}'.format(
+                                    #    stream['stream order'],
+                                    #    self.env.enumeration['language'].find(stream['language']).node['name'])
+                                    #)
                                     
                                 if 'delay' in pivot.resource.hint:
                                     command.append(u'--sync')
@@ -533,12 +488,11 @@ class AudioVideoContainer(Container):
                                 command.append(u'--chapters')
                                 
                         command.append(pivot.resource.path)
-                    
+                        
                 if self.env.check_path_availability(product.path, task.ontology['overwrite']):
                     message = u'Pack {0} --> {1}'.format(self.path, product.path)
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
-    
-    
+                    
     def _pack_m4v(self, task):
         product = task.produce(task.ontology)
         if product:
@@ -548,16 +502,13 @@ class AudioVideoContainer(Container):
                     message = u'Pack {0} --> {1}'.format(unicode(self), unicode(product))
                     command.extend([u'-o', product.path, u'-i', self.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
-    
-    
-    
+                    
 
 
 class Image(Container):
     def __init__(self, asset, location):
         Container.__init__(self, asset, location)
-    
-    
+        
     def transcode(self, task):
         from PIL import Image
         product = task.produce(task.ontology)
@@ -586,14 +537,13 @@ class Image(Container):
                             except IOError as err:
                                 self.log.error(u'Failed to transcode artwork %s', unicode(self))
                                 self.log.debug(u'Exception raised: %s', err)
-    
+                                
 
 
 class Matroska(AudioVideoContainer):
     def __init__(self, asset, location):
         AudioVideoContainer.__init__(self, asset, location)
-    
-    
+        
     def explode(self, task):
         AudioVideoContainer.explode(self, task)
         command = self.env.initialize_command('mkvextract', self.log)
@@ -607,7 +557,7 @@ class Matroska(AudioVideoContainer):
                         product = task.produce(stream)
                         if product:
                             stream['enabled'] = False
-    
+                            
                             if self.env.check_path_availability(product.path, task.ontology['overwrite']):
                                 # Leave a hint about the delay
                                 if 'delay' in stream: product.hint['delay'] = stream['delay']
@@ -629,15 +579,13 @@ class Matroska(AudioVideoContainer):
             if taken:
                 message = u'Explode {}'.format(unicode(self))
                 self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
-    
-
+                
 
 
 class MP4(AudioVideoContainer):
     def __init__(self, asset, location):
         AudioVideoContainer.__init__(self, asset, location)
-    
-    
+        
     def optimize(self, task):
         AudioVideoContainer.optimize(self, task)
         message = u'Optimize {0}'.format(self.path)
@@ -645,8 +593,7 @@ class MP4(AudioVideoContainer):
         if command:
             command.extend([u'-optimize', u'-dest', self.path])
             self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-    
-    
+            
     def tag(self, task):
         update = Ontology(self.env, 'ns.medium.resource.meta.tag')
         meta = self.meta.project('ns.medium.resource.meta.tag')
@@ -659,13 +606,13 @@ class MP4(AudioVideoContainer):
         for i in meta.keys():
             if meta[i] != knowledge[i]:
                 update[i] = knowledge[i]
-
+                
         # Everything that is in knowledge but not in meta
         # should be set to the value in knowledge 
         for i in knowledge.keys():
             if i not in meta:
                 update[i] = knowledge[i]
-        
+                
         modify = []
         for k,v in update.iteritems():
             prototype = update.namespace.find(k)
@@ -673,8 +620,7 @@ class MP4(AudioVideoContainer):
                 modify.append(u'{{{}:{}}}'.format(prototype.node['subler'],v))
                 
         print unicode(modify).encode('utf-8')
- 
-    
+        
     def update(self, task):
         AudioVideoContainer.update(self, task)
         
@@ -713,7 +659,7 @@ class MP4(AudioVideoContainer):
                         u'-dest', self.path,
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-            
+                    
             # add artwork
             elif pivot.location['kind'] == 'png':
                 message = u'Update artwork {0} --> {1}'.format(pivot.resource.path, self.path)
@@ -725,7 +671,7 @@ class MP4(AudioVideoContainer):
                         u'{{{0}:{1}}}'.format(u'Artwork', pivot.resource.path)
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-            
+                    
             # add chapters
             elif pivot.location['kind'] == 'chp':
                 message = u'Update chapters {0} --> {1}'.format(pivot.resource.path, self.path)
@@ -737,20 +683,19 @@ class MP4(AudioVideoContainer):
                         u'-dest', self.path,
                     ])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-    
+                    
 
 
 class RawAudio(Container):
     def __init__(self, asset, location):
         Container.__init__(self, asset, location)
-    
-    
+        
     def transcode(self, task):
         if task.ontology['kind'] == 'ac3':
             self._transcode_ac3(task)
         else:
             self.log.error(u'Unknown target format to transcode %s', unicode(self))
-    
+            
     def _transcode_ac3(self, task):
         product = task.produce(task.ontology)
         if product:
@@ -786,14 +731,13 @@ class RawAudio(Container):
                 command.append(product.path)
                 message = u'Transcode {0} --> {1}'.format(self.path, product.path)
                 self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-    
+                
 
 
 class Text(Container):
     def __init__(self, asset, location):
         Container.__init__(self, asset, location)
-    
-    
+        
     def write(self, path):
         content = self.encode()
         if content:
@@ -803,11 +747,10 @@ class Text(Container):
                 writer.close()
             except IOError as error:
                 self.log.error(str(error))
-    
-    
+                
     def encode(self):
         return None
-    
+        
 
 
 class Subtitles(Text):
@@ -816,8 +759,6 @@ class Subtitles(Text):
         self._caption_track = None
         self._caption = None
         
-    
-    
     @property
     def caption(self):
         if self._caption is None:
@@ -830,14 +771,12 @@ class Subtitles(Text):
             if self._caption is None:
                 self._caption = Caption(self.env)
         return self._caption
-    
-    
+        
     @caption.setter
     def caption(self, value):
         self._caption = value
         self.volatile = True
-    
-    
+        
     def encode(self):
         result = Text.encode(self)
         if self.valid:
@@ -845,8 +784,7 @@ class Subtitles(Text):
             if content:
                 result = u'\n'.join(content)
         return result
-    
-    
+        
     def transcode(self, task):
         product = task.produce(task.ontology)
         if product:
@@ -878,7 +816,7 @@ class Subtitles(Text):
             if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
                 self.log.info(u'Transcode %s --> %s', self.path, product.path)
                 product.write(product.path)
-
+                
 
 
 class TableOfContent(Text):
@@ -886,8 +824,7 @@ class TableOfContent(Text):
         Text.__init__(self, asset, location)
         self._menu_track = None
         self._menu = None
-    
-    
+        
     @property
     def menu(self):
         if self._menu is None:
@@ -899,14 +836,12 @@ class TableOfContent(Text):
             if self._menu is None:
                 self._menu = Menu(self.env)
         return self._menu
-    
-    
+        
     @menu.setter
     def menu(self, value):
         self._menu = value
         self.volatile = True
-    
-    
+        
     def encode(self):
         result = Text.encode(self)
         if self.valid:
@@ -914,8 +849,7 @@ class TableOfContent(Text):
             if content:
                 result = u'\n'.join(content)
         return result
-    
-    
+        
     def transcode(self, task):
         product = task.produce(task.ontology)
         if product:
@@ -941,5 +875,6 @@ class TableOfContent(Text):
             if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
                 self.log.info(u'Transcode %s --> %s', self.path, product.path)
                 product.write(product.path)
-    
+                
+
 

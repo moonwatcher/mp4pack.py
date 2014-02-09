@@ -18,28 +18,24 @@ class Crawler(object):
         self._node = None
         self._execution = None
         self.reload()
-    
+        
     def __unicode__(self):
         return unicode(self.ontology['resource uri'])
-    
-    
+        
     @property
     def env(self):
         return self.ontology.env
-    
-    
+        
     @property
     def valid(self):
         return self.ontology is not None and \
         'path' in self.ontology and \
         os.path.exists(self.ontology['path'])
-    
-    
+        
     @property
     def node(self):
         return self._node
-    
-    
+        
     def reload(self):
         if self.valid:
             self._node = None
@@ -56,7 +52,7 @@ class Crawler(object):
             self._load_ass()
             self._normalize()
             self._infer_profile()
-
+            
             self._node = {
                 'meta':self._execution['result']['meta'].node,
                 'stream':[ o.node for o in self._execution['result']['stream'] ],
@@ -64,9 +60,7 @@ class Crawler(object):
             
             # Clean up
             self._execution = None
-    
-    
-    
+            
     def _load_mediainfo(self):
         command = self.env.initialize_command('mediainfo', self.log)
         if command:
@@ -100,11 +94,11 @@ class Crawler(object):
                                         
                                     # set the concept on the ontology
                                     o.decode(item.tag, text)
-                                
+                                    
                                 # fix the video encoder settings on video tracks
                                 if mtype.key == 'video':
                                     self._fix_mediainfo_encoder_settings(o)
-                                
+                                    
                                 # add the ontology to the stream stack
                                 self._execution['crawl']['stream'].append(o)
                                 
@@ -115,11 +109,10 @@ class Crawler(object):
                                 menu.normalize()
                                 if menu.valid:
                                     self._execution['crawl']['menu'].append(menu)
-                                
+                                    
             # Release resources held by the element, we no longer need it
             element.clear()
-    
-    
+            
     def _load_ogg_chapters(self):
         if self.ontology['kind'] == 'chp':
             content = self._read()
@@ -131,8 +124,7 @@ class Crawler(object):
                 menu.normalize()
                 if menu.valid:
                     self._execution['crawl']['menu'].append(menu)
-    
-    
+                    
     def _load_srt(self):
         if self.ontology['kind'] == 'srt':
             content = self._read()
@@ -148,7 +140,7 @@ class Crawler(object):
                     if index == last_line and current_slide_pointer is not None:
                         # This is the last line
                         next_slide_pointer = index + 1
-                    
+                        
                     match = self.env.expression['srt time line'].search(content[index])
                     if match is not None and content[index - 1].strip().isdigit():
                         next = Slide()
@@ -161,7 +153,7 @@ class Crawler(object):
                             current_slide_pointer = index - 1
                             current = next
                             next = None
-                        
+                            
                     if next_slide_pointer is not None:
                         for line in content[current_slide_pointer + 2:next_slide_pointer]:
                             current.add(line)
@@ -170,7 +162,7 @@ class Crawler(object):
                         next_slide_pointer = None
                         current = next
                         next = None
-                    
+                        
                 caption.normalize()
                 if caption.valid:
                     mtype = self.env.enumeration['mediainfo stream type'].find('text')
@@ -180,8 +172,7 @@ class Crawler(object):
                     o['language'] = self.ontology['language']
                     o['content'] = caption.node
                     self._execution['crawl']['stream'].append(o)
-    
-    
+                    
     def _load_ass(self):
         if self.ontology['kind'] == 'ass':
             content = self._read()
@@ -197,7 +188,7 @@ class Crawler(object):
                             formation = match.group(1).strip().replace(u' ',u'').split(u',')
                         break
                     index += 1
-                
+                    
                 if formation is not None:
                     start = formation.index('Start')
                     stop = formation.index('End')
@@ -217,7 +208,7 @@ class Crawler(object):
                             for line in subtitle_text:
                                 slide.add(line)
                             caption.add(slide)
-                        
+                            
                 caption.normalize()
                 if caption.valid:
                     mtype = self.env.enumeration['mediainfo stream type'].find('text')
@@ -227,8 +218,7 @@ class Crawler(object):
                     o['language'] = self.ontology['language']
                     o['content'] = caption.node
                     self._execution['crawl']['stream'].append(o)
-    
-    
+                    
     def _normalize(self):
         self._execution['breakdown'] = {
             'general':[ o for o in self._execution['crawl']['stream'] if o['stream type'] == u'general' ],
@@ -251,7 +241,7 @@ class Crawler(object):
         }
         
         self._execution['normalized']['image'] = self._execution['breakdown']['image']
-
+        
         # There should always be exactly one meta stream
         if self._execution['breakdown']['general']:
             del self._execution['breakdown']['general'][0]['stream type']
@@ -279,7 +269,7 @@ class Crawler(object):
                 self._execution['normalized']['preview'].append(o)
             else:
                 self._execution['normalized']['video'].append(o)
-                    
+                
         # There should only be one menu stream with one menu in it or none at all
         if self._execution['crawl']['menu']:
             if len(self._execution['normalized']['menu']) == 0:
@@ -294,7 +284,7 @@ class Crawler(object):
             self._execution['normalized']['menu'] = [ menu ]
         else:
             self._execution['normalized']['menu'] = []
-        
+            
         # clean up the now redundent stacks
         del self._execution['crawl']
         del self._execution['breakdown']
@@ -315,14 +305,13 @@ class Crawler(object):
                 else:
                     order['missing'].append(stream)
                 self._execution['result']['stream'].append(stream)
-        
+                
         # fix the streams with missing order
         if order['missing']:
             for stream in order['missing']:
                 order['last'] += 1
                 stream['stream order'] = order['last']
-    
-    
+                
     def _read(self):
         content = None
         if self.valid:
@@ -338,15 +327,13 @@ class Crawler(object):
                 self._detect_text_encoding(content)
                 content = unicode(content, self.ontology['encoding'], errors='ignore')
         return content
-    
-    
+        
     def _detect_text_encoding(self, content):
         if 'encoding' not in self.ontology:
             result = self.env.detect_encoding(content.splitlines())
             self.log.debug(u'%s encoding detected for %s with confidence %s', result['encoding'], unicode(self), result['confidence'])
             self.ontology['encoding'] = result['encoding']
-    
-    
+            
     def _fix_mediainfo_encoder_settings(self, ontology):
         if 'encoder settings string' in ontology:
             if self.env.expression['mediainfo value list'].match(ontology['encoder settings string']):
@@ -360,8 +347,7 @@ class Crawler(object):
             else:
                 self.log.error(u'Could not parse encoder settings %s', ontology['encoder settings string'])
             del ontology['encoder settings string']
-    
-    
+            
     def _fix_meta(self, ontology):
         if ontology is None:
             ontology = Ontology(self.env, self.env.enumeration['mediainfo stream type'].find('general').node['namespace'])
@@ -387,8 +373,7 @@ class Crawler(object):
                         if items:
                             ontology[key] = items
         return ontology
-    
-    
+        
     def _infer_profile(self):
         primary = None
         if self.ontology['essence'] and self.ontology['essence'] in self._execution['normalized']:
@@ -400,7 +385,7 @@ class Crawler(object):
                 primary['primary'] = True
                 
                 if self.ontology['essence'] == 'video':
-                
+                    
                     # set the video profile
                     if 'format profile' in primary:
                         self._execution['result']['meta']['profile'] = primary['format profile'][0]
@@ -412,7 +397,7 @@ class Crawler(object):
                         self._execution['result']['meta']['height'] = self._execution['result']['meta']['width'] / self.env.constant['playback aspect ration']
                     else:
                         self._execution['result']['meta']['height'] = float(primary['height'])
-                            
+                        
                 elif self.ontology['essence'] == 'audio':
                     if primary['kind'] in set(('alac', 'flac', 'pcm')):
                         self._execution['result']['meta']['profile'] = 'lossless'
@@ -422,7 +407,7 @@ class Crawler(object):
                         
                     elif primary['kind'] in set(('aac', 'mp3', 'ogg')):
                         self._execution['result']['meta']['profile'] = 'lossy'
-                            
+                        
                 elif self.ontology['essence'] == 'caption':
                     pass
                     

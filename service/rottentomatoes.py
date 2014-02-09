@@ -12,12 +12,11 @@ from ontology import Ontology
 class RottenTomatoesHandler(ResourceHandler):
     def __init__(self, resolver, node):
         ResourceHandler.__init__(self, resolver, node)
-    
+        
     def prepare(self, query):
         query['parameter']['trimmed imdb movie id']
         ResourceHandler.prepare(self, query)
         
-    
     def parse(self, query):
         for source in query['sources']:
             try:
@@ -51,23 +50,22 @@ class RottenTomatoesHandler(ResourceHandler):
                         # Flatten the review links
                         for r in document['reviews']:
                             if 'links' in r and 'review' in r['links']: r['review_link'] = r['links']['review']
-                        
-
+                            
                     # make a caonical node
                     entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
                     entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
-
+                    
                     # Movie ratings are stored in a sub container, simply decode them directly from there
                     if entry['branch']['name'] == 'service.document.rottentomatoes.movie':
                         if 'ratings' in document:
                             entry['record']['body']['canonical'].decode_all(document['ratings'], 'rottentomatoes')
-    
+                            
                     # Copy indexed values from the canonical node to the genealogy
                     if 'index' in entry['branch']:
                         for index in entry['branch']['index']:
                             if index in entry['record']['body']['canonical']:
                                 entry['record'][u'head'][u'genealogy'][index] = entry['record']['body']['canonical'][index]
-    
+                                
                     query['entires'].append(entry)
-    
+                    
 

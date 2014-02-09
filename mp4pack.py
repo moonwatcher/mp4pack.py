@@ -13,10 +13,10 @@ from environment import Environment, CommandLineParser
 from ontology import Ontology
 
 def main():
-
+    
     # Initialize logging and set the initial log level
     logging.basicConfig()
-    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.DEBUG)
     
     # Initialize an environment
     env = Environment()
@@ -38,6 +38,6 @@ def main():
     # execute the next job
     job = queue.next()
     env.log.debug(u'Job %s history:\n %s', unicode(job), job.document)
-
+    
 if __name__ == '__main__':
     main()

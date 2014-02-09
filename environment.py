@@ -40,132 +40,105 @@ class Environment(object):
         self._caption_filter = None
         self._universal_detector = None
         self.load()
-    
-    
+        
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
-    
+        
     
     @property
     def document(self):
         return json.dumps(self.state, sort_keys=True, indent=4,  default=self.environment_json_handler)
-    
-    
-    # Runtime properties
+        
     @property
     def home(self):
         return self.system['home']
-    
-    
+        
     @property
     def host(self):
         return self.system['host']
-    
-    
+        
     @property
     def domain(self):
         return self.system['domain']
-    
-    
+        
     @property
     def language(self):
         return self.system['language']
-    
-    
-    # Environment configuration
+        
     @property
     def system(self):
         return self.state['system']
-    
-    
+        
     @property
     def archetype(self):
         return self.state['archetype']
-    
-    
+        
     @property
     def enumeration(self):
         return self.state['enumeration']
-    
-    
+        
     @property
     def namespace(self):
         return self.state['namespace']
-    
-    
+        
     @property
     def rule(self):
         return self.state['rule']
-    
-    
+        
     @property
     def service(self):
         return self.state['service']
-    
-    
+        
     @property
     def expression(self):
         return self.state['expression']
-    
-    
+        
     @property
     def constant(self):
         return self.state['constant']
-    
-    
+        
     @property
     def command(self):
         return self.state['command']
-    
-    
+        
     @property
     def preset(self):
         return self.state['preset']
-    
-    
+        
     @property
     def repository(self):
         return self.state['repository']
-    
-    
+        
     @property
     def interface(self):
         return self.state['interface']
-    
-    
+        
     @property
     def subtitle_filter(self):
         return self.state['subtitle filter']
-    
-    
+        
     @property
     def table(self):
         return self.state['table']
-    
-    
-    # Lazy loaders for processors
+        
     @property
     def resolver(self):
         if self._resolver is None:
             self._resolver = Resolver(self)
         return self._resolver
-    
-    
+        
     @property
     def caption_filter(self):
         if  self._caption_filter is None:
             self._caption_filter = CaptionFilterCache(self)
         return self._caption_filter
-    
-    
+        
     @property
     def universal_detector(self):
         if self._universal_detector is None:
             self._universal_detector = UniversalDetector()
         return self._universal_detector
-    
-    
-    # Loading
+        
     def load(self):
         relative = os.path.dirname(__file__)
         self.load_configuration_file(os.path.join(relative,'config/system.json'))
@@ -188,8 +161,7 @@ class Environment(object):
                 self.system['home'] = home
         self.system['conf'] = os.path.join(self.home, u'settings.json')
         self.load_configuration_file(self.system['conf'])
-    
-    
+        
     def load_configuration_file(self, path):
         if path and os.path.isfile(path):
             try:
@@ -217,8 +189,7 @@ class Environment(object):
                         self.load_configuration_node(node)
                     else:
                         self.log.warning(u'Configuration file %s does not contain a valid dictionary', path)
-    
-    
+                        
     def load_interactive(self, ontology):
         self.ontology = ontology
         
@@ -233,14 +204,9 @@ class Environment(object):
                 self.system[e] = self.ontology[e]
         self.ontology['host'] = self.host
         self._load_dynamic_rules()
-    
-    
+        
     def load_configuration_node(self, node):
-        def check(node):
-            if node and ('enable' not in node or node['enable']):
-                return True
-            else:
-                return False
+        def check(node): return "enable" not in node or node["enable"]
             
         if node:
             if 'system' in node:
@@ -322,8 +288,7 @@ class Environment(object):
                     if check(e):
                         e['key'] = k
                         self.interface[k] = e
-    
-    
+                        
     def _load_dynamic_rules(self):
         node = { 'rule':{}, }
         
@@ -388,9 +353,7 @@ class Environment(object):
                 }
             )
         self.load_configuration_node(node)
-    
-    
-    # Direcotry and file
+        
     def cleanup_path(self, path):
         if path and os.path.isfile(path):
             os.remove(path)
@@ -398,15 +361,13 @@ class Environment(object):
                 os.removedirs(os.path.dirname(path))
             except OSError:
                 pass
-    
-    
+        
     def check_path_availability(self, path, overwrite=False):
         result = self.is_path_available(path, overwrite)
         if result:
             self.varify_directory(path)
         return result
-    
-    
+        
     def is_path_available(self, path, overwrite=False):
         result = True
         if path:
@@ -416,8 +377,7 @@ class Environment(object):
         else:
             result = False
         return result
-    
-    
+        
     def varify_directory(self, path):
         result = False
         try:
@@ -433,8 +393,7 @@ class Environment(object):
             result = False
             
         return result
-    
-    
+        
     def purge_if_not_exist(self, path):
         result = True
         if path:
@@ -447,8 +406,7 @@ class Environment(object):
         else:
             result = False
         return result
-    
-    
+        
     def detect_encoding(self, content):
         # This will not survive a multi threaded environment
         self.universal_detector.reset()
@@ -458,8 +416,7 @@ class Environment(object):
                 break
         self.universal_detector.close()
         return self.universal_detector.result
-    
-    
+        
     def environment_json_handler(self, o):
         result = None
         from bson.objectid import ObjectId
@@ -476,8 +433,7 @@ class Environment(object):
         if isinstance(o, set):
             result = list(o)
         return result
-    
-    
+        
     def default_json_handler(self, o):
         result = None
         from bson.objectid import ObjectId
@@ -489,25 +445,21 @@ class Environment(object):
             result = list(o)
             
         return result
-    
-    
-    # Command execution
+        
     def initialize_command(self, command, log):
         if command in self.command and self.command[command]['path']:
             return [ self.command[command]['path'] ]
         else:
             log.debug(u'Command %s is unavailable', command)
             return None
-    
-    
+            
     def encode_command(self, command):
         c = []
         for e in command:
             if self.constant['space'] in e: c.append(u'"{0}"'.format(e))
             else: c.append(e)
         return self.constant['space'].join(c)
-    
-    
+        
     def execute(self, command, message=None, debug=False, pipeout=True, pipeerr=True, log=None):
         report = None
         if command:
@@ -532,12 +484,10 @@ class Environment(object):
                 if message: log.info(message)
                 print self.encode_command(command)
         return report
-    
-    
+        
     def which(self, command):
         def is_executable(fpath):
             return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-            
             
         command['path'] = None
         fpath, fname = os.path.split(command['binary'])
@@ -549,8 +499,8 @@ class Environment(object):
                 bpath = os.path.join(path, command['binary'])
                 if is_executable(bpath):
                     command['path'] = bpath
+                    
     
-
 
 
 
@@ -569,41 +519,34 @@ class Repository(object):
             self.node['default'] = []
         if 'mapping' not in self.node:
             self.node['mapping'] = []
-    
-    
+            
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
-    
-    
+        
     @property
     def valid(self):
         return self.connection is not None
-    
-    
+        
     @property
     def host(self):
         return self.node['host']
-    
-    
+        
     @property
     def domain(self):
         return self.node['domain']
-    
-    
+        
     @property
     def volume(self):
         if self._volume is None:
             self.reload()
         return self._volume
-    
-    
+        
     @property
     def mapping(self):
         if self._mapping is None:
             self.reload()
         return self._mapping
-    
-    
+        
     @property
     def connection(self):
         if self._connection is None and 'mongodb url' in self.mongodb:
@@ -616,29 +559,21 @@ class Repository(object):
             else:
                 self.log.debug(u'Connection established with %s', self.host)
         return self._connection
-    
-    
+        
     @property
     def database(self):
         if self.connection is not None:
             return self._connection[self.mongodb['database']]
         else:
             return None
-    
-    
+        
     def close(self):
         if self._connection is not None:
             self.log.debug(u'Closing mongodb connection to %s', self.host)
             self._connection.disconnect()
-    
-    
+        
     def reload(self):
-        def check(node):
-            if node and ('enable' not in node or node['enable']):
-                return True
-            else:
-                return False
-                
+        def check(node): return "enable" not in node or node["enable"]
         # Load path mappings
         self._mapping = {}
         for mapping in self.node['mapping']:
@@ -655,8 +590,9 @@ class Repository(object):
                         
         # Load the volume enumeration
         for key, volume in self.node['volume']['element'].iteritems():
-            self.log.debug(u'Expanding path %s', volume['path'])
-            volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
+            if check(volume):
+                self.log.debug(u'Expanding path %s', volume['path'])
+                volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
         self._volume = Enumeration(self.env, self.node['volume'])
         
         # Load routing rules
@@ -666,15 +602,14 @@ class Repository(object):
                 branch['requires'].append('host')
             branch['equal']['host'] = self.host
             routing.add_branch(branch)
-        
+            
         default = self.env.rule['rule.task.default.preset']
         for branch in self.node['preset.default']:
             if 'host' not in branch['requires']:
                 branch['requires'].append('host')
             branch['equal']['host'] = self.host
             default.add_branch(branch)
-    
-    
+            
     def decode_resource_path(self, path):
         result = None
         if path:
@@ -706,8 +641,7 @@ class Repository(object):
                 result['host'] = self.host
                 result['domain'] = self.domain
         return result
-    
-    
+        
     def normalize(self, path):
         result = path
         # If the repository has mappings defined
@@ -719,8 +653,7 @@ class Repository(object):
                     result = path.replace(alt, real)
                     break
         return result
-    
-    
+        
     def rebuild_index(self, collection, definition):
         if collection is not None and collection in self.env.table:
             if 'name' in definition:
@@ -745,6 +678,7 @@ class Repository(object):
                 self.log.error(u'Refusing to handle unnamed index for collection %s', collection)
         else:
             self.log.error(u'Unknown collection %s', collection)
+            
 
 
 class CommandLineParser(object):
@@ -753,14 +687,12 @@ class CommandLineParser(object):
         self.node = node
         self.parser = ArgumentParser()
         self.load()
-    
-    
+        
     def load(self):
         def add_argument(parser, name):
             node = self.node['prototype'][name]
             parser.add_argument(*node['flag'], **node['parameter'])
-        
-        
+            
         for argument in self.node['prototype'].values():
             if 'type' in argument['parameter']:
                 # eval the type
@@ -791,14 +723,12 @@ class CommandLineParser(object):
                     group_parser = action_parser.add_argument_group(**group['instruction'])
                     for argument in group['argument']:
                         add_argument(group_parser, argument)
-    
-    
+                        
     def parse(self):
         arguments = vars(self.parser.parse_args())
         ontology = Ontology(self.env, self.node['namespace'])
         for k,v in arguments.iteritems():
             ontology.decode(k, v)
         return ontology
-    
-
+        
 

@@ -6,8 +6,7 @@ from service import ResourceHandler
 class HomeHandler(ResourceHandler):
     def __init__(self, resolver, node):
         ResourceHandler.__init__(self, resolver, node)
-    
-    
+        
     def fetch(self, query):
         if 'depend' in query['match']:
             
@@ -23,8 +22,7 @@ class HomeHandler(ResourceHandler):
                             query['parameter'][index] = dependee[u'head'][u'genealogy'][index]
                             
                     query['sources'].append(dependee)
-    
-    
+                    
     def parse(self, query):
         # Only create a new home document if the dependency is satisfied
         if query['sources']:
@@ -36,5 +34,5 @@ class HomeHandler(ResourceHandler):
             }
             
             query['entires'].append(entry)
-    
+            
 

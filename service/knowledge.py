@@ -9,7 +9,7 @@ from ontology import Ontology
 class KnowledgeBaseHandler(ResourceHandler):
     def __init__(self, resolver, node):
         ResourceHandler.__init__(self, resolver, node)
-    
+        
     def fetch(self, query):
         if 'depend' in query['match']:
             
@@ -30,9 +30,7 @@ class KnowledgeBaseHandler(ResourceHandler):
                         else:
                             if related is not None:
                                 query['sources'].append(related)
-
-    
-    
+                                
     def parse(self, query):
         # Only create a new home document if the dependency is satisfied
         if query['sources']:
@@ -44,12 +42,11 @@ class KnowledgeBaseHandler(ResourceHandler):
                         u'body':None,
                     }
                 }
-        
+                
                 entry['record']['body'] = Ontology(self.env, entry['branch']['namespace'])
                 for source in query['sources']:
                     if 'body' in source and source['body']:
                         entry['record']['body'].merge_all(source['body']['canonical'])
-                    
+                        
                 query['entires'].append(entry)
-    
-
+                

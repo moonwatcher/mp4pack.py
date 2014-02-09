@@ -19,7 +19,7 @@ def xml_to_dictionary(element):
                 if not child.tag in node:
                     node[child.tag] = []
                 node[child.tag].append(xml_to_dictionary(child))
-            
+                
             else:
                 node[child.tag] = child.text
     return node
@@ -32,8 +32,7 @@ class TVDbHandler(ResourceHandler):
             if 'produce' in branch:
                 for product in branch['produce']:
                     product['branch'] = self.branch[product['reference']]
-    
-    
+                    
     def fetch(self, query):
         if 'remote url' in query:
             request = Request(query['remote url'])
@@ -78,8 +77,7 @@ class TVDbHandler(ResourceHandler):
                                     self.log.warning(u'Failed to load document %s from archive %s', filename, query['remote url'])
                             archive.close()
                             bytes.close()
-    
-    
+                            
     def parse(self, query):
         for source in query['sources']:
             try:
@@ -101,7 +99,7 @@ class TVDbHandler(ResourceHandler):
                                         u'body':{ u'original':{ product['tag']:document[product['tag']] } },
                                     }
                                 }
-
+                                
                                 # make a caonical node
                                 entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
                                 entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
@@ -134,15 +132,16 @@ class TVDbHandler(ResourceHandler):
                                 # When processing episodes we deduce the existence of a season
                                 # Seasons are added to the query results before the episodes
                                 if batch and product['branch']['name'] == 'service.document.tvdb.tv.episode':
-                                
+                                    
                                     # Collect all the referenced seasons in the episodes
                                     # Make sure we only create every season once
                                     seasons = {}
                                     for entry in batch:
                                         episode = entry['record'][u'head'][u'genealogy']
                                         if episode['tvdb tv season id'] not in seasons:
-                                            seasons[episode['tvdb tv season id']] = episode.project('ns.knowledge.tv.season').project('ns.service.genealogy')
-                                            
+                                            seasons[episode['tvdb tv season id']] = \
+                                                episode.project('ns.knowledge.tv.season').project('ns.service.genealogy')
+                                                
                                     # Make an entry for every season we find
                                     for season in seasons.values():
                                         query['entires'].append(
@@ -154,7 +153,7 @@ class TVDbHandler(ResourceHandler):
                                         
                                 # Add the entries in the batch to the query results
                                 query['entires'].extend(batch)
-                
+                                
                 elif query['branch']['query type'] == 'search':
                     for trigger in query['branch']['trigger']:
                         if trigger['tag'] in document:
@@ -162,11 +161,12 @@ class TVDbHandler(ResourceHandler):
                                 # Decode concepts from the element and populate the ontology
                                 o = Ontology(self.env, trigger['namespace'])
                                 o.decode_all(element, self.name)
-                                    
+                                
                                 # Make a URI and trigger a resolution
                                 ref = o.project('ns.service.genealogy')
                                 ref['language']
                                 uri = trigger['format'].format(**ref)
                                 self.log.debug(u'Trigger %s resolution', uri)
                                 self.resolver.resolve(uri)
+                                
 

@@ -21,17 +21,14 @@ class Queue(object):
         self.cache = MaterialCache(env)
         self.job = []
         self.load()
-    
-    
+        
     @property
     def length(self):
         return len(self.job)
-    
-    
+        
     def load(self):
         pass
-    
-    
+        
     def submit(self, ontology):
         job = Job.create(self, ontology)
         if job.valid:
@@ -39,8 +36,7 @@ class Queue(object):
         else:
             self.log.warning(u'Ignoring invalid job %s', unicode(job))
         return job
-    
-    
+        
     def next(self):
         job = None
         if self.length > 0:
@@ -49,7 +45,7 @@ class Queue(object):
             job.run()
             job.unload()
         return job
-    
+        
 
 
 class Condition(object):
@@ -57,32 +53,27 @@ class Condition(object):
         self.log = logging.getLogger('Queue')
         self.task = task
         self.node = node
-    
+        
     @property
     def env(self):
         return self.queue.env
-    
-    
+        
     @property
     def job(self):
         return self.task.job
-    
-    
+        
     @property
     def scope(self):
         return self.node['scope']
-    
-    
+        
     @property
     def status(self):
         return self.node['status']
-    
-    
+        
     @property
     def reference(self):
         return self.node['reference']
-    
-    
+        
     @property
     def satisfied(self):
         result = False
@@ -98,6 +89,7 @@ class Condition(object):
                     if task.status != self.status:
                         result = False
         return result
+        
 
 
 class Job(object):
@@ -113,7 +105,7 @@ class Job(object):
         self.execution = None
         self._inclusion = None
         self._exclusion = None
-    
+        
     @classmethod
     def instantiate(cls, queue, node):
         result = None
@@ -124,15 +116,15 @@ class Job(object):
                     result = globals()[o['implementation']](queue, node)
                 except TypeError as err:
                     queue.log.error(u'Job implementation mismatch %s, treating as a generic job', o['implementation'])
+                    
             else:
                 queue.log.warning(u'Unknown job implementation %s, treating as a generic job', o['implementation'])
-                        
+                
             if result is None:
                 result = Job(queue, node)
-
+                
         return result
-    
-    
+        
     @classmethod
     def create(cls, queue, ontology):
         result = None
@@ -145,29 +137,23 @@ class Job(object):
             }
             result = Job.instantiate(queue, node)
         return result
-
-
-    
+        
     @property
     def valid(self):
         return self.ontology is not None
-    
-    
+        
     @property
     def env(self):
         return self.queue.env
-    
-    
+        
     @property
     def cache(self):
         return self.queue.cache
-    
-    
+        
     @property
     def document(self):
         return json.dumps(self.execution, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-    
-    
+        
     def load(self):
         self.log.debug('Open job %s', unicode(self))
         self.journal = {'task':{}, 'group':{}}
@@ -192,8 +178,7 @@ class Job(object):
                 self.log.info(u'Exclusion filter set to \'%s\'', self.ontology['exclusion'])
             except re.error as err:
                 self.log.warning(u'Failed to compile exclusion filter \'%s\' because of %s', self.ontology['exclusion'], err)
-    
-    
+                
     def enqueue(self, task):
         if task:
             self.journal['task'][task.key] = task
@@ -201,8 +186,7 @@ class Job(object):
                 self.journal['group'][task.group] = {}
             self.journal['group'][task.group][task.group] = task
             self.task.append(task)
-    
-    
+            
     def dequeue(self):
         result = None
         for i,task in enumerate(self.task):
@@ -213,31 +197,26 @@ class Job(object):
                 task.unload()
                 result = task
                 break
-
         return result
-    
-    
+        
     def run(self):
         while self.task:
             task = self.dequeue()
             if task: self.execution['task'].append(task.node)
-    
-    
+            
     def unload(self):
         self.execution['end'] = datetime.now()
         self.execution['duration'] = unicode(self.execution['end'] - self.execution['start'])
         self.log.debug('Close job %s', unicode(self))
-    
-    
+        
     def filter(self, path):
         return path and \
         ( self._inclusion is None or self._inclusion.search(path) is not None ) and \
         ( self._exclusion is None or self._exclusion.search(path) is None )
-    
-    
+        
     def __unicode__(self):
         return unicode(self.uuid)
-    
+        
 
 
 class Task(object):
@@ -257,42 +236,34 @@ class Task(object):
         
         if self.ontology is None:
             self.invalidate(u'Task ontology can not be NULL')
-    
-    
+        
     def __unicode__(self):
         return self.key
-    
-    
+        
     @property
     def env(self):
         return self.job.env
-    
-    
+        
     @property
     def cache(self):
         return self.job.cache
-    
-    
+        
     @property
     def valid(self):
         return self.status != 'invalid'
-    
-    
+        
     @property
     def key(self):
         return self.node['uuid']
-    
-    
+        
     @property
     def group(self):
         return self.node['group']
-    
-    
+        
     @group.setter
     def group(self, value):
         self.node['group'] = value
-    
-    
+        
     @property
     def ready(self):
         result = False
@@ -304,19 +275,16 @@ class Task(object):
                         result = False
                         break
         return result
-    
-    
+        
     @property
     def status(self):
         return self.node['status']
-    
-    
+        
     def invalidate(self, message):
         self.node['status'] = 'invalid'
         self.error(message)
         self.log.error(u'%s. aborting task %s', message, unicode(self))
-    
-    
+        
     def constrain(self, node):
         if self.condition is None:
             self.condition = []
@@ -325,34 +293,31 @@ class Task(object):
         condition = Condition(self, node)
         self.node['condition'].append(condition.node)
         self.condition.append(condition)
-    
+        
     def load(self):
         self.log.debug('Starting task %s', unicode(self))
         self.node['start'] = datetime.now()
         if self.valid: self.node['status'] = 'loaded'
-    
-    
+        
     def run(self):
         if self.valid: self.node['status'] = 'running'
-    
-    
+        
     def unload(self):
         self.node['end'] = datetime.now()
         self.node['duration'] = unicode(self.node['end'] - self.node['start'])
         if self.valid: self.node['status'] = 'completed'
         self.log.debug('Finished task %s', unicode(self))
-    
+        
     def error(self, message):
         if 'error' not in self.node: self.node['error'] = []
         self.node['error'].append(message)
-    
+        
 
 
 class ResourceJob(Job):
     def __init__(self, queue, node):
         Job.__init__(self, queue, node)
-    
-    
+        
     def load(self):
         Job.load(self)
         
@@ -371,12 +336,10 @@ class ResourceJob(Job):
             self.log.info(u'Found %d files to process', len(targets))
             for path in targets:
                 self.enqueue(ResourceTask(self, self.ontology.project('ns.system.task'), path))
-    
-    
+                
     def filter(self, path):
         return path and os.path.basename(path)[0] != self.env.constant['dot'] and Job.filter(self, path)
-    
-    
+        
     def _scan_path(self, path, recursive, depth=1):
         result = []
         if os.path.isfile(path):
@@ -391,7 +354,7 @@ class ResourceJob(Job):
                 dnext = os.path.abspath(os.path.join(path,dnext))
                 result.extend(self._scan_path(dnext, recursive, depth - 1))
         return result
-    
+        
 
 
 class ResourceTask(Task):
@@ -406,15 +369,14 @@ class ResourceTask(Task):
         
         if self.location is None:
             self.invalidate(u'Invalid resource path provided {}'.format(path))
-    
-    
+            
     @property
     def preset(self):
         if self._preset is None:
             if self.ontology['preset'] in self.env.preset:
                 self._preset = self.env.preset[self.ontology['preset']]
         return self._preset
-    
+        
     def load(self):
         Task.load(self)
         if self.valid:
@@ -438,11 +400,9 @@ class ResourceTask(Task):
                         self.invalidate(u'Action {} is not defined in preset {}'.format(self.ontology['action'], self.ontology['preset']))
                 else:
                     self.invalidate(u'Invalid resource location')
-    
-    
+                    
     def unload(self):
         if self.valid:
-            
             # Mark products as volatile to make sure they are indexed
             # and add their location to the task node
             if self.product:
@@ -455,8 +415,7 @@ class ResourceTask(Task):
             self.resource.asset.commit()
             
         Task.unload(self)
-    
-    
+        
     def run(self):
         Task.run(self)
         if self.valid:
@@ -477,11 +436,10 @@ class ResourceTask(Task):
                 # if the transform yields not viable input there really is nothing much to do...
                 if not any((any(pivot.stream) for pivot in self.transform.pivot.values())):
                     self.invalidate(u'Task did not yield any viable input')
-            
+                    
             # if we are still go, invoke the action
             if self.valid: self.action()
-    
-    
+            
     def produce(self, override=None):
         # copy the location ontology
         p = Ontology.clone(self.location)
@@ -510,7 +468,7 @@ class ResourceTask(Task):
         # it will override anything we set implicitly
         if self.ontology['profile']:
             p['profile'] = self.ontology['profile']
-        
+            
         # if an override was given set some concepts from it 
         if override:
             for i in set((
@@ -528,50 +486,39 @@ class ResourceTask(Task):
             self.product.append(product)
         else:
             self.log.error(u'Could not determine destination path from %s', p)
-        
+            
         return product
-    
-    
+        
     def info(self):
         self.resource.info(self)
-    
-    
+        
     def copy(self):
         self.resource.copy(self)
-    
-    
+        
     def move(self):
         self.resource.move(self)
-    
-    
+        
     def delete(self):
         self.resource.delete(self)
-    
-    
+        
     def explode(self):
         self.resource.explode(self)
-    
-    
+        
     def pack(self):
         self.resource.pack(self)
-    
-    
+        
     def tag(self):
         self.resource.tag(self)
-    
-    
+        
     def optimize(self):
         self.resource.optimize(self)
-    
-    
+        
     def transcode(self):
         self.resource.transcode(self)
-    
-    
+        
     def update(self):
         self.resource.update(self)
-    
-    
+        
     def prepare(self):
         # enqueue a task to explode the resource
         o = self.job.ontology.project('ns.system.task')
@@ -579,7 +526,7 @@ class ResourceTask(Task):
         explode = ResourceTask(self.job, o, self.location['path'])
         explode.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
         self.job.enqueue(explode)
-
+        
         # enqueue a task to repack the resource fragments
         o = self.job.ontology.project('ns.system.task')
         o['action'] = 'pack'
@@ -588,21 +535,20 @@ class ResourceTask(Task):
         pack.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
         pack.constrain({'scope':'group', 'reference':explode.key, 'status':'completed'})
         self.job.enqueue(pack)
-    
+        
 
 
 class ServiceJob(Job):
     def __init__(self, queue, node):
         Job.__init__(self, queue, node)
-    
-    
+        
     def load(self):
         Job.load(self)
         
         if self.ontology['uris']:
             for uri in self.ontology['uris']:
                 self.enqueue(ServiceTask(self, self.ontology.project('ns.system.task'), uri))
-    
+                
 
 
 class ServiceTask(Task):
@@ -611,11 +557,10 @@ class ServiceTask(Task):
         self.uri = uri
         self.document = None
         self.action = None
-    
+        
         if self.uri is None:
             self.invalidate(u'Invalid resource uri provided')
-    
-    
+            
     def load(self):
         Task.load(self)
         if self.valid:
@@ -628,17 +573,14 @@ class ServiceTask(Task):
                     self.invalidate(u'Unknown action {}'.format(self.ontology['action']))
             else:
                 self.invalidate(u'Could not locate document {}'.format(self.uri))
-    
-    
+                
     def run(self):
         Task.run(self)
         if self.valid: self.action()
-    
-    
+        
     def get(self):
         print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-    
-    
+        
     def set(self):
         genealogy = Ontology(self.env, 'ns.service.genealogy', self.document['head']['genealogy'])
         genealogy.merge_all(self.ontology['genealogy'])
@@ -649,20 +591,16 @@ class ServiceTask(Task):
         
         # refetch the document
         self.document = self.env.resolver.resolve(self.uri, self.ontology['query'])
-    
-    
+        
     def drop(self):
         self.env.resolver.remove(self.uri)
-    
-
-
+        
 
 
 class SystemJob(Job):
     def __init__(self, queue, node):
         Job.__init__(self, queue, node)
-    
-    
+        
     def load(self):
         Job.load(self)
         
@@ -675,7 +613,7 @@ class SystemJob(Job):
         elif self.ontology['tables']:
             for table in self.ontology['tables']:
                 self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))
-    
+                
 
 
 class SystemTask(Task):
@@ -684,7 +622,7 @@ class SystemTask(Task):
         self.action = None
         self.name = name
         self.table = None
-
+        
         if self.name:
             # add the table name to the node
             self.node['table'] = self.name
@@ -695,8 +633,7 @@ class SystemTask(Task):
                 self.invalidate(u'Unknown table {}'.format(self.name))
         else:
             self.invalidate(u'Table name can not be NULL')
-    
-    
+            
     def load(self):
         Task.load(self)
         if self.valid:
@@ -705,16 +642,14 @@ class SystemTask(Task):
             
             if self.action is None:
                 self.invalidate(u'Unknown action {}'.format(self.ontology['action']))
-    
-    
+                
     def run(self):
         Task.run(self)
         if self.valid: self.action()
-    
-    
+        
     def rebuild(self):
         for index in self.table['index']:
             self.env.repository[self.ontology['host']].rebuild_index(self.table['name'], index)
-    
+            
 
 

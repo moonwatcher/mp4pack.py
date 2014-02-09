@@ -16,7 +16,7 @@
                 {
                     "instruction":{
                         "name":"info",
-                        "help":"Report information about resource"
+                        "help":"Report medium information"
                     },
                     "argument":[
                         "scan path",
@@ -32,8 +32,8 @@
                 },
                 {
                     "instruction":{
-                        "name":"prepare",
-                        "help":"Explode streams and repack for transcoding"
+                        "name":"repack",
+                        "help":"Explode streams and repack"
                     },
                     "argument":[
                         "scan path",
@@ -52,8 +52,8 @@
                 },
                 {
                     "instruction":{
-                        "name":"transcode",
-                        "help":"Transcode files to profile"
+                        "name":"code",
+                        "help":"Transcode files to preset"
                     },
                     "argument":[
                         "scan path",
@@ -72,7 +72,7 @@
                     "group":[
                         {
                             "instruction":{
-                                "title":"Video transcoding"
+                                "title":"Video parameters"
                             },
                             "argument":[
                                 "quantizer",
@@ -82,7 +82,7 @@
                         },
                         {
                             "instruction":{
-                                "title":"Subtitle transcoding"
+                                "title":"Subtitle parameters"
                             },
                             "argument":[
                                 "time shift",
@@ -96,7 +96,7 @@
                     "name":"update",
                     "instruction":{
                         "name":"update",
-                        "help":"Update streams in container"
+                        "help":"Update container streams"
                     },
                     "argument":[
                         "scan path",
@@ -116,7 +116,7 @@
                 {
                     "instruction":{
                         "name":"tag",
-                        "help":"Update meta tags"
+                        "help":"Update container metadata"
                     },
                     "argument":[
                         "scan path",

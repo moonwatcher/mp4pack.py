@@ -21,7 +21,6 @@ class Resolver(object):
         self.env = env
         self.handlers = {}
         
-        
         self.log.debug(u'Starting JSON service resolver')
         
         from tmdb import TMDbHandler
@@ -41,12 +40,13 @@ class Resolver(object):
         
         from medium import MediumHandler
         self.handlers['medium'] = MediumHandler(self, self.env.service['medium'])
-
+        
         from knowledge import KnowledgeBaseHandler
         self.handlers['knowledge'] = KnowledgeBaseHandler(self, self.env.service['knowledge'])
         
+        from system import SystemHandler
+        self.handlers['system'] = SystemHandler(self, self.env.service['system'])
         
-    
     def find_repository(self, hostname):
         repository = None
         if hostname is None: 
@@ -62,8 +62,7 @@ class Resolver(object):
             repository = None
             
         return repository
-    
-    
+        
     def resolve(self, uri, location=None):
         result = None
         if uri is not None:
@@ -75,8 +74,7 @@ class Resolver(object):
                         result = handler.resolve(p.path, repository, location)
                         break
         return result
-    
-    
+        
     def remove(self, uri):
         if uri is not None:
             p = urlparse.urlparse(uri)
@@ -86,8 +84,7 @@ class Resolver(object):
                     if handler.match(p.path):
                         result = handler.remove(p.path, repository)
                         break
-    
-    
+                        
     def save(self, node):
         if node:
             if 'canonical' in node[u'head'] and node[u'head']['canonical']:
@@ -100,9 +97,8 @@ class Resolver(object):
                             handler.save(node, repository)
                             break
             else:
-                self.log.debug(u'URIs are missing, refusing to save record %s', unicode(node[u'head']))        
-    
-    
+                self.log.debug(u'URIs are missing, refusing to save record %s', unicode(node[u'head']))            
+                
     def issue(self, hostname, name):
         result = None
         if name == 'oid':
@@ -115,7 +111,7 @@ class Resolver(object):
                     self.log.debug(u'New key %d issued for key pool %s', issued[u'next'], issued[u'_id'])
                     result = int(issued[u'next'])
         return result
-    
+        
 
 
 class ResourceHandler(object):
@@ -135,7 +131,7 @@ class ResourceHandler(object):
             
             # Query type defaults to lookup
             if 'query type' not in branch: branch['query type'] = 'lookup'
-
+            
             for match in branch['match']:
                 # Compile match patterns
                 match['pattern'] = re.compile(match['filter'])
@@ -143,24 +139,20 @@ class ResourceHandler(object):
                 # Convert query parameters to a set
                 if 'query parameter' in match:
                     match['query parameter'] = set(match['query parameter'])
-            
+                    
             self.branch[name] = branch
-    
-    
+            
     @property
     def env(self):
         return self.resolver.env
-    
-    
+        
     @property
     def name(self):
         return self.node['name']
-    
-    
+        
     def match(self, uri):
         return self.pattern.search(uri)
-    
-    
+        
     def remove(self, uri, repository):
         taken = False
         for branch in self.branch.values():
@@ -175,9 +167,7 @@ class ResourceHandler(object):
                             collection.remove({u'head.alternate':uri})
                     break
             if taken: break
-    
-    
-    
+            
     def save(self, node, repository):
         taken = False
         uri = node['head']['canonical']
@@ -205,8 +195,7 @@ class ResourceHandler(object):
                         self.store(query)
                     break
             if taken: break
-    
-    
+            
     def resolve(self, uri, repository, location):
         result = None
         taken = False
@@ -243,10 +232,8 @@ class ResourceHandler(object):
                     result = query['return']
                     break
             if taken: break
-
         return result
-    
-    
+        
     def prepare(self, query):
         # Add an API Key, if the resolver has one
         if 'api key' in self.node:
@@ -280,7 +267,7 @@ class ResourceHandler(object):
                         prototype = query['query parameter'].namespace.find(k)
                         if prototype and prototype.node[self.name]:
                             parameters[prototype.node[self.name]] = unicode(v).encode('utf8')
-    
+                            
                     if parameters:
                         # Break up the URL
                         parsed = list(urlparse.urlparse(query['remote url']))
@@ -291,10 +278,10 @@ class ResourceHandler(object):
                         # Append the parameters to the existing query fragment
                         if parsed[4]: parsed[4] = u'{}&{}'.format(parsed[4], extra)
                         else: parsed[4] = extra
-                            
+                        
                         # Reassemble the URL
                         query['remote url'] = urlparse.urlunparse(parsed)
-    
+                        
     def locate(self, query):
         if query['branch']['persistent']:
             collection = query['repository'].database[query['branch']['collection']]
@@ -319,19 +306,17 @@ class ResourceHandler(object):
                 cursor = collection.find(select)
                 for r in cursor:
                     query['return']['results'].append(r)
-                
+                    
                 # return None instead of empty result set
                 query['return']['result count'] = len(query['return']['results'])
                 if not query['return']['result count'] > 0:
                     query['return'] = None
-    
-    
+                    
     def override(self, query):
         if 'override' in query['branch']:
             for k,v in query['branch']['override'].iteritems():
                 query['parameter'][k] = v
-    
-    
+                
     def collect(self, query):
         if 'collect' in query['branch']:
             for pattern in query['branch']['collect']:
@@ -345,12 +330,12 @@ class ResourceHandler(object):
                         for index in query['branch']['index']:
                             if index in related[u'head'][u'genealogy']:
                                 query['parameter'][index] = related[u'head'][u'genealogy'][index]
-    
+                                
     def fetch(self, query):
         if 'remote url' in query:
             request = Request(query['remote url'], None, {'Accept': 'application/json'})
             self.log.debug(u'Fetching %s', query['remote url'])
-
+            
             try:
                 response = urlopen(request)
             except BadStatusLine, e:
@@ -361,12 +346,10 @@ class ResourceHandler(object):
                 self.log.warning(u'Could not reach server when requesting %s: %s', query['remote url'], e.reason)
             else:
                 query['sources'].append(StringIO(response.read()))
-    
-    
+                
     def parse(self, query):
         pass
-    
-    
+        
     def store(self, query):
         for entry in query['entires']:
             if entry['branch']['persistent']:
@@ -374,8 +357,7 @@ class ResourceHandler(object):
                 # normalize the canonical ontology on the record
                 if 'body' in entry['record'] and entry['record']['body'] and 'canonical' in entry['record']['body']:
                     entry['record']['body']['canonical'].normalize()
-
-                
+                    
                 record = None
                 collection = query['repository'].database[entry['branch']['collection']]
                 entry['record'][u'head'][u'modified'] = datetime.utcnow()
@@ -388,7 +370,7 @@ class ResourceHandler(object):
                 for uri in entry['record'][u'head'][u'alternate']:
                     record = collection.find_one({u'head.alternate':uri})
                     if record is not None: break
-                        
+                    
                 # This is an update, we already have an existing record
                 if record is not None:
                     # Compute the union of the two uri lists
@@ -423,8 +405,7 @@ class ResourceHandler(object):
                     collection.save(record)
                 else:
                     self.log.debug(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
-    
-    
+                    
     def _compute_resolvables(self, entry):
         entry['record'][u'head'][u'alternate'] = []
         entry['record'][u'head']['canonical'] = None
@@ -440,6 +421,6 @@ class ResourceHandler(object):
             except KeyError, e:
                 # self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
                 pass
-    
+                
 
 

@@ -19,7 +19,7 @@ class iTunesHandler(ResourceHandler):
             if 'produce' in branch:
                 for product in branch['produce']:
                     product['branch'] = self.branch[product['reference']]    
-    
+                    
     def parse(self, query):
         for source in query['sources']:
             try:
@@ -56,7 +56,7 @@ class iTunesHandler(ResourceHandler):
                                     # make a caonical node
                                     entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
                                     entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
-    
+                                    
                                     # Copy indexed values from the canonical node to the genealogy
                                     if 'index' in entry['branch']:
                                         for index in entry['branch']['index']:
@@ -66,13 +66,12 @@ class iTunesHandler(ResourceHandler):
                                     # Only produce once for each element
                                     query['entires'].append(entry)
                                     break
-                    
-                    
+                                    
                     elif query['branch']['query type'] == 'search':
                         for trigger in query['branch']['trigger']:
                             for element in document['results']:
                                 if satisfies(element, trigger['condition']):
-                            
+                                    
                                     # Decode concepts from the element and populate the ontology
                                     o = Ontology(self.env, trigger['namespace'])
                                     o.decode_all(element, self.name)
@@ -83,8 +82,7 @@ class iTunesHandler(ResourceHandler):
                                     uri = trigger['format'].format(**ref)
                                     self.log.debug(u'Trigger %s resolution', uri)
                                     self.resolver.resolve(uri)
-    
-    
+                                    
     def parse_itunes_genres(self, document):
         def _recursive_parse_itunes_genres(node, parent=None):
             result = []
@@ -104,8 +102,9 @@ class iTunesHandler(ResourceHandler):
                         if 'subgenres' in element and element['subgenres']:
                             result.extend(_recursive_parse_itunes_genres(element['subgenres'], geID))
             return result
-        
-        
+            
         result = { 'results':_recursive_parse_itunes_genres(document) }
         result['resultCount'] = len(result['results'])
         return result
+        
+
