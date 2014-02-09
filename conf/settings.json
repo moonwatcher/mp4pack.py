@@ -1,13 +1,13 @@
 {
     "system":{
-        "domain":"galanti.no-ip.info",
+        "domain":"portodelgato.no-ip.info",
         "host":"vito"
     },
     "repository":{
         "vito":{
-            "domain":"galanti.no-ip.info",
+            "domain":"portodelgato.no-ip.info",
             "temp":{
-                "path":"/net/vito/volume/kyoto/temp"
+                "path":"/net/vito/volume/barcelona/temp"
             },
             "mongodb":{
                 "database":"mp4pack",
@@ -20,6 +20,11 @@
                 },
                 "synonym":["path"],
                 "element":{
+                    "pluto":{
+                        "enable":false,
+                        "name":"Pluto",
+                        "path":"/net/vito/volume/kyoto/pluto"
+                    },
                     "jupiter":{
                         "enable":false,
                         "name":"Jupiter",
@@ -49,11 +54,6 @@
                         "enable":false,
                         "name":"Eros",
                         "path":"/net/multivac/Volumes/nagasaki/eros"
-                    },
-                    "pluto":{
-                        "enable":false,
-                        "name":"Pluto",
-                        "path":"/net/vito/volume/kyoto/pluto"
                     },
                     "pan":{
                         "enable":false,
