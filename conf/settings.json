@@ -21,37 +21,37 @@
                 "synonym":["path"],
                 "element":{
                     "pluto":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Pluto",
                         "path":"/net/vito/volume/kyoto/pluto"
                     },
                     "jupiter":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Jupiter",
                         "path":"/net/vito/volume/toronto/jupiter"
                     },
                     "saturn":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Saturn",
                         "path":"/net/vito/volume/paris/saturn"
                     },
                     "neptune":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Neptune",
                         "path":"/net/vito/volume/london/neptune"
                     },
                     "titan":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Titan",
                         "path":"/net/multivac/Volumes/hiroshima/titan"
                     },
                     "oberon":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Oberon",
                         "path":"/net/multivac/Volumes/valencia/oberon"
                     },
                     "eros":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Eros",
                         "path":"/net/multivac/Volumes/nagasaki/eros"
                     },
@@ -74,7 +74,7 @@
             },
             "mapping":[
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/vito/volume/toronto",
                     "alternate":[
                         "/net/vito.lan/volume/toronto",
@@ -84,7 +84,7 @@
                     ]
                 },
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/vito/volume/paris",
                     "alternate":[
                         "/net/vito.lan/volume/paris",
@@ -94,7 +94,7 @@
                     ]
                 },
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/vito/volume/london",
                     "alternate":[
                         "/net/vito.lan/volume/london",
@@ -104,7 +104,7 @@
                     ]
                 },
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/vito/volume/kyoto",
                     "alternate":[
                         "/net/vito.lan/volume/kyoto",
@@ -114,7 +114,7 @@
                     ]
                 },
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/vito/volume/barcelona",
                     "alternate":[
                         "/net/vito.lan/volume/barcelona",
@@ -124,7 +124,7 @@
                     ]
                 },
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/multivac/Volumes/hiroshima",
                     "alternate":[
                         "/net/multivac.lan/Volumes/hiroshima",
@@ -132,7 +132,7 @@
                     ]
                 },
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/multivac/Volumes/nagasaki",
                     "alternate":[
                         "/net/multivac.lan/Volumes/nagasaki",
@@ -140,7 +140,7 @@
                     ]
                 },
                 {
-                    "enable":false,
+                    "enable":true,
                     "path":"/net/multivac/Volumes/valencia",
                     "alternate":[
                         "/net/multivac.lan/Volumes/valencia",
