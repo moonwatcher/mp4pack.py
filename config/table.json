@@ -50,6 +50,12 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
+        "knowledge_network":{
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
         "knowledge_movie_translation":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
@@ -237,6 +243,12 @@
             ]
         },
         "tmdb_company":{
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb_network":{
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }

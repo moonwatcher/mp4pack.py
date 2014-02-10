@@ -327,9 +327,10 @@ class ResourceHandler(object):
                     pass
                 else:
                     if related is not None:
-                        for index in query['branch']['index']:
-                            if index in related[u'head'][u'genealogy']:
-                                query['parameter'][index] = related[u'head'][u'genealogy'][index]
+                        if 'head' in related:
+                            for index in query['branch']['index']:
+                                if index in related[u'head'][u'genealogy']:
+                                    query['parameter'][index] = related[u'head'][u'genealogy'][index]
                                 
     def fetch(self, query):
         if 'remote url' in query:

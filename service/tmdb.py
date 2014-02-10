@@ -44,7 +44,7 @@ class TMDbHandler(ResourceHandler):
                     
                 elif query['branch']['query type'] == 'search':
                     for trigger in query['branch']['trigger']:
-                        for element in document['results']:
+                        for element in document[query['branch']['container']]:
                             # Decode a reference
                             o = Ontology(self.env, trigger['namespace'])
                             o.decode_all(element, self.name)

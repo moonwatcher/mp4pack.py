@@ -78,6 +78,11 @@
             "keyword":"company_id",
             "type":"int"
         },
+        "network id":{
+            "name":"Network ID",
+            "keyword":"network_id",
+            "type":"int"
+        },
         "keyword id":{
             "name":"Keyword ID",
             "keyword":"keyword_id",
@@ -111,6 +116,56 @@
         "resource uri":{
             "name":"Resource URI",
             "keyword":"resource_uri",
+            "type":"unicode"
+        },
+        "freebase id":{
+            "name":"Freebase ID",
+            "keyword":"freebase_id",
+            "type":"unicode"
+        },
+        "freebase mid":{
+            "name":"Freebase MID",
+            "keyword":"freebase_mid",
+            "type":"unicode"
+        },
+        "freebase tv show mid":{
+            "name":"Freebase TV show MID",
+            "keyword":"freebase_tv_show_mid",
+            "type":"unicode"
+        },
+        "freebase tv season mid":{
+            "name":"Freebase TV season MID",
+            "keyword":"freebase_tv_season_mid",
+            "type":"unicode"
+        },
+        "freebase tv episode mid":{
+            "name":"Freebase TV episode MID",
+            "keyword":"freebase_tv_episode_mid",
+            "type":"unicode"
+        },
+        "freebase movie mid":{
+            "name":"Freebase movie MID",
+            "keyword":"freebase_movie_mid",
+            "type":"unicode"
+        },
+        "freebase music album mid":{
+            "name":"Freebase music album MID",
+            "keyword":"freebase_music_album_mid",
+            "type":"unicode"
+        },
+        "freebase music track mid":{
+            "name":"Freebase music track MID",
+            "keyword":"freebase_music_track_mid",
+            "type":"unicode"
+        },
+        "freebase person mid":{
+            "name":"Freebase person MID",
+            "keyword":"freebase_person_mid",
+            "type":"unicode"
+        },
+        "freebase company mid":{
+            "name":"Freebase company MID",
+            "keyword":"freebase_company_mid",
             "type":"unicode"
         },
         "itunes person id":{
@@ -280,6 +335,11 @@
             "keyword":"tmdb_company_id",
             "type":"int"
         },
+        "tmdb network id":{
+            "name":"TMDb network ID",
+            "keyword":"tmdb_network_id",
+            "type":"int"
+        },
         "tmdb genre id":{
             "name":"TMDb genre ID",
             "keyword":"tmdb_genre_id",
@@ -299,6 +359,11 @@
         "tmdb tv season id":{
             "name":"TMDb TV season ID",
             "keyword":"tmdb_tv_season_id",
+            "type":"int"
+        },
+        "tmdb tv episode id":{
+            "name":"TMDb TV episode ID",
+            "keyword":"tmdb_tv_episode_id",
             "type":"int"
         },
         
@@ -368,6 +433,11 @@
         "company name":{
             "name":"Company name",
             "keyword":"company_name",
+            "type":"unicode"
+        },
+        "network name":{
+            "name":"Network name",
+            "keyword":"network_name",
             "type":"unicode"
         },
         "person name":{
@@ -468,6 +538,12 @@
         "simple company name":{
             "name":"Simple company name",
             "keyword":"simple_company_name",
+            "type":"unicode",
+            "simplify":true
+        },
+        "simple network name":{
+            "name":"Simple network name",
+            "keyword":"simple_network_name",
             "type":"unicode",
             "simplify":true
         },
@@ -647,6 +723,16 @@
         "absolute tv episode number":{
             "name":"Absolute TV episode",
             "keyword":"absolute_tv_episode",
+            "type":"int"
+        },
+        "total number of tv seasons":{
+            "name":"Total number of TV seasons",
+            "keyword":"total_number_of_tv_seasons",
+            "type":"int"
+        },
+        "total number of tv episodes":{
+            "name":"Total number of TV episodes",
+            "keyword":"total_number_of_tv_episodes",
             "type":"int"
         },
         "tv episode production code":{
@@ -1635,6 +1721,13 @@
             "namespace":"ns.knowledge.company",
             "plural":"list"
         },
+        "networks":{
+            "name":"Networks",
+            "keyword":"networks",
+            "type":"embed",
+            "namespace":"ns.knowledge.network",
+            "plural":"list"
+        },
         "production countries":{
             "name":"Production countries",
             "keyword":"production_countries",
@@ -1659,6 +1752,13 @@
         "backdrops":{
             "name":"Backdrops",
             "keyword":"backdrops",
+            "type":"embed",
+            "namespace":"ns.knowledge.image",
+            "plural":"list"
+        },
+        "stills":{
+            "name":"Stills",
+            "keyword":"stills",
             "type":"embed",
             "namespace":"ns.knowledge.image",
             "plural":"list"
@@ -1714,6 +1814,13 @@
         "crew":{
             "name":"Crew",
             "keyword":"crew",
+            "type":"embed",
+            "namespace":"ns.knowledge.people",
+            "plural":"list"
+        },
+        "guests":{
+            "name":"Guests",
+            "keyword":"guests",
             "type":"embed",
             "namespace":"ns.knowledge.people",
             "plural":"list"

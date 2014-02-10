@@ -1900,6 +1900,18 @@
                 }
             ]
         },
+        "rule.knowledge.simple.name.network":{
+            "name":"Simple network name",
+            "provide":["simple network name"],
+            "branch":[
+                {
+                    "requires":["network name"],
+                    "decode":[
+                        {"property":"network name", "expression":"^(?P<simple_network_name>.+)$"}
+                    ]
+                }
+            ]
+        },
         "rule.knowledge.simple.name.collection":{
             "name":"Simple collection name",
             "provide":["simple collection name"],
