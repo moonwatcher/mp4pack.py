@@ -1282,7 +1282,7 @@
                     ],
                     "aggregate":[
                         {
-                            "uri":"/c/{language}/tvdb/tv/show/{tvdb tv show id}"
+                            "uri":"/c/{language}/tmdb/tv/show/{tmdb tv show id}"
                         },
                         {
                             "uri":"/c/itunes/tv/show/{itunes tv show id}"
@@ -1303,8 +1303,10 @@
                     "namespace":"ns.knowledge.tv.show.canonical",
                     "index":[
                         "tv show id",
+                        "tmdb tv show id",
                         "tvdb tv show id",
                         "imdb tv show id",
+                        "freebase tv show mid",
                         "itunes tv show id",
                         "media kind",
                         "language"
