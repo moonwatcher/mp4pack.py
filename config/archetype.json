@@ -350,7 +350,6 @@
             "keyword":"tmdb_keyword_id",
             "type":"int"
         },
-        
         "tmdb tv show id":{
             "name":"TMDb tv show ID",
             "keyword":"tmdb_tv_show_id",
@@ -366,7 +365,6 @@
             "keyword":"tmdb_tv_episode_id",
             "type":"int"
         },
-        
         "tmdb popularity":{
             "name":"TMDb popularity score",
             "keyword":"tmdb_popularity",

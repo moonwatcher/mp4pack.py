@@ -197,6 +197,7 @@
                 "tv episode id":null,
                 "track id":null,
                 "person id":null,
+                "collection id":null,
                 "company id":null,
                 "network id":null,
                 "genre id":null,
@@ -1688,6 +1689,49 @@
                 "rule.knowledge.simple.name.person"
             ]
         },
+        "ns.knowledge.collection.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "collection id":null,
+                "tmdb collection id":null,
+                "language":null,
+                "collection name":null,
+                "backdrop url":null,
+                "poster url":null,
+                "movies":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.collection"
+            ]
+        },
+        "ns.knowledge.company.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "company id":null,
+                "tmdb company id":null,
+                "description":null,
+                "homepage":null,
+                "company name":null,
+                "simple company name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.company"
+            ]
+        },
+        "ns.knowledge.network.canonical":{
+            "synonym":["keyword"],
+            "element":{
+                "network id":null,
+                "tmdb network id":null,
+                "description":null,
+                "homepage":null,
+                "network name":null,
+                "simple network name":null
+            },
+            "rule":[
+                "rule.knowledge.simple.name.network"
+            ]
+        },
         "ns.knowledge.movie.canonical":{
             "synonym":["keyword"],
             "element":{
@@ -1791,6 +1835,7 @@
                 "long description":null,
                 "language":null,
                 "album name":null,
+                "pictures":null,
                 "simple tv show name":null,
                 "country code":null
             },
@@ -1824,6 +1869,7 @@
                 "backdrop url":null,
                 "content advisory rating":null,
                 "simple tv show name":null,
+                "pictures":null,
                 "simple tv episode name":null,
                 "country code":null
             },
@@ -1833,11 +1879,12 @@
                 "rule.knowledge.release.year"
             ]
         },
-        "ns.knowledge.tv.episode.people.canonical":{
+        "ns.knowledge.tv.show.people.canonical":{
             "synonym":["keyword"],
             "element":{
                 "tv show id":null,
                 "tv season id":null,
+                "tv episode id":null,
                 "tv season number":null,
                 "tv episode number":null,
                 "people":null
