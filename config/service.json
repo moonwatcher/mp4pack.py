@@ -2253,7 +2253,7 @@
                     "match":[
                         {
                             "filter":"^/c/(?P<language>[a-z]{2})/tmdb/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)/find$",
-                            "query parameter":["api key", "language"],
+                            "query parameter":["api key", "language", "imdb movie id"],
                             "remote":"find/{imdb movie id}?external_source=imdb_id"
                         }
                     ],
@@ -2280,7 +2280,7 @@
                     "match":[
                         {
                             "filter":"^/c/tmdb/person/imdb/(?P<imdb_person_id>nm[0-9]+)/find$",
-                            "query parameter":["api key", "language"],
+                            "query parameter":["api key", "language", "imdb person id"],
                             "remote":"find/{imdb person id}?external_source=imdb_id"
                         }
                     ],
@@ -2304,7 +2304,7 @@
                     "match":[
                         {
                             "filter":"^/c/tmdb/person/freebase(?P<freebase_person_mid>/m/[a-z0-9_]+)/find$",
-                            "query parameter":["api key", "language"],
+                            "query parameter":["api key", "language", "freebase person mid"],
                             "remote":"find{freebase person mid}?external_source=freebase_mid"
                         }
                     ],
@@ -2329,7 +2329,7 @@
                     "match":[
                         {
                             "filter":"^/c/tmdb/tv/show/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/find$",
-                            "query parameter":["api key", "language"],
+                            "query parameter":["api key", "language", "tvdb tv show id"],
                             "remote":"find/{tvdb tv show id}?external_source=tvdb_id"
                         }
                     ],
@@ -2355,7 +2355,7 @@
                     "match":[
                         {
                             "filter":"^/c/tmdb/tv/show/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/find$",
-                            "query parameter":["api key", "language"],
+                            "query parameter":["api key", "language", "imdb tv show id"],
                             "remote":"find/{imdb tv show id}?external_source=imdb_id"
                         }
                     ],
@@ -2381,7 +2381,7 @@
                     "match":[
                         {
                             "filter":"^/c/tmdb/tv/show/freebase(?P<freebase_tv_show_mid>/m/[a-z0-9_]+)/find$",
-                            "query parameter":["api key", "language"],
+                            "query parameter":["api key", "language", "freebase tv show mid"],
                             "remote":"find{freebase tv show mid}?external_source=freebase_mid"
                         }
                     ],
