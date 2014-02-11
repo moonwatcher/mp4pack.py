@@ -225,6 +225,7 @@ class ResourceHandler(object):
                     if not query['return']:
                         self.collect(query)
                         self.override(query)
+                        self.prepare(query)
                         self.fetch(query)
                         self.parse(query)
                         self.store(query)
@@ -244,7 +245,7 @@ class ResourceHandler(object):
             try:
                 query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
             except KeyError, e:
-                self.log.error(u'Could not compute remote URL for %s because parameter %s was not provided.', query['uri'], e)
+                self.log.debug(u'Could not compute remote URL for %s because parameter %s was not provided.', query['uri'], e)
             else:
                 if 'query parameter' in query['match']:
                     query['query parameter'] = Ontology(self.env, 'ns.search.query')
@@ -331,7 +332,7 @@ class ResourceHandler(object):
                             for index in query['branch']['index']:
                                 if index in related[u'head'][u'genealogy']:
                                     query['parameter'][index] = related[u'head'][u'genealogy'][index]
-                                
+                                    
     def fetch(self, query):
         if 'remote url' in query:
             request = Request(query['remote url'], None, {'Accept': 'application/json'})
@@ -350,7 +351,7 @@ class ResourceHandler(object):
                 
     def parse(self, query):
         pass
-        
+    
     def store(self, query):
         for entry in query['entires']:
             if entry['branch']['persistent']:

@@ -270,8 +270,7 @@
                             "filter":"^/h/tv/season/(?P<tv_season_id>[0-9]+)$"
                         },
                         {
-                            "filter":"^/h/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
-                            "depend":"/c/{language}/tvdb/tv/season/{tvdb tv show id}/{disc number}"
+                            "filter":"^/h/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$"
                         },
                         {
                             "filter":"^/h/tv/season/tmdb/(?P<tmdb_tv_season_id>[0-9]+)$",
@@ -306,8 +305,9 @@
                         "/h/tv/show/{tv show id}",
                         "/h/tv/show/tmdb/{tmdb tv show id}",
                         "/h/tv/show/tvdb/{tvdb tv show id}",
-                        "/h/tv/show/itunes/{itunes tv show id}",
-                        "/h/tv/show/imdb/{imdb tv show id}"
+                        "/h/tv/show/freebase{freebase tv show mid}",
+                        "/h/tv/show/imdb/{imdb tv show id}",
+                        "/h/tv/show/itunes/{itunes tv show id}"
                     ],
                     "resolvable":[
                         {
@@ -393,27 +393,57 @@
                             "filter":"^/h/tv/episode/(?P<tv_episode_id>[0-9]+)$"
                         },
                         {
-                            "filter":"^/h/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
-                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                            "filter":"^/h/tv/episode/(?P<tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$"
                         },
                         {
-                            "filter":"^/h/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
-                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                            "filter":"^/h/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
                         },
                         {
                             "filter":"^/h/tv/episode/~/(?P<tv_show_handle>[^/]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
                         },
                         {
+                            "filter":"^/h/tv/episode/tmdb/(?P<tmdb_tv_episode_id>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/{tmdb tv episode id}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/tmdb/(?P<tmdb_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/{tmdb tv season id}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/tmdb/(?P<tmdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
                             "filter":"^/h/tv/episode/tvdb/(?P<tvdb_tv_episode_id>[0-9]+)$",
-                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv episode id}"
+                            "depend":"/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv episode id}"
                         },
                         {
                             "filter":"^/h/tv/episode/tvdb/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$",
-                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv season id}/{track number}"
+                            "depend":"/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv season id}/{track number}"
                         },
                         {
                             "filter":"^/h/tv/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
-                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
+                            "depend":"/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/freebase(?P<freebase_tv_episode_mid>/m/[a-z0-9_]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/freebase{freebase tv episode mid}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/freebase(?P<freebase_tv_season_mid>/m/[a-z0-9_]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/freebase{freebase tv season mid}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/freebase(?P<freebase_tv_show_mid>/m/[a-z0-9_]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/freebase{freebase tv show mid}/{disc number}/{track number}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/imdb/{imdb tv episode id}"
+                        },
+                        {
+                            "filter":"^/h/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "depend":"/c/{language}/tmdb/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
                         },
                         {
                             "filter":"^/h/tv/episode/itunes/(?P<itunes_tv_episode_id>[0-9]+)$",
@@ -426,27 +456,26 @@
                         {
                             "filter":"^/h/tv/episode/itunes/(?P<itunes_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
                             "depend":"/c/itunes/tv/episode/{itunes tv show id}/{disc number}/{track number}"
-                        },
-                        {
-                            "filter":"^/h/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$"
-                        },
-                        {
-                            "filter":"^/h/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
-                            "depend":"/c/{language}/tvdb/tv/episode/{tvdb tv show id}/{disc number}/{track number}"
                         }
                     ],
                     "collect":[
                         "/h/tv/show/{tv show id}",
+                        "/h/tv/show/tmdb/{tmdb tv show id}",
                         "/h/tv/show/tvdb/{tvdb tv show id}",
-                        "/h/tv/show/itunes/{itunes tv show id}",
+                        "/h/tv/show/freebase/{freebase tv show mid}",
                         "/h/tv/show/imdb/{imdb tv show id}",
+                        "/h/tv/show/itunes/{itunes tv show id}",
                         "/h/tv/season/{tv season id}",
                         "/h/tv/season/{tv show id}/{disc number}",
+                        "/h/tv/season/tmdb/{tmdb tv show id}/{disc number}",
+                        "/h/tv/season/tmdb/{tmdb tv season id}",
                         "/h/tv/season/tvdb/{tvdb tv show id}/{disc number}",
                         "/h/tv/season/tvdb/{tvdb tv season id}",
+                        "/h/tv/season/freebase{freebase tv show mid}/{disc number}",
+                        "/h/tv/season/freebase{freebase tv season mid}",
+                        "/h/tv/season/imdb/{imdb tv show id}/{disc number}",
                         "/h/tv/season/itunes/{itunes tv show id}/{disc number}",
-                        "/h/tv/season/itunes/{itunes tv season id}",
-                        "/h/tv/season/imdb/{imdb tv show id}/{disc number}"
+                        "/h/tv/season/itunes/{itunes tv season id}"
                     ],
                     "resolvable":[
                         {
@@ -457,7 +486,6 @@
                             "name":"episode home by tv episode id",
                             "format":"/h/tv/episode/{tv episode id}",
                             "canonical":true
-                            
                         },
                         {
                             "name":"episode home by tv season id",
@@ -472,6 +500,18 @@
                             "format":"/h/tv/episode/~/{tv show handle}/{disc number}/{track number}"
                         },
                         {
+                            "name":"episode home by tmdb tv episode id",
+                            "format":"/h/tv/episode/tmdb/{tmdb tv episode id}"
+                        },
+                        {
+                            "name":"episode home by tmdb tv season id",
+                            "format":"/h/tv/episode/tmdb/{tmdb tv season id}/{track number}"
+                        },
+                        {
+                            "name":"episode home by tmdb tv show id",
+                            "format":"/h/tv/episode/tmdb/{tmdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
                             "name":"episode home by tvdb tv episode id",
                             "format":"/h/tv/episode/tvdb/{tvdb tv episode id}"
                         },
@@ -484,6 +524,26 @@
                             "format":"/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}"
                         },
                         {
+                            "name":"episode home by freebase tv episode id",
+                            "format":"/h/tv/episode/freebase{freebase tv episode id}"
+                        },
+                        {
+                            "name":"episode home by freebase tv season id",
+                            "format":"/h/tv/episode/freebase{freebase tv season id}/{track number}"
+                        },
+                        {
+                            "name":"episode home by freebase tv show id",
+                            "format":"/h/tv/episode/freebase{freebase tv show id}/{disc number}/{track number}"
+                        },
+                        {
+                            "name":"episode home by imdb tv episode id",
+                            "format":"/h/tv/episode/imdb/{imdb tv episode id}"
+                        },
+                        {
+                            "name":"episode home by imdb tv show id",
+                            "format":"/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
+                        },
+                        {
                             "name":"episode home by itunes tv episode id",
                             "format":"/h/tv/episode/itunes/{itunes tv episode id}"
                         },
@@ -494,14 +554,6 @@
                         {
                             "name":"episode home by itunes tv show id",
                             "format":"/h/tv/episode/itunes/{itunes tv show id}/{disc number}/{track number}"
-                        },
-                        {
-                            "name":"episode home by imdb tv episode id",
-                            "format":"/h/tv/episode/imdb/{imdb tv episode id}"
-                        },
-                        {
-                            "name":"episode home by imdb tv show id",
-                            "format":"/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
                         }
                     ],
                     "override":{
@@ -510,17 +562,23 @@
                     "collection":"home",
                     "key":"tv episode id",
                     "index":[
-                        "tv show id",
                         "media kind",
-                        "tvdb tv show id",
-                        "imdb tv show id",
-                        "itunes tv show id",
+                        "tv show id",
                         "tv season id",
-                        "tvdb tv season id",
-                        "itunes tv season id",
                         "tv episode id",
+                        "tvdb tv show id",
+                        "tvdb tv season id",
                         "tvdb tv episode id",
+                        "tmdb tv show id",
+                        "tmdb tv season id",
+                        "tmdb tv episode id",
+                        "freebase tv show mid",
+                        "freebase tv season mid",
+                        "freebase tv episode mid",
+                        "imdb tv show id",
                         "imdb tv episode id",
+                        "itunes tv show id",
+                        "itunes tv season id",
                         "itunes tv episode id",
                         "tv show handle",
                         "disc number",
@@ -2222,6 +2280,7 @@
                     "collection":"tmdb_tv_show",
                     "index":[
                         "tmdb tv show id",
+                        "tvdb tv show id",
                         "imdb tv show id",
                         "freebase tv show mid",
                         "tv show name",
@@ -2247,6 +2306,7 @@
                     "collection":"tmdb_tv_show",
                     "index":[
                         "tmdb tv show id",
+                        "tvdb tv show id",
                         "imdb tv show id",
                         "freebase tv show mid",
                         "tv show name",
@@ -2836,34 +2896,43 @@
                             "remote":"tv/{tmdb tv show id}/season/{disc number}"
                         },
                         {
-                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)$"
-                        },
-                        {
                             "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/tvdb/(?P<tvdb_tv_season_id>[0-9]+)$"
                         },
                         {
-                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/tvdb/(?P<tvdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)$"
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"tv/{tmdb tv show id}/season/{disc number}"
+                        },
+                        {
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"tv/{tmdb tv show id}/season/{disc number}"
                         },
                         {
                             "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/freebase(?P<freebase_tv_season_mid>/m/[a-z0-9_]+)$"
                         },
                         {
-                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/freebase(?P<freebase_tv_show_mid>/m/[a-z0-9_]+)/(?P<disc_number>[0-9]+)$"
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/season/freebase(?P<freebase_tv_show_mid>/m/[a-z0-9_]+)/(?P<disc_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"tv/{tmdb tv show id}/season/{disc number}"
                         }
                     ],
                     "collect":[
                         "/c/{language}/tmdb/tv/show/{tmdb tv show id}",
+                        "/c/{language}/tmdb/tv/show/tvdb/{tvdb tv show id}",
+                        "/c/{language}/tmdb/tv/show/imdb/{imdb tv show id}",
+                        "/c/{language}/tmdb/tv/show/freebase{freebase tv show mid}",
                         "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/external"
                     ],
                     "resolvable":[
                         {
                             "name":"tmdb season by tmdb season id",
-                            "format":"/c/{language}/tmdb/tv/season/{tmdb tv season id}",
-                            "canonical":true
+                            "format":"/c/{language}/tmdb/tv/season/{tmdb tv season id}"
                         },
                         {
                             "name":"tmdb season by tmdb show id",
-                            "format":"/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}"
+                            "format":"/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}",
+                            "canonical":true
                         },
                         {
                             "name":"tmdb season by tvdb season id",
@@ -3015,7 +3084,9 @@
                             "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/tvdb/(?P<tvdb_tv_season_id>[0-9]+)/(?P<track_number>[0-9]+)$"
                         },
                         {
-                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/tvdb/(?P<tvdb_tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"tv/{tmdb tv show id}/season/{disc number}/episode/{track number}"
                         },
                         {
                             "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/freebase(?P<freebase_tv_episode_mid>/m/[a-z0-9_]+)$"
@@ -3024,24 +3095,30 @@
                             "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/freebase(?P<freebase_tv_season_mid>/m/[a-z0-9_]+)/(?P<track_number>[0-9]+)$"
                         },
                         {
-                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/freebase(?P<freebase_tv_show_mid>/m/[a-z0-9_]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/freebase(?P<freebase_tv_show_mid>/m/[a-z0-9_]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"tv/{tmdb tv show id}/season/{disc number}/episode/{track number}"
                         },
                         {
                             "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/imdb/(?P<imdb_tv_episode_id>tt[0-9]+)$"
                         },
                         {
-                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
+                            "filter":"^/c/(?P<language>[a-z]{2})/tmdb/tv/episode/imdb/(?P<imdb_tv_show_id>tt[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$",
+                            "query parameter":["api key", "language"],
+                            "remote":"tv/{tmdb tv show id}/season/{disc number}/episode/{track number}"
                         }
                     ],
                     "collect":[
                         "/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}",
+                        "/c/{language}/tmdb/tv/season/tvdb/{tvdb tv show id}/{disc number}",
+                        "/c/{language}/tmdb/tv/season/imdb/{imdb tv show id}/{disc number}",
+                        "/c/{language}/tmdb/tv/season/freebase{freebase tv show mid}/{disc number}",
                         "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/external"
                     ],
                     "resolvable":[
                         {
                             "name":"tmdb episode by tmdb episode id",
-                            "format":"/c/{language}/tmdb/tv/episode/{tmdb tv episode id}",
-                            "canonical":true
+                            "format":"/c/{language}/tmdb/tv/episode/{tmdb tv episode id}"
                         },
                         {
                             "name":"tmdb episode by tmdb season id",
@@ -3049,7 +3126,8 @@
                         },
                         {
                             "name":"tmdb episode by tmdb show id",
-                            "format":"/c/{language}/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}"
+                            "format":"/c/{language}/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}",
+                            "canonical":true
                         },
                         {
                             "name":"tmdb episode by tvdb episode id",
