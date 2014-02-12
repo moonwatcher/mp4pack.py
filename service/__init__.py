@@ -128,9 +128,14 @@ class ResourceHandler(object):
         for name, branch in self.node['branch'].iteritems():
             branch['name'] = name
             
-            # If a collection is defines set the presistence flag to true
-            branch['persistent'] = 'collection' in branch
-            
+            # infer the mongodb collection to use
+            if 'table' in branch:
+                if branch['table'] in self.env.table:
+                    branch['collection'] = self.env.table[branch['table']]['collection']
+                    branch['persistent'] = True
+                else:
+                    self.log.warning(u'Reference to an unknown table %s in branch %s', branch['table'], branch['name'])            
+                    
             # Query type defaults to lookup
             if 'query type' not in branch: branch['query type'] = 'lookup'
             

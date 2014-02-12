@@ -512,6 +512,104 @@
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
+        },
+        "tmdb/tv/season/external":{
+            "collection":"tmdb_tv_season_external",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/show":{
+            "collection":"tmdb_tv_show",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/season/people":{
+            "collection":"tmdb_tv_season_people",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/keyword":{
+            "collection":"tmdb_keyword",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/person/external":{
+            "collection":"tmdb_person_external",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/season/image":{
+            "collection":"tmdb_tv_season_image",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/episode/image":{
+            "collection":"tmdb_tv_episode_image",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/episode/people":{
+            "collection":"tmdb_tv_episode_people",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/show/people":{
+            "collection":"tmdb_tv_show_people",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/show/image":{
+            "collection":"tmdb_tv_show_image",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/episode/external":{
+            "collection":"tmdb_tv_episode_external",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/season":{
+            "collection":"tmdb_tv_season",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "tmdb/tv/show/external":{
+            "collection":"tmdb_tv_show_external",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
+        "knowledge/collection":{
+            "collection":"knowledge_collection",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
         }
     }
 }
