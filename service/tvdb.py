@@ -131,7 +131,7 @@ class TVDbHandler(ResourceHandler):
                                 # TVDB does not explicitly resolve TV seasons, however, it does assign them an id.
                                 # When processing episodes we deduce the existence of a season
                                 # Seasons are added to the query results before the episodes
-                                if batch and product['branch']['name'] == 'service.document.tvdb.tv.episode':
+                                if batch and product['branch']['name'] == 'service/document/tvdb/tv/episode':
                                     
                                     # Collect all the referenced seasons in the episodes
                                     # Make sure we only create every season once
@@ -146,7 +146,7 @@ class TVDbHandler(ResourceHandler):
                                     for season in seasons.values():
                                         query['entires'].append(
                                             {
-                                                'branch':self.branch['service.document.tvdb.tv.season'],
+                                                'branch':self.branch['service/document/tvdb/tv/season'],
                                                 'record':{ u'head':{ u'genealogy':season }, }
                                             }
                                         )

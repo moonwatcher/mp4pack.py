@@ -2,7 +2,7 @@
     "service": {
         "facebook": {
             "branch": {
-                "facebook.movie": {
+                "facebook/movie": {
                     "collection": "facebook_movie", 
                     "index": [
                         "facebook movie id"
@@ -28,7 +28,7 @@
         }, 
         "home": {
             "branch": {
-                "service.home": {
+                "service/home": {
                     "collection": "home", 
                     "match": [
                         {
@@ -36,7 +36,7 @@
                         }
                     ]
                 }, 
-                "service.home.collection": {
+                "service/home/collection": {
                     "collection": "home", 
                     "index": [
                         "collection id", 
@@ -68,7 +68,7 @@
                         }
                     ]
                 }, 
-                "service.home.company": {
+                "service/home/company": {
                     "collection": "home", 
                     "index": [
                         "company id", 
@@ -102,7 +102,7 @@
                         }
                     ]
                 }, 
-                "service.home.department": {
+                "service/home/department": {
                     "collection": "home", 
                     "key": "department id", 
                     "match": [
@@ -122,10 +122,12 @@
                         }
                     ]
                 }, 
-                "service.home.genre": {
+                "service/home/genre": {
                     "collection": "home", 
                     "index": [
                         "genre id", 
+                        "genre type",
+                        "id3 genre type",
                         "tmdb genre id", 
                         "itunes genre id", 
                         "genre name", 
@@ -143,6 +145,12 @@
                         {
                             "depend": "/c/itunes/genre/{itunes genre id}", 
                             "filter": "^/h/genre/itunes/(?P<itunes_genre_id>[0-9]+)$"
+                        },
+                        {
+                            "filter": "^/h/genre/gnre/(?P<genre_type>[0-9]+)$"
+                        },
+                        {
+                            "filter": "^/h/genre/id3/(?P<id3_genre_type>[0-9]+)$"
                         }
                     ], 
                     "resolvable": [
@@ -162,10 +170,18 @@
                         {
                             "format": "/h/genre/itunes/{itunes genre id}", 
                             "name": "genre home by itunes genre id"
+                        },
+                        {
+                            "format": "/h/genre/gnre/{genre type}", 
+                            "name": "genre home by genre type"
+                        },
+                        {
+                            "format": "/h/genre/id3/{id3 genre type}", 
+                            "name": "genre home by id3 genre type"
                         }
                     ]
                 }, 
-                "service.home.job": {
+                "service/home/job": {
                     "collection": "home", 
                     "key": "job id", 
                     "match": [
@@ -185,7 +201,7 @@
                         }
                     ]
                 }, 
-                "service.home.keyword": {
+                "service/home/keyword": {
                     "collection": "home", 
                     "index": [
                         "keyword id", 
@@ -219,7 +235,7 @@
                         }
                     ]
                 }, 
-                "service.home.movie": {
+                "service/home/movie": {
                     "collection": "home", 
                     "index": [
                         "movie id", 
@@ -303,7 +319,7 @@
                         }
                     ]
                 }, 
-                "service.home.music.album": {
+                "service/home/music/album": {
                     "collection": "home", 
                     "index": [
                         "music album id", 
@@ -351,7 +367,7 @@
                         }
                     ]
                 }, 
-                "service.home.music.track": {
+                "service/home/music/track": {
                     "collect": [
                         "/h/music/album/{music album id}", 
                         "/h/music/album/itunes/{itunes music album id}"
@@ -425,7 +441,7 @@
                         }
                     ]
                 }, 
-                "service.home.network": {
+                "service/home/network": {
                     "collection": "home", 
                     "index": [
                         "network id", 
@@ -459,7 +475,7 @@
                         }
                     ]
                 }, 
-                "service.home.person": {
+                "service/home/person": {
                     "collection": "home", 
                     "index": [
                         "person id", 
@@ -520,7 +536,7 @@
                         }
                     ]
                 }, 
-                "service.home.tv.episode": {
+                "service/home/tv/episode": {
                     "collect": [
                         "/h/tv/show/{tv show id}", 
                         "/h/tv/show/tmdb/{tmdb tv show id}", 
@@ -724,7 +740,7 @@
                         }
                     ]
                 }, 
-                "service.home.tv.season": {
+                "service/home/tv/season": {
                     "collect": [
                         "/h/tv/show/{tv show id}", 
                         "/h/tv/show/tmdb/{tmdb tv show id}", 
@@ -847,7 +863,7 @@
                         }
                     ]
                 }, 
-                "service.home.tv.show": {
+                "service/home/tv/show": {
                     "collection": "home", 
                     "index": [
                         "tv show id", 
@@ -940,7 +956,7 @@
         }, 
         "itunes": {
             "branch": {
-                "service.document.itunes.genre": {
+                "service/document/itunes/genre": {
                     "collection": "itunes_genre", 
                     "index": [
                         "itunes genre id", 
@@ -963,7 +979,7 @@
                             "condition": {
                                 "kind": "genre"
                             }, 
-                            "reference": "service.document.itunes.genre"
+                            "reference": "service/document/itunes/genre"
                         }
                     ], 
                     "resolvable": [
@@ -975,7 +991,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.genre.complete": {
+                "service/document/itunes/genre/complete": {
                     "index": [
                         "itunes genre id"
                     ], 
@@ -992,12 +1008,12 @@
                             "condition": {
                                 "kind": "genre"
                             }, 
-                            "reference": "service.document.itunes.genre"
+                            "reference": "service/document/itunes/genre"
                         }
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.movie": {
+                "service/document/itunes/movie": {
                     "collection": "itunes_movie", 
                     "index": [
                         "itunes movie id", 
@@ -1022,7 +1038,7 @@
                                 "kind": "feature-movie", 
                                 "wrapperType": "track"
                             }, 
-                            "reference": "service.document.itunes.movie"
+                            "reference": "service/document/itunes/movie"
                         }
                     ], 
                     "resolvable": [
@@ -1034,7 +1050,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.music.album": {
+                "service/document/itunes/music/album": {
                     "collection": "itunes_music_album", 
                     "index": [
                         "itunes music album id", 
@@ -1059,7 +1075,7 @@
                                 "collectionType": "Album", 
                                 "wrapperType": "collection"
                             }, 
-                            "reference": "service.document.itunes.music.album"
+                            "reference": "service/document/itunes/music/album"
                         }
                     ], 
                     "resolvable": [
@@ -1071,7 +1087,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.music.track": {
+                "service/document/itunes/music/track": {
                     "collection": "itunes_music_track", 
                     "index": [
                         "itunes music track id", 
@@ -1108,14 +1124,14 @@
                                 "kind": "song", 
                                 "wrapperType": "track"
                             }, 
-                            "reference": "service.document.itunes.music.track"
+                            "reference": "service/document/itunes/music/track"
                         }, 
                         {
                             "condition": {
                                 "collectionType": "Album", 
                                 "wrapperType": "collection"
                             }, 
-                            "reference": "service.document.itunes.music.album"
+                            "reference": "service/document/itunes/music/album"
                         }
                     ], 
                     "resolvable": [
@@ -1131,7 +1147,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.person": {
+                "service/document/itunes/person": {
                     "collection": "itunes_person", 
                     "index": [
                         "itunes person id", 
@@ -1154,14 +1170,14 @@
                                 "artistType": "Movie Artist", 
                                 "wrapperType": "artist"
                             }, 
-                            "reference": "service.document.itunes.person"
+                            "reference": "service/document/itunes/person"
                         }, 
                         {
                             "condition": {
                                 "artistType": "Artist", 
                                 "wrapperType": "artist"
                             }, 
-                            "reference": "service.document.itunes.person"
+                            "reference": "service/document/itunes/person"
                         }
                     ], 
                     "resolvable": [
@@ -1173,7 +1189,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.tv.episode": {
+                "service/document/itunes/tv/episode": {
                     "collection": "itunes_tv_episode", 
                     "index": [
                         "itunes tv show id", 
@@ -1218,21 +1234,21 @@
                                 "artistType": "TV Show", 
                                 "wrapperType": "artist"
                             }, 
-                            "reference": "service.document.itunes.tv.show"
+                            "reference": "service/document/itunes/tv/show"
                         }, 
                         {
                             "condition": {
                                 "collectionType": "TV Season", 
                                 "wrapperType": "collection"
                             }, 
-                            "reference": "service.document.itunes.tv.season"
+                            "reference": "service/document/itunes/tv/season"
                         }, 
                         {
                             "condition": {
                                 "kind": "tv-episode", 
                                 "wrapperType": "track"
                             }, 
-                            "reference": "service.document.itunes.tv.episode"
+                            "reference": "service/document/itunes/tv/episode"
                         }
                     ], 
                     "resolvable": [
@@ -1252,7 +1268,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.tv.season": {
+                "service/document/itunes/tv/season": {
                     "collection": "itunes_tv_season", 
                     "index": [
                         "itunes tv show id", 
@@ -1286,14 +1302,14 @@
                                 "artistType": "TV Show", 
                                 "wrapperType": "artist"
                             }, 
-                            "reference": "service.document.itunes.tv.show"
+                            "reference": "service/document/itunes/tv/show"
                         }, 
                         {
                             "condition": {
                                 "collectionType": "TV Season", 
                                 "wrapperType": "collection"
                             }, 
-                            "reference": "service.document.itunes.tv.season"
+                            "reference": "service/document/itunes/tv/season"
                         }
                     ], 
                     "resolvable": [
@@ -1309,7 +1325,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.itunes.tv.show": {
+                "service/document/itunes/tv/show": {
                     "collection": "itunes_tv_show", 
                     "index": [
                         "itunes tv show id", 
@@ -1341,7 +1357,7 @@
                                 "artistType": "TV Show", 
                                 "wrapperType": "artist"
                             }, 
-                            "reference": "service.document.itunes.tv.show"
+                            "reference": "service/document/itunes/tv/show"
                         }
                     ], 
                     "resolvable": [
@@ -1353,7 +1369,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.search.itunes.movie": {
+                "service/search/itunes/movie": {
                     "collection": "itunes_movie", 
                     "index": [
                         "itunes movie id", 
@@ -1386,7 +1402,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.search.itunes.music.album": {
+                "service/search/itunes/music/album": {
                     "collection": "itunes_music_album", 
                     "index": [
                         "itunes music album id", 
@@ -1420,7 +1436,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.search.itunes.person": {
+                "service/search/itunes/person": {
                     "collection": "itunes_person", 
                     "index": [
                         "itunes person id", 
@@ -1458,7 +1474,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.search.itunes.tv.show": {
+                "service/search/itunes/tv/show": {
                     "collection": "itunes_tv_show", 
                     "index": [
                         "itunes tv show id", 
@@ -1498,7 +1514,7 @@
         }, 
         "knowledge": {
             "branch": {
-                "service.document.knowledge.collection": {
+                "service/document/knowledge/collection": {
                     "aggregate": [
                         {
                             "uri": "/c/{language}/tmdb/collection/{tmdb collection id}"
@@ -1529,7 +1545,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.company": {
+                "service/document/knowledge/company": {
                     "aggregate": [
                         {
                             "uri": "/c/{language}/tmdb/company/{tmdb company id}"
@@ -1560,7 +1576,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.company.credit": {
+                "service/document/knowledge/company.credit": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/company/{tmdb company id}/credit"
@@ -1590,7 +1606,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.configuration": {
+                "service/document/knowledge/configuration": {
                     "collection": "knowledge_configuration", 
                     "match": [
                         {
@@ -1605,7 +1621,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.department": {
+                "service/document/knowledge/department": {
                     "collection": "knowledge_department", 
                     "match": [
                         {
@@ -1621,7 +1637,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.genre": {
+                "service/document/knowledge/genre": {
                     "collect": [
                         "/h/genre/{genre id}"
                     ], 
@@ -1645,7 +1661,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.job": {
+                "service/document/knowledge/job": {
                     "collection": "knowledge_job", 
                     "match": [
                         {
@@ -1661,7 +1677,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie": {
+                "service/document/knowledge/movie": {
                     "aggregate": [
                         {
                             "uri": "/c/rottentomatoes/movie/{rottentomatoes movie id}"
@@ -1701,7 +1717,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie.alternative": {
+                "service/document/knowledge/movie/alternative": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/movie/{tmdb movie id}/alternative"
@@ -1734,7 +1750,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie.clip": {
+                "service/document/knowledge/movie/clip": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/movie/{tmdb movie id}/clip"
@@ -1768,7 +1784,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie.image": {
+                "service/document/knowledge/movie/image": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/movie/{tmdb movie id}/image"
@@ -1802,7 +1818,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie.keyword": {
+                "service/document/knowledge/movie/keyword": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/movie/{tmdb movie id}/keyword"
@@ -1835,7 +1851,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie.people": {
+                "service/document/knowledge/movie/people": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/movie/{tmdb movie id}/people"
@@ -1869,7 +1885,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie.rating": {
+                "service/document/knowledge/movie/rating": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/movie/{tmdb movie id}/rating"
@@ -1903,7 +1919,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.movie.translation": {
+                "service/document/knowledge/movie/translation": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/movie/{tmdb movie id}/translation"
@@ -1937,7 +1953,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.music.album": {
+                "service/document/knowledge/music/album": {
                     "aggregate": [
                         {
                             "uri": "/c/itunes/music/album/{itunes music album id}"
@@ -1969,7 +1985,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.music.album.image": {
+                "service/document/knowledge/music/album.image": {
                     "collect": [
                         "/h/music/album/{music album id}"
                     ], 
@@ -1995,7 +2011,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.music.track": {
+                "service/document/knowledge/music/track": {
                     "aggregate": [
                         {
                             "uri": "/c/itunes/music/track/{itunes music track id}"
@@ -2040,7 +2056,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.network": {
+                "service/document/knowledge/network": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/network/{tmdb network id}"
@@ -2070,7 +2086,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.person": {
+                "service/document/knowledge/person": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/person/{tmdb person id}"
@@ -2106,7 +2122,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.person.credit": {
+                "service/document/knowledge/person/credit": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/person/{tmdb person id}/credit"
@@ -2139,7 +2155,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.person.image": {
+                "service/document/knowledge/person/image": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/person/{tmdb person id}/image"
@@ -2172,7 +2188,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.playlist": {
+                "service/document/knowledge/playlist": {
                     "collection": "knowledge_playlist", 
                     "match": [
                         {
@@ -2189,7 +2205,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.episode": {
+                "service/document/knowledge/tv/episode": {
                     "aggregate": [
                         {
                             "uri": "/c/{language}/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}"
@@ -2249,7 +2265,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.episode.image": {
+                "service/document/knowledge/tv/episode/image": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/image"
@@ -2305,7 +2321,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.episode.people": {
+                "service/document/knowledge/tv/episode/people": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/people"
@@ -2361,7 +2377,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.season": {
+                "service/document/knowledge/tv/season": {
                     "aggregate": [
                         {
                             "uri": "/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}"
@@ -2409,7 +2425,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.season.image": {
+                "service/document/knowledge/tv/season/image": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/image"
@@ -2453,7 +2469,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.season.people": {
+                "service/document/knowledge/tv/season/people": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/people"
@@ -2497,7 +2513,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.show": {
+                "service/document/knowledge/tv/show": {
                     "aggregate": [
                         {
                             "uri": "/c/{language}/tmdb/tv/show/{tmdb tv show id}"
@@ -2536,7 +2552,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.show.image": {
+                "service/document/knowledge/tv/show/image": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/tv/show/{tmdb tv show id}/image"
@@ -2568,7 +2584,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.knowledge.tv.show.people": {
+                "service/document/knowledge/tv/show/people": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/tv/show/{tmdb tv show id}/people"
@@ -2605,7 +2621,7 @@
         }, 
         "medium": {
             "branch": {
-                "service.medium.asset": {
+                "service/medium/asset": {
                     "collection": "medium_asset", 
                     "match": [
                         {
@@ -2622,7 +2638,7 @@
                     ], 
                     "type": "reference"
                 }, 
-                "service.medium.resource": {
+                "service/medium/resource": {
                     "collection": "medium_resource", 
                     "match": [
                         {
@@ -2638,7 +2654,7 @@
                     ], 
                     "type": "crawl"
                 }, 
-                "service.medium.resource.fragment": {
+                "service/medium/resource/fragment": {
                     "collection": "medium_resource_fragment", 
                     "match": [
                         {
@@ -2660,7 +2676,7 @@
         "rottentomatoes": {
             "api key": "wyeeuz4yjjqvyjgtju68c6p3", 
             "branch": {
-                "service.document.rottentomatoes.movie": {
+                "service/document/rottentomatoes/movie": {
                     "collection": "rottentomatoes_movie", 
                     "index": [
                         "rottentomatoes movie id", 
@@ -2701,7 +2717,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.rottentomatoes.movie.clip": {
+                "service/document/rottentomatoes/movie/clip": {
                     "collection": "rottentomatoes_movie_clip", 
                     "index": [
                         "rottentomatoes movie id"
@@ -2725,7 +2741,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.rottentomatoes.movie.people": {
+                "service/document/rottentomatoes/movie/people": {
                     "collection": "rottentomatoes_movie_people", 
                     "index": [
                         "rottentomatoes movie id"
@@ -2749,7 +2765,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.rottentomatoes.movie.review": {
+                "service/document/rottentomatoes/movie/review": {
                     "collection": "rottentomatoes_movie_review", 
                     "index": [
                         "rottentomatoes movie id"
@@ -2773,7 +2789,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service.document.rottentomatoes.movie.similar": {
+                "service/document/rottentomatoes/movie/similar": {
                     "collection": "rottentomatoes_movie_similar", 
                     "index": [
                         "rottentomatoes movie id"
@@ -2803,84 +2819,84 @@
         }, 
         "system": {
             "branch": {
-                "service.runtime.archetype": {
+                "service/runtime/archetype": {
                     "match": [
                         {
                             "filter": "^/s/runtime/archetype$"
                         }
                     ]
                 }, 
-                "service.runtime.command": {
+                "service/runtime/command": {
                     "match": [
                         {
                             "filter": "^/s/runtime/command$"
                         }
                     ]
                 }, 
-                "service.runtime.constant": {
+                "service/runtime/constant": {
                     "match": [
                         {
                             "filter": "^/s/runtime/constant$"
                         }
                     ]
                 }, 
-                "service.runtime.expression": {
+                "service/runtime/expression": {
                     "match": [
                         {
                             "filter": "^/s/runtime/expression$"
                         }
                     ]
                 }, 
-                "service.runtime.interface": {
+                "service/runtime/interface": {
                     "match": [
                         {
                             "filter": "^/s/runtime/interface$"
                         }
                     ]
                 }, 
-                "service.runtime.namespace": {
+                "service/runtime/namespace": {
                     "match": [
                         {
                             "filter": "^/s/runtime/namespace$"
                         }
                     ]
                 }, 
-                "service.runtime.preset": {
+                "service/runtime/preset": {
                     "match": [
                         {
                             "filter": "^/s/runtime/preset$"
                         }
                     ]
                 }, 
-                "service.runtime.repository": {
+                "service/runtime/repository": {
                     "match": [
                         {
                             "filter": "^/s/runtime/repository$"
                         }
                     ]
                 }, 
-                "service.runtime.rule": {
+                "service/runtime/rule": {
                     "match": [
                         {
                             "filter": "^/s/runtime/rule$"
                         }
                     ]
                 }, 
-                "service.runtime.service": {
+                "service/runtime/service": {
                     "match": [
                         {
                             "filter": "^/s/runtime/service$"
                         }
                     ]
                 }, 
-                "service.runtime.system": {
+                "service/runtime/system": {
                     "match": [
                         {
                             "filter": "^/s/runtime/system$"
                         }
                     ]
                 }, 
-                "service.runtime.table": {
+                "service/runtime/table": {
                     "match": [
                         {
                             "filter": "^/s/runtime/table$"
@@ -2893,7 +2909,7 @@
         "tmdb": {
             "api key": "a8b9f96dde091408a03cb4c78477bd14", 
             "branch": {
-                "service.document.tmdb.collection": {
+                "service/document/tmdb/collection": {
                     "collection": "tmdb_collection", 
                     "index": [
                         "tmdb collection id", 
@@ -2918,7 +2934,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.company": {
+                "service/document/tmdb/company": {
                     "collection": "tmdb_company", 
                     "index": [
                         "tmdb company id", 
@@ -2945,7 +2961,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.company.credit": {
+                "service/document/tmdb/company/credit": {
                     "collection": "tmdb_company_credit", 
                     "index": [
                         "tmdb company id"
@@ -2968,7 +2984,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.configuration": {
+                "service/document/tmdb/configuration": {
                     "collection": "tmdb_configuration", 
                     "match": [
                         {
@@ -2987,7 +3003,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.genre": {
+                "service/document/tmdb/genre": {
                     "collection": "tmdb_genre", 
                     "index": [
                         "tmdb genre id", 
@@ -3014,7 +3030,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.keyword": {
+                "service/document/tmdb/keyword": {
                     "collection": "tmdb_keyword", 
                     "index": [
                         "tmdb keyword id", 
@@ -3039,7 +3055,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie": {
+                "service/document/tmdb/movie": {
                     "collect": [
                         "/c/{language}/tmdb/movie/imdb/{imdb movie id}/find"
                     ], 
@@ -3079,7 +3095,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie.alternative": {
+                "service/document/tmdb/movie/alternative": {
                     "collection": "tmdb_movie_alternative", 
                     "index": [
                         "tmdb movie id"
@@ -3102,7 +3118,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie.clip": {
+                "service/document/tmdb/movie/clip": {
                     "collection": "tmdb_movie_clip", 
                     "index": [
                         "tmdb movie id"
@@ -3125,7 +3141,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie.image": {
+                "service/document/tmdb/movie/image": {
                     "collection": "tmdb_movie_image", 
                     "index": [
                         "tmdb movie id"
@@ -3148,7 +3164,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie.keyword": {
+                "service/document/tmdb/movie/keyword": {
                     "collection": "tmdb_movie_keyword", 
                     "index": [
                         "tmdb movie id"
@@ -3171,7 +3187,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie.people": {
+                "service/document/tmdb/movie/people": {
                     "collection": "tmdb_movie_people", 
                     "index": [
                         "tmdb movie id"
@@ -3194,7 +3210,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie.rating": {
+                "service/document/tmdb/movie/rating": {
                     "collection": "tmdb_movie_rating", 
                     "index": [
                         "tmdb movie id"
@@ -3217,7 +3233,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.movie.translation": {
+                "service/document/tmdb/movie/translation": {
                     "collection": "tmdb_movie_translation", 
                     "index": [
                         "tmdb movie id"
@@ -3240,7 +3256,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.network": {
+                "service/document/tmdb/network": {
                     "collection": "tmdb_network", 
                     "index": [
                         "tmdb network id", 
@@ -3265,7 +3281,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.person": {
+                "service/document/tmdb/person": {
                     "collect": [
                         "/c/tmdb/person/imdb/{imdb person id}/find", 
                         "/c/tmdb/person/freebase{freebase person mid}/find", 
@@ -3311,7 +3327,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.person.credit": {
+                "service/document/tmdb/person/credit": {
                     "collection": "tmdb_person_credit", 
                     "index": [
                         "tmdb person id"
@@ -3334,7 +3350,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.person.external": {
+                "service/document/tmdb/person/external": {
                     "collection": "tmdb_person_external", 
                     "index": [
                         "tmdb person id", 
@@ -3359,7 +3375,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.person.image": {
+                "service/document/tmdb/person/image": {
                     "collection": "tmdb_person_image", 
                     "index": [
                         "tmdb person id"
@@ -3382,7 +3398,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.episode": {
+                "service/document/tmdb/tv/episode": {
                     "collect": [
                         "/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}", 
                         "/c/{language}/tmdb/tv/season/tvdb/{tvdb tv show id}/{disc number}", 
@@ -3517,7 +3533,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.episode.external": {
+                "service/document/tmdb/tv/episode.external": {
                     "collection": "tmdb_tv_episode_external", 
                     "index": [
                         "tmdb tv show id", 
@@ -3542,7 +3558,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.episode.image": {
+                "service/document/tmdb/tv/episode.image": {
                     "collection": "tmdb_tv_episode_image", 
                     "index": [
                         "tmdb tv show id", 
@@ -3567,7 +3583,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.episode.people": {
+                "service/document/tmdb/tv/episode.people": {
                     "collection": "tmdb_tv_episode_people", 
                     "index": [
                         "tmdb tv show id", 
@@ -3592,7 +3608,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.season": {
+                "service/document/tmdb/tv/season": {
                     "collect": [
                         "/c/{language}/tmdb/tv/show/{tmdb tv show id}", 
                         "/c/{language}/tmdb/tv/show/tvdb/{tvdb tv show id}", 
@@ -3691,7 +3707,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.season.external": {
+                "service/document/tmdb/tv/season.external": {
                     "collection": "tmdb_tv_season_external", 
                     "index": [
                         "tmdb tv show id", 
@@ -3715,7 +3731,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.season.image": {
+                "service/document/tmdb/tv/season.image": {
                     "collection": "tmdb_tv_season_image", 
                     "index": [
                         "tmdb tv show id", 
@@ -3739,7 +3755,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.season.people": {
+                "service/document/tmdb/tv/season.people": {
                     "collection": "tmdb_tv_season_people", 
                     "index": [
                         "tmdb tv show id", 
@@ -3763,7 +3779,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.show": {
+                "service/document/tmdb/tv/show": {
                     "collect": [
                         "/c/tmdb/tv/show/imdb/{imdb tv show id}/find", 
                         "/c/tmdb/tv/show/tvdb/{tvdb tv show id}/find", 
@@ -3821,7 +3837,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.show.external": {
+                "service/document/tmdb/tv/show/external": {
                     "collection": "tmdb_tv_show_external", 
                     "index": [
                         "tmdb tv show id", 
@@ -3847,7 +3863,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.show.image": {
+                "service/document/tmdb/tv/show/image": {
                     "collection": "tmdb_tv_show_image", 
                     "index": [
                         "tmdb tv show id"
@@ -3870,7 +3886,7 @@
                         }
                     ]
                 }, 
-                "service.document.tmdb.tv.show.people": {
+                "service/document/tmdb/tv/show/people": {
                     "collection": "tmdb_tv_show_people", 
                     "index": [
                         "tmdb tv show id"
@@ -3893,7 +3909,7 @@
                         }
                     ]
                 }, 
-                "service.find.tmdb.movie.imdb": {
+                "service/find/tmdb/movie/imdb": {
                     "collection": "tmdb_movie", 
                     "container": "movie_results", 
                     "index": [
@@ -3924,7 +3940,7 @@
                         }
                     ]
                 }, 
-                "service.find.tmdb.person.freebase": {
+                "service/find/tmdb/person/freebase": {
                     "collection": "tmdb_person", 
                     "container": "person_results", 
                     "index": [
@@ -3953,7 +3969,7 @@
                         }
                     ]
                 }, 
-                "service.find.tmdb.person.imdb": {
+                "service/find/tmdb/person/imdb": {
                     "collection": "tmdb_person", 
                     "container": "person_results", 
                     "index": [
@@ -3981,7 +3997,7 @@
                         }
                     ]
                 }, 
-                "service.find.tmdb.tv.show.freebase": {
+                "service/find/tmdb/tv/show/freebase": {
                     "collection": "tmdb_tv_show", 
                     "container": "tv_results", 
                     "index": [
@@ -4010,7 +4026,7 @@
                         }
                     ]
                 }, 
-                "service.find.tmdb.tv.show.imdb": {
+                "service/find/tmdb/tv/show/imdb": {
                     "collection": "tmdb_tv_show", 
                     "container": "tv_results", 
                     "index": [
@@ -4040,7 +4056,7 @@
                         }
                     ]
                 }, 
-                "service.find.tmdb.tv.show.tvdb": {
+                "service/find/tmdb/tv/show/tvdb": {
                     "collection": "tmdb_tv_show", 
                     "container": "tv_results", 
                     "index": [
@@ -4070,7 +4086,7 @@
                         }
                     ]
                 }, 
-                "service.search.tmdb.collection": {
+                "service/search/tmdb/collection": {
                     "collection": "tmdb_collection", 
                     "container": "results", 
                     "index": [
@@ -4099,7 +4115,7 @@
                         }
                     ]
                 }, 
-                "service.search.tmdb.company": {
+                "service/search/tmdb/company": {
                     "collection": "tmdb_company", 
                     "container": "results", 
                     "index": [
@@ -4127,7 +4143,7 @@
                         }
                     ]
                 }, 
-                "service.search.tmdb.keyword": {
+                "service/search/tmdb/keyword": {
                     "collection": "tmdb_keyword", 
                     "container": "results", 
                     "index": [
@@ -4155,7 +4171,7 @@
                         }
                     ]
                 }, 
-                "service.search.tmdb.movie": {
+                "service/search/tmdb/movie": {
                     "collection": "tmdb_movie", 
                     "container": "results", 
                     "index": [
@@ -4189,7 +4205,7 @@
                         }
                     ]
                 }, 
-                "service.search.tmdb.person": {
+                "service/search/tmdb/person": {
                     "collection": "tmdb_person", 
                     "container": "results", 
                     "index": [
@@ -4217,7 +4233,7 @@
                         }
                     ]
                 }, 
-                "service.search.tmdb.tv.show": {
+                "service/search/tmdb/tv/show": {
                     "collection": "tmdb_tv_show", 
                     "container": "results", 
                     "index": [
@@ -4253,7 +4269,7 @@
         "tvdb": {
             "api key": "7B3B400B0146EA83", 
             "branch": {
-                "service.document.tvdb.tv.episode": {
+                "service/document/tvdb/tv/episode": {
                     "collect": [
                         "/c/{language}/tvdb/tv/show/{tvdb tv show id}"
                     ], 
@@ -4297,7 +4313,7 @@
                     "produce": [
                         {
                             "coalesce": false, 
-                            "reference": "service.document.tvdb.tv.episode", 
+                            "reference": "service/document/tvdb/tv/episode", 
                             "tag": "Episode"
                         }
                     ], 
@@ -4326,7 +4342,7 @@
                     ], 
                     "type": "xml"
                 }, 
-                "service.document.tvdb.tv.season": {
+                "service/document/tvdb/tv/season": {
                     "collect": [
                         "/c/{language}/tvdb/tv/show/{tvdb tv show id}", 
                         "/c/{language}/tvdb/tv/show/{tvdb tv show id}/complete"
@@ -4368,7 +4384,7 @@
                     ], 
                     "type": "xml"
                 }, 
-                "service.document.tvdb.tv.show": {
+                "service/document/tvdb/tv/show": {
                     "collect": [
                         "/c/{language}/tvdb/tv/show/search/imdb/{imdb tv show id}"
                     ], 
@@ -4394,7 +4410,7 @@
                     "produce": [
                         {
                             "coalesce": false, 
-                            "reference": "service.document.tvdb.tv.show", 
+                            "reference": "service/document/tvdb/tv/show", 
                             "tag": "Series"
                         }
                     ], 
@@ -4411,7 +4427,7 @@
                     ], 
                     "type": "xml"
                 }, 
-                "service.document.tvdb.tv.show.complete": {
+                "service/document/tvdb/tv/show/complete": {
                     "collect": [
                         "/c/{language}/tvdb/tv/show/{tvdb tv show id}"
                     ], 
@@ -4428,28 +4444,28 @@
                     "produce": [
                         {
                             "coalesce": false, 
-                            "reference": "service.document.tvdb.tv.show", 
+                            "reference": "service/document/tvdb/tv/show", 
                             "tag": "Series"
                         }, 
                         {
                             "coalesce": false, 
-                            "reference": "service.document.tvdb.tv.episode", 
+                            "reference": "service/document/tvdb/tv/episode", 
                             "tag": "Episode"
                         }, 
                         {
                             "coalesce": true, 
-                            "reference": "service.document.tvdb.tv.show.image", 
+                            "reference": "service/document/tvdb/tv/show/image", 
                             "tag": "Banner"
                         }, 
                         {
                             "coalesce": true, 
-                            "reference": "service.document.tvdb.tv.show.people", 
+                            "reference": "service/document/tvdb/tv/show/people", 
                             "tag": "Actor"
                         }
                     ], 
                     "type": "zip"
                 }, 
-                "service.document.tvdb.tv.show.image": {
+                "service/document/tvdb/tv/show/image": {
                     "collection": "tvdb_tv_show_image", 
                     "index": [
                         "tvdb tv show id"
@@ -4464,7 +4480,7 @@
                     "produce": [
                         {
                             "coalesce": true, 
-                            "reference": "service.document.tvdb.tv.show.image", 
+                            "reference": "service/document/tvdb/tv/show/image", 
                             "tag": "Banner"
                         }
                     ], 
@@ -4477,7 +4493,7 @@
                     ], 
                     "type": "xml"
                 }, 
-                "service.document.tvdb.tv.show.people": {
+                "service/document/tvdb/tv/show/people": {
                     "collection": "tvdb_tv_show_people", 
                     "index": [
                         "tvdb tv show id"
@@ -4492,7 +4508,7 @@
                     "produce": [
                         {
                             "coalesce": true, 
-                            "reference": "service.document.tvdb.tv.show.people", 
+                            "reference": "service/document/tvdb/tv/show/people", 
                             "tag": "Actor"
                         }
                     ], 
@@ -4505,7 +4521,7 @@
                     ], 
                     "type": "xml"
                 }, 
-                "service.document.tvdb.update.daily": {
+                "service/document/tvdb/update/daily": {
                     "match": [
                         {
                             "filter": "^/c/tvdb/update/day$", 
@@ -4522,7 +4538,7 @@
                     ], 
                     "type": "zip"
                 }, 
-                "service.document.tvdb.update.monthly": {
+                "service/document/tvdb/update/monthly": {
                     "match": [
                         {
                             "filter": "^/c/tvdb/update/month$", 
@@ -4539,7 +4555,7 @@
                     ], 
                     "type": "zip"
                 }, 
-                "service.document.tvdb.update.weekly": {
+                "service/document/tvdb/update/weekly": {
                     "match": [
                         {
                             "filter": "^/c/tvdb/update/week$", 
@@ -4556,7 +4572,7 @@
                     ], 
                     "type": "zip"
                 }, 
-                "service.search.tvdb.tv.show": {
+                "service/search/tvdb/tv/show": {
                     "collection": "tvdb_tv_show", 
                     "index": [
                         "itunes tv show id", 
@@ -4599,8 +4615,8 @@
         }, 
         "wikipedia": {
             "branch": {
-                "wikipedia.company": {}, 
-                "wikipedia.movie": {
+                "wikipedia/company": {}, 
+                "wikipedia/movie": {
                     "collection": "wikipedia_movie", 
                     "index": [
                         "wikipedia movie id"
@@ -4620,8 +4636,8 @@
                     ], 
                     "type": "json"
                 }, 
-                "wikipedia.person": {}, 
-                "wikipedia.tvshow.show": {}
+                "wikipedia/person": {}, 
+                "wikipedia/tvshow/show": {}
             }, 
             "match": "^/c(?:/[a-z]{2})?/wikipedia/.*$"
         }

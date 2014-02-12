@@ -37,7 +37,7 @@ class RottenTomatoesHandler(ResourceHandler):
                     }
                     
                     # Rotten tomatoes specific overrides
-                    if entry['branch']['name'] == 'service.document.rottentomatoes.movie':
+                    if entry['branch']['name'] == '/service/document/rottentomatoes/movie':
                         # Rotten tomatoes holds the imdb id without the tt prefix, inside the alternate_ids dictionary
                         if 'alternate_ids' in document and 'imdb' in document['alternate_ids'] and document['alternate_ids']['imdb']:
                             document[u'imdb_id'] = u'tt{0}'.format(document['alternate_ids']['imdb'])
@@ -46,7 +46,7 @@ class RottenTomatoesHandler(ResourceHandler):
                         if 'release_dates' in document and 'theater' in document['release_dates']:
                             document[u'release_date'] = document['release_dates']['theater']
                         
-                    if entry['branch']['name'] == 'service.document.rottentomatoes.movie.review' and 'reviews' in document:
+                    if entry['branch']['name'] == 'service/document/rottentomatoes/movie/review' and 'reviews' in document:
                         # Flatten the review links
                         for r in document['reviews']:
                             if 'links' in r and 'review' in r['links']: r['review_link'] = r['links']['review']
@@ -56,7 +56,7 @@ class RottenTomatoesHandler(ResourceHandler):
                     entry['record']['body']['canonical'].decode_all(entry['record']['body']['original'], self.name)
                     
                     # Movie ratings are stored in a sub container, simply decode them directly from there
-                    if entry['branch']['name'] == 'service.document.rottentomatoes.movie':
+                    if entry['branch']['name'] == 'service/document/rottentomatoes/movie':
                         if 'ratings' in document:
                             entry['record']['body']['canonical'].decode_all(document['ratings'], 'rottentomatoes')
                             

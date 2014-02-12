@@ -751,12 +751,18 @@
             "name": "Genre name", 
             "type": "unicode"
         }, 
+        "id3 genre type": {
+            "description": "Enumerated value from ID3 tag set", 
+            "keyword": "id3_genre_type", 
+            "name": "ID3 predefined genre", 
+            "type": "int"
+        }, 
         "genre type": {
             "atom": "gnre", 
             "description": "Enumerated value from ID3 tag set, plus 1", 
             "enumeration": "genre", 
             "keyword": "genre_type", 
-            "name": "Pre-defined genre", 
+            "name": "predefined genre", 
             "type": "enum"
         }, 
         "genres": {
@@ -1213,6 +1219,11 @@
         "native language name": {
             "keyword": "native_language_name", 
             "name": "Native language name", 
+            "type": "unicode"
+        }, 
+        "namespace": {
+            "keyword": "namespace", 
+            "name": "Namespace", 
             "type": "unicode"
         }, 
         "network id": {

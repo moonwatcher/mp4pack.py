@@ -34,11 +34,11 @@ class MediumHandler(ResourceHandler):
             collection = query['repository'].database['medium_resource']
             
             # create the asset node: references to all resources of this asset
-            if query['branch']['name'] == 'service.medium.asset':
+            if query['branch']['name'] == 'service/medium/asset':
                 resources = collection.find({u'head.genealogy.home id':query['parameter']['home id']})
                 
             # create the fragment node: references to all resources that are fragments of this resource
-            elif query['branch']['name'] == 'service.medium.resource.fragment':
+            elif query['branch']['name'] == 'service/medium/resource/fragment':
                 resources = collection.find(
                     {
                         u'head.genealogy.resource path digest':query['parameter']['path digest'],

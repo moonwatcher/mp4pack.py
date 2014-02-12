@@ -633,20 +633,20 @@ class Repository(object):
                     break
         return result
         
-    def rebuild_index(self, collection, definition):
-        if collection is not None and collection in self.env.table:
+    def rebuild_index(self, name, definition):
+        if name is not None and name in self.env.table:
             if 'name' in definition:
-                table = self.database[collection]
+                table = self.database[self.env.table[name]['collection']]
                 if 'unique' not in definition: definition['unique'] = False
                 if 'dropDups' not in definition: definition['dropDups'] = False
                 
                 existing = table.index_information()
                 
                 if definition['name'] in existing:
-                    self.log.info(u'Dropping index %s on collection %s', definition['name'], collection)
+                    self.log.info(u'Dropping index %s on collection %s', definition['name'], name)
                     table.drop_index(definition['name'])
                     
-                self.log.info(u'Rebuilding index %s on collection %s', definition['name'], collection)
+                self.log.info(u'Rebuilding index %s on collection %s', definition['name'], name)
                 table.create_index(
                     definition['key'],
                     name=definition['name'],
@@ -654,9 +654,9 @@ class Repository(object):
                     dropDups=definition['dropDups']
                 )
             else:
-                self.log.error(u'Refusing to handle unnamed index for collection %s', collection)
+                self.log.error(u'Refusing to handle unnamed index for collection %s', name)
         else:
-            self.log.error(u'Unknown collection %s', collection)
+            self.log.error(u'Unknown collection %s', name)
             
 
 class CommandLineParser(object):

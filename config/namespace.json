@@ -202,7 +202,9 @@
                 "simple genre name": null, 
                 "tmdb genre id": {
                     "tmdb": "id"
-                }
+                },
+                "genre type":null,
+                "id3 genre type":null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.genre"
@@ -219,7 +221,9 @@
                 "genre name": null, 
                 "itunes genre id": null, 
                 "simple genre name": null, 
-                "tmdb genre id": null
+                "tmdb genre id": null,
+                "genre type":null,
+                "id3 genre type":null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.genre"
@@ -3344,6 +3348,7 @@
                 "music album id": null, 
                 "music album name": null, 
                 "music track name": null, 
+                "namespace":null,
                 "network id": null, 
                 "path": null, 
                 "path digest": null, 
