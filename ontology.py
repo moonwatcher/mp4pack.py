@@ -12,7 +12,7 @@ from datetime import datetime
 class Ontology(dict):
     def __init__(self, env, namespace,  *args, **kw):
         dict.__init__(self, *args, **kw)
-        self.log = logging.getLogger('ontology')
+        self.log = logging.getLogger('Ontology')
         self.env = env
         self.namespace = self.env.namespace[namespace]
         
@@ -406,9 +406,9 @@ class Prototype(Element):
             self.node['type'] = 'unicode'
             
         # find the cast, format and merge functions
-        c = getattr(self, '_cast_{0}'.format(self.type), None) or (lambda x,y: x)
-        f = getattr(self, '_format_{0}'.format(self.type), None) or (lambda x: x)
-        m = getattr(self, '_merge_{0}'.format(self.type), None) or (lambda x,y: y)
+        c = getattr(self, '_cast_{}'.format(self.type), None) or (lambda x,y: x)
+        f = getattr(self, '_format_{}'.format(self.type), None) or (lambda x: x)
+        m = getattr(self, '_merge_{}'.format(self.type), None) or (lambda x,y: y)
         
         if not self.node['plural']:
             self._cast = c
@@ -474,7 +474,7 @@ class Prototype(Element):
         while v > 1024.0 and p < 4:
             p += 1
             v /= 1024.0
-        return u'{0:.2f} {1}'.format(v, self.env.enumeration['binary iec 60027 2'].get(p))
+        return u'{:.2f} {1}'.format(v, self.env.enumeration['binary iec 60027 2'].get(p))
         
     def _format_bit_as_si(self, value):
         p = 0
@@ -482,7 +482,7 @@ class Prototype(Element):
         while v > 1000.0 and p < 4:
             p += 1
             v /= 1000.0
-        return u'{0:.2f} {1}'.format(v, self.env.enumeration['decimal si'].get(p))
+        return u'{:.2f} {1}'.format(v, self.env.enumeration['decimal si'].get(p))
         
     def _format_timecode(self, value):
         t = Timestamp(Timestamp.SRT)
@@ -493,13 +493,13 @@ class Prototype(Element):
         return self.env.enumeration[self.node['enumeration']].format(value)
         
     def _format_float(self, value):
-        return u'{0:.3f}'.format(value)
+        return u'{:.3f}'.format(value)
         
     def _format_int(self, value):
         result = unicode(value)
         if 'format' in self.node:
             if self.node['format'] == 'bitrate':
-                result = u'{0}/s'.format(self._format_bit_as_si(value))
+                result = u'{}/s'.format(self._format_bit_as_si(value))
                 
             elif self.node['format'] == 'millisecond':
                 result =  self._format_timecode(value)
@@ -508,13 +508,13 @@ class Prototype(Element):
                 result = self._format_byte_as_iec_60027_2(value)
                 
             elif self.node['format'] == 'bit':
-                result = u'{0} bit'.format(value)
+                result = u'{} bit'.format(value)
                 
             elif self.node['format'] == 'frequency':
-                result = u'{0} Hz'.format(value)
+                result = u'{} Hz'.format(value)
                 
             elif self.node['format'] == 'pixel':
-                result = u'{0} px'.format(value)
+                result = u'{} px'.format(value)
                 
         return result
         
@@ -536,7 +536,7 @@ class Prototype(Element):
             
     def _format_dict(self, value, formatter):
         if value:
-            return u', '.join([ u'{0}:{1}'.format(k,formatter(v)) for k,v in value.iteritems() ])
+            return u', '.join([ u'{}:{}'.format(k,formatter(v)) for k,v in value.iteritems() ])
         else:
             return None
             
@@ -551,7 +551,7 @@ class Prototype(Element):
         try:
             result = int(value)
         except ValueError:
-            self.log.error(u'Failed to decode %s: %s as an integer', self.key, value)
+            self.log.error(u'Failed to decode value % as integer for %s', value, self.key)
         return result
         
     def _cast_float(self, value, axis=None):
@@ -559,7 +559,7 @@ class Prototype(Element):
         try:
             result = float(value)
         except ValueError:
-            self.log.error(u'Failed to decode %s: %s as an integer', self.key, value)
+            self.log.error(u'Failed to decode value % as float for %s', value, self.key)
         return result
         
     def _cast_unicode(self, value, axis=None):
@@ -592,9 +592,9 @@ class Prototype(Element):
                 try:
                     result = datetime(**parsed)
                 except TypeError, ValueError:
-                    self.log.debug(u'Failed to decode datetime %s: %s', self.key, value)
+                    self.log.debug(u'Failed to decode value % as datetime for %s', value, self.key)
             else:
-                self.log.debug(u'Failed to parse datetime %s: %s', self.key, value)
+                self.log.debug(u'Failed to parse value % as datetime for %s', value, self.key)
         return result
         
     def _cast_bool(self, value, axis=None):
@@ -606,12 +606,11 @@ class Prototype(Element):
     def _cast_plist(self, value, axis=None):
         # Clean and parse plist into a dictionary
         result = value
-        # result = value.replace(u'&quot;', u'"')
         result = self.env.expression['clean xml'].sub(u'', result).strip()
         try:
             result = plistlib.readPlistFromString(result.encode('utf-8'))
         except Exception, e:
-            self.log.debug(u'Could not parse plist %s', result)
+            self.log.error(u'Failed to parse plist for %s', self.key)
             result = None
             
         return result
@@ -624,7 +623,7 @@ class Prototype(Element):
                 if self.env.expression['mediainfo value list'].match(value):
                     literals = value.split(u'/')
                 else:
-                    self.log.error(u'Could not parse list %s', value)
+                    self.log.error(u'Failed to parse value %s as list for %s', value, self.key)
                     
             elif self.node['plural format'] == 'tvdb list':
                 value = self.env.expression['tvdb list separators'].sub(u'|', value)
@@ -735,7 +734,7 @@ class Enumerator(Element):
 
 class Deduction(object):
     def __init__(self, env, node):
-        self.log = logging.getLogger('deduction')
+        self.log = logging.getLogger('Deduction')
         self.env = env
         self.node = node
         self._rule = None
@@ -774,7 +773,7 @@ class Deduction(object):
 
 class Rule(object):
     def __init__(self, env, node):
-        self.log = logging.getLogger('rule')
+        self.log = logging.getLogger('Rule')
         self.env = env
         self.node = node
         
@@ -850,10 +849,10 @@ class Umid(object):
         return (sum(digits[::-2]) + sum(map(lambda d: sum(divmod(3*d, 16)), digits[-2::-2]))) % 16
         
     @classmethod
-    def _generate(cls, string):
+    def _check_digit(cls, string):
         d = Umid._checksum(string + '0')
         if d != 0: d = 16 - d
-        return '{:x}'.format(d)
+        return u'{:x}'.format(d)
         
     @classmethod
     def verify(cls, string):
@@ -888,8 +887,8 @@ class Umid(object):
     @property
     def code(self):
         if self._code is None and self._media_kind is not None and self._home_id is not None:
-            code = '{:>02x}{:>010x}'.format(self._media_kind, self._home_id)
-            self._code = '{}{}'.format(code, Umid._generate(code))
+            code = u'{:>02x}{:>010x}'.format(self._media_kind, self._home_id)
+            self._code = u'{}{}'.format(code, Umid._check_digit(code))
         return self._code
         
     @code.setter

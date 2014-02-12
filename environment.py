@@ -44,7 +44,6 @@ class Environment(object):
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
         
-    
     @property
     def document(self):
         return json.dumps(self.state, sort_keys=True, indent=4,  default=self.environment_json_handler)
@@ -166,29 +165,25 @@ class Environment(object):
         if path and os.path.isfile(path):
             try:
                 content = open(path, 'r')
-                
             except IOError, e:
                 self.log.warning(u'Failed to load configuration file %s', path)
                 self.log.debug(u'Exception raised: %s', unicode(e))
-                
             else:
                 extention = os.path.splitext(path)[1]
                 try:
-                    if extention == '.py':
+                    if extention == u'.py':
                         node = eval(content.read())
-                    elif extention == '.json':
+                    elif extention == u'.json':
                         node = json.load(content)
-                    self.log.debug(u'Loaded configuration dictionary %s', path)
-                    
+                    self.log.debug(u'Configuration dictionary loaded from %s', path)
                 except SyntaxError, e:
-                    self.log.warning(u'Failed to evaluate configuration file syntax %s', path)
+                    self.log.warning(u'Syntax error in configuration file %s', path)
                     self.log.debug(u'Exception raised: %s', unicode(e))
-                    
                 else:
                     if isinstance(node, dict):
                         self.load_configuration_node(node)
                     else:
-                        self.log.warning(u'Configuration file %s does not contain a valid dictionary', path)
+                        self.log.warning(u'Configuration file %s is not a valid dictionary', path)
                         
     def load_interactive(self, ontology):
         self.ontology = ontology
@@ -251,8 +246,8 @@ class Environment(object):
             if 'expression' in node:
                 for e in node['expression']:
                     if check(e):
-                        if 'flags' not in e:
-                            e['flags'] = 0
+                        # flags defaults to zero
+                        if 'flags' not in e: e['flags'] = 0
                         self.expression[e['name']] = re.compile(e['definition'], e['flags'])
                         
             if 'constant' in node:
@@ -363,50 +358,34 @@ class Environment(object):
                 pass
         
     def check_path_availability(self, path, overwrite=False):
-        result = self.is_path_available(path, overwrite)
-        if result:
-            self.varify_directory(path)
-        return result
-        
-    def is_path_available(self, path, overwrite=False):
-        result = True
         if path:
             if os.path.exists(path) and not overwrite:
                 self.log.warning(u'Refusing to overwrite %s', path)
-                result = False
+                return False
+            else:
+                self.varify_directory(path)
+                return True
         else:
-            result = False
-        return result
-        
+            return False
+            
     def varify_directory(self, path):
-        result = False
         try:
             directory = os.path.dirname(path)
             if not os.path.exists(directory):
                 self.log.debug(u'Creating directory %s', directory)
                 os.makedirs(directory)
-                result = True
                 
         except OSError as err:
             self.log.error(u'Failed to create directory %s', directory)
             self.log.debug(unicode(err))
-            result = False
             
-        return result
-        
     def purge_if_not_exist(self, path):
-        result = True
-        if path:
-            if not os.path.exists(path):
-                result = False
-                try:
-                    os.removedirs(os.path.dirname(path))
-                except OSError, oserr:
-                    self.log.debug(oserr)
-        else:
-            result = False
-        return result
-        
+        if path and not os.path.exists(path):
+            try:
+                os.removedirs(os.path.dirname(path))
+            except OSError, oserr:
+                self.log.debug(oserr)
+                
     def detect_encoding(self, content):
         # This will not survive a multi threaded environment
         self.universal_detector.reset()
@@ -495,12 +474,14 @@ class Environment(object):
             if is_executable(command['binary']):
                 command['path'] = command['binary']
         else:
-            for path in os.environ["PATH"].split(os.pathsep):
+            for path in os.environ['PATH'].split(os.pathsep):
                 bpath = os.path.join(path, command['binary'])
                 if is_executable(bpath):
                     command['path'] = bpath
                     
-    
+    def encode_json(self, node):
+        return json.dumps(node, sort_keys=True, indent=4, default=self.default_json_handler)
+        
 
 
 

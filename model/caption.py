@@ -151,7 +151,7 @@ class Caption(object):
 
 class CaptionFilter(object):
     def __init__(self, node):
-        self.log = logging.getLogger('Caption filter')
+        self.log = logging.getLogger('Caption')
         self.expression = []
         self.action = node['action']
         self.scope = node['scope']
@@ -247,7 +247,7 @@ class CaptionFilter(object):
 class CaptionFilterCache(dict):
     def __init__(self, env, *args, **kw):
         dict.__init__(self, *args, **kw)
-        self.log = logging.getLogger('Subtitle Filter Cache')
+        self.log = logging.getLogger('Caption')
         self.env = env
     
     

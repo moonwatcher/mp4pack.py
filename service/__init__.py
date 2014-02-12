@@ -21,7 +21,7 @@ class Resolver(object):
         self.env = env
         self.handlers = {}
         
-        self.log.debug(u'Starting JSON service resolver')
+        self.log.debug(u'Starting resolver')
         
         from tmdb import TMDbHandler
         self.handlers['tmdb'] = TMDbHandler(self, self.env.service['tmdb'])
@@ -29,8 +29,8 @@ class Resolver(object):
         from itunes import iTunesHandler
         self.handlers['itunes'] = iTunesHandler(self, self.env.service['itunes'])
         
-        from tvdb import TVDbHandler
-        self.handlers['tvdb'] = TVDbHandler(self, self.env.service['tvdb'])
+        # from tvdb import TVDbHandler
+        # self.handlers['tvdb'] = TVDbHandler(self, self.env.service['tvdb'])
         
         from rottentomatoes import RottenTomatoesHandler
         self.handlers['rottentomatoes'] = RottenTomatoesHandler(self, self.env.service['rottentomatoes'])
@@ -58,7 +58,7 @@ class Resolver(object):
             self.log.warning(u'Unresolvable host name %s', hostname)
             
         if repository and not repository.valid:
-            self.log.warning(u'Could not start a repository for %s', hostname)
+            self.log.warning(u'Failed to start repository %s', hostname)
             repository = None
             
         return repository
@@ -97,19 +97,21 @@ class Resolver(object):
                             handler.save(node, repository)
                             break
             else:
-                self.log.debug(u'URIs are missing, refusing to save record %s', unicode(node[u'head']))            
+                self.log.debug(u'Refusing to save record with missing cononical address:\n%s', self.env.encode_json(node[u'head']))            
                 
     def issue(self, hostname, name):
         result = None
-        if name == 'oid':
-            result = ObjectId()
-        else:
-            repository = self.find_repository(hostname)
-            if repository is not None:
-                issued = repository.database.counters.find_and_modify(query={u'_id':name}, update={u'$inc':{u'next':1}, u'$set':{u'modified':datetime.now()}}, new=True, upsert=True)
-                if issued is not None:
-                    self.log.debug(u'New key %d issued for key pool %s', issued[u'next'], issued[u'_id'])
-                    result = int(issued[u'next'])
+        repository = self.find_repository(hostname)
+        if repository is not None:
+            issued = repository.database.counters.find_and_modify(
+                query={u'_id':name},
+                update={u'$inc':{u'next':1}, u'$set':{u'modified':datetime.now()}},
+                new=True,
+                upsert=True
+            )
+            if issued is not None:
+                self.log.debug(u'New key %d issued from pool %s', issued[u'next'], issued[u'_id'])
+                result = int(issued[u'next'])
         return result
         
 
@@ -126,7 +128,7 @@ class ResourceHandler(object):
         for name, branch in self.node['branch'].iteritems():
             branch['name'] = name
             
-            # If a collection is defined, Set the presistence flag
+            # If a collection is defines set the presistence flag to true
             branch['persistent'] = 'collection' in branch
             
             # Query type defaults to lookup
@@ -162,7 +164,7 @@ class ResourceHandler(object):
                     taken = True
                     if branch['query type'] == 'lookup':
                         if branch['persistent']:
-                            self.log.debug(u'Dropping %s', uri)
+                            self.log.debug(u'Dropping document %s', uri)
                             collection = repository.database[branch['collection']]
                             collection.remove({u'head.alternate':uri})
                     break
@@ -245,7 +247,7 @@ class ResourceHandler(object):
             try:
                 query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
             except KeyError, e:
-                self.log.debug(u'Could not compute remote URL for %s because parameter %s was not provided.', query['uri'], e)
+                self.log.debug(u'Failed to assemble remote URL for %s because parameter %s was missing.', query['uri'], e)
             else:
                 if 'query parameter' in query['match']:
                     query['query parameter'] = Ontology(self.env, 'ns.search.query')
@@ -324,7 +326,7 @@ class ResourceHandler(object):
                 try:
                     related = self.resolver.resolve(pattern.format(**query['parameter']))
                 except KeyError, e:
-                    # self.log.debug(u'Could not create related uri for pattern %s because parameter %s was missing', pattern, e)
+                    # self.log.debug(u'Failed to assemble related uri for pattern %s because parameter %s was missing', pattern, e)
                     pass
                 else:
                     if related is not None:
@@ -341,7 +343,7 @@ class ResourceHandler(object):
             try:
                 response = urlopen(request)
             except BadStatusLine, e:
-                self.log.warning(u'Bad HTTP status error when requesting %s', query['remote url'])
+                self.log.warning(u'Bad http status error when requesting %s', query['remote url'])
             except HTTPError, e:
                 self.log.warning(u'Server returned an error when requesting %s: %s', query['remote url'], e.code)
             except URLError, e:
@@ -402,11 +404,14 @@ class ResourceHandler(object):
                     record = entry['record']
                     
                 # Check that canonical and alternate are set
-                if 'canonical' in record[u'head'] and record[u'head']['canonical'] and 'alternate' in record[u'head'] and record[u'head']['alternate']:
-                    self.log.debug(u'Persisting %s', unicode(record[u'head']['canonical']))
-                    collection.save(record)
+                if 'canonical' in record[u'head'] and record[u'head']['canonical']:
+                    if 'alternate' in record[u'head'] and record[u'head']['alternate']:
+                        self.log.debug(u'Persisting document %s', unicode(record[u'head']['canonical']))
+                        collection.save(record)
+                    else:
+                        self.log.debug(u'Refusing to save record with missing alternate address block:\n%s', self.env.encode_json(record[u'head']))            
                 else:
-                    self.log.debug(u'URIs are missing, refusing to save record %s', unicode(record[u'head']))
+                    self.log.debug(u'Refusing to save record with missing cononical address:\n%s', self.env.encode_json(record[u'head']))            
                     
     def _compute_resolvables(self, entry):
         entry['record'][u'head'][u'alternate'] = []
@@ -421,7 +426,7 @@ class ResourceHandler(object):
                     entry['record'][u'head']['canonical'] = link
                     
             except KeyError, e:
-                # self.log.debug(u'Could not create uri for %s because %s was missing from the genealogy', resolvable['name'], e)
+                # self.log.debug(u'Failed to assemble uri for %s because %s was missing', resolvable['name'], e)
                 pass
                 
 

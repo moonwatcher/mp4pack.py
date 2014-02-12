@@ -327,13 +327,12 @@ class ResourceJob(Job):
                 if os.path.exists(path):
                     path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
                     files = self._scan_path(path, self.ontology['recursive'])
-                    self.log.debug(u'Found %d files in %s', len(files), path)
                     targets.extend(files)
                 else:
                     self.log.error(u'Path %s does not exist', path)
         if targets:
             targets = sorted(set(targets))
-            self.log.info(u'Found %d files to process', len(targets))
+            self.log.info(u'%d files queued in job %s', len(targets), self)
             for path in targets:
                 self.enqueue(ResourceTask(self, self.ontology.project('ns.system.task'), path))
                 
@@ -353,6 +352,7 @@ class ResourceJob(Job):
             for dnext in os.listdir(path):
                 dnext = os.path.abspath(os.path.join(path,dnext))
                 result.extend(self._scan_path(dnext, recursive, depth - 1))
+            self.log.debug(u'%d files queued from %s', len(result), path)
         return result
         
 

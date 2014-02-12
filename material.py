@@ -41,7 +41,7 @@ class MaterialCache(object):
             if asset:
                 result = asset.locate_resource(location)
             else:
-                self.log.debug(u'Could not locate asset for %s', location)
+                self.log.debug(u'Failed to locate asset for %s', location)
         return result
         
     def clean(self, options):
@@ -277,7 +277,7 @@ class Resource(object):
                 self.volatile = False
         else:
             self.env.resolver.remove(self.uri)
-            self.log.debug(u'Dropped orphan resource document %s', unicode(self))
+            self.log.debug(u'Orphan resource document dropped %s', unicode(self))
             
     def read(self):
         pass
@@ -299,7 +299,7 @@ class Resource(object):
                     # for copy is to copy the source, not the link
                     command.append(os.path.realpath(self.path))
                     command.append(product.path)
-                    message = u'Copy ' + self.path + u' --> ' + product.path
+                    message = u'Copy {} --> {}'.format(self.path, product.path)
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
                     
     def move(self, task):
@@ -312,17 +312,15 @@ class Resource(object):
                     command = self.env.initialize_command('mv', self.log)
                     if command:
                         command.extend([self.path, product.path])
-                        message = u'Move {0} --> {1}'.format(self.path, product.path)
+                        message = u'Move {} --> {}'.format(self.path, product.path)
                         self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                         self.env.purge_if_not_exist(self.path)
-                else:
-                    self.log.warning(u'Refuse to overwrite destination %s with %s', product.path, self.path)
-                    
+                        
     def delete(self, task):
         command = self.env.initialize_command('rm', self.log)
         if command:
             command.append(self.path)
-            message = u'Remove {0}'.format(self.path)
+            message = u'Remove {}'.format(self.path)
             self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
             self.env.purge_if_not_exist(self.path)
             
@@ -407,7 +405,7 @@ class AudioVideoContainer(Container):
                                 
                             x264_config = []
                             for k,v in stream['handbrake x264 settings'].iteritems():
-                                x264_config.append(u'{0}={1}'.format(k, unicode(v)))
+                                x264_config.append(u'{}={}'.format(k, unicode(v)))
                             x264_config = u':'.join(x264_config)
                             command.append(u'--encopts')
                             command.append(x264_config)
@@ -423,7 +421,7 @@ class AudioVideoContainer(Container):
                         command.append(u','.join(v))
                         
                 if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                    message = u'Transcode {0} --> {1}'.format(self.path, product.path)
+                    message = u'Transcode {} --> {}'.format(self.path, product.path)
                     command.extend([u'--input', self.path, u'--output', product.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
                     
@@ -459,14 +457,14 @@ class AudioVideoContainer(Container):
                             if stream['stream kind'] != 'menu':
                                 if 'language' in stream:
                                     command.append(u'--language')
-                                    command.append(u'{0}:{1}'.format(
+                                    command.append(u'{}:{}'.format(
                                         stream['stream order'],
                                         self.env.enumeration['language'].find(stream['language']).node['ISO 639-1'])
                                     )
                                     
                                 if 'stream name' in stream:
                                     command.append(u'--track-name')
-                                    command.append(u'{0}:{1}'.format(stream['stream order'], stream['stream name']))
+                                    command.append(u'{}:{}'.format(stream['stream order'], stream['stream name']))
                                     # command.append(u'{0}:{1}'.format(
                                     #    stream['stream order'],
                                     #    self.env.enumeration['language'].find(stream['language']).node['name'])
@@ -474,11 +472,11 @@ class AudioVideoContainer(Container):
                                     
                                 if 'delay' in pivot.resource.hint:
                                     command.append(u'--sync')
-                                    command.append(u'{0}:{1}'.format(stream['stream order'], pivot.resource.hint['delay']))
+                                    command.append(u'{}:{}'.format(stream['stream order'], pivot.resource.hint['delay']))
                                     
                                 if stream['kind'] == 'srt':
                                     command.append(u'--sub-charset')
-                                    command.append(u'{0}:{1}'.format(stream['stream order'], u'UTF-8'))
+                                    command.append(u'{}:{}'.format(stream['stream order'], u'UTF-8'))
                                     
                             else:
                                 command.append(u'--chapter-language')
@@ -490,7 +488,7 @@ class AudioVideoContainer(Container):
                         command.append(pivot.resource.path)
                         
                 if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                    message = u'Pack {0} --> {1}'.format(self.path, product.path)
+                    message = u'Pack {} --> {}'.format(self.path, product.path)
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
                     
     def _pack_m4v(self, task):
@@ -499,7 +497,7 @@ class AudioVideoContainer(Container):
             command = self.env.initialize_command('subler', self.log)
             if command:
                 if self.env.check_path_availability(product.path, task.ontology['overwrite']):
-                    message = u'Pack {0} --> {1}'.format(unicode(self), unicode(product))
+                    message = u'Pack {} --> {}'.format(unicode(self), unicode(product))
                     command.extend([u'-o', product.path, u'-i', self.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
                     
@@ -526,7 +524,7 @@ class Image(Container):
                             
                         if factor is not None:
                             resize = (int(round(image.size[0] * factor)), int(round(image.size[1] * factor)))
-                            self.log.debug(u'Resize artwork: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
+                            self.log.debug(u'Resize image: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
                             image = image.resize(resize, Image.ANTIALIAS)
                             
                         if self.env.check_path_availability(product.path, task.ontology['overwrite']):
@@ -563,7 +561,7 @@ class Matroska(AudioVideoContainer):
                                 if 'delay' in stream: product.hint['delay'] = stream['delay']
                                 
                                 # add a clause to the command to extract the stream
-                                command.append(u'{0}:{1}'.format(unicode(stream['stream order']), product.path))
+                                command.append(u'{}:{}'.format(unicode(stream['stream order']), product.path))
                                 taken = True
                                 
                                 # enqueue a task for transcoding
@@ -588,7 +586,7 @@ class MP4(AudioVideoContainer):
         
     def optimize(self, task):
         AudioVideoContainer.optimize(self, task)
-        message = u'Optimize {0}'.format(self.path)
+        message = u'Optimize {}'.format(self.path)
         command = self.env.initialize_command('subler', self.log)
         if command:
             command.extend([u'-optimize', u'-dest', self.path])
@@ -648,7 +646,7 @@ class MP4(AudioVideoContainer):
             # add subtitles
             if pivot.location['kind'] == 'srt':
                 stream = pivot.stream[0]
-                message = u'Update subtitles {0} --> {1}'.format(pivot.resource.path, self.path)
+                message = u'Update subtitles {} --> {}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
                     command.extend([
@@ -662,7 +660,7 @@ class MP4(AudioVideoContainer):
                     
             # add artwork
             elif pivot.location['kind'] == 'png':
-                message = u'Update artwork {0} --> {1}'.format(pivot.resource.path, self.path)
+                message = u'Update artwork {} --> {}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
                     command.extend([
@@ -674,7 +672,7 @@ class MP4(AudioVideoContainer):
                     
             # add chapters
             elif pivot.location['kind'] == 'chp':
-                message = u'Update chapters {0} --> {1}'.format(pivot.resource.path, self.path)
+                message = u'Update chapters {} --> {}'.format(pivot.resource.path, self.path)
                 command = self.env.initialize_command('subler', self.log)
                 if command:
                     command.extend([
@@ -729,7 +727,7 @@ class RawAudio(Container):
                 if taken: break
             if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
                 command.append(product.path)
-                message = u'Transcode {0} --> {1}'.format(self.path, product.path)
+                message = u'Transcode {} --> {}'.format(self.path, product.path)
                 self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
                 
 
