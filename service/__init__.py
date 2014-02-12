@@ -368,7 +368,7 @@ class ResourceHandler(object):
                 record = None
                 collection = query['repository'].database[entry['branch']['collection']]
                 entry['record'][u'head'][u'modified'] = datetime.utcnow()
-                entry['record'][u'head'][u'namespace'] = entry['branch']['name']
+                entry['record'][u'head'][u'namespace'] = entry['branch']['table']
                 self._compute_resolvables(entry)
                 
                 # Make a pseudo empty body for bodyless records
