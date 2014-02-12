@@ -135,7 +135,7 @@
                     ], 
                     "instruction": {
                         "help": "Transcode files to preset", 
-                        "name": "code"
+                        "name": "transcode"
                     }
                 }, 
                 {

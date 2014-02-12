@@ -31,10 +31,11 @@ class Queue(object):
         
     def submit(self, ontology):
         job = Job.create(self, ontology)
-        if job.valid:
-            self.job.append(job)
-        else:
-            self.log.warning(u'Ignoring invalid job %s', unicode(job))
+        if job:
+            if job.valid:
+                self.job.append(job)
+            else:
+                self.log.warning(u'Ignoring invalid job %s', unicode(job))
         return job
         
     def next(self):
@@ -122,6 +123,9 @@ class Job(object):
                 
             if result is None:
                 result = Job(queue, node)
+        else:
+            queue.log.warning(u'Could not infer job implementation for action')
+            
                 
         return result
         
