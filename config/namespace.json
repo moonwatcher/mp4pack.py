@@ -175,7 +175,10 @@
                 "country code": null, 
                 "country name": null, 
                 "itunes country id": null, 
-                "native language name": null
+                "native language name": null,
+                "iso 3166 1 alpha 2": null, 
+                "iso 3166 1 alpha 3": null, 
+                "iso 3166 1 numeric": null 
             }, 
             "synonym": [
                 "keyword"
@@ -330,6 +333,9 @@
                 "language": {
                     "tmdb": "iso_639_1"
                 }
+                "iso 639 1": null, 
+                "iso 639 2t": null, 
+                "iso 639 2b": null
             }, 
             "synonym": [
                 "keyword", 

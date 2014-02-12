@@ -1,5 +1,35 @@
 {
     "archetype": {
+        "iso 3166 1 alpha 2": {
+            "keyword": "iso_3166_1_2", 
+            "name": "ISO 3166-1 alpha-2", 
+            "type": "unicode"
+        }, 
+        "iso 3166 1 alpha 3": {
+            "keyword": "iso_3166_1_3", 
+            "name": "ISO 3166-1 alpha-3", 
+            "type": "unicode"
+        }, 
+        "iso 3166 1 numeric": {
+            "keyword": "iso_3166_1_numeric", 
+            "name": "ISO 3166-1 numeric", 
+            "type": "unicode"
+        }, 
+        "iso 639 1": {
+            "keyword": "iso_639_1", 
+            "name": "ISO 639-1", 
+            "type": "unicode"
+        }, 
+        "iso 639 2t": {
+            "keyword": "iso_639_2_t", 
+            "name": "ISO 639-2/T", 
+            "type": "unicode"
+        }, 
+        "iso 639 2b": {
+            "keyword": "iso_639_2_b", 
+            "name": "ISO 639-2/B", 
+            "type": "unicode"
+        }, 
         "8x8 dct": {
             "keyword": "8x8_dct", 
             "name": "Adaptive 8x8 discrete cosine transform", 
