@@ -3403,7 +3403,7 @@
                         "/c/{language}/tmdb/tv/season/freebase{freebase tv show mid}/{disc number}", 
                         "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/external"
                     ], 
-                    "table": "tvdb/tv/episode", 
+                    "table": "tmdb/tv/episode", 
                     "index": [
                         "tmdb tv show id", 
                         "imdb tv show id", 
