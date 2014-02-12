@@ -46,7 +46,7 @@ class Environment(object):
         
     @property
     def document(self):
-        return json.dumps(self.state, sort_keys=True, indent=4,  default=self.environment_json_handler)
+        return json.dumps(self.state, ensure_ascii=False, sort_keys=True, indent=4,  default=self.environment_json_handler)
         
     @property
     def home(self):
@@ -356,7 +356,7 @@ class Environment(object):
                 os.removedirs(os.path.dirname(path))
             except OSError:
                 pass
-        
+                
     def check_path_availability(self, path, overwrite=False):
         if path:
             if os.path.exists(path) and not overwrite:
@@ -443,9 +443,9 @@ class Environment(object):
         report = None
         if command:
             if not debug:
-                if log == None:
-                    log = self.log
-                
+                # if a logger was provided, use it. Otherwise default to the local
+                if log == None: log = self.log
+                    
                 log.debug(u'Execute: %s', self.encode_command(command))
                 if message: log.info(message)
                 
@@ -482,8 +482,6 @@ class Environment(object):
     def encode_json(self, node):
         return json.dumps(node, sort_keys=True, indent=4, default=self.default_json_handler)
         
-
-
 
 class Repository(object):
     def __init__(self, env, node):
@@ -547,12 +545,12 @@ class Repository(object):
             return self._connection[self.mongodb['database']]
         else:
             return None
-        
+            
     def close(self):
         if self._connection is not None:
             self.log.debug(u'Closing mongodb connection to %s', self.host)
             self._connection.disconnect()
-        
+            
     def reload(self):
         def check(node): return "enable" not in node or node["enable"]
         # Load path mappings
@@ -660,7 +658,6 @@ class Repository(object):
         else:
             self.log.error(u'Unknown collection %s', collection)
             
-
 
 class CommandLineParser(object):
     def __init__(self, env, node):

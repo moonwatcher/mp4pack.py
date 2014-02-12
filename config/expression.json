@@ -1,86 +1,86 @@
 {
-    "expression":[
+    "constant": {
+        "dot": ".", 
+        "empty string": "", 
+        "hd threshold": 720, 
+        "playback aspect ration": 1.7777777777777777, 
+        "space": " "
+    }, 
+    "expression": [
         {
-            "name":"srt time line",
-            "definition":"^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})$",
-            "flags":32
-        },
+            "definition": "^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})$", 
+            "flags": 32, 
+            "name": "srt time line"
+        }, 
         {
-            "name":"ass timecode",
-            "definition":"([0-9]):([0-9]{2}):([0-9]{2}).([0-9]{2})",
-            "flags":32
-        },
+            "definition": "([0-9]):([0-9]{2}):([0-9]{2}).([0-9]{2})", 
+            "flags": 32, 
+            "name": "ass timecode"
+        }, 
         {
-            "name":"ass subtitle line",
-            "definition":"^Dialogue\\s*:\\s*(.*)$",
-            "flags":32
-        },
+            "definition": "^Dialogue\\s*:\\s*(.*)$", 
+            "flags": 32, 
+            "name": "ass subtitle line"
+        }, 
         {
-            "name":"ass formation line",
-            "definition":"^Format\\s*:\\s*(.*)$",
-            "flags":32
-        },
+            "definition": "^Format\\s*:\\s*(.*)$", 
+            "flags": 32, 
+            "name": "ass formation line"
+        }, 
         {
-            "name":"ass condense line breaks",
-            "definition":"(\\\\N)+",
-            "flags":32
-        },
+            "definition": "(\\\\N)+", 
+            "flags": 32, 
+            "name": "ass condense line breaks"
+        }, 
         {
-            "name":"ass event command",
-            "definition":"\\{\\\\[^\\}]+\\}",
-            "flags":32
-        },
+            "definition": "\\{\\\\[^\\}]+\\}", 
+            "flags": 32, 
+            "name": "ass event command"
+        }, 
         {
-            "name":"whitespace",
-            "definition":"\\s+",
-            "flags":32
-        },
+            "definition": "\\s+", 
+            "flags": 32, 
+            "name": "whitespace"
+        }, 
         {
-            "name":"characters to exclude from filename",
-            "definition":"[\\\/?<>:*|'\"^\\.]",
-            "flags":32
-        },
+            "definition": "[\\/?<>:*|'\"^\\.]", 
+            "flags": 32, 
+            "name": "characters to exclude from filename"
+        }, 
         {
-            "name":"sentence end",
-            "definition":"[.!?]",
-            "flags":32
-        },
+            "definition": "[.!?]", 
+            "flags": 32, 
+            "name": "sentence end"
+        }, 
         {
-            "name":"mediainfo value list",
-            "definition":"^[^/]+(?:\\s*/\\s*[^/]+)*$",
-            "flags":32
-        },
+            "definition": "^[^/]+(?:\\s*/\\s*[^/]+)*$", 
+            "flags": 32, 
+            "name": "mediainfo value list"
+        }, 
         {
-            "name":"tvdb list separators",
-            "definition":"\\||,",
-            "flags":32
-        },
+            "definition": "\\||,", 
+            "flags": 32, 
+            "name": "tvdb list separators"
+        }, 
         {
-            "name":"space around tvdb list item",
-            "definition":"\\s*\\|\\s*",
-            "flags":32
-        },
+            "definition": "\\s*\\|\\s*", 
+            "flags": 32, 
+            "name": "space around tvdb list item"
+        }, 
         {
-            "name":"clean xml",
-            "definition":"\\s+/\\s+(?:\t)*",
-            "flags":32
-        },
+            "definition": "\\s+/\\s+(?:\t)*", 
+            "flags": 32, 
+            "name": "clean xml"
+        }, 
         {
-            "name":"true value",
-            "definition":"yes|true|1",
-            "flags":34
-        },
+            "definition": "yes|true|1", 
+            "flags": 34, 
+            "name": "true value"
+        }, 
         {
-            "name":"full utc datetime",
-            "definition":"(?:(?P<tzinfo>[A-Za-z/]+) )?(?P<year>[0-9]{4})(?:-(?P<month>[0-9]{2})(?:-(?P<day>[0-9]{2})(?:(?: |T)(?P<hour>[0-9]{2}):(?P<minute>[0-9]{2}):(?P<second>[0-9]{2}))?)?)?",
-            "flags":32
+            "definition": "(?:(?P<tzinfo>[A-Za-z/]+) )?(?P<year>[0-9]{4})(?:-(?P<month>[0-9]{2})(?:-(?P<day>[0-9]{2})(?:(?: |T)(?P<hour>[0-9]{2}):(?P<minute>[0-9]{2}):(?P<second>[0-9]{2}))?)?)?", 
+            "flags": 32, 
+            "name": "full utc datetime"
         }
-    ],
-    "constant":{
-        "empty string":"",
-        "hd threshold":720,
-        "playback aspect ration":1.7777777777777777,
-        "space":" ",
-        "dot":"."
-    }
+    ]
 }

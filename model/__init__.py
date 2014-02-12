@@ -12,8 +12,7 @@ class Timestamp(object):
         self._millisecond = 0
         self._timecode = None
         self.codec = Timestamp.format[format]
-    
-    
+        
     @property
     def millisecond(self):
         if self._millisecond is None and self._timecode is not None:
@@ -57,14 +56,12 @@ class Timestamp(object):
                 
             self._millisecond = (hour * 3600 + 60 * minute + second) * 1000 + millisecond
         return self._millisecond
-    
-    
+        
     @millisecond.setter
     def millisecond(self, value):
         self._millisecond = value
         self._timecode = None
-    
-    
+        
     @property
     def timecode(self):
         if self._timecode is None and self._millisecond is not None:
@@ -77,31 +74,25 @@ class Timestamp(object):
             millisecond = int(second_modulo)
             self._timecode = self.codec['encode'].format(hour, minute, second, millisecond)
         return self._timecode
-    
-    
+        
     @timecode.setter
     def timecode(self, value):
         self._timecode = value
         self._millisecond = None
-    
-    
+        
     @property
     def node(self):
         return { 'timecode':self.timecode, 'millisecond':self.millisecond }
-    
-    
+        
     def shift(self, offset):
         self.millisecond += offset
-    
-    
+        
     def scale(self, factor):
         self.millisecond = int(round(float(self.millisecond) * float(factor)))
-    
-    
+        
     def __unicode__(self):
         return self.timecode
-    
-    
+        
     SRT = 1
     CHAPTER = 2
     format = {
@@ -119,23 +110,19 @@ class ResourceTransform(object):
     def __init__(self, resource):
         self.resource = resource
         self.pivot = {}
-    
-    
+        
     @property
     def env(self):
         return self.resource.env
-    
-    
+        
     @property
     def node(self):
         return { u'pivot':[ p.node for p in self.pivot.values() ] }
-    
-    
+        
     @property
     def space(self):
         return self.resource.asset.resource.values()
-    
-    
+        
     def transform(self, preset, action):
         if action in preset['action']:
             # First use the pivot section to select resources to pivot
@@ -147,7 +134,7 @@ class ResourceTransform(object):
                             operator(branch['constraint'])
                         else:
                             operator()
-                                
+                            
             # Than use the transform to resolve the pivots on the selected resources
             if 'transform' in preset['action'][action] and self.pivot:
                 for template in preset['action'][action]['transform']:
@@ -161,77 +148,64 @@ class ResourceTransform(object):
                                     
                         if taken and template['mode'] == 'choose':
                             break
-    
-    
+                            
     def add(self, resource):
         if resource.uri not in self.pivot:
             self.pivot[resource.uri] = ResourcePivot(resource)
-    
-    
+            
     def remove(self, resource):
         if resource.uri in self.pivot:
             del self.pivot[resource.uri]
-    
-    
+            
     def this(self):
         self.add(self.resource)
-    
-    
+        
     def fragments(self):
         constraint = {'resource path digest':self.resource.location['path digest'], 'routing type':'fragment'}
         for resource in self.space:
             if resource.location.match(constraint):
                 self.add(resource)
-    
-    
+                
     def select(self, constraint):
         for resource in self.space:
             if resource.location.match(constraint):
                 self.add(resource)
-    
-    
+                
     def intersect(self, constraint):
         for k in self.selected.keys():
             if not self.selected[k].location.match(constraint):
                 self.remove(self.selected[k])
-    
-    
+                
     def subtract(self, constraint):
         for k in self.selected.keys():
             if self.selected[k].location.match(constraint):
                 self.remove(self.selected[k])
-    
-
+                
 
 class ResourcePivot(object):
     def __init__(self, resource):
         self.resource = resource
         self.location = Ontology.clone(resource.location)
         self.stream = []
-    
-    
+        
     @property
     def node(self):
         return {
             u'location':self.location,
             u'stream':self.stream,
         }
-    
-    
+        
     def __unicode__(self):
         return unicode(self.node)
-    
-    
+        
     @property
     def uri(self):
         return self.resource.uri
-    
-    
+        
     @property
     def taken(self):
         return len(self.stream) > 0
-    
-    
+        
     def transform(self, template):
         # apply overrides on the pivot location from the template
         if 'override' in template:
@@ -259,7 +233,5 @@ class ResourcePivot(object):
                         break
                         
         return self.taken
-    
-
-
+        
 
