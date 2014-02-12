@@ -29,9 +29,6 @@ class Resolver(object):
         from itunes import iTunesHandler
         self.handlers['itunes'] = iTunesHandler(self, self.env.service['itunes'])
         
-        # from tvdb import TVDbHandler
-        # self.handlers['tvdb'] = TVDbHandler(self, self.env.service['tvdb'])
-        
         from rottentomatoes import RottenTomatoesHandler
         self.handlers['rottentomatoes'] = RottenTomatoesHandler(self, self.env.service['rottentomatoes'])
         

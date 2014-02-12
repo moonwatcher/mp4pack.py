@@ -167,18 +167,6 @@
             "plural": "list", 
             "type": "embed"
         }, 
-        "banner url": {
-            "keyword": "banner_url", 
-            "name": "Banner URL", 
-            "type": "unicode"
-        }, 
-        "banners": {
-            "keyword": "banners", 
-            "name": "Banners", 
-            "namespace": "ns.knowledge.image", 
-            "plural": "list", 
-            "type": "embed"
-        }, 
         "biography": {
             "keyword": "biography", 
             "name": "Biography", 
@@ -645,11 +633,6 @@
         "exploded path": {
             "keyword": "exploded_path", 
             "name": "Exploded path", 
-            "type": "unicode"
-        }, 
-        "fan art url": {
-            "keyword": "fan_art_url", 
-            "name": "Fan Art URL", 
             "type": "unicode"
         }, 
         "file name": {
@@ -1934,11 +1917,6 @@
             "name": "Threads", 
             "type": "int"
         }, 
-        "thumbnail url": {
-            "keyword": "thumbnail_url", 
-            "name": "Thumbnail URL", 
-            "type": "unicode"
-        }, 
         "time shift": {
             "keyword": "shift", 
             "name": "Time shift", 
@@ -2145,16 +2123,6 @@
             "name": "TV show UMID", 
             "type": "unicode"
         }, 
-        "tvdb image id": {
-            "keyword": "tvdb_image_id", 
-            "name": "TVDb image ID", 
-            "type": "int"
-        }, 
-        "tvdb person id": {
-            "keyword": "tvdb_person_id", 
-            "name": "TVDb person ID", 
-            "type": "int"
-        }, 
         "tvdb tv episode id": {
             "keyword": "tvdb_tv_episode_id", 
             "name": "TVDb TV episode ID", 
@@ -2242,11 +2210,6 @@
             "atom": "xid", 
             "keyword": "xid", 
             "name": "iTunes extra ID", 
-            "type": "unicode"
-        }, 
-        "zap2it tv show id": {
-            "keyword": "zap2it_tv_show_id", 
-            "name": "Zap2It TV show ID", 
             "type": "unicode"
         }
     }

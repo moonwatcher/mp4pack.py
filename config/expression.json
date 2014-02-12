@@ -58,16 +58,6 @@
             "name": "mediainfo value list"
         }, 
         {
-            "definition": "\\||,", 
-            "flags": 32, 
-            "name": "tvdb list separators"
-        }, 
-        {
-            "definition": "\\s*\\|\\s*", 
-            "flags": 32, 
-            "name": "space around tvdb list item"
-        }, 
-        {
             "definition": "\\s+/\\s+(?:\t)*", 
             "flags": 32, 
             "name": "clean xml"

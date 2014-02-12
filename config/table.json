@@ -464,41 +464,6 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
-        "tvdb/tv/show/image":{
-            "collection":"tvdb_tv_show_image",
-            "index":[
-                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
-                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
-            ]
-        },
-        "tvdb/tv/show/people":{
-            "collection":"tvdb_tv_show_people",
-            "index":[
-                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
-                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
-            ]
-        },
-        "tvdb/tv/show":{
-            "collection":"tvdb_tv_show",
-            "index":[
-                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
-                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
-            ]
-        },
-        "tvdb/tv/episode":{
-            "collection":"tvdb_tv_episode",
-            "index":[
-                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
-                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
-            ]
-        },
-        "tvdb/tv/season":{
-            "collection":"tvdb_tv_season",
-            "index":[
-                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
-                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
-            ]
-        },
         "wikipedia/movie":{
             "collection":"wikipedia_movie",
             "index":[
