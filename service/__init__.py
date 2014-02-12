@@ -126,6 +126,7 @@ class ResourceHandler(object):
             branch['name'] = name
             
             # infer the mongodb collection to use
+            branch['persistent'] = False
             if 'table' in branch:
                 if branch['table'] in self.env.table:
                     branch['collection'] = self.env.table[branch['table']]['collection']
