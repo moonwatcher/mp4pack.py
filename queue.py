@@ -154,10 +154,6 @@ class Job(object):
     def cache(self):
         return self.queue.cache
         
-    @property
-    def document(self):
-        return json.dumps(self.execution, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-        
     def load(self):
         self.log.debug('Open job %s', unicode(self))
         self.journal = {'task':{}, 'group':{}}
@@ -489,7 +485,7 @@ class ResourceTask(Task):
         if product:
             self.product.append(product)
         else:
-            self.log.error(u'Could not determine destination path from %s', p)
+            self.log.error(u'Could not determine destination path from:\n%s', self.env.encode_json(p))
             
         return product
         

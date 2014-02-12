@@ -3,6 +3,8 @@
 import re
 import json
 import logging
+import copy 
+
 from datetime import datetime
 
 from ontology import Ontology 
@@ -117,7 +119,16 @@ class ResourceTransform(object):
         
     @property
     def node(self):
-        return { u'pivot':[ p.node for p in self.pivot.values() ] }
+        result = { u'pivot':[] }
+        for pivot in self.pivot.values():
+            p = { 'stream':[], 'location':copy.deepcopy(pivot.node['location'].node) }
+            if 'stream' in pivot.node:
+                for stream in pivot.node['stream']:
+                    s = copy.deepcopy(stream.node)
+                    if 'content' in s: del s['content']
+                    p['stream'].append(s)
+            result[u'pivot'].append(p)
+        return result
         
     @property
     def space(self):

@@ -480,6 +480,7 @@ class Environment(object):
                     command['path'] = bpath
                     
     def encode_json(self, node):
+        # Can't use ensure_ascii=False because the logging library seems to break when fed utf8 with non ascii characters
         return json.dumps(node, sort_keys=True, indent=4, default=self.default_json_handler)
         
 

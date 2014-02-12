@@ -37,7 +37,7 @@ def main():
     
     # execute the next job
     job = queue.next()
-    job and env.log.debug(u'Job %s history:\n%s', unicode(job), job.document)
+    job and env.log.debug(u'Job %s history:\n%s', unicode(job), env.encode_json(job.execution))
     
 if __name__ == '__main__':
     main()
