@@ -527,6 +527,13 @@
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
+        "tmdb/tv/episode":{
+            "collection":"tmdb_tv_episode",
+            "index":[
+                { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
+                { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
+            ]
+        },
         "tmdb/tv/episode/people":{
             "collection":"tmdb_tv_episode_people",
             "index":[
