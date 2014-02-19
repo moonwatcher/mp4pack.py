@@ -1576,7 +1576,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service/document/knowledge/company.credit": {
+                "service/document/knowledge/company/credit": {
                     "aggregate": [
                         {
                             "uri": "/c/tmdb/company/{tmdb company id}/credit"
@@ -1985,7 +1985,7 @@
                     ], 
                     "type": "json"
                 }, 
-                "service/document/knowledge/music/album.image": {
+                "service/document/knowledge/music/album/image": {
                     "collect": [
                         "/h/music/album/{music album id}"
                     ], 
