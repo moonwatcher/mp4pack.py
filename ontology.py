@@ -550,7 +550,7 @@ class Prototype(Element):
         try:
             result = int(value)
         except ValueError:
-            self.log.error(u'Failed to decode value % as integer for %s', value, self.key)
+            self.log.error(u'Failed to decode value %s as integer for %s', value, self.key)
         return result
         
     def _cast_float(self, value, axis=None):
@@ -558,7 +558,7 @@ class Prototype(Element):
         try:
             result = float(value)
         except ValueError:
-            self.log.error(u'Failed to decode value % as float for %s', value, self.key)
+            self.log.error(u'Failed to decode value %s as float for %s', value, self.key)
         return result
         
     def _cast_unicode(self, value, axis=None):
@@ -591,9 +591,9 @@ class Prototype(Element):
                 try:
                     result = datetime(**parsed)
                 except TypeError, ValueError:
-                    self.log.debug(u'Failed to decode value % as datetime for %s', value, self.key)
+                    self.log.debug(u'Failed to decode value %s as datetime for %s', value, self.key)
             else:
-                self.log.debug(u'Failed to parse value % as datetime for %s', value, self.key)
+                self.log.debug(u'Failed to parse value %s as datetime for %s', value, self.key)
         return result
         
     def _cast_bool(self, value, axis=None):
