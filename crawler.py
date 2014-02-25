@@ -16,6 +16,7 @@ class Crawler(object):
     def __init__(self, ontology):
         self.log = logging.getLogger('Crawler')
         self.ontology = ontology
+        self._universal_detector = None
         self._node = None
         self._execution = None
         self.reload()
