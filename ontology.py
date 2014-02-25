@@ -769,15 +769,6 @@ class Rule(object):
         self.env = env
         self.node = node
         
-        if 'provide' in self.node:
-            self.node['provide'] = set(self.node['provide'])
-            
-        if 'branch' not in self.node:
-            self.node['branch'] = []
-            
-        for branch in self.branch:
-            self._load_branch(branch)
-            
     def __unicode__(self):
         return self.node['key']
         
@@ -794,33 +785,8 @@ class Rule(object):
         return self.node['branch']
         
     def add_branch(self, branch):
-        if self._load_branch(branch):
-            self.branch.append(branch)
-            
-    def _load_branch(self, branch):
-        result = False
-        if branch is not None:
-            try:
-                if 'requires' in branch:
-                    branch['requires'] = set(branch['requires'])
-                    
-                if 'match' in branch:
-                    if 'flags' not in branch['match']:
-                        branch['match']['flags'] = re.UNICODE
-                    branch['match']['pattern'] = re.compile(branch['match']['expression'], branch['match']['flags'])
-                    
-                if 'decode' in branch:
-                    for c in branch['decode']:
-                        if 'flags' not in c:
-                            c['flags'] = re.UNICODE
-                        c['pattern'] = re.compile(c['expression'], c['flags'])
-                result = True
-            except Exception, e:
-                self.log.error(u'Failed to load banch for rule %s', unicode(self))
-                self.log.debug(u'Exception raised: %s', unicode(e))
-        return result
+        self.branch.append(branch)
         
-
 
 class Umid(object):
     def __init__(self, home_id=None, media_kind=None):

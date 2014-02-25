@@ -1,61 +1,52 @@
 {
-    "command": [
-        {
+    "command": {
+        "rsync":{
             "binary": "rsync", 
-            "name": "rsync", 
             "path": "/usr/bin/rsync"
         }, 
-        {
+        "mv":{
             "binary": "mv", 
-            "name": "mv", 
             "path": "/bin/mv"
         }, 
-        {
+        "rm":{
             "binary": "rm", 
-            "name": "rm", 
             "path": "/bin/rm"
         }, 
-        {
+        "handbrake":{
             "binary": "HandbrakeCLI", 
-            "name": "handbrake", 
             "path": "/Users/lg/.bin/HandbrakeCLI"
         }, 
-        {
+        "subler":{
             "binary": "SublerCLI", 
-            "name": "subler", 
             "path": "/Users/lg/.bin/SublerCLI"
         }, 
-        {
+        "mkvmerge":{
             "binary": "mkvmerge", 
-            "name": "mkvmerge", 
             "path": "/usr/local/bin/mkvmerge"
         }, 
-        {
+        "mkvextract":{
             "binary": "mkvextract", 
-            "name": "mkvextract", 
             "path": "/usr/local/bin/mkvextract"
         }, 
-        {
+        "mp4file":{
+            "enable":false,
             "binary": "mp4file", 
-            "name": "mp4file", 
             "path": null
         }, 
-        {
+        "mp4art":{
+            "enable":false,
             "binary": "mp4art", 
-            "name": "mp4art", 
             "path": null
         }, 
-        {
+        "mediainfo":{
             "binary": "mediainfo", 
-            "name": "mediainfo", 
             "path": "/usr/local/bin/mediainfo"
         }, 
-        {
+        "ffmpeg":{
             "binary": "ffmpeg", 
-            "name": "ffmpeg", 
             "path": "/Users/lg/.bin/ffmpeg"
         }
-    ], 
+    }, 
     "interface": {
         "default": {
             "action": [

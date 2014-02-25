@@ -2,7 +2,6 @@
 
 import json
 import os
-from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 from service import ResourceHandler
 from ontology import Ontology

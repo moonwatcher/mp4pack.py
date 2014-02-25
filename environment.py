@@ -6,6 +6,9 @@ import logging
 import copy
 import hashlib
 import json
+import pickle
+
+from StringIO import StringIO
 from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
 from chardet.universaldetector import UniversalDetector
@@ -16,11 +19,307 @@ from model.caption import CaptionFilterCache
 from service import Resolver
 from argparse import ArgumentParser
 
+check = lambda node: "enable" not in node or node["enable"]
+
+class Cache(object):
+    def __init__(self):
+        self.log = logging.getLogger('Environment')
+        self.home = u'/etc/mpk'
+        self.node = None
+        self.state = dict()
+        self.path = None
+        self.dirty = False
+        self.relative = os.path.dirname(__file__)
+        
+        # correct the home directory from the environment variable
+        home = os.getenv('MPK_HOME')
+        if home and os.path.isdir(home):
+            self.home = home
+            
+        self.log.debug(u'home directory is %s', home)
+        self.path = os.path.join(self.home, u'cache.db')
+        self.open()
+        
+    def get(self, path):
+        result = None
+        path = os.path.expanduser(os.path.expandvars(path))
+        key = hashlib.sha1(path).hexdigest()
+        
+        if key not in self.state: self.state[key] = dict()
+        state = self.state[key]
+        
+        if key not in self.node['record']: self.node['record'][key] = dict()
+        record = self.node['record'][key]
+        
+        if 'file sha1' not in state:
+            if os.path.isfile(path):
+                try:
+                    content = StringIO(open(path, 'rb').read())
+                    state['file sha1'] = hashlib.sha1(content.read()).hexdigest()
+                except IOError, e:
+                    self.log.warning(u'Failed to load configuration file %s', path)
+                    self.log.debug(u'Exception raised: %s', unicode(e))
+                else:
+                    if 'cached sha1' not in record or (state['file sha1'] != record['cached sha1']):
+                        self.dirty = True
+                        if 'node' in record:
+                            del record['node']
+                            self.log.debug(u'Removed old cached entry for %s', path)
+                            
+                        extension = os.path.splitext(path)[1]
+                        content.seek(0)
+                        try:
+                            if extension == u'.json':
+                                record['node'] = json.load(content)
+                                self.log.debug(u'Loaded JSON configuration dictionary from %s with sha1 %s', path, state['file sha1'])
+                            elif extension == u'.py':
+                                record['node'] = eval(content.read())
+                                self.log.debug(u'Loaded Python configuration dictionary from %s with sha1 %s', path, state['file sha1'])
+                            else:
+                                self.log.error(u'Uknown configuration type %s for %s', extension, path)
+                                
+                        except SyntaxError, e:
+                            self.log.warning(u'Syntax error in configuration file %s', path)
+                            self.log.debug(u'Exception raised: %s', unicode(e))
+                        else:
+                            if 'node' in record:
+                                if isinstance(record['node'], dict):
+                                    # if everything is fine cache the record
+                                    # and set the cached sha1 to match the file we loaded
+                                    record['cached sha1'] = state['file sha1']
+                                    
+                                    # than apply any postprocessing
+                                    self.load(record)
+                                else:
+                                    del record['node']
+                                    del record['cached sha1']
+                                    self.log.warning(u'No valid dictionary in configuration file %s', path)
+            else:
+                self.log.warning(u'Configuration file at %s does not exists', path)
+                
+        if 'node' in record:
+            result = record['node']
+        return result
+        
+    def load(self, record):
+        def load_dictionary(node, name, key='key'):
+            temp = node[name]
+            node[name] = {}
+            for k,e in temp.iteritems():
+                if check(e):
+                    e[key] = k
+                    node[name][k] = e
+                    
+        node = record['node']
+        if node:
+            if 'archetype' in node:
+                load_dictionary(node, 'archetype')
+                
+            if 'enumeration' in node:
+                load_dictionary(node, 'enumeration')
+                
+            if 'namespace' in node:
+                load_dictionary(node, 'namespace')
+                
+            if 'rule' in node:
+                load_dictionary(node, 'rule')
+                self.load_rule_node(node['rule'])
+                
+            if 'service' in node:
+                load_dictionary(node, 'service', 'name')
+                
+            if 'table' in node:
+                load_dictionary(node, 'table', 'name')
+                
+            if 'expression' in node:
+                load_dictionary(node, 'expression', 'key')
+                self.load_expression_node(node['expression'])
+                
+            if 'command' in node:
+                load_dictionary(node, 'command', 'name')
+                self.load_command_node(node['command'])
+                
+            if 'preset' in node:
+                load_dictionary(node, 'preset', 'name')
+                
+            if 'repository' in node:
+                load_dictionary(node, 'repository', 'host')
+                self.load_repository_node(node['repository'])
+                
+            if 'subtitle filter' in node:
+                load_dictionary(node, 'subtitle filter', 'name')
+                
+            if 'interface' in node:
+                load_dictionary(node, 'interface')
+                self.load_interface_node(node['interface'])
+                
+    def open(self):
+        if os.path.exists(self.path):
+            try:
+                self.node = pickle.load(open(self.path, 'rb'))
+            except KeyError:
+                self.log.warning(u'Failed to load pickled cache from %s', self.path)
+                self.node = None
+                
+        if self.node is None:
+            self.node = { 'record':{} }
+            
+    def close(self):
+        if self.dirty:
+            try:
+                pickle.dump(self.node, open(self.path, 'wb'))
+                self.log.debug(u'Saved pickled cache to %s', self.path)
+            except IOError, e:
+                self.log.warning(u'Failed to write cache to %s', self.path)
+                self.log.debug(u'Exception raised: %s', unicode(e))
+                
+    def load_rule_branch(self, branch):
+        result = True
+        try:
+            if 'requires' in branch:
+                branch['requires'] = set(branch['requires'])
+                
+            if 'match' in branch:
+                if 'flags' not in branch['match']: branch['match']['flags'] = re.UNICODE
+                branch['match']['pattern'] = re.compile(branch['match']['expression'], branch['match']['flags'])
+                
+            if 'decode' in branch:
+                for c in branch['decode']:
+                    if 'flags' not in c: c['flags'] = re.UNICODE
+                    c['pattern'] = re.compile(c['expression'], c['flags'])
+        except Exception, e:
+            self.log.error(u'Failed to load banch for rule %s', e['key'])
+            self.log.debug(u'Exception raised: %s', unicode(e))
+            result = False
+        return result
+        
+    def load_rule_node(self, node):
+        for k,e in node.iteritems():
+            if 'provide' in e:
+                e['provide'] = set(e['provide'])
+                
+            if 'branch' not in e:
+                e['branch'] = []
+                
+            else:
+                for branch in e['branch']:
+                    self.load_rule_branch(branch)
+                    
+    def load_expression_node(self, node):
+        for k,e in node.iteritems():
+            if 'flags' not in e: e['flags'] = 0
+            node[k] = re.compile(e['definition'], e['flags'])
+            
+    def load_command_node(self, node):
+        for k,e in node.iteritems():
+            self.which(e)
+            
+    def load_interface_node(self, node):
+        for k,e in node.iteritems():
+            for argument in e['prototype'].values():
+                if 'type' in argument['parameter']:
+                    # eval the type
+                    argument['parameter']['type'] = eval(argument['parameter']['type'])
+                    
+    def load_repository_node(self, node):
+        for k,e in node.iteritems():
+            if 'routing' not in e: e['routing'] = []
+            if 'default' not in e: e['default'] = []
+            if 'mapping' not in e: e['mapping'] = []
+            
+            # expand path mappings
+            temp = e['mapping']
+            e['mapping'] = list()
+            for mapping in temp:
+                if check(mapping):
+                    self.log.debug(u'Expanding path %s', mapping['path'])
+                    mapping['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(mapping['path'])))
+                    
+                    alternate = set()
+                    for alt in mapping['alternate']:
+                        self.log.debug(u'Expanding path %s', alt)
+                        alternate.add(os.path.realpath(os.path.expanduser(os.path.expandvars(alt))))
+                    mapping['alternate'] = list(alternate)
+                    e['mapping'].append(mapping)
+                    
+            # expand volume paths
+            temp = e['volume']['element']
+            e['volume']['element'] = dict()
+            for key, volume in temp.iteritems():
+                if check(volume):
+                    self.log.debug(u'Expanding path %s', volume['path'])
+                    volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
+                    e['volume']['element'][key] = volume
+                    
+    def which(self, command):
+        def is_executable(fpath):
+            return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+            
+        command['path'] = None
+        fpath, fname = os.path.split(command['binary'])
+        if fpath:
+            if is_executable(command['binary']):
+                command['path'] = command['binary']
+        else:
+            for path in os.environ['PATH'].split(os.pathsep):
+                bpath = os.path.join(path, command['binary'])
+                if is_executable(bpath):
+                    command['path'] = bpath
+                    
+
+
 class Environment(object):
     def __init__(self):
         self.log = logging.getLogger('Environment')
         self.ontology = None
+        self.cache = Cache()
         self.state = {
+            'config':[
+                {
+                    'name':'system',
+                    'path':'config/system.json',
+                },
+                {
+                    'name':'expression',
+                    'path':'config/expression.json',
+                },
+                {
+                    'name':'interface',
+                    'path':'config/interface.json',
+                },
+                {
+                    'name':'enumeration',
+                    'path':'config/enumeration.py',
+                },
+                {
+                    'name':'archetype',
+                    'path':'config/archetype.json',
+                },
+                {
+                    'name':'rule',
+                    'path':'config/rule.json',
+                },
+                {
+                    'name':'namespace',
+                    'path':'config/namespace.json',
+                },
+                {
+                    'name':'service',
+                    'path':'config/service.json',
+                },
+                {
+                    'name':'table',
+                    'path':'config/table.json',
+                },
+                {
+                    'name':'material',
+                    'path':'config/material.json',
+                },
+                {
+                    'name':'subtitle',
+                    'path':'config/subtitle.py',
+                },
+            ],
             'system':{},
             'archetype':{},
             'enumeration':{},
@@ -63,6 +362,10 @@ class Environment(object):
     @property
     def language(self):
         return self.system['language']
+        
+    @property
+    def config(self):
+        return self.state['config']
         
     @property
     def system(self):
@@ -138,71 +441,42 @@ class Environment(object):
             self._universal_detector = UniversalDetector()
         return self._universal_detector
         
+    def close(self):
+        if self.cache is not None:
+            self.cache.close()
+            
     def load(self):
+        # calculate a relative address for config files
         relative = os.path.dirname(__file__)
-        self.load_configuration_file(os.path.join(relative,'config/system.json'))
-        self.load_configuration_file(os.path.join(relative,'config/expression.json'))
-        self.load_configuration_file(os.path.join(relative,'config/interface.json'))
-        self.load_configuration_file(os.path.join(relative,'config/enumeration.py'))
-        self.load_configuration_file(os.path.join(relative,'config/archetype.json'))
-        self.load_configuration_file(os.path.join(relative,'config/rule.json'))
-        self.load_configuration_file(os.path.join(relative,'config/namespace.json'))
-        self.load_configuration_file(os.path.join(relative,'config/service.json'))
-        self.load_configuration_file(os.path.join(relative,'config/table.json'))
-        self.load_configuration_file(os.path.join(relative,'config/material.json'))
-        self.load_configuration_file(os.path.join(relative,'config/subtitle.py'))
         
-        # Override the default home folder from env if specified and valid
-        home = os.getenv('MPK_HOME')
-        if home:
-            home = os.path.expanduser(os.path.expandvars(home))
-            if os.path.isdir(home):
-                self.system['home'] = home
-        self.system['conf'] = os.path.join(self.home, u'settings.json')
-        self.load_configuration_file(self.system['conf'])
+        # load the config files
+        for config in self.config:
+            # caluclate an absolute address
+            config['path'] = os.path.join(relative, config['path'])
+            self.load_configuration_node(self.cache.get(config['path']))
+            
+        # Override the default home folder from env
+        self.system['home'] = self.cache.home
         
-    def load_configuration_file(self, path):
-        if path and os.path.isfile(path):
-            try:
-                content = open(path, 'r')
-            except IOError, e:
-                self.log.warning(u'Failed to load configuration file %s', path)
-                self.log.debug(u'Exception raised: %s', unicode(e))
-            else:
-                extention = os.path.splitext(path)[1]
-                try:
-                    if extention == u'.py':
-                        node = eval(content.read())
-                    elif extention == u'.json':
-                        node = json.load(content)
-                    self.log.debug(u'Configuration dictionary loaded from %s', path)
-                except SyntaxError, e:
-                    self.log.warning(u'Syntax error in configuration file %s', path)
-                    self.log.debug(u'Exception raised: %s', unicode(e))
-                else:
-                    if isinstance(node, dict):
-                        self.load_configuration_node(node)
-                    else:
-                        self.log.warning(u'Configuration file %s is not a valid dictionary', path)
-                        
+        # Load the settings file
+        self.load_configuration_node(self.cache.get(os.path.join(self.home, u'settings.json')))
+        
     def load_interactive(self, ontology):
         self.ontology = ontology
         
-        # Load conf file from command line argument
+        # Load config file from command line argument
         if 'configuration path' in self.ontology:
             self.ontology['configuration path'] = os.path.expanduser(os.path.expandvars(self.ontology['configuration path']))
-            self.load_configuration_file(self.ontology['configuration path'])
+            self.load_configuration_node(self.cache.get(self.ontology['configuration path']))
             
         # Override some value from command line
         for e in ('domain', 'host', 'language'):
             if e in self.ontology:
                 self.system[e] = self.ontology[e]
         self.ontology['host'] = self.host
-        self._load_dynamic_rules()
+        self.load_dynamic_rules()
         
     def load_configuration_node(self, node):
-        def check(node): return "enable" not in node or node["enable"]
-            
         if node:
             if 'system' in node:
                 for k,e in node['system'].iteritems():
@@ -210,81 +484,57 @@ class Environment(object):
                     
             if 'archetype' in node:
                 for k,e in node['archetype'].iteritems():
-                    if check(e):
-                        e['key'] = k
-                        self.archetype[k] = e
-                        
+                    self.archetype[k] = e
+                    
             if 'enumeration' in node:
                 for k,e in node['enumeration'].iteritems():
-                    if check(e):
-                        e['key'] = k
-                        self.enumeration[k] = Enumeration(self, e)
-                        
+                    self.enumeration[k] = Enumeration(self, e)
+                    
             if 'namespace' in node:
                 for k,e in node['namespace'].iteritems():
-                    e['key'] = k
                     self.namespace[k] = PrototypeSpace(self, e)
                     
             if 'rule' in node:
                 for k,e in node['rule'].iteritems():
-                    if check(e):
-                        e['key'] = k
-                        self.rule[k] = Rule(self, e)
-                        
+                    self.rule[k] = Rule(self, e)
+                    
             if 'service' in node:
                 for k,e in node['service'].iteritems():
-                    if check(e):
-                        e['name'] = k
-                        self.service[k] = e
-                        
+                    self.service[k] = e
+                    
             if 'table' in node:
                 for k,e in node['table'].iteritems():
-                    if check(e):
-                        e['name'] = k
-                        self.table[k] = e
-                        
+                    self.table[k] = e
+                    
             if 'expression' in node:
-                for e in node['expression']:
-                    if check(e):
-                        # flags defaults to zero
-                        if 'flags' not in e: e['flags'] = 0
-                        self.expression[e['name']] = re.compile(e['definition'], e['flags'])
-                        
+                for k,e in node['expression'].iteritems():
+                    self.expression[k] = e
+                    
             if 'constant' in node:
                 for k,e in node['constant'].iteritems():
                     self.constant[k] = e
                     
             if 'command' in node:
-                for e in node['command']:
-                    if check(e):
-                        self.command[e['name']] = e
-                        self.which(e)
-                        
+                for k,e in node['command'].iteritems():
+                    self.command[k] = e
+                    
             if 'preset' in node:
                 for k,e in node['preset'].iteritems():
-                    if check(e):
-                        e['name'] = k
-                        self.preset[k] = e
-                        
+                    self.preset[k] = e
+                    
             if 'repository' in node:
                 for k,e in node['repository'].iteritems():
-                    if check(e):
-                        e['host'] = k
-                        self.repository[k] = Repository(self, e)
-                        
+                    self.repository[k] = Repository(self, e)
+                    
             if 'subtitle filter' in node:
                 for k,e in node['subtitle filter'].iteritems():
-                    if check(e):
-                        e['name'] = k
-                        self.subtitle_filter[k] = e
-                        
+                    self.subtitle_filter[k] = e
+                    
             if 'interface' in node:
                 for k,e in node['interface'].iteritems():
-                    if check(e):
-                        e['key'] = k
-                        self.interface[k] = e
-                        
-    def _load_dynamic_rules(self):
+                    self.interface[k] = e
+                    
+    def load_dynamic_rules(self):
         node = { 'rule':{}, }
         
         # Default host
@@ -313,6 +563,23 @@ class Environment(object):
             ],
         }
         
+        # Temp location
+        node['rule']['rule.system.temp.location'] = {
+            'name':'Temp location',
+            'provide':['temp path'],
+            'branch':[],
+        }
+        for repository in self.repository.values():
+            node['rule']['rule.system.temp.location']['branch'].append(
+                {
+                    'requires':['host', 'domain'],
+                    'equal':{'host':repository.host, 'domain':repository.domain},
+                    'apply':(
+                        {'property':'temp path', 'value':repository.node['temp']['path']},
+                    ),
+                }
+            )
+        
         # Volume location
         node['rule']['rule.system.volume.location'] = {
             'name':'Volume location',
@@ -330,23 +597,7 @@ class Environment(object):
                         ),
                     }
                 )
-                
-        # Temp location
-        node['rule']['rule.system.temp.location'] = {
-            'name':'Temp location',
-            'provide':['temp path'],
-            'branch':[],
-        }
-        for repository in self.repository.values():
-            node['rule']['rule.system.temp.location']['branch'].append(
-                {
-                    'requires':['host', 'domain'],
-                    'equal':{'host':repository.host, 'domain':repository.domain},
-                    'apply':(
-                        {'property':'temp path', 'value':repository.node['temp']['path']},
-                    ),
-                }
-            )
+        self.cache.load({'node':node})
         self.load_configuration_node(node)
         
     def cleanup_path(self, path):
@@ -464,25 +715,11 @@ class Environment(object):
                 print self.encode_command(command)
         return report
         
-    def which(self, command):
-        def is_executable(fpath):
-            return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-            
-        command['path'] = None
-        fpath, fname = os.path.split(command['binary'])
-        if fpath:
-            if is_executable(command['binary']):
-                command['path'] = command['binary']
-        else:
-            for path in os.environ['PATH'].split(os.pathsep):
-                bpath = os.path.join(path, command['binary'])
-                if is_executable(bpath):
-                    command['path'] = bpath
-                    
     def encode_json(self, node):
         # Can't use ensure_ascii=False because the logging library seems to break when fed utf8 with non ascii characters
         return json.dumps(node, sort_keys=True, indent=4, default=self.default_json_handler)
         
+
 
 class Repository(object):
     def __init__(self, env, node):
@@ -493,13 +730,7 @@ class Repository(object):
         self._volume = None
         self._mapping = None
         self._connection = None
-        if 'routing' not in self.node:
-            self.node['routing'] = []
-        if 'default' not in self.node:
-            self.node['default'] = []
-        if 'mapping' not in self.node:
-            self.node['mapping'] = []
-            
+        
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
         
@@ -553,43 +784,35 @@ class Repository(object):
             self._connection.disconnect()
             
     def reload(self):
-        def check(node): return "enable" not in node or node["enable"]
         # Load path mappings
         self._mapping = {}
         for mapping in self.node['mapping']:
-            if check(mapping):
-                self.log.debug(u'Expanding path %s', mapping['path'])
-                mapping['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(mapping['path'])))
-                for alt in mapping['alternate']:
-                    self.log.debug(u'Expanding path %s', alt)
-                    alternate = os.path.realpath(os.path.expanduser(os.path.expandvars(alt)))
-                    if alternate not in self._mapping:
-                        self._mapping[alternate] = mapping['real']
-                    else:
-                        self.log.warning(u'Path %s on %s already mapped to %s', alternate, self.host, self._mapping[alternate])
-                        
+            for alt in mapping['alternate']:
+                if alt not in self._mapping:
+                    self._mapping[alt] = mapping['real']
+                else:
+                    self.log.warning(u'Path %s on %s already mapped to %s', alt, self.host, self._mapping[alt])
+                    
         # Load the volume enumeration
-        for key, volume in self.node['volume']['element'].iteritems():
-            if check(volume):
-                self.log.debug(u'Expanding path %s', volume['path'])
-                volume['real'] = os.path.realpath(os.path.expanduser(os.path.expandvars(volume['path'])))
         self._volume = Enumeration(self.env, self.node['volume'])
         
         # Load routing rules
         routing = self.env.rule['rule.system.default.routing']
-        for branch in self.node['volume.default']:
+        for branch in self.node['routing']['volume.default']:
             if 'host' not in branch['requires']:
                 branch['requires'].append('host')
             branch['equal']['host'] = self.host
-            routing.add_branch(branch)
-            
+            if self.env.cache.load_rule_branch(branch):
+                routing.add_branch(branch)
+                
         default = self.env.rule['rule.task.default.preset']
-        for branch in self.node['preset.default']:
+        for branch in self.node['routing']['preset.default']:
             if 'host' not in branch['requires']:
                 branch['requires'].append('host')
             branch['equal']['host'] = self.host
-            default.add_branch(branch)
-            
+            if self.env.cache.load_rule_branch(branch):
+                default.add_branch(branch)
+                
     def decode_resource_path(self, path):
         result = None
         if path:
@@ -660,6 +883,7 @@ class Repository(object):
             self.log.error(u'Unknown collection %s', name)
             
 
+
 class CommandLineParser(object):
     def __init__(self, env, node):
         self.env = env
@@ -673,10 +897,6 @@ class CommandLineParser(object):
             parser.add_argument(*node['flag'], **node['parameter'])
             
         for argument in self.node['prototype'].values():
-            if 'type' in argument['parameter']:
-                # eval the type
-                argument['parameter']['type'] = eval(argument['parameter']['type'])
-                
             if 'dest' in argument['parameter']:
                 archetype = self.env.archetype[argument['parameter']['dest']]
                 

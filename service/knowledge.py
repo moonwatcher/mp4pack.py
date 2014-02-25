@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 from service import ResourceHandler
 from ontology import Ontology

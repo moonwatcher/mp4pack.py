@@ -148,185 +148,188 @@
                     ]
                 }
             ],
-            "preset.default":[
-                {
-                    "requires":["action"],
-                    "equal":{"action":"info"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"explode"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"pack"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"tag"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action"],
-                    "equal":{"action":"update"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"m4v"},
-                    "apply":[
-                        {"property":"preset", "value":"atv3"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"mkv"},
-                    "apply":[
-                        {"property":"preset", "value":"atv3"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"png"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"dts"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"ac3"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"flac"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"srt"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"chp"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                },
-                {
-                    "requires":["action", "kind"],
-                    "equal":{"action":"transcode", "kind":"ass"},
-                    "apply":[
-                        {"property":"preset", "value":"default"}
-                    ]
-                }
-            ],
-            "volume.default":[
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"srt"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"png"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"chp"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"m4v"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"m4a"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"mkv"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"avi"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"ac3"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"ass"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"dts"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                },
-                {
-                    "requires":["kind"],
-                    "equal":{"kind":"flac"},
-                    "apply":[
-                        {"property":"volume", "value":"titan"}
-                    ]
-                }
-            ]
+            "routing":{
+                "preset.default":[
+                    {
+                        "requires":["action"],
+                        "equal":{"action":"info"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action"],
+                        "equal":{"action":"explode"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action"],
+                        "equal":{"action":"pack"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action"],
+                        "equal":{"action":"tag"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action"],
+                        "equal":{"action":"update"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"m4v"},
+                        "apply":[
+                            {"property":"preset", "value":"atv3"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"mkv"},
+                        "apply":[
+                            {"property":"preset", "value":"atv3"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"png"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"dts"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"ac3"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"flac"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"srt"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"chp"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    },
+                    {
+                        "requires":["action", "kind"],
+                        "equal":{"action":"transcode", "kind":"ass"},
+                        "apply":[
+                            {"property":"preset", "value":"default"}
+                        ]
+                    }
+                ],
+                "volume.default":[
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"srt"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"png"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"chp"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"m4v"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"m4a"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"mkv"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"avi"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"ac3"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"ass"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"dts"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    },
+                    {
+                        "requires":["kind"],
+                        "equal":{"kind":"flac"},
+                        "apply":[
+                            {"property":"volume", "value":"titan"}
+                        ]
+                    }
+                ]
+                
+            }
         }
     }
 }

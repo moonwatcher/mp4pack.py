@@ -2,7 +2,6 @@
 
 import json
 import uuid
-from StringIO import StringIO
 from urllib2 import Request, urlopen, URLError, HTTPError
 from service import ResourceHandler
 from crawler import Crawler
