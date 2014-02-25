@@ -3,10 +3,11 @@
 import os
 import logging
 import base64
-from datetime import datetime
-from subprocess import Popen, PIPE
 import xml.etree.cElementTree as ElementTree
 
+from datetime import datetime
+from subprocess import Popen, PIPE
+from chardet.universaldetector import UniversalDetector
 from ontology import Ontology
 from model.menu import Chapter, Menu
 from model.caption import Caption, Slide
@@ -35,6 +36,21 @@ class Crawler(object):
     @property
     def node(self):
         return self._node
+        
+    @property
+    def universal_detector(self):
+        if self._universal_detector is None:
+            self._universal_detector = UniversalDetector()
+        return self._universal_detector
+        
+    def detect_encoding(self, content):
+        self.universal_detector.reset()
+        for line in content:
+            self.universal_detector.feed(line)
+            if self.universal_detector.done:
+                break
+        self.universal_detector.close()
+        return self.universal_detector.result
         
     def reload(self):
         if self.valid:
@@ -327,7 +343,7 @@ class Crawler(object):
         
     def _detect_text_encoding(self, content):
         if 'encoding' not in self.ontology:
-            result = self.env.detect_encoding(content.splitlines())
+            result = self.detect_encoding(content.splitlines())
             self.log.debug(u'%s encoding detected for %s with confidence %s', result['encoding'], unicode(self), result['confidence'])
             self.ontology['encoding'] = result['encoding']
             

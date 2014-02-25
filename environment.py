@@ -337,7 +337,6 @@ class Environment(object):
         }
         self._resolver = None
         self._caption_filter = None
-        self._universal_detector = None
         self.load()
         
     def __unicode__(self):
@@ -434,12 +433,6 @@ class Environment(object):
         if  self._caption_filter is None:
             self._caption_filter = CaptionFilterCache(self)
         return self._caption_filter
-        
-    @property
-    def universal_detector(self):
-        if self._universal_detector is None:
-            self._universal_detector = UniversalDetector()
-        return self._universal_detector
         
     def close(self):
         if self.cache is not None:
@@ -637,16 +630,6 @@ class Environment(object):
             except OSError, oserr:
                 self.log.debug(oserr)
                 
-    def detect_encoding(self, content):
-        # This will not survive a multi threaded environment
-        self.universal_detector.reset()
-        for line in content:
-            self.universal_detector.feed(line)
-            if self.universal_detector.done:
-                break
-        self.universal_detector.close()
-        return self.universal_detector.result
-        
     def environment_json_handler(self, o):
         result = None
         from bson.objectid import ObjectId
