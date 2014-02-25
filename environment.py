@@ -98,7 +98,7 @@ class Cache(object):
                 self.log.warning(u'Configuration file at %s does not exists', path)
                 
         if 'node' in record:
-            result = record['node']
+            result = copy.deepcopy(record['node'])
         return result
         
     def load(self, record):
@@ -174,25 +174,18 @@ class Cache(object):
                 self.log.debug(u'Exception raised: %s', unicode(e))
                 
     def load_rule_branch(self, branch):
-        result = True
-        try:
-            if 'requires' in branch:
-                branch['requires'] = set(branch['requires'])
-                
-            if 'match' in branch:
-                if 'flags' not in branch['match']: branch['match']['flags'] = re.UNICODE
-                branch['match']['pattern'] = re.compile(branch['match']['expression'], branch['match']['flags'])
-                
-            if 'decode' in branch:
-                for c in branch['decode']:
-                    if 'flags' not in c: c['flags'] = re.UNICODE
-                    c['pattern'] = re.compile(c['expression'], c['flags'])
-        except Exception, e:
-            self.log.error(u'Failed to load banch for rule %s', e['key'])
-            self.log.debug(u'Exception raised: %s', unicode(e))
-            result = False
-        return result
-        
+        if 'requires' in branch:
+            branch['requires'] = set(branch['requires'])
+            
+        if 'match' in branch:
+            if 'flags' not in branch['match']:
+                branch['match']['flags'] = re.UNICODE
+            
+        if 'decode' in branch:
+            for c in branch['decode']:
+                if 'flags' not in c:
+                    c['flags'] = re.UNICODE
+                    
     def load_rule_node(self, node):
         for k,e in node.iteritems():
             if 'provide' in e:
@@ -207,9 +200,9 @@ class Cache(object):
                     
     def load_expression_node(self, node):
         for k,e in node.iteritems():
-            if 'flags' not in e: e['flags'] = 0
-            node[k] = re.compile(e['definition'], e['flags'])
-            
+            if 'flags' not in e:
+                e['flags'] = 0
+                
     def load_command_node(self, node):
         for k,e in node.iteritems():
             self.which(e)
@@ -501,7 +494,7 @@ class Environment(object):
                     
             if 'expression' in node:
                 for k,e in node['expression'].iteritems():
-                    self.expression[k] = e
+                    self.expression[k] = re.compile(e['definition'], e['flags'])
                     
             if 'constant' in node:
                 for k,e in node['constant'].iteritems():
@@ -785,16 +778,15 @@ class Repository(object):
             if 'host' not in branch['requires']:
                 branch['requires'].append('host')
             branch['equal']['host'] = self.host
-            if self.env.cache.load_rule_branch(branch):
-                routing.add_branch(branch)
-                
+            self.env.cache.load_rule_branch(branch)
+            routing.add_branch(branch)
         default = self.env.rule['rule.task.default.preset']
         for branch in self.node['routing']['preset.default']:
             if 'host' not in branch['requires']:
                 branch['requires'].append('host')
             branch['equal']['host'] = self.host
-            if self.env.cache.load_rule_branch(branch):
-                default.add_branch(branch)
+            self.env.cache.load_rule_branch(branch)
+            default.add_branch(branch)
                 
     def decode_resource_path(self, path):
         result = None

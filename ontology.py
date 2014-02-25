@@ -769,6 +769,11 @@ class Rule(object):
         self.env = env
         self.node = node
         
+        temp = self.node['branch']
+        self.node['branch'] = []
+        for branch in temp:
+            self.add_branch(branch)
+            
     def __unicode__(self):
         return self.node['key']
         
@@ -785,7 +790,17 @@ class Rule(object):
         return self.node['branch']
         
     def add_branch(self, branch):
-        self.branch.append(branch)
+        try:
+            if 'match' in branch:
+                branch['match']['pattern'] = re.compile(branch['match']['expression'], branch['match']['flags'])
+                
+            if 'decode' in branch:
+                for c in branch['decode']:
+                    c['pattern'] = re.compile(c['expression'], c['flags'])
+            self.branch.append(branch)
+        except Exception, e:
+            self.log.error(u'Failed to load banch for rule %s', e['key'])
+            self.log.debug(u'Exception raised: %s', unicode(e))
         
 
 
