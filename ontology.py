@@ -788,6 +788,7 @@ class Rule(object):
         self.branch.append(branch)
         
 
+
 class Umid(object):
     def __init__(self, home_id=None, media_kind=None):
         self._home_id = home_id

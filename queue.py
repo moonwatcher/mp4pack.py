@@ -579,7 +579,13 @@ class ServiceTask(Task):
         if self.valid: self.action()
         
     def get(self):
-        print json.dumps(self.document, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
+        print json.dumps(
+            self.document,
+            ensure_ascii=False,
+            sort_keys=True,
+            indent=4,
+            default=self.env.default_json_handler
+        ).encode('utf-8')
         
     def set(self):
         genealogy = Ontology(self.env, 'ns.service.genealogy', self.document['head']['genealogy'])
@@ -614,6 +620,7 @@ class SystemJob(Job):
             for table in self.ontology['tables']:
                 self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))
                 
+
 
 
 class SystemTask(Task):

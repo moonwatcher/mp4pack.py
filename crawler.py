@@ -69,10 +69,6 @@ class Crawler(object):
             proc_grep = Popen([u'grep', u'-v', u'Cover_Data'], stdin=proc_mediainfo.stdout, stdout=PIPE)
             raw_xml = proc_grep.communicate()[0]
             
-            # fix mediainfo's violation of xml standards so that ElementTree won't choke on it
-            # MediaInfoLib - v0.7.63 seems to be fixed already
-            raw_xml = raw_xml.replace('dt:dt="binary.base64"', 'dt="binary.base64"')
-            
             # parse the DOM
             element = ElementTree.fromstring(raw_xml)
             if element is not None:
