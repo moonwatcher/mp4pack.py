@@ -579,12 +579,17 @@ class ServiceTask(Task):
         if self.valid: self.action()
         
     def get(self):
+        if self.env.expression["system runtime document"].match(self.uri):
+            handler = self.env.environment_json_handler
+        else:
+            handler = self.env.default_json_handler
+            
         print json.dumps(
             self.document,
             ensure_ascii=False,
             sort_keys=True,
             indent=4,
-            default=self.env.default_json_handler
+            default=self.env.environment_json_handler
         ).encode('utf-8')
         
     def set(self):
