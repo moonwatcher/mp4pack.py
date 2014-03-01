@@ -589,7 +589,7 @@ class ServiceTask(Task):
             ensure_ascii=False,
             sort_keys=True,
             indent=4,
-            default=self.env.environment_json_handler
+            default=handler
         ).encode('utf-8')
         
     def set(self):

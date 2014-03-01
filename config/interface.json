@@ -316,8 +316,8 @@
                     "host", 
                     "configuration path", 
                     "debug", 
-                    "verbosity", 
-                    "version"
+                    "version",
+                    "verbosity"
                 ]
             }, 
             "namespace": "ns.system.command.default", 
