@@ -9,6 +9,8 @@ import hashlib
 
 from datetime import datetime
 
+check = lambda node: 'enable' not in node or node['enable']
+
 class Ontology(dict):
     def __init__(self, env, namespace,  *args, **kw):
         dict.__init__(self, *args, **kw)
@@ -701,7 +703,6 @@ class Enumeration(Space):
         Space.__init__(self, env, node)
         
     def _load_element(self):
-        def check(node): return "enable" not in node or node["enable"]
         self._element = {}
         for k,e in self.node['element'].iteritems():
             if check(e):

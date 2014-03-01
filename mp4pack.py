@@ -20,6 +20,7 @@ def main():
     
     # Initialize an environment
     env = Environment()
+    env.open()
     
     # Parse the command line
     cli = CommandLineParser(env, env.interface['default'])
@@ -38,6 +39,8 @@ def main():
     # execute the next job
     job = queue.next()
     job and env.log.debug(u'Job %s history:\n%s', unicode(job), env.encode_json(job.execution))
+    
+    # Cleanly close the environment
     env.close()
     
 if __name__ == '__main__':

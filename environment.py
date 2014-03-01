@@ -11,22 +11,20 @@ import pickle
 from StringIO import StringIO
 from subprocess import Popen, PIPE
 from datetime import timedelta, datetime
-from chardet.universaldetector import UniversalDetector
-
 from ontology import Ontology, Enumeration, PrototypeSpace, Rule, Space, Umid
 from model import Timestamp
 from model.caption import CaptionFilterCache
 from service import Resolver
 from argparse import ArgumentParser
 
-check = lambda node: "enable" not in node or node["enable"]
+check = lambda node: 'enable' not in node or node['enable']
 
-class Cache(object):
+class ConfigurationCache(object):
     def __init__(self):
         self.log = logging.getLogger('Environment')
         self.home = u'/etc/mpk'
-        self.node = None
         self.state = dict()
+        self.node = None
         self.path = None
         self.dirty = False
         self.relative = os.path.dirname(__file__)
@@ -35,19 +33,20 @@ class Cache(object):
         home = os.getenv('MPK_HOME')
         if home and os.path.isdir(home):
             self.home = home
+        self.log.debug(u'Using home directory: %s', home)
             
-        self.log.debug(u'home directory is %s', home)
         self.path = os.path.join(self.home, u'cache.db')
-        self.open()
         
     def get(self, path):
         result = None
         path = os.path.expanduser(os.path.expandvars(path))
         key = hashlib.sha1(path).hexdigest()
         
+        # get the state for the path
         if key not in self.state: self.state[key] = dict()
         state = self.state[key]
         
+        # get the record for the path
         if key not in self.node['record']: self.node['record'][key] = dict()
         record = self.node['record'][key]
         
@@ -157,6 +156,7 @@ class Cache(object):
         if os.path.exists(self.path):
             try:
                 self.node = pickle.load(open(self.path, 'rb'))
+                self.log.debug(u'Pickled configuration cache loaded from %s', self.path)
             except KeyError:
                 self.log.warning(u'Failed to load pickled cache from %s', self.path)
                 self.node = None
@@ -265,7 +265,7 @@ class Environment(object):
     def __init__(self):
         self.log = logging.getLogger('Environment')
         self.ontology = None
-        self.cache = Cache()
+        self.cache = ConfigurationCache()
         self.state = {
             'config':[
                 {
@@ -330,7 +330,6 @@ class Environment(object):
         }
         self._resolver = None
         self._caption_filter = None
-        self.load()
         
     def __unicode__(self):
         return unicode(u'{}:{}'.format(self.domain, self.host))
@@ -427,26 +426,28 @@ class Environment(object):
             self._caption_filter = CaptionFilterCache(self)
         return self._caption_filter
         
-    def close(self):
-        if self.cache is not None:
-            self.cache.close()
-            
-    def load(self):
+    def open(self):
+        # start the configuration cache 
+        self.cache.open()
+        
         # calculate a relative address for config files
         relative = os.path.dirname(__file__)
         
-        # load the config files
+        # load the internal config files
         for config in self.config:
             # caluclate an absolute address
             config['path'] = os.path.join(relative, config['path'])
             self.load_configuration_node(self.cache.get(config['path']))
             
-        # Override the default home folder from env
+        # Override the default home folder from the cache
         self.system['home'] = self.cache.home
         
         # Load the settings file
         self.load_configuration_node(self.cache.get(os.path.join(self.home, u'settings.json')))
         
+    def close(self):
+        self.cache.close()
+            
     def load_interactive(self, ontology):
         self.ontology = ontology
         
@@ -595,27 +596,22 @@ class Environment(object):
                 pass
                 
     def check_path_availability(self, path, overwrite=False):
+        result = False
         if path:
             if os.path.exists(path) and not overwrite:
                 self.log.warning(u'Refusing to overwrite %s', path)
-                return False
             else:
-                self.varify_directory(path)
-                return True
-        else:
-            return False
-            
-    def varify_directory(self, path):
-        try:
-            directory = os.path.dirname(path)
-            if not os.path.exists(directory):
-                self.log.debug(u'Creating directory %s', directory)
-                os.makedirs(directory)
-                
-        except OSError as err:
-            self.log.error(u'Failed to create directory %s', directory)
-            self.log.debug(unicode(err))
-            
+                try:
+                    directory = os.path.dirname(path)
+                    if not os.path.exists(directory):
+                        self.log.debug(u'Creating directory %s', directory)
+                        os.makedirs(directory)
+                    result = True
+                except OSError as err:
+                    self.log.error(u'Failed to create directory %s', directory)
+                    self.log.debug(unicode(err))
+        return result
+        
     def purge_if_not_exist(self, path):
         if path and not os.path.exists(path):
             try:
@@ -623,35 +619,6 @@ class Environment(object):
             except OSError, oserr:
                 self.log.debug(oserr)
                 
-    def environment_json_handler(self, o):
-        result = None
-        from bson.objectid import ObjectId
-        if isinstance(o, datetime):
-            result = o.isoformat()
-        if isinstance(o, ObjectId):
-            result = str(o)
-        if isinstance(o, Rule):
-            result = o.node
-        if isinstance(o, Repository):
-            result = o.node
-        if isinstance(o, Space):
-            result = o.node
-        if isinstance(o, set):
-            result = list(o)
-        return result
-        
-    def default_json_handler(self, o):
-        result = None
-        from bson.objectid import ObjectId
-        if isinstance(o, datetime):
-            result = o.isoformat()
-        if isinstance(o, ObjectId):
-            result = str(o)
-        if isinstance(o, set):
-            result = list(o)
-            
-        return result
-        
     def initialize_command(self, command, log):
         if command in self.command and self.command[command]['path']:
             return [ self.command[command]['path'] ]
@@ -690,6 +657,35 @@ class Environment(object):
                 if message: log.info(message)
                 print self.encode_command(command)
         return report
+        
+    def environment_json_handler(self, o):
+        result = None
+        from bson.objectid import ObjectId
+        if isinstance(o, datetime):
+            result = o.isoformat()
+        if isinstance(o, ObjectId):
+            result = str(o)
+        if isinstance(o, Rule):
+            result = o.node
+        if isinstance(o, Repository):
+            result = o.node
+        if isinstance(o, Space):
+            result = o.node
+        if isinstance(o, set):
+            result = list(o)
+        return result
+        
+    def default_json_handler(self, o):
+        result = None
+        from bson.objectid import ObjectId
+        if isinstance(o, datetime):
+            result = o.isoformat()
+        if isinstance(o, ObjectId):
+            result = str(o)
+        if isinstance(o, set):
+            result = list(o)
+            
+        return result
         
     def encode_json(self, node):
         # Can't use ensure_ascii=False because the logging library seems to break when fed utf8 with non ascii characters
