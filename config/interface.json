@@ -308,6 +308,15 @@
                         "help": "Rebuild database", 
                         "name": "rebuild"
                     }
+                },
+                {
+                    "argument": [
+                        "scan path"
+                    ], 
+                    "instruction": {
+                        "help": "Load records from JSON file", 
+                        "name": "populate"
+                    }
                 }
             ], 
             "global": {

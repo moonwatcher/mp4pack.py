@@ -39,15 +39,37 @@ class SystemHandler(ResourceHandler):
             query['sources'].append(self.env.table)
             
     def parse(self, query):
-        if query['sources']:
-            entry = {
-                'branch':query['branch'],
-                'record':{
-                    u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
-                    u'body':query['sources'][0],
+        if query['branch']['name'] == 'service/collection/search':
+            if query['parameter']['table handle'] in self.env.table:
+                # locate the collection
+                collection = query['repository'].database[self.env.table[query['parameter']['table handle']]['collection']]
+                
+                # prepare a return value
+                query['return'] = { u'result count':0, u'results':[] }
+                
+                # prepare the query dictionary
+                select = {}
+                if query['location']:
+                    for k,v in query['location'].iteritems():
+                        select[u'head.genealogy.' + unicode(k)] = v
+                        
+                # collect the results
+                cursor = collection.find(select)
+                for r in cursor:
+                    query['return']['results'].append(r)
+                    
+                # count the results
+                query['return']['result count'] = len(query['return']['results'])
+        else:
+            if query['sources']:
+                entry = {
+                    'branch':query['branch'],
+                    'record':{
+                        u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
+                        u'body':query['sources'][0],
+                    }
                 }
-            }
-            query['return'] = entry['record']
-            query['entires'].append(entry)
-            
+                query['return'] = entry['record']
+                query['entires'].append(entry)
+                
 

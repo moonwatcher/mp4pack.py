@@ -3129,6 +3129,7 @@
                     "itunes": "term", 
                     "tmdb": "query"
                 }, 
+                "table handle":null,
                 "term": {
                     "itunes": "term", 
                     "tmdb": "query"
@@ -3225,6 +3226,7 @@
                 "simple tv show name": null, 
                 "stream id": null, 
                 "stream order": null, 
+                "table handle":null,
                 "tmdb collection id": null, 
                 "tmdb company id": null, 
                 "tmdb genre id": null, 

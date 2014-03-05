@@ -8,7 +8,7 @@ import getopt
 import logging
 import copy
 
-from queue import Queue, ResourceJob, ServiceJob
+from queue import Queue
 from environment import Environment, CommandLineParser
 from ontology import Ontology
 

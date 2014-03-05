@@ -14,6 +14,9 @@ from material import MaterialCache
 from datetime import datetime
 from model import ResourceTransform
 
+invisible = lambda path: os.path.basename(path)[0] == '.'
+extension = lambda path: os.path.splitext(path)[1]
+
 class Queue(object):
     def __init__(self, env):
         self.log = logging.getLogger('Queue')
@@ -99,7 +102,6 @@ class Job(object):
         self.queue = queue
         self.node = node
         self.ontology = Ontology(self.env, 'ns.system.job', node['ontology'])
-        self.uuid = uuid.UUID(self.node['uuid'])
         self.journal = None
         self.task = None
         
@@ -179,7 +181,7 @@ class Job(object):
             except re.error as err:
                 self.log.warning(u'Failed to compile exclusion filter \'%s\' because of %s', self.ontology['exclusion'], err)
                 
-    def enqueue(self, task):
+    def push(self, task):
         if task:
             self.journal['task'][task.key] = task
             if task.group not in self.journal['group']:
@@ -187,7 +189,7 @@ class Job(object):
             self.journal['group'][task.group][task.group] = task
             self.task.append(task)
             
-    def dequeue(self):
+    def pop(self):
         result = None
         for i,task in enumerate(self.task):
             if task.ready or not task.valid:
@@ -201,7 +203,7 @@ class Job(object):
         
     def run(self):
         while self.task:
-            task = self.dequeue()
+            task = self.pop()
             if task: self.execution['task'].append(task.node)
             
     def unload(self):
@@ -214,8 +216,37 @@ class Job(object):
         ( self._inclusion is None or self._inclusion.search(path) is not None ) and \
         ( self._exclusion is None or self._exclusion.search(path) is None )
         
+    def scan(self):
+        def collect(path, recursive, depth=1):
+            result = []
+            if os.path.isfile(path):
+                dname, fname = os.path.split(path)
+                if self.filter(fname):
+                    result.append(unicode(path, 'utf-8'))
+                    
+            # Recursively scan decendent paths and aggregate the results
+            elif (recursive or depth > 0) and os.path.isdir(path) and \
+            os.path.basename(path)[0] != self.env.constant['dot']:
+                for dnext in os.listdir(path):
+                    dnext = os.path.abspath(os.path.join(path,dnext))
+                    result.extend(collect(dnext, recursive, depth - 1))
+                self.log.debug(u'%d files queued from %s', len(result), path)
+            return result
+            
+        result = []
+        if self.ontology['scan path']:
+            for path in self.ontology['scan path']:
+                if os.path.exists(path):
+                    path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
+                    files = collect(path, self.ontology['recursive'])
+                    result.extend(files)
+                else:
+                    self.log.error(u'Path %s does not exist', path)
+        if result: result = sorted(set(result))
+        return result
+        
     def __unicode__(self):
-        return unicode(self.uuid)
+        return self.node['uuid']
         
 
 
@@ -318,43 +349,18 @@ class ResourceJob(Job):
     def __init__(self, queue, node):
         Job.__init__(self, queue, node)
         
+    def filter(self, path):
+        return path and not invisible(path) and Job.filter(self, path)
+        
     def load(self):
         Job.load(self)
         
-        targets = []
-        if self.ontology['scan path']:
-            for path in self.ontology['scan path']:
-                if os.path.exists(path):
-                    path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
-                    files = self._scan_path(path, self.ontology['recursive'])
-                    targets.extend(files)
-                else:
-                    self.log.error(u'Path %s does not exist', path)
+        targets = self.scan()
         if targets:
-            targets = sorted(set(targets))
             self.log.info(u'%d files queued in job %s', len(targets), self)
             for path in targets:
-                self.enqueue(ResourceTask(self, self.ontology.project('ns.system.task'), path))
+                self.push(ResourceTask(self, self.ontology.project('ns.system.task'), path))
                 
-    def filter(self, path):
-        return path and os.path.basename(path)[0] != self.env.constant['dot'] and Job.filter(self, path)
-        
-    def _scan_path(self, path, recursive, depth=1):
-        result = []
-        if os.path.isfile(path):
-            dname, fname = os.path.split(path)
-            if self.filter(fname):
-                result.append(unicode(path, 'utf-8'))
-                
-        # Recursively scan decendent paths and aggregate the results
-        elif (recursive or depth > 0) and os.path.isdir(path) and \
-        os.path.basename(path)[0] != self.env.constant['dot']:
-            for dnext in os.listdir(path):
-                dnext = os.path.abspath(os.path.join(path,dnext))
-                result.extend(self._scan_path(dnext, recursive, depth - 1))
-            self.log.debug(u'%d files queued from %s', len(result), path)
-        return result
-        
 
 
 class ResourceTask(Task):
@@ -520,25 +526,25 @@ class ResourceTask(Task):
         self.resource.update(self)
         
     def prepare(self):
-        # enqueue a task to explode the resource
+        # push a task to explode the resource
         o = self.job.ontology.project('ns.system.task')
         o['action'] = 'explode'
         explode = ResourceTask(self.job, o, self.location['path'])
         explode.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
-        self.job.enqueue(explode)
+        self.job.push(explode)
         
-        # enqueue a task to repack the resource fragments
+        # push a task to repack the resource fragments
         o = self.job.ontology.project('ns.system.task')
         o['action'] = 'pack'
         o['preset'] = 'fragment'
         pack = ResourceTask(self.job, o, self.location['path'])
         pack.constrain({'scope':'task', 'reference':self.key, 'status':'completed'})
         pack.constrain({'scope':'group', 'reference':explode.key, 'status':'completed'})
-        self.job.enqueue(pack)
+        self.job.push(pack)
         
 
 
-class ServiceJob(Job):
+class DocumentJob(Job):
     def __init__(self, queue, node):
         Job.__init__(self, queue, node)
         
@@ -547,11 +553,11 @@ class ServiceJob(Job):
         
         if self.ontology['uris']:
             for uri in self.ontology['uris']:
-                self.enqueue(ServiceTask(self, self.ontology.project('ns.system.task'), uri))
+                self.push(DocumentTask(self, self.ontology.project('ns.system.task'), uri))
                 
 
 
-class ServiceTask(Task):
+class DocumentTask(Task):
     def __init__(self, job, ontology, uri):
         Task.__init__(self, job, ontology)
         self.uri = uri
@@ -608,27 +614,26 @@ class ServiceTask(Task):
         
 
 
-class SystemJob(Job):
+class TableJob(Job):
     def __init__(self, queue, node):
         Job.__init__(self, queue, node)
         
     def load(self):
         Job.load(self)
         
-        # if the --all flag was specificed rebuild indexes on all known tables
+        # if the --all flag was specificed operate on all known tables
         if self.ontology['all']:
             for table in self.env.table.keys():
-                self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))
+                self.push(TableTask(self, self.ontology.project('ns.system.task'), table))
                 
         # otherwise, if a table list was specificed, use the list to create the tasks
         elif self.ontology['tables']:
             for table in self.ontology['tables']:
-                self.enqueue(SystemTask(self, self.ontology.project('ns.system.task'), table))
+                self.push(TableTask(self, self.ontology.project('ns.system.task'), table))
                 
 
 
-
-class SystemTask(Task):
+class TableTask(Task):
     def __init__(self, job, ontology, name):
         Task.__init__(self, job, ontology)
         self.action = None
@@ -663,5 +668,64 @@ class SystemTask(Task):
         for index in self.table['index']:
             self.env.repository[self.ontology['host']].rebuild_index(self.table['name'], index)
             
+
+
+class InstructionJob(Job):
+    def __init__(self, queue, node):
+        Job.__init__(self, queue, node)
+        
+    def filter(self, path):
+        return path and not invisible(path) and extension(path) == '.json' and Job.filter(self, path)
+        
+    def load(self):
+        Job.load(self)
+        
+        targets = self.scan()
+        if targets:
+            self.log.info(u'%d files queued in job %s', len(targets), self)
+            for path in targets:
+                self.push(InstructionTask(self, self.ontology.project('ns.system.task'), path))
+                
+
+
+class InstructionTask(Task):
+    def __init__(self, job, ontology, path):
+        Task.__init__(self, job, ontology)
+        self.path = path
+        self.action = None
+        if not os.path.isfile(self.path):
+            self.invalidate(u'File {} does not exists'.format(path))
+            
+    def load(self):
+        Task.load(self)
+        if self.valid:
+            # locate a method that implements the action
+            self.action = getattr(self, self.ontology['action'], None)
+            
+            if self.action is None:
+                self.invalidate(u'Unknown action {}'.format(self.ontology['action']))
+                
+    def run(self):
+        Task.run(self)
+        if self.valid: self.action()
+        
+    def populate(self):
+        try:
+            content = StringIO(open(self.path, 'rb').read())
+        except IOError, e:
+            self.invalidate(u'Failed to load file {}'.format(path))
+            self.log.debug(u'Exception raised: %s', unicode(e))
+        else:
+            content.seek(0)
+            try:
+                instruction = json.load(content)
+                self.log.debug(u'Loaded JSON file %s', path)
+            except SyntaxError, e:
+                self.invalidate(u'Syntax error in file {}'.format(path))
+                self.log.debug(u'Exception raised: %s', unicode(e))
+            else:
+                for node in instruction:
+                    self.env.resolver.save(node)
+                    
 
 

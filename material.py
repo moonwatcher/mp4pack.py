@@ -370,7 +370,7 @@ class AudioVideoContainer(Container):
                                 product.menu = Menu.from_node(self.env, stream['content'])
                                 product.write(product.path)
                                 
-                                # enqueue a task for transcoding
+                                # push a task for transcoding
                                 if 'tasks' in stream:
                                     for template in stream['tasks']:
                                         o = task.job.ontology.project('ns.system.task')
@@ -378,7 +378,7 @@ class AudioVideoContainer(Container):
                                         t = queue.ResourceTask(task.job, o, product.path)
                                         t.group = task.key
                                         t.constrain({'scope':'task', 'reference':task.key, 'status':'completed'})
-                                        task.job.enqueue(t)
+                                        task.job.push(t)
                                         
     def pack(self, task):
         if task.ontology['kind'] == 'mkv':
@@ -564,7 +564,7 @@ class Matroska(AudioVideoContainer):
                                 command.append(u'{}:{}'.format(unicode(stream['stream order']), product.path))
                                 taken = True
                                 
-                                # enqueue a task for transcoding
+                                # push a task for transcoding
                                 if 'tasks' in stream:
                                     for template in stream['tasks']:
                                         o = task.job.ontology.project('ns.system.task')
@@ -572,7 +572,7 @@ class Matroska(AudioVideoContainer):
                                         t = queue.ResourceTask(task.job, o, product.path)
                                         t.group = task.key
                                         t.constrain({'scope':'task', 'reference':task.key, 'status':'completed'})
-                                        task.job.enqueue(t)
+                                        task.job.push(t)
                                         
             if taken:
                 message = u'Explode {}'.format(unicode(self))

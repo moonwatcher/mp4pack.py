@@ -1887,6 +1887,11 @@
             "name": "Target frame rate", 
             "type": "enum"
         }, 
+        "table handle": {
+            "keyword": "table_handle", 
+            "name": "Table handle", 
+            "type": "unicode"
+        }, 
         "tasks": {
             "keyword": "tasks", 
             "name": "Tasks", 

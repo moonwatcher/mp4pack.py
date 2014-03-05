@@ -2816,6 +2816,17 @@
         }, 
         "system": {
             "branch": {
+                "service/collection/search": {
+                    "index": [
+                        "table handle"
+                    ], 
+                    "match": [
+                        {
+                            "filter": "^/s/collection/search/(?P<table_handle>[a-z]+(/[a-z]+)*)$"
+                        }
+                    ],
+                    "query type": "search"                    
+                }, 
                 "service/runtime/archetype": {
                     "match": [
                         {

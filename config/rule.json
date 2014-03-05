@@ -8,21 +8,21 @@
                     "requires":["action"],
                     "equal":{"action":"get"},
                     "apply":[
-                        {"property":"implementation", "value":"ServiceJob"}
+                        {"property":"implementation", "value":"DocumentJob"}
                     ]
                 },
                 {
                     "requires":["action"],
                     "equal":{"action":"set"},
                     "apply":[
-                        {"property":"implementation", "value":"ServiceJob"}
+                        {"property":"implementation", "value":"DocumentJob"}
                     ]
                 },
                 {
                     "requires":["action"],
                     "equal":{"action":"drop"},
                     "apply":[
-                        {"property":"implementation", "value":"ServiceJob"}
+                        {"property":"implementation", "value":"DocumentJob"}
                     ]
                 },
                 {
@@ -106,7 +106,14 @@
                     "requires":["action"],
                     "equal":{"action":"rebuild"},
                     "apply":[
-                        {"property":"implementation", "value":"SystemJob"}
+                        {"property":"implementation", "value":"TableJob"}
+                    ]
+                },
+                {
+                    "requires":["action"],
+                    "equal":{"action":"populate"},
+                    "apply":[
+                        {"property":"implementation", "value":"InstructionJob"}
                     ]
                 }
             ]
