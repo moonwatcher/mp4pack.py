@@ -73,7 +73,7 @@
                     ], 
                     "instruction": {
                         "help": "Explode streams and repack", 
-                        "name": "repack"
+                        "name": "prepare"
                     }
                 }, 
                 {
