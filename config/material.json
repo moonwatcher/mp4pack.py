@@ -426,6 +426,7 @@
         "ac3audio":{
             "description":"A preset for prepare to explode, transcode DTS and FLAC tracks to AC3 and repack the fragments",
             "action":{
+                "prepare":{},
                 "explode":{
                     "pivot":[
                         { "operator":"this" }
