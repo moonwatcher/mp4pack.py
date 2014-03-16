@@ -24,6 +24,7 @@ def main():
     
     # Parse the command line
     cli = CommandLineParser(env, env.interface['default'])
+    env.cache.flush()
     env.load_interactive(cli.parse())
     cli = None
     

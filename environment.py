@@ -21,9 +21,9 @@ check = lambda node: 'enable' not in node or node['enable']
 
 class ConfigurationCache(object):
     def __init__(self):
-        self.log = logging.getLogger('Environment')
-        self.home = u'/etc/mpk'
-        self.state = dict()
+        self.log = logging.getLogger('Configuration')
+        self.home = u'/etc/mpk' # Defaul home directory
+        self.state = {}
         self.node = None
         self.path = None
         self.dirty = False
@@ -43,11 +43,11 @@ class ConfigurationCache(object):
         key = hashlib.sha1(path).hexdigest()
         
         # get the state for the path
-        if key not in self.state: self.state[key] = dict()
+        if key not in self.state: self.state[key] = {}
         state = self.state[key]
         
         # get the record for the path
-        if key not in self.node['record']: self.node['record'][key] = dict()
+        if key not in self.node['record']: self.node['record'][key] = {}
         record = self.node['record'][key]
         
         if 'file sha1' not in state:
@@ -63,17 +63,17 @@ class ConfigurationCache(object):
                         self.dirty = True
                         if 'node' in record:
                             del record['node']
-                            self.log.debug(u'Removed old cached entry for %s', path)
+                            self.log.debug(u'Removed cached configuration for %s', path)
                             
                         extension = os.path.splitext(path)[1]
                         content.seek(0)
                         try:
                             if extension == u'.json':
                                 record['node'] = json.load(content)
-                                self.log.debug(u'Loaded JSON configuration dictionary from %s with sha1 %s', path, state['file sha1'])
+                                self.log.debug(u'Loaded JSON configuration from %s with sha1 %s', path, state['file sha1'])
                             elif extension == u'.py':
                                 record['node'] = eval(content.read())
-                                self.log.debug(u'Loaded Python configuration dictionary from %s with sha1 %s', path, state['file sha1'])
+                                self.log.debug(u'Loaded Python configuration from %s with sha1 %s', path, state['file sha1'])
                             else:
                                 self.log.error(u'Uknown configuration type %s for %s', extension, path)
                                 
@@ -92,7 +92,7 @@ class ConfigurationCache(object):
                                 else:
                                     del record['node']
                                     del record['cached sha1']
-                                    self.log.warning(u'No valid dictionary in configuration file %s', path)
+                                    self.log.warning(u'No valid dictionary found in configuration file %s', path)
             else:
                 self.log.warning(u'Configuration file at %s does not exists', path)
                 
@@ -156,23 +156,27 @@ class ConfigurationCache(object):
         if os.path.exists(self.path):
             try:
                 self.node = pickle.load(open(self.path, 'rb'))
-                self.log.debug(u'Pickled configuration cache loaded from %s', self.path)
+                self.log.debug(u'Cached configuration loaded from %s', self.path)
             except KeyError:
-                self.log.warning(u'Failed to load pickled cache from %s', self.path)
+                self.log.warning(u'Failed to load cache from %s', self.path)
                 self.node = None
                 
         if self.node is None:
             self.node = { 'record':{} }
             
-    def close(self):
+    def flush(self):
         if self.dirty:
             try:
                 pickle.dump(self.node, open(self.path, 'wb'))
-                self.log.debug(u'Saved pickled cache to %s', self.path)
+                self.log.debug(u'Cache saved to %s', self.path)
+                self.dirty = False
             except IOError, e:
                 self.log.warning(u'Failed to write cache to %s', self.path)
                 self.log.debug(u'Exception raised: %s', unicode(e))
                 
+    def close(self):
+        self.flush()
+        
     def load_rule_branch(self, branch):
         if 'requires' in branch:
             branch['requires'] = set(branch['requires'])
@@ -584,18 +588,13 @@ class Environment(object):
                         ),
                     }
                 )
+                
+        # decorate the node
         self.cache.load({'node':node})
+        # load the node
         self.load_configuration_node(node)
         
-    def cleanup_path(self, path):
-        if path and os.path.isfile(path):
-            os.remove(path)
-            try:
-                os.removedirs(os.path.dirname(path))
-            except OSError:
-                pass
-                
-    def check_path_availability(self, path, overwrite=False):
+    def check_path_available(self, path, overwrite=False):
         result = False
         if path:
             if os.path.exists(path) and not overwrite:
@@ -612,7 +611,7 @@ class Environment(object):
                     self.log.debug(unicode(err))
         return result
         
-    def purge_if_not_exist(self, path):
+    def clean_path(self, path):
         if path and not os.path.exists(path):
             try:
                 os.removedirs(os.path.dirname(path))
@@ -629,7 +628,7 @@ class Environment(object):
     def encode_command(self, command):
         c = []
         for e in command:
-            if self.constant['space'] in e: c.append(u'"{0}"'.format(e))
+            if self.constant['space'] in e: c.append(u'"{}"'.format(e))
             else: c.append(e)
         return self.constant['space'].join(c)
         
@@ -637,7 +636,7 @@ class Environment(object):
         report = None
         if command:
             if not debug:
-                # if a logger was provided, use it. Otherwise default to the local
+                # if a logger was provided, use it. Otherwise default to the environment logger
                 if log == None: log = self.log
                     
                 log.debug(u'Execute: %s', self.encode_command(command))
@@ -768,7 +767,7 @@ class Repository(object):
         # Load the volume enumeration
         self._volume = Enumeration(self.env, self.node['volume'])
         
-        # Load routing rules
+        # Load default volume routing rules
         routing = self.env.rule['rule.system.default.routing']
         for branch in self.node['routing']['volume.default']:
             if 'host' not in branch['requires']:
@@ -776,6 +775,8 @@ class Repository(object):
             branch['equal']['host'] = self.host
             self.env.cache.load_rule_branch(branch)
             routing.add_branch(branch)
+            
+        # Load default preset rules
         default = self.env.rule['rule.task.default.preset']
         for branch in self.node['routing']['preset.default']:
             if 'host' not in branch['requires']:
@@ -783,7 +784,7 @@ class Repository(object):
             branch['equal']['host'] = self.host
             self.env.cache.load_rule_branch(branch)
             default.add_branch(branch)
-                
+            
     def decode_resource_path(self, path):
         result = None
         if path:
@@ -812,6 +813,7 @@ class Repository(object):
                 result = decoded.project('ns.medium.resource.location')
                 for k,v in decoded.iteritems(): result[k] = v
                 
+                # set the host and domain
                 result['host'] = self.host
                 result['domain'] = self.domain
         return result
@@ -849,9 +851,9 @@ class Repository(object):
                     dropDups=definition['dropDups']
                 )
             else:
-                self.log.error(u'Refusing to handle unnamed index for collection %s', name)
+                self.log.error(u'Ignoring unnamed index for collection %s', name)
         else:
-            self.log.error(u'Unknown collection %s', name)
+            self.log.error(u'Ignoring unknown collection %s', name)
             
 
 

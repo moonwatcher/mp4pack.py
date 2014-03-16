@@ -64,6 +64,7 @@ class Slide(object):
         content.append(u'')
         
 
+
 class Caption(object):
     def __init__(self, env):
         self.env = env
@@ -126,6 +127,7 @@ class Caption(object):
                 slide.encode(content)
         return content
         
+
 
 class CaptionFilter(object):
     def __init__(self, node):
@@ -218,6 +220,7 @@ class CaptionFilter(object):
             result = slide.valid
         return result
         
+
 
 class CaptionFilterCache(dict):
     def __init__(self, env, *args, **kw):

@@ -193,6 +193,7 @@ class ResourceTransform(object):
                 self.remove(self.selected[k])
                 
 
+
 class ResourcePivot(object):
     def __init__(self, resource):
         self.resource = resource

@@ -5,12 +5,12 @@ import logging
 import hashlib
 import re
 import json
+import queue
 
 from ontology import Ontology
 from model.menu import Chapter, Menu
 from model.caption import Caption
 from crawler import Crawler
-import queue
 
 class MaterialCache(object):
     def __init__(self, env):
@@ -292,7 +292,7 @@ class Resource(object):
     def copy(self, task):
         product = task.produce()
         if product:
-            if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+            if self.env.check_path_available(product.path, task.ontology['overwrite']):
                 command = self.env.initialize_command('rsync', self.log)
                 if command:
                     # Resolving the real path means the semantic 
@@ -308,13 +308,13 @@ class Resource(object):
             if os.path.exists(product.path) and os.path.samefile(self.path, product.path):
                 self.log.debug(u'No move necessary for %s', unicode(self))
             else:
-                if self.env.check_path_availability(product.path, False):
+                if self.env.check_path_available(product.path, False):
                     command = self.env.initialize_command('mv', self.log)
                     if command:
                         command.extend([self.path, product.path])
                         message = u'Move {} --> {}'.format(self.path, product.path)
                         self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-                        self.env.purge_if_not_exist(self.path)
+                        self.env.clean_path(self.path)
                         
     def delete(self, task):
         command = self.env.initialize_command('rm', self.log)
@@ -322,7 +322,7 @@ class Resource(object):
             command.append(self.path)
             message = u'Remove {}'.format(self.path)
             self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
-            self.env.purge_if_not_exist(self.path)
+            self.env.clean_path(self.path)
             
 
 
@@ -365,7 +365,7 @@ class AudioVideoContainer(Container):
                     stream['enabled'] = False
                     product = task.produce(stream)
                     if product:
-                        if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                        if self.env.check_path_available(product.path, task.ontology['overwrite']):
                             if not task.ontology['debug']:
                                 product.menu = Menu.from_node(self.env, stream['content'])
                                 product.write(product.path)
@@ -420,7 +420,7 @@ class AudioVideoContainer(Container):
                         command.append(k)
                         command.append(u','.join(v))
                         
-                if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                if taken and self.env.check_path_available(product.path, task.ontology['overwrite']):
                     message = u'Transcode {} --> {}'.format(self.path, product.path)
                     command.extend([u'--input', self.path, u'--output', product.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
@@ -487,7 +487,7 @@ class AudioVideoContainer(Container):
                                 
                         command.append(pivot.resource.path)
                         
-                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                if self.env.check_path_available(product.path, task.ontology['overwrite']):
                     message = u'Pack {} --> {}'.format(self.path, product.path)
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
                     
@@ -496,7 +496,7 @@ class AudioVideoContainer(Container):
         if product:
             command = self.env.initialize_command('subler', self.log)
             if command:
-                if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                if self.env.check_path_available(product.path, task.ontology['overwrite']):
                     message = u'Pack {} --> {}'.format(unicode(self), unicode(product))
                     command.extend([u'-o', product.path, u'-i', self.path])
                     self.env.execute(command, message, task.ontology['debug'], pipeout=False, pipeerr=False, log=self.log)
@@ -527,7 +527,7 @@ class Image(Container):
                             self.log.debug(u'Resize image: %dx%d --> %dx%d', image.size[0], image.size[1], resize[0], resize[1])
                             image = image.resize(resize, Image.ANTIALIAS)
                             
-                        if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                        if self.env.check_path_available(product.path, task.ontology['overwrite']):
                             try:
                                 image.save(product.path)
                                 self.log.info(u'Transcode %s --> %s', self.path, product.path)
@@ -556,7 +556,7 @@ class Matroska(AudioVideoContainer):
                         if product:
                             stream['enabled'] = False
                             
-                            if self.env.check_path_availability(product.path, task.ontology['overwrite']):
+                            if self.env.check_path_available(product.path, task.ontology['overwrite']):
                                 # Leave a hint about the delay
                                 if 'delay' in stream: product.hint['delay'] = stream['delay']
                                 
@@ -725,7 +725,7 @@ class RawAudio(Container):
                                 if v is not None: command.append(unicode(v))
                                 
                 if taken: break
-            if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+            if taken and self.env.check_path_available(product.path, task.ontology['overwrite']):
                 command.append(product.path)
                 message = u'Transcode {} --> {}'.format(self.path, product.path)
                 self.env.execute(command, message, task.ontology['debug'], pipeout=True, pipeerr=False, log=self.log)
@@ -811,7 +811,7 @@ class Subtitles(Text):
                         product.caption.normalize()
                         
                 if taken: break
-            if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+            if taken and self.env.check_path_available(product.path, task.ontology['overwrite']):
                 self.log.info(u'Transcode %s --> %s', self.path, product.path)
                 product.write(product.path)
                 
@@ -870,7 +870,7 @@ class TableOfContent(Text):
                         product.menu.normalize()
                         
                 if taken: break
-            if taken and self.env.check_path_availability(product.path, task.ontology['overwrite']):
+            if taken and self.env.check_path_available(product.path, task.ontology['overwrite']):
                 self.log.info(u'Transcode %s --> %s', self.path, product.path)
                 product.write(product.path)
                 
