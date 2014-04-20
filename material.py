@@ -444,10 +444,15 @@ class AudioVideoContainer(Container):
                         command.append(u'--title')
                         command.append(self.asset.location['full name'])
                         
-                        command.append(u'--audio-tracks')
-                        command.append(u','.join([ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'audio']))
-                        command.append(u'--video-tracks')
-                        command.append(u','.join([ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'video']))
+                        tracks = [ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'audio']
+                        if tracks:
+                            command.append(u'--audio-tracks')
+                            command.append(u','.join(tracks))
+                            
+                        tracks = [ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'video']
+                        if tracks:
+                            command.append(u'--video-tracks')
+                            command.append(u','.join(tracks))
                         
                     # Only if at least one stream was chosen
                     if pivot.stream:
