@@ -448,12 +448,16 @@ class AudioVideoContainer(Container):
                         if tracks:
                             command.append(u'--audio-tracks')
                             command.append(u','.join(tracks))
+                        else:
+                            command.append(u'--no-audio')
                             
                         tracks = [ unicode(stream['stream order']) for stream in pivot.stream if stream['stream kind'] == 'video']
                         if tracks:
                             command.append(u'--video-tracks')
                             command.append(u','.join(tracks))
-                        
+                        else:
+                            command.append(u'--no-video')
+                            
                     # Only if at least one stream was chosen
                     if pivot.stream:
                         # Iterate the tracks
