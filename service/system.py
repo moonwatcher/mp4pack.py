@@ -41,6 +41,7 @@ class SystemHandler(ResourceHandler):
     def parse(self, query):
         if query['branch']['name'] == 'service/collection/search':
             if query['parameter']['table handle'] in self.env.table:
+                
                 # locate the collection
                 collection = query['repository'].database[self.env.table[query['parameter']['table handle']]['collection']]
                 

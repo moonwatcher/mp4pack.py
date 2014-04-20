@@ -245,6 +245,21 @@ class ResourceHandler(object):
         if 'api key' in self.node:
             query['parameter']['api key'] = self.node['api key']
             
+        # If parameters have been declared for the match
+        if 'query parameter' in query['match']:
+            # Collect matching parameters from the query parameter
+            query['query parameter'] = Ontology(self.env, 'ns.search.query')
+            if 'query parameter' in query['match']:
+                for k in query['match']['query parameter']:
+                    if k in query['parameter']:
+                        query['query parameter'][k] = query['parameter'][k]
+                    
+            # Collect matching parameters from the location
+            if query['location']:
+                for k in query['match']['query parameter']:
+                    if k in query['location']:
+                        query['query parameter'][k] = query['location'][k]
+
         # Compute the remote URL, if required
         if 'remote' in query['match']:
             try:
@@ -252,26 +267,14 @@ class ResourceHandler(object):
             except KeyError, e:
                 self.log.debug(u'Failed to assemble remote URL for %s because parameter %s was missing.', query['uri'], e)
             else:
-                if 'query parameter' in query['match']:
-                    query['query parameter'] = Ontology(self.env, 'ns.search.query')
+                if 'query parameter' in query:
                     
-                    # Collect matching parameters from the query parameter
-                    for k in query['match']['query parameter']:
-                        if k in query['parameter']:
-                            query['query parameter'][k] = query['parameter'][k]
-                            
-                    # Collect matching parameters from the location
-                    if query['location']:
-                        for k in query['match']['query parameter']:
-                            if k in query['location']:
-                                query['query parameter'][k] = query['location'][k]
-                                
                     # Construct an encoded query URL
-                    # First rename the parameters to the resolver's syntax and utf8 encode them 
                     parameters = {}
                     for k,v in query['query parameter'].iteritems():
                         prototype = query['query parameter'].namespace.find(k)
                         if prototype and prototype.node[self.name]:
+                            # Rename the parameters to the resolver's syntax and utf8 encode them 
                             parameters[prototype.node[self.name]] = unicode(v).encode('utf8')
                             
                     if parameters:

@@ -2822,7 +2822,10 @@
                     ], 
                     "match": [
                         {
-                            "filter": "^/s/collection/search/(?P<table_handle>[a-z]+(/[a-z]+)*)$"
+                            "filter": "^/s/collection/search/(?P<table_handle>[a-z]+(/[a-z]+)*)$",
+                            "query parameter": [
+                                "home id"
+                            ]
                         }
                     ],
                     "query type": "search"                    

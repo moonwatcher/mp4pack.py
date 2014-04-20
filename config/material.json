@@ -495,7 +495,8 @@
                                             {
                                                 "action":"transcode",
                                                 "routing type":"fragment",
-                                                "kind":"ac3"
+                                                "kind":"ac3",
+                                                "preset":"default"
                                             }
                                         ]
                                     }
@@ -511,7 +512,8 @@
                                             {
                                                 "action":"transcode",
                                                 "routing type":"fragment",
-                                                "kind":"ac3"
+                                                "kind":"ac3",
+                                                "preset":"default"
                                             }
                                         ]
                                     }

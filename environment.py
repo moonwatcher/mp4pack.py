@@ -22,7 +22,7 @@ check = lambda node: 'enable' not in node or node['enable']
 class ConfigurationCache(object):
     def __init__(self):
         self.log = logging.getLogger('Configuration')
-        self.home = u'/etc/mpk' # Defaul home directory
+        self.home = u'/etc/mpk' # Default home directory
         self.state = {}
         self.node = None
         self.path = None
