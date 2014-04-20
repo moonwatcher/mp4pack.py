@@ -179,14 +179,13 @@ class Crawler(object):
                         
                 caption.normalize()
                 if caption.valid:
-                    # mediainfo creates a text stream for SubRip files
-                    text = [ o for o in self._execution['crawl']['stream'] if o['stream type'] == u'text' ]
-                    if text:
-                        o = text[0]
-                        o['stream type'] = u'text'
-                        o['format'] = u'SubRip'
-                        o['language'] = self.ontology['language']
-                        o['content'] = caption.node
+                    mtype = self.env.enumeration['mediainfo stream type'].find('text')
+                    o = Ontology(self.env, mtype.node['namespace'])
+                    o['stream type'] = u'text'
+                    o['format'] = u'UTF-8'
+                    o['language'] = self.ontology['language']
+                    o['content'] = caption.node
+                    self._execution['crawl']['stream'].append(o)
                     
     def _load_ass(self):
         if self.ontology['kind'] == 'ass':
