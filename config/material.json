@@ -1051,6 +1051,153 @@
                 }
             }
         },
+        "jennifer":{
+            "description":"transcoding presets for Jennifer",
+            "action":{
+                "transcode":{
+                    "pivot":[
+                        { "operator":"this" }
+                    ],
+                    "transform":[
+                        {
+                            "description":"Audio and video streams from a matroska or m4v file",
+                            "mode":"choose",
+                            "branch":[
+                                {"kind":"mkv"},
+                                {"kind":"m4v"}
+                            ],
+                            "override":{
+                                "profile":"High@L3.1"
+                            },                            
+                            "track":[
+                                {
+                                    "description":"Transcode the main video track to H.264",
+                                    "mode":"choose",
+                                    "branch":[
+                                        {"stream kind":"video"}
+                                    ],
+                                    "override":{
+                                        "handbrake parameters":{
+                                            "--pfr":null,
+                                            "--rate":30,
+                                            "--large-file":null,
+                                            "--loose-anamorphic":null,
+                                            "--quality":22,
+                                            "--modulus":2,
+                                            "--maxHeight":720,
+                                            "--maxWidth":1280,
+                                            "--encoder":"x264",
+                                            "--x264-profile":"high",
+                                            "--h264-level":"3.1",
+                                            "--x264-preset":"slow"
+                                        },
+                                        "handbrake x264 settings":{
+                                            "subme":9,
+                                            "trellis":2,
+                                            "vbv-bufsize":17500,
+                                            "vbv-maxrate":17500
+                                        }
+                                    }
+                                },
+                                {
+                                    "description":"Copy aac and ac3 audio tracks",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"ac3"},
+                                        {"stream kind":"audio", "kind":"aac"}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"copy", "--ab":"auto", "--mixdown":"auto"}
+                                    }
+                                },
+                                {
+                                    "description":"Transcode 6,5 and 4 channels flac or dts to 448kbps ac3",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"flac", "channels":6},
+                                        {"stream kind":"audio", "kind":"flac", "channels":5},
+                                        {"stream kind":"audio", "kind":"flac", "channels":4},
+                                        {"stream kind":"audio", "kind":"dts", "channels":6},
+                                        {"stream kind":"audio", "kind":"dts", "channels":5},
+                                        {"stream kind":"audio", "kind":"dts", "channels":4}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"ac3", "--ab":448}
+                                    }
+                                },
+                                {
+                                    "description":"Transcode 3 and 2 channels flac or dts to 256kbps ac3",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"flac", "channels":3},
+                                        {"stream kind":"audio", "kind":"flac", "channels":2},
+                                        {"stream kind":"audio", "kind":"dts", "channels":3},
+                                        {"stream kind":"audio", "kind":"dts", "channels":2}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"ac3", "--ab":256}
+                                    }
+                                },
+                                {
+                                    "description":"Transcode 1 channel flac or dts to 192kbps ac3",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"flac", "channels":1},
+                                        {"stream kind":"audio", "kind":"dts", "channels":1}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"ac3", "--ab":192}
+                                    }
+                                },
+                                {
+                                    "description":"Transcode flac or dts to 256kbps Dolby Pro Logic II aac",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"flac"},
+                                        {"stream kind":"audio", "kind":"dts"}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"ca_aac", "--ab":256, "--mixdown":"dpl2"}
+                                    }
+                                },
+                                {
+                                    "description":"Transcode ac3 to 160kbps Dolby Pro Logic II aac",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"ac3"}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"ca_aac", "--ab":160, "--mixdown":"dpl2"}
+                                    }
+                                },
+                                {
+                                    "description":"Transcode mp3 or vorbis stereo tracks to 128kbps stereo aac",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"mp3", "channels":2},
+                                        {"stream kind":"audio", "kind":"ogg", "channels":2}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"ca_aac", "--ab":128, "--mixdown":"stereo"}
+                                    }
+                                },
+                                {
+                                    "description":"Transcode mono mp3 or vorbis tracks to 64kbps mono aac",
+                                    "mode":"select",
+                                    "branch":[
+                                        {"stream kind":"audio", "kind":"mp3", "channels":1},
+                                        {"stream kind":"audio", "kind":"ogg", "channels":1}
+                                    ],
+                                    "override":{
+                                        "handbrake audio encoder settings":{"--aencoder":"ca_aac", "--ab":64, "--mixdown":"mono"}
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
         "iphone":{
             "description":"iPhone transcoding presets",
             "action":{
