@@ -16,8 +16,7 @@
                     "namespace": "ns.facebook.movie", 
                     "resolvable": [
                         {
-                            "format": "/c/facebook/movie/{facebook movie id}", 
-                            "name": "facebook movie by facebook id"
+                            "format": "/c/facebook/movie/{facebook movie id}"
                         }
                     ], 
                     "type": "json"
@@ -54,17 +53,14 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "collection home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/collection/{collection id}", 
-                            "name": "collection home by id"
+                            "format": "/h/collection/{collection id}"
                         }, 
                         {
-                            "format": "/h/collection/tmdb/{tmdb collection id}", 
-                            "name": "collection home by tmdb id"
+                            "format": "/h/collection/tmdb/{tmdb collection id}"
                         }
                     ]
                 }, 
@@ -88,17 +84,14 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "company home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/company/{company id}", 
-                            "name": "company home by company id"
+                            "format": "/h/company/{company id}"
                         }, 
                         {
-                            "format": "/h/company/tmdb/{tmdb company id}", 
-                            "name": "company home by tmdb company id"
+                            "format": "/h/company/tmdb/{tmdb company id}"
                         }
                     ]
                 }, 
@@ -112,13 +105,11 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "department home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/department/{department id}", 
-                            "name": "department home by department id"
+                            "format": "/h/department/{department id}"
                         }
                     ]
                 }, 
@@ -155,29 +146,23 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "genre home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/genre/{genre id}", 
-                            "name": "genre home by genre id"
+                            "format": "/h/genre/{genre id}"
                         }, 
                         {
-                            "format": "/h/genre/tmdb/{tmdb genre id}", 
-                            "name": "genre home by tmdb genre id"
+                            "format": "/h/genre/tmdb/{tmdb genre id}"
                         }, 
                         {
-                            "format": "/h/genre/itunes/{itunes genre id}", 
-                            "name": "genre home by itunes genre id"
+                            "format": "/h/genre/itunes/{itunes genre id}"
                         },
                         {
-                            "format": "/h/genre/gnre/{genre type}", 
-                            "name": "genre home by genre type"
+                            "format": "/h/genre/gnre/{genre type}"
                         },
                         {
-                            "format": "/h/genre/id3/{id3 genre type}", 
-                            "name": "genre home by id3 genre type"
+                            "format": "/h/genre/id3/{id3 genre type}"
                         }
                     ]
                 }, 
@@ -191,13 +176,11 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "job home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/job/{job id}", 
-                            "name": "job home by job id"
+                            "format": "/h/job/{job id}"
                         }
                     ]
                 }, 
@@ -221,17 +204,14 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "keyword home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/keyword/{keyword id}", 
-                            "name": "keyword home by company id"
+                            "format": "/h/keyword/{keyword id}"
                         }, 
                         {
-                            "format": "/h/keyword/tmdb/{tmdb keyword id}", 
-                            "name": "keyword home by tmdb keyword id"
+                            "format": "/h/keyword/tmdb/{tmdb keyword id}"
                         }
                     ]
                 }, 
@@ -289,33 +269,26 @@
                     }, 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "movie home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/movie/{movie id}", 
-                            "name": "movie home by id"
+                            "format": "/h/movie/{movie id}"
                         }, 
                         {
-                            "format": "/h/movie/~/{movie handle}", 
-                            "name": "movie home by handle"
+                            "format": "/h/movie/~/{movie handle}"
                         }, 
                         {
-                            "format": "/h/movie/tmdb/{tmdb movie id}", 
-                            "name": "movie home by tmdb id"
+                            "format": "/h/movie/tmdb/{tmdb movie id}"
                         }, 
                         {
-                            "format": "/h/movie/imdb/{imdb movie id}", 
-                            "name": "movie home by imdb id"
+                            "format": "/h/movie/imdb/{imdb movie id}"
                         }, 
                         {
-                            "format": "/h/movie/itunes/{itunes movie id}", 
-                            "name": "movie home by itunes id"
+                            "format": "/h/movie/itunes/{itunes movie id}"
                         }, 
                         {
-                            "format": "/h/movie/rottentomatoes/{rottentomatoes movie id}", 
-                            "name": "movie home by rottentomatoes movie id"
+                            "format": "/h/movie/rottentomatoes/{rottentomatoes movie id}"
                         }
                     ]
                 }, 
@@ -349,21 +322,17 @@
                     }, 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "music album home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/music/album/{music album id}", 
-                            "name": "music album home by music album id"
+                            "format": "/h/music/album/{music album id}"
                         }, 
                         {
-                            "format": "/h/music/album/itunes/{itunes music album id}", 
-                            "name": "music album home by itunes music album id"
+                            "format": "/h/music/album/itunes/{itunes music album id}"
                         }, 
                         {
-                            "format": "/h/music/album/~/{album handle}", 
-                            "name": "music album home by album handle"
+                            "format": "/h/music/album/~/{album handle}"
                         }
                     ]
                 }, 
@@ -415,29 +384,23 @@
                     }, 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "music track home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/music/track/{track id}", 
-                            "name": "music track home by track id"
+                            "format": "/h/music/track/{track id}"
                         }, 
                         {
-                            "format": "/h/music/track/{music album id}/{disc number}/{track number}", 
-                            "name": "music track home by music album id"
+                            "format": "/h/music/track/{music album id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/music/track/itunes/{itunes music track id}", 
-                            "name": "music track home by itunes music track id"
+                            "format": "/h/music/track/itunes/{itunes music track id}"
                         }, 
                         {
-                            "format": "/h/music/track/itunes/{itunes music album id}/{disc number}/{track number}", 
-                            "name": "music track home by itunes music album id"
+                            "format": "/h/music/track/itunes/{itunes music album id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/music/track/~/{album handle}/{disc number}/{track number}", 
-                            "name": "music track home by album handle"
+                            "format": "/h/music/track/~/{album handle}/{disc number}/{track number}"
                         }
                     ]
                 }, 
@@ -461,17 +424,14 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "network home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/network/{network id}", 
-                            "name": "network home by network id"
+                            "format": "/h/network/{network id}"
                         }, 
                         {
-                            "format": "/h/network/tmdb/{tmdb network id}", 
-                            "name": "network home by tmdb network id"
+                            "format": "/h/network/tmdb/{tmdb network id}"
                         }
                     ]
                 }, 
@@ -510,29 +470,23 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "person home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/person/{person id}", 
-                            "name": "person home by person id"
+                            "format": "/h/person/{person id}"
                         }, 
                         {
-                            "format": "/h/person/tmdb/{tmdb person id}", 
-                            "name": "person home by tmdb person id"
+                            "format": "/h/person/tmdb/{tmdb person id}"
                         }, 
                         {
-                            "format": "/h/person/itunes/{itunes person id}", 
-                            "name": "person home by itunes person id"
+                            "format": "/h/person/itunes/{itunes person id}"
                         }, 
                         {
-                            "format": "/h/person/imdb/{imdb person id}", 
-                            "name": "person home by imdb person id"
+                            "format": "/h/person/imdb/{imdb person id}"
                         }, 
                         {
-                            "format": "/h/person/freebase{freebase person mid}", 
-                            "name": "person home by freebase person id"
+                            "format": "/h/person/freebase{freebase person mid}"
                         }
                     ]
                 }, 
@@ -662,81 +616,62 @@
                     }, 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "episode home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/tv/episode/{tv episode id}", 
-                            "name": "episode home by tv episode id"
+                            "format": "/h/tv/episode/{tv episode id}"
                         }, 
                         {
-                            "format": "/h/tv/episode/{tv season id}/{track number}", 
-                            "name": "episode home by tv season id"
+                            "format": "/h/tv/episode/{tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/{tv show id}/{disc number}/{track number}", 
-                            "name": "episode home by tv show id"
+                            "format": "/h/tv/episode/{tv show id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/~/{tv show handle}/{disc number}/{track number}", 
-                            "name": "episode home by tv show handle"
+                            "format": "/h/tv/episode/~/{tv show handle}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/tmdb/{tmdb tv episode id}", 
-                            "name": "episode home by tmdb tv episode id"
+                            "format": "/h/tv/episode/tmdb/{tmdb tv episode id}"
                         }, 
                         {
-                            "format": "/h/tv/episode/tmdb/{tmdb tv season id}/{track number}", 
-                            "name": "episode home by tmdb tv season id"
+                            "format": "/h/tv/episode/tmdb/{tmdb tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/tmdb/{tmdb tv show id}/{disc number}/{track number}", 
-                            "name": "episode home by tmdb tv show id"
+                            "format": "/h/tv/episode/tmdb/{tmdb tv show id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/tvdb/{tvdb tv episode id}", 
-                            "name": "episode home by tvdb tv episode id"
+                            "format": "/h/tv/episode/tvdb/{tvdb tv episode id}"
                         }, 
                         {
-                            "format": "/h/tv/episode/tvdb/{tvdb tv season id}/{track number}", 
-                            "name": "episode home by tvdb tv season id"
+                            "format": "/h/tv/episode/tvdb/{tvdb tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}", 
-                            "name": "episode home by tvdb tv show id"
+                            "format": "/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/freebase{freebase tv episode id}", 
-                            "name": "episode home by freebase tv episode id"
+                            "format": "/h/tv/episode/freebase{freebase tv episode id}"
                         }, 
                         {
-                            "format": "/h/tv/episode/freebase{freebase tv season id}/{track number}", 
-                            "name": "episode home by freebase tv season id"
+                            "format": "/h/tv/episode/freebase{freebase tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/freebase{freebase tv show id}/{disc number}/{track number}", 
-                            "name": "episode home by freebase tv show id"
+                            "format": "/h/tv/episode/freebase{freebase tv show id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/imdb/{imdb tv episode id}", 
-                            "name": "episode home by imdb tv episode id"
+                            "format": "/h/tv/episode/imdb/{imdb tv episode id}"
                         }, 
                         {
-                            "format": "/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}", 
-                            "name": "episode home by imdb tv show id"
+                            "format": "/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/itunes/{itunes tv episode id}", 
-                            "name": "episode home by itunes tv episode id"
+                            "format": "/h/tv/episode/itunes/{itunes tv episode id}"
                         }, 
                         {
-                            "format": "/h/tv/episode/itunes/{itunes tv season id}/{track number}", 
-                            "name": "episode home by itunes tv season id"
+                            "format": "/h/tv/episode/itunes/{itunes tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/h/tv/episode/itunes/{itunes tv show id}/{disc number}/{track number}", 
-                            "name": "episode home by itunes tv show id"
+                            "format": "/h/tv/episode/itunes/{itunes tv show id}/{disc number}/{track number}"
                         }
                     ]
                 }, 
@@ -813,53 +748,41 @@
                     }, 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "season home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/tv/season/{tv season id}", 
-                            "name": "season home by tv season id"
+                            "format": "/h/tv/season/{tv season id}"
                         }, 
                         {
-                            "format": "/h/tv/season/{tv show id}/{disc number}", 
-                            "name": "season home by tv show id"
+                            "format": "/h/tv/season/{tv show id}/{disc number}"
                         }, 
                         {
-                            "format": "/h/tv/season/tmdb/{tmdb tv season id}", 
-                            "name": "season home by tmdb tv season id"
+                            "format": "/h/tv/season/tmdb/{tmdb tv season id}"
                         }, 
                         {
-                            "format": "/h/tv/season/tmdb/{tmdb tv show id}/{disc number}", 
-                            "name": "season home by tmdb tv show id"
+                            "format": "/h/tv/season/tmdb/{tmdb tv show id}/{disc number}"
                         }, 
                         {
-                            "format": "/h/tv/season/tvdb/{tvdb tv season id}", 
-                            "name": "season home by tvdb tv season id"
+                            "format": "/h/tv/season/tvdb/{tvdb tv season id}"
                         }, 
                         {
-                            "format": "/h/tv/season/tvdb/{tvdb tv show id}/{disc number}", 
-                            "name": "season home by tvdb tv show id"
+                            "format": "/h/tv/season/tvdb/{tvdb tv show id}/{disc number}"
                         }, 
                         {
-                            "format": "/h/tv/season/tmdb/freebase{freebase tv season mid}", 
-                            "name": "season home by freebase tv season mid"
+                            "format": "/h/tv/season/tmdb/freebase{freebase tv season mid}"
                         }, 
                         {
-                            "format": "/h/tv/season/tmdb/freebase{freebase tv show mid}/{disc number}", 
-                            "name": "season home by freebase tv show mid"
+                            "format": "/h/tv/season/tmdb/freebase{freebase tv show mid}/{disc number}"
                         }, 
                         {
-                            "format": "/h/tv/season/itunes/{itunes tv season id}", 
-                            "name": "season home by itunes tv season id"
+                            "format": "/h/tv/season/itunes/{itunes tv season id}"
                         }, 
                         {
-                            "format": "/h/tv/season/itunes/{itunes tv show id}/{disc number}", 
-                            "name": "season home by itunes tv show id"
+                            "format": "/h/tv/season/itunes/{itunes tv show id}/{disc number}"
                         }, 
                         {
-                            "format": "/h/tv/season/imdb/{imdb tv show id}/{disc number}", 
-                            "name": "season home by imdb tv show id"
+                            "format": "/h/tv/season/imdb/{imdb tv show id}/{disc number}"
                         }
                     ]
                 }, 
@@ -913,37 +836,29 @@
                     }, 
                     "resolvable": [
                         {
-                            "format": "/h/{home id}", 
-                            "name": "show home by home id"
+                            "format": "/h/{home id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/h/tv/show/{tv show id}", 
-                            "name": "show home by tv show id"
+                            "format": "/h/tv/show/{tv show id}"
                         }, 
                         {
-                            "format": "/h/tv/show/~/{tv show handle}", 
-                            "name": "show home by tv show handle"
+                            "format": "/h/tv/show/~/{tv show handle}"
                         }, 
                         {
-                            "format": "/h/tv/show/tmdb/{tmdb tv show id}", 
-                            "name": "show home by tmdb tv show id"
+                            "format": "/h/tv/show/tmdb/{tmdb tv show id}"
                         }, 
                         {
-                            "format": "/h/tv/show/tvdb/{tvdb tv show id}", 
-                            "name": "show home by tvdb tv show id"
+                            "format": "/h/tv/show/tvdb/{tvdb tv show id}"
                         }, 
                         {
-                            "format": "/h/tv/show/itunes/{itunes tv show id}", 
-                            "name": "show home by itunes tv show id"
+                            "format": "/h/tv/show/itunes/{itunes tv show id}"
                         }, 
                         {
-                            "format": "/h/tv/show/imdb/{imdb tv show id}", 
-                            "name": "show home by imdb tv show id"
+                            "format": "/h/tv/show/imdb/{imdb tv show id}"
                         }, 
                         {
-                            "format": "/h/tv/show/freebase{freebase tv show mid}", 
-                            "name": "show home by freebase tv show mid"
+                            "format": "/h/tv/show/freebase{freebase tv show mid}"
                         }
                     ]
                 }
@@ -985,8 +900,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/genre/{itunes genre id}", 
-                            "name": "itunes genre by itunes id"
+                            "format": "/c/itunes/genre/{itunes genre id}"
                         }
                     ], 
                     "type": "json"
@@ -1044,8 +958,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/movie/{itunes movie id}", 
-                            "name": "itunes movie by itunes id"
+                            "format": "/c/itunes/movie/{itunes movie id}"
                         }
                     ], 
                     "type": "json"
@@ -1081,8 +994,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/music/album/{itunes music album id}", 
-                            "name": "itunes album by itunes id"
+                            "format": "/c/itunes/music/album/{itunes music album id}"
                         }
                     ], 
                     "type": "json"
@@ -1137,12 +1049,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/music/track/{itunes music track id}", 
-                            "name": "itunes music track by itunes id"
+                            "format": "/c/itunes/music/track/{itunes music track id}"
                         }, 
                         {
-                            "format": "/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}", 
-                            "name": "itunes music track by itunes album id"
+                            "format": "/c/itunes/music/track/{itunes music album id}/{disc number}/{track number}"
                         }
                     ], 
                     "type": "json"
@@ -1183,8 +1093,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/person/{itunes person id}", 
-                            "name": "itunes person by itunes id"
+                            "format": "/c/itunes/person/{itunes person id}"
                         }
                     ], 
                     "type": "json"
@@ -1254,16 +1163,13 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/tv/episode/{itunes tv episode id}", 
-                            "name": "itunes tv episode by itunes id"
+                            "format": "/c/itunes/tv/episode/{itunes tv episode id}"
                         }, 
                         {
-                            "format": "/c/itunes/tv/episode/{itunes tv season id}/{track number}", 
-                            "name": "itunes tv episode by itunes season id"
+                            "format": "/c/itunes/tv/episode/{itunes tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/c/itunes/tv/episode/{itunes tv show id}/{disc number}/{track number}", 
-                            "name": "itunes tv episode by itunes show id"
+                            "format": "/c/itunes/tv/episode/{itunes tv show id}/{disc number}/{track number}"
                         }
                     ], 
                     "type": "json"
@@ -1315,12 +1221,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/tv/season/{itunes tv season id}", 
-                            "name": "itunes tv season by itunes id"
+                            "format": "/c/itunes/tv/season/{itunes tv season id}"
                         }, 
                         {
-                            "format": "/c/itunes/tv/season/{itunes tv show id}/{disc number}", 
-                            "name": "itunes tv season by itunes show id"
+                            "format": "/c/itunes/tv/season/{itunes tv show id}/{disc number}"
                         }
                     ], 
                     "type": "json"
@@ -1363,8 +1267,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/itunes/tv/show/{itunes tv show id}", 
-                            "name": "itunes tv show by itunes id"
+                            "format": "/c/itunes/tv/show/{itunes tv show id}"
                         }
                     ], 
                     "type": "json"
@@ -1539,8 +1442,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/collection/{collection id}", 
-                            "name": "collection knowledge by id"
+                            "format": "/k/{language}/collection/{collection id}"
                         }
                     ], 
                     "type": "json"
@@ -1570,8 +1472,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/company/{company id}", 
-                            "name": "company by knowledge id"
+                            "format": "/k/{language}/company/{company id}"
                         }
                     ], 
                     "type": "json"
@@ -1600,8 +1501,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/company/{company id}/credit", 
-                            "name": "company credit"
+                            "format": "/k/company/{company id}/credit"
                         }
                     ], 
                     "type": "json"
@@ -1615,8 +1515,7 @@
                     ], 
                     "resolvable": [
                         {
-                            "format": "/k/configuration", 
-                            "name": "knowledge configuration"
+                            "format": "/k/configuration"
                         }
                     ], 
                     "type": "json"
@@ -1631,8 +1530,7 @@
                     "namespace": "ns.knowledge.department", 
                     "resolvable": [
                         {
-                            "format": "/k/{language}/department/{department id}", 
-                            "name": "department"
+                            "format": "/k/{language}/department/{department id}"
                         }
                     ], 
                     "type": "json"
@@ -1655,8 +1553,7 @@
                     "namespace": "ns.knowledge.genre", 
                     "resolvable": [
                         {
-                            "format": "/k/{language}/genre/{genre id}", 
-                            "name": "genre by genre id"
+                            "format": "/k/{language}/genre/{genre id}"
                         }
                     ], 
                     "type": "json"
@@ -1671,8 +1568,7 @@
                     "namespace": "ns.knowledge.job", 
                     "resolvable": [
                         {
-                            "format": "/k/{language}/job/{job id}", 
-                            "name": "job"
+                            "format": "/k/{language}/job/{job id}"
                         }
                     ], 
                     "type": "json"
@@ -1711,8 +1607,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/movie/{movie id}", 
-                            "name": "movie knowledge by id"
+                            "format": "/k/{language}/movie/{movie id}"
                         }
                     ], 
                     "type": "json"
@@ -1744,8 +1639,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/movie/{movie id}/alternative", 
-                            "name": "movie alternative knowledge"
+                            "format": "/k/movie/{movie id}/alternative"
                         }
                     ], 
                     "type": "json"
@@ -1778,8 +1672,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/movie/{movie id}/clip", 
-                            "name": "movie clip knowledge"
+                            "format": "/k/movie/{movie id}/clip"
                         }
                     ], 
                     "type": "json"
@@ -1812,8 +1705,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/movie/{movie id}/image", 
-                            "name": "movie image knowledge"
+                            "format": "/k/movie/{movie id}/image"
                         }
                     ], 
                     "type": "json"
@@ -1845,8 +1737,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/movie/{movie id}/keyword", 
-                            "name": "movie keyword knowledge"
+                            "format": "/k/movie/{movie id}/keyword"
                         }
                     ], 
                     "type": "json"
@@ -1879,8 +1770,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/movie/{movie id}/people", 
-                            "name": "movie people knowledge"
+                            "format": "/k/movie/{movie id}/people"
                         }
                     ], 
                     "type": "json"
@@ -1913,8 +1803,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/movie/{movie id}/rating", 
-                            "name": "movie rating knowledge"
+                            "format": "/k/movie/{movie id}/rating"
                         }
                     ], 
                     "type": "json"
@@ -1947,8 +1836,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/movie/{movie id}/translation", 
-                            "name": "movie translation knowledge"
+                            "format": "/k/movie/{movie id}/translation"
                         }
                     ], 
                     "type": "json"
@@ -1979,8 +1867,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/music/album/{music album id}", 
-                            "name": "music album"
+                            "format": "/k/{language}/music/album/{music album id}"
                         }
                     ], 
                     "type": "json"
@@ -2005,8 +1892,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/music/album/{music album id}/image", 
-                            "name": "music album image"
+                            "format": "/k/music/album/{music album id}/image"
                         }
                     ], 
                     "type": "json"
@@ -2046,12 +1932,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/music/track/{track id}", 
-                            "name": "music track by track id"
+                            "format": "/k/{language}/music/track/{track id}"
                         }, 
                         {
-                            "format": "/k/{language}/music/track/{music album id}/{disc number}/{track number}", 
-                            "name": "music track by album id"
+                            "format": "/k/{language}/music/track/{music album id}/{disc number}/{track number}"
                         }
                     ], 
                     "type": "json"
@@ -2080,8 +1964,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/network/{network id}", 
-                            "name": "network by knowledge id"
+                            "format": "/k/network/{network id}"
                         }
                     ], 
                     "type": "json"
@@ -2115,8 +1998,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/person/{person id}", 
-                            "name": "person by knowledge id"
+                            "format": "/k/{language}/person/{person id}"
                         }
                     ], 
                     "type": "json"
@@ -2147,8 +2029,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/person/{person id}/credit", 
-                            "name": "person credit"
+                            "format": "/k/person/{person id}/credit"
                         }
                     ], 
                     "type": "json"
@@ -2179,8 +2060,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/person/{person id}/image", 
-                            "name": "person image"
+                            "format": "/k/person/{person id}/image"
                         }
                     ], 
                     "type": "json"
@@ -2196,8 +2076,7 @@
                     "namespace": "ns.knowledge.playlist", 
                     "resolvable": [
                         {
-                            "format": "/k/{language}/playlist/{playlist id}", 
-                            "name": "playlist knowledge"
+                            "format": "/k/{language}/playlist/{playlist id}"
                         }
                     ], 
                     "type": "json"
@@ -2248,16 +2127,13 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/tv/episode/{tv episode id}", 
-                            "name": "episode knowledge by tv episode id"
+                            "format": "/k/{language}/tv/episode/{tv episode id}"
                         }, 
                         {
-                            "format": "/k/{language}/tv/episode/{tv season id}/{track number}", 
-                            "name": "episode knowledge by tv season id"
+                            "format": "/k/{language}/tv/episode/{tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}", 
-                            "name": "episode knowledge by tv show id"
+                            "format": "/k/{language}/tv/episode/{tv show id}/{disc number}/{track number}"
                         }
                     ], 
                     "type": "json"
@@ -2304,16 +2180,13 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/tv/episode/{tv episode id}/image", 
-                            "name": "tv show episode image"
+                            "format": "/k/tv/episode/{tv episode id}/image"
                         }, 
                         {
-                            "format": "/k/tv/episode/{tv season id}/{track number}/image", 
-                            "name": "episode knowledge by tv season id"
+                            "format": "/k/tv/episode/{tv season id}/{track number}/image"
                         }, 
                         {
-                            "format": "/k/tv/episode/{tv show id}/{disc number}/{track number}/image", 
-                            "name": "tv show episode image"
+                            "format": "/k/tv/episode/{tv show id}/{disc number}/{track number}/image"
                         }
                     ], 
                     "type": "json"
@@ -2360,16 +2233,13 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/tv/episode/{tv episode id}/people", 
-                            "name": "tv show episode people"
+                            "format": "/k/tv/episode/{tv episode id}/people"
                         }, 
                         {
-                            "format": "/k/tv/episode/{tv season id}/{track number}/people", 
-                            "name": "episode knowledge by tv season id"
+                            "format": "/k/tv/episode/{tv season id}/{track number}/people"
                         }, 
                         {
-                            "format": "/k/tv/episode/{tv show id}/{disc number}/{track number}/people", 
-                            "name": "tv show episode people"
+                            "format": "/k/tv/episode/{tv show id}/{disc number}/{track number}/people"
                         }
                     ], 
                     "type": "json"
@@ -2412,12 +2282,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/tv/season/{tv season id}", 
-                            "name": "season knowledge by tv season id"
+                            "format": "/k/{language}/tv/season/{tv season id}"
                         }, 
                         {
-                            "format": "/k/{language}/tv/season/{tv show id}/{disc number}", 
-                            "name": "season knowledge by tv show id and position"
+                            "format": "/k/{language}/tv/season/{tv show id}/{disc number}"
                         }
                     ], 
                     "type": "json"
@@ -2456,12 +2324,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/tv/season/{tv season id}/image", 
-                            "name": "tv show season image"
+                            "format": "/k/tv/season/{tv season id}/image"
                         }, 
                         {
-                            "format": "/k/tv/season/{tv show id}/{disc number}/image", 
-                            "name": "tv show season image"
+                            "format": "/k/tv/season/{tv show id}/{disc number}/image"
                         }
                     ], 
                     "type": "json"
@@ -2500,12 +2366,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/tv/season/{tv season id}/people", 
-                            "name": "tv show season people"
+                            "format": "/k/tv/season/{tv season id}/people"
                         }, 
                         {
-                            "format": "/k/tv/season/{tv show id}/{disc number}/people", 
-                            "name": "tv show season people"
+                            "format": "/k/tv/season/{tv show id}/{disc number}/people"
                         }
                     ], 
                     "type": "json"
@@ -2543,8 +2407,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/{language}/tv/show/{tv show id}", 
-                            "name": "show knowledge by tv show id"
+                            "format": "/k/{language}/tv/show/{tv show id}"
                         }
                     ], 
                     "type": "json"
@@ -2575,8 +2438,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/tv/show/{tv show id}/image", 
-                            "name": "tv show image"
+                            "format": "/k/tv/show/{tv show id}/image"
                         }
                     ], 
                     "type": "json"
@@ -2607,8 +2469,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/k/tv/show/{tv show id}/people", 
-                            "name": "tv show people"
+                            "format": "/k/tv/show/{tv show id}/people"
                         }
                     ], 
                     "type": "json"
@@ -2629,8 +2490,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/m/asset/{home id}", 
-                            "name": "asset by home id"
+                            "format": "/m/asset/{home id}"
                         }
                     ], 
                     "type": "reference"
@@ -2645,8 +2505,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/m/resource/sha1/{path digest}", 
-                            "name": "resource"
+                            "format": "/m/resource/sha1/{path digest}"
                         }
                     ], 
                     "type": "crawl"
@@ -2661,8 +2520,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/m/resource/sha1/{path digest}/fragment", 
-                            "name": "resource"
+                            "format": "/m/resource/sha1/{path digest}/fragment"
                         }
                     ], 
                     "type": "reference"
@@ -2704,12 +2562,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}", 
-                            "name": "rotten tomatoes movie by rottentomatoes movie id"
+                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}"
                         }, 
                         {
-                            "format": "/c/rottentomatoes/movie/imdb/{imdb movie id}", 
-                            "name": "rotten tomatoes movie by imdb id"
+                            "format": "/c/rottentomatoes/movie/imdb/{imdb movie id}"
                         }
                     ], 
                     "type": "json"
@@ -2732,8 +2588,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/clip", 
-                            "name": "rotten tomatoes movie clip by rottentomatoes movie id"
+                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/clip"
                         }
                     ], 
                     "type": "json"
@@ -2756,8 +2611,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/people", 
-                            "name": "rotten tomatoes movie people by rottentomatoes movie id"
+                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/people"
                         }
                     ], 
                     "type": "json"
@@ -2780,8 +2634,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/review", 
-                            "name": "rotten tomatoes movie review by rottentomatoes movie id"
+                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/review"
                         }
                     ], 
                     "type": "json"
@@ -2804,8 +2657,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/similar", 
-                            "name": "rotten tomatoes similar movies by rottentomatoes movie id"
+                            "format": "/c/rottentomatoes/movie/{rottentomatoes movie id}/similar"
                         }
                     ], 
                     "type": "json"
@@ -2940,8 +2792,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/{language}/tmdb/collection/{tmdb collection id}", 
-                            "name": "tmdb collection by tmdb id"
+                            "format": "/c/{language}/tmdb/collection/{tmdb collection id}"
                         }
                     ]
                 }, 
@@ -2967,8 +2818,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/{language}/tmdb/company/{tmdb company id}", 
-                            "name": "tmdb company by tmdb id"
+                            "format": "/c/{language}/tmdb/company/{tmdb company id}"
                         }
                     ]
                 }, 
@@ -2990,8 +2840,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/company/{tmdb company id}/credit", 
-                            "name": "tmdb company credit by tmdb id"
+                            "format": "/c/tmdb/company/{tmdb company id}/credit"
                         }
                     ]
                 }, 
@@ -3009,8 +2858,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/configuration", 
-                            "name": "tmdb configuration"
+                            "format": "/c/tmdb/configuration"
                         }
                     ]
                 }, 
@@ -3036,8 +2884,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/{language}/tmdb/genre/{tmdb genre id}", 
-                            "name": "tmdb genre by tmdb id"
+                            "format": "/c/{language}/tmdb/genre/{tmdb genre id}"
                         }
                     ]
                 }, 
@@ -3061,8 +2908,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/keyword/{tmdb keyword id}", 
-                            "name": "tmdb keyword by tmdb id"
+                            "format": "/c/tmdb/keyword/{tmdb keyword id}"
                         }
                     ]
                 }, 
@@ -3097,12 +2943,10 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/{language}/tmdb/movie/{tmdb movie id}", 
-                            "name": "tmdb movie by tmdb id"
+                            "format": "/c/{language}/tmdb/movie/{tmdb movie id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/movie/imdb/{imdb movie id}", 
-                            "name": "tmdb movie by imdb id"
+                            "format": "/c/{language}/tmdb/movie/imdb/{imdb movie id}"
                         }
                     ]
                 }, 
@@ -3124,8 +2968,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/movie/{tmdb movie id}/alternative", 
-                            "name": "tmdb movie alternative by tmdb id"
+                            "format": "/c/tmdb/movie/{tmdb movie id}/alternative"
                         }
                     ]
                 }, 
@@ -3147,8 +2990,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/movie/{tmdb movie id}/clip", 
-                            "name": "tmdb movie clip by tmdb id"
+                            "format": "/c/tmdb/movie/{tmdb movie id}/clip"
                         }
                     ]
                 }, 
@@ -3170,8 +3012,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/movie/{tmdb movie id}/image", 
-                            "name": "tmdb movie image by tmdb id"
+                            "format": "/c/tmdb/movie/{tmdb movie id}/image"
                         }
                     ]
                 }, 
@@ -3193,8 +3034,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/movie/{tmdb movie id}/keyword", 
-                            "name": "tmdb movie keyword by tmdb id"
+                            "format": "/c/tmdb/movie/{tmdb movie id}/keyword"
                         }
                     ]
                 }, 
@@ -3216,8 +3056,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/movie/{tmdb movie id}/people", 
-                            "name": "tmdb movie people by tmdb id"
+                            "format": "/c/tmdb/movie/{tmdb movie id}/people"
                         }
                     ]
                 }, 
@@ -3239,8 +3078,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/movie/{tmdb movie id}/rating", 
-                            "name": "tmdb movie release by tmdb id"
+                            "format": "/c/tmdb/movie/{tmdb movie id}/rating"
                         }
                     ]
                 }, 
@@ -3262,8 +3100,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/movie/{tmdb movie id}/translation", 
-                            "name": "tmdb movie translation by tmdb id"
+                            "format": "/c/tmdb/movie/{tmdb movie id}/translation"
                         }
                     ]
                 }, 
@@ -3287,8 +3124,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/network/{tmdb network id}", 
-                            "name": "tmdb network by tmdb id"
+                            "format": "/c/tmdb/network/{tmdb network id}"
                         }
                     ]
                 }, 
@@ -3325,16 +3161,13 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/person/{tmdb person id}", 
-                            "name": "tmdb person by tmdb id"
+                            "format": "/c/tmdb/person/{tmdb person id}"
                         }, 
                         {
-                            "format": "/c/tmdb/person/imdb/{imdb person id}", 
-                            "name": "tmdb person by imdb id"
+                            "format": "/c/tmdb/person/imdb/{imdb person id}"
                         }, 
                         {
-                            "format": "/c/tmdb/person/freebase{freebase person mid}", 
-                            "name": "tmdb person by freebase mid"
+                            "format": "/c/tmdb/person/freebase{freebase person mid}"
                         }
                     ]
                 }, 
@@ -3356,8 +3189,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/person/{tmdb person id}/credit", 
-                            "name": "tmdb person credit by tmdb id"
+                            "format": "/c/tmdb/person/{tmdb person id}/credit"
                         }
                     ]
                 }, 
@@ -3381,8 +3213,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/person/{tmdb person id}/external", 
-                            "name": "tmdb person external ids by tmdb person id"
+                            "format": "/c/tmdb/person/{tmdb person id}/external"
                         }
                     ]
                 }, 
@@ -3404,8 +3235,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/person/{tmdb person id}/image", 
-                            "name": "tmdb person image by tmdb id"
+                            "format": "/c/tmdb/person/{tmdb person id}/image"
                         }
                     ]
                 }, 
@@ -3498,49 +3328,38 @@
                     "namespace": "ns.knowledge.tv.episode", 
                     "resolvable": [
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/{tmdb tv episode id}", 
-                            "name": "tmdb episode by tmdb episode id"
+                            "format": "/c/{language}/tmdb/tv/episode/{tmdb tv episode id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/{tmdb tv season id}/{track number}", 
-                            "name": "tmdb episode by tmdb season id"
+                            "format": "/c/{language}/tmdb/tv/episode/{tmdb tv season id}/{track number}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/c/{language}/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}", 
-                            "name": "tmdb episode by tmdb show id"
+                            "format": "/c/{language}/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv episode id}", 
-                            "name": "tmdb episode by tvdb episode id"
+                            "format": "/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv episode id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv season id}/{track number}", 
-                            "name": "tmdb episode by tvdb season id"
+                            "format": "/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv season id}/{track number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}", 
-                            "name": "tmdb episode by tvdb show id"
+                            "format": "/c/{language}/tmdb/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/freebase{freebase tv episode mid}", 
-                            "name": "tmdb episode by freebase episode mid"
+                            "format": "/c/{language}/tmdb/tv/episode/freebase{freebase tv episode mid}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/freebase{freebase tv season mid}/{track number}", 
-                            "name": "tmdb episode by freebase season mid"
+                            "format": "/c/{language}/tmdb/tv/episode/freebase{freebase tv season mid}/{track number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/freebase{freebase tv show mid}/{disc number}/{track number}", 
-                            "name": "tmdb episode by freebase show mid"
+                            "format": "/c/{language}/tmdb/tv/episode/freebase{freebase tv show mid}/{disc number}/{track number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/imdb/{imdb tv episode id}", 
-                            "name": "tmdb episode by imdb episode id"
+                            "format": "/c/{language}/tmdb/tv/episode/imdb/{imdb tv episode id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}", 
-                            "name": "tmdb episode by imdb show id"
+                            "format": "/c/{language}/tmdb/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}"
                         }
                     ]
                 }, 
@@ -3564,8 +3383,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/external", 
-                            "name": "tmdb episode external by tmdb show id"
+                            "format": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/external"
                         }
                     ]
                 }, 
@@ -3589,8 +3407,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/image", 
-                            "name": "tmdb episode images by tmdb show id"
+                            "format": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/image"
                         }
                     ]
                 }, 
@@ -3614,8 +3431,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/people", 
-                            "name": "tmdb episode people by tmdb show id"
+                            "format": "/c/tmdb/tv/episode/{tmdb tv show id}/{disc number}/{track number}/people"
                         }
                     ]
                 }, 
@@ -3688,33 +3504,26 @@
                     "namespace": "ns.knowledge.tv.season", 
                     "resolvable": [
                         {
-                            "format": "/c/{language}/tmdb/tv/season/{tmdb tv season id}", 
-                            "name": "tmdb season by tmdb season id"
+                            "format": "/c/{language}/tmdb/tv/season/{tmdb tv season id}"
                         }, 
                         {
                             "canonical": true, 
-                            "format": "/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}", 
-                            "name": "tmdb season by tmdb show id"
+                            "format": "/c/{language}/tmdb/tv/season/{tmdb tv show id}/{disc number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/season/tvdb/{tvdb tv season id}", 
-                            "name": "tmdb season by tvdb season id"
+                            "format": "/c/{language}/tmdb/tv/season/tvdb/{tvdb tv season id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/season/tvdb/{tvdb tv show id}/{disc number}", 
-                            "name": "tmdb season by tvdb show id"
+                            "format": "/c/{language}/tmdb/tv/season/tvdb/{tvdb tv show id}/{disc number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/season/imdb/{imdb tv show id}/{disc number}", 
-                            "name": "tmdb season by imdb show id"
+                            "format": "/c/{language}/tmdb/tv/season/imdb/{imdb tv show id}/{disc number}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/season/freebase{freebase tv season mid}", 
-                            "name": "tmdb season by freebase season mid"
+                            "format": "/c/{language}/tmdb/tv/season/freebase{freebase tv season mid}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/season/freebase{freebase tv show mid}/{disc number}", 
-                            "name": "tmdb season by freebase show mid"
+                            "format": "/c/{language}/tmdb/tv/season/freebase{freebase tv show mid}/{disc number}"
                         }
                     ]
                 }, 
@@ -3737,8 +3546,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/external", 
-                            "name": "tmdb season external by tmdb show id"
+                            "format": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/external"
                         }
                     ]
                 }, 
@@ -3761,8 +3569,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/image", 
-                            "name": "tmdb season images by tmdb show id"
+                            "format": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/image"
                         }
                     ]
                 }, 
@@ -3785,8 +3592,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/people", 
-                            "name": "tmdb season people by tmdb show id"
+                            "format": "/c/tmdb/tv/season/{tmdb tv show id}/{disc number}/people"
                         }
                     ]
                 }, 
@@ -3831,20 +3637,16 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/{language}/tmdb/tv/show/{tmdb tv show id}", 
-                            "name": "tmdb show by tmdb show id"
+                            "format": "/c/{language}/tmdb/tv/show/{tmdb tv show id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/show/imdb/{imdb tv show id}", 
-                            "name": "tmdb show by imdb show id"
+                            "format": "/c/{language}/tmdb/tv/show/imdb/{imdb tv show id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/show/tvdb/{tvdb tv show id}", 
-                            "name": "tmdb show by tvdb show id"
+                            "format": "/c/{language}/tmdb/tv/show/tvdb/{tvdb tv show id}"
                         }, 
                         {
-                            "format": "/c/{language}/tmdb/tv/show/freebase{freebase tv show mid}", 
-                            "name": "tmdb show by freebase show id"
+                            "format": "/c/{language}/tmdb/tv/show/freebase{freebase tv show mid}"
                         }
                     ]
                 }, 
@@ -3869,8 +3671,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/show/{tmdb tv show id}/external", 
-                            "name": "tmdb show external ids by tmdb show id"
+                            "format": "/c/tmdb/tv/show/{tmdb tv show id}/external"
                         }
                     ]
                 }, 
@@ -3892,8 +3693,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/show/{tmdb tv show id}/image", 
-                            "name": "tmdb show image by tmdb show id"
+                            "format": "/c/tmdb/tv/show/{tmdb tv show id}/image"
                         }
                     ]
                 }, 
@@ -3915,8 +3715,7 @@
                     "resolvable": [
                         {
                             "canonical": true, 
-                            "format": "/c/tmdb/tv/show/{tmdb tv show id}/people", 
-                            "name": "tmdb show people by tmdb show id"
+                            "format": "/c/tmdb/tv/show/{tmdb tv show id}/people"
                         }
                     ]
                 }, 
@@ -4294,8 +4093,7 @@
                     "namespace": "ns.wikipedia.movie", 
                     "resolvable": [
                         {
-                            "format": "/c/wikipedia/movie/{wikipedia movie id}", 
-                            "name": "wikipedia movie by wikipedia id"
+                            "format": "/c/wikipedia/movie/{wikipedia movie id}"
                         }
                     ], 
                     "type": "json"

@@ -2216,6 +2216,21 @@
             "keyword": "xid", 
             "name": "iTunes extra ID", 
             "type": "unicode"
+        },
+        "peak limited frame rate": {
+            "keyword": "peak_limited_frame_rate", 
+            "name": "Peak limited frame rate", 
+            "type": "float"
+        },
+        "constant frame rate": {
+            "keyword": "constant_frame_rate", 
+            "name": "Constant frame rate", 
+            "type": "float"
+        },
+        "variable frame rate": {
+            "keyword": "variable_frame_rate", 
+            "name": "Variable frame rate", 
+            "type": "bool"
         }
     }
 }

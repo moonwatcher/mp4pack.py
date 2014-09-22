@@ -7,7 +7,7 @@
         "vito":{
             "domain":"portodelgato.no-ip.info",
             "temp":{
-                "path":"/net/vito/volume/barcelona/temp"
+                "path":"/volume/vito/barcelona/temp"
             },
             "mongodb":{
                 "database":"mp4pack",
@@ -23,60 +23,66 @@
                     "pluto":{
                         "enable":true,
                         "name":"Pluto",
-                        "path":"/net/vito/volume/kyoto/pluto"
+                        "path":"/volume/vito/kyoto"
                     },
                     "jupiter":{
                         "enable":true,
                         "name":"Jupiter",
-                        "path":"/net/vito/volume/toronto/jupiter"
+                        "path":"/volume/vito/toronto/jupiter"
                     },
                     "saturn":{
                         "enable":true,
                         "name":"Saturn",
-                        "path":"/net/vito/volume/paris/saturn"
+                        "path":"/volume/vito/paris/saturn"
                     },
                     "neptune":{
                         "enable":true,
                         "name":"Neptune",
-                        "path":"/net/vito/volume/london/neptune"
+                        "path":"/volume/vito/london/neptune"
                     },
                     "titan":{
                         "enable":true,
                         "name":"Titan",
-                        "path":"/net/multivac/Volumes/hiroshima/titan"
+                        "path":"/volume/multivac/hiroshima/titan"
                     },
                     "oberon":{
                         "enable":true,
                         "name":"Oberon",
-                        "path":"/net/multivac/Volumes/valencia/oberon"
+                        "path":"/volume/multivac/valencia/oberon"
                     },
                     "eros":{
                         "enable":true,
                         "name":"Eros",
-                        "path":"/net/multivac/Volumes/nagasaki/eros"
+                        "path":"/volume/multivac/nagasaki/eros"
                     },
                     "pan":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Pan",
-                        "path":"/Volumes/chicago/pan"
+                        "path":"/volume/grandcentral/chicago/pan"
                     },
                     "atlas":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Atlas",
-                        "path":"/Volumes/huston/atlas"
+                        "path":"/volume/grandcentral/huston/atlas"
                     },
                     "janus":{
-                        "enable":false,
+                        "enable":true,
                         "name":"Janus",
-                        "path":"/Volumes/columbia/janus"
+                        "path":"/volume/grandcentral/columbia/janus"
+                    },
+                    "django":{
+                        "enable":true,
+                        "name":"Django",
+                        "path":"/volume/grandcentral/banff/django"
                     }
                 }
             },
             "mapping":[
                 {
                     "enable":true,
-                    "path":"/net/vito/volume/toronto",
+                    "path":"/volume/vito/toronto",
                     "alternate":[
+                        "/net/vito/volume/toronto",
                         "/net/vito.lan/volume/toronto",
                         "/volume/toronto",
                         "/media/toronto",
@@ -85,8 +91,9 @@
                 },
                 {
                     "enable":true,
-                    "path":"/net/vito/volume/paris",
+                    "path":"/volume/vito/paris",
                     "alternate":[
+                        "/net/vito/volume/paris",
                         "/net/vito.lan/volume/paris",
                         "/volume/paris",
                         "/media/paris",
@@ -95,8 +102,9 @@
                 },
                 {
                     "enable":true,
-                    "path":"/net/vito/volume/london",
+                    "path":"/volume/vito/london",
                     "alternate":[
+                        "/net/vito/volume/london",
                         "/net/vito.lan/volume/london",
                         "/volume/london",
                         "/media/london",
@@ -105,8 +113,9 @@
                 },
                 {
                     "enable":true,
-                    "path":"/net/vito/volume/kyoto",
+                    "path":"/volume/vito/kyoto",
                     "alternate":[
+                        "/net/vito/volume/kyoto",
                         "/net/vito.lan/volume/kyoto",
                         "/volume/kyoto",
                         "/media/kyoto",
@@ -115,8 +124,9 @@
                 },
                 {
                     "enable":true,
-                    "path":"/net/vito/volume/barcelona",
+                    "path":"/volume/vito/barcelona",
                     "alternate":[
+                        "/net/vito/volume/barcelona",
                         "/net/vito.lan/volume/barcelona",
                         "/volume/barcelona",
                         "/media/barcelona",
@@ -125,26 +135,64 @@
                 },
                 {
                     "enable":true,
-                    "path":"/net/multivac/Volumes/hiroshima",
+                    "path":"/volume/multivac/hiroshima",
                     "alternate":[
+                        "/net/multivac/Volumes/hiroshima",
                         "/net/multivac.lan/Volumes/hiroshima",
                         "/Volumes/hiroshima"
                     ]
                 },
                 {
                     "enable":true,
-                    "path":"/net/multivac/Volumes/nagasaki",
+                    "path":"/volume/multivac/nagasaki",
                     "alternate":[
+                        "/net/multivac/Volumes/nagasaki",
                         "/net/multivac.lan/Volumes/nagasaki",
                         "/Volumes/nagasaki"
                     ]
                 },
                 {
                     "enable":true,
-                    "path":"/net/multivac/Volumes/valencia",
+                    "path":"/volume/multivac/valencia",
                     "alternate":[
+                        "/net/multivac/Volumes/valencia",
                         "/net/multivac.lan/Volumes/valencia",
                         "/Volumes/valencia"
+                    ]
+                },
+                {
+                    "enable":true,
+                    "path":"/volume/grandcentral/banff",
+                    "alternate":[
+                        "/Volumes/banff"
+                    ]
+                },
+                {
+                    "enable":true,
+                    "path":"/volume/grandcentral/chicago",
+                    "alternate":[
+                        "/Volumes/chicago"
+                    ]
+                },
+                {
+                    "enable":true,
+                    "path":"/volume/grandcentral/columbia",
+                    "alternate":[
+                        "/Volumes/columbia"
+                    ]
+                },
+                {
+                    "enable":true,
+                    "path":"/volume/grandcentral/edmonton",
+                    "alternate":[
+                        "/Volumes/edmonton"
+                    ]
+                },
+                {
+                    "enable":true,
+                    "path":"/volume/grandcentral/huston",
+                    "alternate":[
+                        "/Volumes/huston"
                     ]
                 }
             ],

@@ -16,7 +16,7 @@ def main():
     
     # Initialize logging and set the initial log level
     logging.basicConfig()
-    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.DEBUG)
     
     # Initialize an environment
     env = Environment()

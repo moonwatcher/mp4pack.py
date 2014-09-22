@@ -142,7 +142,7 @@ class ResourceHandler(object):
                 match['pattern'] = re.compile(match['filter'])
                 
                 # Convert query parameters to a set
-                if 'query parameter' in match:
+                if 'query parameter' in match and match['query parameter']:
                     match['query parameter'] = set(match['query parameter'])
                     
             self.branch[name] = branch
