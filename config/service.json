@@ -216,6 +216,9 @@
                     ]
                 }, 
                 "service/home/movie": {
+                    "collect": [
+                        "/c/rottentomatoes/movie/imdb/{imdb movie id}"
+                    ], 
                     "table": "home", 
                     "index": [
                         "movie id", 
