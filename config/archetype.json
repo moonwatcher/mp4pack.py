@@ -839,6 +839,21 @@
             "name": "Home URI", 
             "type": "unicode"
         }, 
+        "people uri": {
+            "keyword": "people_uri", 
+            "name": "People URI", 
+            "type": "unicode"
+        }, 
+        "knowledge uri": {
+            "keyword": "knowledge_uri", 
+            "name": "Knowledge URI", 
+            "type": "unicode"
+        }, 
+        "credit uri": {
+            "keyword": "credit_uri", 
+            "name": "Credit URI", 
+            "type": "unicode"
+        }, 
         "homepage": {
             "keyword": "homepage", 
             "name": "Homepage", 

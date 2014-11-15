@@ -447,7 +447,8 @@
                         "freebase person mid", 
                         "itunes person id", 
                         "person name", 
-                        "simple person name"
+                        "simple person name",
+                        "media kind"
                     ], 
                     "key": "person id", 
                     "match": [
@@ -471,6 +472,9 @@
                             "filter": "^/h/person/freebase(?P<freebase_person_mid>/m/[a-z0-9_]+)$"
                         }
                     ], 
+                    "override": {
+                        "media kind": 100
+                    }, 
                     "resolvable": [
                         {
                             "format": "/h/{home id}"

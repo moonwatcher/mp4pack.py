@@ -115,6 +115,13 @@
                     "apply":[
                         {"property":"implementation", "value":"InstructionJob"}
                     ]
+                },
+                {
+                    "requires":["action"],
+                    "equal":{"action":"acquire"},
+                    "apply":[
+                        {"property":"implementation", "value":"InstructionJob"}
+                    ]
                 }
             ]
         },
@@ -635,6 +642,46 @@
                     "apply":[
                         { "property":"home uri", "format":"/h/music/track/itunes/{itunes music album id}/{disc number}/{track number}" }
                     ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb person id"
+                    ],
+                    "equal":{"media kind":100 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/person/tmdb/{tmdb person id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "imdb person id"
+                    ],
+                    "equal":{"media kind":100 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/person/imdb/{imdb person id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "itunes person id"
+                    ],
+                    "equal":{"media kind":100 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/person/itunes/{itunes person id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "freebase person mid"
+                    ],
+                    "equal":{"media kind":100 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/person/freebase{freebase person mid}" }
+                    ]
                 }
             ]
         },
@@ -711,6 +758,48 @@
                     "equal":{ "media kind":1 },
                     "apply":[
                         { "property":"knowledge uri", "format":"/k/{language}/music/track/{music album id}/{disc number}/{track number}" }
+                    ]
+                }
+            ]
+        },
+        "rule.medium.people.uri":{
+            "name":"People URI",
+            "provide":["people uri"],
+            "branch":[
+                {
+                    "requires":[
+                        "media kind",
+                        "tv episode id"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"people uri", "format":"/k/tv/episode/{tv episode id}/people" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "movie id"
+                    ],
+                    "equal":{ "media kind":9 },
+                    "apply":[
+                        { "property":"people uri", "format":"/k/movie/{movie id}/people" }
+                    ]
+                }
+            ]
+        },
+        "rule.medium.credit.uri":{
+            "name":"Credit URI",
+            "provide":["credit uri"],
+            "branch":[
+                {
+                    "requires":[
+                        "media kind",
+                        "person id"
+                    ],
+                    "equal":{ "media kind":100 },
+                    "apply":[
+                        { "property":"credit uri", "format":"/k/person/{person id}/credit" }
                     ]
                 }
             ]

@@ -15,6 +15,7 @@
                 14:{    'name':u'Ringtone',     'stik':14 },
                 21:{    'name':u'Podcast',      'stik':21 },
                 23:{    'name':u'iTunes U',     'stik':23 },
+                100:{   'name':u'Person',                 },
             },
         },
         'decimal si':{

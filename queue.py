@@ -13,6 +13,7 @@ from ontology import Ontology
 from material import MaterialCache
 from datetime import datetime
 from model import ResourceTransform
+from StringIO import StringIO
 
 invisible = lambda path: os.path.basename(path)[0] == '.'
 extension = lambda path: os.path.splitext(path)[1]
@@ -713,19 +714,50 @@ class InstructionTask(Task):
         try:
             content = StringIO(open(self.path, 'rb').read())
         except IOError, e:
-            self.invalidate(u'Failed to load file {}'.format(path))
+            self.invalidate(u'Failed to load file {}'.format(self.path))
             self.log.debug(u'Exception raised: %s', unicode(e))
         else:
             content.seek(0)
             try:
                 instruction = json.load(content)
-                self.log.debug(u'Loaded JSON file %s', path)
+                self.log.debug(u'Loaded JSON file %s', self.path)
             except SyntaxError, e:
-                self.invalidate(u'Syntax error in file {}'.format(path))
+                self.invalidate(u'Syntax error in file {}'.format(self.path))
                 self.log.debug(u'Exception raised: %s', unicode(e))
             else:
                 for node in instruction:
                     self.env.resolver.save(node)
                     
+    def acquire(self):
+        try:
+            content = StringIO(open(self.path, 'rb').read())
+        except IOError, e:
+            self.invalidate(u'Failed to load file {}'.format(self.path))
+            self.log.debug(u'Exception raised: %s', unicode(e))
+        else:
+            content.seek(0)
+            try:
+                instruction = json.load(content)
+                self.log.debug(u'Loaded JSON file %s', self.path)
+            except SyntaxError, e:
+                self.invalidate(u'Syntax error in file {}'.format(self.path))
+                self.log.debug(u'Exception raised: %s', unicode(e))
+            else:
+                for node in instruction:
+                    mh = Ontology(self.env, "ns.service.genealogy", node)
+                    movie_home = self.env.resolver.resolve(mh['home uri'])
+                    if movie_home:
+                        mg = Ontology(self.env, "ns.service.genealogy", movie_home['head']['genealogy'])
+                        people = self.env.resolver.resolve(mg['people uri'])
+                        for i in people['body']['people']:
+                            ig = Ontology(self.env, "ns.service.genealogy", i)
+                            person_home = self.env.resolver.resolve(ig['home uri'])
+                            if person_home:
+                                pg= Ontology(self.env, "ns.service.genealogy", person_home['head']['genealogy'])
+                                print pg['credit uri']
+                                credit = self.env.resolver.resolve(pg['credit uri'])
+                                print json.dumps(credit, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
+    
 
 
+        

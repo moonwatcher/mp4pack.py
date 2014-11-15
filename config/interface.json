@@ -306,6 +306,15 @@
                         "help": "Load records from JSON file", 
                         "name": "populate"
                     }
+                },
+                {
+                    "argument": [
+                        "scan path"
+                    ], 
+                    "instruction": {
+                        "help": "Populate home records", 
+                        "name": "acquire"
+                    }
                 }
             ], 
             "global": {
