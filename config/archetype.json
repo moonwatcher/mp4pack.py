@@ -221,6 +221,27 @@
             "plural": "list", 
             "type": "embed"
         }, 
+        "creators": {
+            "keyword": "creators", 
+            "name": "Creators", 
+            "namespace": "ns.knowledge.people", 
+            "plural": "list", 
+            "type": "embed"
+        }, 
+        "tv seasons": {
+            "keyword": "tv_seasons", 
+            "name": "TV Seasons", 
+            "namespace": "ns.knowledge.tv.season", 
+            "plural": "list", 
+            "type": "embed"
+        }, 
+        "tv episodes": {
+            "keyword": "tv_episodes", 
+            "name": "TV episodes", 
+            "namespace": "ns.knowledge.tv.episode", 
+            "plural": "list", 
+            "type": "embed"
+        },
         "certifications": {
             "keyword": "certification", 
             "name": "Certification", 

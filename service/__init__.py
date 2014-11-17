@@ -124,13 +124,18 @@ class ResourceHandler(object):
         
         for name, branch in self.node['branch'].iteritems():
             branch['name'] = name
+            table = None
             
             # infer the mongodb collection to use
             branch['persistent'] = False
             if 'table' in branch:
                 if branch['table'] in self.env.table:
-                    branch['collection'] = self.env.table[branch['table']]['collection']
+                    table = self.env.table[branch['table']]
+                    branch['collection'] = table['collection']
                     branch['persistent'] = True
+                    # assign the default namespace for the table if one was not specified 
+                    if 'namespace' in table and 'namespace' not in branch:
+                        branch['namespace'] = table['namespace'] 
                 else:
                     self.log.warning(u'Reference to an unknown table %s in branch %s', branch['table'], branch['name'])            
                     
@@ -228,13 +233,16 @@ class ResourceHandler(object):
                     self.prepare(query)
                     self.locate(query)
                     if not query['return']:
+                        self.trigger(query)
                         self.collect(query)
                         self.override(query)
                         self.prepare(query)
                         self.fetch(query)
+                        self.collect(query)
                         self.parse(query)
                         self.store(query)
                         self.locate(query)
+                    self.activate(query)
                     result = query['return']
                     break
             if taken: break
@@ -371,7 +379,11 @@ class ResourceHandler(object):
                 record = None
                 collection = query['repository'].database[entry['branch']['collection']]
                 entry['record'][u'head'][u'modified'] = datetime.utcnow()
-                entry['record'][u'head'][u'namespace'] = entry['branch']['table']
+                
+                # declare the namespace for the record
+                if 'namespace' in entry['branch']:
+                    entry['record'][u'head'][u'namespace'] = entry['branch']['namespace']
+                    
                 self._compute_resolvables(entry)
                 
                 # Make a pseudo empty body for bodyless records
@@ -420,6 +432,28 @@ class ResourceHandler(object):
                 else:
                     self.log.debug(u'Refusing to save record with missing cononical address:\n%s', self.env.encode_json(record[u'head']))            
                     
+    def activate(self, query):
+        if query['return']:
+            if 'head' in query['return']:
+                if 'genealogy' in query['return']['head']:
+                    query['return']['head']['genealogy'] = Ontology(self.env, 'ns.service.genealogy', query['return']['head']['genealogy']);
+                
+                if 'namespace' in query['return']['head'] and \
+                query['return']['head']['namespace'] in self.env.namespace and \
+                query['return']['body'] is not None:
+                    if 'canonical' in query['return']['body']:
+                        query['return']['body']['canonical'] = Ontology(self.env, query['return']['head']['namespace'], query['return']['body']['canonical']);
+                    else:
+                        query['return']['body'] = Ontology(self.env, query['return']['head']['namespace'], query['return']['body']);
+                
+    def trigger(self, query):
+        if 'trigger' in query['branch']:
+            for pattern in query['branch']['trigger']:
+                try:
+                    related = self.resolver.resolve(pattern.format(**query['parameter']))
+                except KeyError, e:
+                    # self.log.debug(u'Failed to assemble related uri for pattern %s because parameter %s was missing', pattern, e)
+                    pass
     def _compute_resolvables(self, entry):
         entry['record'][u'head'][u'alternate'] = []
         entry['record'][u'head']['canonical'] = None

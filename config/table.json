@@ -2,6 +2,7 @@
     "table":{
         "home":{
             "collection":"home",
+            "namespace": "ns.service.genealogy",
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -32,6 +33,7 @@
         },
         "knowledge/music/track":{
             "collection":"knowledge_music_track",
+            "namespace": "ns.knowledge.music.track.canonical",
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -39,6 +41,7 @@
         },
         "knowledge/playlist":{
             "collection":"knowledge_playlist",
+            "namespace": "ns.knowledge.playlist", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -46,6 +49,7 @@
         },
         "knowledge/movie/people":{
             "collection":"knowledge_movie_people",
+            "namespace": "ns.knowledge.movie.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -53,6 +57,7 @@
         },
         "knowledge/company":{
             "collection":"knowledge_company",
+            "namespace": "ns.knowledge.company.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -60,12 +65,14 @@
         },
         "knowledge/network":{
             "collection":"knowledge_network",
+            "namespace": "ns.knowledge.network.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
         "knowledge/movie/translation":{
+            "namespace": "ns.knowledge.movie.canonical", 
             "collection":"knowledge_movie_translation",
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
@@ -74,6 +81,7 @@
         },
         "knowledge/person/credit":{
             "collection":"knowledge_person_credit",
+            "namespace": "ns.knowledge.person.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -81,6 +89,7 @@
         },
         "knowledge/tv/show/image":{
             "collection":"knowledge_tv_show_image",
+            "namespace": "ns.knowledge.tv.show.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -88,6 +97,7 @@
         },
         "knowledge/movie/image":{
             "collection":"knowledge_movie_image",
+            "namespace": "ns.knowledge.movie.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -95,6 +105,7 @@
         },
         "knowledge/person/image":{
             "collection":"knowledge_person_image",
+            "namespace": "ns.knowledge.person.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -102,6 +113,7 @@
         },
         "knowledge/job":{
             "collection":"knowledge_job",
+            "namespace": "ns.knowledge.job", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -109,6 +121,7 @@
         },
         "knowledge/company/image":{
             "collection":"knowledge_company_image",
+            "namespace": "ns.knowledge.company.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -116,6 +129,7 @@
         },
         "knowledge/person":{
             "collection":"knowledge_person",
+            "namespace": "ns.knowledge.person.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -123,6 +137,7 @@
         },
         "knowledge/tv/season/image":{
             "collection":"knowledge_tv_season_image",
+            "namespace": "ns.knowledge.tv.season.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -130,6 +145,7 @@
         },
         "knowledge/music/album":{
             "collection":"knowledge_music_album",
+            "namespace": "ns.knowledge.music.album.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -137,6 +153,7 @@
         },
         "knowledge/movie/keyword":{
             "collection":"knowledge_movie_keyword",
+            "namespace": "ns.knowledge.movie.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -144,6 +161,7 @@
         },
         "knowledge/tv/episode/image":{
             "collection":"knowledge_tv_episode_image",
+            "namespace": "ns.knowledge.tv.episode.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -151,6 +169,7 @@
         },
         "knowledge/company/credit":{
             "collection":"knowledge_company_credit",
+            "namespace": "ns.knowledge.company", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -158,13 +177,16 @@
         },
         "knowledge/tv/show":{
             "collection":"knowledge_tv_show",
+            "namespace": "ns.knowledge.tv.show.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
         "knowledge/tv/show/people":{
+            "comment": "This is weird",
             "collection":"knowledge_tv_show_people",
+            "namespace": "ns.knowledge.tv.show.people.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -172,6 +194,7 @@
         },
         "knowledge/tv/season":{
             "collection":"knowledge_tv_season",
+            "namespace": "ns.knowledge.tv.season.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -179,6 +202,7 @@
         },
         "knowledge/music/album/image":{
             "collection":"knowledge_music_album_image",
+            "namespace": "ns.knowledge.music.album.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -186,6 +210,7 @@
         },
         "knowledge/movie":{
             "collection":"knowledge_movie",
+            "namespace": "ns.knowledge.movie.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -193,6 +218,7 @@
         },
         "knowledge/movie/clip":{
             "collection":"knowledge_movie_clip",
+            "namespace": "ns.knowledge.movie.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -200,6 +226,7 @@
         },
         "knowledge/genre":{
             "collection":"knowledge_genre",
+            "namespace": "ns.knowledge.genre", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -207,13 +234,16 @@
         },
         "knowledge/movie/alternative":{
             "collection":"knowledge_movie_alternative",
+            "namespace": "ns.knowledge.movie.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
         "knowledge/tv/episode/people":{
+            "comment": "This is weird",
             "collection":"knowledge_tv_episode_people",
+            "namespace": "ns.knowledge.tv.show.people.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -221,6 +251,7 @@
         },
         "knowledge/department":{
             "collection":"knowledge_department",
+            "namespace": "ns.knowledge.department", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -228,19 +259,23 @@
         },
         "knowledge/movie/rating":{
             "collection":"knowledge_movie_rating",
+            "namespace": "ns.knowledge.movie.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
         "knowledge/tv/season/people":{
+            "comment": "This is weird",
             "collection":"knowledge_tv_season_people",
+            "namespace": "ns.knowledge.tv.show.people.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
         "knowledge/configuration":{
+            "comment": "has no namespace",
             "collection":"knowledge_configuration",
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
@@ -249,6 +284,7 @@
         },
         "knowledge/tv/episode":{
             "collection":"knowledge_tv_episode",
+            "namespace": "ns.knowledge.tv.episode.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -256,6 +292,7 @@
         },
         "tmdb/collection":{
             "collection":"tmdb_collection",
+            "namespace": "ns.knowledge.collection", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -263,6 +300,7 @@
         },
         "tmdb/movie/clip":{
             "collection":"tmdb_movie_clip",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -270,6 +308,7 @@
         },
         "tmdb/person/image":{
             "collection":"tmdb_person_image",
+            "namespace": "ns.knowledge.person", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -277,6 +316,7 @@
         },
         "tmdb/company/credit":{
             "collection":"tmdb_company_credit",
+            "namespace": "ns.knowledge.company",
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -284,6 +324,7 @@
         },
         "tmdb/company":{
             "collection":"tmdb_company",
+            "namespace": "ns.knowledge.company", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -291,12 +332,14 @@
         },
         "tmdb/network":{
             "collection":"tmdb_network",
+            "namespace": "ns.knowledge.network", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
             ]
         },
         "tmdb/configuration":{
+            "comment": "has no namespace",
             "collection":"tmdb_configuration",
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
@@ -305,6 +348,7 @@
         },
         "tmdb/movie/translation":{
             "collection":"tmdb_movie_translation",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -312,6 +356,7 @@
         },
         "tmdb/movie/keyword":{
             "collection":"tmdb_movie_keyword",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -319,6 +364,7 @@
         },
         "tmdb/movie/alternative":{
             "collection":"tmdb_movie_alternative",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -326,6 +372,7 @@
         },
         "tmdb/movie":{
             "collection":"tmdb_movie",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -333,6 +380,7 @@
         },
         "tmdb/movie/image":{
             "collection":"tmdb_movie_image",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -340,6 +388,7 @@
         },
         "tmdb/movie/rating":{
             "collection":"tmdb_movie_rating",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -347,6 +396,7 @@
         },
         "tmdb/movie/people":{
             "collection":"tmdb_movie_people",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -354,6 +404,7 @@
         },
         "tmdb/person":{
             "collection":"tmdb_person",
+            "namespace": "ns.knowledge.person", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -361,6 +412,7 @@
         },
         "tmdb/genre":{
             "collection":"tmdb_genre",
+            "namespace": "ns.knowledge.genre", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -368,6 +420,7 @@
         },
         "tmdb/person/credit":{
             "collection":"tmdb_person_credit",
+            "namespace": "ns.knowledge.person", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -375,6 +428,7 @@
         },
         "itunes/person":{
             "collection":"itunes_person",
+            "namespace": "ns.knowledge.person", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -382,6 +436,7 @@
         },
         "itunes/tv/episode":{
             "collection":"itunes_tv_episode",
+            "namespace": "ns.knowledge.tv.episode", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -389,6 +444,7 @@
         },
         "itunes/music/album":{
             "collection":"itunes_music_album",
+            "namespace": "ns.knowledge.music.album", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -396,6 +452,7 @@
         },
         "itunes/music/track":{
             "collection":"itunes_music_track",
+            "namespace": "ns.knowledge.music.track", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -403,6 +460,7 @@
         },
         "itunes/tv/season":{
             "collection":"itunes_tv_season",
+            "namespace": "ns.knowledge.tv.season", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -410,6 +468,7 @@
         },
         "itunes/tv/show":{
             "collection":"itunes_tv_show",
+            "namespace": "ns.knowledge.tv.show", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -417,6 +476,7 @@
         },
         "itunes/genre":{
             "collection":"itunes_genre",
+            "namespace": "ns.knowledge.genre", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -424,6 +484,7 @@
         },
         "itunes/movie":{
             "collection":"itunes_movie",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -431,6 +492,7 @@
         },
         "rottentomatoes/movie":{
             "collection":"rottentomatoes_movie",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -438,6 +500,7 @@
         },
         "rottentomatoes/movie/clip":{
             "collection":"rottentomatoes_movie_clip",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -445,6 +508,7 @@
         },
         "rottentomatoes/movie/people":{
             "collection":"rottentomatoes_movie_people",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -452,6 +516,7 @@
         },
         "rottentomatoes/movie/review":{
             "collection":"rottentomatoes_movie_review",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -459,6 +524,7 @@
         },
         "rottentomatoes/movie/similar":{
             "collection":"rottentomatoes_movie_similar",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -466,6 +532,7 @@
         },
         "wikipedia/movie":{
             "collection":"wikipedia_movie",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -473,6 +540,7 @@
         },
         "facebook/movie":{
             "collection":"facebook_movie",
+            "namespace": "ns.knowledge.movie", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -480,6 +548,7 @@
         },
         "tmdb/tv/season/external":{
             "collection":"tmdb_tv_season_external",
+            "namespace": "ns.knowledge.tv.season", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -487,6 +556,7 @@
         },
         "tmdb/tv/show":{
             "collection":"tmdb_tv_show",
+            "namespace": "ns.knowledge.tv.show", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -494,6 +564,7 @@
         },
         "tmdb/tv/season/people":{
             "collection":"tmdb_tv_season_people",
+            "namespace": "ns.knowledge.tv.season", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -501,6 +572,7 @@
         },
         "tmdb/keyword":{
             "collection":"tmdb_keyword",
+            "namespace": "ns.knowledge.keyword", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -508,6 +580,7 @@
         },
         "tmdb/person/external":{
             "collection":"tmdb_person_external",
+            "namespace": "ns.knowledge.person", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -515,6 +588,7 @@
         },
         "tmdb/tv/season/image":{
             "collection":"tmdb_tv_season_image",
+            "namespace": "ns.knowledge.tv.season", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -522,6 +596,7 @@
         },
         "tmdb/tv/episode/image":{
             "collection":"tmdb_tv_episode_image",
+            "namespace": "ns.knowledge.tv.episode", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -529,6 +604,7 @@
         },
         "tmdb/tv/episode":{
             "collection":"tmdb_tv_episode",
+            "namespace": "ns.knowledge.tv.episode", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -536,6 +612,7 @@
         },
         "tmdb/tv/episode/people":{
             "collection":"tmdb_tv_episode_people",
+            "namespace": "ns.knowledge.tv.episode", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -543,6 +620,7 @@
         },
         "tmdb/tv/show/people":{
             "collection":"tmdb_tv_show_people",
+            "namespace": "ns.knowledge.tv.show", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -550,6 +628,7 @@
         },
         "tmdb/tv/show/image":{
             "collection":"tmdb_tv_show_image",
+            "namespace": "ns.knowledge.tv.show", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -557,6 +636,7 @@
         },
         "tmdb/tv/episode/external":{
             "collection":"tmdb_tv_episode_external",
+            "namespace": "ns.knowledge.tv.episode", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -564,6 +644,7 @@
         },
         "tmdb/tv/season":{
             "collection":"tmdb_tv_season",
+            "namespace": "ns.knowledge.tv.season", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -571,6 +652,7 @@
         },
         "tmdb/tv/show/external":{
             "collection":"tmdb_tv_show_external",
+            "namespace": "ns.knowledge.tv.show", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -578,6 +660,7 @@
         },
         "knowledge/collection":{
             "collection":"knowledge_collection",
+            "namespace": "ns.knowledge.collection.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }

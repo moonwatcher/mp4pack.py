@@ -13,7 +13,6 @@
                             "remote": "{facebook movie id}"
                         }
                     ], 
-                    "namespace": "ns.facebook.movie", 
                     "resolvable": [
                         {
                             "format": "/c/facebook/movie/{facebook movie id}"
@@ -894,7 +893,6 @@
                             "remote": "WebObjects/MZStoreServices.woa/ws/genres"
                         }
                     ], 
-                    "namespace": "ns.knowledge.genre", 
                     "process": "parse_itunes_genres", 
                     "produce": [
                         {
@@ -922,7 +920,6 @@
                             "remote": "WebObjects/MZStoreServices.woa/ws/genres"
                         }
                     ], 
-                    "namespace": "ns.knowledge.genre", 
                     "process": "parse_itunes_genres", 
                     "produce": [
                         {
@@ -952,7 +949,6 @@
                             "remote": "lookup?entity=movie"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "produce": [
                         {
                             "condition": {
@@ -988,7 +984,6 @@
                             "remote": "lookup?entity=album"
                         }
                     ], 
-                    "namespace": "ns.knowledge.music.album", 
                     "produce": [
                         {
                             "condition": {
@@ -1036,7 +1031,6 @@
                             "remote": "lookup?entity=song&limit=500"
                         }
                     ], 
-                    "namespace": "ns.knowledge.music.track", 
                     "produce": [
                         {
                             "condition": {
@@ -1080,7 +1074,6 @@
                             "remote": "lookup"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person", 
                     "produce": [
                         {
                             "condition": {
@@ -1143,7 +1136,6 @@
                             "remote": "lookup?entity=tvEpisode&limit=500"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.episode", 
                     "produce": [
                         {
                             "condition": {
@@ -1208,7 +1200,6 @@
                             "remote": "lookup?entity=tvSeason&limit=500"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.season", 
                     "produce": [
                         {
                             "condition": {
@@ -1261,7 +1252,6 @@
                             "remote": "search?entity=tvShow&attribute=showTerm"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show", 
                     "produce": [
                         {
                             "condition": {
@@ -1300,7 +1290,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "condition": {
                                 "kind": "feature-movie", 
@@ -1334,7 +1324,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "condition": {
                                 "collectionType": "Album", 
@@ -1364,7 +1354,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "condition": {
                                 "artistType": "Movie Artist", 
@@ -1406,7 +1396,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "condition": {
                                 "artistType": "TV Show", 
@@ -1445,7 +1435,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/collection/(?P<collection_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.collection.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1475,7 +1464,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/company/(?P<company_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.company.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1504,7 +1492,6 @@
                             "filter": "^/k/company/(?P<company_id>[0-9]+)/credit$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.company", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1534,7 +1521,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/department/(?P<department_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.department", 
                     "resolvable": [
                         {
                             "format": "/k/{language}/department/{department id}"
@@ -1557,7 +1543,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/genre/(?P<genre_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.genre", 
                     "resolvable": [
                         {
                             "format": "/k/{language}/genre/{genre id}"
@@ -1572,7 +1557,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/job/(?P<job_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.job", 
                     "resolvable": [
                         {
                             "format": "/k/{language}/job/{job id}"
@@ -1610,7 +1594,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/movie/(?P<movie_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1642,7 +1625,6 @@
                             "filter": "^/k/movie/(?P<movie_id>[0-9]+)/alternative$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1675,7 +1657,6 @@
                             "filter": "^/k/movie/(?P<movie_id>[0-9]+)/clip$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1708,7 +1689,6 @@
                             "filter": "^/k/movie/(?P<movie_id>[0-9]+)/image$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1740,7 +1720,6 @@
                             "filter": "^/k/movie/(?P<movie_id>[0-9]+)/keyword$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1773,7 +1752,6 @@
                             "filter": "^/k/movie/(?P<movie_id>[0-9]+)/people$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1806,7 +1784,6 @@
                             "filter": "^/k/movie/(?P<movie_id>[0-9]+)/rating$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1839,7 +1816,6 @@
                             "filter": "^/k/movie/(?P<movie_id>[0-9]+)/translation$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1870,7 +1846,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/music/album/(?P<music_album_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.music.album.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1895,7 +1870,6 @@
                             "filter": "^/k/music/album/(?P<music_album_id>[0-9]+)/image$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.music.album.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1935,7 +1909,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/music/track/(?P<music_album_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.music.track.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -1967,7 +1940,6 @@
                             "filter": "^/k/network/(?P<network_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.network.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2001,7 +1973,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/person/(?P<person_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2032,7 +2003,6 @@
                             "filter": "^/k/person/(?P<person_id>[0-9]+)/credit$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2063,7 +2033,6 @@
                             "filter": "^/k/person/(?P<person_id>[0-9]+)/image$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2080,7 +2049,6 @@
                             "filter": "^/k/playlist/(?P<playlist_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.playlist", 
                     "resolvable": [
                         {
                             "format": "/k/{language}/playlist/{playlist id}"
@@ -2130,7 +2098,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.episode.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2183,7 +2150,6 @@
                             "filter": "^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/image$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.episode.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2236,7 +2202,6 @@
                             "filter": "^/k/tv/episode/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/(?P<track_number>[0-9]+)/people$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show.people.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2285,7 +2250,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.season.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2327,7 +2291,6 @@
                             "filter": "^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/image$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.season.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2369,7 +2332,6 @@
                             "filter": "^/k/tv/season/(?P<tv_show_id>[0-9]+)/(?P<disc_number>[0-9]+)/people$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show.people.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2410,7 +2372,6 @@
                             "filter": "^/k/(?P<language>[a-z]{2})/tv/show/(?P<tv_show_id>[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2441,7 +2402,6 @@
                             "filter": "^/k/tv/show/(?P<tv_show_id>[0-9]+)/image$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2472,7 +2432,6 @@
                             "filter": "^/k/tv/show/(?P<tv_show_id>[0-9]+)/people$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show.people.canonical", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2565,7 +2524,6 @@
                             "remote": "movie_alias.json?type=imdb"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2591,7 +2549,6 @@
                             "remote": "movies/{rottentomatoes movie id}/clips.json"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2614,7 +2571,6 @@
                             "remote": "movies/{rottentomatoes movie id}/cast.json"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2637,7 +2593,6 @@
                             "remote": "movies/{rottentomatoes movie id}/reviews.json?review_type=top_critic"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2660,7 +2615,6 @@
                             "remote": "movies/{rottentomatoes movie id}/similar.json"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2795,7 +2749,6 @@
                             "remote": "collection/{tmdb collection id}"
                         }
                     ], 
-                    "namespace": "ns.knowledge.collection", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2821,7 +2774,6 @@
                             "remote": "company/{tmdb company id}"
                         }
                     ], 
-                    "namespace": "ns.knowledge.company", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2843,7 +2795,6 @@
                             "remote": "company/{tmdb company id}/movies"
                         }
                     ], 
-                    "namespace": "ns.knowledge.company", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2887,7 +2838,6 @@
                             "remote": "genre/{tmdb genre id}"
                         }
                     ], 
-                    "namespace": "ns.knowledge.genre", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2911,7 +2861,6 @@
                             "remote": "keyword/{tmdb keyword id}"
                         }
                     ], 
-                    "namespace": "ns.knowledge.keyword", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2946,7 +2895,6 @@
                             "filter": "^/c/(?P<language>[a-z]{2})/tmdb/movie/imdb/(?P<imdb_movie_id>tt[0-9]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2971,7 +2919,6 @@
                             "remote": "movie/{tmdb movie id}/alternative_titles"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -2993,7 +2940,6 @@
                             "remote": "movie/{tmdb movie id}/trailers"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3015,7 +2961,6 @@
                             "remote": "movie/{tmdb movie id}/images"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3037,7 +2982,6 @@
                             "remote": "movie/{tmdb movie id}/keywords"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3059,7 +3003,6 @@
                             "remote": "movie/{tmdb movie id}/credits"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3081,7 +3024,6 @@
                             "remote": "movie/{tmdb movie id}/releases"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3103,7 +3045,6 @@
                             "remote": "movie/{tmdb movie id}/translations"
                         }
                     ], 
-                    "namespace": "ns.knowledge.movie", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3127,7 +3068,6 @@
                             "remote": "network/{tmdb network id}"
                         }
                     ], 
-                    "namespace": "ns.knowledge.network", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3136,9 +3076,11 @@
                     ]
                 }, 
                 "service/document/tmdb/person": {
-                    "collect": [
+                    "trigger": [
                         "/c/tmdb/person/imdb/{imdb person id}/find", 
-                        "/c/tmdb/person/freebase{freebase person mid}/find", 
+                        "/c/tmdb/person/freebase{freebase person mid}/find"
+                    ],
+                    "collect": [
                         "/c/tmdb/person/{tmdb person id}/external"
                     ], 
                     "table": "tmdb/person", 
@@ -3164,7 +3106,6 @@
                             "filter": "^/c/tmdb/person/freebase(?P<freebase_person_mid>/m/[a-z0-9_]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3192,7 +3133,7 @@
                             "remote": "person/{tmdb person id}/combined_credits"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person", 
+                    "process": "resolve_media_kind", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3216,7 +3157,6 @@
                             "remote": "person/{tmdb person id}/external_ids"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3238,7 +3178,6 @@
                             "remote": "person/{tmdb person id}/images"
                         }
                     ], 
-                    "namespace": "ns.knowledge.person", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3332,7 +3271,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}/episode/{track number}"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.episode", 
                     "resolvable": [
                         {
                             "format": "/c/{language}/tmdb/tv/episode/{tmdb tv episode id}"
@@ -3386,7 +3324,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}/episode/{track number}/external_ids"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.episode", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3410,7 +3347,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}/episode/{track number}/images"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.episode", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3434,7 +3370,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}/episode/{track number}/credits"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.episode", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3508,7 +3443,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.season", 
                     "resolvable": [
                         {
                             "format": "/c/{language}/tmdb/tv/season/{tmdb tv season id}"
@@ -3549,7 +3483,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}/external_ids"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.season", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3572,7 +3505,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}/images"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.season", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3595,7 +3527,6 @@
                             "remote": "tv/{tmdb tv show id}/season/{disc number}/credits"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.season", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3604,10 +3535,12 @@
                     ]
                 }, 
                 "service/document/tmdb/tv/show": {
-                    "collect": [
+                    "trigger": [
                         "/c/tmdb/tv/show/imdb/{imdb tv show id}/find", 
                         "/c/tmdb/tv/show/tvdb/{tvdb tv show id}/find", 
-                        "/c/tmdb/tv/show/freebase{freebase tv show mid}/find", 
+                        "/c/tmdb/tv/show/freebase{freebase tv show mid}/find"
+                    ],
+                    "collect": [
                         "/c/tmdb/tv/show/{tmdb tv show id}/external"
                     ], 
                     "table": "tmdb/tv/show", 
@@ -3640,7 +3573,7 @@
                             "filter": "^/c/(?P<language>[a-z]{2})/tmdb/tv/show/freebase(?P<freebase_tv_show_mid>/m/[a-z0-9_]+)$"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show", 
+                    "process": "expand_tv_season",
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3674,7 +3607,6 @@
                             "remote": "tv/{tmdb tv show id}/external_ids"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3696,7 +3628,6 @@
                             "remote": "tv/{tmdb tv show id}/images"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3718,7 +3649,6 @@
                             "remote": "tv/{tmdb tv show id}/credits"
                         }
                     ], 
-                    "namespace": "ns.knowledge.tv.show", 
                     "resolvable": [
                         {
                             "canonical": true, 
@@ -3750,7 +3680,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/{language}/tmdb/movie/{tmdb movie id}", 
                             "namespace": "ns.knowledge.movie"
@@ -3779,7 +3709,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/tmdb/person/{tmdb person id}", 
                             "namespace": "ns.knowledge.person"
@@ -3807,7 +3737,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/tmdb/person/{tmdb person id}", 
                             "namespace": "ns.knowledge.person"
@@ -3836,7 +3766,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/{language}/tmdb/tv/show/{tmdb tv show id}", 
                             "namespace": "ns.knowledge.tv.show"
@@ -3866,7 +3796,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/{language}/tmdb/tv/show/{tmdb tv show id}", 
                             "namespace": "ns.knowledge.tv.show"
@@ -3896,7 +3826,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/{language}/tmdb/tv/show/{tmdb tv show id}", 
                             "namespace": "ns.knowledge.tv.show"
@@ -3925,7 +3855,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/{language}/tmdb/collection/{tmdb collection id}", 
                             "namespace": "ns.knowledge.collection"
@@ -3953,7 +3883,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/tmdb/company/{tmdb company id}", 
                             "namespace": "ns.knowledge.company"
@@ -3981,7 +3911,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/tmdb/keyword/{tmdb keyword id}", 
                             "namespace": "ns.knowledge.keyword"
@@ -4015,7 +3945,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/{language}/tmdb/movie/{tmdb movie id}", 
                             "namespace": "ns.knowledge.movie"
@@ -4043,7 +3973,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/tmdb/person/{tmdb person id}", 
                             "namespace": "ns.knowledge.person"
@@ -4072,7 +4002,7 @@
                         }
                     ], 
                     "query type": "search", 
-                    "trigger": [
+                    "resolve": [
                         {
                             "format": "/c/{language}/tmdb/tv/show/{tmdb tv show id}", 
                             "namespace": "ns.knowledge.tv.show"
@@ -4097,7 +4027,6 @@
                             "remote": ""
                         }
                     ], 
-                    "namespace": "ns.wikipedia.movie", 
                     "resolvable": [
                         {
                             "format": "/c/wikipedia/movie/{wikipedia movie id}"

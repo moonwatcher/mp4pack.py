@@ -38,14 +38,48 @@ class KnowledgeBaseHandler(ResourceHandler):
                     'branch':query['branch'],
                     'record':{
                         u'head':{ u'genealogy':query['parameter'].project('ns.service.genealogy'), },
-                        u'body':None,
+                        u'body':{u'canonical':None, u'original':None},
                     }
                 }
                 
-                entry['record']['body'] = Ontology(self.env, entry['branch']['namespace'])
+                entry['record']['body']['canonical'] = Ontology(self.env, entry['branch']['namespace'])
                 for source in query['sources']:
-                    if 'body' in source and source['body']:
-                        entry['record']['body'].merge_all(source['body']['canonical'])
+                    if 'body' in source and 'canonical' in source['body'] and source['body']['canonical']:
+                        entry['record']['body']['canonical'].merge_all(Ontology(self.env, entry['branch']['namespace'], source['body']['canonical']))
                         
+                self.expand(entry['record']['body']['canonical'])
                 query['entires'].append(entry)
+                
+    def expand(self, ontology):
+        def discover(o):
+            for k,v in o.iteritems():
+                prototype = o.namespace.find(k)
+                if prototype and prototype.type == 'embed':
+                    discovered.append({'prototype':prototype, 'ontology':o[k]})
+                    
+        # start a queue
+        discovered = []
+        
+        # discover the root ontology
+        discover(ontology)
+        
+        while discovered:
+            node = discovered.pop(0)
+            if node['prototype'] is not None:
+                if node['prototype'].plural is None:
+                    discover(node['ontology'])
+                    
+                elif node['prototype'].plural == 'list':
+                    for i,e in enumerate(node['ontology']):
+                        h = e.project('ns.service.genealogy')
+                        print h['home uri']
+                        if h['home uri']:
+                            home = self.resolver.resolve(h['home uri'])
+                            if home is not None:
+                                e.merge_all(Ontology(self.env, 'ns.service.genealogy', home['head']['genealogy']))
+                                if e['knowledge uri']:
+                                    knowledge = self.resolver.resolve(e['knowledge uri'])
+                                    if knowledge is not None:
+                                        e.merge_all(Ontology(self.env, node['prototype'].node['namespace'], knowledge['body']['canonical']))
+                        discover(e)
                 

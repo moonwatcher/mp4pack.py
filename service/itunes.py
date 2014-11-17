@@ -67,7 +67,7 @@ class iTunesHandler(ResourceHandler):
                                     break
                                     
                     elif query['branch']['query type'] == 'search':
-                        for trigger in query['branch']['trigger']:
+                        for trigger in query['branch']['resolve']:
                             for element in document['results']:
                                 if satisfies(element, trigger['condition']):
                                     

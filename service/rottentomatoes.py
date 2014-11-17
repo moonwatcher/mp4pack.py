@@ -25,7 +25,7 @@ class RottenTomatoesHandler(ResourceHandler):
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
                 if 'error' in document:
-                    self.log.warning(u'API error: %s', document['error'])
+                    self.log.warning(u'Rotten tomatoes api error: %s', document['error'])
                 else:
                     entry = {
                         'branch':query['branch'],

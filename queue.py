@@ -14,6 +14,7 @@ from material import MaterialCache
 from datetime import datetime
 from model import ResourceTransform
 from StringIO import StringIO
+from collections import deque
 
 invisible = lambda path: os.path.basename(path)[0] == '.'
 extension = lambda path: os.path.splitext(path)[1]
@@ -573,6 +574,7 @@ class DocumentTask(Task):
         if self.valid:
             self.document = self.env.resolver.resolve(self.uri, self.ontology['query'])
             if self.document:
+            
                 # locate a method that implements the action
                 self.action = getattr(self, self.ontology['action'], None)
                 
@@ -729,35 +731,91 @@ class InstructionTask(Task):
                     self.env.resolver.save(node)
                     
     def acquire(self):
-        try:
-            content = StringIO(open(self.path, 'rb').read())
-        except IOError, e:
-            self.invalidate(u'Failed to load file {}'.format(self.path))
-            self.log.debug(u'Exception raised: %s', unicode(e))
-        else:
-            content.seek(0)
+        upcoming_movies = deque()
+        discovered_movies = set()
+        upcoming_people = deque()
+        discovered_people = set()
+        upcoming_shows = deque()
+        discovered_shows = set()
+        
+        def load_kernel():
             try:
-                instruction = json.load(content)
-                self.log.debug(u'Loaded JSON file %s', self.path)
-            except SyntaxError, e:
-                self.invalidate(u'Syntax error in file {}'.format(self.path))
+                content = StringIO(open(self.path, 'rb').read())
+            except IOError, e:
+                self.invalidate(u'Failed to load file {}'.format(self.path))
                 self.log.debug(u'Exception raised: %s', unicode(e))
             else:
-                for node in instruction:
-                    mh = Ontology(self.env, "ns.service.genealogy", node)
-                    movie_home = self.env.resolver.resolve(mh['home uri'])
-                    if movie_home:
-                        mg = Ontology(self.env, "ns.service.genealogy", movie_home['head']['genealogy'])
-                        people = self.env.resolver.resolve(mg['people uri'])
-                        for i in people['body']['people']:
-                            ig = Ontology(self.env, "ns.service.genealogy", i)
-                            person_home = self.env.resolver.resolve(ig['home uri'])
-                            if person_home:
-                                pg= Ontology(self.env, "ns.service.genealogy", person_home['head']['genealogy'])
-                                print pg['credit uri']
-                                credit = self.env.resolver.resolve(pg['credit uri'])
-                                print json.dumps(credit, ensure_ascii=False, sort_keys=True, indent=4,  default=self.env.default_json_handler).encode('utf-8')
-    
+                content.seek(0)
+                try:
+                    instruction = json.load(content)
+                    self.log.debug(u'Loaded JSON file %s', self.path)
+                except SyntaxError, e:
+                    self.invalidate(u'Syntax error in file {}'.format(self.path))
+                    self.log.debug(u'Exception raised: %s', unicode(e))
+                else:
+                    if 'movie' in instruction:
+                        for node in instruction['movie']:
+                            o = Ontology(self.env, "ns.service.genealogy", node)
+                            movie = self.env.resolver.resolve(o['home uri'])
+                            if movie:
+                                self.log.debug(u'Discovered movie %s', o['home uri'])
+                                upcoming_movies.appendleft(movie);
+                                discovered_movies.add(movie['head']['canonical'])
+                                
+                    if 'person' in instruction:
+                        for node in instruction['person']:
+                            o = Ontology(self.env, "ns.service.genealogy", node)
+                            person = self.env.resolver.resolve(o['home uri'])
+                            if person:
+                                self.log.debug(u'Discovered person %s', o['home uri'])
+                                upcoming_people.appendleft(person);
+                                discovered_people.add(person['head']['canonical'])
+                                
+                    if 'tv show' in instruction:
+                        for node in instruction['tv show']:
+                            o = Ontology(self.env, "ns.service.genealogy", node)
+                            show = self.env.resolver.resolve(o['home uri'])
+                            if show:
+                                self.log.debug(u'Discovered tv show %s', o['home uri'])
+                                upcoming_shows.appendleft(show);
+                                discovered_shows.add(show['head']['canonical'])
+        load_kernel()
+        while len(upcoming_movies) > 0 or len(upcoming_people) > 0:
+            if len(upcoming_movies) > 0:
+                self.log.info(u'Movies: %s queued, %s discovered', len(upcoming_movies), len(discovered_movies))
+                movie = upcoming_movies.pop()
+                people = self.env.resolver.resolve(movie['head']['genealogy']['people uri'])
+                if people and 'body' in people and 'people' in people['body']:
+                    for p in people['body']['people']:
+                        p = p.project('ns.service.genealogy')
+                        person = self.env.resolver.resolve(p['home uri'])
+                        if person and person['head']['canonical'] not in discovered_people:
+                            upcoming_people.appendleft(person);
+                            discovered_people.add(person['head']['canonical'])
+                            self.log.info(u'Discovered person %s %s', p['home uri'], person['head']['canonical'])
+                        
+            elif len(upcoming_people) > 0:
+                self.log.info(u'People: %s queued, %s discovered', len(upcoming_people), len(discovered_people))
+                person = upcoming_people.pop()
+                credit = self.env.resolver.resolve(person['head']['genealogy']['credit uri'])
+                if credit:
+                    for c in credit['body']['credit']:
+                        c = c.project('ns.service.genealogy')
+                        if c['media kind'] == 9:
+                            movie = self.env.resolver.resolve(c['home uri'])
+                            if movie and movie['head']['canonical'] not in discovered_movies:
+                                upcoming_movies.appendleft(movie);
+                                discovered_movies.add(movie['head']['canonical'])
+                                self.log.info(u'Discovered movie %s %s', c['home uri'], movie['head']['canonical'])
+                                
+                        if c['media kind'] == 10:
+                            show = self.env.resolver.resolve(c['home uri'])
+                            if show and show['head']['canonical'] not in discovered_shows:
+                                upcoming_shows.appendleft(show);
+                                discovered_shows.add(show['head']['canonical'])
+                                self.log.info(u'Discovered tv show %s %s', c['home uri'], show['head']['canonical'])
+                                
+            elif len(upcoming_shows) > 0:
+                self.log.info(u'TV Show: %s queued, %s discovered', len(upcoming_shows), len(discovered_shows))
+                
 
-
-        

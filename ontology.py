@@ -19,10 +19,31 @@ class Ontology(dict):
         self.namespace = self.env.namespace[namespace]
         
         # Make sure no empty concepts slipped in...
-        for key in dict.keys(self):
-            if dict.__getitem__(self, key) is None:
-                dict.__delitem__(self, key)
+        #for key in dict.keys(self):
+        #    if dict.__getitem__(self, key) is None:
+        #        dict.__delitem__(self, key)
                 
+        for key in dict.keys(self):
+            element = dict.__getitem__(self, key)
+            if element is None:
+                dict.__delitem__(self, key)
+            else:
+                prototype = self.namespace.find(key)
+                if prototype is not None:
+                    if prototype.type == 'embed':
+                        if prototype.plural is None:
+                            # a reference to an embedded ontology
+                            if not isinstance(element, Ontology):
+                                dict.__setitem__(self, key, Ontology(self.env, prototype.node['namespace'], element))
+                                
+                        if prototype.plural == 'list':
+                            # a list of references to embedded ontologies
+                            for i,e in enumerate(element):
+                                if not isinstance(e, Ontology):
+                                    element[i] = Ontology(self.env, prototype.node['namespace'], e)
+                else:
+                    self.log.warning(u'Element %s is missing a Prototype in %s', key, dict.keys(self))
+                    
         self.kernel = dict(self)
         self.dependency = {}
         
@@ -111,9 +132,12 @@ class Ontology(dict):
             self.__setitem__(k, v)
             
     def decode_all(self, mapping, axis=None):
-        for k,v in mapping.iteritems():
-            self.decode(k,v, axis)
-            
+        if not isinstance(mapping, dict):
+            self.log.debug(u'Failed to decode %s because the mapping provided is not a dictionary', mapping)
+        else:
+            for k,v in mapping.iteritems():
+                self.decode(k,v, axis)
+                
     def _resolve(self, key):
         if not dict.__contains__(self, key):
             if key in self.namespace.deduction.dependency:
@@ -139,20 +163,33 @@ class Ontology(dict):
                             if 'apply' in branch:
                                 for x in branch['apply']:
                                     if not dict.__contains__(self, x['property']):
+                                    
+                                        # digest filters
                                         if 'digest' in x and 'algorithm' in x:
                                             if x['algorithm'] == 'sha1':
                                                 dict.__setitem__(self, x['property'], hashlib.sha1(self[x['digest']].encode('utf-8')).hexdigest())
                                             elif x['algorithm'] == 'umid':
                                                 dict.__setitem__(self, x['property'], Umid(*[self[i] for i in x['digest']]).code)
+                                                
                                         if 'reference' in x:
-                                            if 'datetime format' in x:
+                                            if 'member' in x:
+                                                prototype = self.namespace.find(x['property'])
+                                                if prototype:
+                                                    try:
+                                                        dict.__setitem__(self, x['property'], getattr(self[x['reference']], x['member']))
+                                                    except AttributeError, e:
+                                                        self.log.error(u'Failed to locate member %s for %s: %s', x['member'], x['property'], e)
+                                                        
+                                            elif 'datetime format' in x:
                                                 prototype = self.namespace.find(x['property'])
                                                 if prototype:
                                                     dict.__setitem__(self, x['property'], prototype.cast(self[x['reference']].strftime(x['datetime format'])))
                                             else:
                                                 dict.__setitem__(self, x['property'], self[x['reference']])
+                                                
                                         if 'format' in x:
                                             dict.__setitem__(self, x['property'], x['format'].format(**self))
+                                            
                                         elif 'value' in x:
                                             dict.__setitem__(self, x['property'], x['value'])
                                             
@@ -202,6 +239,22 @@ class Ontology(dict):
                                 for k,v in action['extention'].iteritems():
                                     self[action['element']][k] = v
                                     
+        # recursively normalize embedded ontologies
+        for key in dict.keys(self):
+            element = dict.__getitem__(self, key)
+            if element is not None:
+                prototype = self.namespace.find(key)
+                if prototype is not None:
+                    if prototype.type == 'embed':
+                        if prototype.plural is None:
+                            # a reference to an embedded ontology
+                            element.normalize()
+                                
+                        if prototype.plural == 'list':
+                            # a list of references to embedded ontologies
+                            for i,e in enumerate(element):
+                                e.normalize()                    
+                                    
 
 
 class Space(object):
@@ -233,6 +286,9 @@ class Space(object):
             'normalize':[],
         }
         self.extend(node)
+        
+    def __unicode__(self):
+        return self.key
         
     def extend(self, node):
         for k,v in node.iteritems():

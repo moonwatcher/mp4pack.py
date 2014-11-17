@@ -18,6 +18,13 @@ class TMDbHandler(ResourceHandler):
                 self.log.warning(u'Failed to decode JSON document %s', query['remote url'])
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
+                if 'process' in query['branch']:
+                    action = getattr(self, query['branch']['process'], None)
+                    if action is not None:
+                        document = action(document)
+                    else:
+                        self.log.warning(u'Ignoring unknown process function %s', query['branch']['process'])
+                        
                 if query['branch']['query type'] == 'lookup':
                     entry = {
                         'branch':query['branch'],
@@ -42,7 +49,7 @@ class TMDbHandler(ResourceHandler):
                     query['entires'].append(entry)
                     
                 elif query['branch']['query type'] == 'search':
-                    for trigger in query['branch']['trigger']:
+                    for trigger in query['branch']['resolve']:
                         for element in document[query['branch']['container']]:
                             # Decode a reference
                             o = Ontology(self.env, trigger['namespace'])
@@ -55,4 +62,35 @@ class TMDbHandler(ResourceHandler):
                             self.log.debug(u'Trigger %s resolution', uri)
                             self.resolver.resolve(uri)
                             
+    def resolve_media_kind(self, document):
+        def resolve_media_kind_for_reference(node):
+            if 'media_type' in node and 'id' in node:
+                if node['media_type'] == 'movie':
+                    node['media_kind'] = 9
+                    node['movie_id'] = node['id']
+                    
+                elif node['media_type'] == 'tv':
+                    node['media_kind'] = 10
+                    node['tv_show_id'] = node['id']
+                    
+                del node['media_type']
+                del node['id']
+            
+        if 'cast' in document:
+            for element in document['cast']:
+                resolve_media_kind_for_reference(element)
+                
+        if 'crew' in document:
+            for element in document['crew']:
+                resolve_media_kind_for_reference(element)
+        return document
+        
+    def expand_tv_season(self, document):
+        if 'seasons' in document:
+            for e in document['seasons']:
+                e['tv_show_id'] = document['id']
+        return document
+        
+        
+        
 

@@ -966,6 +966,15 @@
                 "profiles": null, 
                 "simple person name": null
             }, 
+            "normalize": [
+                {
+                    "action": "complement", 
+                    "element": "credit", 
+                    "extention": {
+                        "media kind": 9
+                    }
+                }
+            ], 
             "rule": [
                 "rule.knowledge.simple.name.person"
             ], 
@@ -975,9 +984,11 @@
         }, 
         "ns.knowledge.person.credit": {
             "element": {
-                "media kind": null,
+                "media kind": {
+                    "tmdb": "media_kind"
+                },
                 "character name": {
-                    "tmdb": "character name"
+                    "tmdb": "character"
                 }, 
                 "department": {
                     "tmdb": "department"
@@ -996,9 +1007,12 @@
                 }, 
                 "release date": {
                     "tmdb": "release_date"
-                }, 
+                },
+                "tmdb tv show id": {
+                    "tmdb": "tv_show_id"
+                },
                 "tmdb movie id": {
-                    "tmdb": "id"
+                    "tmdb": "movie_id"
                 }
             }, 
             "rule": [
@@ -1304,6 +1318,9 @@
                 "backdrops": {
                     "tmdb": "backdrops"
                 }, 
+                "tv episodes": {
+                    "tmdb": "episodes"
+                },
                 "cast": {
                     "tmdb": "cast"
                 }, 
@@ -1318,6 +1335,9 @@
                 }, 
                 "crew": {
                     "tmdb": "crew"
+                }, 
+                "guests": {
+                    "tmdb": "guest_stars"
                 }, 
                 "disc count": null, 
                 "disc number": null, 
@@ -1351,12 +1371,16 @@
                 "tmdb tv season id": {
                     "tmdb": "id"
                 }, 
-                "tmdb tv show id": null, 
+                "tmdb tv show id": {
+                    "tmdb": "tv_show_id"
+                }, 
                 "track count": {
                     "itunes": "trackCount"
                 }, 
                 "tv season id": null, 
-                "tv season number": null, 
+                "tv season number": {
+                    "tmdb": "season_number"
+                }, 
                 "tv show id": null, 
                 "tv show name": {
                     "itunes": "artistName"
@@ -1364,7 +1388,8 @@
                 "tvdb tv season id": {
                     "tmdb": "tvdb_id"
                 }, 
-                "tvdb tv show id": null
+                "tvdb tv show id": null,
+                "media kind": null
             }, 
             "normalize": [
                 {
@@ -1373,6 +1398,14 @@
                     "extention": {
                         "department": "Acting", 
                         "job": "Actor"
+                    }
+                }, 
+                {
+                    "action": "complement", 
+                    "element": "guests", 
+                    "extention": {
+                        "department": "Acting", 
+                        "job": "Guest Actor"
                     }
                 }, 
                 {
@@ -1440,6 +1473,7 @@
                 "language": null, 
                 "long description": null, 
                 "pictures": null, 
+                "tv episodes": null,
                 "release date": null, 
                 "release year": null, 
                 "simple tv show name": null, 
@@ -1505,6 +1539,15 @@
                 "crew": {
                     "tmdb": "crew"
                 }, 
+                "guests": {
+                    "tmdb": "guest_stars"
+                }, 
+                "creators": {
+                    "tmdb": "created_by"
+                }, 
+                "tv seasons": {
+                    "tmdb": "seasons"
+                },
                 "description": {
                     "tmdb": "overview", 
                     "unescape xml": true
@@ -1571,15 +1614,39 @@
                 }, 
                 "vote count": {
                     "tmdb": "vote_count"
-                }
+                },
+                "media kind": null
             }, 
             "normalize": [
+                {
+                    "action": "complement", 
+                    "element": "tv seasons", 
+                    "extention": {
+                        "media kind": 10
+                    }
+                }, 
                 {
                     "action": "complement", 
                     "element": "cast", 
                     "extention": {
                         "department": "Acting", 
                         "job": "Actor"
+                    }
+                }, 
+                {
+                    "action": "complement", 
+                    "element": "creators", 
+                    "extention": {
+                        "department": "Production", 
+                        "job": "Creator"
+                    }
+                }, 
+                {
+                    "action": "complement", 
+                    "element": "guests", 
+                    "extention": {
+                        "department": "Acting", 
+                        "job": "Guest Actor"
                     }
                 }, 
                 {
@@ -1600,7 +1667,8 @@
                     "action": "coalesce", 
                     "source": [
                         "cast", 
-                        "crew"
+                        "crew",
+                        "creators"
                     ], 
                     "target": "people"
                 }, 
@@ -1640,6 +1708,7 @@
                 "language": null, 
                 "modified date": null, 
                 "people": null, 
+                "tv seasons": null,
                 "pictures": null, 
                 "release date": null, 
                 "release year": null, 
@@ -1651,8 +1720,14 @@
                 "tv show id": null, 
                 "tv show name": null, 
                 "tv show status": null, 
+                "tmdb tv show id": null,
                 "vote average": null, 
-                "vote count": null
+                "vote count": null,
+                "total number of tv episodes": null, 
+                "total number of tv seasons": null, 
+                "networks": null,
+                "homepage": null,
+                "tmdb popularity": null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.tv.show", 
@@ -3280,6 +3355,7 @@
                 "trimmed imdb movie id": null, 
                 "tv episode id": null, 
                 "tv episode name": null, 
+                "tv season number": null, 
                 "tv season id": null, 
                 "tv season umid": null, 
                 "tv show handle": null, 
@@ -3389,7 +3465,8 @@
                 }, 
                 "verbosity": null, 
                 "volume": null, 
-                "width": null
+                "width": null,
+                "verbosity":null
             }, 
             "synonym": [
                 "key"
@@ -3443,7 +3520,8 @@
                     "auto cast": false
                 }, 
                 "volume": null, 
-                "width": null
+                "width": null,
+                "verbosity":null
             }, 
             "rule": [
                 "rule.job.implementation"
@@ -3504,7 +3582,8 @@
                 "target frame rate": null, 
                 "time shift": null, 
                 "volume": null, 
-                "width": null
+                "width": null,
+                "verbosity":null
             }, 
             "rule": [
                 "rule.task.default.preset"

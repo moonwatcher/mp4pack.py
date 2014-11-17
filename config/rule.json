@@ -545,6 +545,39 @@
                 {
                     "requires":[
                         "media kind",
+                        "tmdb tv episode id"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/episode/tmdb/{tmdb tv episode id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb tv season id",
+                        "track number"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/episode/tmdb/{tmdb tv season id}/{track number}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb tv show id",
+                        "disc number",
+                        "track number"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/episode/tmdb/{tmdb tv show id}/{disc number}/{track number}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
                         "itunes tv episode id"
                     ],
                     "equal":{"media kind":10 },
@@ -595,6 +628,37 @@
                     "equal":{"media kind":10 },
                     "apply":[
                         { "property":"home uri", "format":"/h/tv/episode/imdb/{imdb tv show id}/{disc number}/{track number}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb tv show id",
+                        "tv season number"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/season/tmdb/{tmdb tv show id}/{tv season number}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb tv season id"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/season/tmdb/{tmdb tv season id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb tv show id"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/show/tmdb/{tmdb tv show id}" }
                     ]
                 },
                 {
@@ -1907,7 +1971,7 @@
                 {
                     "requires":["release date"],
                     "apply":[
-                        {"property":"release year", "datetime format":"%Y", "reference":"release date" }
+                        {"property":"release year", "member":"year", "reference":"release date" }
                     ]
                 }
             ]

@@ -3,19 +3,19 @@
 {
     'enumeration':{
         'media kind':{
-            'synonym':['stik'],
+            'synonym':['code'],
             'element':{
-                0:{     'name':u'Home Video',   'stik':0 },
-                1:{     'name':u'Music',        'stik':1 },
-                2:{     'name':u'Audio Book',   'stik':2 },
-                6:{     'name':u'Music Video',  'stik':6 },
-                9:{     'name':u'Movie',        'stik':9 },
-                10:{    'name':u'TV Show',      'stik':10 },
-                11:{    'name':u'Booklet',      'stik':11 },
-                14:{    'name':u'Ringtone',     'stik':14 },
-                21:{    'name':u'Podcast',      'stik':21 },
-                23:{    'name':u'iTunes U',     'stik':23 },
-                100:{   'name':u'Person',                 },
+                0:{     'name':u'Home Video',   'stik':0,    'code':0 },
+                1:{     'name':u'Music',        'stik':1,    'code':1 },
+                2:{     'name':u'Audio Book',   'stik':2,    'code':2 },
+                6:{     'name':u'Music Video',  'stik':6,    'code':6 },
+                9:{     'name':u'Movie',        'stik':9,    'code':9 },
+                10:{    'name':u'TV Show',      'stik':10,   'code':10 },
+                11:{    'name':u'Booklet',      'stik':11,   'code':11 },
+                14:{    'name':u'Ringtone',     'stik':14,   'code':14 },
+                21:{    'name':u'Podcast',      'stik':21,   'code':21 },
+                23:{    'name':u'iTunes U',     'stik':23,   'code':23 },
+                100:{   'name':u'Person',                    'code':100 },
             },
         },
         'decimal si':{
