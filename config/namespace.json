@@ -861,7 +861,9 @@
                 }, 
                 "tmdb person id": {
                     "tmdb": "id"
-                } 
+                },
+                "person id": null,
+                "simple person name": null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.person", 
