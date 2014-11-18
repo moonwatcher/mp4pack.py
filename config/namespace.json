@@ -75,6 +75,7 @@
         }, 
         "ns.knowledge.company": {
             "element": {
+                "media kind": null,
                 "company id": null, 
                 "company name": {
                     "tmdb": "name"
@@ -100,6 +101,7 @@
         }, 
         "ns.knowledge.company.canonical": {
             "element": {
+                "media kind": null,
                 "company id": null, 
                 "company name": null, 
                 "description": null, 
@@ -191,6 +193,7 @@
         }, 
         "ns.knowledge.genre": {
             "element": {
+                "media kind": null,
                 "genre id": null, 
                 "genre name": {
                     "itunes": "name", 
@@ -217,6 +220,7 @@
         }, 
         "ns.knowledge.genre.reference": {
             "element": {
+                "media kind": null,
                 "genre id": null, 
                 "genre name": null, 
                 "itunes genre id": null, 
@@ -487,9 +491,23 @@
                 }, 
                 {
                     "action": "complement", 
+                    "element": "genres", 
+                    "extention": {
+                        "media kind": 101
+                    }
+                }, 
+                {
+                    "action": "complement", 
                     "element": "people", 
                     "extention": {
                         "media kind": 100
+                    }
+                }, 
+                {
+                    "action": "complement", 
+                    "element": "production companies", 
+                    "extention": {
+                        "media kind": 103
                     }
                 }, 
                 {
@@ -550,7 +568,11 @@
                 "titles": null, 
                 "tmdb popularity": null, 
                 "vote average": null, 
-                "vote count": null
+                "vote count": null,
+                "rottentomatoes movie id": null,
+                "imdb movie id": null,
+                "tmdb movie id": null,
+                "itunes movie id": null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.movie", 
@@ -779,6 +801,7 @@
         }, 
         "ns.knowledge.network": {
             "element": {
+                "media kind": null,
                 "description": {
                     "tmdb": "description"
                 }, 
@@ -804,6 +827,7 @@
         }, 
         "ns.knowledge.network.canonical": {
             "element": {
+                "media kind": null,
                 "description": null, 
                 "homepage": null, 
                 "network id": null, 
@@ -966,7 +990,9 @@
                 "place of birth": null, 
                 "profile url": null, 
                 "profiles": null, 
-                "simple person name": null
+                "simple person name": null,
+                "tmdb person id": null,
+                "imdb person id": null
             }, 
             "normalize": [
                 {
@@ -1076,6 +1102,7 @@
         }, 
         "ns.knowledge.tv.episode": {
             "element": {
+                "media kind": null,
                 "absolute tv episode number": null, 
                 "album name": {
                     "itunes": "collectionName"
@@ -1097,7 +1124,9 @@
                     "itunes": "shortDescription", 
                     "unescape xml": true
                 }, 
-                "disc number": null, 
+                "disc number": {
+                    "tmdb": "season_number"
+                }, 
                 "freebase tv episode mid": {
                     "tmdb": "freebase_mid"
                 }, 
@@ -1139,13 +1168,16 @@
                     "tmdb": "id"
                 }, 
                 "tmdb tv season id": null, 
-                "tmdb tv show id": null, 
+                "tmdb tv show id": {
+                    "tmdb": "tv_show_id"
+                }, 
                 "track count": {
                     "itunes": "trackCount"
                 }, 
                 "track name": null, 
                 "track number": {
-                    "itunes": "trackNumber"
+                    "itunes": "trackNumber",
+                    "tmdb": "episode_number"
                 }, 
                 "tv episode id": null, 
                 "tv episode name": {
@@ -1246,6 +1278,7 @@
                 "language": null, 
                 "long description": null, 
                 "pictures": null, 
+                "people": null, 
                 "release date": null, 
                 "release year": null, 
                 "simple tv episode name": null, 
@@ -1260,7 +1293,9 @@
                 "tv show id": null, 
                 "tv show name": null, 
                 "vote average": null, 
-                "vote count": null
+                "vote count": null,
+                "tmdb tv episode id": null,
+                "people": null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.tv.show", 
@@ -1342,7 +1377,9 @@
                     "tmdb": "guest_stars"
                 }, 
                 "disc count": null, 
-                "disc number": null, 
+                "disc number": {
+                    "tmdb": "season_number"
+                }, 
                 "freebase tv season mid": {
                     "tmdb": "freebase_mid"
                 }, 
@@ -1380,9 +1417,7 @@
                     "itunes": "trackCount"
                 }, 
                 "tv season id": null, 
-                "tv season number": {
-                    "tmdb": "season_number"
-                }, 
+                "tv season number": null, 
                 "tv show id": null, 
                 "tv show name": {
                     "itunes": "artistName"
@@ -1434,6 +1469,13 @@
                 }, 
                 {
                     "action": "complement", 
+                    "element": "tv episodes", 
+                    "extention": {
+                        "media kind": 10
+                    }
+                }, 
+                {
+                    "action": "complement", 
                     "element": "people", 
                     "extention": {
                         "media kind": 100
@@ -1475,6 +1517,7 @@
                 "language": null, 
                 "long description": null, 
                 "pictures": null, 
+                "people": null, 
                 "tv episodes": null,
                 "release date": null, 
                 "release year": null, 
@@ -1485,7 +1528,9 @@
                 "tv show id": null, 
                 "tv show name": null, 
                 "tvdb tv season id": null, 
-                "tvdb tv show id": null
+                "tvdb tv show id": null,
+                "tmdb tv show id": null,
+                "tmdb tv season id": null
             }, 
             "rule": [
                 "rule.itunes.tv.season.parse", 
@@ -1629,6 +1674,20 @@
                 }, 
                 {
                     "action": "complement", 
+                    "element": "genres", 
+                    "extention": {
+                        "media kind": 101
+                    }
+                }, 
+                {
+                    "action": "complement", 
+                    "element": "networks", 
+                    "extention": {
+                        "media kind": 102
+                    }
+                }, 
+                {
+                    "action": "complement", 
                     "element": "cast", 
                     "extention": {
                         "department": "Acting", 
@@ -1733,24 +1792,6 @@
             }, 
             "rule": [
                 "rule.knowledge.simple.name.tv.show", 
-                "rule.knowledge.release.year"
-            ], 
-            "synonym": [
-                "keyword"
-            ]
-        }, 
-        "ns.knowledge.tv.show.people.canonical": {
-            "element": {
-                "people": null, 
-                "tv episode id": null, 
-                "tv episode number": null, 
-                "tv season id": null, 
-                "tv season number": null, 
-                "tv show id": null
-            }, 
-            "rule": [
-                "rule.knowledge.simple.name.tv.show", 
-                "rule.knowledge.simple.name.tv.episode", 
                 "rule.knowledge.release.year"
             ], 
             "synonym": [
@@ -3316,6 +3357,7 @@
                 "music track name": null, 
                 "namespace":null,
                 "network id": null, 
+                "network name": null,
                 "path": null, 
                 "path digest": null, 
                 "person id": null, 

@@ -427,16 +427,6 @@
                 {
                     "requires":[
                         "media kind",
-                        "movie handle"
-                    ],
-                    "equal":{"media kind":9 },
-                    "apply":[
-                        { "property":"home uri", "format":"/h/movie/~/{movie handle}" }
-                    ]
-                },
-                {
-                    "requires":[
-                        "media kind",
                         "tmdb movie id"
                     ],
                     "equal":{"media kind":9 },
@@ -500,56 +490,13 @@
                 {
                     "requires":[
                         "media kind",
-                        "tv show handle",
+                        "tmdb tv show id",
                         "disc number",
                         "track number"
                     ],
                     "equal":{"media kind":10 },
                     "apply":[
-                        { "property":"home uri", "format":"/h/tv/episode/~/{tv show handle}/{disc number}/{track number}" }
-                    ]
-                },
-                {
-                    "requires":[
-                        "media kind",
-                        "tvdb tv episode id"
-                    ],
-                    "equal":{"media kind":10 },
-                    "apply":[
-                        { "property":"home uri", "format":"/h/tv/episode/tvdb/{tvdb tv episode id}" }
-                    ]
-                },
-                {
-                    "requires":[
-                        "media kind",
-                        "tvdb tv season id",
-                        "track number"
-                    ],
-                    "equal":{"media kind":10 },
-                    "apply":[
-                        { "property":"home uri", "format":"/h/tv/episode/tvdb/{tvdb tv season id}/{track number}" }
-                    ]
-                },
-                {
-                    "requires":[
-                        "media kind",
-                        "tvdb tv show id",
-                        "disc number",
-                        "track number"
-                    ],
-                    "equal":{"media kind":10 },
-                    "apply":[
-                        { "property":"home uri", "format":"/h/tv/episode/tvdb/{tvdb tv show id}/{disc number}/{track number}" }
-                    ]
-                },
-                {
-                    "requires":[
-                        "media kind",
-                        "tmdb tv episode id"
-                    ],
-                    "equal":{"media kind":10 },
-                    "apply":[
-                        { "property":"home uri", "format":"/h/tv/episode/tmdb/{tmdb tv episode id}" }
+                        { "property":"home uri", "format":"/h/tv/episode/tmdb/{tmdb tv show id}/{disc number}/{track number}" }
                     ]
                 },
                 {
@@ -566,13 +513,11 @@
                 {
                     "requires":[
                         "media kind",
-                        "tmdb tv show id",
-                        "disc number",
-                        "track number"
+                        "tmdb tv episode id"
                     ],
                     "equal":{"media kind":10 },
                     "apply":[
-                        { "property":"home uri", "format":"/h/tv/episode/tmdb/{tmdb tv show id}/{disc number}/{track number}" }
+                        { "property":"home uri", "format":"/h/tv/episode/tmdb/{tmdb tv episode id}" }
                     ]
                 },
                 {
@@ -633,12 +578,33 @@
                 {
                     "requires":[
                         "media kind",
-                        "tmdb tv show id",
-                        "tv season number"
+                        "tv season id"
                     ],
                     "equal":{"media kind":10 },
                     "apply":[
-                        { "property":"home uri", "format":"/h/tv/season/tmdb/{tmdb tv show id}/{tv season number}" }
+                        { "property":"home uri", "format":"/h/tv/season/{tv season id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tv show id",
+                        "disc number"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/season/{tv show id}/{disc number}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb tv show id",
+                        "disc number"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/season/tmdb/{tmdb tv show id}/{disc number}" }
                     ]
                 },
                 {
@@ -649,6 +615,16 @@
                     "equal":{"media kind":10 },
                     "apply":[
                         { "property":"home uri", "format":"/h/tv/season/tmdb/{tmdb tv season id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tv show id"
+                    ],
+                    "equal":{"media kind":10 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/tv/show/{tv show id}" }
                     ]
                 },
                 {
@@ -746,6 +722,36 @@
                     "apply":[
                         { "property":"home uri", "format":"/h/person/freebase{freebase person mid}" }
                     ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb genre id"
+                    ],
+                    "equal":{"media kind":101 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/genre/tmdb/{tmdb genre id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb network id"
+                    ],
+                    "equal":{"media kind":102 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/network/tmdb/{tmdb network id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tmdb company id"
+                    ],
+                    "equal":{"media kind":103 },
+                    "apply":[
+                        { "property":"home uri", "format":"/h/company/tmdb/{tmdb company id}" }
+                    ]
                 }
             ]
         },
@@ -792,6 +798,40 @@
                 {
                     "requires":[
                         "media kind",
+                        "tv season id",
+                        "language"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/tv/season/{tv season id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tv show id",
+                        "tv season number",
+                        "language"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/tv/season/{tv show id}/{disc number}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tv show id",
+                        "language"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/tv/show/{tv show id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
                         "movie id",
                         "language"
                     ],
@@ -823,6 +863,49 @@
                     "apply":[
                         { "property":"knowledge uri", "format":"/k/{language}/music/track/{music album id}/{disc number}/{track number}" }
                     ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "person id",
+                        "language"
+                    ],
+                    "equal":{"media kind":100 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/person/{person id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "genre id",
+                        "language"
+                    ],
+                    "equal":{"media kind":101 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/genre/{genre id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "network id"
+                    ],
+                    "equal":{"media kind":102 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/network/{network id}" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "company id",
+                        "language"
+                    ],
+                    "equal":{"media kind":103 },
+                    "apply":[
+                        { "property":"knowledge uri", "format":"/k/{language}/company/{company id}" }
+                    ]
                 }
             ]
         },
@@ -838,6 +921,26 @@
                     "equal":{ "media kind":10 },
                     "apply":[
                         { "property":"people uri", "format":"/k/tv/episode/{tv episode id}/people" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tv season id"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"people uri", "format":"/k/tv/season/{tv season id}/people" }
+                    ]
+                },
+                {
+                    "requires":[
+                        "media kind",
+                        "tv show id"
+                    ],
+                    "equal":{ "media kind":10 },
+                    "apply":[
+                        { "property":"people uri", "format":"/k/tv/show/{tv show id}/people" }
                     ]
                 },
                 {

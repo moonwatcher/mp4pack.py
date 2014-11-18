@@ -186,7 +186,7 @@
         "knowledge/tv/show/people":{
             "comment": "This is weird",
             "collection":"knowledge_tv_show_people",
-            "namespace": "ns.knowledge.tv.show.people.canonical", 
+            "namespace": "ns.knowledge.tv.show.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -243,7 +243,7 @@
         "knowledge/tv/episode/people":{
             "comment": "This is weird",
             "collection":"knowledge_tv_episode_people",
-            "namespace": "ns.knowledge.tv.show.people.canonical", 
+            "namespace": "ns.knowledge.tv.episode.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }
@@ -268,7 +268,7 @@
         "knowledge/tv/season/people":{
             "comment": "This is weird",
             "collection":"knowledge_tv_season_people",
-            "namespace": "ns.knowledge.tv.show.people.canonical", 
+            "namespace": "ns.knowledge.tv.season.canonical", 
             "index":[
                 { "key":[["head.canonical", 1]], "unique":true, "dropDups":true, "name":"canonical" },
                 { "key":[["head.alternate", 1]], "unique":true, "dropDups":true, "name":"alternate" }

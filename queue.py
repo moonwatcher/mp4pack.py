@@ -731,14 +731,30 @@ class InstructionTask(Task):
                     self.env.resolver.save(node)
                     
     def acquire(self):
-        upcoming_movies = deque()
-        discovered_movies = set()
-        upcoming_people = deque()
-        discovered_people = set()
-        upcoming_shows = deque()
-        discovered_shows = set()
+        process = {
+            'movies':{
+                'upcoming': deque(),
+                'discovered': set(),
+            },
+            'people':{
+                'upcoming': deque(),
+                'discovered': set(),
+            },
+            'tv shows':{
+                'upcoming': deque(),
+                'discovered': set(),
+            },
+            'tv seasons':{
+                'upcoming': deque(),
+                'discovered': set(),
+            },
+            'tv episodes':{
+                'upcoming': deque(),
+                'discovered': set(),
+            },
+        }
         
-        def load_kernel():
+        def kernel():
             try:
                 content = StringIO(open(self.path, 'rb').read())
             except IOError, e:
@@ -759,8 +775,8 @@ class InstructionTask(Task):
                             movie = self.env.resolver.resolve(o['home uri'])
                             if movie:
                                 self.log.debug(u'Discovered movie %s', o['home uri'])
-                                upcoming_movies.appendleft(movie);
-                                discovered_movies.add(movie['head']['canonical'])
+                                process['movies']['upcoming'].appendleft(movie);
+                                process['movies']['discovered'].add(movie['head']['canonical'])
                                 
                     if 'person' in instruction:
                         for node in instruction['person']:
@@ -768,8 +784,8 @@ class InstructionTask(Task):
                             person = self.env.resolver.resolve(o['home uri'])
                             if person:
                                 self.log.debug(u'Discovered person %s', o['home uri'])
-                                upcoming_people.appendleft(person);
-                                discovered_people.add(person['head']['canonical'])
+                                process['people']['upcoming'].appendleft(person);
+                                process['people']['discovered'].add(person['head']['canonical'])
                                 
                     if 'tv show' in instruction:
                         for node in instruction['tv show']:
@@ -777,45 +793,118 @@ class InstructionTask(Task):
                             show = self.env.resolver.resolve(o['home uri'])
                             if show:
                                 self.log.debug(u'Discovered tv show %s', o['home uri'])
-                                upcoming_shows.appendleft(show);
-                                discovered_shows.add(show['head']['canonical'])
-        load_kernel()
-        while len(upcoming_movies) > 0 or len(upcoming_people) > 0:
-            if len(upcoming_movies) > 0:
-                self.log.info(u'Movies: %s queued, %s discovered', len(upcoming_movies), len(discovered_movies))
-                movie = upcoming_movies.pop()
-                people = self.env.resolver.resolve(movie['head']['genealogy']['people uri'])
-                if people and 'body' in people and 'people' in people['body']:
-                    for p in people['body']['people']:
-                        p = p.project('ns.service.genealogy')
-                        person = self.env.resolver.resolve(p['home uri'])
-                        if person and person['head']['canonical'] not in discovered_people:
-                            upcoming_people.appendleft(person);
-                            discovered_people.add(person['head']['canonical'])
-                            self.log.info(u'Discovered person %s %s', p['home uri'], person['head']['canonical'])
+                                process['tv shows']['upcoming'].appendleft(show);
+                                process['tv shows']['discovered'].add(show['head']['canonical'])
+        def next_movie():
+            self.log.info(u'Movies: %s queued, %s discovered', len(process['movies']['upcoming']), len(process['movies']['discovered']))
+            movie = process['movies']['upcoming'].pop()
+            knowledge = self.env.resolver.resolve(movie['head']['genealogy']['knowledge uri'])
+            people = self.env.resolver.resolve(movie['head']['genealogy']['people uri'])
+            if people and 'body' in people and 'people' in people['body']['canonical']:
+                for p in people['body']['canonical']['people']:
+                    p = p.project('ns.service.genealogy')
+                    person = self.env.resolver.resolve(p['home uri'])
+                    if person and person['head']['canonical'] not in process['people']['discovered']:
+                        process['people']['upcoming'].appendleft(person);
+                        process['people']['discovered'].add(person['head']['canonical'])
+                        self.log.info(u'Discovered person %s %s', p['home uri'], person['head']['canonical'])
                         
-            elif len(upcoming_people) > 0:
-                self.log.info(u'People: %s queued, %s discovered', len(upcoming_people), len(discovered_people))
-                person = upcoming_people.pop()
-                credit = self.env.resolver.resolve(person['head']['genealogy']['credit uri'])
-                if credit:
-                    for c in credit['body']['credit']:
-                        c = c.project('ns.service.genealogy')
-                        if c['media kind'] == 9:
-                            movie = self.env.resolver.resolve(c['home uri'])
-                            if movie and movie['head']['canonical'] not in discovered_movies:
-                                upcoming_movies.appendleft(movie);
-                                discovered_movies.add(movie['head']['canonical'])
-                                self.log.info(u'Discovered movie %s %s', c['home uri'], movie['head']['canonical'])
-                                
-                        if c['media kind'] == 10:
-                            show = self.env.resolver.resolve(c['home uri'])
-                            if show and show['head']['canonical'] not in discovered_shows:
-                                upcoming_shows.appendleft(show);
-                                discovered_shows.add(show['head']['canonical'])
-                                self.log.info(u'Discovered tv show %s %s', c['home uri'], show['head']['canonical'])
-                                
-            elif len(upcoming_shows) > 0:
-                self.log.info(u'TV Show: %s queued, %s discovered', len(upcoming_shows), len(discovered_shows))
-                
-
+        def next_tv_show():
+            self.log.info(u'TV Show: %s queued, %s discovered', len(process['tv shows']['upcoming']), len(process['tv shows']['discovered']))
+            show = process['tv shows']['upcoming'].pop()
+            knowledge = self.env.resolver.resolve(show['head']['genealogy']['knowledge uri'])
+            people = self.env.resolver.resolve(show['head']['genealogy']['people uri'])
+            
+            if people and 'body' in people and 'people' in people['body']['canonical']:
+                for p in people['body']['canonical']['people']:
+                    p = p.project('ns.service.genealogy')
+                    person = self.env.resolver.resolve(p['home uri'])
+                    if person and person['head']['canonical'] not in process['people']['discovered']:
+                        process['people']['upcoming'].appendleft(person);
+                        process['people']['discovered'].add(person['head']['canonical'])
+                        self.log.info(u'Discovered person %s %s', p['home uri'], person['head']['canonical'])
+            
+            if knowledge and 'body' in knowledge and 'tv seasons' in knowledge['body']['canonical']:
+                for s in knowledge['body']['canonical']['tv seasons']:
+                    s = s.project('ns.service.genealogy')
+                    season = self.env.resolver.resolve(s['home uri'])
+                    if season and season['head']['canonical'] not in process['tv seasons']['discovered']:
+                        process['tv seasons']['upcoming'].appendleft(season);
+                        process['tv seasons']['discovered'].add(season['head']['canonical'])
+                        self.log.info(u'Discovered tv season %s %s', s['home uri'], season['head']['canonical'])
+            
+        def next_tv_season():
+            self.log.info(u'TV Seasons: %s queued, %s discovered', len(process['tv seasons']['upcoming']), len(process['tv seasons']['discovered']))
+            season = process['tv seasons']['upcoming'].pop()
+            knowledge = self.env.resolver.resolve(season['head']['genealogy']['knowledge uri'])
+            people = self.env.resolver.resolve(season['head']['genealogy']['people uri'])
+            
+            if people and 'body' in people and 'people' in people['body']['canonical']:
+                for p in people['body']['canonical']['people']:
+                    p = p.project('ns.service.genealogy')
+                    person = self.env.resolver.resolve(p['home uri'])
+                    if person and person['head']['canonical'] not in process['people']['discovered']:
+                        process['people']['upcoming'].appendleft(person);
+                        process['people']['discovered'].add(person['head']['canonical'])
+                        self.log.info(u'Discovered person %s %s', p['home uri'], person['head']['canonical'])
+                        
+            for e in knowledge['body']['canonical']['tv episodes']:
+                e = e.project('ns.service.genealogy')
+                episode = self.env.resolver.resolve(e['home uri'])
+                if episode and episode['head']['canonical'] not in process['tv episodes']['discovered']:
+                    process['tv episodes']['upcoming'].appendleft(episode);
+                    process['tv episodes']['discovered'].add(episode['head']['canonical'])
+                    self.log.info(u'Discovered tv episode %s %s', e['home uri'], episode['head']['canonical'])
+            
+        def next_tv_episode():
+            self.log.info(u'TV Episodes: %s queued, %s discovered', len(process['tv episodes']['upcoming']), len(process['tv episodes']['discovered']))
+            episode = process['tv episodes']['upcoming'].pop()
+            knowledge = self.env.resolver.resolve(episode['head']['genealogy']['knowledge uri'])
+            people = self.env.resolver.resolve(episode['head']['genealogy']['people uri'])
+            if people and 'body' in people and 'people' in people['body']['canonical']:
+                for p in people['body']['canonical']['people']:
+                    p = p.project('ns.service.genealogy')
+                    person = self.env.resolver.resolve(p['home uri'])
+                    if person and person['head']['canonical'] not in process['people']['discovered']:
+                        process['people']['upcoming'].appendleft(person);
+                        process['people']['discovered'].add(person['head']['canonical'])
+                        self.log.info(u'Discovered person %s %s', p['home uri'], person['head']['canonical'])
+                        
+        def next_person():
+            self.log.info(u'People: %s queued, %s discovered', len(process['people']['upcoming']), len(process['people']['discovered']))
+            person = process['people']['upcoming'].pop()
+            knowledge = self.env.resolver.resolve(person['head']['genealogy']['knowledge uri'])
+            credit = self.env.resolver.resolve(person['head']['genealogy']['credit uri'])
+            if credit:
+                for c in credit['body']['canonical']['credit']:
+                    c = c.project('ns.service.genealogy')
+                    if c['media kind'] == 9:
+                        movie = self.env.resolver.resolve(c['home uri'])
+                        if movie and movie['head']['canonical'] not in process['movies']['discovered']:
+                            process['movies']['upcoming'].appendleft(movie);
+                            process['movies']['discovered'].add(movie['head']['canonical'])
+                            self.log.info(u'Discovered movie %s %s', c['home uri'], movie['head']['canonical'])
+                            
+                    if c['media kind'] == 10:
+                        show = self.env.resolver.resolve(c['home uri'])
+                        if show and show['head']['canonical'] not in process['tv shows']['discovered']:
+                            process['tv shows']['upcoming'].appendleft(show);
+                            process['tv shows']['discovered'].add(show['head']['canonical'])
+                            self.log.info(u'Discovered tv show %s %s', c['home uri'], show['head']['canonical'])
+                            
+        
+        import random
+        kernel()
+        while len(process['movies']['upcoming']) > 0 or \
+            len(process['people']['upcoming']) > 0 or \
+            len(process['tv shows']['upcoming']) > 0 or \
+            len(process['tv seasons']['upcoming']) > 0 or \
+            len(process['tv episodes']['upcoming']) > 0:
+            
+            next = random.choice([ k for k in process.keys() if len(process[k]['upcoming']) > 0 ])
+            
+            if next == 'movies': next_movie()
+            elif next == 'people': next_person()
+            elif next == 'tv shows': next_tv_show()
+            elif next == 'tv seasons': next_tv_season()
+            elif next == 'tv episodes': next_tv_episode()

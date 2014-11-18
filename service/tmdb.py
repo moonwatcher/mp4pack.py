@@ -21,7 +21,7 @@ class TMDbHandler(ResourceHandler):
                 if 'process' in query['branch']:
                     action = getattr(self, query['branch']['process'], None)
                     if action is not None:
-                        document = action(document)
+                        document = action(query, document)
                     else:
                         self.log.warning(u'Ignoring unknown process function %s', query['branch']['process'])
                         
@@ -62,7 +62,7 @@ class TMDbHandler(ResourceHandler):
                             self.log.debug(u'Trigger %s resolution', uri)
                             self.resolver.resolve(uri)
                             
-    def resolve_media_kind(self, document):
+    def resolve_media_kind(self, query, document):
         def resolve_media_kind_for_reference(node):
             if 'media_type' in node and 'id' in node:
                 if node['media_type'] == 'movie':
@@ -85,10 +85,16 @@ class TMDbHandler(ResourceHandler):
                 resolve_media_kind_for_reference(element)
         return document
         
-    def expand_tv_season(self, document):
+    def expand_tv_season(self, query, document):
         if 'seasons' in document:
             for e in document['seasons']:
                 e['tv_show_id'] = document['id']
+        return document
+        
+    def expand_tv_episode(self, query, document):
+        if 'episodes' in document:
+            for e in document['episodes']:
+                e['tv_show_id'] = query['parameter']['tmdb tv show id']
         return document
         
         

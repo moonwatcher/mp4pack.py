@@ -72,7 +72,6 @@ class KnowledgeBaseHandler(ResourceHandler):
                 elif node['prototype'].plural == 'list':
                     for i,e in enumerate(node['ontology']):
                         h = e.project('ns.service.genealogy')
-                        print h['home uri']
                         if h['home uri']:
                             home = self.resolver.resolve(h['home uri'])
                             if home is not None:

@@ -1,0 +1,21 @@
+{
+    "movie": [
+        {
+            "media kind": 9,
+            "tmdb movie id": 550
+        }
+    ],
+    "person": [
+        {
+            "media kind": 100,
+            "tmdb person id": 1032
+        }
+    ],
+    "tv show": [
+        {
+            "media kind": 10,
+            "tmdb tv show id": 1434
+        }
+    ]
+}
+

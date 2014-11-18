@@ -16,6 +16,9 @@
                 21:{    'name':u'Podcast',      'stik':21,   'code':21 },
                 23:{    'name':u'iTunes U',     'stik':23,   'code':23 },
                 100:{   'name':u'Person',                    'code':100 },
+                101:{   'name':u'Genre',                     'code':101 },
+                102:{   'name':u'Network',                   'code':102 },
+                103:{   'name':u'Production Company',        'code':103 },
             },
         },
         'decimal si':{
