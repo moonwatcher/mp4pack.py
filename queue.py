@@ -849,13 +849,14 @@ class InstructionTask(Task):
                         process['people']['discovered'].add(person['head']['canonical'])
                         self.log.info(u'Discovered person %s %s', p['home uri'], person['head']['canonical'])
                         
-            for e in knowledge['body']['canonical']['tv episodes']:
-                e = e.project('ns.service.genealogy')
-                episode = self.env.resolver.resolve(e['home uri'])
-                if episode and episode['head']['canonical'] not in process['tv episodes']['discovered']:
-                    process['tv episodes']['upcoming'].appendleft(episode);
-                    process['tv episodes']['discovered'].add(episode['head']['canonical'])
-                    self.log.info(u'Discovered tv episode %s %s', e['home uri'], episode['head']['canonical'])
+            if 'tv episodes' in knowledge['body']['canonical']:
+                for e in knowledge['body']['canonical']['tv episodes']:
+                    e = e.project('ns.service.genealogy')
+                    episode = self.env.resolver.resolve(e['home uri'])
+                    if episode and episode['head']['canonical'] not in process['tv episodes']['discovered']:
+                        process['tv episodes']['upcoming'].appendleft(episode);
+                        process['tv episodes']['discovered'].add(episode['head']['canonical'])
+                        self.log.info(u'Discovered tv episode %s %s', e['home uri'], episode['head']['canonical'])
             
         def next_tv_episode():
             self.log.info(u'TV Episodes: %s queued, %s discovered', len(process['tv episodes']['upcoming']), len(process['tv episodes']['discovered']))
