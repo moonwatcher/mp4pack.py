@@ -858,7 +858,9 @@
         }, 
         "ns.knowledge.people": {
             "element": {
-                "media kind": null,
+                "media kind": {
+                    "tmdb": "media_kind"
+                },
                 "character name": {
                     "tmdb": "character"
                 }, 
@@ -900,7 +902,9 @@
         }, 
         "ns.knowledge.person": {
             "element": {
-                "media kind": null,
+                "media kind": {
+                    "tmdb": "media_kind"
+                },
                 "biography": {
                     "tmdb": "biography"
                 }, 
@@ -994,15 +998,7 @@
                 "tmdb person id": null,
                 "imdb person id": null
             }, 
-            "normalize": [
-                {
-                    "action": "complement", 
-                    "element": "credit", 
-                    "extention": {
-                        "media kind": 9
-                    }
-                }
-            ], 
+            "normalize": [], 
             "rule": [
                 "rule.knowledge.simple.name.person"
             ], 
