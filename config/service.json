@@ -2495,7 +2495,7 @@
             "match": "^/m/.*$"
         }, 
         "rottentomatoes": {
-            "api key": "wyeeuz4yjjqvyjgtju68c6p3", 
+            "api key": "2wtvefrvy8x8cpdm3533vaf9", 
             "branch": {
                 "service/document/rottentomatoes/movie": {
                     "table": "rottentomatoes/movie", 
