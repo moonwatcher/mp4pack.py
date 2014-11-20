@@ -8,6 +8,7 @@ import urllib
 import uuid
 import json
 import hashlib 
+import random
 
 from ontology import Ontology
 from material import MaterialCache
@@ -891,9 +892,6 @@ class InstructionTask(Task):
                             process['tv shows']['upcoming'].appendleft(show);
                             process['tv shows']['discovered'].add(show['head']['canonical'])
                             self.log.info(u'Discovered tv show %s %s', c['home uri'], show['head']['canonical'])
-                            
-        
-        import random
         kernel()
         while len(process['movies']['upcoming']) > 0 or \
             len(process['people']['upcoming']) > 0 or \

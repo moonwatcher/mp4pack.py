@@ -2495,7 +2495,11 @@
             "match": "^/m/.*$"
         }, 
         "rottentomatoes": {
-            "api key": "2wtvefrvy8x8cpdm3533vaf9", 
+            "api key": [
+                "2wtvefrvy8x8cpdm3533vaf9",
+                "wyeeuz4yjjqvyjgtju68c6p3",
+                "dcpvd97yj8uevayyreczu5uq"
+            ], 
             "branch": {
                 "service/document/rottentomatoes/movie": {
                     "table": "rottentomatoes/movie", 
@@ -2731,7 +2735,9 @@
             "match": "^/s/.*$"
         }, 
         "tmdb": {
-            "api key": "a8b9f96dde091408a03cb4c78477bd14", 
+            "api key": [
+                "a8b9f96dde091408a03cb4c78477bd14"
+            ], 
             "branch": {
                 "service/document/tmdb/collection": {
                     "table": "tmdb/collection", 

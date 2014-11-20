@@ -7,6 +7,8 @@ import copy
 import json
 import urllib
 import urlparse
+import random
+
 from datetime import datetime
 from ontology import Ontology
 from bson import json_util
@@ -249,9 +251,11 @@ class ResourceHandler(object):
         return result
         
     def prepare(self, query):
-        # Add an API Key, if the resolver has one
+        
+        # Add an API Key, if the resolver has one. Randomly pick one of the keys...
         if 'api key' in self.node:
-            query['parameter']['api key'] = self.node['api key']
+            query['parameter']['api key'] = random.choice(self.node['api key'])
+            self.log.debug(u'Picked {} api key for service {}.'.format(query['parameter']['api key'], self.name))
             
         # If parameters have been declared for the match
         if 'query parameter' in query['match']:
