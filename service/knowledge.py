@@ -24,7 +24,7 @@ class KnowledgeBaseHandler(ResourceHandler):
                     for reference in query['branch']['aggregate']:
                         try:
                             related = self.resolver.resolve(reference['uri'].format(**query['parameter']))
-                        except KeyError, e:
+                        except KeyError as e:
                             self.log.debug(u'Could not create referenced uri for pattern %s because parameter %s was missing', reference['uri'], e)
                         else:
                             if related is not None:

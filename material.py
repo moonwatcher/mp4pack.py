@@ -150,7 +150,7 @@ class Resource(object):
                     try:
                         # Try to instantiate a specific container
                         result = globals()[kind.node['container']](asset, location)
-                    except TypeError as err:
+                    except TypeError:
                         asset.log.debug(u'Unknown resource type %s, treating as generic', kind.node['container'])
                         
             # If can not handle as a specific container, instantiate as a generic
@@ -541,9 +541,9 @@ class Image(Container):
                                 image.save(product.path)
                                 self.log.info(u'Transcode %s --> %s', self.path, product.path)
                                 
-                            except IOError as err:
+                            except IOError as e:
                                 self.log.error(u'Failed to transcode artwork %s', unicode(self))
-                                self.log.debug(u'Exception raised: %s', err)
+                                self.log.debug(u'Exception raised: %s', e)
                                 
 
 
@@ -752,8 +752,8 @@ class Text(Container):
                 writer = open(path, 'w')
                 writer.write(content.encode('utf-8'))
                 writer.close()
-            except IOError as error:
-                self.log.error(str(error))
+            except IOError as e:
+                self.log.error(str(e))
                 
     def encode(self):
         return None

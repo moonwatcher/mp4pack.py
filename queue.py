@@ -119,7 +119,7 @@ class Job(object):
             if o['implementation'] in globals():
                 try:
                     result = globals()[o['implementation']](queue, node)
-                except TypeError as err:
+                except TypeError:
                     queue.log.error(u'Job implementation mismatch %s, treating as a generic job', o['implementation'])
                     
             else:
@@ -173,15 +173,15 @@ class Job(object):
             try:
                 self._inclusion = re.compile(self.ontology['inclusion'], re.UNICODE)
                 self.log.info(u'Inclusion filter set to \'%s\'', self.ontology['inclusion'])
-            except re.error as err:
-                self.log.warning(u'Failed to compile inclusion filter \'%s\' because of %s', self.ontology['inclusion'], err)
+            except re.error as e:
+                self.log.warning(u'Failed to compile inclusion filter \'%s\' because of %s', self.ontology['inclusion'], e)
                 
         if 'exclusion' in self.ontology:
             try:
                 self._exclusion = re.compile(self.ontology['exclusion'], re.UNICODE)
                 self.log.info(u'Exclusion filter set to \'%s\'', self.ontology['exclusion'])
-            except re.error as err:
-                self.log.warning(u'Failed to compile exclusion filter \'%s\' because of %s', self.ontology['exclusion'], err)
+            except re.error as e:
+                self.log.warning(u'Failed to compile exclusion filter \'%s\' because of %s', self.ontology['exclusion'], e)
                 
     def push(self, task):
         if task:
@@ -715,7 +715,7 @@ class InstructionTask(Task):
     def populate(self):
         try:
             content = StringIO(open(self.path, 'rb').read())
-        except IOError, e:
+        except IOError as e:
             self.invalidate(u'Failed to load file {}'.format(self.path))
             self.log.debug(u'Exception raised: %s', unicode(e))
         else:
@@ -723,7 +723,7 @@ class InstructionTask(Task):
             try:
                 instruction = json.load(content)
                 self.log.debug(u'Loaded JSON file %s', self.path)
-            except SyntaxError, e:
+            except SyntaxError as e:
                 self.invalidate(u'Syntax error in file {}'.format(self.path))
                 self.log.debug(u'Exception raised: %s', unicode(e))
             else:
@@ -757,7 +757,7 @@ class InstructionTask(Task):
         def kernel():
             try:
                 content = StringIO(open(self.path, 'rb').read())
-            except IOError, e:
+            except IOError as e:
                 self.invalidate(u'Failed to load file {}'.format(self.path))
                 self.log.debug(u'Exception raised: %s', unicode(e))
             else:
@@ -765,7 +765,7 @@ class InstructionTask(Task):
                 try:
                     instruction = json.load(content)
                     self.log.debug(u'Loaded JSON file %s', self.path)
-                except SyntaxError, e:
+                except SyntaxError as e:
                     self.invalidate(u'Syntax error in file {}'.format(self.path))
                     self.log.debug(u'Exception raised: %s', unicode(e))
                 else:

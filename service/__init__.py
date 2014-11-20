@@ -272,7 +272,7 @@ class ResourceHandler(object):
         if 'remote' in query['match']:
             try:
                 query['remote url'] = os.path.join(self.node['remote base'], query['match']['remote'].format(**query['parameter']))
-            except KeyError, e:
+            except KeyError as e:
                 self.log.debug(u'Failed to assemble remote URL for %s because parameter %s was missing.', query['uri'], e)
             else:
                 if 'query parameter' in query:
@@ -339,7 +339,7 @@ class ResourceHandler(object):
             for pattern in query['branch']['collect']:
                 try:
                     related = self.resolver.resolve(pattern.format(**query['parameter']))
-                except KeyError, e:
+                except KeyError as e:
                     # self.log.debug(u'Failed to assemble related uri for pattern %s because parameter %s was missing', pattern, e)
                     pass
                 else:
@@ -356,11 +356,11 @@ class ResourceHandler(object):
             
             try:
                 response = urlopen(request)
-            except BadStatusLine, e:
+            except BadStatusLine as e:
                 self.log.warning(u'Bad http status error when requesting %s', query['remote url'])
-            except HTTPError, e:
+            except HTTPError as e:
                 self.log.warning(u'Server returned an error when requesting %s: %s', query['remote url'], e.code)
-            except URLError, e:
+            except URLError as e:
                 self.log.warning(u'Could not reach server when requesting %s: %s', query['remote url'], e.reason)
             else:
                 query['sources'].append(StringIO(response.read()))
@@ -451,7 +451,7 @@ class ResourceHandler(object):
             for pattern in query['branch']['trigger']:
                 try:
                     related = self.resolver.resolve(pattern.format(**query['parameter']))
-                except KeyError, e:
+                except KeyError as e:
                     # self.log.debug(u'Failed to assemble related uri for pattern %s because parameter %s was missing', pattern, e)
                     pass
     def _compute_resolvables(self, entry):
@@ -466,7 +466,7 @@ class ResourceHandler(object):
                 if 'canonical' in resolvable and resolvable['canonical']:
                     entry['record'][u'head']['canonical'] = link
                     
-            except KeyError, e:
+            except KeyError as e:
                 # self.log.debug(u'Failed to assemble uri for %s because %s was missing', resolvable['name'], e)
                 pass
                 

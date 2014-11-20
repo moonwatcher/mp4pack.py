@@ -14,7 +14,7 @@ class TMDbHandler(ResourceHandler):
         for source in query['sources']:
             try:
                 document = json.load(source)
-            except ValueError, e:
+            except ValueError as e:
                 self.log.warning(u'Failed to decode JSON document %s', query['remote url'])
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:

@@ -177,7 +177,7 @@ class Ontology(dict):
                                                 if prototype:
                                                     try:
                                                         dict.__setitem__(self, x['property'], getattr(self[x['reference']], x['member']))
-                                                    except AttributeError, e:
+                                                    except AttributeError as e:
                                                         self.log.error(u'Failed to locate member %s for %s: %s', x['member'], x['property'], e)
                                                         
                                             elif 'datetime format' in x:
@@ -648,7 +648,7 @@ class Prototype(Element):
                     parsed[u'day'] = 1
                 try:
                     result = datetime(**parsed)
-                except TypeError, ValueError:
+                except (TypeError, ValueError):
                     self.log.debug(u'Failed to decode value %s as datetime for %s', value, self.key)
             else:
                 self.log.debug(u'Failed to parse value %s as datetime for %s', value, self.key)
@@ -666,7 +666,7 @@ class Prototype(Element):
         result = self.env.expression['clean xml'].sub(u'', result).strip()
         try:
             result = plistlib.readPlistFromString(result.encode('utf-8'))
-        except Exception, e:
+        except Exception:
             self.log.error(u'Failed to parse plist for %s', self.key)
             result = None
             
@@ -709,7 +709,7 @@ class Prototype(Element):
                 try:
                     result = Ontology(self.env, self.node['namespace'], eval(value))
                     # self.log.debug(u'Evaluating dictionary %s %s', result, eval(value))
-                except SyntaxError, e:
+                except SyntaxError as e:
                     self.log.warning(u'Failed to evaluate dictionary %s', value)
                     self.log.debug(u'Exception raised: %s', unicode(e))
                     result = None
@@ -855,7 +855,7 @@ class Rule(object):
                 for c in branch['decode']:
                     c['pattern'] = re.compile(c['expression'], c['flags'])
             self.branch.append(branch)
-        except Exception, e:
+        except Exception as e:
             self.log.error(u'Failed to load banch for rule %s', e['key'])
             self.log.debug(u'Exception raised: %s', unicode(e))
         

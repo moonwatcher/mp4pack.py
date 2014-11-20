@@ -334,8 +334,8 @@ class Crawler(object):
                     reader = open(self.ontology['path'], 'r')
                     content = reader.read()
                     reader.close()
-                except IOError as error:
-                    self.log.error(str(error))
+                except IOError as e:
+                    self.log.error(str(e))
                     
             if content:
                 self._detect_text_encoding(content)

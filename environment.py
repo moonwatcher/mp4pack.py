@@ -55,7 +55,7 @@ class ConfigurationCache(object):
                 try:
                     content = StringIO(open(path, 'rb').read())
                     state['file sha1'] = hashlib.sha1(content.read()).hexdigest()
-                except IOError, e:
+                except IOError as e:
                     self.log.warning(u'Failed to load configuration file %s', path)
                     self.log.debug(u'Exception raised: %s', unicode(e))
                 else:
@@ -77,7 +77,7 @@ class ConfigurationCache(object):
                             else:
                                 self.log.error(u'Uknown configuration type %s for %s', extension, path)
                                 
-                        except SyntaxError, e:
+                        except SyntaxError as e:
                             self.log.warning(u'Syntax error in configuration file %s', path)
                             self.log.debug(u'Exception raised: %s', unicode(e))
                         else:
@@ -170,7 +170,7 @@ class ConfigurationCache(object):
                 pickle.dump(self.node, open(self.path, 'wb'))
                 self.log.debug(u'Cache saved to %s', self.path)
                 self.dirty = False
-            except IOError, e:
+            except IOError as e:
                 self.log.warning(u'Failed to write cache to %s', self.path)
                 self.log.debug(u'Exception raised: %s', unicode(e))
                 
@@ -606,17 +606,17 @@ class Environment(object):
                         self.log.debug(u'Creating directory %s', directory)
                         os.makedirs(directory)
                     result = True
-                except OSError as err:
+                except OSError as e:
                     self.log.error(u'Failed to create directory %s', directory)
-                    self.log.debug(unicode(err))
+                    self.log.debug(unicode(e))
         return result
         
     def clean_path(self, path):
         if path and not os.path.exists(path):
             try:
                 os.removedirs(os.path.dirname(path))
-            except OSError, oserr:
-                self.log.debug(oserr)
+            except OSError as e:
+                self.log.debug(e)
                 
     def initialize_command(self, command, log):
         if command in self.command and self.command[command]['path']:
@@ -736,7 +736,7 @@ class Repository(object):
                 import pymongo
                 self.log.debug(u'Connecting to %s', self.mongodb['mongodb url'])
                 self._connection = pymongo.Connection(self.mongodb['mongodb url'])
-            except pymongo.errors.PyMongoError, e:
+            except pymongo.errors.PyMongoError as e:
                 self.log.error(u'Could not establish connection with %s because %s', self.mongodb['mongodb url'], e)
             else:
                 self.log.debug(u'Connection established with %s', self.host)

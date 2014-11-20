@@ -23,7 +23,7 @@ class iTunesHandler(ResourceHandler):
         for source in query['sources']:
             try:
                 document = json.load(source)
-            except ValueError, e:
+            except ValueError as e:
                 self.log.warning(u'Failed to decode JSON document %s', query['remote url'])
                 self.log.debug(u'Exception raised %s', unicode(e))
             else:
@@ -89,7 +89,7 @@ class iTunesHandler(ResourceHandler):
                 for key,element in node.iteritems():
                     try:
                         geID = int(key)
-                    except ValueError, e:
+                    except ValueError as e:
                         self.log.warning(u'Invalid genre id %s', key)
                     else:
                         record = dict([(k,v) for k,v in element.iteritems() if not k == 'subgenres'])
