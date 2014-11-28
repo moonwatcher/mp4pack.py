@@ -877,7 +877,7 @@ class InstructionTask(Task):
             person = process['people']['upcoming'].pop()
             knowledge = self.env.resolver.resolve(person['head']['genealogy']['knowledge uri'])
             credit = self.env.resolver.resolve(person['head']['genealogy']['credit uri'])
-            if credit:
+            if credit and 'credit' in credit['body']['canonical']:
                 for c in credit['body']['canonical']['credit']:
                     c = c.project('ns.service.genealogy')
                     if c['media kind'] == 9:
