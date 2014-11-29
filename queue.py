@@ -671,7 +671,118 @@ class TableTask(Task):
     def rebuild(self):
         for index in self.table['index']:
             self.env.repository[self.ontology['host']].rebuild_index(self.table['name'], index)
+          
+    def dump_tv_episode(self, episode, person, reference, order):
+        if episode is not None and person is not None:
+            age = None
+            if person['body']['canonical']['birthday'] and episode['body']['canonical']['release date']:
+                age = episode['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
+                record = ['episode']
+                record.append(unicode(person['head']['genealogy']['person id']))
+                record.append(unicode(episode['head']['genealogy']['tv episode id']))
+                record.append(unicode(order))
+                record.append(unicode(episode['body']['canonical']['release year']))
+                record.append(unicode(age))
+                record.append(unicode(reference['job']).lower())
+                record.append(unicode(reference['department']).lower())
+                record.append(unicode(episode['body']['canonical']['budget']))
+                record.append(unicode(episode['body']['canonical']['revenue']))
+                record.append(unicode(episode['body']['canonical']['tmdb popularity']))
+                record.append(unicode(episode['body']['canonical']['vote average']))
+                record.append(unicode(episode['body']['canonical']['vote count']))
+                record.append(unicode(None))
+                record.append(unicode(None))
+                record.append(unicode(None))
+                record.append(unicode(None))
+                record.append(unicode(person['body']['canonical']['simple person name']))
+                record.append(unicode(episode['body']['canonical']['simple tv episode name']))
+                # record.append(unicode(reference['simple character name']))
+                print '\t'.join(record).encode('utf8')
+        
+    def dump_tv_season(self, season, person, reference, order):
+        if season is not None and person is not None:
+            age = None
+            if person['body']['canonical']['birthday'] and season['body']['canonical']['release date']:
+                age = season['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
             
+            record = ['season']
+            record.append(unicode(person['head']['genealogy']['person id']))
+            record.append(unicode(season['head']['genealogy']['tv season id']))
+            record.append(unicode(order))
+            record.append(unicode(season['body']['canonical']['release year']))
+            record.append(unicode(age))
+            record.append(unicode(reference['job']).lower())
+            record.append(unicode(reference['department']).lower())
+            record.append(unicode(season['body']['canonical']['budget']))
+            record.append(unicode(season['body']['canonical']['revenue']))
+            record.append(unicode(season['body']['canonical']['tmdb popularity']))
+            record.append(unicode(season['body']['canonical']['vote average']))
+            record.append(unicode(season['body']['canonical']['vote count']))
+            record.append(unicode(None))
+            record.append(unicode(None))
+            record.append(unicode(None))
+            record.append(unicode(None))
+            record.append(unicode(person['body']['canonical']['simple person name']))
+            record.append(unicode(season['body']['canonical']['disc number']))
+            # record.append(unicode(reference['simple character name']))
+            print '\t'.join(record).encode('utf8')
+        
+    def dump_tv_show(self, show, person, reference, order):
+        if show is not None and person is not None:
+            age = None
+            if person['body']['canonical']['birthday'] and show['body']['canonical']['release date']:
+                age = show['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
+            
+            record = ['show']
+            record.append(unicode(person['head']['genealogy']['person id']))
+            record.append(unicode(show['head']['genealogy']['tv show id']))
+            record.append(unicode(order))
+            record.append(unicode(show['body']['canonical']['release year']))
+            record.append(unicode(age))
+            record.append(unicode(reference['job']).lower())
+            record.append(unicode(reference['department']).lower())
+            record.append(unicode(show['body']['canonical']['budget']))
+            record.append(unicode(show['body']['canonical']['revenue']))
+            record.append(unicode(show['body']['canonical']['tmdb popularity']))
+            record.append(unicode(show['body']['canonical']['vote average']))
+            record.append(unicode(show['body']['canonical']['vote count']))
+            record.append(unicode(None))
+            record.append(unicode(None))
+            record.append(unicode(None))
+            record.append(unicode(None))
+            record.append(unicode(person['body']['canonical']['simple person name']))
+            record.append(unicode(show['body']['canonical']['simple tv show name']))
+            # record.append(unicode(reference['simple character name']))
+            print '\t'.join(record).encode('utf8')
+        
+    def dump_movie(self, movie, person, reference, order):
+        if movie is not None and person is not None:
+            age = None
+            if person['body']['canonical']['birthday'] and movie['body']['canonical']['release date']:
+                age = movie['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
+            
+            record = ['movie']
+            record.append(unicode(person['head']['genealogy']['person id']))
+            record.append(unicode(movie['head']['genealogy']['movie id']))
+            record.append(unicode(order))
+            record.append(unicode(movie['body']['canonical']['release year']))
+            record.append(unicode(age))
+            record.append(unicode(reference['job']).lower())
+            record.append(unicode(reference['department']).lower())
+            record.append(unicode(movie['body']['canonical']['budget']))
+            record.append(unicode(movie['body']['canonical']['revenue']))
+            record.append(unicode(movie['body']['canonical']['tmdb popularity']))
+            record.append(unicode(movie['body']['canonical']['vote average']))
+            record.append(unicode(movie['body']['canonical']['vote count']))
+            record.append(unicode(movie['body']['canonical']['audience rating']))
+            record.append(unicode(movie['body']['canonical']['audience score']))
+            record.append(unicode(movie['body']['canonical']['critics rating']))
+            record.append(unicode(movie['body']['canonical']['critics score']))
+            record.append(unicode(person['body']['canonical']['simple person name']))
+            record.append(unicode(movie['body']['canonical']['simple movie title']))
+            # record.append(unicode(reference['simple character name']))
+            print '\t'.join(record).encode('utf8')
+        
     def dump(self):
         discovered = []
         collection = self.env.repository[self.ontology['host']].database[self.table['collection']]
@@ -686,32 +797,7 @@ class TableTask(Task):
                 for person_reference in movie_people['body']['canonical']['people']:
                     p = person_reference.project('ns.service.genealogy')
                     person = self.env.resolver.resolve(p['knowledge uri'])
-                    age_at_release = None
-                    if person['body']['canonical']['birthday'] and movie['body']['canonical']['release date']:
-                        age_at_release = movie['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
-                    
-                    record = ['movie']
-                    record.append(unicode(person['head']['genealogy']['person id']))
-                    record.append(unicode(movie['head']['genealogy']['movie id']))
-                    record.append(unicode(order))
-                    record.append(unicode(movie['body']['canonical']['release year']))
-                    record.append(unicode(age_at_release))
-                    record.append(unicode(person_reference['job']).lower())
-                    record.append(unicode(person_reference['department']).lower())
-                    record.append(unicode(movie['body']['canonical']['budget']))
-                    record.append(unicode(movie['body']['canonical']['revenue']))
-                    record.append(unicode(movie['body']['canonical']['tmdb popularity']))
-                    record.append(unicode(movie['body']['canonical']['vote average']))
-                    record.append(unicode(movie['body']['canonical']['vote count']))
-                    record.append(unicode(movie['body']['canonical']['audience rating']))
-                    record.append(unicode(movie['body']['canonical']['audience score']))
-                    record.append(unicode(movie['body']['canonical']['critics rating']))
-                    record.append(unicode(movie['body']['canonical']['critics score']))
-                    record.append(unicode(person['body']['canonical']['simple person name']))
-                    record.append(unicode(movie['body']['canonical']['simple movie title']))
-                    record.append(unicode(person_reference['simple character name']))
-
-                    print '\t'.join(record).encode('utf8')
+                    self.dump_movie(movie, person, person_reference, order)
                     order += 1
                     
         if self.name == "knowledge/tv/show":
@@ -722,37 +808,26 @@ class TableTask(Task):
                 order = 0;
                 show = self.env.resolver.resolve(show_reference)
                 show_people = self.env.resolver.resolve(show['head']['genealogy']['people uri'])
+                
                 if 'people' in show_people['body']['canonical']:
+                    # append an episode record for each person and episode in the season
+                    if 'tv seasons' in show['body']['canonical']:
+                        for season_reference in show['body']['canonical']['tv seasons']:
+                            s = season_reference.project('ns.service.genealogy')
+                            season = self.env.resolver.resolve(s['knowledge uri'])
+                            if 'tv episodes' in season['body']['canonical']:
+                                for episode_reference in season['body']['canonical']['tv episodes']:
+                                    e = episode_reference.project('ns.service.genealogy')
+                                    episode = self.env.resolver.resolve(e['knowledge uri'])
+                                    for person_reference in show_people['body']['canonical']['people']:
+                                        p = person_reference.project('ns.service.genealogy')
+                                        person = self.env.resolver.resolve(p['knowledge uri'])
+                                        self.dump_tv_episode(episode, person, person_reference, person_reference['sort order'])
+                                        
                     for person_reference in show_people['body']['canonical']['people']:
                         p = person_reference.project('ns.service.genealogy')
                         person = self.env.resolver.resolve(p['knowledge uri'])
-                        age_at_release = None
-                        if person['body']['canonical']['birthday'] and show['body']['canonical']['release date']:
-                            age_at_release = show['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
-                        
-                        record = ['show']
-                        record.append(unicode(person['head']['genealogy']['person id']))
-                        record.append(unicode(show['head']['genealogy']['tv show id']))
-                        record.append(unicode(order))
-                        record.append(unicode(show['body']['canonical']['release year']))
-                        record.append(unicode(age_at_release))
-                        record.append(unicode(person_reference['job']).lower())
-                        record.append(unicode(person_reference['department']).lower())
-
-                        record.append(unicode(show['body']['canonical']['budget']))
-                        record.append(unicode(show['body']['canonical']['revenue']))
-                        record.append(unicode(show['body']['canonical']['tmdb popularity']))
-                        record.append(unicode(show['body']['canonical']['vote average']))
-                        record.append(unicode(show['body']['canonical']['vote count']))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(person['body']['canonical']['simple person name']))
-                        record.append(unicode(show['body']['canonical']['simple tv show name']))
-                        record.append(unicode(person_reference['simple character name']))
-    
-                        print '\t'.join(record).encode('utf8')
+                        self.dump_tv_show(show, person, person_reference, order)
                         order += 1
                         
         if self.name == "knowledge/tv/season":
@@ -762,39 +837,24 @@ class TableTask(Task):
             for season_reference in discovered:
                 order = 0;
                 season = self.env.resolver.resolve(season_reference)
-                season_people = self.env.resolver.resolve(season['head']['genealogy']['people uri'])
-                if 'people' in season_people['body']['canonical']:
-                    for person_reference in season_people['body']['canonical']['people']:
-                        p = person_reference.project('ns.service.genealogy')
-                        person = self.env.resolver.resolve(p['knowledge uri'])
-                        age_at_release = None
-                        if person['body']['canonical']['birthday'] and season['body']['canonical']['release date']:
-                            age_at_release = season['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
-                        
-                        record = ['season']
-                        record.append(unicode(person['head']['genealogy']['person id']))
-                        record.append(unicode(season['head']['genealogy']['tv season id']))
-                        record.append(unicode(order))
-                        record.append(unicode(season['body']['canonical']['release year']))
-                        record.append(unicode(age_at_release))
-                        record.append(unicode(person_reference['job']).lower())
-                        record.append(unicode(person_reference['department']).lower())
-
-                        record.append(unicode(season['body']['canonical']['budget']))
-                        record.append(unicode(season['body']['canonical']['revenue']))
-                        record.append(unicode(season['body']['canonical']['tmdb popularity']))
-                        record.append(unicode(season['body']['canonical']['vote average']))
-                        record.append(unicode(season['body']['canonical']['vote count']))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(person['body']['canonical']['simple person name']))
-                        record.append(unicode(season['body']['canonical']['disc number']))
-                        record.append(unicode(person_reference['simple character name']))
-    
-                        print '\t'.join(record).encode('utf8')
-                        order += 1
+                if(season['head']['genealogy']['disc number'] > 0):
+                    season_people = self.env.resolver.resolve(season['head']['genealogy']['people uri'])
+                    if 'people' in season_people['body']['canonical']:
+                        # append an episode record for each person and episode in the season
+                        if 'tv episodes' in season['body']['canonical']:
+                            for episode_reference in season['body']['canonical']['tv episodes']:
+                                e = episode_reference.project('ns.service.genealogy')
+                                episode = self.env.resolver.resolve(e['knowledge uri'])
+                                for person_reference in season_people['body']['canonical']['people']:
+                                    p = person_reference.project('ns.service.genealogy')
+                                    person = self.env.resolver.resolve(p['knowledge uri'])
+                                    self.dump_tv_episode(episode, person, person_reference, person_reference['sort order'])
+                                    
+                        for person_reference in season_people['body']['canonical']['people']:
+                            p = person_reference.project('ns.service.genealogy')
+                            person = self.env.resolver.resolve(p['knowledge uri'])
+                            self.dump_tv_season(season, person, person_reference, person_reference['sort order'])                       
+                            order += 1
                         
         if self.name == "knowledge/tv/episode":
             # collect season knowledge documents
@@ -805,36 +865,10 @@ class TableTask(Task):
                 episode = self.env.resolver.resolve(episode_reference)
                 episode_people = self.env.resolver.resolve(episode['head']['genealogy']['people uri'])
                 if 'people' in episode_people['body']['canonical']:
-                    for person_reference in episode_people['body']['canonical']['people']:
-                        p = person_reference.project('ns.service.genealogy')
+                    for reference in episode_people['body']['canonical']['people']:
+                        p = reference.project('ns.service.genealogy')
                         person = self.env.resolver.resolve(p['knowledge uri'])
-                        age_at_release = None
-                        if person['body']['canonical']['birthday'] and episode['body']['canonical']['release date']:
-                            age_at_release = episode['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
-                        
-                        record = ['episode']
-                        record.append(unicode(person['head']['genealogy']['person id']))
-                        record.append(unicode(episode['head']['genealogy']['tv episode id']))
-                        record.append(unicode(order))
-                        record.append(unicode(episode['body']['canonical']['release year']))
-                        record.append(unicode(age_at_release))
-                        record.append(unicode(person_reference['job']).lower())
-                        record.append(unicode(person_reference['department']).lower())
-
-                        record.append(unicode(episode['body']['canonical']['budget']))
-                        record.append(unicode(episode['body']['canonical']['revenue']))
-                        record.append(unicode(episode['body']['canonical']['tmdb popularity']))
-                        record.append(unicode(episode['body']['canonical']['vote average']))
-                        record.append(unicode(episode['body']['canonical']['vote count']))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(None))
-                        record.append(unicode(person['body']['canonical']['simple person name']))
-                        record.append(unicode(episode['body']['canonical']['simple tv episode name']))
-                        record.append(unicode(person_reference['simple character name']))
-    
-                        print '\t'.join(record).encode('utf8')
+                        self.dump_tv_episode(episode, person, reference, order)
                         order += 1
                     
 
