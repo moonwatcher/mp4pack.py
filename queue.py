@@ -715,7 +715,7 @@ class TableTask(Task):
                     order += 1
                     
         if self.name == "knowledge/tv/show":
-            # collect movie knowledge documents
+            # collect show knowledge documents
             for show in collection.find({}, {'head.genealogy.tv show id':1, '_id':0}):
                 discovered.append('/k/en/tv/show/' + unicode(show['head']['genealogy']['tv show id']))
             for show_reference in discovered:
@@ -750,6 +750,47 @@ class TableTask(Task):
                         record.append(unicode(None))
                         record.append(unicode(person['body']['canonical']['simple person name']))
                         record.append(unicode(show['body']['canonical']['simple tv show name']))
+                        record.append(unicode(person_reference['simple character name']))
+    
+                        print '\t'.join(record).encode('utf8')
+                        order += 1
+                        
+        if self.name == "knowledge/tv/season":
+            # collect season knowledge documents
+            for show in collection.find({}, {'head.genealogy.tv season id':1, '_id':0}):
+                discovered.append('/k/en/tv/season/' + unicode(show['head']['genealogy']['tv season id']))
+            for season_reference in discovered:
+                order = 0;
+                season = self.env.resolver.resolve(season_reference)
+                season_people = self.env.resolver.resolve(season['head']['genealogy']['people uri'])
+                if 'people' in season_people['body']['canonical']:
+                    for person_reference in season_people['body']['canonical']['people']:
+                        p = person_reference.project('ns.service.genealogy')
+                        person = self.env.resolver.resolve(p['knowledge uri'])
+                        age_at_release = None
+                        if person['body']['canonical']['birthday'] and season['body']['canonical']['release date']:
+                            age_at_release = season['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
+                        
+                        record = ['season']
+                        record.append(unicode(person['head']['genealogy']['person id']))
+                        record.append(unicode(season['head']['genealogy']['tv season id']))
+                        record.append(unicode(order))
+                        record.append(unicode(season['body']['canonical']['release year']))
+                        record.append(unicode(age_at_release))
+                        record.append(unicode(person_reference['job']).lower())
+                        record.append(unicode(person_reference['department']).lower())
+
+                        record.append(unicode(season['body']['canonical']['budget']))
+                        record.append(unicode(season['body']['canonical']['revenue']))
+                        record.append(unicode(season['body']['canonical']['tmdb popularity']))
+                        record.append(unicode(season['body']['canonical']['vote average']))
+                        record.append(unicode(season['body']['canonical']['vote count']))
+                        record.append(unicode(None))
+                        record.append(unicode(None))
+                        record.append(unicode(None))
+                        record.append(unicode(None))
+                        record.append(unicode(person['body']['canonical']['simple person name']))
+                        record.append(unicode(season['body']['canonical']['disc number']))
                         record.append(unicode(person_reference['simple character name']))
     
                         print '\t'.join(record).encode('utf8')
