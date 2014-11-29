@@ -672,6 +672,49 @@ class TableTask(Task):
         for index in self.table['index']:
             self.env.repository[self.ontology['host']].rebuild_index(self.table['name'], index)
             
+    def dump(self):
+        discovered = []
+        collection = self.env.repository[self.ontology['host']].database[self.table['collection']]
+        if self.name == "knowledge/movie":
+            # collect movie knowledge documents
+            for movie in collection.find({}, {'head.genealogy.movie id':1, '_id':0}):
+                discovered.append('/k/en/movie/' + unicode(movie['head']['genealogy']['movie id']))
+            for movie_reference in discovered:
+                order = 0;
+                movie = self.env.resolver.resolve(movie_reference)
+                movie_people = self.env.resolver.resolve(movie['head']['genealogy']['people uri'])
+                for person_reference in movie_people['body']['canonical']['people']:
+                    p = person_reference.project('ns.service.genealogy')
+                    person = self.env.resolver.resolve(p['knowledge uri'])
+                    age_at_release = None
+                    if person['body']['canonical']['birthday'] and movie['body']['canonical']['release date']:
+                        age_at_release = movie['body']['canonical']['release date'].year - person['body']['canonical']['birthday'].year
+                    
+                    record = ['movie']
+                    record.append(unicode(person['head']['genealogy']['person id']))
+                    record.append(unicode(movie['head']['genealogy']['movie id']))
+                    record.append(unicode(order))
+                    record.append(unicode(movie['body']['canonical']['release year']))
+                    record.append(unicode(age_at_release))
+                    record.append(unicode(person_reference['job']).lower())
+                    record.append(unicode(person_reference['department']).lower())
+                    record.append(unicode(movie['body']['canonical']['budget']))
+                    record.append(unicode(movie['body']['canonical']['revenue']))
+                    record.append(unicode(movie['body']['canonical']['tmdb popularity']))
+                    record.append(unicode(movie['body']['canonical']['vote average']))
+                    record.append(unicode(movie['body']['canonical']['vote count']))
+                    record.append(unicode(movie['body']['canonical']['audience rating']))
+                    record.append(unicode(movie['body']['canonical']['audience score']))
+                    record.append(unicode(movie['body']['canonical']['critics rating']))
+                    record.append(unicode(movie['body']['canonical']['critics score']))
+                    record.append(unicode(person['body']['canonical']['simple person name']))
+                    record.append(unicode(movie['body']['canonical']['simple movie title']))
+                    record.append(unicode(person_reference['simple character name']))
+
+                    print '\t'.join(record).encode('utf8')
+                    order += 1
+                    
+
 
 
 class InstructionJob(Job):
@@ -907,3 +950,7 @@ class InstructionTask(Task):
             elif next == 'tv shows': next_tv_show()
             elif next == 'tv seasons': next_tv_season()
             elif next == 'tv episodes': next_tv_episode()
+
+    
+    
+

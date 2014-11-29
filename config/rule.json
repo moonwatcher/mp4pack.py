@@ -122,6 +122,13 @@
                     "apply":[
                         {"property":"implementation", "value":"InstructionJob"}
                     ]
+                },
+                {
+                    "requires":["action"],
+                    "equal":{"action":"dump"},
+                    "apply":[
+                        {"property":"implementation", "value":"TableJob"}
+                    ]
                 }
             ]
         },

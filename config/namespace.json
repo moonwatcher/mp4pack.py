@@ -889,7 +889,8 @@
                     "tmdb": "id"
                 },
                 "person id": null,
-                "simple person name": null
+                "simple person name": null,
+                "simple character name": null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.person", 
@@ -950,6 +951,7 @@
                     "tmdb": "profiles"
                 }, 
                 "simple person name": null, 
+                "simple character name": null,
                 "tmdb person id": {
                     "tmdb": "id"
                 }
@@ -973,7 +975,8 @@
                 }
             ], 
             "rule": [
-                "rule.knowledge.simple.name.person"
+                "rule.knowledge.simple.name.person",
+                "rule.knowledge.simple.name.character"
             ], 
             "synonym": [
                 "keyword", 
@@ -995,12 +998,14 @@
                 "profile url": null, 
                 "profiles": null, 
                 "simple person name": null,
+                "simple character name": null,
                 "tmdb person id": null,
                 "imdb person id": null
             }, 
             "normalize": [], 
             "rule": [
-                "rule.knowledge.simple.name.person"
+                "rule.knowledge.simple.name.person",
+                "rule.knowledge.simple.name.character"
             ], 
             "synonym": [
                 "keyword"
@@ -1037,7 +1042,8 @@
                 },
                 "tmdb movie id": {
                     "tmdb": "movie_id"
-                }
+                },
+                "simple character name": null
             }, 
             "rule": [
                 "rule.knowledge.simple.name.character", 

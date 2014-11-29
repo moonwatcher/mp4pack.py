@@ -315,6 +315,15 @@
                         "help": "Populate home records", 
                         "name": "acquire"
                     }
+                },
+                {
+                    "argument": [
+                        "tables"
+                    ],
+                    "instruction": {
+                        "help": "dump csv for ranking", 
+                        "name": "dump"
+                    }
                 }
             ], 
             "global": {
