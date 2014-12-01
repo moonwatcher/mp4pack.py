@@ -865,7 +865,7 @@ class TableTask(Task):
                 order = 0;
                 episode = self.env.resolver.resolve(episode_reference)
                 episode_people = self.env.resolver.resolve(episode['head']['genealogy']['people uri'])
-                if 'people' in episode_people['body']['canonical']:
+                if episode and episode_people and 'people' in episode_people['body']['canonical']:
                     for reference in episode_people['body']['canonical']['people']:
                         p = reference.project('ns.service.genealogy')
                         person = self.env.resolver.resolve(p['knowledge uri'])
