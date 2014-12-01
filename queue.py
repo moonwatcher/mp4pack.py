@@ -794,11 +794,12 @@ class TableTask(Task):
                 order = 0;
                 movie = self.env.resolver.resolve(movie_reference)
                 movie_people = self.env.resolver.resolve(movie['head']['genealogy']['people uri'])
-                for person_reference in movie_people['body']['canonical']['people']:
-                    p = person_reference.project('ns.service.genealogy')
-                    person = self.env.resolver.resolve(p['knowledge uri'])
-                    self.dump_movie(movie, person, person_reference, order)
-                    order += 1
+                if movie and movie_people and 'people' in movie_people['body']['canonical']:
+                    for person_reference in movie_people['body']['canonical']['people']:
+                        p = person_reference.project('ns.service.genealogy')
+                        person = self.env.resolver.resolve(p['knowledge uri'])
+                        self.dump_movie(movie, person, person_reference, order)
+                        order += 1
                     
         if self.name == "knowledge/tv/show":
             # collect show knowledge documents
@@ -809,13 +810,13 @@ class TableTask(Task):
                 show = self.env.resolver.resolve(show_reference)
                 show_people = self.env.resolver.resolve(show['head']['genealogy']['people uri'])
                 
-                if 'people' in show_people['body']['canonical']:
+                if show and show_people and 'people' in show_people['body']['canonical']:
                     # append an episode record for each person and episode in the season
                     if 'tv seasons' in show['body']['canonical']:
                         for season_reference in show['body']['canonical']['tv seasons']:
                             s = season_reference.project('ns.service.genealogy')
                             season = self.env.resolver.resolve(s['knowledge uri'])
-                            if 'tv episodes' in season['body']['canonical']:
+                            if season and 'tv episodes' in season['body']['canonical']:
                                 for episode_reference in season['body']['canonical']['tv episodes']:
                                     e = episode_reference.project('ns.service.genealogy')
                                     episode = self.env.resolver.resolve(e['knowledge uri'])
@@ -837,9 +838,9 @@ class TableTask(Task):
             for season_reference in discovered:
                 order = 0;
                 season = self.env.resolver.resolve(season_reference)
-                if(season['head']['genealogy']['disc number'] > 0):
+                if season and season['head']['genealogy']['disc number'] > 0:
                     season_people = self.env.resolver.resolve(season['head']['genealogy']['people uri'])
-                    if 'people' in season_people['body']['canonical']:
+                    if season_people and 'people' in season_people['body']['canonical']:
                         # append an episode record for each person and episode in the season
                         if 'tv episodes' in season['body']['canonical']:
                             for episode_reference in season['body']['canonical']['tv episodes']:
